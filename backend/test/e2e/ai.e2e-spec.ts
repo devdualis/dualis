@@ -4,7 +4,7 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AppModule } from '../../src/app.module';
 import { AuthService } from '../../src/modules/auth/auth.service';
@@ -31,6 +31,11 @@ describe('AI Symptom Classification E2E (POST /v1/ai/classify-symptom)', () => {
     app = moduleFixture.createNestApplication<NestFastifyApplication>(
       new FastifyAdapter(),
     );
+
+    app.enableVersioning({
+      type: VersioningType.URI,
+      defaultVersion: '1',
+    });
 
     app.useGlobalPipes(
       new ValidationPipe({

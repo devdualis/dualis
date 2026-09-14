@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, integer, timestamp, pgPolicy } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, integer, timestamp, pgPolicy, boolean } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { users } from './users.schema';
 
@@ -13,6 +13,9 @@ export const symptomLogs = pgTable(
     intensity: integer('intensity').notNull(),
     anatomicalSystem: text('anatomical_system'),
     emotionalDimension: text('emotional_dimension'),
+    disposition: text('disposition'),
+    organicPrimacyApplied: boolean('organic_primacy_applied').default(false).notNull(),
+    stepAnswers: text('step_answers'),
     recordedAt: timestamp('recorded_at', { withTimezone: true }).defaultNow().notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

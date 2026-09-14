@@ -3,7 +3,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ClassifySymptomDto, TriageClassificationResult } from './dto/classify-symptom.dto';
 import { GeminiTriageService } from './services/gemini-triage.service';
 
-@Controller('v1/ai')
+@Controller({ path: 'ai', version: '1' })
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
 export class AiController {
   constructor(

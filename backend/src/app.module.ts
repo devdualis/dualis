@@ -7,6 +7,7 @@ import { LegalModule } from './modules/legal/legal.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TriageAuditModule } from './modules/triage-audit/triage-audit.module';
 import { AiModule } from './modules/ai/ai.module';
+import { TriageModule } from './modules/triage/triage.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { AiModule } from './modules/ai/ai.module';
     AuthModule,
     TriageAuditModule,
     AiModule,
+    TriageModule,
   ],
 })
 export class AppModule {}
