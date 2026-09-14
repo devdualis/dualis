@@ -34,6 +34,7 @@ Unified, safe, and clinically consistent daily health triage bridging somatic/ph
 - [ ] **RNF-001 (Sub-2s Classification Latency)**: AI symptom classification using structured JSON schemas returning responses in under 2 seconds.
 - [ ] **RNF-002 (Data Privacy & LGPD Compliance)**: Health data governance with PostgreSQL Row-Level Security (RLS) and encrypted object storage for sensitive medical documents.
 - [ ] **RNF-003 (Cross-Platform Mobile Architecture)**: Flutter client for iOS and Android with Riverpod state management and Material 3 design system.
+- [ ] **RNF-004 (Trilingual Localization)**: Comprehensive multilingual support across Spanish (`es`), Brazilian Portuguese (`pt-BR`), and English (`en`) for UI strings, medical disclaimers, triage decision trees, and AI classification prompts.
 
 ### Out of Scope
 
@@ -43,23 +44,26 @@ Unified, safe, and clinically consistent daily health triage bridging somatic/ph
 
 ## Context
 
-- **Client Stack**: Flutter (iOS & Android) with Riverpod for reactive state management, automatic triage session lifecycle cleanup, and AsyncValue handling. Material 3 UI design with thumb-friendly controls and smooth vertical state transitions.
-- **Backend Stack**: Dockerized NestJS API deployed to managed container services (Google Cloud Run / Azure Container Apps).
-- **Database & Storage**: PostgreSQL hosted in the São Paulo region (LGPD compliance, low latency), utilizing temporal indices for 14-day historical queries and Row-Level Security (RLS). Encrypted S3 / Azure Blob Storage for medical PDFs and images. Redis for semantic query caching and background task queues.
-- **AI Engine**: Gemini 1.5 Flash / Flash-8B or GPT-4o-mini using JSON Schema outputs for strict classification across 19 categories (7 emotional + 12 anatomical). Decoupled OCR + LLM pipeline for lab reports to optimize token cost and accuracy.
+- **Client Stack**: Flutter (iOS & Android) with Riverpod for reactive state management, automatic triage session lifecycle cleanup, and AsyncValue handling. Material 3 UI design with thumb-friendly controls and smooth vertical state transitions. Multilingual localization via Flutter `intl` and `.arb` bundles (`pt-BR`, `es`, `en`).
+- **Backend Stack**: Dockerized NestJS API deployed to managed container services (Google Cloud Run / Azure Container Apps). Multilingual legal disclaimer contracts and localized emergency service numbers.
+- **Database & Storage**: PostgreSQL utilizing temporal indices for 14-day historical queries and native Row-Level Security (RLS). Hosted on **Supabase Free Tier during development**, and **Google Cloud SQL for PostgreSQL in production (São Paulo region `southamerica-east1` for LGPD compliance)**. Drizzle ORM provides standard connection string compatibility (`DATABASE_URL`) with zero lock-in across both environments. Encrypted S3 / GCS for medical PDFs and images. Redis for semantic query caching and background task queues.
+- **AI Engine**: Gemini 1.5 Flash / Flash-8B or GPT-4o-mini using JSON Schema outputs for strict classification across 19 categories (7 emotional + 12 anatomical). Trilingual prompt engineering supporting colloquial distress idioms across Portuguese, Spanish, and English. Decoupled OCR + LLM pipeline for lab reports to optimize token cost and accuracy.
 
 ## Constraints
 
-- **Tech Stack**: Flutter + Riverpod (Mobile), NestJS + PostgreSQL + Redis (Backend) — Cross-platform efficiency and robust relational data management.
-- **Performance**: Sub-2-second latency on AI triage classification.
+- **Tech Stack**: Flutter + Riverpod (Mobile), NestJS + PostgreSQL (Supabase dev / Google Cloud SQL prod) + Redis (Backend) — Cross-platform efficiency and robust relational data management.
+- **Performance**: Sub-2-second latency on AI triage classification across all supported languages.
 - **Clinical Safety**: Zero-failure fail-safe trigger for Level 4/5 symptoms into emergency red screen.
 - **Regulatory**: Full LGPD compliance for Brazilian users (regional data residency, strict RLS, encryption at rest and in transit).
+- **Internationalization**: Trilingual support (Spanish, Brazilian Portuguese, English) across mobile UI, API contracts, and AI reasoning.
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Flutter + Riverpod for Mobile | Shared codebase for iOS & Android with compile-time state safety and clean session auto-dispose | — Pending |
+| Supabase (Dev) / Google Cloud SQL (Prod) | Rapid zero-cost development sandbox with standard PostgreSQL RLS, seamlessly deploying to Google Cloud SQL São Paulo in prod via Drizzle ORM | ✓ Good |
+| Trilingual Architecture (ES, PT-BR, EN) | Direct support for Brazilian Portuguese, Spanish, and English expands reach while maintaining clinical nuance in regional distress idioms | ✓ Good |
 | Parallel Triage with 5-Step Tree | Provides clinical consistency across both mental and physical health while preserving distinct context | — Pending |
 | Soft Indigo & Clinical Teal Themes | High visual distinction between Psico-Emocional and Física verticals reduces user cognitive load | — Pending |
 | 14-Day Temporal Antiburla Engine | Prevents conflicting timelines and enhances longitudinal clinical value | — Pending |
