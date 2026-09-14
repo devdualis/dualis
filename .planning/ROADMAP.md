@@ -195,8 +195,8 @@ Plans:
 
 Plans:
 
-- [ ] 07-01: Temporal index optimization, longitudinal consistency evaluation, and biological boundary validation service in PostgreSQL/NestJS
-- [ ] 07-02: Screen 5 Antiburla friendly bottom sheet UI with binary choice buttons and state reconciliation
+- [x] 07-01: Temporal index optimization, longitudinal consistency evaluation, and biological boundary validation service in PostgreSQL/NestJS
+- [x] 07-02: Screen 5 Antiburla friendly bottom sheet UI with binary choice buttons and state reconciliation
 
 ---
 
