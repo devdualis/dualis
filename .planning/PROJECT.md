@@ -23,7 +23,7 @@ Unified, safe, and clinically consistent daily health triage bridging somatic/ph
 
 ### Active
 
-- [ ] **RF-001 (Unified Entry Point)**: Daily symptom check-in starting with "How are you feeling today?" routing dynamically into triage.
+- [ ] **RF-001 (Unified Dual-Axis Entry Point)**: Daily check-in presenting two mandatory trigger evaluations ("Como você está se sentindo hoje?"): 1) Psico-Emocional and 2) Avaliação Física (Dor Física) with 3 response options (`[Bem / Normal]`, `[Mais ou menos]`, `[Mal / Ruim]`), routing into zero-friction confirmation if both normal, or into the respective AI triage flow(s) with standard/high sensitivity.
 - [ ] **RF-002 (Parallel Triage Architecture & Visual State Switching)**: Standardized 5-step decision tree (Nature → Persistence → Intensity → Triggers → Outcome) across Psico-Emocional (7 dimensions, soft indigo) and Física (12 anatomical systems, clinical teal).
 - [ ] **RF-003 (Historical Consistency Engine / Antiburla)**: Real-time temporal 14-day scan of past logs across emotional and anatomical systems with empathetic clarification dialogs for inconsistencies.
 - [ ] **RF-004 (Somatic & Psychosomatic Symptom Mapping)**: AI classification engine recognizing somatic/psychosomatic symptoms, mapping lay descriptions (e.g., "racing heart", "lump in throat") into clinical matrices.
