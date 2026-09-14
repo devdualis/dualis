@@ -380,6 +380,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
           vertical: verticalStr,
           category: category,
           selectedPersistence: selectedPersistence,
+          narrative: widget.naturalLanguageText,
         );
 
         if (checkResult.triggered && context.mounted) {

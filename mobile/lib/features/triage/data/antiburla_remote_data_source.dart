@@ -2,9 +2,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/security/secure_storage_service.dart';
 
 final antiburlaDataSourceProvider = Provider<AntiburlaRemoteDataSource>((ref) {
-  return AntiburlaRemoteDataSource();
+  final secureStorage = ref.watch(secureStorageServiceProvider);
+  return AntiburlaRemoteDataSource(secureStorage: secureStorage);
 });
 
 class AntiburlaCheckResult {
@@ -41,9 +43,13 @@ class AntiburlaCheckResult {
 
 class AntiburlaRemoteDataSource {
   final ApiClient _apiClient;
+  final SecureStorageService _secureStorage;
 
-  AntiburlaRemoteDataSource({ApiClient? apiClient})
-      : _apiClient = apiClient ?? ApiClient();
+  AntiburlaRemoteDataSource({
+    ApiClient? apiClient,
+    SecureStorageService? secureStorage,
+  })  : _apiClient = apiClient ?? ApiClient(),
+        _secureStorage = secureStorage ?? SecureStorageService();
 
   Future<AntiburlaCheckResult> checkConsistency({
     required String vertical,
@@ -53,6 +59,7 @@ class AntiburlaRemoteDataSource {
     String? token,
   }) async {
     try {
+      final authToken = token ?? await _secureStorage.getAccessToken();
       final response = await _apiClient.post(
         ApiEndpoints.antiburlaCheck,
         data: {
@@ -61,8 +68,8 @@ class AntiburlaRemoteDataSource {
           'selectedPersistence': selectedPersistence,
           if (narrative != null && narrative.isNotEmpty) 'narrative': narrative,
         },
-        options: token != null
-            ? Options(headers: {'Authorization': 'Bearer $token'})
+        options: authToken != null
+            ? Options(headers: {'Authorization': 'Bearer $authToken'})
             : null,
       );
 
@@ -71,7 +78,6 @@ class AntiburlaRemoteDataSource {
       }
       return const AntiburlaCheckResult(triggered: false);
     } catch (_) {
-      // Offline fallback: does not trigger if offline to avoid blocking triage flow
       return const AntiburlaCheckResult(triggered: false);
     }
   }

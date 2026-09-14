@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:dualis_mobile/features/triage/data/antiburla_remote_data_source.dart';
 import 'package:dualis_mobile/features/triage/domain/triage_vertical.dart';
 import 'package:dualis_mobile/features/triage/presentation/screens/triage_wizard_screen.dart';
 import 'package:dualis_mobile/features/triage/presentation/widgets/triage_intensity_selector.dart';
@@ -10,12 +11,35 @@ import 'package:dualis_mobile/features/triage/presentation/widgets/triage_option
 import 'package:dualis_mobile/features/triage/presentation/widgets/triage_preview_card.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
+class FakeAntiburlaRemoteDataSource extends AntiburlaRemoteDataSource {
+  final AntiburlaCheckResult result;
+
+  FakeAntiburlaRemoteDataSource({
+    this.result = const AntiburlaCheckResult(triggered: false),
+  });
+
+  @override
+  Future<AntiburlaCheckResult> checkConsistency({
+    required String vertical,
+    required String category,
+    required String selectedPersistence,
+    String? narrative,
+    String? token,
+  }) async {
+    return result;
+  }
+}
+
 Widget createTriageTestWidget({
   TriageVertical vertical = TriageVertical.psicoEmocional,
-  
+  AntiburlaRemoteDataSource? antiburlaDataSource,
 }) {
   return ProviderScope(
-    
+    overrides: [
+      antiburlaDataSourceProvider.overrideWithValue(
+        antiburlaDataSource ?? FakeAntiburlaRemoteDataSource(),
+      ),
+    ],
     child: MaterialApp(
       locale: const Locale('pt', 'BR'),
       localizationsDelegates: const [
@@ -130,19 +154,16 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Step 0: Location
       await tester.tap(find.text('Costas / Coluna'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();
 
-      // Step 1: Duration
       await tester.tap(find.text('Começou agora'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();
 
-      // Step 2: Intensity scale
       expect(find.text('Passo 3 de 5'), findsOneWidget);
       expect(find.byType(TriageIntensitySelector), findsOneWidget);
       expect(find.text('1'), findsOneWidget);
@@ -156,31 +177,26 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Step 0
       await tester.tap(find.text('Cansaço Mental'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();
 
-      // Step 1
       await tester.tap(find.text('Começou hoje'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();
 
-      // Step 2
       await tester.tap(find.text('Leve e controlável'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();
 
-      // Step 3
       await tester.tap(find.text('Trabalho / Estudos'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();
 
-      // Step 4: Preview
       expect(find.text('Passo 5 de 5'), findsOneWidget);
       expect(find.byType(TriagePreviewCard), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Confirmar e Finalizar'), findsOneWidget);

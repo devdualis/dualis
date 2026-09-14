@@ -94,9 +94,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         elevation: 0,
         scrolledUnderElevation: 1,
         title: const DualisLogo(
-          variant: DualisLogoVariant.horizontal,
+          variant: DualisLogoVariant.emblemOnly,
           emblemSize: 32,
-          fontSize: 18,
         ),
         actions: [
           IconButton(
