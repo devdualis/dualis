@@ -32,6 +32,7 @@ dependencies:
   # UI, Typography & Visuals
   google_fonts: ^8.2.1
   flutter_svg: ^2.3.0
+  fl_chart: ^1.2.0
 
   # Device & Telephony Intents
   url_launcher: ^6.3.2

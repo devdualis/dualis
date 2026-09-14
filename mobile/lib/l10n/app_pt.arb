@@ -559,5 +559,65 @@
   "offlineModeNotice": "Você está offline. Seu histórico e avaliação continuam funcionando normalmente.",
   "@offlineModeNotice": {
     "description": "Explanatory text for offline functionality"
+  },
+  "historyScreenTitle": "Histórico & Tendências",
+  "@historyScreenTitle": {
+    "description": "Title of the historical dashboard screen"
+  },
+  "tabEmotional": "Psico-Emocional",
+  "@tabEmotional": {
+    "description": "Tab label for emotional vertical"
+  },
+  "tabPhysical": "Física",
+  "@tabPhysical": {
+    "description": "Tab label for physical vertical"
+  },
+  "bodyMapTitle": "Mapa Corporal 2D (14 Dias)",
+  "@bodyMapTitle": {
+    "description": "Title of the 2D anatomical body map"
+  },
+  "bodyMapHint": "Toque em uma região para ver detalhes",
+  "@bodyMapHint": {
+    "description": "Hint to interact with the body map"
+  },
+  "heatLegendNone": "Sem dor",
+  "@heatLegendNone": {
+    "description": "Legend label for no pain"
+  },
+  "heatLegendMild": "Leve (1-2)",
+  "@heatLegendMild": {
+    "description": "Legend label for mild pain"
+  },
+  "heatLegendModerate": "Moderada (3)",
+  "@heatLegendModerate": {
+    "description": "Legend label for moderate pain"
+  },
+  "heatLegendSevere": "Intensa (4-5)",
+  "@heatLegendSevere": {
+    "description": "Legend label for severe pain"
+  },
+  "emotionalChartTitle": "Evolução Emocional (7 Dias)",
+  "@emotionalChartTitle": {
+    "description": "Title for emotional trend chart"
+  },
+  "criticalRecurrenceTitle": "Foco de Atenção",
+  "@criticalRecurrenceTitle": {
+    "description": "Title for critical recurrence cards"
+  },
+  "retrospectiveFeedTitle": "Registros Anteriores",
+  "@retrospectiveFeedTitle": {
+    "description": "Title for retrospective list feed"
+  },
+  "emptyHistoryTitle": "Nenhum registro anterior",
+  "@emptyHistoryTitle": {
+    "description": "Empty state title when history is empty"
+  },
+  "emptyHistorySubtitle": "Seus check-ins diários concluídos aparecerão aqui.",
+  "@emptyHistorySubtitle": {
+    "description": "Empty state subtitle"
+  },
+  "readRecommendedArticle": "Ler Artigo Recomendado",
+  "@readRecommendedArticle": {
+    "description": "Button to read recommended article on recurrence card"
   }
 }

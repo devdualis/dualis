@@ -464,4 +464,50 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get offlineModeNotice =>
       'Você está offline. Seu histórico e avaliação continuam funcionando normalmente.';
+
+  @override
+  String get historyScreenTitle => 'Histórico & Tendências';
+
+  @override
+  String get tabEmotional => 'Psico-Emocional';
+
+  @override
+  String get tabPhysical => 'Física';
+
+  @override
+  String get bodyMapTitle => 'Mapa Corporal 2D (14 Dias)';
+
+  @override
+  String get bodyMapHint => 'Toque em uma região para ver detalhes';
+
+  @override
+  String get heatLegendNone => 'Sem dor';
+
+  @override
+  String get heatLegendMild => 'Leve (1-2)';
+
+  @override
+  String get heatLegendModerate => 'Moderada (3)';
+
+  @override
+  String get heatLegendSevere => 'Intensa (4-5)';
+
+  @override
+  String get emotionalChartTitle => 'Evolução Emocional (7 Dias)';
+
+  @override
+  String get criticalRecurrenceTitle => 'Foco de Atenção';
+
+  @override
+  String get retrospectiveFeedTitle => 'Registros Anteriores';
+
+  @override
+  String get emptyHistoryTitle => 'Nenhum registro anterior';
+
+  @override
+  String get emptyHistorySubtitle =>
+      'Seus check-ins diários concluídos aparecerão aqui.';
+
+  @override
+  String get readRecommendedArticle => 'Ler Artigo Recomendado';
 }

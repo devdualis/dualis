@@ -132,5 +132,20 @@
   "offlineBannerText": "Offline Mode — Your check-ins will be saved locally and synced automatically once connection is restored.",
   "offlineSyncPendingCount": "{count, plural, =1{1 pending sync check-in} other{{count} pending sync check-ins}}",
   "offlineSyncSuccessText": "Synchronization completed successfully.",
-  "offlineModeNotice": "You are offline. Your triage assessment continues to function seamlessly."
+  "offlineModeNotice": "You are offline. Your triage assessment continues to function seamlessly.",
+  "historyScreenTitle": "History & Trends",
+  "tabEmotional": "Psycho-Emotional",
+  "tabPhysical": "Physical",
+  "bodyMapTitle": "2D Body Map (14 Days)",
+  "bodyMapHint": "Tap a region to view details",
+  "heatLegendNone": "No pain",
+  "heatLegendMild": "Mild (1-2)",
+  "heatLegendModerate": "Moderate (3)",
+  "heatLegendSevere": "Severe (4-5)",
+  "emotionalChartTitle": "Emotional Evolution (7 Days)",
+  "criticalRecurrenceTitle": "Focus of Attention",
+  "retrospectiveFeedTitle": "Past Records",
+  "emptyHistoryTitle": "No records yet",
+  "emptyHistorySubtitle": "Your completed daily check-ins will appear here.",
+  "readRecommendedArticle": "Read Recommended Article"
 }

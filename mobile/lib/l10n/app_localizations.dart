@@ -897,6 +897,96 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Você está offline. Seu histórico e avaliação continuam funcionando normalmente.'**
   String get offlineModeNotice;
+
+  /// Title of the historical dashboard screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Histórico & Tendências'**
+  String get historyScreenTitle;
+
+  /// Tab label for emotional vertical
+  ///
+  /// In pt, this message translates to:
+  /// **'Psico-Emocional'**
+  String get tabEmotional;
+
+  /// Tab label for physical vertical
+  ///
+  /// In pt, this message translates to:
+  /// **'Física'**
+  String get tabPhysical;
+
+  /// Title of the 2D anatomical body map
+  ///
+  /// In pt, this message translates to:
+  /// **'Mapa Corporal 2D (14 Dias)'**
+  String get bodyMapTitle;
+
+  /// Hint to interact with the body map
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque em uma região para ver detalhes'**
+  String get bodyMapHint;
+
+  /// Legend label for no pain
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem dor'**
+  String get heatLegendNone;
+
+  /// Legend label for mild pain
+  ///
+  /// In pt, this message translates to:
+  /// **'Leve (1-2)'**
+  String get heatLegendMild;
+
+  /// Legend label for moderate pain
+  ///
+  /// In pt, this message translates to:
+  /// **'Moderada (3)'**
+  String get heatLegendModerate;
+
+  /// Legend label for severe pain
+  ///
+  /// In pt, this message translates to:
+  /// **'Intensa (4-5)'**
+  String get heatLegendSevere;
+
+  /// Title for emotional trend chart
+  ///
+  /// In pt, this message translates to:
+  /// **'Evolução Emocional (7 Dias)'**
+  String get emotionalChartTitle;
+
+  /// Title for critical recurrence cards
+  ///
+  /// In pt, this message translates to:
+  /// **'Foco de Atenção'**
+  String get criticalRecurrenceTitle;
+
+  /// Title for retrospective list feed
+  ///
+  /// In pt, this message translates to:
+  /// **'Registros Anteriores'**
+  String get retrospectiveFeedTitle;
+
+  /// Empty state title when history is empty
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum registro anterior'**
+  String get emptyHistoryTitle;
+
+  /// Empty state subtitle
+  ///
+  /// In pt, this message translates to:
+  /// **'Seus check-ins diários concluídos aparecerão aqui.'**
+  String get emptyHistorySubtitle;
+
+  /// Button to read recommended article on recurrence card
+  ///
+  /// In pt, this message translates to:
+  /// **'Ler Artigo Recomendado'**
+  String get readRecommendedArticle;
 }
 
 class _AppLocalizationsDelegate

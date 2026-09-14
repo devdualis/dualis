@@ -462,4 +462,50 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get offlineModeNotice =>
       'You are offline. Your triage assessment continues to function seamlessly.';
+
+  @override
+  String get historyScreenTitle => 'History & Trends';
+
+  @override
+  String get tabEmotional => 'Psycho-Emotional';
+
+  @override
+  String get tabPhysical => 'Physical';
+
+  @override
+  String get bodyMapTitle => '2D Body Map (14 Days)';
+
+  @override
+  String get bodyMapHint => 'Tap a region to view details';
+
+  @override
+  String get heatLegendNone => 'No pain';
+
+  @override
+  String get heatLegendMild => 'Mild (1-2)';
+
+  @override
+  String get heatLegendModerate => 'Moderate (3)';
+
+  @override
+  String get heatLegendSevere => 'Severe (4-5)';
+
+  @override
+  String get emotionalChartTitle => 'Emotional Evolution (7 Days)';
+
+  @override
+  String get criticalRecurrenceTitle => 'Focus of Attention';
+
+  @override
+  String get retrospectiveFeedTitle => 'Past Records';
+
+  @override
+  String get emptyHistoryTitle => 'No records yet';
+
+  @override
+  String get emptyHistorySubtitle =>
+      'Your completed daily check-ins will appear here.';
+
+  @override
+  String get readRecommendedArticle => 'Read Recommended Article';
 }

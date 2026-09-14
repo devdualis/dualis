@@ -11,6 +11,7 @@ import '../../features/triage/domain/triage_vertical.dart';
 import '../../features/triage/presentation/screens/triage_wizard_screen.dart';
 import '../../features/triage_outcome/domain/triage_outcome_models.dart';
 import '../../features/triage_outcome/presentation/screens/triage_outcome_screen.dart';
+import '../../features/dashboard/presentation/screens/historical_dashboard_screen.dart';
 import 'route_paths.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -83,6 +84,11 @@ GoRouter createRouter({String initialLocation = RoutePaths.onboarding}) {
               );
           return TriageOutcomeScreen(outcome: outcome);
         },
+      ),
+      GoRoute(
+        path: RoutePaths.history,
+        name: 'history',
+        builder: (context, state) => const HistoricalDashboardScreen(),
       ),
     ],
   );

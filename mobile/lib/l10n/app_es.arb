@@ -132,5 +132,20 @@
   "offlineBannerText": "Modo Offline — Tus registros se guardarán localmente y se sincronizarán automáticamente.",
   "offlineSyncPendingCount": "{count, plural, =1{1 registro pendiente de sincronización} other{{count} registros pendientes de sincronización}}",
   "offlineSyncSuccessText": "Sincronización completada con éxito.",
-  "offlineModeNotice": "Estás sin conexión. Tu historial y evaluación siguen funcionando normalmente."
+  "offlineModeNotice": "Estás sin conexión. Tu historial y evaluación siguen funcionando normalmente.",
+  "historyScreenTitle": "Historial y Tendencias",
+  "tabEmotional": "Psicoemocional",
+  "tabPhysical": "Física",
+  "bodyMapTitle": "Mapa Corporal 2D (14 Días)",
+  "bodyMapHint": "Toca una región para ver detalles",
+  "heatLegendNone": "Sin dolor",
+  "heatLegendMild": "Leve (1-2)",
+  "heatLegendModerate": "Moderada (3)",
+  "heatLegendSevere": "Intensa (4-5)",
+  "emotionalChartTitle": "Evolución Emocional (7 Días)",
+  "criticalRecurrenceTitle": "Foco de Atención",
+  "retrospectiveFeedTitle": "Registros Anteriores",
+  "emptyHistoryTitle": "Sin registros aún",
+  "emptyHistorySubtitle": "Tus chequeos diarios completados aparecerán aquí.",
+  "readRecommendedArticle": "Leer Artículo Recomendado"
 }

@@ -98,8 +98,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           emblemSize: 32,
           fontSize: 18,
         ),
-        actions: const [
-          Padding(
+        actions: [
+          IconButton(
+            key: const Key('home_history_button'),
+            icon: const Icon(Icons.analytics_outlined, color: AppColors.softIndigo),
+            tooltip: 'Histórico & Tendências',
+            onPressed: () => context.push(RoutePaths.history),
+          ),
+          const Padding(
             padding: EdgeInsets.only(right: 8.0),
             child: LanguagePickerButton(),
           ),
@@ -266,6 +272,68 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
               // Privacy-safe Local Partner AdMob Banner (RF-009 / AD-01)
               const AdMobBannerContainer(),
+              const SizedBox(height: 16),
+
+              Card(
+                elevation: 0.5,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: AppColors.softIndigo.withValues(alpha: 0.2)),
+                ),
+                child: InkWell(
+                  key: const Key('home_history_card'),
+                  onTap: () => context.push(RoutePaths.history),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.softIndigo.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.insights_rounded,
+                            color: AppColors.softIndigo,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Histórico & Mapa Corporal 2D',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimaryLight,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Tendências de 7 dias e mapa de calor de 14 dias',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondaryLight,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 16,
+                          color: AppColors.textSecondaryLight,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(height: 24),
 
               // Status Summary Card
