@@ -16,7 +16,11 @@ export class GeminiTriageService {
     @Optional() @Inject(IdiomDictionaryService) idiomDictionary?: IdiomDictionaryService,
   ) {
     this.idiomDict = idiomDictionary ?? new IdiomDictionaryService();
-    const apiKey = this.configService?.get<string>('GEMINI_API_KEY');
+    const apiKey =
+      this.configService?.get<string>('GEMINI_API') ||
+      this.configService?.get<string>('GEMINI_API_KEY') ||
+      process.env.GEMINI_API ||
+      process.env.GEMINI_API_KEY;
     if (apiKey && apiKey !== 'mock-gemini-key') {
       try {
         this.client = new GoogleGenAI({ apiKey });
@@ -25,7 +29,7 @@ export class GeminiTriageService {
         this.logger.warn(`Failed to initialize GoogleGenAI client: ${(err as Error).message}`);
       }
     } else {
-      this.logger.log('GEMINI_API_KEY not provided or mock; operating with deterministic clinical dictionary engine');
+      this.logger.log('GEMINI_API / GEMINI_API_KEY not provided or mock; operating with deterministic clinical dictionary engine');
     }
   }
 
