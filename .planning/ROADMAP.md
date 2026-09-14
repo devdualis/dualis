@@ -172,8 +172,8 @@ Plans:
 
 Plans:
 
-- [ ] 06-01: Distress idiom translation engine and somatic-emotional clinical matrix mapping with Organic Primacy
-- [ ] 06-02: Screen 6 Outcome UI with dimension badges, calculated intensity score, care disposition, and curated article cards
+- [x] 06-01: Distress idiom translation engine and somatic-emotional clinical matrix mapping with Organic Primacy
+- [x] 06-02: Screen 6 Outcome UI with dimension badges, calculated intensity score, care disposition, and curated article cards
 
 ---
 
@@ -280,7 +280,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 3. Emergency Risk Alert Screen (Screen 8 / RF-006) | 2/2 | Complete | 2026-09-14 |
 | 4. Dynamic 5-Step Triage Wizard (Screen 4 / RF-002) | 2/2 | Complete | 2026-09-14 |
 | 5. Home & Unified Trigger Check-in (Screen 3 / RF-001) & AdMob Container | 2/2 | Complete | 2026-09-14 |
-| 6. Triage Outcome, Somatic Mapping & Article Recommendations (Screen 6 / RF-004 & RF-005) | 0/2 | Not started | - |
+| 6. Triage Outcome, Somatic Mapping & Article Recommendations (Screen 6 / RF-004 & RF-005) | 2/2 | Complete | 2026-09-14 |
 | 7. Antiburla Historical Verification Sheet (Screen 5 / RF-003 & UC-01) | 0/2 | Not started | - |
 | 8. Offline Caching & Outbox Synchronization | 0/2 | Not started | - |
 | 9. Historical Dashboard & 2D Body Heat Map (Screen 7 / RF-008 & Section 5.1) | 0/2 | Not started | - |
