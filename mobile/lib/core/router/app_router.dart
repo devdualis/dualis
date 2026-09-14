@@ -4,6 +4,9 @@ import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/emergency/domain/emergency_context.dart';
+import '../../features/emergency/domain/emergency_trigger_category.dart';
+import '../../features/emergency/presentation/screens/emergency_screen.dart';
 import 'route_paths.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -33,6 +36,20 @@ GoRouter createRouter({String initialLocation = RoutePaths.onboarding}) {
         path: RoutePaths.home,
         name: 'home',
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.emergency,
+        name: 'emergency',
+        builder: (context, state) {
+          final emergencyContext = state.extra as EmergencyContext? ??
+              EmergencyContext(
+                category: EmergencyTriggerCategory.generalCriticalIntensity,
+                severityLevel: 5,
+                isEmotional: false,
+                detectedAt: DateTime.now(),
+              );
+          return EmergencyScreen(emergencyContext: emergencyContext);
+        },
       ),
     ],
   );
