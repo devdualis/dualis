@@ -12,15 +12,15 @@ class IntensityMeter extends StatelessWidget {
   Color _getColorForLevel(int level) {
     switch (level) {
       case 1:
-        return const Color(0xFF4CAF50); // Green
+        return const Color(0xFF4CAF50);
       case 2:
-        return const Color(0xFF8BC34A); // Light green
+        return const Color(0xFF8BC34A);
       case 3:
-        return const Color(0xFFFFB300); // Amber
+        return const Color(0xFFFFB300);
       case 4:
-        return const Color(0xFFFF9800); // Orange
+        return const Color(0xFFFF9800);
       case 5:
-        return const Color(0xFFE53935); // Red
+        return const Color(0xFFE53935);
       default:
         return const Color(0xFF9E9E9E);
     }
@@ -67,12 +67,15 @@ class IntensityMeter extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Nível de Intensidade',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+              Flexible(
+                child: Text(
+                  'Nível de Intensidade',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               Container(
@@ -93,12 +96,15 @@ class IntensityMeter extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Text(
-                      _getLabelForScore(score),
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: activeColor,
+                    Flexible(
+                      child: Text(
+                        _getLabelForScore(score),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: activeColor,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -107,7 +113,6 @@ class IntensityMeter extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          // 5-segment bar
           Row(
             children: List.generate(5, (index) {
               final level = index + 1;

@@ -29,15 +29,28 @@ export class ArticleEmbeddingService {
     if (this.client) {
       try {
         const response = await this.client.models.embedContent({
-          model: 'text-embedding-004',
+          model: 'gemini-embedding-2',
           contents: text,
+          config: { outputDimensionality: 768 },
         });
-        const values = (response as any)?.embedding?.values || (response as any)?.embeddings?.[0]?.values;
+        const values = (response as any)?.embeddings?.[0]?.values || (response as any)?.embedding?.values;
         if (Array.isArray(values) && values.length > 0) {
           return values;
         }
       } catch (err) {
-        this.logger.warn(`Gemini embedding failed, falling back to clinical vector projection: ${(err as Error).message}`);
+        try {
+          const fallbackRes = await this.client.models.embedContent({
+            model: 'gemini-embedding-001',
+            contents: text,
+            config: { outputDimensionality: 768 },
+          });
+          const values = (fallbackRes as any)?.embeddings?.[0]?.values || (fallbackRes as any)?.embedding?.values;
+          if (Array.isArray(values) && values.length > 0) {
+            return values;
+          }
+        } catch (innerErr) {
+          this.logger.warn(`Gemini embedding failed, falling back to clinical vector projection: ${(innerErr as Error).message}`);
+        }
       }
     }
     return this.generateDeterministicEmbedding(text);
