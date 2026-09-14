@@ -214,7 +214,29 @@ void main() {
       await tester.tap(leaveBtn);
       await tester.pumpAndSettle();
 
-      // Verify navigated to home
+      expect(find.text('Home Screen'), findsOneWidget);
+      expect(find.byType(EmergencyScreen), findsNothing);
+    });
+
+    testWidgets('Tapping top close button triggers confirmation dialog and navigates to home when confirmed', (tester) async {
+      await tester.pumpWidget(
+        createEmergencyTestApp(emergencyContext: physicalEmergency),
+      );
+      await tester.pumpAndSettle();
+
+      final closeBtn = find.byKey(const Key('emergency_close_button'));
+      expect(closeBtn, findsOneWidget);
+
+      await tester.tap(closeBtn);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(EmergencyExitConfirmationDialog), findsOneWidget);
+      expect(find.text('Atenção Médica Urgente'), findsOneWidget);
+
+      final leaveBtn = find.text('Entendi os Riscos / Sair');
+      await tester.tap(leaveBtn);
+      await tester.pumpAndSettle();
+
       expect(find.text('Home Screen'), findsOneWidget);
       expect(find.byType(EmergencyScreen), findsNothing);
     });

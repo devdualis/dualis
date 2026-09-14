@@ -12,10 +12,6 @@ import '../widgets/emergency_exit_confirmation_dialog.dart';
 import '../widgets/emergency_instructions_card.dart';
 import '../widgets/telephony_fallback_dialog.dart';
 
-/// Screen 8: Emergency Risk Alert Screen (RF-006).
-///
-/// Full-screen high-contrast clinical emergency interface rendered upon detection
-/// of red-flag symptoms. Locked against accidental dismissal via [PopScope].
 class EmergencyScreen extends ConsumerWidget {
   final EmergencyContext emergencyContext;
 
@@ -77,14 +73,40 @@ class EmergencyScreen extends ConsumerWidget {
       },
       child: Scaffold(
         backgroundColor: AppColors.emergencyCrimson,
+        appBar: AppBar(
+          backgroundColor: AppColors.emergencyCrimson,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+              key: const Key('emergency_close_button'),
+              icon: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.close_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
+              ),
+              tooltip: loc.emergencyExitButton,
+              onPressed: () => _handlePopAttempt(context, ref),
+            ),
+            const SizedBox(width: 8),
+          ],
+        ),
         body: SafeArea(
+          top: false,
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Top alert icon
                 Center(
                   child: Container(
                     width: 72,
@@ -101,14 +123,10 @@ class EmergencyScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // Emergency Badge
                 Center(
                   child: EmergencyBadge(category: emergencyContext.category),
                 ),
                 const SizedBox(height: 16),
-
-                // Emergency Title
                 Text(
                   loc.emergencyTitle,
                   textAlign: TextAlign.center,
@@ -120,8 +138,6 @@ class EmergencyScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-
-                // Emergency Subtitle
                 Text(
                   loc.emergencySubtitle,
                   textAlign: TextAlign.center,
@@ -133,12 +149,8 @@ class EmergencyScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-
-                // Clinical Instructions Card
                 EmergencyInstructionsCard(isEmotional: isEmotional),
                 const SizedBox(height: 24),
-
-                // Primary Dialer Button (56px)
                 EmergencyActionButton(
                   label: isEmotional ? loc.emergencyCallCvv : loc.emergencyCallSamu,
                   icon: Icons.phone,
@@ -152,8 +164,6 @@ class EmergencyScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-
-                // Secondary Dialer Button (56px)
                 EmergencyActionButton(
                   label: isEmotional ? loc.emergencyCallSamu : loc.emergencyCallBombeiros,
                   icon: Icons.phone_in_talk,
@@ -167,8 +177,6 @@ class EmergencyScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-
-                // Maps Emergency Room Locator Button
                 EmergencyActionButton(
                   label: loc.emergencyFindHospital,
                   icon: Icons.local_hospital,
@@ -182,8 +190,6 @@ class EmergencyScreen extends ConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16),
-
-                // Dispatcher Advice
                 Text(
                   loc.emergencyDispatcherHint,
                   textAlign: TextAlign.center,
@@ -195,8 +201,6 @@ class EmergencyScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-
-                // Exit Screen Text Button
                 Center(
                   child: TextButton(
                     onPressed: () => _handlePopAttempt(context, ref),
