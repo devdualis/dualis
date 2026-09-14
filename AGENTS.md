@@ -10,7 +10,7 @@ DualisCheckUp is a mobile preventive health platform that centralizes personal h
 
 ### Constraints
 
-- **Tech Stack**: Flutter + Riverpod (Mobile), NestJS + PostgreSQL + Redis (Backend) — Cross-platform efficiency and robust relational data management.
+- **Tech Stack**: Flutter + Riverpod (Mobile), NestJS + PostgreSQL (Supabase dev / Google Cloud SQL prod) + Redis (Backend) — Cross-platform efficiency and robust relational data management.
 - **Performance**: Sub-2-second latency on AI triage classification.
 - **Clinical Safety**: Zero-failure fail-safe trigger for Level 4/5 symptoms into emergency red screen.
 - **Regulatory**: Full LGPD compliance for Brazilian users (regional data residency, strict RLS, encryption at rest and in transit).
