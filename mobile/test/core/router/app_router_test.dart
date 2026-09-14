@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:dualis_mobile/core/router/app_router.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:dualis_mobile/features/auth/presentation/screens/register_screen.dart';
+import 'package:dualis_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 import 'package:dualis_mobile/l10n/locale_provider.dart';
 import 'package:dualis_mobile/shared/widgets/dualis_primary_button.dart';
@@ -60,7 +62,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Register Screen'), findsOneWidget);
+      expect(find.byType(RegisterScreen), findsOneWidget);
     });
 
     testWidgets('navigates directly to /login',
@@ -70,7 +72,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Login Screen'), findsOneWidget);
+      expect(find.byType(LoginScreen), findsOneWidget);
     });
 
     testWidgets('navigates directly to /home',

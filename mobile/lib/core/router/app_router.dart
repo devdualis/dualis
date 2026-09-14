@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
 import 'route_paths.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -20,16 +22,12 @@ GoRouter createRouter({String initialLocation = RoutePaths.onboarding}) {
       GoRoute(
         path: RoutePaths.register,
         name: 'register',
-        builder: (context, state) => const Scaffold(
-          body: Center(child: Text('Register Screen')),
-        ),
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: RoutePaths.login,
         name: 'login',
-        builder: (context, state) => const Scaffold(
-          body: Center(child: Text('Login Screen')),
-        ),
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: RoutePaths.home,
