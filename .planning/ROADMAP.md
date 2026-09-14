@@ -149,8 +149,8 @@ Plans:
 
 Plans:
 
-- [ ] 05-01: Screen 3 Home UI with dual-axis trigger flow (Psico-Emocional and Física), wellness confirmation, and native AdMob container
-- [ ] 05-02: Gemini 1.5 Flash structured JSON classification service with Redis caching and sub-2s SLA validation
+- [x] 05-01: Screen 3 Home UI with dual-axis trigger flow (Psico-Emocional and Física), wellness confirmation, and native AdMob container
+- [x] 05-02: Gemini 1.5 Flash structured JSON classification service with Redis caching and sub-2s SLA validation
 
 ---
 
@@ -279,7 +279,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 2. Onboarding & Identity (Screens 1 & 2) with Native Biometrics | 2/2 | Complete | 2026-09-14 |
 | 3. Emergency Risk Alert Screen (Screen 8 / RF-006) | 2/2 | Complete | 2026-09-14 |
 | 4. Dynamic 5-Step Triage Wizard (Screen 4 / RF-002) | 2/2 | Complete | 2026-09-14 |
-| 5. Home & Unified Trigger Check-in (Screen 3 / RF-001) & AdMob Container | 0/2 | Ready to plan | - |
+| 5. Home & Unified Trigger Check-in (Screen 3 / RF-001) & AdMob Container | 2/2 | Complete | 2026-09-14 |
 | 6. Triage Outcome, Somatic Mapping & Article Recommendations (Screen 6 / RF-004 & RF-005) | 0/2 | Not started | - |
 | 7. Antiburla Historical Verification Sheet (Screen 5 / RF-003 & UC-01) | 0/2 | Not started | - |
 | 8. Offline Caching & Outbox Synchronization | 0/2 | Not started | - |

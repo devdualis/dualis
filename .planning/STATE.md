@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: "05"
-current_phase_name: home-and-unified-trigger-checkin
+current_phase: "06"
+current_phase_name: triage-outcome-somatic-mapping
 status: ready_to_plan
-stopped_at: Phase 4 executed and verified (Plans 04-01 and 04-02 complete)
-last_updated: "2026-09-14T11:45:00.000Z"
+stopped_at: Phase 5 executed and verified (Plans 05-01 and 05-02 complete)
+last_updated: "2026-09-14T11:58:00.000Z"
 last_activity: 2026-09-14
-last_activity_desc: Executed and verified Phase 4 (Plans 04-01 and 04-02)
+last_activity_desc: Executed and verified Phase 5 (Plans 05-01 and 05-02)
 progress:
   total_phases: 10
-  completed_phases: 4
-  total_plans: 10
-  completed_plans: 8
+  completed_phases: 5
+  total_plans: 12
+  completed_plans: 10
 ---
 
 # Project State
@@ -23,24 +23,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-14)
 
 **Core value:** Unified, safe, and clinically consistent daily health triage bridging somatic/physical symptoms and psycho-emotional states with immediate emergency escalation and 14-day anti-tampering historical verification.
-**Current focus:** Phase 05 — home-and-unified-trigger-checkin
+**Current focus:** Phase 06 — triage-outcome-somatic-mapping
 
 ## Current Position
 
-Phase: 05 (home-and-unified-trigger-checkin) — READY TO PLAN
+Phase: 06 (triage-outcome-somatic-mapping) — READY TO PLAN
 Plan: 0 of 2
-Status: Phase 04 completed and verified; Phase 05 ready to plan
-Last activity: 2026-09-14 — Executed and verified Phase 04 (Plans 04-01 and 04-02)
+Status: Phase 05 completed and verified; Phase 06 ready to plan
+Last activity: 2026-09-14 — Executed and verified Phase 05 (Plans 05-01 and 05-02)
 
-Progress: [████░░░░░░] 40%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 8
+- Total plans completed: 10
 - Average duration: 15 min
-- Total execution time: 2.0 hours
+- Total execution time: 2.5 hours
 
 **By Phase:**
 
@@ -50,7 +50,7 @@ Progress: [████░░░░░░] 40%
 | 2. Onboarding & Identity (Screens 1 & 2) with Native Biometrics | 2/2 | 30m | 15m |
 | 3. Emergency Risk Alert Screen (Screen 8 / RF-006) | 2/2 | 25m | 12m |
 | 4. Dynamic 5-Step Triage Wizard (Screen 4 / RF-002) | 2/2 | 25m | 12m |
-| 5. Home & Unified Trigger Check-in (Screen 3 / RF-001) & AdMob Container | 0/2 | - | - |
+| 5. Home & Unified Trigger Check-in (Screen 3 / RF-001) & AdMob Container | 2/2 | 30m | 15m |
 | 6. Triage Outcome, Somatic Mapping & Article Recommendations (Screen 6 / RF-004 & RF-005) | 0/2 | - | - |
 | 7. Antiburla Historical Verification Sheet (Screen 5 / RF-003 & UC-01) | 0/2 | - | - |
 | 8. Offline Caching & Outbox Synchronization | 0/2 | - | - |
