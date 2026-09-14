@@ -1,4 +1,4 @@
-package com.dualischeckup.app.dualis_mobile
+package com.dualischeckup.app
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

@@ -5,6 +5,7 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/locale_provider.dart';
+import 'shared/widgets/privacy_veil_overlay.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +39,11 @@ class DualisApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
+      builder: (context, child) {
+        return PrivacyVeilOverlay(
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
   }
 }
