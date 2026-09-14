@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../l10n/locale_provider.dart';
+import '../../../../shared/widgets/dualis_logo.dart';
 import '../../../../shared/widgets/language_picker_button.dart';
 import '../../domain/value_card_item.dart';
 import '../controllers/onboarding_controller.dart';
@@ -88,35 +89,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
           child: Column(
             children: [
               const SizedBox(height: 8),
-              // Branded Header with Animated Shield Icon
+              // Branded Header with Animated Medical Shield Emblem Logo
               ScaleTransition(
                 scale: _scaleAnimation,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.softIndigo.withAlpha(25),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.shield_outlined,
-                        size: 32,
-                        color: AppColors.softIndigo,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      'DualisCheckUp',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.softIndigo,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                  ],
+                child: const DualisLogo(
+                  key: Key('onboarding_brand_header'),
+                  variant: DualisLogoVariant.horizontal,
+                  emblemSize: 36,
+                  fontSize: 22,
                 ),
               ),
               const SizedBox(height: 16),

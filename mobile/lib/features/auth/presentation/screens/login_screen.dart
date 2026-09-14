@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
+import '../../../../shared/widgets/dualis_logo.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
 import '../../../../shared/widgets/dualis_text_field.dart';
 import '../../domain/form_validators.dart';
@@ -40,12 +41,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (success && mounted) {
       context.go(RoutePaths.home);
     } else if (mounted) {
-      final error = ref.read(authControllerProvider).errorMessage;
-      if (error != null) {
+      final rawError = ref.read(authControllerProvider).errorMessage;
+      if (rawError != null) {
+        final errorText = (rawError.toLowerCase().contains('unauthorized') ||
+                rawError.toLowerCase().contains('401'))
+            ? 'Credenciais inválidas. Verifique seu e-mail e senha.'
+            : rawError;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(error),
+            content: Text(errorText),
             backgroundColor: AppColors.emergencyCrimson,
+            duration: const Duration(seconds: 4),
           ),
         );
       }
@@ -74,6 +80,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 4, bottom: 24),
+                    child: DualisLogo(
+                      key: Key('loginBrandLogo'),
+                      variant: DualisLogoVariant.vertical,
+                      emblemSize: 48,
+                      showTagline: true,
+                    ),
+                  ),
+                ),
                 Text(
                   'Entrar no DualisCheckUp',
                   style: GoogleFonts.plusJakartaSans(

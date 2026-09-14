@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
+import 'dualis_logo.dart';
 import '../../core/security/app_lifecycle_observer.dart';
 import '../../core/security/biometric_service.dart';
 
@@ -104,18 +105,11 @@ class PrivacyVeilOverlayState extends State<PrivacyVeilOverlay> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                        width: 96,
-                        height: 96,
-                        decoration: BoxDecoration(
-                          color: AppColors.clinicalTeal.withAlpha(40),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.shield_outlined,
-                          size: 52,
-                          color: AppColors.clinicalTeal,
-                        ),
+                      const DualisEmblem(
+                        key: Key('privacyVeilEmblem'),
+                        size: 64,
+                        withContainer: true,
+                        shape: BoxShape.circle,
                       ),
                       const SizedBox(height: 24),
                       Text(

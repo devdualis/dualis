@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
+import '../../../../shared/widgets/dualis_logo.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
 import '../../../../shared/widgets/dualis_text_field.dart';
 import '../../domain/form_validators.dart';
@@ -113,10 +114,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     } else if (mounted) {
       final error = ref.read(authControllerProvider).errorMessage;
       if (error != null) {
+        final isConflict = error.toLowerCase().contains('já cadastrado') ||
+            error.toLowerCase().contains('already') ||
+            error.toLowerCase().contains('registrado');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(error),
             backgroundColor: AppColors.emergencyCrimson,
+            duration: Duration(seconds: isConflict ? 6 : 4),
+            action: isConflict
+                ? SnackBarAction(
+                    label: 'Entrar',
+                    textColor: Colors.white,
+                    onPressed: () {
+                      if (mounted) context.go(RoutePaths.login);
+                    },
+                  )
+                : null,
           ),
         );
       }
@@ -146,6 +160,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 4, bottom: 20),
+                    child: DualisLogo(
+                      key: Key('registerBrandLogo'),
+                      variant: DualisLogoVariant.horizontal,
+                      emblemSize: 36,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
                 Text(
                   'Criar sua conta',
                   style: GoogleFonts.plusJakartaSans(
@@ -183,6 +208,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   key: const Key('birthDateField'),
                   labelText: 'Data de Nascimento',
                   hintText: 'DD/MM/AAAA',
+                  helperText: 'Ex: 15/08/1990 ou selecione pelo calendário.',
                   controller: _dobController,
                   validator: FormValidators.validateDateOfBirth,
                   keyboardType: TextInputType.datetime,
@@ -225,6 +251,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   key: const Key('passwordField'),
                   labelText: 'Senha',
                   hintText: 'Mínimo 8 caracteres',
+                  helperText: 'Use 8+ caracteres com maiúscula, número e símbolo.',
                   controller: _passwordController,
                   validator: FormValidators.validatePassword,
                   obscureText: _obscurePassword,

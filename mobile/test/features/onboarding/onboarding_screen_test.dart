@@ -8,6 +8,7 @@ import 'package:dualis_mobile/features/onboarding/presentation/screens/onboardin
 import 'package:dualis_mobile/features/onboarding/presentation/widgets/animated_page_indicator.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 import 'package:dualis_mobile/l10n/locale_provider.dart';
+import 'package:dualis_mobile/shared/widgets/dualis_logo.dart';
 
 Widget createTestApp() {
   final router = GoRouter(
@@ -58,9 +59,11 @@ void main() {
     await tester.pumpWidget(createTestApp());
     await tester.pumpAndSettle();
 
-    // Brand and Shield Header
-    expect(find.text('DualisCheckUp'), findsOneWidget);
-    expect(find.byIcon(Icons.shield_outlined), findsOneWidget);
+    // Brand and Shield Emblem Header
+    expect(find.byType(DualisLogo), findsOneWidget);
+    expect(find.byType(DualisEmblem), findsOneWidget);
+    expect(find.textContaining('Dualis'), findsWidgets);
+    expect(find.textContaining('CheckUp'), findsWidgets);
 
     // Initial Card 1
     expect(find.text('Triagem Preventiva Unificada'), findsOneWidget);

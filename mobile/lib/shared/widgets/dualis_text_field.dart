@@ -6,6 +6,7 @@ class DualisTextField extends StatelessWidget {
   final TextEditingController? controller;
   final String labelText;
   final String? hintText;
+  final String? helperText;
   final String? errorText;
   final String? Function(String?)? validator;
   final bool obscureText;
@@ -24,6 +25,7 @@ class DualisTextField extends StatelessWidget {
     required this.labelText,
     this.controller,
     this.hintText,
+    this.helperText,
     this.errorText,
     this.validator,
     this.obscureText = false,
@@ -62,6 +64,7 @@ class DualisTextField extends StatelessWidget {
         decoration: InputDecoration(
           labelText: labelText,
           hintText: hintText,
+          helperText: helperText,
           errorText: errorText,
           prefixIcon: prefixIcon,
           suffixIcon: suffixIcon,

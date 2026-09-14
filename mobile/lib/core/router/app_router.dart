@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/home/presentation/screens/home_screen.dart';
 import 'route_paths.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -32,9 +33,7 @@ GoRouter createRouter({String initialLocation = RoutePaths.onboarding}) {
       GoRoute(
         path: RoutePaths.home,
         name: 'home',
-        builder: (context, state) => const Scaffold(
-          body: Center(child: Text('Home Screen')),
-        ),
+        builder: (context, state) => const HomeScreen(),
       ),
     ],
   );
