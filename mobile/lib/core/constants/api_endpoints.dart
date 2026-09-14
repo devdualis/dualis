@@ -33,4 +33,7 @@ class ApiEndpoints {
 
   // Antiburla Endpoints
   static const String antiburlaCheck = '/v1/triage/antiburla-check';
+
+  // Triage History Endpoints
+  static const String triageHistory = '/v1/triage/history';
 }
