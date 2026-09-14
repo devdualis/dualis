@@ -61,6 +61,14 @@ GoRouter createRouter({String initialLocation = RoutePaths.onboarding}) {
         path: RoutePaths.triage,
         name: 'triage',
         builder: (context, state) {
+          if (state.extra is TriageNavigationArgs) {
+            final args = state.extra as TriageNavigationArgs;
+            return TriageWizardScreen(
+              vertical: args.initialVertical,
+              isDual: args.isDual,
+              naturalLanguageText: args.naturalLanguageText,
+            );
+          }
           final vertical =
               state.extra as TriageVertical? ?? TriageVertical.psicoEmocional;
           return TriageWizardScreen(vertical: vertical);

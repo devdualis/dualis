@@ -127,7 +127,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Welcome Header
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -222,11 +221,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Dual-Axis Mandatory Trigger Check-in Card (RF-001 / TRG-01)
               const DualAxisTriggerCard(),
               const SizedBox(height: 16),
-
-              // Action CTA: Confirmar Check-in com Roteamento Clínico
               Consumer(
                 builder: (context, ref, child) {
                   final triggerState = ref.watch(triggerCheckInProvider);
@@ -250,20 +246,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               case RoutingOutcome.psicoEmocionalOnly:
                                 context.push(
                                   RoutePaths.triage,
-                                  extra: TriageVertical.psicoEmocional,
+                                  extra: TriageNavigationArgs(
+                                    initialVertical: TriageVertical.psicoEmocional,
+                                    isDual: false,
+                                    naturalLanguageText: triggerState.naturalLanguageText,
+                                  ),
                                 );
                                 break;
                               case RoutingOutcome.fisicaOnly:
                                 context.push(
                                   RoutePaths.triage,
-                                  extra: TriageVertical.fisica,
+                                  extra: TriageNavigationArgs(
+                                    initialVertical: TriageVertical.fisica,
+                                    isDual: false,
+                                    naturalLanguageText: triggerState.naturalLanguageText,
+                                  ),
                                 );
                                 break;
                               case RoutingOutcome.dualOrganicPrimacy:
-                                // Organic Primacy: somatic/physical evaluation first
                                 context.push(
                                   RoutePaths.triage,
-                                  extra: TriageVertical.fisica,
+                                  extra: TriageNavigationArgs(
+                                    initialVertical: TriageVertical.fisica,
+                                    isDual: true,
+                                    naturalLanguageText: triggerState.naturalLanguageText,
+                                  ),
                                 );
                                 break;
                               case RoutingOutcome.none:
@@ -275,8 +282,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 },
               ),
               const SizedBox(height: 20),
-
-              // Privacy-safe Local Partner AdMob Banner (RF-009 / AD-01)
               const AdMobBannerContainer(),
               const SizedBox(height: 16),
 

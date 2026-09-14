@@ -171,6 +171,8 @@ class DualisLogo extends StatelessWidget {
         ],
       ),
       textAlign: variant == DualisLogoVariant.vertical ? TextAlign.center : TextAlign.start,
+      overflow: TextOverflow.ellipsis,
+      maxLines: 1,
     );
 
     final taglineWidget = showTagline
@@ -210,13 +212,15 @@ class DualisLogo extends StatelessWidget {
       children: [
         emblem,
         const SizedBox(width: 12),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            brandTitle,
-            if (taglineWidget != null) taglineWidget,
-          ],
+        Flexible(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              brandTitle,
+              if (taglineWidget != null) taglineWidget,
+            ],
+          ),
         ),
       ],
     );

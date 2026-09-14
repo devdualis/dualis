@@ -33,7 +33,32 @@ export class TriageOutcomeService {
       label: 'Cabeça e Pescoço',
       somaticNormalized: 'Cefaleia / Desconforto crânio-cervical',
     },
+    cabeca_pescoco: {
+      code: 'cabeca_pescoco',
+      label: 'Cabeça e Pescoço',
+      somaticNormalized: 'Cefaleia / Desconforto crânio-cervical',
+    },
     costas: {
+      code: 'coluna_dor_dorsal',
+      label: 'Coluna e Dor Dorsal',
+      somaticNormalized: 'Dor lombar / Tensão paravertebral postural',
+    },
+    costas_coluna: {
+      code: 'coluna_dor_dorsal',
+      label: 'Coluna e Dor Dorsal',
+      somaticNormalized: 'Dor lombar / Tensão paravertebral postural',
+    },
+    coluna: {
+      code: 'coluna_dor_dorsal',
+      label: 'Coluna e Dor Dorsal',
+      somaticNormalized: 'Dor lombar / Tensão paravertebral postural',
+    },
+    dor_lombar_costas: {
+      code: 'coluna_dor_dorsal',
+      label: 'Coluna e Dor Dorsal',
+      somaticNormalized: 'Dor lombar / Tensão paravertebral postural',
+    },
+    lombar: {
       code: 'coluna_dor_dorsal',
       label: 'Coluna e Dor Dorsal',
       somaticNormalized: 'Dor lombar / Tensão paravertebral postural',
@@ -44,6 +69,11 @@ export class TriageOutcomeService {
       somaticNormalized: 'Artralgia / Desconforto musculoarticular periférico',
     },
     abdomen: {
+      code: 'gastrointestinal_abdomen',
+      label: 'Gastrointestinal e Abdômen',
+      somaticNormalized: 'Desconforto epigástrico / Dispepsia funcional',
+    },
+    abdomen_estomago: {
       code: 'gastrointestinal_abdomen',
       label: 'Gastrointestinal e Abdômen',
       somaticNormalized: 'Desconforto epigástrico / Dispepsia funcional',
@@ -61,7 +91,17 @@ export class TriageOutcomeService {
       label: 'Dimensão Ansiosa / Agitação',
       somaticNormalized: 'Ansiedade antecipatória / Tensão psicomotora',
     },
+    ansiedade_agitacao: {
+      code: 'ansiosa_agitacao',
+      label: 'Dimensão Ansiosa / Agitação',
+      somaticNormalized: 'Ansiedade antecipatória / Tensão psicomotora',
+    },
     tristeza: {
+      code: 'depressiva_desanimo',
+      label: 'Dimensão Depressiva / Desânimo',
+      somaticNormalized: 'Desânimo transitório / Anedonia leve a moderada',
+    },
+    tristeza_desanimo: {
       code: 'depressiva_desanimo',
       label: 'Dimensão Depressiva / Desânimo',
       somaticNormalized: 'Desânimo transitório / Anedonia leve a moderada',
@@ -71,7 +111,17 @@ export class TriageOutcomeService {
       label: 'Dimensão Estresse / Burnout',
       somaticNormalized: 'Sobrecarga de estresse cognitivo / Esgotamento funcional',
     },
+    estresse_irritabilidade: {
+      code: 'estresse_burnout',
+      label: 'Dimensão Estresse / Burnout',
+      somaticNormalized: 'Sobrecarga de estresse cognitivo / Esgotamento funcional',
+    },
     cansaco: {
+      code: 'sono_cognitiva',
+      label: 'Dimensão Sono e Cansaço Mental',
+      somaticNormalized: 'Fadiga mental / Privação do descanso fisiológico',
+    },
+    cansaco_mental: {
       code: 'sono_cognitiva',
       label: 'Dimensão Sono e Cansaço Mental',
       somaticNormalized: 'Fadiga mental / Privação do descanso fisiológico',
@@ -92,44 +142,50 @@ export class TriageOutcomeService {
     }
 
     const { vertical, answers, narrative } = dto;
-    const step1 = answers[1]?.toLowerCase() || '';
-    const step3 = answers[3] || '';
+    const isZeroIndexed = answers[0] !== undefined || answers['0'] !== undefined;
+    const step1 = ((isZeroIndexed ? (answers[0] || answers['0']) : (answers[1] || answers['1'])) || '').toLowerCase();
+    const step3 = (isZeroIndexed ? (answers[2] || answers['2']) : (answers[3] || answers['3'])) || '';
 
-    // 1. Resolve Category Mapping (SOM-01)
-    let mapping: CategoryMapping;
+    let mapping: CategoryMapping | undefined;
     if (vertical === 'physical') {
-      mapping = this.physicalMappings[step1] || {
-        code: 'geral',
-        label: 'Avaliação Física Sistêmica',
-        somaticNormalized: 'Desconforto corporal geral',
-      };
+      mapping = this.physicalMappings[step1] ||
+        Object.entries(this.physicalMappings).find(([k]) => step1.includes(k) || k.includes(step1))?.[1];
+      if (!mapping) {
+        mapping = {
+          code: 'geral',
+          label: 'Avaliação Física Sistêmica',
+          somaticNormalized: 'Desconforto corporal geral',
+        };
+      }
     } else {
-      mapping = this.emotionalMappings[step1] || {
-        code: 'estresse_burnout',
-        label: 'Dimensão Estresse e Bem-Estar Emocional',
-        somaticNormalized: 'Sobrecarga emocional geral',
-      };
+      mapping = this.emotionalMappings[step1] ||
+        Object.entries(this.emotionalMappings).find(([k]) => step1.includes(k) || k.includes(step1))?.[1];
+      if (!mapping) {
+        mapping = {
+          code: 'estresse_burnout',
+          label: 'Dimensão Estresse e Bem-Estar Emocional',
+          somaticNormalized: 'Sobrecarga emocional geral',
+        };
+      }
     }
 
-    // 2. Calculate Intensity Score (OUT-01)
-    let intensityScore = 2; // default
+    let intensityScore = 2;
     if (vertical === 'physical') {
       const numeric = parseInt(step3, 10);
       if (!isNaN(numeric) && numeric >= 1 && numeric <= 5) {
         intensityScore = numeric;
       }
     } else {
-      if (step3.includes('muito_forte') || step3.includes('grave')) {
+      const lower3 = step3.toLowerCase();
+      if (lower3.includes('muito_forte') || lower3.includes('grave') || lower3.includes('crise') || lower3 === '4' || lower3 === '5') {
         intensityScore = 4;
-      } else if (step3.includes('moderada')) {
+      } else if (lower3.includes('moderada') || lower3 === '3') {
         intensityScore = 3;
-      } else if (step3.includes('leve')) {
+      } else if (lower3.includes('leve') || lower3 === '1' || lower3 === '2') {
         intensityScore = 2;
       }
     }
 
-    // 3. Organic Primacy Protocol (SOM-02)
-    // Physical symptoms reported in emotional triage trigger mandatory somatic safety evaluation
     let organicPrimacyApplied = false;
     let organicPrimacyNotice: string | undefined;
 
@@ -143,7 +199,6 @@ export class TriageOutcomeService {
         'Atenção Clínica (Primazia Orgânica): Sintomas físicos concorrentes exigem que causas orgânicas sejam avaliadas presencialmente por um médico antes de atribuí-los unicamente ao estresse psicológico.';
     }
 
-    // 4. Calculate Care Disposition (OUT-01)
     let careDisposition: CareDisposition;
     if (intensityScore <= 2) {
       careDisposition = 'auto_cuidado';
@@ -155,15 +210,12 @@ export class TriageOutcomeService {
       careDisposition = 'emergencia';
     }
 
-    // Organic Primacy guarantee: disposition cannot be downgraded to self-care if organic primacy triggered
     if (organicPrimacyApplied && careDisposition === 'auto_cuidado') {
       careDisposition = 'consulta_rotina';
     }
 
-    // 5. Query Specialist Articles (REC-01)
     const recommendedArticles = this.articlesCatalog.getArticlesForCategory(mapping.code);
 
-    // 5.1 Idempotency Check (SYNC-01)
     if (dto.clientSessionId) {
       const existing = await this.db.transaction(async (tx) => {
         await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`);
@@ -192,7 +244,6 @@ export class TriageOutcomeService {
       }
     }
 
-    // 6. Encrypt and Persist under RLS
     const encryptedNarrative = narrative ? this.encryptionService.encrypt(narrative) : null;
     const encryptedStepAnswers = this.encryptionService.encrypt(JSON.stringify(answers));
 

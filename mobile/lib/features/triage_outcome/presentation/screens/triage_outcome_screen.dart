@@ -47,7 +47,6 @@ class TriageOutcomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Vertical banner badge
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -92,23 +91,63 @@ class TriageOutcomeScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              if (outcome.secondaryCategoryLabel != null) ...[
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.softIndigo.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.softIndigo.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.psychology_rounded,
+                        color: AppColors.softIndigo,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              outcome.secondaryCategoryLabel!,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.softIndigo,
+                              ),
+                            ),
+                            if (outcome.secondarySomaticMapping != null &&
+                                outcome.secondarySomaticMapping!.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                outcome.secondarySomaticMapping!,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
-
-              // Intensity meter (1 to 5)
               IntensityMeter(score: outcome.intensityScore),
               const SizedBox(height: 16),
-
-              // Organic Primacy banner if applicable
               if (outcome.organicPrimacyApplied) ...[
                 OrganicPrimacyBanner(notice: outcome.organicPrimacyNotice),
                 const SizedBox(height: 16),
               ],
-
-              // Care disposition card
               DispositionCard(disposition: outcome.careDisposition),
               const SizedBox(height: 24),
-
-              // Specialist Articles Header
               Row(
                 children: [
                   const Icon(
@@ -136,8 +175,6 @@ class TriageOutcomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-
-              // Articles list
               if (outcome.recommendedArticles.isEmpty)
                 Text(
                   'Nenhum artigo disponível no momento.',
@@ -147,10 +184,7 @@ class TriageOutcomeScreen extends StatelessWidget {
                 ...outcome.recommendedArticles.map(
                   (article) => ArticleCard(article: article),
                 ),
-
               const SizedBox(height: 24),
-
-              // Finish button
               FilledButton(
                 style: FilledButton.styleFrom(
                   backgroundColor: verticalColor,

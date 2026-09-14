@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/security/secure_storage_service.dart';
 import '../../data/triage_outcome_remote_data_source.dart';
 import '../../domain/triage_outcome_models.dart';
 
 final triageOutcomeDataSourceProvider = Provider<TriageOutcomeRemoteDataSource>((ref) {
-  return TriageOutcomeRemoteDataSource();
+  final secureStorage = ref.watch(secureStorageServiceProvider);
+  return TriageOutcomeRemoteDataSource(secureStorage: secureStorage);
 });
 
 class TriageOutcomeState {

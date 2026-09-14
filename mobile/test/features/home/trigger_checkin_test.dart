@@ -24,7 +24,14 @@ Widget createTriggerCheckInTestApp({
       GoRoute(
         path: RoutePaths.triage,
         builder: (context, state) {
-          final vertical = state.extra as TriageVertical? ?? TriageVertical.psicoEmocional;
+          final TriageVertical vertical;
+          if (state.extra is TriageNavigationArgs) {
+            vertical = (state.extra as TriageNavigationArgs).initialVertical;
+          } else if (state.extra is TriageVertical) {
+            vertical = state.extra as TriageVertical;
+          } else {
+            vertical = TriageVertical.psicoEmocional;
+          }
           if (onTriageNavigated != null) {
             onTriageNavigated(vertical);
           }

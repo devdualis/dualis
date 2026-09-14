@@ -23,15 +23,16 @@ import 'package:dualis_mobile/features/sync/data/triage_outbox_repository.dart';
 import '../../../../core/network/connectivity_service.dart';
 import 'package:uuid/uuid.dart';
 
-/// Screen 4: Dynamic 5-Step Triage Wizard (RF-002 / SRS ID 02 & 03).
-/// Features 300ms chromatic palette tweening between Soft Indigo (#3F51B5)
-/// for Psico-Emocional and Clinical Teal (#00796B) for Física.
 class TriageWizardScreen extends ConsumerStatefulWidget {
   final TriageVertical vertical;
+  final bool isDual;
+  final String? naturalLanguageText;
 
   const TriageWizardScreen({
     super.key,
     this.vertical = TriageVertical.psicoEmocional,
+    this.isDual = false,
+    this.naturalLanguageText,
   });
 
   @override
@@ -40,6 +41,7 @@ class TriageWizardScreen extends ConsumerStatefulWidget {
 
 class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
   Color _prevColor = AppColors.softIndigo;
+  TriageOutcome? _physicalOutcome;
 
   @override
   void initState() {
@@ -251,6 +253,8 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
     final canAdvance = state.canAdvance;
 
     if (question.isPreview) {
+      final isTransitionToEmotional =
+          widget.isDual && state.activeVertical == TriageVertical.fisica;
       return FilledButton(
         style: FilledButton.styleFrom(
           backgroundColor: activeColor,
@@ -278,6 +282,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
               outcome = await dataSource.submitTriage(
                 vertical: verticalStr,
                 answers: answers,
+                narrative: widget.naturalLanguageText,
                 clientSessionId: clientSessionId,
               );
             } catch (_) {
@@ -286,7 +291,11 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
                 answers: answers,
                 clientSessionId: clientSessionId,
               );
-              outcome = dataSource.generateOfflineFallback(verticalStr, answers, null);
+              outcome = dataSource.generateOfflineFallback(
+                verticalStr,
+                answers,
+                widget.naturalLanguageText,
+              );
             }
           } else {
             await ref.read(triageOutboxRepositoryProvider).enqueueTriageCheckIn(
@@ -294,15 +303,40 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
               answers: answers,
               clientSessionId: clientSessionId,
             );
-            outcome = dataSource.generateOfflineFallback(verticalStr, answers, null);
+            outcome = dataSource.generateOfflineFallback(
+              verticalStr,
+              answers,
+              widget.naturalLanguageText,
+            );
+          }
+
+          if (isTransitionToEmotional) {
+            setState(() {
+              _physicalOutcome = outcome;
+            });
+            ref
+                .read(triageWizardNotifierProvider.notifier)
+                .setVertical(TriageVertical.psicoEmocional);
+            return;
+          }
+
+          var finalOutcome = outcome;
+          if (widget.isDual && _physicalOutcome != null) {
+            finalOutcome = _physicalOutcome!.copyWith(
+              secondaryCategoryLabel: outcome.categoryLabel,
+              secondarySomaticMapping: outcome.somaticMapping,
+              secondaryIntensityScore: outcome.intensityScore,
+            );
           }
 
           if (context.mounted) {
-            context.go(RoutePaths.triageOutcome, extra: outcome);
+            context.go(RoutePaths.triageOutcome, extra: finalOutcome);
           }
         },
         child: Text(
-          l10n.triagePreviewSubmit,
+          isTransitionToEmotional
+              ? 'Concluir Física e Iniciar Psico-Emocional'
+              : l10n.triagePreviewSubmit,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -332,7 +366,6 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
   }
 
   Future<void> _handleNext(BuildContext context, TriageWizardState state) async {
-    // Intercept Step 1 (Duration/Persistence) if user reports onset now/today
     if (state.currentStep == 1) {
       final selectedPersistence = state.answers[1] ?? '';
       if (selectedPersistence == 'comecou_agora' ||

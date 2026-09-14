@@ -1,8 +1,16 @@
-/// Identifies which clinical vertical is active in the 5-step triage wizard.
 enum TriageVertical {
-  /// Psico-Emocional vertical — Soft Indigo (#3F51B5) theme.
   psicoEmocional,
-
-  /// Física vertical — Clinical Teal (#00796B) theme.
   fisica,
+}
+
+class TriageNavigationArgs {
+  final TriageVertical initialVertical;
+  final bool isDual;
+  final String? naturalLanguageText;
+
+  const TriageNavigationArgs({
+    required this.initialVertical,
+    this.isDual = false,
+    this.naturalLanguageText,
+  });
 }

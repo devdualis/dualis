@@ -73,6 +73,9 @@ class TriageOutcome {
   final String? organicPrimacyNotice;
   final List<RecommendedArticle> recommendedArticles;
   final DateTime recordedAt;
+  final String? secondaryCategoryLabel;
+  final String? secondarySomaticMapping;
+  final int? secondaryIntensityScore;
 
   const TriageOutcome({
     required this.id,
@@ -86,6 +89,9 @@ class TriageOutcome {
     this.organicPrimacyNotice,
     required this.recommendedArticles,
     required this.recordedAt,
+    this.secondaryCategoryLabel,
+    this.secondarySomaticMapping,
+    this.secondaryIntensityScore,
   });
 
   factory TriageOutcome.fromJson(Map<String, dynamic> json) {
@@ -104,6 +110,43 @@ class TriageOutcome {
               .toList() ??
           const [],
       recordedAt: DateTime.tryParse(json['recordedAt'] as String? ?? '') ?? DateTime.now(),
+      secondaryCategoryLabel: json['secondaryCategoryLabel'] as String?,
+      secondarySomaticMapping: json['secondarySomaticMapping'] as String?,
+      secondaryIntensityScore: (json['secondaryIntensityScore'] as num?)?.toInt(),
+    );
+  }
+
+  TriageOutcome copyWith({
+    String? id,
+    String? vertical,
+    int? intensityScore,
+    CareDisposition? careDisposition,
+    String? primaryCategory,
+    String? categoryLabel,
+    String? somaticMapping,
+    bool? organicPrimacyApplied,
+    String? organicPrimacyNotice,
+    List<RecommendedArticle>? recommendedArticles,
+    DateTime? recordedAt,
+    String? secondaryCategoryLabel,
+    String? secondarySomaticMapping,
+    int? secondaryIntensityScore,
+  }) {
+    return TriageOutcome(
+      id: id ?? this.id,
+      vertical: vertical ?? this.vertical,
+      intensityScore: intensityScore ?? this.intensityScore,
+      careDisposition: careDisposition ?? this.careDisposition,
+      primaryCategory: primaryCategory ?? this.primaryCategory,
+      categoryLabel: categoryLabel ?? this.categoryLabel,
+      somaticMapping: somaticMapping ?? this.somaticMapping,
+      organicPrimacyApplied: organicPrimacyApplied ?? this.organicPrimacyApplied,
+      organicPrimacyNotice: organicPrimacyNotice ?? this.organicPrimacyNotice,
+      recommendedArticles: recommendedArticles ?? this.recommendedArticles,
+      recordedAt: recordedAt ?? this.recordedAt,
+      secondaryCategoryLabel: secondaryCategoryLabel ?? this.secondaryCategoryLabel,
+      secondarySomaticMapping: secondarySomaticMapping ?? this.secondarySomaticMapping,
+      secondaryIntensityScore: secondaryIntensityScore ?? this.secondaryIntensityScore,
     );
   }
 
@@ -119,5 +162,8 @@ class TriageOutcome {
         'organicPrimacyNotice': organicPrimacyNotice,
         'recommendedArticles': recommendedArticles.map((a) => a.toJson()).toList(),
         'recordedAt': recordedAt.toIso8601String(),
+        if (secondaryCategoryLabel != null) 'secondaryCategoryLabel': secondaryCategoryLabel,
+        if (secondarySomaticMapping != null) 'secondarySomaticMapping': secondarySomaticMapping,
+        if (secondaryIntensityScore != null) 'secondaryIntensityScore': secondaryIntensityScore,
       };
 }

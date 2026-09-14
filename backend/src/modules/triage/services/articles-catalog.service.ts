@@ -119,12 +119,10 @@ export class ArticlesCatalogService {
   getArticlesForCategory(category: string): RecommendedArticleDto[] {
     const matched = this.articles.filter((a) => a.category === category);
     if (matched.length > 0) {
-      // Return matched article plus general wellness article
       const general = this.articles.find((a) => a.category === 'geral');
       return general && !matched.includes(general) ? [...matched, general] : matched;
     }
 
-    // Default fallback
     return this.articles.slice(0, 2);
   }
 }
