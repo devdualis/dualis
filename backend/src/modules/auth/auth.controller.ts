@@ -7,6 +7,7 @@ import {
   HttpStatus,
   UseGuards,
   Req,
+  Inject,
 } from '@nestjs/common';
 import { FastifyRequest } from 'fastify';
 import { AuthService } from './auth.service';
@@ -21,7 +22,7 @@ interface AuthenticatedRequest extends FastifyRequest {
 
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(@Inject(AuthService) private readonly authService: AuthService) {}
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)

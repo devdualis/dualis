@@ -21,7 +21,7 @@ import { AuthResponseDto, SanitizedUser } from './dto/auth-response.dto';
 export class AuthService {
   constructor(
     @Inject(DRIZZLE_DB) private readonly db: NodePgDatabase<typeof schema>,
-    private readonly jwtService: JwtService,
+    @Inject(JwtService) private readonly jwtService: JwtService,
   ) {}
 
   async register(
