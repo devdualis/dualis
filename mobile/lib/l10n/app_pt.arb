@@ -227,5 +227,198 @@
   "emergencyCopiedToast": "Número copiado para a área de transferência.",
   "@emergencyCopiedToast": {
     "description": "Toast or snackbar message indicating emergency number was copied"
+  },
+  "triageBannerEmotional": "Iniciando Autoavaliação Psico-Emocional",
+  "@triageBannerEmotional": {
+    "description": "Banner text for emotional triage vertical"
+  },
+  "triageBannerPhysical": "Iniciando Autoavaliação Física",
+  "@triageBannerPhysical": {
+    "description": "Banner text for physical triage vertical"
+  },
+  "triageStep": "Passo {step} de {total}",
+  "@triageStep": {
+    "description": "Step progress indicator",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "triageNext": "Próximo",
+  "@triageNext": {
+    "description": "Button to advance to next triage step"
+  },
+  "triageBack": "Voltar",
+  "@triageBack": {
+    "description": "Button to go back to previous triage step"
+  },
+  "triageConfirm": "Confirmar",
+  "@triageConfirm": {
+    "description": "Confirm button label"
+  },
+  "triagePreviewTitle": "Revisão da sua Avaliação",
+  "@triagePreviewTitle": {
+    "description": "Title of the preview step card"
+  },
+  "triagePreviewSubmit": "Confirmar e Finalizar",
+  "@triagePreviewSubmit": {
+    "description": "Final submission CTA button"
+  },
+  "triageQ1Emotional": "Olhando para o seu lado emocional e mental, qual palavra descreve melhor o que você está sentindo agora?",
+  "@triageQ1Emotional": {
+    "description": "Question 1 emotional"
+  },
+  "triageOptAnsiedade": "Ansiedade / Agitação",
+  "@triageOptAnsiedade": {
+    "description": "Emotional option: Anxiety/Agitation"
+  },
+  "triageOptTristeza": "Tristeza / Desânimo",
+  "@triageOptTristeza": {
+    "description": "Emotional option: Sadness/Discouragement"
+  },
+  "triageOptEstresse": "Estresse / Irritabilidade",
+  "@triageOptEstresse": {
+    "description": "Emotional option: Stress/Irritability"
+  },
+  "triageOptCansaco": "Cansaço Mental",
+  "@triageOptCansaco": {
+    "description": "Emotional option: Mental Fatigue"
+  },
+  "triageQ2Emotional": "Você tem se sentido assim frequentemente nos últimos dias ou é algo muito específico de hoje?",
+  "@triageQ2Emotional": {
+    "description": "Question 2 emotional"
+  },
+  "triageOptComecouHoje": "Começou hoje",
+  "@triageOptComecouHoje": {
+    "description": "Persistence option: Started today"
+  },
+  "triageOptJaFazDias": "Já faz alguns dias",
+  "@triageOptJaFazDias": {
+    "description": "Persistence option: A few days ago"
+  },
+  "triageOptConstanteSemanas": "É algo constante há semanas",
+  "@triageOptConstanteSemanas": {
+    "description": "Persistence option: Constant for weeks"
+  },
+  "triageQ3Emotional": "Essa sensação está parecendo um leve incômodo de fundo ou algo forte que está acelerando seus pensamentos?",
+  "@triageQ3Emotional": {
+    "description": "Question 3 emotional"
+  },
+  "triageOptLeveControlavel": "Leve e controlável",
+  "@triageOptLeveControlavel": {
+    "description": "Emotional intensity: Mild and controllable"
+  },
+  "triageOptModerada": "Moderada",
+  "@triageOptModerada": {
+    "description": "Emotional intensity: Moderate"
+  },
+  "triageOptMuitoForte": "Muito forte e difícil de segurar",
+  "@triageOptMuitoForte": {
+    "description": "Emotional intensity: Very strong and hard to control"
+  },
+  "triageQ4Emotional": "Você consegue identificar se existe um motivo principal para isso estar acontecendo hoje?",
+  "@triageQ4Emotional": {
+    "description": "Question 4 emotional"
+  },
+  "triageOptTrabalho": "Trabalho / Estudos",
+  "@triageOptTrabalho": {
+    "description": "Trigger option: Work/Studies"
+  },
+  "triageOptFamilia": "Família / Relacionamentos",
+  "@triageOptFamilia": {
+    "description": "Trigger option: Family/Relationships"
+  },
+  "triageOptNoiteRuim": "Noite ruim de sono",
+  "@triageOptNoiteRuim": {
+    "description": "Trigger option: Poor sleep"
+  },
+  "triageOptNaoSei": "Não sei dizer",
+  "@triageOptNaoSei": {
+    "description": "Trigger option: Cannot tell"
+  },
+  "triagePreviewEmotional": "Revisão da sua Autoavaliação Psico-Emocional",
+  "@triagePreviewEmotional": {
+    "description": "Emotional preview step description"
+  },
+  "triageQ1Physical": "Vamos falar sobre a parte física. Onde você está sentindo esse desconforto ou dor principal?",
+  "@triageQ1Physical": {
+    "description": "Question 1 physical"
+  },
+  "triageOptCabeca": "Cabeça",
+  "@triageOptCabeca": {
+    "description": "Physical location: Head"
+  },
+  "triageOptCostas": "Costas / Coluna",
+  "@triageOptCostas": {
+    "description": "Physical location: Back/Spine"
+  },
+  "triageOptArticulacoes": "Articulações (Joelho, Ombro, etc.)",
+  "@triageOptArticulacoes": {
+    "description": "Physical location: Joints"
+  },
+  "triageOptAbdomen": "Abdômen / Estômago",
+  "@triageOptAbdomen": {
+    "description": "Physical location: Abdomen/Stomach"
+  },
+  "triageQ2Physical": "Há quanto tempo essa dor ou anomalia persiste?",
+  "@triageQ2Physical": {
+    "description": "Question 2 physical"
+  },
+  "triageOptComecouAgora": "Começou agora",
+  "@triageOptComecouAgora": {
+    "description": "Physical persistence: Started now"
+  },
+  "triageOptHaAlgunsDias": "Há alguns dias",
+  "@triageOptHaAlgunsDias": {
+    "description": "Physical persistence: A few days ago"
+  },
+  "triageOptCronica": "É crônica",
+  "@triageOptCronica": {
+    "description": "Physical persistence: Chronic"
+  },
+  "triageQ3Physical": "Em uma escala de 1 a 5 (onde 1 é quase imperceptível e 5 é insuportável), como está agora?",
+  "@triageQ3Physical": {
+    "description": "Question 3 physical"
+  },
+  "triageQ4Physical": "Você lembra de ter feito algum esforço atípico, exercício pesado ou sofrido alguma batida/queda recentemente?",
+  "@triageQ4Physical": {
+    "description": "Question 4 physical"
+  },
+  "triageOptSimExercicio": "Sim, exercício intenso",
+  "@triageOptSimExercicio": {
+    "description": "Physical trigger: Intense exercise"
+  },
+  "triageOptSimQueda": "Sim, sofri uma queda",
+  "@triageOptSimQueda": {
+    "description": "Physical trigger: Fall/impact"
+  },
+  "triageOptNaoComecouNada": "Não, começou do nada",
+  "@triageOptNaoComecouNada": {
+    "description": "Physical trigger: Started out of nowhere"
+  },
+  "triagePreviewPhysical": "Revisão da sua Avaliação Física",
+  "@triagePreviewPhysical": {
+    "description": "Physical preview step description"
+  },
+  "triageIntensityLabel": "Intensidade: {value}",
+  "@triageIntensityLabel": {
+    "description": "Intensity label",
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "triageIntensityMin": "Quase imperceptível",
+  "@triageIntensityMin": {
+    "description": "Intensity scale minimum label"
+  },
+  "triageIntensityMax": "Insuportável",
+  "@triageIntensityMax": {
+    "description": "Intensity scale maximum label"
   }
 }

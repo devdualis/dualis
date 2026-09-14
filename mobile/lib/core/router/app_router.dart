@@ -7,6 +7,8 @@ import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/emergency/domain/emergency_context.dart';
 import '../../features/emergency/domain/emergency_trigger_category.dart';
 import '../../features/emergency/presentation/screens/emergency_screen.dart';
+import '../../features/triage/domain/triage_vertical.dart';
+import '../../features/triage/presentation/screens/triage_wizard_screen.dart';
 import 'route_paths.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -49,6 +51,15 @@ GoRouter createRouter({String initialLocation = RoutePaths.onboarding}) {
                 detectedAt: DateTime.now(),
               );
           return EmergencyScreen(emergencyContext: emergencyContext);
+        },
+      ),
+      GoRoute(
+        path: RoutePaths.triage,
+        name: 'triage',
+        builder: (context, state) {
+          final vertical =
+              state.extra as TriageVertical? ?? TriageVertical.psicoEmocional;
+          return TriageWizardScreen(vertical: vertical);
         },
       ),
     ],

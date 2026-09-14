@@ -441,6 +441,276 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Número copiado para a área de transferência.'**
   String get emergencyCopiedToast;
+
+  /// Banner text for emotional triage vertical
+  ///
+  /// In pt, this message translates to:
+  /// **'Iniciando Autoavaliação Psico-Emocional'**
+  String get triageBannerEmotional;
+
+  /// Banner text for physical triage vertical
+  ///
+  /// In pt, this message translates to:
+  /// **'Iniciando Autoavaliação Física'**
+  String get triageBannerPhysical;
+
+  /// Step progress indicator
+  ///
+  /// In pt, this message translates to:
+  /// **'Passo {step} de {total}'**
+  String triageStep(int step, int total);
+
+  /// Button to advance to next triage step
+  ///
+  /// In pt, this message translates to:
+  /// **'Próximo'**
+  String get triageNext;
+
+  /// Button to go back to previous triage step
+  ///
+  /// In pt, this message translates to:
+  /// **'Voltar'**
+  String get triageBack;
+
+  /// Confirm button label
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar'**
+  String get triageConfirm;
+
+  /// Title of the preview step card
+  ///
+  /// In pt, this message translates to:
+  /// **'Revisão da sua Avaliação'**
+  String get triagePreviewTitle;
+
+  /// Final submission CTA button
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar e Finalizar'**
+  String get triagePreviewSubmit;
+
+  /// Question 1 emotional
+  ///
+  /// In pt, this message translates to:
+  /// **'Olhando para o seu lado emocional e mental, qual palavra descreve melhor o que você está sentindo agora?'**
+  String get triageQ1Emotional;
+
+  /// Emotional option: Anxiety/Agitation
+  ///
+  /// In pt, this message translates to:
+  /// **'Ansiedade / Agitação'**
+  String get triageOptAnsiedade;
+
+  /// Emotional option: Sadness/Discouragement
+  ///
+  /// In pt, this message translates to:
+  /// **'Tristeza / Desânimo'**
+  String get triageOptTristeza;
+
+  /// Emotional option: Stress/Irritability
+  ///
+  /// In pt, this message translates to:
+  /// **'Estresse / Irritabilidade'**
+  String get triageOptEstresse;
+
+  /// Emotional option: Mental Fatigue
+  ///
+  /// In pt, this message translates to:
+  /// **'Cansaço Mental'**
+  String get triageOptCansaco;
+
+  /// Question 2 emotional
+  ///
+  /// In pt, this message translates to:
+  /// **'Você tem se sentido assim frequentemente nos últimos dias ou é algo muito específico de hoje?'**
+  String get triageQ2Emotional;
+
+  /// Persistence option: Started today
+  ///
+  /// In pt, this message translates to:
+  /// **'Começou hoje'**
+  String get triageOptComecouHoje;
+
+  /// Persistence option: A few days ago
+  ///
+  /// In pt, this message translates to:
+  /// **'Já faz alguns dias'**
+  String get triageOptJaFazDias;
+
+  /// Persistence option: Constant for weeks
+  ///
+  /// In pt, this message translates to:
+  /// **'É algo constante há semanas'**
+  String get triageOptConstanteSemanas;
+
+  /// Question 3 emotional
+  ///
+  /// In pt, this message translates to:
+  /// **'Essa sensação está parecendo um leve incômodo de fundo ou algo forte que está acelerando seus pensamentos?'**
+  String get triageQ3Emotional;
+
+  /// Emotional intensity: Mild and controllable
+  ///
+  /// In pt, this message translates to:
+  /// **'Leve e controlável'**
+  String get triageOptLeveControlavel;
+
+  /// Emotional intensity: Moderate
+  ///
+  /// In pt, this message translates to:
+  /// **'Moderada'**
+  String get triageOptModerada;
+
+  /// Emotional intensity: Very strong and hard to control
+  ///
+  /// In pt, this message translates to:
+  /// **'Muito forte e difícil de segurar'**
+  String get triageOptMuitoForte;
+
+  /// Question 4 emotional
+  ///
+  /// In pt, this message translates to:
+  /// **'Você consegue identificar se existe um motivo principal para isso estar acontecendo hoje?'**
+  String get triageQ4Emotional;
+
+  /// Trigger option: Work/Studies
+  ///
+  /// In pt, this message translates to:
+  /// **'Trabalho / Estudos'**
+  String get triageOptTrabalho;
+
+  /// Trigger option: Family/Relationships
+  ///
+  /// In pt, this message translates to:
+  /// **'Família / Relacionamentos'**
+  String get triageOptFamilia;
+
+  /// Trigger option: Poor sleep
+  ///
+  /// In pt, this message translates to:
+  /// **'Noite ruim de sono'**
+  String get triageOptNoiteRuim;
+
+  /// Trigger option: Cannot tell
+  ///
+  /// In pt, this message translates to:
+  /// **'Não sei dizer'**
+  String get triageOptNaoSei;
+
+  /// Emotional preview step description
+  ///
+  /// In pt, this message translates to:
+  /// **'Revisão da sua Autoavaliação Psico-Emocional'**
+  String get triagePreviewEmotional;
+
+  /// Question 1 physical
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos falar sobre a parte física. Onde você está sentindo esse desconforto ou dor principal?'**
+  String get triageQ1Physical;
+
+  /// Physical location: Head
+  ///
+  /// In pt, this message translates to:
+  /// **'Cabeça'**
+  String get triageOptCabeca;
+
+  /// Physical location: Back/Spine
+  ///
+  /// In pt, this message translates to:
+  /// **'Costas / Coluna'**
+  String get triageOptCostas;
+
+  /// Physical location: Joints
+  ///
+  /// In pt, this message translates to:
+  /// **'Articulações (Joelho, Ombro, etc.)'**
+  String get triageOptArticulacoes;
+
+  /// Physical location: Abdomen/Stomach
+  ///
+  /// In pt, this message translates to:
+  /// **'Abdômen / Estômago'**
+  String get triageOptAbdomen;
+
+  /// Question 2 physical
+  ///
+  /// In pt, this message translates to:
+  /// **'Há quanto tempo essa dor ou anomalia persiste?'**
+  String get triageQ2Physical;
+
+  /// Physical persistence: Started now
+  ///
+  /// In pt, this message translates to:
+  /// **'Começou agora'**
+  String get triageOptComecouAgora;
+
+  /// Physical persistence: A few days ago
+  ///
+  /// In pt, this message translates to:
+  /// **'Há alguns dias'**
+  String get triageOptHaAlgunsDias;
+
+  /// Physical persistence: Chronic
+  ///
+  /// In pt, this message translates to:
+  /// **'É crônica'**
+  String get triageOptCronica;
+
+  /// Question 3 physical
+  ///
+  /// In pt, this message translates to:
+  /// **'Em uma escala de 1 a 5 (onde 1 é quase imperceptível e 5 é insuportável), como está agora?'**
+  String get triageQ3Physical;
+
+  /// Question 4 physical
+  ///
+  /// In pt, this message translates to:
+  /// **'Você lembra de ter feito algum esforço atípico, exercício pesado ou sofrido alguma batida/queda recentemente?'**
+  String get triageQ4Physical;
+
+  /// Physical trigger: Intense exercise
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim, exercício intenso'**
+  String get triageOptSimExercicio;
+
+  /// Physical trigger: Fall/impact
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim, sofri uma queda'**
+  String get triageOptSimQueda;
+
+  /// Physical trigger: Started out of nowhere
+  ///
+  /// In pt, this message translates to:
+  /// **'Não, começou do nada'**
+  String get triageOptNaoComecouNada;
+
+  /// Physical preview step description
+  ///
+  /// In pt, this message translates to:
+  /// **'Revisão da sua Avaliação Física'**
+  String get triagePreviewPhysical;
+
+  /// Intensity label
+  ///
+  /// In pt, this message translates to:
+  /// **'Intensidade: {value}'**
+  String triageIntensityLabel(int value);
+
+  /// Intensity scale minimum label
+  ///
+  /// In pt, this message translates to:
+  /// **'Quase imperceptível'**
+  String get triageIntensityMin;
+
+  /// Intensity scale maximum label
+  ///
+  /// In pt, this message translates to:
+  /// **'Insuportável'**
+  String get triageIntensityMax;
 }
 
 class _AppLocalizationsDelegate

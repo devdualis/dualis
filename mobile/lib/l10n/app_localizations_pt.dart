@@ -197,4 +197,152 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get emergencyCopiedToast =>
       'Número copiado para a área de transferência.';
+
+  @override
+  String get triageBannerEmotional => 'Iniciando Autoavaliação Psico-Emocional';
+
+  @override
+  String get triageBannerPhysical => 'Iniciando Autoavaliação Física';
+
+  @override
+  String triageStep(int step, int total) {
+    return 'Passo $step de $total';
+  }
+
+  @override
+  String get triageNext => 'Próximo';
+
+  @override
+  String get triageBack => 'Voltar';
+
+  @override
+  String get triageConfirm => 'Confirmar';
+
+  @override
+  String get triagePreviewTitle => 'Revisão da sua Avaliação';
+
+  @override
+  String get triagePreviewSubmit => 'Confirmar e Finalizar';
+
+  @override
+  String get triageQ1Emotional =>
+      'Olhando para o seu lado emocional e mental, qual palavra descreve melhor o que você está sentindo agora?';
+
+  @override
+  String get triageOptAnsiedade => 'Ansiedade / Agitação';
+
+  @override
+  String get triageOptTristeza => 'Tristeza / Desânimo';
+
+  @override
+  String get triageOptEstresse => 'Estresse / Irritabilidade';
+
+  @override
+  String get triageOptCansaco => 'Cansaço Mental';
+
+  @override
+  String get triageQ2Emotional =>
+      'Você tem se sentido assim frequentemente nos últimos dias ou é algo muito específico de hoje?';
+
+  @override
+  String get triageOptComecouHoje => 'Começou hoje';
+
+  @override
+  String get triageOptJaFazDias => 'Já faz alguns dias';
+
+  @override
+  String get triageOptConstanteSemanas => 'É algo constante há semanas';
+
+  @override
+  String get triageQ3Emotional =>
+      'Essa sensação está parecendo um leve incômodo de fundo ou algo forte que está acelerando seus pensamentos?';
+
+  @override
+  String get triageOptLeveControlavel => 'Leve e controlável';
+
+  @override
+  String get triageOptModerada => 'Moderada';
+
+  @override
+  String get triageOptMuitoForte => 'Muito forte e difícil de segurar';
+
+  @override
+  String get triageQ4Emotional =>
+      'Você consegue identificar se existe um motivo principal para isso estar acontecendo hoje?';
+
+  @override
+  String get triageOptTrabalho => 'Trabalho / Estudos';
+
+  @override
+  String get triageOptFamilia => 'Família / Relacionamentos';
+
+  @override
+  String get triageOptNoiteRuim => 'Noite ruim de sono';
+
+  @override
+  String get triageOptNaoSei => 'Não sei dizer';
+
+  @override
+  String get triagePreviewEmotional =>
+      'Revisão da sua Autoavaliação Psico-Emocional';
+
+  @override
+  String get triageQ1Physical =>
+      'Vamos falar sobre a parte física. Onde você está sentindo esse desconforto ou dor principal?';
+
+  @override
+  String get triageOptCabeca => 'Cabeça';
+
+  @override
+  String get triageOptCostas => 'Costas / Coluna';
+
+  @override
+  String get triageOptArticulacoes => 'Articulações (Joelho, Ombro, etc.)';
+
+  @override
+  String get triageOptAbdomen => 'Abdômen / Estômago';
+
+  @override
+  String get triageQ2Physical =>
+      'Há quanto tempo essa dor ou anomalia persiste?';
+
+  @override
+  String get triageOptComecouAgora => 'Começou agora';
+
+  @override
+  String get triageOptHaAlgunsDias => 'Há alguns dias';
+
+  @override
+  String get triageOptCronica => 'É crônica';
+
+  @override
+  String get triageQ3Physical =>
+      'Em uma escala de 1 a 5 (onde 1 é quase imperceptível e 5 é insuportável), como está agora?';
+
+  @override
+  String get triageQ4Physical =>
+      'Você lembra de ter feito algum esforço atípico, exercício pesado ou sofrido alguma batida/queda recentemente?';
+
+  @override
+  String get triageOptSimExercicio => 'Sim, exercício intenso';
+
+  @override
+  String get triageOptSimQueda => 'Sim, sofri uma queda';
+
+  @override
+  String get triageOptNaoComecouNada => 'Não, começou do nada';
+
+  @override
+  String get triagePreviewPhysical => 'Revisão da sua Avaliação Física';
+
+  @override
+  String triageIntensityLabel(int value) {
+    return 'Intensidade: $value';
+  }
+
+  @override
+  String get triageIntensityMin => 'Quase imperceptível';
+
+  @override
+  String get triageIntensityMax => 'Insuportável';
 }

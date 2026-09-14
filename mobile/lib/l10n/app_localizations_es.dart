@@ -195,4 +195,153 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get emergencyCopiedToast => 'Número copiado al portapapeles.';
+
+  @override
+  String get triageBannerEmotional => 'Iniciando Autoevaluación Psicoemocional';
+
+  @override
+  String get triageBannerPhysical => 'Iniciando Autoevaluación Física';
+
+  @override
+  String triageStep(int step, int total) {
+    return 'Paso $step de $total';
+  }
+
+  @override
+  String get triageNext => 'Siguiente';
+
+  @override
+  String get triageBack => 'Volver';
+
+  @override
+  String get triageConfirm => 'Confirmar';
+
+  @override
+  String get triagePreviewTitle => 'Revisión de su Evaluación';
+
+  @override
+  String get triagePreviewSubmit => 'Confirmar y Finalizar';
+
+  @override
+  String get triageQ1Emotional =>
+      'Mirando su lado emocional y mental, ¿qué palabra describe mejor lo que siente ahora?';
+
+  @override
+  String get triageOptAnsiedade => 'Ansiedad / Agitación';
+
+  @override
+  String get triageOptTristeza => 'Tristeza / Desánimo';
+
+  @override
+  String get triageOptEstresse => 'Estrés / Irritabilidad';
+
+  @override
+  String get triageOptCansaco => 'Cansancio Mental';
+
+  @override
+  String get triageQ2Emotional =>
+      '¿Se ha sentido así con frecuencia en los últimos días o es algo específico de hoy?';
+
+  @override
+  String get triageOptComecouHoje => 'Empezó hoy';
+
+  @override
+  String get triageOptJaFazDias => 'Hace unos días';
+
+  @override
+  String get triageOptConstanteSemanas =>
+      'Es algo constante desde hace semanas';
+
+  @override
+  String get triageQ3Emotional =>
+      '¿Esta sensación parece una leve molestia de fondo o algo fuerte que acelera sus pensamientos?';
+
+  @override
+  String get triageOptLeveControlavel => 'Leve y controlable';
+
+  @override
+  String get triageOptModerada => 'Moderada';
+
+  @override
+  String get triageOptMuitoForte => 'Muy fuerte y difícil de controlar';
+
+  @override
+  String get triageQ4Emotional =>
+      '¿Puede identificar si existe un motivo principal para lo que está sucediendo hoy?';
+
+  @override
+  String get triageOptTrabalho => 'Trabajo / Estudios';
+
+  @override
+  String get triageOptFamilia => 'Familia / Relaciones';
+
+  @override
+  String get triageOptNoiteRuim => 'Mala noche de sueño';
+
+  @override
+  String get triageOptNaoSei => 'No sabría decir';
+
+  @override
+  String get triagePreviewEmotional =>
+      'Revisión de su Autoevaluación Psicoemocional';
+
+  @override
+  String get triageQ1Physical =>
+      'Hablemos de la parte física. ¿Dónde siente esta molestia o dolor principal?';
+
+  @override
+  String get triageOptCabeca => 'Cabeza';
+
+  @override
+  String get triageOptCostas => 'Espalda / Columna';
+
+  @override
+  String get triageOptArticulacoes => 'Articulaciones (Rodilla, Hombro, etc.)';
+
+  @override
+  String get triageOptAbdomen => 'Abdomen / Estómago';
+
+  @override
+  String get triageQ2Physical =>
+      '¿Cuánto tiempo persiste este dolor o anomalía?';
+
+  @override
+  String get triageOptComecouAgora => 'Empezó ahora';
+
+  @override
+  String get triageOptHaAlgunsDias => 'Hace unos días';
+
+  @override
+  String get triageOptCronica => 'Es crónica';
+
+  @override
+  String get triageQ3Physical =>
+      'En una escala del 1 al 5 (donde 1 es casi imperceptible y 5 es insoportable), ¿cómo está ahora?';
+
+  @override
+  String get triageQ4Physical =>
+      '¿Recuerda haber hecho un esfuerzo atípico, ejercicio pesado o sufrido un golpe/caída recientemente?';
+
+  @override
+  String get triageOptSimExercicio => 'Sí, ejercicio intenso';
+
+  @override
+  String get triageOptSimQueda => 'Sí, sufrí una caída';
+
+  @override
+  String get triageOptNaoComecouNada => 'No, empezó de la nada';
+
+  @override
+  String get triagePreviewPhysical => 'Revisión de su Evaluación Física';
+
+  @override
+  String triageIntensityLabel(int value) {
+    return 'Intensidad: $value';
+  }
+
+  @override
+  String get triageIntensityMin => 'Casi imperceptible';
+
+  @override
+  String get triageIntensityMax => 'Insoportable';
 }

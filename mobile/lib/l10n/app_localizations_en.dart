@@ -195,4 +195,152 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emergencyCopiedToast => 'Number copied to clipboard.';
+
+  @override
+  String get triageBannerEmotional =>
+      'Starting Psycho-Emotional Self-Assessment';
+
+  @override
+  String get triageBannerPhysical => 'Starting Physical Self-Assessment';
+
+  @override
+  String triageStep(int step, int total) {
+    return 'Step $step of $total';
+  }
+
+  @override
+  String get triageNext => 'Next';
+
+  @override
+  String get triageBack => 'Back';
+
+  @override
+  String get triageConfirm => 'Confirm';
+
+  @override
+  String get triagePreviewTitle => 'Review Your Assessment';
+
+  @override
+  String get triagePreviewSubmit => 'Confirm and Submit';
+
+  @override
+  String get triageQ1Emotional =>
+      'Looking at your emotional and mental side, which word best describes how you feel right now?';
+
+  @override
+  String get triageOptAnsiedade => 'Anxiety / Agitation';
+
+  @override
+  String get triageOptTristeza => 'Sadness / Low Mood';
+
+  @override
+  String get triageOptEstresse => 'Stress / Irritability';
+
+  @override
+  String get triageOptCansaco => 'Mental Fatigue';
+
+  @override
+  String get triageQ2Emotional =>
+      'Have you felt this way frequently in recent days or is it very specific to today?';
+
+  @override
+  String get triageOptComecouHoje => 'Started today';
+
+  @override
+  String get triageOptJaFazDias => 'A few days ago';
+
+  @override
+  String get triageOptConstanteSemanas => 'Constant for weeks';
+
+  @override
+  String get triageQ3Emotional =>
+      'Does this feeling seem like a mild background nuisance or something strong accelerating your thoughts?';
+
+  @override
+  String get triageOptLeveControlavel => 'Mild and controllable';
+
+  @override
+  String get triageOptModerada => 'Moderate';
+
+  @override
+  String get triageOptMuitoForte => 'Very strong and hard to manage';
+
+  @override
+  String get triageQ4Emotional =>
+      'Can you identify if there is a primary reason for this happening today?';
+
+  @override
+  String get triageOptTrabalho => 'Work / Studies';
+
+  @override
+  String get triageOptFamilia => 'Family / Relationships';
+
+  @override
+  String get triageOptNoiteRuim => 'Poor night of sleep';
+
+  @override
+  String get triageOptNaoSei => 'Cannot tell';
+
+  @override
+  String get triagePreviewEmotional =>
+      'Review of your Psycho-Emotional Self-Assessment';
+
+  @override
+  String get triageQ1Physical =>
+      'Let us talk about the physical aspect. Where are you feeling this primary discomfort or pain?';
+
+  @override
+  String get triageOptCabeca => 'Head';
+
+  @override
+  String get triageOptCostas => 'Back / Spine';
+
+  @override
+  String get triageOptArticulacoes => 'Joints (Knee, Shoulder, etc.)';
+
+  @override
+  String get triageOptAbdomen => 'Abdomen / Stomach';
+
+  @override
+  String get triageQ2Physical => 'How long has this pain or symptom persisted?';
+
+  @override
+  String get triageOptComecouAgora => 'Started just now';
+
+  @override
+  String get triageOptHaAlgunsDias => 'A few days ago';
+
+  @override
+  String get triageOptCronica => 'It is chronic';
+
+  @override
+  String get triageQ3Physical =>
+      'On a scale of 1 to 5 (where 1 is barely noticeable and 5 is unbearable), how is it right now?';
+
+  @override
+  String get triageQ4Physical =>
+      'Do you recall doing atypical strenuous exercise, heavy exertion, or suffering a fall/impact recently?';
+
+  @override
+  String get triageOptSimExercicio => 'Yes, intense exercise';
+
+  @override
+  String get triageOptSimQueda => 'Yes, suffered a fall';
+
+  @override
+  String get triageOptNaoComecouNada => 'No, started out of nowhere';
+
+  @override
+  String get triagePreviewPhysical => 'Review of your Physical Assessment';
+
+  @override
+  String triageIntensityLabel(int value) {
+    return 'Intensity: $value';
+  }
+
+  @override
+  String get triageIntensityMin => 'Barely noticeable';
+
+  @override
+  String get triageIntensityMax => 'Unbearable';
 }
