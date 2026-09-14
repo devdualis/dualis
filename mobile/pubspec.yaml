@@ -1,0 +1,43 @@
+name: dualis_mobile
+description: DualisCheckUp Mobile Preventive Health Platform
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.7.0 <4.0.0'
+  flutter: '>=3.29.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+
+  # Reactive State Management
+  flutter_riverpod: ^3.4.3
+  riverpod_annotation: ^4.0.7
+
+  # Navigation & Routing
+  go_router: ^18.0.1
+
+  # Networking & HTTP
+  dio: ^5.11.1
+
+  # Hardware Security & Biometrics
+  local_auth: ^3.0.0
+  flutter_secure_storage: ^11.1.1
+
+  # UI, Typography & Visuals
+  google_fonts: ^8.2.1
+  flutter_svg: ^2.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
+  generate: true

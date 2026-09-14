@@ -1,0 +1,115 @@
+{
+  "@@locale": "pt",
+  "appTitle": "DualisCheckUp",
+  "@appTitle": {
+    "description": "Application title"
+  },
+  "screen1PrimaryCta": "Criar Conta",
+  "@screen1PrimaryCta": {
+    "description": "Primary action button on Screen 1"
+  },
+  "screen1SecondaryCta": "Entrar",
+  "@screen1SecondaryCta": {
+    "description": "Secondary action button on Screen 1"
+  },
+  "screen2PrimaryCta": "Finalizar Cadastro",
+  "@screen2PrimaryCta": {
+    "description": "Primary action button on Screen 2"
+  },
+  "valueCard1Title": "Triagem Preventiva Unificada",
+  "@valueCard1Title": {
+    "description": "Title of the first onboarding carousel card"
+  },
+  "valueCard1Body": "Conecte sua saúde física e estado psico-emocional em um único fluxo diário inteligente, garantindo cuidado holístico e sem ruídos.",
+  "@valueCard1Body": {
+    "description": "Body copy of the first onboarding carousel card"
+  },
+  "valueCard2Title": "Registros Médicos Blindados",
+  "@valueCard2Title": {
+    "description": "Title of the second onboarding carousel card"
+  },
+  "valueCard2Body": "Seu histórico clínico protegido por criptografia AES-256 e custodiado sob os mais rigorosos padrões da LGPD. Você é o único dono dos seus dados.",
+  "@valueCard2Body": {
+    "description": "Body copy of the second onboarding carousel card"
+  },
+  "valueCard3Title": "Orientações Preventivas Precisas",
+  "@valueCard3Title": {
+    "description": "Title of the third onboarding carousel card"
+  },
+  "valueCard3Body": "Recomendações e artigos de especialistas médicos renomados sem diagnósticos falsos ou alarmismos desnecessários.",
+  "@valueCard3Body": {
+    "description": "Body copy of the third onboarding carousel card"
+  },
+  "lgpdConsentCheckbox": "Li e concordo com a Política de Privacidade e consinto expressamente com o tratamento de meus dados pessoais sensíveis de saúde para fins de triagem preventiva e acompanhamento longitudinal, nos termos do Art. 11 da LGPD.",
+  "@lgpdConsentCheckbox": {
+    "description": "LGPD Article 11 mandatory consent checkbox text"
+  },
+  "privacyVeilTitle": "Dados de Saúde Protegidos",
+  "@privacyVeilTitle": {
+    "description": "Title displayed when privacy veil obscures health data"
+  },
+  "privacyVeilBody": "Autentique-se com biometria ou senha para acessar seu prontuário.",
+  "@privacyVeilBody": {
+    "description": "Body copy displayed on the privacy veil"
+  },
+  "formErrorName": "Por favor, informe seu nome completo (nome e sobrenome).",
+  "@formErrorName": {
+    "description": "Validation error for full name input"
+  },
+  "formErrorEmail": "Informe um endereço de e-mail válido.",
+  "@formErrorEmail": {
+    "description": "Validation error for email input"
+  },
+  "formErrorPassword": "A senha deve ter pelo menos 8 caracteres, incluindo letra maiúscula, minúscula, número e símbolo especial.",
+  "@formErrorPassword": {
+    "description": "Validation error for password input"
+  },
+  "fullName": "Nome Completo",
+  "@fullName": {
+    "description": "Label for full name input field"
+  },
+  "birthDate": "Data de Nascimento",
+  "@birthDate": {
+    "description": "Label for date of birth input field"
+  },
+  "biologicalSex": "Sexo Biológico",
+  "@biologicalSex": {
+    "description": "Label for biological sex segmented control"
+  },
+  "email": "E-mail",
+  "@email": {
+    "description": "Label for email input field"
+  },
+  "password": "Senha",
+  "@password": {
+    "description": "Label for password input field"
+  },
+  "sexMale": "Masculino",
+  "@sexMale": {
+    "description": "Biological sex male option"
+  },
+  "sexFemale": "Feminino",
+  "@sexFemale": {
+    "description": "Biological sex female option"
+  },
+  "sexOther": "Outro",
+  "@sexOther": {
+    "description": "Biological sex other option"
+  },
+  "language": "Idioma",
+  "@language": {
+    "description": "Language label"
+  },
+  "portuguese": "Português",
+  "@portuguese": {
+    "description": "Portuguese language name"
+  },
+  "spanish": "Espanhol",
+  "@spanish": {
+    "description": "Spanish language name"
+  },
+  "english": "Inglês",
+  "@english": {
+    "description": "English language name"
+  }
+}
