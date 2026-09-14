@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
+import '../../../../core/utils/date_input_formatter.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
 import '../../../../shared/widgets/dualis_text_field.dart';
@@ -88,9 +89,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (date != null) {
       return '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
     }
-    final parts = text.trim().split('/');
+    final trimmed = text.trim();
+    final parts = trimmed.split('/');
     if (parts.length == 3) {
-      return '${parts[2]}-${parts[1].padLeft(2, '0')}-${parts[0].padLeft(2, '0')}';
+      final day = parts[0].padLeft(2, '0');
+      final month = parts[1].padLeft(2, '0');
+      final year = parts[2].padLeft(4, '0');
+      return '$year-$month-$day';
+    }
+    if (trimmed.length == 8 && RegExp(r'^\d{8}$').hasMatch(trimmed)) {
+      final day = trimmed.substring(0, 2);
+      final month = trimmed.substring(2, 4);
+      final year = trimmed.substring(4, 8);
+      return '$year-$month-$day';
     }
     return text;
   }
@@ -211,7 +222,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   helperText: 'Ex: 15/08/1990 ou selecione pelo calendário.',
                   controller: _dobController,
                   validator: FormValidators.validateDateOfBirth,
-                  keyboardType: TextInputType.datetime,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    DateInputFormatter(),
+                  ],
                   textInputAction: TextInputAction.next,
                   prefixIcon: const Icon(Icons.calendar_today_outlined, color: AppColors.textSecondaryLight),
                   suffixIcon: IconButton(

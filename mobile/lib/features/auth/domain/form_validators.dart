@@ -62,9 +62,28 @@ class FormValidators {
         final month = int.tryParse(parts[1]);
         final year = int.tryParse(parts[2]);
         if (day != null && month != null && year != null) {
-          parsedDate = DateTime.tryParse(
-            '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}',
-          );
+          if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+            final candidate = DateTime.tryParse(
+              '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}',
+            );
+            if (candidate != null && candidate.day == day && candidate.month == month) {
+              parsedDate = candidate;
+            }
+          }
+        }
+      } else if (trimmed.length == 8 && RegExp(r'^\d{8}$').hasMatch(trimmed)) {
+        final day = int.tryParse(trimmed.substring(0, 2));
+        final month = int.tryParse(trimmed.substring(2, 4));
+        final year = int.tryParse(trimmed.substring(4, 8));
+        if (day != null && month != null && year != null) {
+          if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+            final candidate = DateTime.tryParse(
+              '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}',
+            );
+            if (candidate != null && candidate.day == day && candidate.month == month) {
+              parsedDate = candidate;
+            }
+          }
         }
       } else {
         parsedDate = DateTime.tryParse(trimmed);

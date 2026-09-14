@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
 
@@ -19,6 +20,7 @@ class DualisTextField extends StatelessWidget {
   final bool enabled;
   final AutovalidateMode? autovalidateMode;
   final FocusNode? focusNode;
+  final List<TextInputFormatter>? inputFormatters;
 
   const DualisTextField({
     super.key,
@@ -38,6 +40,7 @@ class DualisTextField extends StatelessWidget {
     this.enabled = true,
     this.autovalidateMode,
     this.focusNode,
+    this.inputFormatters,
   });
 
   @override
@@ -57,6 +60,7 @@ class DualisTextField extends StatelessWidget {
         onFieldSubmitted: onFieldSubmitted,
         autovalidateMode: autovalidateMode,
         focusNode: focusNode,
+        inputFormatters: inputFormatters,
         style: GoogleFonts.plusJakartaSans(
           fontSize: 16,
           fontWeight: FontWeight.w400,
