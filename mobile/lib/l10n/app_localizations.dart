@@ -267,6 +267,180 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Inglês'**
   String get english;
+
+  /// Title of the emergency risk alert screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Alerta de Risco Imediato'**
+  String get emergencyTitle;
+
+  /// Subtitle describing immediate risk and advising urgent care
+  ///
+  /// In pt, this message translates to:
+  /// **'Sintomas de gravidade identificados. Procure atendimento médico urgente.'**
+  String get emergencySubtitle;
+
+  /// Emergency badge for critical chest pain
+  ///
+  /// In pt, this message translates to:
+  /// **'Dor Torácica Crítica'**
+  String get emergencyBadgeChestPain;
+
+  /// Emergency badge for acute respiratory distress
+  ///
+  /// In pt, this message translates to:
+  /// **'Dificuldade Respiratória Aguda'**
+  String get emergencyBadgeRespiratory;
+
+  /// Emergency badge for suspected stroke
+  ///
+  /// In pt, this message translates to:
+  /// **'Suspeita de Déficit Neurológico (AVC)'**
+  String get emergencyBadgeStroke;
+
+  /// Emergency badge for sudden explosive thunderclap headache
+  ///
+  /// In pt, this message translates to:
+  /// **'Cefaleia Súbita e Explosiva'**
+  String get emergencyBadgeHeadache;
+
+  /// Emergency badge for acute emotional crisis / life safety
+  ///
+  /// In pt, this message translates to:
+  /// **'Apoio Emocional Imediato / Risco à Vida'**
+  String get emergencyBadgeEmotional;
+
+  /// Emergency badge for general critical intensity symptoms
+  ///
+  /// In pt, this message translates to:
+  /// **'Sintoma Crítico (Nível 4–5)'**
+  String get emergencyBadgeGeneral;
+
+  /// First physical emergency action step
+  ///
+  /// In pt, this message translates to:
+  /// **'Interrompa qualquer esforço físico e permaneça em repouso.'**
+  String get emergencyInstructionPhysical1;
+
+  /// Second physical emergency action step
+  ///
+  /// In pt, this message translates to:
+  /// **'Não dirija até o hospital. Acione o 192 ou peça ajuda a terceiros.'**
+  String get emergencyInstructionPhysical2;
+
+  /// Third physical emergency action step
+  ///
+  /// In pt, this message translates to:
+  /// **'Afrouxe roupas apertadas e tente manter a calma enquanto o socorro chega.'**
+  String get emergencyInstructionPhysical3;
+
+  /// First emotional emergency action step
+  ///
+  /// In pt, this message translates to:
+  /// **'Você não está sozinho(a). Ajuda qualificada e sigilosa está disponível agora.'**
+  String get emergencyInstructionEmotional1;
+
+  /// Second emotional emergency action step
+  ///
+  /// In pt, this message translates to:
+  /// **'O CVV oferece apoio emocional gratuito 24 horas por dia pelo telefone 188.'**
+  String get emergencyInstructionEmotional2;
+
+  /// Third emotional emergency action step
+  ///
+  /// In pt, this message translates to:
+  /// **'Se sentir que está em perigo imediato, acione o 192 ou procure a emergência.'**
+  String get emergencyInstructionEmotional3;
+
+  /// Button label to dial SAMU emergency services (192)
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligar SAMU (192)'**
+  String get emergencyCallSamu;
+
+  /// Button label to dial Bombeiros fire/rescue (193)
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligar Bombeiros (193)'**
+  String get emergencyCallBombeiros;
+
+  /// Button label to dial CVV crisis emotional hotline (188)
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligar CVV - Apoio Emocional (188)'**
+  String get emergencyCallCvv;
+
+  /// Button label to dial Police emergency line (190)
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligar Polícia (190)'**
+  String get emergencyCallPolicia;
+
+  /// Button label to open maps looking for nearest emergency room
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar Pronto-Socorro Mais Próximo'**
+  String get emergencyFindHospital;
+
+  /// Hint text advising patient to provide address clearly to emergency dispatchers
+  ///
+  /// In pt, this message translates to:
+  /// **'Ao ligar, informe seu endereço com clareza e mantenha a calma.'**
+  String get emergencyDispatcherHint;
+
+  /// Text button to initiate exiting the emergency screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Voltar ao Início (Não recomendado)'**
+  String get emergencyExitButton;
+
+  /// Title of the exit confirmation dialog
+  ///
+  /// In pt, this message translates to:
+  /// **'Atenção Médica Urgente'**
+  String get emergencyExitConfirmTitle;
+
+  /// Body message of the exit confirmation dialog warning of life-safety risks
+  ///
+  /// In pt, this message translates to:
+  /// **'Seus sintomas indicam uma situação de risco à vida. Recomendamos fortemente que você contate um serviço médico antes de sair. Deseja realmente voltar ao início?'**
+  String get emergencyExitConfirmBody;
+
+  /// Primary action button to stay on the emergency screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Permanecer na Emergência'**
+  String get emergencyExitConfirmStay;
+
+  /// Destructive secondary action button confirming exit despite life-safety warnings
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendi os Riscos / Sair'**
+  String get emergencyExitConfirmLeave;
+
+  /// Title of the telephony fallback dialog for tablets/devices without phone dialers
+  ///
+  /// In pt, this message translates to:
+  /// **'Dispositivo sem Discador'**
+  String get emergencyFallbackTitle;
+
+  /// Body text of telephony fallback dialog with instructions
+  ///
+  /// In pt, this message translates to:
+  /// **'Este aparelho não suporta chamadas diretas. Disque manualmente para o número abaixo em outro telefone:'**
+  String get emergencyFallbackBody;
+
+  /// Button label to copy emergency number to clipboard
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar Número'**
+  String get emergencyCopyNumber;
+
+  /// Toast or snackbar message indicating emergency number was copied
+  ///
+  /// In pt, this message translates to:
+  /// **'Número copiado para a área de transferência.'**
+  String get emergencyCopiedToast;
 }
 
 class _AppLocalizationsDelegate

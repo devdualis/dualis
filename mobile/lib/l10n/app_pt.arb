@@ -111,5 +111,121 @@
   "english": "Inglês",
   "@english": {
     "description": "English language name"
+  },
+  "emergencyTitle": "Alerta de Risco Imediato",
+  "@emergencyTitle": {
+    "description": "Title of the emergency risk alert screen"
+  },
+  "emergencySubtitle": "Sintomas de gravidade identificados. Procure atendimento médico urgente.",
+  "@emergencySubtitle": {
+    "description": "Subtitle describing immediate risk and advising urgent care"
+  },
+  "emergencyBadgeChestPain": "Dor Torácica Crítica",
+  "@emergencyBadgeChestPain": {
+    "description": "Emergency badge for critical chest pain"
+  },
+  "emergencyBadgeRespiratory": "Dificuldade Respiratória Aguda",
+  "@emergencyBadgeRespiratory": {
+    "description": "Emergency badge for acute respiratory distress"
+  },
+  "emergencyBadgeStroke": "Suspeita de Déficit Neurológico (AVC)",
+  "@emergencyBadgeStroke": {
+    "description": "Emergency badge for suspected stroke"
+  },
+  "emergencyBadgeHeadache": "Cefaleia Súbita e Explosiva",
+  "@emergencyBadgeHeadache": {
+    "description": "Emergency badge for sudden explosive thunderclap headache"
+  },
+  "emergencyBadgeEmotional": "Apoio Emocional Imediato / Risco à Vida",
+  "@emergencyBadgeEmotional": {
+    "description": "Emergency badge for acute emotional crisis / life safety"
+  },
+  "emergencyBadgeGeneral": "Sintoma Crítico (Nível 4–5)",
+  "@emergencyBadgeGeneral": {
+    "description": "Emergency badge for general critical intensity symptoms"
+  },
+  "emergencyInstructionPhysical1": "Interrompa qualquer esforço físico e permaneça em repouso.",
+  "@emergencyInstructionPhysical1": {
+    "description": "First physical emergency action step"
+  },
+  "emergencyInstructionPhysical2": "Não dirija até o hospital. Acione o 192 ou peça ajuda a terceiros.",
+  "@emergencyInstructionPhysical2": {
+    "description": "Second physical emergency action step"
+  },
+  "emergencyInstructionPhysical3": "Afrouxe roupas apertadas e tente manter a calma enquanto o socorro chega.",
+  "@emergencyInstructionPhysical3": {
+    "description": "Third physical emergency action step"
+  },
+  "emergencyInstructionEmotional1": "Você não está sozinho(a). Ajuda qualificada e sigilosa está disponível agora.",
+  "@emergencyInstructionEmotional1": {
+    "description": "First emotional emergency action step"
+  },
+  "emergencyInstructionEmotional2": "O CVV oferece apoio emocional gratuito 24 horas por dia pelo telefone 188.",
+  "@emergencyInstructionEmotional2": {
+    "description": "Second emotional emergency action step"
+  },
+  "emergencyInstructionEmotional3": "Se sentir que está em perigo imediato, acione o 192 ou procure a emergência.",
+  "@emergencyInstructionEmotional3": {
+    "description": "Third emotional emergency action step"
+  },
+  "emergencyCallSamu": "Ligar SAMU (192)",
+  "@emergencyCallSamu": {
+    "description": "Button label to dial SAMU emergency services (192)"
+  },
+  "emergencyCallBombeiros": "Ligar Bombeiros (193)",
+  "@emergencyCallBombeiros": {
+    "description": "Button label to dial Bombeiros fire/rescue (193)"
+  },
+  "emergencyCallCvv": "Ligar CVV - Apoio Emocional (188)",
+  "@emergencyCallCvv": {
+    "description": "Button label to dial CVV crisis emotional hotline (188)"
+  },
+  "emergencyCallPolicia": "Ligar Polícia (190)",
+  "@emergencyCallPolicia": {
+    "description": "Button label to dial Police emergency line (190)"
+  },
+  "emergencyFindHospital": "Buscar Pronto-Socorro Mais Próximo",
+  "@emergencyFindHospital": {
+    "description": "Button label to open maps looking for nearest emergency room"
+  },
+  "emergencyDispatcherHint": "Ao ligar, informe seu endereço com clareza e mantenha a calma.",
+  "@emergencyDispatcherHint": {
+    "description": "Hint text advising patient to provide address clearly to emergency dispatchers"
+  },
+  "emergencyExitButton": "Voltar ao Início (Não recomendado)",
+  "@emergencyExitButton": {
+    "description": "Text button to initiate exiting the emergency screen"
+  },
+  "emergencyExitConfirmTitle": "Atenção Médica Urgente",
+  "@emergencyExitConfirmTitle": {
+    "description": "Title of the exit confirmation dialog"
+  },
+  "emergencyExitConfirmBody": "Seus sintomas indicam uma situação de risco à vida. Recomendamos fortemente que você contate um serviço médico antes de sair. Deseja realmente voltar ao início?",
+  "@emergencyExitConfirmBody": {
+    "description": "Body message of the exit confirmation dialog warning of life-safety risks"
+  },
+  "emergencyExitConfirmStay": "Permanecer na Emergência",
+  "@emergencyExitConfirmStay": {
+    "description": "Primary action button to stay on the emergency screen"
+  },
+  "emergencyExitConfirmLeave": "Entendi os Riscos / Sair",
+  "@emergencyExitConfirmLeave": {
+    "description": "Destructive secondary action button confirming exit despite life-safety warnings"
+  },
+  "emergencyFallbackTitle": "Dispositivo sem Discador",
+  "@emergencyFallbackTitle": {
+    "description": "Title of the telephony fallback dialog for tablets/devices without phone dialers"
+  },
+  "emergencyFallbackBody": "Este aparelho não suporta chamadas diretas. Disque manualmente para o número abaixo em outro telefone:",
+  "@emergencyFallbackBody": {
+    "description": "Body text of telephony fallback dialog with instructions"
+  },
+  "emergencyCopyNumber": "Copiar Número",
+  "@emergencyCopyNumber": {
+    "description": "Button label to copy emergency number to clipboard"
+  },
+  "emergencyCopiedToast": "Número copiado para a área de transferência.",
+  "@emergencyCopiedToast": {
+    "description": "Toast or snackbar message indicating emergency number was copied"
   }
 }

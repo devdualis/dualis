@@ -97,4 +97,102 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get english => 'Inglés';
+
+  @override
+  String get emergencyTitle => 'Alerta de Riesgo Inmediato';
+
+  @override
+  String get emergencySubtitle =>
+      'Síntomas graves identificados. Busque atención médica urgente.';
+
+  @override
+  String get emergencyBadgeChestPain => 'Dolor Torácico Crítico';
+
+  @override
+  String get emergencyBadgeRespiratory => 'Dificultad Respiratoria Aguda';
+
+  @override
+  String get emergencyBadgeStroke => 'Sospecha de Déficit Neurológico (ACV)';
+
+  @override
+  String get emergencyBadgeHeadache => 'Cefalea Súbita y Explosiva';
+
+  @override
+  String get emergencyBadgeEmotional =>
+      'Apoyo Emocional Inmediato / Riesgo Vital';
+
+  @override
+  String get emergencyBadgeGeneral => 'Síntoma Crítico (Nivel 4–5)';
+
+  @override
+  String get emergencyInstructionPhysical1 =>
+      'Interrumpa cualquier esfuerzo físico y permanezca en reposo.';
+
+  @override
+  String get emergencyInstructionPhysical2 =>
+      'No conduzca al hospital. Llame al 192 o pida ayuda a un acompañante.';
+
+  @override
+  String get emergencyInstructionPhysical3 =>
+      'Afloje la ropa ajustada e intente mantener la calma mientras espera la ayuda.';
+
+  @override
+  String get emergencyInstructionEmotional1 =>
+      'No estás solo/a. Hay ayuda especializada y confidencial disponible ahora mismo.';
+
+  @override
+  String get emergencyInstructionEmotional2 =>
+      'El CVV ofrece apoyo emocional gratuito las 24 horas a través del teléfono 188.';
+
+  @override
+  String get emergencyInstructionEmotional3 =>
+      'Si siente que está en peligro inmediato, llame al 192 o acuda a una sala de emergencias.';
+
+  @override
+  String get emergencyCallSamu => 'Llamar SAMU (192)';
+
+  @override
+  String get emergencyCallBombeiros => 'Llamar Bomberos (193)';
+
+  @override
+  String get emergencyCallCvv => 'Llamar CVV - Apoyo Emocional (188)';
+
+  @override
+  String get emergencyCallPolicia => 'Llamar Policía (190)';
+
+  @override
+  String get emergencyFindHospital => 'Buscar Sala de Urgencias Cercana';
+
+  @override
+  String get emergencyDispatcherHint =>
+      'Al llamar, informe su dirección con claridad y mantenga la calma.';
+
+  @override
+  String get emergencyExitButton => 'Volver al Inicio (No recomendado)';
+
+  @override
+  String get emergencyExitConfirmTitle => 'Atención Médica Urgente';
+
+  @override
+  String get emergencyExitConfirmBody =>
+      'Sus síntomas indican una situación de riesgo vital. Le recomendamos encarecidamente que contacte con un servicio médico antes de salir. ¿Desea realmente volver al inicio?';
+
+  @override
+  String get emergencyExitConfirmStay => 'Permanecer en Emergencia';
+
+  @override
+  String get emergencyExitConfirmLeave => 'Entendido / Salir';
+
+  @override
+  String get emergencyFallbackTitle => 'Dispositivo sin Marcador';
+
+  @override
+  String get emergencyFallbackBody =>
+      'Este dispositivo no soporta llamadas directas. Marque manualmente el siguiente número en otro teléfono:';
+
+  @override
+  String get emergencyCopyNumber => 'Copiar Número';
+
+  @override
+  String get emergencyCopiedToast => 'Número copiado al portapapeles.';
 }

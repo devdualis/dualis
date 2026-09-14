@@ -11,6 +11,9 @@ class AppColors {
   static const Color clinicalTealLight = Color(0xFFB2DFDB);
 
   static const Color emergencyCrimson = Color(0xFFD32F2F);
+  static const Color emergencyDarkRed = Color(0xFFB71C1C);
+  static const Color emergencySurfaceRed = Color(0xFFFFEBEE);
+  static const Color emergencyTextDark = Color(0xFF5A0C0C);
 
   // Surfaces & Backgrounds
   static const Color surfaceLight = Color(0xFFFFFFFF);
