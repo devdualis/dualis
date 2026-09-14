@@ -8,6 +8,8 @@ import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:dualis_mobile/features/home/presentation/widgets/admob_banner_container.dart';
 import 'package:dualis_mobile/features/home/presentation/widgets/wellness_confirmation_dialog.dart';
+import 'package:dualis_mobile/features/home/domain/trigger_checkin_state.dart';
+import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
 import 'package:dualis_mobile/features/triage/domain/triage_vertical.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
@@ -241,6 +243,81 @@ void main() {
       expect(find.byType(AdMobBannerContainer), findsOneWidget);
       expect(find.text('Parceiro Local • Zero rastreamento clínico'), findsOneWidget);
       expect(find.text('AD'), findsOneWidget);
+    });
+
+    testWidgets('8. Wellness confirmation remembers status, shows completed banner and updated button text',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1200, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(createTriggerCheckInTestApp());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('emotional_goodNormal')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('physical_goodNormal')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('startTriageButton')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Concluir Check-in'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('dailyCheckInCompletedBanner')), findsOneWidget);
+      expect(find.text('Check-in de Hoje Concluído'), findsOneWidget);
+      expect(find.byKey(const Key('startTriageButton')), findsOneWidget);
+    });
+
+    testWidgets('9. Modifying option after completion changes button to Atualizar Check-in de Hoje',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1200, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(createTriggerCheckInTestApp());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('emotional_goodNormal')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('physical_goodNormal')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('startTriageButton')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Concluir Check-in'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('physical_soSo')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Atualizar Check-in de Hoje'), findsOneWidget);
+    });
+
+    testWidgets('10. Resets values to blank when calendar date advances past 24:00h',
+        (WidgetTester tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(triggerCheckInProvider.notifier);
+      notifier.setEmotionalStatus(TriggerStatus.goodNormal);
+      notifier.setPhysicalStatus(TriggerStatus.goodNormal);
+      notifier.markCompletedToday();
+
+      expect(container.read(triggerCheckInProvider).isCompletedToday, isTrue);
+      expect(container.read(triggerCheckInProvider).isReadyToSubmit, isTrue);
+
+      final nextDay = DateTime.now().add(const Duration(days: 1));
+      notifier.checkAndResetIfNewDay(nextDay);
+
+      expect(container.read(triggerCheckInProvider).emotionalStatus, isNull);
+      expect(container.read(triggerCheckInProvider).physicalStatus, isNull);
+      expect(container.read(triggerCheckInProvider).isCompletedToday, isFalse);
+      expect(container.read(triggerCheckInProvider).isReadyToSubmit, isFalse);
     });
   });
 }

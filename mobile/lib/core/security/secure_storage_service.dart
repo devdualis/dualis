@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -10,6 +11,7 @@ class SecureStorageService {
   static const String _keyRefreshToken = 'dualis_refresh_token';
   static const String _keyUserId = 'dualis_user_id';
   static const String _keyBiometricEnabled = 'dualis_biometric_enabled';
+  static const String _prefixDailyCheckIn = 'dualis_daily_checkin_';
 
   final FlutterSecureStorage _storage;
 
@@ -24,7 +26,6 @@ class SecureStorageService {
               ),
             );
 
-  /// Persists authentication tokens and user identifier in hardware keystore.
   Future<void> persistTokens({
     required String accessToken,
     required String refreshToken,
@@ -55,6 +56,33 @@ class SecureStorageService {
     );
   }
 
-  /// Wipes all sensitive tokens and session data on logout.
+  Future<void> saveDailyCheckIn({
+    required String userId,
+    required Map<String, dynamic> data,
+  }) async {
+    final key = '$_prefixDailyCheckIn$userId';
+    await _storage.write(key: key, value: jsonEncode(data));
+  }
+
+  Future<Map<String, dynamic>?> getDailyCheckIn(String userId) async {
+    final key = '$_prefixDailyCheckIn$userId';
+    final raw = await _storage.read(key: key);
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> clearDailyCheckIn(String userId) async {
+    final key = '$_prefixDailyCheckIn$userId';
+    await _storage.delete(key: key);
+  }
+
   Future<void> clearAll() => _storage.deleteAll();
 }

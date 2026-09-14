@@ -8,15 +8,15 @@ class LocaleNotifier extends Notifier<Locale> {
     Locale('en'),
   ];
 
+  static const _supportedLanguageCodes = ['pt', 'es', 'en'];
+
   @override
   Locale build() {
     return const Locale('pt', 'BR');
   }
 
   void setLocale(Locale locale) {
-    if (locale.languageCode == 'pt' ||
-        locale.languageCode == 'es' ||
-        locale.languageCode == 'en') {
+    if (_supportedLanguageCodes.contains(locale.languageCode)) {
       state = locale;
     }
   }

@@ -33,6 +33,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (authState.user == null) {
         ref.read(authControllerProvider.notifier).restoreSession();
       }
+      ref.read(triggerCheckInProvider.notifier).checkAndResetIfNewDay();
     });
   }
 
@@ -93,23 +94,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         backgroundColor: AppColors.surfaceLight,
         elevation: 0,
         scrolledUnderElevation: 1,
+        centerTitle: false,
+        titleSpacing: 16,
         title: const DualisLogo(
           variant: DualisLogoVariant.emblemOnly,
-          emblemSize: 32,
+          emblemSize: 28,
+          withEmblemContainer: false,
         ),
         actions: [
-          IconButton(
+          _AppBarIconButton(
             key: const Key('home_privacy_button'),
-            icon: const Icon(Icons.shield_outlined, color: AppColors.clinicalTeal),
+            icon: Icons.shield_outlined,
+            color: AppColors.clinicalTeal,
             tooltip: 'Privacidade & Dados (LGPD)',
-            onPressed: () => context.push(RoutePaths.privacyCenter),
+            onTap: () => context.push(RoutePaths.privacyCenter),
           ),
-          IconButton(
+          const SizedBox(width: 4),
+          _AppBarIconButton(
             key: const Key('home_history_button'),
-            icon: const Icon(Icons.analytics_outlined, color: AppColors.softIndigo),
+            icon: Icons.analytics_outlined,
+            color: AppColors.softIndigo,
             tooltip: 'Histórico & Tendências',
-            onPressed: () => context.push(RoutePaths.history),
+            onTap: () => context.push(RoutePaths.history),
           ),
+          const SizedBox(width: 4),
           const Padding(
             padding: EdgeInsets.only(right: 8.0),
             child: LanguagePickerButton(),
@@ -227,9 +235,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   final triggerState = ref.watch(triggerCheckInProvider);
                   final isReady = triggerState.isReadyToSubmit;
 
+                  String buttonText;
+                  if (!isReady) {
+                    buttonText = 'Selecione os Dois Eixos';
+                  } else if (triggerState.isCompletedToday && !triggerState.isModifiedAfterCompletion) {
+                    buttonText = 'Check-in de Hoje Concluído';
+                  } else if (triggerState.isCompletedToday && triggerState.isModifiedAfterCompletion) {
+                    buttonText = 'Atualizar Check-in de Hoje';
+                  } else {
+                    buttonText = 'Confirmar Check-in';
+                  }
+
                   return DualisPrimaryButton(
                     key: const Key('startTriageButton'),
-                    text: isReady ? 'Confirmar Check-in' : 'Selecione os Dois Eixos',
+                    text: buttonText,
                     onPressed: isReady
                         ? () {
                             final outcome = triggerState.routingOutcome;
@@ -238,7 +257,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 WellnessConfirmationDialog.show(
                                   context,
                                   onDismiss: () {
-                                    ref.read(triggerCheckInProvider.notifier).reset();
+                                    ref.read(triggerCheckInProvider.notifier).markCompletedToday();
                                   },
                                 );
                                 break;
@@ -438,5 +457,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   ),
 ),
 );
+  }
+}
+
+class _AppBarIconButton extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  const _AppBarIconButton({
+    super.key,
+    required this.icon,
+    required this.color,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: color.withAlpha(20),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: color.withAlpha(80)),
+          ),
+          child: Icon(icon, size: 18, color: color),
+        ),
+      ),
+    );
   }
 }

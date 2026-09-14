@@ -20,6 +20,7 @@ import '../../data/antiburla_remote_data_source.dart';
 import 'package:dualis_mobile/features/triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import 'package:dualis_mobile/features/triage_outcome/domain/triage_outcome_models.dart';
 import 'package:dualis_mobile/features/sync/data/triage_outbox_repository.dart';
+import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
 import '../../../../core/network/connectivity_service.dart';
 import 'package:uuid/uuid.dart';
 
@@ -328,6 +329,8 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
               secondaryIntensityScore: outcome.intensityScore,
             );
           }
+
+          ref.read(triggerCheckInProvider.notifier).markCompletedToday();
 
           if (context.mounted) {
             context.go(RoutePaths.triageOutcome, extra: finalOutcome);

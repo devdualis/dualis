@@ -6,8 +6,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../domain/trigger_checkin_state.dart';
 import '../controllers/trigger_checkin_controller.dart';
 
-/// Interactive dual-axis card for the mandatory trigger question:
-/// "Como você está se sentindo hoje?" (RF-001 / TRG-01).
 class DualAxisTriggerCard extends ConsumerStatefulWidget {
   const DualAxisTriggerCard({super.key});
 
@@ -21,7 +19,8 @@ class _DualAxisTriggerCardState extends ConsumerState<DualAxisTriggerCard> {
   @override
   void initState() {
     super.initState();
-    _textController = TextEditingController();
+    final initialText = ref.read(triggerCheckInProvider).naturalLanguageText;
+    _textController = TextEditingController(text: initialText);
   }
 
   @override
@@ -32,6 +31,15 @@ class _DualAxisTriggerCardState extends ConsumerState<DualAxisTriggerCard> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<String>(
+      triggerCheckInProvider.select((s) => s.naturalLanguageText),
+      (prev, next) {
+        if (_textController.text != next) {
+          _textController.text = next;
+        }
+      },
+    );
+
     final state = ref.watch(triggerCheckInProvider);
     final notifier = ref.read(triggerCheckInProvider.notifier);
     final theme = Theme.of(context);
@@ -51,7 +59,6 @@ class _DualAxisTriggerCardState extends ConsumerState<DualAxisTriggerCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header
             Row(
               children: [
                 Container(
@@ -94,11 +101,45 @@ class _DualAxisTriggerCardState extends ConsumerState<DualAxisTriggerCard> {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+            if (state.isCompletedToday) ...[
+              Container(
+                key: const Key('dailyCheckInCompletedBanner'),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.clinicalTeal.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: AppColors.clinicalTeal.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      color: AppColors.clinicalTeal,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        state.completedAt != null
+                            ? 'Check-in de hoje registrado às ${state.completedAt!.hour.toString().padLeft(2, '0')}:${state.completedAt!.minute.toString().padLeft(2, '0')}'
+                            : 'Check-in de hoje registrado',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.clinicalTeal,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             const Divider(height: 1),
             const SizedBox(height: 20),
-
-            // Axis 1: Psico-Emocional
             _buildAxisSection(
               context: context,
               title: '1. Eixo Psico-Emocional',
@@ -110,10 +151,7 @@ class _DualAxisTriggerCardState extends ConsumerState<DualAxisTriggerCard> {
               isDark: isDark,
               axisKey: 'emotional',
             ),
-
             const SizedBox(height: 24),
-
-            // Axis 2: Avaliação Física
             _buildAxisSection(
               context: context,
               title: '2. Eixo Avaliação Física',
@@ -125,12 +163,9 @@ class _DualAxisTriggerCardState extends ConsumerState<DualAxisTriggerCard> {
               isDark: isDark,
               axisKey: 'physical',
             ),
-
             const SizedBox(height: 20),
             const Divider(height: 1),
             const SizedBox(height: 16),
-
-            // Free-form Lay Term Description Field (TRG-02 / I18N-02)
             Text(
               'Descreva com suas palavras (opcional):',
               style: GoogleFonts.plusJakartaSans(
@@ -163,8 +198,6 @@ class _DualAxisTriggerCardState extends ConsumerState<DualAxisTriggerCard> {
               ),
             ),
             const SizedBox(height: 10),
-
-            // Quick suggestion chips
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
