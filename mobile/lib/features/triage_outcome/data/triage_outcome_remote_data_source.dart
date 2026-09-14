@@ -92,7 +92,10 @@ class TriageOutcomeRemoteDataSource {
     List<RecommendedArticle> articles;
 
     final lowerStep1 = step1.toLowerCase();
-    if (lowerStep1.contains('costas') || lowerStep1.contains('coluna') || lowerStep1.contains('lombar')) {
+    final lowerNarrative = (narrative ?? '').toLowerCase();
+    final matchTarget = '$lowerStep1 $lowerNarrative';
+
+    if (matchTarget.contains('costas') || matchTarget.contains('coluna') || matchTarget.contains('lombar')) {
       categoryLabel = 'Coluna e Dor Dorsal';
       somaticDesc = 'Dor lombar / Tensão paravertebral postural (modo desconectado)';
       articles = const [
@@ -107,7 +110,52 @@ class TriageOutcomeRemoteDataSource {
           url: 'https://dualis.health/artigos/ergonomia-postura-coluna',
         ),
       ];
-    } else if (lowerStep1.contains('ansiedade') || lowerStep1.contains('agitacao')) {
+    } else if (matchTarget.contains('cabeca') || matchTarget.contains('enxaqueca') || matchTarget.contains('cefaleia')) {
+      categoryLabel = 'Cabeça e Pescoço';
+      somaticDesc = 'Cefaleia / Desconforto crânio-cervical (modo desconectado)';
+      articles = const [
+        RecommendedArticle(
+          id: 'art-cabeca-01',
+          title: 'Cefaleia Tensional vs. Enxaqueca: Como Identificar os Primeiros Sinais',
+          category: 'cabeca_pescoco',
+          author: 'Dr. Thiago Albuquerque',
+          authorRole: 'Neurologista Clínico (UNIFESP / CRM-SP 156.702)',
+          readTimeMinutes: 4,
+          summary: 'Diferenciação prática entre dores de cabeça causadas por tensão muscular e crises de enxaqueca pulsátil.',
+          url: 'https://dualis.health/artigos/cefaleia-e-enxaqueca',
+        ),
+      ];
+    } else if (matchTarget.contains('peito') || matchTarget.contains('coracao') || matchTarget.contains('palpitac')) {
+      categoryLabel = 'Cardiovascular e Tórax';
+      somaticDesc = 'Sensação de palpitação / Tensão torácica (modo desconectado)';
+      articles = const [
+        RecommendedArticle(
+          id: 'art-cardio-01',
+          title: 'Compreendendo as Palpitações e Quando Procurar um Cardiologista',
+          category: 'cardiovascular_torax',
+          author: 'Dra. Beatriz Silva',
+          authorRole: 'Cardiologista (InCor / CRM-SP 142.890)',
+          readTimeMinutes: 4,
+          summary: 'Guia clínico sobre diferenciação de palpitações benignas por estresse e arritmias que requerem eletrocardiograma imediato.',
+          url: 'https://dualis.health/artigos/palpitacoes-e-cuidados-cardiacos',
+        ),
+      ];
+    } else if (matchTarget.contains('estomago') || matchTarget.contains('abdomen') || matchTarget.contains('digest')) {
+      categoryLabel = 'Gastrointestinal e Abdômen';
+      somaticDesc = 'Desconforto digestivo funcional (modo desconectado)';
+      articles = const [
+        RecommendedArticle(
+          id: 'art-gastro-01',
+          title: 'O Eixo Intestino-Cérebro: Como o Estresse Afeta Sua Digestão',
+          category: 'gastrointestinal_abdomen',
+          author: 'Dra. Fernanda Toledo',
+          authorRole: 'Gastroenterologista (FBG / CRM-SP 139.112)',
+          readTimeMinutes: 5,
+          summary: 'Mecanismos neuroquímicos da dispepsia funcional, gastrite nervosa e estratégias de modulação alimentar.',
+          url: 'https://dualis.health/artigos/eixo-intestino-cerebro',
+        ),
+      ];
+    } else if (matchTarget.contains('ansiedade') || matchTarget.contains('agitacao') || matchTarget.contains('nervos')) {
       categoryLabel = 'Dimensão Ansiosa / Agitação';
       somaticDesc = 'Ansiedade antecipatória / Tensão psicomotora (modo desconectado)';
       articles = const [
@@ -120,6 +168,51 @@ class TriageOutcomeRemoteDataSource {
           readTimeMinutes: 4,
           summary: 'Exercício guiado 4-7-8 para desaceleração do sistema simpático e restabelecimento do equilíbrio vagal em minutos.',
           url: 'https://dualis.health/artigos/respiracao-diafragmatica-ansiedade',
+        ),
+      ];
+    } else if (matchTarget.contains('tristeza') || matchTarget.contains('desanimo') || matchTarget.contains('depress')) {
+      categoryLabel = 'Dimensão Depressiva / Desânimo';
+      somaticDesc = 'Sensação de desânimo / Queda de energia psicomotora (modo desconectado)';
+      articles = const [
+        RecommendedArticle(
+          id: 'art-desanimo-01',
+          title: 'Ativação Comportamental: Passos para Romper o Ciclo do Desânimo',
+          category: 'depressiva_desanimo',
+          author: 'Dr. Rafael Nogueira',
+          authorRole: 'Psiquiatra e Psicoterapeuta (CRM-SP 148.910)',
+          readTimeMinutes: 5,
+          summary: 'Estratégias práticas para reengajar em pequenas atividades diárias e restaurar gradualmente a motivação.',
+          url: 'https://dualis.health/artigos/ativacao-comportamental-desanimo',
+        ),
+      ];
+    } else if (matchTarget.contains('burnout') || matchTarget.contains('estresse') || matchTarget.contains('sobrecarga')) {
+      categoryLabel = 'Dimensão Estresse / Sobrecarga';
+      somaticDesc = 'Sobrecarga psíquica e mental (modo desconectado)';
+      articles = const [
+        RecommendedArticle(
+          id: 'art-burnout-01',
+          title: 'Prevenção da Exaustão Mental e Sobrecarga Emocional',
+          category: 'estresse_burnout',
+          author: 'Dr. Lucas Rossi',
+          authorRole: 'Psicólogo Clínico (CRP-06/123456)',
+          readTimeMinutes: 5,
+          summary: 'Sinais precoces de esgotamento pelo trabalho e métodos de reestruturação de rotina para restauração cognitiva.',
+          url: 'https://dualis.health/artigos/prevencao-esgotamento-burnout',
+        ),
+      ];
+    } else if (matchTarget.contains('sono') || matchTarget.contains('insonia')) {
+      categoryLabel = 'Dimensão do Sono';
+      somaticDesc = 'Irregularidade do ciclo sono-vigília (modo desconectado)';
+      articles = const [
+        RecommendedArticle(
+          id: 'art-sono-01',
+          title: 'Higiene do Sono: 7 Hábitos Essenciais para uma Noite Reparadora',
+          category: 'sono',
+          author: 'Dra. Helena Vasconcelos',
+          authorRole: 'Especialista em Medicina do Sono (ABMS / CRM-SP 153.220)',
+          readTimeMinutes: 4,
+          summary: 'Protocolo de descompressão antes de deitar, controle da exposição à luz azul e ambiente ideal para repouso.',
+          url: 'https://dualis.health/artigos/higiene-do-sono',
         ),
       ];
     } else {

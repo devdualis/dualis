@@ -1,4 +1,4 @@
-import { Injectable, Inject, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, Optional, BadRequestException } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { sql } from 'drizzle-orm';
 import { DRIZZLE_DB } from '../../../database/database.service';
@@ -6,8 +6,10 @@ import * as schema from '../../../database/schema';
 import { symptomLogs } from '../../../database/schema';
 import { EncryptionService } from '../../../common/encryption/encryption.service';
 import { ArticlesCatalogService } from './articles-catalog.service';
+import { ArticlesVectorService } from './articles-vector.service';
 import {
   CareDisposition,
+  RecommendedArticleDto,
   SubmitTriageDto,
   TriageOutcomeResponseDto,
 } from '../dto/triage-outcome.dto';
@@ -20,12 +22,28 @@ interface CategoryMapping {
 
 @Injectable()
 export class TriageOutcomeService {
+  private readonly articlesVector?: ArticlesVectorService;
+  private readonly articlesCatalog?: ArticlesCatalogService;
+
   constructor(
     @Inject(DRIZZLE_DB) private readonly db: NodePgDatabase<typeof schema>,
     @Inject(EncryptionService) private readonly encryptionService: EncryptionService,
-    @Inject(ArticlesCatalogService)
-    private readonly articlesCatalog: ArticlesCatalogService,
-  ) {}
+    @Optional() @Inject(ArticlesVectorService)
+    articlesVector?: ArticlesVectorService | ArticlesCatalogService,
+    @Optional() @Inject(ArticlesCatalogService)
+    articlesCatalog?: ArticlesCatalogService,
+  ) {
+    if (articlesVector && 'searchArticles' in articlesVector) {
+      this.articlesVector = articlesVector as ArticlesVectorService;
+      this.articlesCatalog = articlesCatalog;
+    } else if (articlesVector && 'getArticlesForCategory' in articlesVector) {
+      this.articlesCatalog = articlesVector as ArticlesCatalogService;
+      this.articlesVector = undefined;
+    } else {
+      this.articlesVector = (articlesVector as unknown as ArticlesVectorService) ?? undefined;
+      this.articlesCatalog = articlesCatalog;
+    }
+  }
 
   private readonly physicalMappings: Record<string, CategoryMapping> = {
     cabeca: {
@@ -214,7 +232,16 @@ export class TriageOutcomeService {
       careDisposition = 'consulta_rotina';
     }
 
-    const recommendedArticles = this.articlesCatalog.getArticlesForCategory(mapping.code);
+    let recommendedArticles: RecommendedArticleDto[] = [];
+    if (this.articlesVector) {
+      recommendedArticles = await this.articlesVector.searchArticles({
+        queryText: narrative,
+        category: mapping.code,
+        vertical,
+      });
+    } else if (this.articlesCatalog) {
+      recommendedArticles = this.articlesCatalog.getArticlesForCategory(mapping.code);
+    }
 
     if (dto.clientSessionId) {
       const existing = await this.db.transaction(async (tx) => {
