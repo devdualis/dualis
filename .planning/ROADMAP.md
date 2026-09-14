@@ -217,8 +217,8 @@ Plans:
 
 Plans:
 
-- [ ] 08-01: Local Drift SQLite database setup with encrypted schema and transactional outbox queue
-- [ ] 08-02: Network connectivity monitor and resilient background synchronization worker with idempotency keys
+- [x] 08-01: Local Drift SQLite database setup with encrypted schema and transactional outbox queue
+- [x] 08-02: Network connectivity monitor and resilient background synchronization worker with idempotency keys
 
 ---
 
