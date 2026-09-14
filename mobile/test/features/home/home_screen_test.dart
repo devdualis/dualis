@@ -112,6 +112,14 @@ void main() {
       await tester.pumpWidget(createHomeTestApp());
       await tester.pumpAndSettle();
 
+      // Select axes so the button activates and navigates to triage
+      await tester.tap(find.byKey(const Key('emotional_soSo')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('physical_goodNormal')));
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.byKey(const Key('startTriageButton')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('startTriageButton')));
       await tester.pumpAndSettle();
 

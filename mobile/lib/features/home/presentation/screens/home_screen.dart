@@ -9,6 +9,11 @@ import '../../../../shared/widgets/dualis_primary_button.dart';
 import '../../../../shared/widgets/language_picker_button.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../triage/domain/triage_vertical.dart';
+import '../../domain/trigger_checkin_state.dart';
+import '../controllers/trigger_checkin_controller.dart';
+import '../widgets/admob_banner_container.dart';
+import '../widgets/dual_axis_trigger_card.dart';
+import '../widgets/wellness_confirmation_dialog.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -198,6 +203,64 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               const SizedBox(height: 24),
 
+              // Dual-Axis Mandatory Trigger Check-in Card (RF-001 / TRG-01)
+              const DualAxisTriggerCard(),
+              const SizedBox(height: 16),
+
+              // Action CTA: Confirmar Check-in com Roteamento Clínico
+              Consumer(
+                builder: (context, ref, child) {
+                  final triggerState = ref.watch(triggerCheckInProvider);
+                  final isReady = triggerState.isReadyToSubmit;
+
+                  return DualisPrimaryButton(
+                    key: const Key('startTriageButton'),
+                    text: isReady ? 'Confirmar Check-in' : 'Selecione os Dois Eixos',
+                    onPressed: isReady
+                        ? () {
+                            final outcome = triggerState.routingOutcome;
+                            switch (outcome) {
+                              case RoutingOutcome.wellnessConfirmation:
+                                WellnessConfirmationDialog.show(
+                                  context,
+                                  onDismiss: () {
+                                    ref.read(triggerCheckInProvider.notifier).reset();
+                                  },
+                                );
+                                break;
+                              case RoutingOutcome.psicoEmocionalOnly:
+                                context.push(
+                                  RoutePaths.triage,
+                                  extra: TriageVertical.psicoEmocional,
+                                );
+                                break;
+                              case RoutingOutcome.fisicaOnly:
+                                context.push(
+                                  RoutePaths.triage,
+                                  extra: TriageVertical.fisica,
+                                );
+                                break;
+                              case RoutingOutcome.dualOrganicPrimacy:
+                                // Organic Primacy: somatic/physical evaluation first
+                                context.push(
+                                  RoutePaths.triage,
+                                  extra: TriageVertical.fisica,
+                                );
+                                break;
+                              case RoutingOutcome.none:
+                                break;
+                            }
+                          }
+                        : null,
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // Privacy-safe Local Partner AdMob Banner (RF-009 / AD-01)
+              const AdMobBannerContainer(),
+              const SizedBox(height: 24),
+
               // Status Summary Card
               Text(
                 'Visão Geral do Cuidado',
@@ -240,20 +303,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-
-              // Action CTA: Iniciar Triagem
-              DualisPrimaryButton(
-                key: const Key('startTriageButton'),
-                text: 'Iniciar Nova Triagem',
-                onPressed: () {
-                  context.push(
-                    RoutePaths.triage,
-                    extra: TriageVertical.psicoEmocional,
-                  );
-                },
-              ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 20),
 
               // Logout Button
               SizedBox(
