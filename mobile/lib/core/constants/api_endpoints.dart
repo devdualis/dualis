@@ -30,4 +30,7 @@ class ApiEndpoints {
 
   // Triage Outcome Endpoints
   static const String triageOutcome = '/v1/triage/outcome';
+
+  // Antiburla Endpoints
+  static const String antiburlaCheck = '/v1/triage/antiburla-check';
 }

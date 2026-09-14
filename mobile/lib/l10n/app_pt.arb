@@ -501,5 +501,42 @@
   "outcomeDoneButton": "Concluir e Voltar ao Início",
   "@outcomeDoneButton": {
     "description": "Button to finish triage and return home"
+  },
+  "antiburlaTitle": "Verificação Histórica",
+  "@antiburlaTitle": {
+    "description": "Screen 5 Antiburla Bottom Sheet title"
+  },
+  "antiburlaDialogPrompt": "Você registrou um sintoma similar há {days} dias. É a mesma sensação que voltou ou algo totalmente novo?",
+  "@antiburlaDialogPrompt": {
+    "description": "Empathetic question prompt for Antiburla historical check",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "antiburlaOptionRecurring": "É a mesma sensação que voltou",
+  "@antiburlaOptionRecurring": {
+    "description": "Button label when symptom is recurring from previous episode"
+  },
+  "antiburlaOptionRecurringDesc": "Ajustaremos o início para 'Há alguns dias' para manter seu histórico clínico consistente.",
+  "@antiburlaOptionRecurringDesc": {
+    "description": "Explanation for recurring symptom choice"
+  },
+  "antiburlaOptionNew": "É um sentimento completamente novo",
+  "@antiburlaOptionNew": {
+    "description": "Button label when symptom is an isolated new occurrence"
+  },
+  "antiburlaOptionNewDesc": "Manteremos registrado como um evento agudo que começou hoje.",
+  "@antiburlaOptionNewDesc": {
+    "description": "Explanation for new symptom choice"
+  },
+  "antiburlaBiologicalDiscordanceTitle": "Aviso Anatômico Preventivo",
+  "@antiburlaBiologicalDiscordanceTitle": {
+    "description": "Title for biological discordance alert"
+  },
+  "antiburlaBiologicalDiscordanceDesc": "Notamos uma divergência entre a anatomia informada e os parâmetros do seu perfil. Deseja revisar antes de prosseguir?",
+  "@antiburlaBiologicalDiscordanceDesc": {
+    "description": "Description for biological discordance alert"
   }
 }

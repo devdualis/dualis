@@ -15,6 +15,8 @@ import '../widgets/triage_intensity_selector.dart';
 import '../widgets/triage_option_chip.dart';
 import '../widgets/triage_preview_card.dart';
 import '../widgets/triage_step_banner.dart';
+import '../widgets/antiburla_verification_bottom_sheet.dart';
+import '../../data/antiburla_remote_data_source.dart';
 import 'package:dualis_mobile/features/triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 
 /// Screen 4: Dynamic 5-Step Triage Wizard (RF-002 / SRS ID 02 & 03).
@@ -290,11 +292,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
           borderRadius: BorderRadius.circular(12),
         ),
       ),
-      onPressed: canAdvance
-          ? () {
-              ref.read(triageWizardNotifierProvider.notifier).advance();
-            }
-          : null,
+      onPressed: canAdvance ? () => _handleNext(context, state) : null,
       child: Text(
         l10n.triageNext,
         style: GoogleFonts.plusJakartaSans(
@@ -303,5 +301,47 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _handleNext(BuildContext context, TriageWizardState state) async {
+    // Intercept Step 1 (Duration/Persistence) if user reports onset now/today
+    if (state.currentStep == 1) {
+      final selectedPersistence = state.answers[1] ?? '';
+      if (selectedPersistence == 'comecou_agora' ||
+          selectedPersistence == 'comecou_hoje') {
+        final verticalStr = state.activeVertical == TriageVertical.fisica
+            ? 'physical'
+            : 'emotional';
+        final category = state.answers[0] ?? '';
+
+        final antiburlaDataSource = ref.read(antiburlaDataSourceProvider);
+        final checkResult = await antiburlaDataSource.checkConsistency(
+          vertical: verticalStr,
+          category: category,
+          selectedPersistence: selectedPersistence,
+        );
+
+        if (checkResult.triggered && context.mounted) {
+          final choice = await AntiburlaVerificationBottomSheet.show(
+            context,
+            result: checkResult,
+          );
+
+          if (choice == AntiburlaUserChoice.recurring) {
+            final reconciledValue =
+                state.activeVertical == TriageVertical.fisica
+                    ? 'ha_alguns_dias'
+                    : 'ja_faz_alguns_dias';
+            ref
+                .read(triageWizardNotifierProvider.notifier)
+                .updateAnswer(1, reconciledValue);
+          }
+        }
+      }
+    }
+
+    if (context.mounted) {
+      ref.read(triageWizardNotifierProvider.notifier).advance();
+    }
   }
 }

@@ -120,5 +120,13 @@
   "outcomeArticlesTitle": "Artículos Médicos Recomendados",
   "outcomeArticlesSubtitle": "Contenidos preventivos elaborados por especialistas reconocidos",
   "outcomeReadTime": "{minutes} min de lectura",
-  "outcomeDoneButton": "Concluir y Volver al Inicio"
+  "outcomeDoneButton": "Concluir y Volver al Inicio",
+  "antiburlaTitle": "Verificación Histórica",
+  "antiburlaDialogPrompt": "Registraste un síntoma similar hace {days} días. ¿Es la misma sensación que volvió o algo totalmente nuevo?",
+  "antiburlaOptionRecurring": "Es la misma sensación que volvió",
+  "antiburlaOptionRecurringDesc": "Ajustaremos el inicio a 'Hace unos días' para mantener tu historial clínico consistente.",
+  "antiburlaOptionNew": "Es un sentimiento completamente nuevo",
+  "antiburlaOptionNewDesc": "Lo mantendremos registrado como un evento agudo que comenzó hoy.",
+  "antiburlaBiologicalDiscordanceTitle": "Aviso Anatómico Preventivo",
+  "antiburlaBiologicalDiscordanceDesc": "Notamos una discrepancia entre la región anatómica informada y los parámetros de tu perfil. ¿Deseas revisar antes de continuar?"
 }

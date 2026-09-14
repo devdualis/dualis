@@ -35,6 +35,11 @@ class TriageWizardNotifier extends _$TriageWizardNotifier {
     return false;
   }
 
+  /// Updates an answer directly without running emergency evaluation (e.g. Antiburla reconciliation).
+  void updateAnswer(int stepIndex, String optionKey) {
+    state = state.copyWith(answers: {...state.answers, stepIndex: optionKey});
+  }
+
   /// Advances to the next step. Blocked if current step is unanswered.
   void advance() {
     if (!state.canAdvance) return;

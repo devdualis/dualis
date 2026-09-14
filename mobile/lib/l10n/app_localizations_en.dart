@@ -410,4 +410,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get outcomeDoneButton => 'Finish and Return Home';
+
+  @override
+  String get antiburlaTitle => 'Historical Verification';
+
+  @override
+  String antiburlaDialogPrompt(int days) {
+    return 'You recorded a similar symptom $days days ago. Is this the same sensation returning or something completely new?';
+  }
+
+  @override
+  String get antiburlaOptionRecurring => 'It\'s the same sensation returning';
+
+  @override
+  String get antiburlaOptionRecurringDesc =>
+      'We will adjust the onset to \'A few days ago\' to keep your clinical history consistent.';
+
+  @override
+  String get antiburlaOptionNew => 'It\'s a completely new feeling';
+
+  @override
+  String get antiburlaOptionNewDesc =>
+      'We will keep it recorded as an acute event starting today.';
+
+  @override
+  String get antiburlaBiologicalDiscordanceTitle => 'Preventive Anatomy Notice';
+
+  @override
+  String get antiburlaBiologicalDiscordanceDesc =>
+      'We noticed a discrepancy between the anatomical region selected and your profile parameters. Would you like to review before proceeding?';
 }

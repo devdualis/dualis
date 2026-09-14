@@ -411,4 +411,34 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get outcomeDoneButton => 'Concluir y Volver al Inicio';
+
+  @override
+  String get antiburlaTitle => 'Verificación Histórica';
+
+  @override
+  String antiburlaDialogPrompt(int days) {
+    return 'Registraste un síntoma similar hace $days días. ¿Es la misma sensación que volvió o algo totalmente nuevo?';
+  }
+
+  @override
+  String get antiburlaOptionRecurring => 'Es la misma sensación que volvió';
+
+  @override
+  String get antiburlaOptionRecurringDesc =>
+      'Ajustaremos el inicio a \'Hace unos días\' para mantener tu historial clínico consistente.';
+
+  @override
+  String get antiburlaOptionNew => 'Es un sentimiento completamente nuevo';
+
+  @override
+  String get antiburlaOptionNewDesc =>
+      'Lo mantendremos registrado como un evento agudo que comenzó hoy.';
+
+  @override
+  String get antiburlaBiologicalDiscordanceTitle =>
+      'Aviso Anatómico Preventivo';
+
+  @override
+  String get antiburlaBiologicalDiscordanceDesc =>
+      'Notamos una discrepancia entre la región anatómica informada y los parámetros de tu perfil. ¿Deseas revisar antes de continuar?';
 }

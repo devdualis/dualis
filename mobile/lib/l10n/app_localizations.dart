@@ -825,6 +825,54 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Concluir e Voltar ao Início'**
   String get outcomeDoneButton;
+
+  /// Screen 5 Antiburla Bottom Sheet title
+  ///
+  /// In pt, this message translates to:
+  /// **'Verificação Histórica'**
+  String get antiburlaTitle;
+
+  /// Empathetic question prompt for Antiburla historical check
+  ///
+  /// In pt, this message translates to:
+  /// **'Você registrou um sintoma similar há {days} dias. É a mesma sensação que voltou ou algo totalmente novo?'**
+  String antiburlaDialogPrompt(int days);
+
+  /// Button label when symptom is recurring from previous episode
+  ///
+  /// In pt, this message translates to:
+  /// **'É a mesma sensação que voltou'**
+  String get antiburlaOptionRecurring;
+
+  /// Explanation for recurring symptom choice
+  ///
+  /// In pt, this message translates to:
+  /// **'Ajustaremos o início para \'Há alguns dias\' para manter seu histórico clínico consistente.'**
+  String get antiburlaOptionRecurringDesc;
+
+  /// Button label when symptom is an isolated new occurrence
+  ///
+  /// In pt, this message translates to:
+  /// **'É um sentimento completamente novo'**
+  String get antiburlaOptionNew;
+
+  /// Explanation for new symptom choice
+  ///
+  /// In pt, this message translates to:
+  /// **'Manteremos registrado como um evento agudo que começou hoje.'**
+  String get antiburlaOptionNewDesc;
+
+  /// Title for biological discordance alert
+  ///
+  /// In pt, this message translates to:
+  /// **'Aviso Anatômico Preventivo'**
+  String get antiburlaBiologicalDiscordanceTitle;
+
+  /// Description for biological discordance alert
+  ///
+  /// In pt, this message translates to:
+  /// **'Notamos uma divergência entre a anatomia informada e os parâmetros do seu perfil. Deseja revisar antes de prosseguir?'**
+  String get antiburlaBiologicalDiscordanceDesc;
 }
 
 class _AppLocalizationsDelegate
