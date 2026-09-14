@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/emergency_context.dart';
+import '../../services/emergency_audit_service.dart';
 import '../../services/telephony_service.dart';
 import '../controllers/emergency_controller.dart';
 import '../widgets/emergency_action_button.dart';
@@ -31,16 +32,25 @@ class EmergencyScreen extends ConsumerWidget {
     );
 
     if (shouldExit == true && context.mounted) {
+      ref.read(emergencyAuditServiceProvider).reportEventFireAndForget(
+            emergencyContext,
+            actionTaken: 'DISMISSED_CONFIRMED',
+          );
       ref.read(emergencyControllerProvider.notifier).recordExitConfirmed(context);
     }
   }
 
   Future<void> _dialOrFallback({
     required BuildContext context,
+    required WidgetRef ref,
     required TelephonyService telephonyService,
     required String number,
     required String serviceName,
   }) async {
+    ref.read(emergencyAuditServiceProvider).reportEventFireAndForget(
+          emergencyContext,
+          actionTaken: 'DIALED_$number',
+        );
     final launched = await telephonyService.callNumber(number);
     if (!launched && context.mounted) {
       showDialog(
@@ -135,6 +145,7 @@ class EmergencyScreen extends ConsumerWidget {
                   isPrimary: true,
                   onPressed: () => _dialOrFallback(
                     context: context,
+                    ref: ref,
                     telephonyService: telephonyService,
                     number: isEmotional ? '188' : '192',
                     serviceName: isEmotional ? 'CVV' : 'SAMU',
@@ -149,6 +160,7 @@ class EmergencyScreen extends ConsumerWidget {
                   isOutlined: true,
                   onPressed: () => _dialOrFallback(
                     context: context,
+                    ref: ref,
                     telephonyService: telephonyService,
                     number: isEmotional ? '192' : '193',
                     serviceName: isEmotional ? 'SAMU' : 'Bombeiros',
@@ -162,6 +174,10 @@ class EmergencyScreen extends ConsumerWidget {
                   icon: Icons.local_hospital,
                   isOutlined: true,
                   onPressed: () async {
+                    ref.read(emergencyAuditServiceProvider).reportEventFireAndForget(
+                          emergencyContext,
+                          actionTaken: 'OPENED_MAPS',
+                        );
                     await telephonyService.openNearestEmergencyRoom();
                   },
                 ),

@@ -24,4 +24,7 @@ class ApiEndpoints {
   // Legal & Regulatory Endpoints
   static const String disclaimer = '/v1/legal/disclaimer';
   static const String consent = '/v1/legal/consent';
+
+  // Triage Emergency Audit Endpoints
+  static const String emergencyEvent = '/v1/triage/emergency-event';
 }

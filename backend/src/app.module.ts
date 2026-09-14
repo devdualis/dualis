@@ -5,6 +5,7 @@ import { DatabaseModule } from './database/database.module';
 import { EncryptionModule } from './common/encryption/encryption.module';
 import { LegalModule } from './modules/legal/legal.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { TriageAuditModule } from './modules/triage-audit/triage-audit.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AuthModule } from './modules/auth/auth.module';
     EncryptionModule,
     LegalModule,
     AuthModule,
+    TriageAuditModule,
   ],
 })
 export class AppModule {}
