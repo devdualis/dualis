@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
-import '../../domain/triage_vertical.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// Placeholder scaffold for the 5-Step Triage Wizard.
-/// Full implementation is built in Phase 4 Plan 02 (04-02).
-class TriageWizardScreen extends StatelessWidget {
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/router/route_paths.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../domain/triage_question.dart';
+import '../../domain/triage_question_bank.dart';
+import '../../domain/triage_vertical.dart';
+import '../../domain/triage_wizard_state.dart';
+import '../controllers/triage_wizard_notifier.dart';
+import '../widgets/triage_intensity_selector.dart';
+import '../widgets/triage_option_chip.dart';
+import '../widgets/triage_preview_card.dart';
+import '../widgets/triage_step_banner.dart';
+
+/// Screen 4: Dynamic 5-Step Triage Wizard (RF-002 / SRS ID 02 & 03).
+/// Features 300ms chromatic palette tweening between Soft Indigo (#3F51B5)
+/// for Psico-Emocional and Clinical Teal (#00796B) for Física.
+class TriageWizardScreen extends ConsumerStatefulWidget {
   final TriageVertical vertical;
 
   const TriageWizardScreen({
@@ -12,17 +28,275 @@ class TriageWizardScreen extends StatelessWidget {
   });
 
   @override
+  ConsumerState<TriageWizardScreen> createState() => _TriageWizardScreenState();
+}
+
+class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
+  Color _prevColor = AppColors.softIndigo;
+
+  @override
+  void initState() {
+    super.initState();
+    _prevColor = widget.vertical == TriageVertical.psicoEmocional
+        ? AppColors.softIndigo
+        : AppColors.clinicalTeal;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(triageWizardNotifierProvider.notifier).setVertical(widget.vertical);
+    });
+  }
+
+  Color _getActiveColor(TriageVertical vertical) {
+    switch (vertical) {
+      case TriageVertical.psicoEmocional:
+        return AppColors.softIndigo;
+      case TriageVertical.fisica:
+        return AppColors.clinicalTeal;
+    }
+  }
+
+  String _resolveQuestionText(BuildContext context, String key) {
+    final l10n = AppLocalizations.of(context);
+    switch (key) {
+      case 'triageQ1Emotional':
+        return l10n.triageQ1Emotional;
+      case 'triageQ2Emotional':
+        return l10n.triageQ2Emotional;
+      case 'triageQ3Emotional':
+        return l10n.triageQ3Emotional;
+      case 'triageQ4Emotional':
+        return l10n.triageQ4Emotional;
+      case 'triagePreviewEmotional':
+        return l10n.triagePreviewEmotional;
+      case 'triageQ1Physical':
+        return l10n.triageQ1Physical;
+      case 'triageQ2Physical':
+        return l10n.triageQ2Physical;
+      case 'triageQ3Physical':
+        return l10n.triageQ3Physical;
+      case 'triageQ4Physical':
+        return l10n.triageQ4Physical;
+      case 'triagePreviewPhysical':
+        return l10n.triagePreviewPhysical;
+      default:
+        return key;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          vertical == TriageVertical.psicoEmocional
-              ? 'Autoavaliação Psico-Emocional'
-              : 'Autoavaliação Física',
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final state = ref.watch(triageWizardNotifierProvider);
+    final questions = TriageQuestionBank.forVertical(state.activeVertical);
+    final currentQuestion = state.currentStep < questions.length
+        ? questions[state.currentStep]
+        : questions.last;
+
+    final targetColor = _getActiveColor(state.activeVertical);
+
+    final bannerTitle = state.activeVertical == TriageVertical.psicoEmocional
+        ? l10n.triageBannerEmotional
+        : l10n.triageBannerPhysical;
+
+    return TweenAnimationBuilder<Color?>(
+      tween: ColorTween(begin: _prevColor, end: targetColor),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      onEnd: () {
+        _prevColor = targetColor;
+      },
+      builder: (context, animatedColor, child) {
+        final activeColor = animatedColor ?? targetColor;
+
+        return Scaffold(
+          backgroundColor: isDark
+              ? AppColors.backgroundDark
+              : AppColors.backgroundLight,
+          appBar: TriageStepBanner(
+            title: bannerTitle,
+            currentStep: state.currentStep,
+            totalSteps: questions.length,
+            activeColor: activeColor,
+            onBack: () {
+              if (state.currentStep > 0) {
+                ref.read(triageWizardNotifierProvider.notifier).goBack();
+              } else {
+                context.pop();
+              }
+            },
+          ),
+          body: SafeArea(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              child: KeyedSubtree(
+                key: ValueKey<int>(state.currentStep),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (!currentQuestion.isPreview) ...[
+                        Text(
+                          _resolveQuestionText(context, currentQuestion.questionKey),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimaryLight,
+                            height: 1.35,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: _buildStepContent(
+                            context,
+                            state,
+                            currentQuestion,
+                            activeColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildBottomBar(
+                        context,
+                        state,
+                        currentQuestion,
+                        activeColor,
+                        l10n,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStepContent(
+    BuildContext context,
+    TriageWizardState state,
+    TriageQuestion question,
+    Color activeColor,
+  ) {
+    if (question.isPreview) {
+      return TriagePreviewCard(
+        vertical: state.activeVertical,
+        answers: state.answers,
+        activeColor: activeColor,
+      );
+    }
+
+    if (question.isNumericScale) {
+      final selectedInt = int.tryParse(state.answers[state.currentStep] ?? '');
+      return Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: TriageIntensitySelector(
+          selectedValue: selectedInt,
+          activeColor: activeColor,
+          onSelect: (value) {
+            ref.read(triageWizardNotifierProvider.notifier).selectOption(
+                  context,
+                  state.currentStep,
+                  '$value',
+                );
+          },
+        ),
+      );
+    }
+
+    return Column(
+      children: question.options.map((option) {
+        final isSelected = state.answers[state.currentStep] == option.key;
+        final label = TriagePreviewCard.resolveAnswerLabel(context, option.key);
+
+        return TriageOptionChip(
+          label: label,
+          isSelected: isSelected,
+          activeColor: activeColor,
+          onTap: () {
+            ref.read(triageWizardNotifierProvider.notifier).selectOption(
+                  context,
+                  state.currentStep,
+                  option.key,
+                );
+          },
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildBottomBar(
+    BuildContext context,
+    TriageWizardState state,
+    TriageQuestion question,
+    Color activeColor,
+    AppLocalizations l10n,
+  ) {
+    final canAdvance = state.canAdvance;
+
+    if (question.isPreview) {
+      return FilledButton(
+        style: FilledButton.styleFrom(
+          backgroundColor: activeColor,
+          foregroundColor: Colors.white,
+          minimumSize: const Size.fromHeight(52),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        onPressed: () {
+          ref.read(triageWizardNotifierProvider.notifier).advance();
+          // Conclude wizard session
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Autoavaliação concluída com sucesso.',
+                style: GoogleFonts.plusJakartaSans(),
+              ),
+              backgroundColor: activeColor,
+            ),
+          );
+          context.go(RoutePaths.home);
+        },
+        child: Text(
+          l10n.triagePreviewSubmit,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    }
+
+    return FilledButton(
+      style: FilledButton.styleFrom(
+        backgroundColor: canAdvance ? activeColor : activeColor.withValues(alpha: 0.4),
+        foregroundColor: Colors.white,
+        minimumSize: const Size.fromHeight(52),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
-      body: const Center(
-        child: Text('Triage Wizard — Phase 4 implementation in progress'),
+      onPressed: canAdvance
+          ? () {
+              ref.read(triageWizardNotifierProvider.notifier).advance();
+            }
+          : null,
+      child: Text(
+        l10n.triageNext,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

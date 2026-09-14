@@ -24,6 +24,12 @@ Widget createHomeTestApp({AuthState? initialAuthState}) {
           body: Center(child: Text('Onboarding Screen')),
         ),
       ),
+      GoRoute(
+        path: RoutePaths.triage,
+        builder: (context, state) => const Scaffold(
+          body: Center(child: Text('Triage Screen')),
+        ),
+      ),
     ],
   );
 
@@ -101,15 +107,15 @@ void main() {
       expect(find.byKey(const Key('logoutButton')), findsOneWidget);
     });
 
-    testWidgets('Tapping start triage button shows informative SnackBar',
+    testWidgets('Tapping start triage button navigates to /triage screen',
         (WidgetTester tester) async {
       await tester.pumpWidget(createHomeTestApp());
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('startTriageButton')));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
-      expect(find.text('Módulo de Triagem Unificada em inicialização.'), findsOneWidget);
+      expect(find.text('Triage Screen'), findsOneWidget);
     });
 
     testWidgets('Tapping logout button opens dialog and confirms exit to onboarding',

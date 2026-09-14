@@ -8,6 +8,7 @@ import '../../../../shared/widgets/dualis_logo.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
 import '../../../../shared/widgets/language_picker_button.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../triage/domain/triage_vertical.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -246,11 +247,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 key: const Key('startTriageButton'),
                 text: 'Iniciar Nova Triagem',
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Módulo de Triagem Unificada em inicialização.'),
-                      backgroundColor: AppColors.clinicalTeal,
-                    ),
+                  context.push(
+                    RoutePaths.triage,
+                    extra: TriageVertical.psicoEmocional,
                   );
                 },
               ),
