@@ -56,6 +56,35 @@ void main() {
       expect(tappedKey, isNotNull);
     });
 
+    testWidgets('2b. Supports coluna_dor_dorsal key in physicalSummary and displays detail card', (tester) async {
+      final summary = {
+        'coluna_dor_dorsal': 3,
+      };
+
+      String? tappedKey;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AnatomicalBodyMap(
+              physicalSummary: summary,
+              onRegionSelected: (key) => tappedKey = key,
+            ),
+          ),
+        ),
+      );
+
+      final gestureDetector = find.byKey(const Key('body_map_gesture_detector'));
+      final center = tester.getCenter(gestureDetector);
+      final size = tester.getSize(gestureDetector);
+      await tester.tapAt(Offset(center.dx, center.dy - size.height * 0.20));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('body_map_detail_card')), findsOneWidget);
+      expect(tappedKey, equals('coluna_dorsal'));
+      expect(find.text('Coluna e Dor Dorsal'), findsOneWidget);
+      expect(find.textContaining('Nível 3'), findsOneWidget);
+    });
+
     testWidgets('3. RetrospectiveListView renders entries with formatted date and category', (tester) async {
       final entries = [
         TriageHistoryEntry(

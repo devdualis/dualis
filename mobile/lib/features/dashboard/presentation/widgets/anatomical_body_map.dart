@@ -58,7 +58,7 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
     AnatomicalRegion(
       key: 'coluna_dorsal',
       label: 'Coluna e Dor Dorsal',
-      relativeBounds: Rect.fromLTWH(0.44, 0.22, 0.12, 0.24),
+      relativeBounds: Rect.fromLTWH(0.44, 0.17, 0.12, 0.30),
     ),
     AnatomicalRegion(
       key: 'membros_superiores_d',
@@ -104,11 +104,16 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
     final relY = localPosition.dy / size.height;
 
     String? foundKey;
-    for (final reg in regions) {
-      if (reg.key == 'dermatologico') continue;
-      if (reg.relativeBounds.contains(Offset(relX, relY))) {
-        foundKey = reg.key;
-        break;
+    final spineRegion = regions.firstWhere((r) => r.key == 'coluna_dorsal');
+    if (spineRegion.relativeBounds.contains(Offset(relX, relY))) {
+      foundKey = 'coluna_dorsal';
+    } else {
+      for (final reg in regions) {
+        if (reg.key == 'dermatologico' || reg.key == 'coluna_dorsal') continue;
+        if (reg.relativeBounds.contains(Offset(relX, relY))) {
+          foundKey = reg.key;
+          break;
+        }
       }
     }
 
@@ -129,7 +134,10 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
       (r) => r.key == _selectedRegionKey,
       orElse: () => regions.first,
     );
-    final selectedIntensity = widget.physicalSummary[_selectedRegionKey] ?? 0;
+    final selectedIntensity = widget.physicalSummary[_selectedRegionKey] ??
+        (_selectedRegionKey == 'coluna_dorsal'
+            ? widget.physicalSummary['coluna_dor_dorsal'] ?? 0
+            : 0);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -402,21 +410,67 @@ class _BodyMapPainter extends CustomPainter {
     canvas.drawRRect(lLegRect, lLegPaint);
     canvas.drawRRect(lLegRect, outlinePaint);
 
-    final spineLine = Path()
-      ..moveTo(w * 0.50, h * 0.17)
-      ..lineTo(w * 0.50, h * 0.46);
-    final spineIntensity = physicalSummary['coluna_dorsal'] ?? 0;
-    final spinePaint = Paint()
+    final spineIntensity = physicalSummary['coluna_dor_dorsal'] ??
+        physicalSummary['coluna_dorsal'] ??
+        0;
+    final spineColor = spineIntensity > 0
+        ? _AnatomicalBodyMapState.getHeatColor(spineIntensity)
+        : const Color(0xFFB0BEC5);
+
+    final spineCanalRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.47, h * 0.17, w * 0.06, h * 0.29),
+      const Radius.circular(4),
+    );
+    final canalPaint = Paint()
       ..color = spineIntensity > 0
-          ? _AnatomicalBodyMapState.getHeatColor(spineIntensity)
-          : const Color(0xFF78909C)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = spineIntensity > 0 ? 5.0 : 2.5;
-    canvas.drawPath(spineLine, spinePaint);
+          ? spineColor.withValues(alpha: 0.25)
+          : const Color(0xFFCFD8DC)
+      ..style = PaintingStyle.fill;
+    canvas.drawRRect(spineCanalRect, canalPaint);
+
+    const int vertebraeCount = 7;
+    final vWidth = w * 0.09;
+    final vHeight = h * 0.025;
+    final vLeft = (w - vWidth) / 2;
+    final startY = h * 0.175;
+    final stepY = (h * 0.28 - vHeight) / (vertebraeCount - 1);
+
+    for (int i = 0; i < vertebraeCount; i++) {
+      final vRect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(vLeft, startY + i * stepY, vWidth, vHeight),
+        const Radius.circular(3),
+      );
+      final vFill = Paint()
+        ..color = spineIntensity > 0 ? spineColor : const Color(0xFFECEFF1)
+        ..style = PaintingStyle.fill;
+      final vStroke = Paint()
+        ..color = spineIntensity > 0
+            ? Colors.white.withValues(alpha: 0.9)
+            : const Color(0xFFB0BEC5)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2;
+
+      canvas.drawRRect(vRect, vFill);
+      canvas.drawRRect(vRect, vStroke);
+
+      final centerCirclePaint = Paint()
+        ..color = spineIntensity > 0
+            ? Colors.white.withValues(alpha: 0.8)
+            : const Color(0xFF90A4AE)
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(
+        Offset(w * 0.50, startY + i * stepY + vHeight / 2),
+        1.5,
+        centerCirclePaint,
+      );
+    }
 
     if (selectedRegionKey != null) {
       final selectedRegion = _AnatomicalBodyMapState.regions.firstWhere(
-        (r) => r.key == selectedRegionKey,
+        (r) =>
+            r.key == selectedRegionKey ||
+            (selectedRegionKey == 'coluna_dor_dorsal' &&
+                r.key == 'coluna_dorsal'),
         orElse: () => _AnatomicalBodyMapState.regions.first,
       );
       final bounds = selectedRegion.relativeBounds;

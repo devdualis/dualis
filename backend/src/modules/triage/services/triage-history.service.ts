@@ -43,6 +43,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   respiratorio: 'Respiratório',
   gastrointestinal_abdomen: 'Gastrointestinal / Abdômen',
   coluna_dorsal: 'Coluna e Dor Dorsal',
+  coluna_dor_dorsal: 'Coluna e Dor Dorsal',
   membros_superiores_d: 'Membros Superiores (D)',
   membros_superiores_e: 'Membros Superiores (E)',
   membros_inferiores_d: 'Membros Inferiores (D)',
@@ -77,6 +78,10 @@ const RECOMMENDED_ARTICLES: Record<string, { title: string; url: string }> = {
     url: 'https://dualis.app/artigos/higiene-sono',
   },
   coluna_dorsal: {
+    title: 'Postura Laboral e Exercícios Preventivos para a Coluna',
+    url: 'https://dualis.app/artigos/coluna-postura',
+  },
+  coluna_dor_dorsal: {
     title: 'Postura Laboral e Exercícios Preventivos para a Coluna',
     url: 'https://dualis.app/artigos/coluna-postura',
   },
@@ -147,6 +152,10 @@ export class TriageHistoryService {
         const key = row.anatomicalSystem;
         const currentMax = physicalSummary[key] || 0;
         physicalSummary[key] = Math.max(currentMax, row.intensity);
+        if (key === 'coluna_dor_dorsal' || key === 'coluna_dorsal') {
+          physicalSummary['coluna_dorsal'] = Math.max(physicalSummary['coluna_dorsal'] || 0, row.intensity);
+          physicalSummary['coluna_dor_dorsal'] = Math.max(physicalSummary['coluna_dor_dorsal'] || 0, row.intensity);
+        }
       }
     }
 
