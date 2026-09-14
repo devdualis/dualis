@@ -9,7 +9,6 @@ import '../../domain/triage_wizard_state.dart';
 
 part 'triage_wizard_notifier.g.dart';
 
-/// Alias matching plan naming conventions
 final triageWizardNotifierProvider = triageWizardProvider;
 
 @riverpod
@@ -21,26 +20,22 @@ class TriageWizardNotifier extends _$TriageWizardNotifier {
     state = state.copyWith(activeVertical: vertical, currentStep: 0, answers: {});
   }
 
-  /// Selects an option for [stepIndex]. Runs deterministic emergency gate before saving.
-  /// Returns true if emergency was triggered (caller should not advance wizard).
   bool selectOption(BuildContext context, int stepIndex, String optionKey) {
     final emergency = _evaluateGate(stepIndex, optionKey);
     if (emergency != null) {
       ref
           .read(emergencyControllerProvider.notifier)
           .triggerEmergency(context, emergency);
-      return true; // emergency triggered
+      return true;
     }
     state = state.copyWith(answers: {...state.answers, stepIndex: optionKey});
     return false;
   }
 
-  /// Updates an answer directly without running emergency evaluation (e.g. Antiburla reconciliation).
   void updateAnswer(int stepIndex, String optionKey) {
     state = state.copyWith(answers: {...state.answers, stepIndex: optionKey});
   }
 
-  /// Advances to the next step. Blocked if current step is unanswered.
   void advance() {
     if (!state.canAdvance) return;
     final maxStep = TriageQuestionBank.forVertical(state.activeVertical).length - 1;
@@ -51,30 +46,20 @@ class TriageWizardNotifier extends _$TriageWizardNotifier {
     }
   }
 
-  /// Goes back to the previous step.
   void goBack() {
     if (state.currentStep > 0) {
       state = state.copyWith(currentStep: state.currentStep - 1);
     }
   }
 
-  /// Resets all wizard state (used on completion or explicit cancel).
   void reset() {
     state = const TriageWizardState();
   }
-
-  // ── Private emergency gate ──────────────────────────────────────────────
-  //
-  // DESIGN NOTE (W1 fix): The gate fires ONLY at Step 2 (Intensity), not at
-  // Step 0 (Nature). EMRG-01 requires "high intensity ASSOCIATED WITH critical
-  // red-flag areas" — nature selection alone lacks intensity context.
-  // _emotionalDimensionFromStep0() carries the nature dimension into Step 2.
 
   EmergencyContext? _evaluateGate(int stepIndex, String optionKey) {
     final vertical = state.activeVertical;
 
     if (vertical == TriageVertical.psicoEmocional) {
-      // Step 2 (Intensity): map verbal intensity to numeric + use nature from Step 0
       if (stepIndex == 2) {
         final intensityMap = {
           'leve_controlavel': 2,
@@ -91,7 +76,6 @@ class TriageWizardNotifier extends _$TriageWizardNotifier {
         );
       }
     } else {
-      // Vertical B Physical — Step 2 (Intensity): direct numeric 1–5
       if (stepIndex == 2) {
         final intensity = int.tryParse(optionKey) ?? 1;
         final sys = _physicalSystemFromStep0();
@@ -110,8 +94,15 @@ class TriageWizardNotifier extends _$TriageWizardNotifier {
     final step0Answer = state.answers[0] ?? '';
     const map = {
       'tristeza_desanimo': 'depressive_hopelessness',
+      'depressiva_desanimo': 'depressive_hopelessness',
       'ansiedade_agitacao': 'anxious_agitation',
+      'ansiosa_agitacao': 'anxious_agitation',
       'estresse_irritabilidade': 'stress_burnout',
+      'estresse_burnout': 'stress_burnout',
+      'somatica': 'somatica',
+      'sono': 'sono',
+      'cognitiva_foco': 'cognitiva_foco',
+      'autoestima': 'autoestima',
     };
     return map[step0Answer] ?? 'emotional_general';
   }
@@ -120,9 +111,21 @@ class TriageWizardNotifier extends _$TriageWizardNotifier {
     final step0Answer = state.answers[0] ?? '';
     const map = {
       'cabeca': 'head_neck',
+      'cabeca_pescoco': 'head_neck',
       'costas_coluna': 'musculoskeletal_back',
+      'coluna_dor_dorsal': 'musculoskeletal_back',
       'articulacoes': 'musculoskeletal_joints',
+      'membros_superiores': 'musculoskeletal_joints',
+      'membros_inferiores': 'musculoskeletal_joints',
       'abdomen_estomago': 'gastrointestinal',
+      'gastrointestinal_abdomen': 'gastrointestinal',
+      'cardiovascular_torax': 'cardiovascular_chest',
+      'respiratorio': 'respiratory',
+      'neurologico': 'neurological',
+      'geniturinario_pelvico': 'general_somatic',
+      'dermatologico': 'general_somatic',
+      'muscular_geral_sistemico': 'general_somatic',
+      'endocrino_metabolico': 'general_somatic',
     };
     return map[step0Answer] ?? 'general_somatic';
   }

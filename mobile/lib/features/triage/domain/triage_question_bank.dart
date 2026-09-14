@@ -1,41 +1,51 @@
 import 'triage_question.dart';
 import 'triage_vertical.dart';
 
-/// Static registry of all 10 questions (5 per vertical).
-/// Question text and labels are referenced by ARB localization keys.
 class TriageQuestionBank {
   const TriageQuestionBank._();
 
-  /// Vertical A — Psico-Emocional: 5 clinical steps.
   static const List<TriageQuestion> psicoEmocional = [
-    // Step 0: Nature of emotional state
     TriageQuestion(
       stepIndex: 0,
       questionKey: 'triageQ1Emotional',
       options: [
         TriageOption(
-          key: 'ansiedade_agitacao',
-          labelKey: 'triageOptAnsiedade',
-          systemKey: 'anxious_agitation',
+          key: 'ansiosa_agitacao',
+          labelKey: 'triageOptAnsiosaAgitacao',
+          systemKey: 'ansiosa_agitacao',
         ),
         TriageOption(
-          key: 'tristeza_desanimo',
-          labelKey: 'triageOptTristeza',
-          systemKey: 'depressive_hopelessness',
+          key: 'depressiva_desanimo',
+          labelKey: 'triageOptDepressivaDesanimo',
+          systemKey: 'depressiva_desanimo',
         ),
         TriageOption(
-          key: 'estresse_irritabilidade',
-          labelKey: 'triageOptEstresse',
-          systemKey: 'stress_burnout',
+          key: 'estresse_burnout',
+          labelKey: 'triageOptEstresseBurnout',
+          systemKey: 'estresse_burnout',
         ),
         TriageOption(
-          key: 'cansaco_mental',
-          labelKey: 'triageOptCansaco',
-          systemKey: 'emotional_general',
+          key: 'somatica',
+          labelKey: 'triageOptSomatica',
+          systemKey: 'somatica',
+        ),
+        TriageOption(
+          key: 'sono',
+          labelKey: 'triageOptSono',
+          systemKey: 'sono',
+        ),
+        TriageOption(
+          key: 'cognitiva_foco',
+          labelKey: 'triageOptCognitivaFoco',
+          systemKey: 'cognitiva_foco',
+        ),
+        TriageOption(
+          key: 'autoestima',
+          labelKey: 'triageOptAutoestima',
+          systemKey: 'autoestima',
         ),
       ],
     ),
-    // Step 1: Persistence / duration
     TriageQuestion(
       stepIndex: 1,
       questionKey: 'triageQ2Emotional',
@@ -48,7 +58,6 @@ class TriageQuestionBank {
         ),
       ],
     ),
-    // Step 2: Intensity — emergency gate fires here
     TriageQuestion(
       stepIndex: 2,
       questionKey: 'triageQ3Emotional',
@@ -70,7 +79,6 @@ class TriageQuestionBank {
         ),
       ],
     ),
-    // Step 3: Triggers / context
     TriageQuestion(
       stepIndex: 3,
       questionKey: 'triageQ4Emotional',
@@ -84,7 +92,6 @@ class TriageQuestionBank {
         TriageOption(key: 'nao_sei_dizer', labelKey: 'triageOptNaoSei'),
       ],
     ),
-    // Step 4: Preview / confirmation (no selection required)
     TriageQuestion(
       stepIndex: 4,
       questionKey: 'triagePreviewEmotional',
@@ -93,36 +100,73 @@ class TriageQuestionBank {
     ),
   ];
 
-  /// Vertical B — Física: 5 clinical steps.
   static const List<TriageQuestion> fisica = [
-    // Step 0: Location / anatomical system
     TriageQuestion(
       stepIndex: 0,
       questionKey: 'triageQ1Physical',
       options: [
         TriageOption(
-          key: 'cabeca',
-          labelKey: 'triageOptCabeca',
-          systemKey: 'head_neck',
+          key: 'cabeca_pescoco',
+          labelKey: 'triageOptCabecaPescoco',
+          systemKey: 'cabeca_pescoco',
         ),
         TriageOption(
-          key: 'costas_coluna',
-          labelKey: 'triageOptCostas',
-          systemKey: 'musculoskeletal_back',
+          key: 'cardiovascular_torax',
+          labelKey: 'triageOptCardiovascularTorax',
+          systemKey: 'cardiovascular_torax',
         ),
         TriageOption(
-          key: 'articulacoes',
-          labelKey: 'triageOptArticulacoes',
-          systemKey: 'musculoskeletal_joints',
+          key: 'respiratorio',
+          labelKey: 'triageOptRespiratorio',
+          systemKey: 'respiratorio',
         ),
         TriageOption(
-          key: 'abdomen_estomago',
-          labelKey: 'triageOptAbdomen',
-          systemKey: 'gastrointestinal',
+          key: 'gastrointestinal_abdomen',
+          labelKey: 'triageOptGastrointestinalAbdomen',
+          systemKey: 'gastrointestinal_abdomen',
+        ),
+        TriageOption(
+          key: 'coluna_dor_dorsal',
+          labelKey: 'triageOptColunaDorDorsal',
+          systemKey: 'coluna_dor_dorsal',
+        ),
+        TriageOption(
+          key: 'membros_superiores',
+          labelKey: 'triageOptMembrosSuperiores',
+          systemKey: 'membros_superiores',
+        ),
+        TriageOption(
+          key: 'membros_inferiores',
+          labelKey: 'triageOptMembrosInferiores',
+          systemKey: 'membros_inferiores',
+        ),
+        TriageOption(
+          key: 'neurologico',
+          labelKey: 'triageOptNeurologico',
+          systemKey: 'neurologico',
+        ),
+        TriageOption(
+          key: 'geniturinario_pelvico',
+          labelKey: 'triageOptGeniturinarioPelvico',
+          systemKey: 'geniturinario_pelvico',
+        ),
+        TriageOption(
+          key: 'dermatologico',
+          labelKey: 'triageOptDermatologico',
+          systemKey: 'dermatologico',
+        ),
+        TriageOption(
+          key: 'muscular_geral_sistemico',
+          labelKey: 'triageOptMuscularGeralSistemico',
+          systemKey: 'muscular_geral_sistemico',
+        ),
+        TriageOption(
+          key: 'endocrino_metabolico',
+          labelKey: 'triageOptEndocrinoMetabolico',
+          systemKey: 'endocrino_metabolico',
         ),
       ],
     ),
-    // Step 1: Duration / persistence
     TriageQuestion(
       stepIndex: 1,
       questionKey: 'triageQ2Physical',
@@ -135,14 +179,12 @@ class TriageQuestionBank {
         TriageOption(key: 'e_cronica', labelKey: 'triageOptCronica'),
       ],
     ),
-    // Step 2: Intensity scale 1-5 (numeric selector, emergency gate fires here)
     TriageQuestion(
       stepIndex: 2,
       questionKey: 'triageQ3Physical',
       options: [],
       isNumericScale: true,
     ),
-    // Step 3: Triggers / context
     TriageQuestion(
       stepIndex: 3,
       questionKey: 'triageQ4Physical',
@@ -158,7 +200,6 @@ class TriageQuestionBank {
         ),
       ],
     ),
-    // Step 4: Preview / confirmation (no selection required)
     TriageQuestion(
       stepIndex: 4,
       questionKey: 'triagePreviewPhysical',
@@ -167,7 +208,6 @@ class TriageQuestionBank {
     ),
   ];
 
-  /// Returns the question list for the given vertical.
   static List<TriageQuestion> forVertical(TriageVertical v) =>
       v == TriageVertical.psicoEmocional ? psicoEmocional : fisica;
 }

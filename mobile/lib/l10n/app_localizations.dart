@@ -520,6 +520,48 @@ abstract class AppLocalizations {
   /// **'Cansaço Mental'**
   String get triageOptCansaco;
 
+  /// Emotional dimension 1: Ansiosa / Agitação
+  ///
+  /// In pt, this message translates to:
+  /// **'Ansiosa / Agitação'**
+  String get triageOptAnsiosaAgitacao;
+
+  /// Emotional dimension 2: Depressiva / Desânimo
+  ///
+  /// In pt, this message translates to:
+  /// **'Depressiva / Desânimo'**
+  String get triageOptDepressivaDesanimo;
+
+  /// Emotional dimension 3: Estresse / Burnout
+  ///
+  /// In pt, this message translates to:
+  /// **'Estresse / Burnout'**
+  String get triageOptEstresseBurnout;
+
+  /// Emotional dimension 4: Somática (Psicossomática)
+  ///
+  /// In pt, this message translates to:
+  /// **'Somática (Psicossomática)'**
+  String get triageOptSomatica;
+
+  /// Emotional dimension 5: Sono (Insônia/Hipersônia)
+  ///
+  /// In pt, this message translates to:
+  /// **'Sono (Insônia / Hipersônia)'**
+  String get triageOptSono;
+
+  /// Emotional dimension 6: Cognitiva / Foco
+  ///
+  /// In pt, this message translates to:
+  /// **'Cognitiva / Foco'**
+  String get triageOptCognitivaFoco;
+
+  /// Emotional dimension 7: Autoestima / Autoimagem
+  ///
+  /// In pt, this message translates to:
+  /// **'Autoestima / Autoimagem'**
+  String get triageOptAutoestima;
+
   /// Question 2 emotional
   ///
   /// In pt, this message translates to:
@@ -633,6 +675,78 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Abdômen / Estômago'**
   String get triageOptAbdomen;
+
+  /// Physical system 1: Cabeça e Pescoço
+  ///
+  /// In pt, this message translates to:
+  /// **'Cabeça e Pescoço'**
+  String get triageOptCabecaPescoco;
+
+  /// Physical system 2: Cardiovascular / Tórax
+  ///
+  /// In pt, this message translates to:
+  /// **'Cardiovascular / Tórax'**
+  String get triageOptCardiovascularTorax;
+
+  /// Physical system 3: Sistema Respiratório
+  ///
+  /// In pt, this message translates to:
+  /// **'Sistema Respiratório'**
+  String get triageOptRespiratorio;
+
+  /// Physical system 4: Gastrointestinal / Abdômen
+  ///
+  /// In pt, this message translates to:
+  /// **'Gastrointestinal / Abdômen'**
+  String get triageOptGastrointestinalAbdomen;
+
+  /// Physical system 5: Coluna e Dor Dorsal
+  ///
+  /// In pt, this message translates to:
+  /// **'Coluna e Dor Dorsal'**
+  String get triageOptColunaDorDorsal;
+
+  /// Physical system 6: Membros Superiores D/E
+  ///
+  /// In pt, this message translates to:
+  /// **'Membros Superiores D/E'**
+  String get triageOptMembrosSuperiores;
+
+  /// Physical system 7: Membros Inferiores D/E
+  ///
+  /// In pt, this message translates to:
+  /// **'Membros Inferiores D/E'**
+  String get triageOptMembrosInferiores;
+
+  /// Physical system 8: Sistema Neurológico
+  ///
+  /// In pt, this message translates to:
+  /// **'Sistema Neurológico'**
+  String get triageOptNeurologico;
+
+  /// Physical system 9: Geniturinário / Pélvico
+  ///
+  /// In pt, this message translates to:
+  /// **'Geniturinário / Pélvico'**
+  String get triageOptGeniturinarioPelvico;
+
+  /// Physical system 10: Sistema Dermatológico
+  ///
+  /// In pt, this message translates to:
+  /// **'Sistema Dermatológico'**
+  String get triageOptDermatologico;
+
+  /// Physical system 11: Muscular / Geral Sistêmico
+  ///
+  /// In pt, this message translates to:
+  /// **'Muscular / Geral Sistêmico'**
+  String get triageOptMuscularGeralSistemico;
+
+  /// Physical system 12: Endócrino / Metabólico
+  ///
+  /// In pt, this message translates to:
+  /// **'Endócrino / Metabólico'**
+  String get triageOptEndocrinoMetabolico;
 
   /// Question 2 physical
   ///

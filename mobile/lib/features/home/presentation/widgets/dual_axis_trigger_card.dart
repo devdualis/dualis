@@ -45,6 +45,8 @@ class _DualAxisTriggerCardState extends ConsumerState<DualAxisTriggerCard> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    final chips = _getAdaptiveSuggestionChips(state.emotionalStatus, state.physicalStatus);
+
     return Card(
       elevation: 0,
       color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
@@ -201,18 +203,71 @@ class _DualAxisTriggerCardState extends ConsumerState<DualAxisTriggerCard> {
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
-                children: [
-                  _buildSuggestionChip('Dor de cabeça', notifier),
-                  _buildSuggestionChip('Cansaço excessivo', notifier),
-                  _buildSuggestionChip('Aperto no peito', notifier),
-                  _buildSuggestionChip('Crise de ansiedade', notifier),
-                ],
+                children: chips.map((c) => _buildSuggestionChip(c, notifier)).toList(),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  List<String> _getAdaptiveSuggestionChips(TriggerStatus? emotional, TriggerStatus? physical) {
+    final isEmotionalDistressed =
+        emotional == TriggerStatus.soSo || emotional == TriggerStatus.badSick;
+    final isPhysicalDistressed =
+        physical == TriggerStatus.soSo || physical == TriggerStatus.badSick;
+
+    if (isEmotionalDistressed && !isPhysicalDistressed) {
+      return const [
+        'Crise de ansiedade',
+        'Desânimo / Apatia',
+        'Esgotamento / Burnout',
+        'Nó na garganta / Gastrite nervosa',
+        'Insônia / Noite ruim',
+        'Névoa mental / Sem foco',
+        'Culpa / Autocrítica',
+      ];
+    }
+
+    if (isPhysicalDistressed && !isEmotionalDistressed) {
+      return const [
+        'Dor de cabeça',
+        'Dor no peito / Palpitação',
+        'Falta de ar / Chiado',
+        'Azia / Queimação no estômago',
+        'Dor na coluna / Lombar',
+        'Dor no ombro / braço',
+        'Dor no joelho / perna',
+        'Tontura / Labirintite',
+        'Dor ao urinar',
+        'Manchas / Alergia na pele',
+        'Dor no corpo todo / Febre',
+        'Sede excessiva / Cansaço extremo',
+      ];
+    }
+
+    if (isPhysicalDistressed && isEmotionalDistressed) {
+      return const [
+        'Dor de cabeça',
+        'Dor na coluna / Lombar',
+        'Aperto no peito',
+        'Crise de ansiedade',
+        'Azia / Gastrite nervosa',
+        'Insônia / Noite ruim',
+        'Tontura / Labirintite',
+        'Esgotamento / Burnout',
+      ];
+    }
+
+    return const [
+      'Dor de cabeça',
+      'Cansaço excessivo',
+      'Aperto no peito',
+      'Crise de ansiedade',
+      'Dor na coluna',
+      'Insônia',
+    ];
   }
 
   Widget _buildAxisSection({

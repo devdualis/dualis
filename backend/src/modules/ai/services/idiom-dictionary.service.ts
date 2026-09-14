@@ -14,7 +14,6 @@ interface IdiomEntry {
 @Injectable()
 export class IdiomDictionaryService {
   private readonly entries: IdiomEntry[] = [
-    // ── Emergency Physical Flags ──────────────────────────────────────────
     {
       pattern: /(dor\s+no\s+peito|peito\s+apertado|press[aã]o\s+no\s+peito|queima[cç][aã]o\s+no\s+peito|dolor\s+en\s+el\s+pecho|chest\s+pain|pressure\s+in\s+chest)/i,
       vertical: 'physical',
@@ -51,8 +50,6 @@ export class IdiomDictionaryService {
       clinicalConcept: 'suspeita de acidente vascular cerebral (AVC)',
       isEmergencyCandidate: true,
     },
-
-    // ── Emergency Emotional Flags ─────────────────────────────────────────
     {
       pattern: /(vontade\s+de\s+sumir|n[aã]o\s+quero\s+mais\s+viver|pensando\s+em\s+suic[ií]dio|tirar\s+a\s+pr[oó]pria\s+vida|ganas\s+de\s+morir|want\s+to\s+die|suicid)/i,
       vertical: 'emotional',
@@ -71,8 +68,6 @@ export class IdiomDictionaryService {
       clinicalConcept: 'transtorno de ansiedade / crise de pânico paroxística',
       isEmergencyCandidate: true,
     },
-
-    // ── Non-Emergency Physical Lay Terms ──────────────────────────────────
     {
       pattern: /(dor\s+de\s+cabe[cç]a|enxaqueca|cefaleia|cabeza|headache|migraine)/i,
       vertical: 'physical',
@@ -92,12 +87,21 @@ export class IdiomDictionaryService {
       isEmergencyCandidate: false,
     },
     {
-      pattern: /(joelho|ombro|articula[cç][aã]o|juntas|articulaciones|joint\s+pain|knee)/i,
+      pattern: /(joelho|articula[cç][aã]o|juntas|articulaciones|joint\s+pain|knee|pernas\s+pesadas|incha[cç]o\s+nos\s+tornozelos|calcanhar|panturrilha)/i,
       vertical: 'physical',
-      systemOrDimension: 'musculoskeletal_joints',
+      systemOrDimension: 'membros_inferiores',
       urgencyScore: 2,
-      mappedLayTerm: 'dor articular / juntas',
-      clinicalConcept: 'artralgia / tendinite',
+      mappedLayTerm: 'dor em membros inferiores / articulação',
+      clinicalConcept: 'artralgia / dor musculoesquelética de membro inferior',
+      isEmergencyCandidate: false,
+    },
+    {
+      pattern: /(ombro|bra[cç]o|punho|tendinite|cotovelo|m[aã]os)/i,
+      vertical: 'physical',
+      systemOrDimension: 'membros_superiores',
+      urgencyScore: 2,
+      mappedLayTerm: 'dor em membros superiores / ombro / braço',
+      clinicalConcept: 'tendinopatia / dor musculoesquelética de membro superior',
       isEmergencyCandidate: false,
     },
     {
@@ -109,8 +113,51 @@ export class IdiomDictionaryService {
       clinicalConcept: 'dispepsia funcional / refluxo gastresofágico',
       isEmergencyCandidate: false,
     },
-
-    // ── Non-Emergency Emotional Lay Terms ─────────────────────────────────
+    {
+      pattern: /(tontura|vertigem|labirintite|perda\s+de\s+equil[ií]brio)/i,
+      vertical: 'physical',
+      systemOrDimension: 'neurological',
+      urgencyScore: 2,
+      mappedLayTerm: 'tontura / vertigem',
+      clinicalConcept: 'vestibulopatia / disfunção vestibular periférica',
+      isEmergencyCandidate: false,
+    },
+    {
+      pattern: /(dor\s+ao\s+urinar|ard[eê]ncia\s+ao\s+urinar|c[oó]lica\s+renal|dor\s+p[eé]lvica|baixo\s+ventre)/i,
+      vertical: 'physical',
+      systemOrDimension: 'geniturinario_pelvico',
+      urgencyScore: 2,
+      mappedLayTerm: 'desconforto urinário / pélvico',
+      clinicalConcept: 'disúria / queixa funcional pélvica',
+      isEmergencyCandidate: false,
+    },
+    {
+      pattern: /(coceira|manchas\s+na\s+pele|urtic[aá]ria|alergia\s+na\s+pele|prurido)/i,
+      vertical: 'physical',
+      systemOrDimension: 'dermatologico',
+      urgencyScore: 2,
+      mappedLayTerm: 'alergia / lesão de pele',
+      clinicalConcept: 'dermatite / reação alérgica cutânea',
+      isEmergencyCandidate: false,
+    },
+    {
+      pattern: /(dor\s+no\s+corpo\s+todo|moleza|febre|calafrio|dor\s+nos\s+m[uú]sculos|mialgia)/i,
+      vertical: 'physical',
+      systemOrDimension: 'muscular_geral_sistemico',
+      urgencyScore: 2,
+      mappedLayTerm: 'dor muscular / indisposição geral',
+      clinicalConcept: 'mialgia difusa / queixa sistêmica',
+      isEmergencyCandidate: false,
+    },
+    {
+      pattern: /(sede\s+excessiva|perda\s+de\s+peso\s+repentina|cansa[cç]o\s+extremo)/i,
+      vertical: 'physical',
+      systemOrDimension: 'endocrino_metabolico',
+      urgencyScore: 2,
+      mappedLayTerm: 'alteração metabólica / sede excessiva',
+      clinicalConcept: 'avaliação metabólica / desgaste energético',
+      isEmergencyCandidate: false,
+    },
     {
       pattern: /(ansiedade|ansioso|agitado|nervoso|preocupa[cç][aã]o|ansiedad|anxiety|nervous)/i,
       vertical: 'emotional',
@@ -121,7 +168,7 @@ export class IdiomDictionaryService {
       isEmergencyCandidate: false,
     },
     {
-      pattern: /(tristeza|triste|des[aâ]nimo|deprimido|choro|tristeza|sadness|low\s+mood)/i,
+      pattern: /(tristeza|triste|des[aâ]nimo|deprimido|choro|sadness|low\s+mood)/i,
       vertical: 'emotional',
       systemOrDimension: 'depressive_hopelessness',
       urgencyScore: 2,
@@ -139,20 +186,43 @@ export class IdiomDictionaryService {
       isEmergencyCandidate: false,
     },
     {
-      pattern: /(cansa[cç]o\s+mental|esgotado|mente\s+pesada|fadiga|mental\s+fatigue|exhausted)/i,
+      pattern: /(n[oó]\s+na\s+garganta|aperto\s+na\s+garganta|gastrite\s+nervosa)/i,
       vertical: 'emotional',
-      systemOrDimension: 'emotional_general',
+      systemOrDimension: 'somatica',
       urgencyScore: 2,
-      mappedLayTerm: 'cansaço mental',
-      clinicalConcept: 'fadiga cognitiva / astenia',
+      mappedLayTerm: 'manifestação psicossomática',
+      clinicalConcept: 'somatização de estresse emocional',
+      isEmergencyCandidate: false,
+    },
+    {
+      pattern: /(ins[oô]nia|sono\s+ruim|acordo\s+de\s+madrugada|pesadelo|durmo\s+demais)/i,
+      vertical: 'emotional',
+      systemOrDimension: 'sono',
+      urgencyScore: 2,
+      mappedLayTerm: 'distúrbio do sono',
+      clinicalConcept: 'insônia / alteração do padrão de repouso',
+      isEmergencyCandidate: false,
+    },
+    {
+      pattern: /(n[eé]voa\s+mental|brain\s+fog|sem\s+foco|mente\s+lerda|cansa[cç]o\s+mental|esgotado|mente\s+pesada|fadiga|mental\s+fatigue|exhausted)/i,
+      vertical: 'emotional',
+      systemOrDimension: 'cognitiva_foco',
+      urgencyScore: 2,
+      mappedLayTerm: 'cansaço mental / névoa mental',
+      clinicalConcept: 'fadiga cognitiva / sobrecarga atencional',
+      isEmergencyCandidate: false,
+    },
+    {
+      pattern: /(culpa|incapaz|me\s+sinto\s+um\s+lixo|autocr[ií]tica)/i,
+      vertical: 'emotional',
+      systemOrDimension: 'autoestima',
+      urgencyScore: 2,
+      mappedLayTerm: 'autocrítica severa / sentimento de culpa',
+      clinicalConcept: 'autoimagem fragilizada / distorção de autoeficácia',
       isEmergencyCandidate: false,
     },
   ];
 
-  /**
-   * Deterministic match against Brazilian/Latin American medical lay-term idioms.
-   * Execution time: <2ms.
-   */
   match(text: string): TriageClassificationResult | null {
     const start = performance.now();
     const clean = text.trim();

@@ -239,6 +239,27 @@ class AppLocalizationsEs extends AppLocalizations {
   String get triageOptCansaco => 'Cansancio Mental';
 
   @override
+  String get triageOptAnsiosaAgitacao => 'Ansiosa / Agitación';
+
+  @override
+  String get triageOptDepressivaDesanimo => 'Depresiva / Desánimo';
+
+  @override
+  String get triageOptEstresseBurnout => 'Estrés / Burnout';
+
+  @override
+  String get triageOptSomatica => 'Somática (Psicosomática)';
+
+  @override
+  String get triageOptSono => 'Sueño (Insomnio / Hipersomnia)';
+
+  @override
+  String get triageOptCognitivaFoco => 'Cognitiva / Foco';
+
+  @override
+  String get triageOptAutoestima => 'Autoestima / Autoimagen';
+
+  @override
   String get triageQ2Emotional =>
       '¿Se ha sentido así con frecuencia en los últimos días o es algo específico de hoy?';
 
@@ -300,6 +321,42 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get triageOptAbdomen => 'Abdomen / Estómago';
+
+  @override
+  String get triageOptCabecaPescoco => 'Cabeza y Cuello';
+
+  @override
+  String get triageOptCardiovascularTorax => 'Cardiovascular / Tórax';
+
+  @override
+  String get triageOptRespiratorio => 'Sistema Respiratorio';
+
+  @override
+  String get triageOptGastrointestinalAbdomen => 'Gastrointestinal / Abdomen';
+
+  @override
+  String get triageOptColunaDorDorsal => 'Columna y Dolor Dorsal';
+
+  @override
+  String get triageOptMembrosSuperiores => 'Miembros Superiores D/I';
+
+  @override
+  String get triageOptMembrosInferiores => 'Miembros Inferiores D/I';
+
+  @override
+  String get triageOptNeurologico => 'Sistema Neurológico';
+
+  @override
+  String get triageOptGeniturinarioPelvico => 'Genitourinario / Pélvico';
+
+  @override
+  String get triageOptDermatologico => 'Sistema Dermatológico';
+
+  @override
+  String get triageOptMuscularGeralSistemico => 'Muscular / General Sistémico';
+
+  @override
+  String get triageOptEndocrinoMetabolico => 'Endocrino / Metabólico';
 
   @override
   String get triageQ2Physical =>

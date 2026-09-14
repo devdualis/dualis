@@ -240,6 +240,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get triageOptCansaco => 'Mental Fatigue';
 
   @override
+  String get triageOptAnsiosaAgitacao => 'Anxious / Agitation';
+
+  @override
+  String get triageOptDepressivaDesanimo => 'Depressive / Low Mood';
+
+  @override
+  String get triageOptEstresseBurnout => 'Stress / Burnout';
+
+  @override
+  String get triageOptSomatica => 'Somatic (Psychosomatic)';
+
+  @override
+  String get triageOptSono => 'Sleep (Insomnia / Hypersomnia)';
+
+  @override
+  String get triageOptCognitivaFoco => 'Cognitive / Focus';
+
+  @override
+  String get triageOptAutoestima => 'Self-esteem / Self-image';
+
+  @override
   String get triageQ2Emotional =>
       'Have you felt this way frequently in recent days or is it very specific to today?';
 
@@ -300,6 +321,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get triageOptAbdomen => 'Abdomen / Stomach';
+
+  @override
+  String get triageOptCabecaPescoco => 'Head and Neck';
+
+  @override
+  String get triageOptCardiovascularTorax => 'Cardiovascular / Chest';
+
+  @override
+  String get triageOptRespiratorio => 'Respiratory System';
+
+  @override
+  String get triageOptGastrointestinalAbdomen => 'Gastrointestinal / Abdomen';
+
+  @override
+  String get triageOptColunaDorDorsal => 'Spine and Back Pain';
+
+  @override
+  String get triageOptMembrosSuperiores => 'Upper Limbs R/L';
+
+  @override
+  String get triageOptMembrosInferiores => 'Lower Limbs R/L';
+
+  @override
+  String get triageOptNeurologico => 'Neurological System';
+
+  @override
+  String get triageOptGeniturinarioPelvico => 'Genitourinary / Pelvic';
+
+  @override
+  String get triageOptDermatologico => 'Dermatological System';
+
+  @override
+  String get triageOptMuscularGeralSistemico => 'Muscular / General Systemic';
+
+  @override
+  String get triageOptEndocrinoMetabolico => 'Endocrine / Metabolic';
 
   @override
   String get triageQ2Physical => 'How long has this pain or symptom persisted?';

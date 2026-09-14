@@ -67,7 +67,7 @@ void main() {
 
       expect(find.text('Iniciando Autoavaliação Psico-Emocional'), findsOneWidget);
       expect(find.text('Passo 1 de 5'), findsOneWidget);
-      expect(find.byType(TriageOptionChip), findsNWidgets(4));
+      expect(find.byType(TriageOptionChip), findsNWidgets(7));
     });
 
     testWidgets('2. Renders "Iniciando Autoavaliação Física" banner on fisica vertical',
@@ -79,7 +79,8 @@ void main() {
 
       expect(find.text('Iniciando Autoavaliação Física'), findsOneWidget);
       expect(find.text('Passo 1 de 5'), findsOneWidget);
-      expect(find.text('Cabeça'), findsOneWidget);
+      expect(find.text('Cabeça e Pescoço'), findsOneWidget);
+      expect(find.byType(TriageOptionChip), findsNWidgets(12));
     });
 
     testWidgets('3. "Próximo" button starts disabled when no option is selected',
@@ -103,7 +104,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Cansaço Mental'));
+      await tester.tap(find.text('Ansiosa / Agitação'));
       await tester.pumpAndSettle();
 
       final nextButton = find.widgetWithText(FilledButton, 'Próximo');
@@ -117,7 +118,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Cansaço Mental'));
+      await tester.tap(find.text('Ansiosa / Agitação'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
@@ -133,7 +134,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Cansaço Mental'));
+      await tester.tap(find.text('Ansiosa / Agitação'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
@@ -144,7 +145,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Passo 1 de 5'), findsOneWidget);
-      expect(find.text('Cansaço Mental'), findsOneWidget);
+      expect(find.text('Ansiosa / Agitação'), findsOneWidget);
     });
 
     testWidgets('7. Step 3 in Physical vertical renders TriageIntensitySelector',
@@ -154,7 +155,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Costas / Coluna'));
+      await tester.tap(find.text('Coluna e Dor Dorsal'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();
@@ -177,7 +178,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Cansaço Mental'));
+      await tester.tap(find.text('Ansiosa / Agitação'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();

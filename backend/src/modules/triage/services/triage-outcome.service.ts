@@ -56,6 +56,56 @@ export class TriageOutcomeService {
       label: 'Cabeça e Pescoço',
       somaticNormalized: 'Cefaleia / Desconforto crânio-cervical',
     },
+    head_neck: {
+      code: 'cabeca_pescoco',
+      label: 'Cabeça e Pescoço',
+      somaticNormalized: 'Cefaleia / Desconforto crânio-cervical',
+    },
+    cardiovascular: {
+      code: 'cardiovascular_torax',
+      label: 'Cardiovascular e Tórax',
+      somaticNormalized: 'Sensação de aperto torácico funcional / Palpitações',
+    },
+    cardiovascular_torax: {
+      code: 'cardiovascular_torax',
+      label: 'Cardiovascular e Tórax',
+      somaticNormalized: 'Sensação de aperto torácico funcional / Palpitações',
+    },
+    cardiovascular_chest: {
+      code: 'cardiovascular_torax',
+      label: 'Cardiovascular e Tórax',
+      somaticNormalized: 'Sensação de aperto torácico funcional / Palpitações',
+    },
+    respiratorio: {
+      code: 'respiratorio',
+      label: 'Sistema Respiratório',
+      somaticNormalized: 'Desconforto respiratório / Dispneia funcional',
+    },
+    respiratory: {
+      code: 'respiratorio',
+      label: 'Sistema Respiratório',
+      somaticNormalized: 'Desconforto respiratório / Dispneia funcional',
+    },
+    abdomen: {
+      code: 'gastrointestinal_abdomen',
+      label: 'Gastrointestinal e Abdômen',
+      somaticNormalized: 'Desconforto epigástrico / Dispepsia funcional',
+    },
+    abdomen_estomago: {
+      code: 'gastrointestinal_abdomen',
+      label: 'Gastrointestinal e Abdômen',
+      somaticNormalized: 'Desconforto epigástrico / Dispepsia funcional',
+    },
+    gastrointestinal_abdomen: {
+      code: 'gastrointestinal_abdomen',
+      label: 'Gastrointestinal e Abdômen',
+      somaticNormalized: 'Desconforto epigástrico / Dispepsia funcional',
+    },
+    gastrointestinal: {
+      code: 'gastrointestinal_abdomen',
+      label: 'Gastrointestinal e Abdômen',
+      somaticNormalized: 'Desconforto epigástrico / Dispepsia funcional',
+    },
     costas: {
       code: 'coluna_dor_dorsal',
       label: 'Coluna e Dor Dorsal',
@@ -71,6 +121,11 @@ export class TriageOutcomeService {
       label: 'Coluna e Dor Dorsal',
       somaticNormalized: 'Dor lombar / Tensão paravertebral postural',
     },
+    coluna_dor_dorsal: {
+      code: 'coluna_dor_dorsal',
+      label: 'Coluna e Dor Dorsal',
+      somaticNormalized: 'Dor lombar / Tensão paravertebral postural',
+    },
     dor_lombar_costas: {
       code: 'coluna_dor_dorsal',
       label: 'Coluna e Dor Dorsal',
@@ -81,25 +136,65 @@ export class TriageOutcomeService {
       label: 'Coluna e Dor Dorsal',
       somaticNormalized: 'Dor lombar / Tensão paravertebral postural',
     },
+    musculoskeletal_back: {
+      code: 'coluna_dor_dorsal',
+      label: 'Coluna e Dor Dorsal',
+      somaticNormalized: 'Dor lombar / Tensão paravertebral postural',
+    },
+    membros_superiores: {
+      code: 'membros_superiores',
+      label: 'Membros Superiores D/E',
+      somaticNormalized: 'Desconforto musculoarticular nos membros superiores',
+    },
+    membros_inferiores: {
+      code: 'membros_inferiores',
+      label: 'Membros Inferiores D/E',
+      somaticNormalized: 'Desconforto musculoarticular nos membros inferiores',
+    },
     articulacoes: {
-      code: 'membros_superiores_inferiores',
+      code: 'membros_superiores',
       label: 'Membros e Articulações',
       somaticNormalized: 'Artralgia / Desconforto musculoarticular periférico',
     },
-    abdomen: {
-      code: 'gastrointestinal_abdomen',
-      label: 'Gastrointestinal e Abdômen',
-      somaticNormalized: 'Desconforto epigástrico / Dispepsia funcional',
+    musculoskeletal_joints: {
+      code: 'membros_superiores',
+      label: 'Membros e Articulações',
+      somaticNormalized: 'Artralgia / Desconforto musculoarticular periférico',
     },
-    abdomen_estomago: {
-      code: 'gastrointestinal_abdomen',
-      label: 'Gastrointestinal e Abdômen',
-      somaticNormalized: 'Desconforto epigástrico / Dispepsia funcional',
+    neurologico: {
+      code: 'neurologico',
+      label: 'Sistema Neurológico',
+      somaticNormalized: 'Tontura / Instabilidade postural e equilíbrio',
     },
-    cardiovascular: {
-      code: 'cardiovascular_torax',
-      label: 'Cardiovascular e Tórax',
-      somaticNormalized: 'Sensação de aperto torácico funcional / Palpitações',
+    neurological: {
+      code: 'neurologico',
+      label: 'Sistema Neurológico',
+      somaticNormalized: 'Tontura / Instabilidade postural e equilíbrio',
+    },
+    geniturinario_pelvico: {
+      code: 'geniturinario_pelvico',
+      label: 'Geniturinário e Pélvico',
+      somaticNormalized: 'Desconforto pélvico / Queixas urinárias funcionais',
+    },
+    dermatologico: {
+      code: 'dermatologico',
+      label: 'Sistema Dermatológico',
+      somaticNormalized: 'Prurido cutâneo / Hipersensibilidade dermatológica',
+    },
+    muscular_geral_sistemico: {
+      code: 'muscular_geral_sistemico',
+      label: 'Sistema Muscular / Geral Sistêmico',
+      somaticNormalized: 'Mialgia difusa / Sobrecarga fisiológica sistêmica',
+    },
+    general_somatic: {
+      code: 'muscular_geral_sistemico',
+      label: 'Sistema Muscular / Geral Sistêmico',
+      somaticNormalized: 'Mialgia difusa / Sobrecarga fisiológica sistêmica',
+    },
+    endocrino_metabolico: {
+      code: 'endocrino_metabolico',
+      label: 'Endócrino e Metabólico',
+      somaticNormalized: 'Oscilação metabólica / Desgaste energético',
     },
   };
 
@@ -114,12 +209,32 @@ export class TriageOutcomeService {
       label: 'Dimensão Ansiosa / Agitação',
       somaticNormalized: 'Ansiedade antecipatória / Tensão psicomotora',
     },
+    ansiosa_agitacao: {
+      code: 'ansiosa_agitacao',
+      label: 'Dimensão Ansiosa / Agitação',
+      somaticNormalized: 'Ansiedade antecipatória / Tensão psicomotora',
+    },
+    anxious_agitation: {
+      code: 'ansiosa_agitacao',
+      label: 'Dimensão Ansiosa / Agitação',
+      somaticNormalized: 'Ansiedade antecipatória / Tensão psicomotora',
+    },
     tristeza: {
       code: 'depressiva_desanimo',
       label: 'Dimensão Depressiva / Desânimo',
       somaticNormalized: 'Desânimo transitório / Anedonia leve a moderada',
     },
     tristeza_desanimo: {
+      code: 'depressiva_desanimo',
+      label: 'Dimensão Depressiva / Desânimo',
+      somaticNormalized: 'Desânimo transitório / Anedonia leve a moderada',
+    },
+    depressiva_desanimo: {
+      code: 'depressiva_desanimo',
+      label: 'Dimensão Depressiva / Desânimo',
+      somaticNormalized: 'Desânimo transitório / Anedonia leve a moderada',
+    },
+    depressive_hopelessness: {
       code: 'depressiva_desanimo',
       label: 'Dimensão Depressiva / Desânimo',
       somaticNormalized: 'Desânimo transitório / Anedonia leve a moderada',
@@ -134,20 +249,60 @@ export class TriageOutcomeService {
       label: 'Dimensão Estresse / Burnout',
       somaticNormalized: 'Sobrecarga de estresse cognitivo / Esgotamento funcional',
     },
-    cansaco: {
-      code: 'sono_cognitiva',
-      label: 'Dimensão Sono e Cansaço Mental',
-      somaticNormalized: 'Fadiga mental / Privação do descanso fisiológico',
+    estresse_burnout: {
+      code: 'estresse_burnout',
+      label: 'Dimensão Estresse / Burnout',
+      somaticNormalized: 'Sobrecarga de estresse cognitivo / Esgotamento funcional',
     },
-    cansaco_mental: {
-      code: 'sono_cognitiva',
-      label: 'Dimensão Sono e Cansaço Mental',
-      somaticNormalized: 'Fadiga mental / Privação do descanso fisiológico',
+    stress_burnout: {
+      code: 'estresse_burnout',
+      label: 'Dimensão Estresse / Burnout',
+      somaticNormalized: 'Sobrecarga de estresse cognitivo / Esgotamento funcional',
     },
     somatico: {
       code: 'somatica',
-      label: 'Dimensão Psicossomática',
+      label: 'Dimensão Somática (Psicossomática)',
       somaticNormalized: 'Manifestação somatizada de sobrecarga emocional (nó na garganta / aperto torácico)',
+    },
+    somatica: {
+      code: 'somatica',
+      label: 'Dimensão Somática (Psicossomática)',
+      somaticNormalized: 'Manifestação somatizada de sobrecarga emocional (nó na garganta / aperto torácico)',
+    },
+    sono: {
+      code: 'sono',
+      label: 'Dimensão Sono / Ritmo Circadiano',
+      somaticNormalized: 'Privação do descanso fisiológico / Sono não-reparador',
+    },
+    sono_cognitiva: {
+      code: 'sono',
+      label: 'Dimensão Sono / Ritmo Circadiano',
+      somaticNormalized: 'Privação do descanso fisiológico / Sono não-reparador',
+    },
+    cansaco: {
+      code: 'sono',
+      label: 'Dimensão Sono / Ritmo Circadiano',
+      somaticNormalized: 'Fadiga mental / Privação do descanso fisiológico',
+    },
+    cansaco_mental: {
+      code: 'cognitiva_foco',
+      label: 'Dimensão Cognitiva / Foco',
+      somaticNormalized: 'Fadiga mental / Névoa cognitiva e dispersão atencional',
+    },
+    cognitiva_foco: {
+      code: 'cognitiva_foco',
+      label: 'Dimensão Cognitiva / Foco',
+      somaticNormalized: 'Fadiga mental / Névoa cognitiva e dispersão atencional',
+    },
+    emotional_general: {
+      code: 'cognitiva_foco',
+      label: 'Dimensão Cognitiva / Foco',
+      somaticNormalized: 'Fadiga mental / Névoa cognitiva e dispersão atencional',
+    },
+    autoestima: {
+      code: 'autoestima',
+      label: 'Dimensão Autoestima / Autoimagem',
+      somaticNormalized: 'Autocrítica severa / Insegurança situacional',
     },
   };
 
@@ -170,7 +325,7 @@ export class TriageOutcomeService {
         Object.entries(this.physicalMappings).find(([k]) => step1.includes(k) || k.includes(step1))?.[1];
       if (!mapping) {
         mapping = {
-          code: 'geral',
+          code: 'muscular_geral_sistemico',
           label: 'Avaliação Física Sistêmica',
           somaticNormalized: 'Desconforto corporal geral',
         };
@@ -209,7 +364,7 @@ export class TriageOutcomeService {
 
     const somaticKeywords = ['peito', 'coraç', 'ar', 'respir', 'garganta', 'estômago', 'nó', 'aperto'];
     const narrativeHasSomatic = narrative && somaticKeywords.some((kw) => narrative.toLowerCase().includes(kw));
-    const isPsychosomaticDimension = step1 === 'somatico';
+    const isPsychosomaticDimension = step1 === 'somatico' || step1 === 'somatica';
 
     if (vertical === 'emotional' && (narrativeHasSomatic || isPsychosomaticDimension)) {
       organicPrimacyApplied = true;

@@ -12,23 +12,18 @@ void main() {
         expect(questions[i].stepIndex, equals(i));
       }
 
-      // Step 0: Nature (4 options)
-      expect(questions[0].options.length, equals(4));
+      expect(questions[0].options.length, equals(7));
       expect(questions[0].isPreview, isFalse);
 
-      // Step 1: Persistence (3 options)
       expect(questions[1].options.length, equals(3));
       expect(questions[1].isPreview, isFalse);
 
-      // Step 2: Intensity (3 options with intensity values)
       expect(questions[2].options.length, equals(3));
       expect(questions[2].options.every((o) => o.intensityValue != null), isTrue);
 
-      // Step 3: Triggers (4 options)
       expect(questions[3].options.length, equals(4));
       expect(questions[3].isPreview, isFalse);
 
-      // Step 4: Preview
       expect(questions[4].isPreview, isTrue);
       expect(questions[4].options, isEmpty);
     });
@@ -41,20 +36,15 @@ void main() {
         expect(questions[i].stepIndex, equals(i));
       }
 
-      // Step 0: Location (4 options with system keys)
-      expect(questions[0].options.length, equals(4));
+      expect(questions[0].options.length, equals(12));
       expect(questions[0].options.every((o) => o.systemKey != null), isTrue);
 
-      // Step 1: Duration (3 options)
       expect(questions[1].options.length, equals(3));
 
-      // Step 2: Intensity (numeric 1-5 scale)
       expect(questions[2].isNumericScale, isTrue);
 
-      // Step 3: Triggers (3 options)
       expect(questions[3].options.length, equals(3));
 
-      // Step 4: Preview
       expect(questions[4].isPreview, isTrue);
       expect(questions[4].options, isEmpty);
     });

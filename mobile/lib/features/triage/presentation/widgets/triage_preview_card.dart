@@ -4,7 +4,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/triage_vertical.dart';
 
-/// Summary card presented at Step 4 displaying all captured answers before confirmation.
 class TriagePreviewCard extends StatelessWidget {
   final TriageVertical vertical;
   final Map<int, String> answers;
@@ -20,17 +19,29 @@ class TriagePreviewCard extends StatelessWidget {
   static String resolveAnswerLabel(BuildContext context, String key) {
     final l10n = AppLocalizations.of(context);
     switch (key) {
-      // Emotional Step 0
       case 'ansiedade_agitacao':
         return l10n.triageOptAnsiedade;
+      case 'ansiosa_agitacao':
+        return l10n.triageOptAnsiosaAgitacao;
       case 'tristeza_desanimo':
         return l10n.triageOptTristeza;
+      case 'depressiva_desanimo':
+        return l10n.triageOptDepressivaDesanimo;
       case 'estresse_irritabilidade':
         return l10n.triageOptEstresse;
+      case 'estresse_burnout':
+        return l10n.triageOptEstresseBurnout;
       case 'cansaco_mental':
         return l10n.triageOptCansaco;
+      case 'somatica':
+        return l10n.triageOptSomatica;
+      case 'sono':
+        return l10n.triageOptSono;
+      case 'cognitiva_foco':
+        return l10n.triageOptCognitivaFoco;
+      case 'autoestima':
+        return l10n.triageOptAutoestima;
 
-      // Emotional Step 1
       case 'comecou_hoje':
         return l10n.triageOptComecouHoje;
       case 'ja_faz_alguns_dias':
@@ -38,7 +49,6 @@ class TriagePreviewCard extends StatelessWidget {
       case 'algo_constante_semanas':
         return l10n.triageOptConstanteSemanas;
 
-      // Emotional Step 2
       case 'leve_controlavel':
         return l10n.triageOptLeveControlavel;
       case 'moderada':
@@ -46,7 +56,6 @@ class TriagePreviewCard extends StatelessWidget {
       case 'muito_forte':
         return l10n.triageOptMuitoForte;
 
-      // Emotional Step 3
       case 'trabalho_estudos':
         return l10n.triageOptTrabalho;
       case 'familia_relacionamentos':
@@ -56,17 +65,39 @@ class TriagePreviewCard extends StatelessWidget {
       case 'nao_sei_dizer':
         return l10n.triageOptNaoSei;
 
-      // Physical Step 0
       case 'cabeca':
         return l10n.triageOptCabeca;
+      case 'cabeca_pescoco':
+        return l10n.triageOptCabecaPescoco;
       case 'costas_coluna':
         return l10n.triageOptCostas;
+      case 'coluna_dor_dorsal':
+        return l10n.triageOptColunaDorDorsal;
       case 'articulacoes':
         return l10n.triageOptArticulacoes;
       case 'abdomen_estomago':
         return l10n.triageOptAbdomen;
+      case 'gastrointestinal_abdomen':
+        return l10n.triageOptGastrointestinalAbdomen;
+      case 'cardiovascular_torax':
+        return l10n.triageOptCardiovascularTorax;
+      case 'respiratorio':
+        return l10n.triageOptRespiratorio;
+      case 'membros_superiores':
+        return l10n.triageOptMembrosSuperiores;
+      case 'membros_inferiores':
+        return l10n.triageOptMembrosInferiores;
+      case 'neurologico':
+        return l10n.triageOptNeurologico;
+      case 'geniturinario_pelvico':
+        return l10n.triageOptGeniturinarioPelvico;
+      case 'dermatologico':
+        return l10n.triageOptDermatologico;
+      case 'muscular_geral_sistemico':
+        return l10n.triageOptMuscularGeralSistemico;
+      case 'endocrino_metabolico':
+        return l10n.triageOptEndocrinoMetabolico;
 
-      // Physical Step 1
       case 'comecou_agora':
         return l10n.triageOptComecouAgora;
       case 'ha_alguns_dias':
@@ -74,7 +105,6 @@ class TriagePreviewCard extends StatelessWidget {
       case 'e_cronica':
         return l10n.triageOptCronica;
 
-      // Physical Step 3
       case 'sim_exercicio_intenso':
         return l10n.triageOptSimExercicio;
       case 'sim_sofri_queda':

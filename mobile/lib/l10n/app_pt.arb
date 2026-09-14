@@ -288,6 +288,34 @@
   "@triageOptCansaco": {
     "description": "Emotional option: Mental Fatigue"
   },
+  "triageOptAnsiosaAgitacao": "Ansiosa / Agitação",
+  "@triageOptAnsiosaAgitacao": {
+    "description": "Emotional dimension 1: Ansiosa / Agitação"
+  },
+  "triageOptDepressivaDesanimo": "Depressiva / Desânimo",
+  "@triageOptDepressivaDesanimo": {
+    "description": "Emotional dimension 2: Depressiva / Desânimo"
+  },
+  "triageOptEstresseBurnout": "Estresse / Burnout",
+  "@triageOptEstresseBurnout": {
+    "description": "Emotional dimension 3: Estresse / Burnout"
+  },
+  "triageOptSomatica": "Somática (Psicossomática)",
+  "@triageOptSomatica": {
+    "description": "Emotional dimension 4: Somática (Psicossomática)"
+  },
+  "triageOptSono": "Sono (Insônia / Hipersônia)",
+  "@triageOptSono": {
+    "description": "Emotional dimension 5: Sono (Insônia/Hipersônia)"
+  },
+  "triageOptCognitivaFoco": "Cognitiva / Foco",
+  "@triageOptCognitivaFoco": {
+    "description": "Emotional dimension 6: Cognitiva / Foco"
+  },
+  "triageOptAutoestima": "Autoestima / Autoimagem",
+  "@triageOptAutoestima": {
+    "description": "Emotional dimension 7: Autoestima / Autoimagem"
+  },
   "triageQ2Emotional": "Você tem se sentido assim frequentemente nos últimos dias ou é algo muito específico de hoje?",
   "@triageQ2Emotional": {
     "description": "Question 2 emotional"
@@ -363,6 +391,54 @@
   "triageOptAbdomen": "Abdômen / Estômago",
   "@triageOptAbdomen": {
     "description": "Physical location: Abdomen/Stomach"
+  },
+  "triageOptCabecaPescoco": "Cabeça e Pescoço",
+  "@triageOptCabecaPescoco": {
+    "description": "Physical system 1: Cabeça e Pescoço"
+  },
+  "triageOptCardiovascularTorax": "Cardiovascular / Tórax",
+  "@triageOptCardiovascularTorax": {
+    "description": "Physical system 2: Cardiovascular / Tórax"
+  },
+  "triageOptRespiratorio": "Sistema Respiratório",
+  "@triageOptRespiratorio": {
+    "description": "Physical system 3: Sistema Respiratório"
+  },
+  "triageOptGastrointestinalAbdomen": "Gastrointestinal / Abdômen",
+  "@triageOptGastrointestinalAbdomen": {
+    "description": "Physical system 4: Gastrointestinal / Abdômen"
+  },
+  "triageOptColunaDorDorsal": "Coluna e Dor Dorsal",
+  "@triageOptColunaDorDorsal": {
+    "description": "Physical system 5: Coluna e Dor Dorsal"
+  },
+  "triageOptMembrosSuperiores": "Membros Superiores D/E",
+  "@triageOptMembrosSuperiores": {
+    "description": "Physical system 6: Membros Superiores D/E"
+  },
+  "triageOptMembrosInferiores": "Membros Inferiores D/E",
+  "@triageOptMembrosInferiores": {
+    "description": "Physical system 7: Membros Inferiores D/E"
+  },
+  "triageOptNeurologico": "Sistema Neurológico",
+  "@triageOptNeurologico": {
+    "description": "Physical system 8: Sistema Neurológico"
+  },
+  "triageOptGeniturinarioPelvico": "Geniturinário / Pélvico",
+  "@triageOptGeniturinarioPelvico": {
+    "description": "Physical system 9: Geniturinário / Pélvico"
+  },
+  "triageOptDermatologico": "Sistema Dermatológico",
+  "@triageOptDermatologico": {
+    "description": "Physical system 10: Sistema Dermatológico"
+  },
+  "triageOptMuscularGeralSistemico": "Muscular / Geral Sistêmico",
+  "@triageOptMuscularGeralSistemico": {
+    "description": "Physical system 11: Muscular / Geral Sistêmico"
+  },
+  "triageOptEndocrinoMetabolico": "Endócrino / Metabólico",
+  "@triageOptEndocrinoMetabolico": {
+    "description": "Physical system 12: Endócrino / Metabólico"
   },
   "triageQ2Physical": "Há quanto tempo essa dor ou anomalia persiste?",
   "@triageQ2Physical": {
