@@ -38,7 +38,11 @@ describe('Security Regression: PostgreSQL Cross-Tenant RLS Isolation (SEC-01)', 
       await pool.query(`
         CREATE TABLE IF NOT EXISTS users (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          name VARCHAR(255) NOT NULL DEFAULT 'Test User',
           email VARCHAR(255) NOT NULL UNIQUE,
+          password_hash VARCHAR(255) NOT NULL DEFAULT 'hash',
+          gender VARCHAR(50) NOT NULL DEFAULT 'unspecified',
+          date_of_birth DATE,
           created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
         );
@@ -98,7 +102,9 @@ describe('Security Regression: PostgreSQL Cross-Tenant RLS Isolation (SEC-01)', 
 
     // Insert test tenants
     await pool.query(
-      `INSERT INTO users (id, email) VALUES ($1, $2), ($3, $4);`,
+      `INSERT INTO users (id, name, email, password_hash, gender) VALUES 
+       ($1, 'Tenant A', $2, 'hashA', 'female'), 
+       ($3, 'Tenant B', $4, 'hashB', 'male');`,
       [userA_Id, 'tenantA@dualis.com.br', userB_Id, 'tenantB@dualis.com.br'],
     );
 
