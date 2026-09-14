@@ -96,11 +96,8 @@ void main() {
       // Verify LGPD badge
       expect(find.text('Prontuário Ativo & Protegido (LGPD Art. 11)'), findsOneWidget);
 
-      // Verify Clinical systems
-      expect(find.text('Visão Geral do Cuidado'), findsOneWidget);
-      expect(find.text('Saúde Física & Sintomas'), findsOneWidget);
-      expect(find.text('Bem-estar Psico-emocional'), findsOneWidget);
-      expect(find.text('Criptografia AES-256-GCM'), findsOneWidget);
+      expect(find.byKey(const Key('home_history_card')), findsOneWidget);
+      expect(find.byKey(const Key('home_privacy_card')), findsOneWidget);
 
       // Verify CTAs
       expect(find.byKey(const Key('startTriageButton')), findsOneWidget);

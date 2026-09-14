@@ -402,52 +402,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-
-              // Status Summary Card
-              Text(
-                'Visão Geral do Cuidado',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimaryLight,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceLight,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.outlineLight),
-                ),
-                child: Column(
-                  children: [
-                    _buildFeatureRow(
-                      icon: Icons.favorite_border_rounded,
-                      iconColor: AppColors.clinicalTeal,
-                      title: 'Saúde Física & Sintomas',
-                      subtitle: '12 sistemas anatômicos integrados para triagem diária preventiva.',
-                    ),
-                    const Divider(height: 24, color: AppColors.outlineLight),
-                    _buildFeatureRow(
-                      icon: Icons.psychology_outlined,
-                      iconColor: AppColors.softIndigo,
-                      title: 'Bem-estar Psico-emocional',
-                      subtitle: 'Acompanhamento longitudinal de estresse, sono e humor.',
-                    ),
-                    const Divider(height: 24, color: AppColors.outlineLight),
-                    _buildFeatureRow(
-                      icon: Icons.lock_outline,
-                      iconColor: AppColors.clinicalTealDark,
-                      title: 'Criptografia AES-256-GCM',
-                      subtitle: 'Isolamento estrito por usuário via PostgreSQL Row-Level Security.',
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Logout Button
               SizedBox(
                 width: double.infinity,
                 height: 52,
@@ -480,51 +434,5 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   ),
 ),
 );
-  }
-
-  Widget _buildFeatureRow({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String subtitle,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: iconColor.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, color: iconColor, size: 22),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimaryLight,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
-                  color: AppColors.textSecondaryLight,
-                  height: 1.3,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
   }
 }
