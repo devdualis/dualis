@@ -20,6 +20,10 @@ export class SubmitTriageDto {
   @IsString()
   @IsOptional()
   narrative?: string;
+
+  @IsString()
+  @IsOptional()
+  clientSessionId?: string;
 }
 
 export interface RecommendedArticleDto {

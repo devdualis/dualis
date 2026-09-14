@@ -16,6 +16,7 @@ export const symptomLogs = pgTable(
     disposition: text('disposition'),
     organicPrimacyApplied: boolean('organic_primacy_applied').default(false).notNull(),
     stepAnswers: text('step_answers'),
+    clientSessionId: text('client_session_id'),
     recordedAt: timestamp('recorded_at', { withTimezone: true }).defaultNow().notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

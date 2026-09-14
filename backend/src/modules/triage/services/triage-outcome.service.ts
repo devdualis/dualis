@@ -163,6 +163,35 @@ export class TriageOutcomeService {
     // 5. Query Specialist Articles (REC-01)
     const recommendedArticles = this.articlesCatalog.getArticlesForCategory(mapping.code);
 
+    // 5.1 Idempotency Check (SYNC-01)
+    if (dto.clientSessionId) {
+      const existing = await this.db.transaction(async (tx) => {
+        await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`);
+        return tx
+          .select()
+          .from(symptomLogs)
+          .where(sql`${symptomLogs.userId} = ${userId}::uuid AND ${symptomLogs.clientSessionId} = ${dto.clientSessionId}`)
+          .limit(1);
+      });
+
+      if (existing.length > 0) {
+        const record = existing[0];
+        return {
+          id: record.id,
+          vertical,
+          intensityScore: record.intensity,
+          careDisposition: (record.disposition as CareDisposition) || careDisposition,
+          primaryCategory: mapping.code,
+          categoryLabel: mapping.label,
+          somaticMapping: mapping.somaticNormalized,
+          organicPrimacyApplied: record.organicPrimacyApplied,
+          organicPrimacyNotice,
+          recommendedArticles,
+          recordedAt: record.recordedAt.toISOString(),
+        };
+      }
+    }
+
     // 6. Encrypt and Persist under RLS
     const encryptedNarrative = narrative ? this.encryptionService.encrypt(narrative) : null;
     const encryptedStepAnswers = this.encryptionService.encrypt(JSON.stringify(answers));
@@ -180,6 +209,7 @@ export class TriageOutcomeService {
           disposition: careDisposition,
           organicPrimacyApplied,
           stepAnswers: encryptedStepAnswers,
+          clientSessionId: dto.clientSessionId || null,
           recordedAt: new Date(),
         })
         .returning();
