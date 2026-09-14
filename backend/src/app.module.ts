@@ -6,6 +6,7 @@ import { EncryptionModule } from './common/encryption/encryption.module';
 import { LegalModule } from './modules/legal/legal.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TriageAuditModule } from './modules/triage-audit/triage-audit.module';
+import { AiModule } from './modules/ai/ai.module';
 
 @Module({
   imports: [
@@ -17,6 +18,33 @@ import { TriageAuditModule } from './modules/triage-audit/triage-audit.module';
       pinoHttp: {
         level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
         redact: ['req.headers.authorization', 'req.headers.cookie', 'body.password'],
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? {
+                target: 'pino-pretty',
+                options: {
+                  colorize: true,
+                  singleLine: true,
+                  translateTime: 'SYS:standard',
+                  ignore: 'pid,hostname',
+                },
+              }
+            : undefined,
+        serializers: {
+          req: (req: any) => ({
+            id: req.id,
+            method: req.method,
+            url: req.url,
+            query: req.query,
+          }),
+          res: (res: any) => ({
+            statusCode: res.statusCode,
+          }),
+        },
+        customSuccessMessage: (req: any, res: any) =>
+          `${req.method} ${req.url} completed with ${res.statusCode}`,
+        customErrorMessage: (req: any, res: any, error: any) =>
+          `${req.method} ${req.url} failed with ${res.statusCode}: ${error?.message ?? 'error'}`,
       },
     }),
     DatabaseModule,
@@ -24,6 +52,7 @@ import { TriageAuditModule } from './modules/triage-audit/triage-audit.module';
     LegalModule,
     AuthModule,
     TriageAuditModule,
+    AiModule,
   ],
 })
 export class AppModule {}
