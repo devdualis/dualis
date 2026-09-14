@@ -442,4 +442,26 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get antiburlaBiologicalDiscordanceDesc =>
       'Notamos uma divergência entre a anatomia informada e os parâmetros do seu perfil. Deseja revisar antes de prosseguir?';
+
+  @override
+  String get offlineBannerText =>
+      'Modo Offline — Seus check-ins serão salvos localmente e sincronizados automaticamente.';
+
+  @override
+  String offlineSyncPendingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count registros pendentes de sincronização',
+      one: '1 registro pendente de sincronização',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get offlineSyncSuccessText => 'Sincronização concluída com sucesso.';
+
+  @override
+  String get offlineModeNotice =>
+      'Você está offline. Seu histórico e avaliação continuam funcionando normalmente.';
 }

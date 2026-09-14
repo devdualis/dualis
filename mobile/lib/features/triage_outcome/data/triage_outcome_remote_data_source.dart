@@ -14,6 +14,7 @@ class TriageOutcomeRemoteDataSource {
     required Map<int, String> answers,
     String? narrative,
     String? token,
+    String? clientSessionId,
   }) async {
     try {
       final response = await _apiClient.post(
@@ -22,6 +23,8 @@ class TriageOutcomeRemoteDataSource {
           'vertical': vertical,
           'answers': answers.map((key, value) => MapEntry(key.toString(), value)),
           if (narrative != null && narrative.isNotEmpty) 'narrative': narrative,
+          if (clientSessionId != null && clientSessionId.isNotEmpty)
+            'clientSessionId': clientSessionId,
         },
         options: token != null
             ? Options(headers: {'Authorization': 'Bearer $token'})
@@ -34,11 +37,11 @@ class TriageOutcomeRemoteDataSource {
       throw Exception('Formato de resposta de desfecho inesperado.');
     } catch (_) {
       // Deterministic offline fallback to ensure the patient always receives clinical guidance
-      return _generateOfflineFallback(vertical, answers, narrative);
+      return generateOfflineFallback(vertical, answers, narrative);
     }
   }
 
-  TriageOutcome _generateOfflineFallback(
+  TriageOutcome generateOfflineFallback(
     String vertical,
     Map<int, String> answers,
     String? narrative,

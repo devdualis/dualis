@@ -14,6 +14,8 @@ import '../controllers/trigger_checkin_controller.dart';
 import '../widgets/admob_banner_container.dart';
 import '../widgets/dual_axis_trigger_card.dart';
 import '../widgets/wellness_confirmation_dialog.dart';
+import '../../../sync/presentation/widgets/offline_indicator_banner.dart';
+import '../../../sync/presentation/controllers/sync_outbox_worker.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -83,6 +85,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final user = authState.user;
     final userName = (user?.name != null && user!.name.isNotEmpty) ? user.name : 'Paciente';
     final userEmail = (user?.email != null && user!.email.isNotEmpty) ? user.email : 'Sessão ativa';
+    ref.watch(syncOutboxWorkerProvider);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -103,12 +106,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Welcome Header
+        child: Column(
+          children: [
+            const OfflineIndicatorBanner(),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Welcome Header
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -334,7 +341,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ),
-    );
+    ],
+  ),
+),
+);
   }
 
   Widget _buildFeatureRow({

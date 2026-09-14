@@ -873,6 +873,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Notamos uma divergência entre a anatomia informada e os parâmetros do seu perfil. Deseja revisar antes de prosseguir?'**
   String get antiburlaBiologicalDiscordanceDesc;
+
+  /// Notice banner when device is offline
+  ///
+  /// In pt, this message translates to:
+  /// **'Modo Offline — Seus check-ins serão salvos localmente e sincronizados automaticamente.'**
+  String get offlineBannerText;
+
+  /// Count of pending outbox sync items
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 registro pendente de sincronização} other{{count} registros pendentes de sincronização}}'**
+  String offlineSyncPendingCount(int count);
+
+  /// Toast message when outbox sync completes
+  ///
+  /// In pt, this message translates to:
+  /// **'Sincronização concluída com sucesso.'**
+  String get offlineSyncSuccessText;
+
+  /// Explanatory text for offline functionality
+  ///
+  /// In pt, this message translates to:
+  /// **'Você está offline. Seu histórico e avaliação continuam funcionando normalmente.'**
+  String get offlineModeNotice;
 }
 
 class _AppLocalizationsDelegate

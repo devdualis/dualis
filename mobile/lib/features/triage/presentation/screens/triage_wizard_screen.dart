@@ -18,6 +18,10 @@ import '../widgets/triage_step_banner.dart';
 import '../widgets/antiburla_verification_bottom_sheet.dart';
 import '../../data/antiburla_remote_data_source.dart';
 import 'package:dualis_mobile/features/triage_outcome/presentation/controllers/triage_outcome_controller.dart';
+import 'package:dualis_mobile/features/triage_outcome/domain/triage_outcome_models.dart';
+import 'package:dualis_mobile/features/sync/data/triage_outbox_repository.dart';
+import '../../../../core/network/connectivity_service.dart';
+import 'package:uuid/uuid.dart';
 
 /// Screen 4: Dynamic 5-Step Triage Wizard (RF-002 / SRS ID 02 & 03).
 /// Features 300ms chromatic palette tweening between Soft Indigo (#3F51B5)
@@ -264,10 +268,34 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
           ref.read(triageWizardNotifierProvider.notifier).advance();
 
           final dataSource = ref.read(triageOutcomeDataSourceProvider);
-          final outcome = await dataSource.submitTriage(
-            vertical: verticalStr,
-            answers: answers,
-          );
+          final connectivity = ref.read(connectivityServiceProvider);
+          final isOnline = await connectivity.checkOnline();
+          final clientSessionId = const Uuid().v4();
+
+          TriageOutcome outcome;
+          if (isOnline) {
+            try {
+              outcome = await dataSource.submitTriage(
+                vertical: verticalStr,
+                answers: answers,
+                clientSessionId: clientSessionId,
+              );
+            } catch (_) {
+              await ref.read(triageOutboxRepositoryProvider).enqueueTriageCheckIn(
+                vertical: verticalStr,
+                answers: answers,
+                clientSessionId: clientSessionId,
+              );
+              outcome = dataSource.generateOfflineFallback(verticalStr, answers, null);
+            }
+          } else {
+            await ref.read(triageOutboxRepositoryProvider).enqueueTriageCheckIn(
+              vertical: verticalStr,
+              answers: answers,
+              clientSessionId: clientSessionId,
+            );
+            outcome = dataSource.generateOfflineFallback(verticalStr, answers, null);
+          }
 
           if (context.mounted) {
             context.go(RoutePaths.triageOutcome, extra: outcome);

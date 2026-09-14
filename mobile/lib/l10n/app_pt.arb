@@ -538,5 +538,26 @@
   "antiburlaBiologicalDiscordanceDesc": "Notamos uma divergência entre a anatomia informada e os parâmetros do seu perfil. Deseja revisar antes de prosseguir?",
   "@antiburlaBiologicalDiscordanceDesc": {
     "description": "Description for biological discordance alert"
+  },
+  "offlineBannerText": "Modo Offline — Seus check-ins serão salvos localmente e sincronizados automaticamente.",
+  "@offlineBannerText": {
+    "description": "Notice banner when device is offline"
+  },
+  "offlineSyncPendingCount": "{count, plural, =1{1 registro pendente de sincronização} other{{count} registros pendentes de sincronização}}",
+  "@offlineSyncPendingCount": {
+    "description": "Count of pending outbox sync items",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "offlineSyncSuccessText": "Sincronização concluída com sucesso.",
+  "@offlineSyncSuccessText": {
+    "description": "Toast message when outbox sync completes"
+  },
+  "offlineModeNotice": "Você está offline. Seu histórico e avaliação continuam funcionando normalmente.",
+  "@offlineModeNotice": {
+    "description": "Explanatory text for offline functionality"
   }
 }

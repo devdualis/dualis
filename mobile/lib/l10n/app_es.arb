@@ -128,5 +128,9 @@
   "antiburlaOptionNew": "Es un sentimiento completamente nuevo",
   "antiburlaOptionNewDesc": "Lo mantendremos registrado como un evento agudo que comenzó hoy.",
   "antiburlaBiologicalDiscordanceTitle": "Aviso Anatómico Preventivo",
-  "antiburlaBiologicalDiscordanceDesc": "Notamos una discrepancia entre la región anatómica informada y los parámetros de tu perfil. ¿Deseas revisar antes de continuar?"
+  "antiburlaBiologicalDiscordanceDesc": "Notamos una discrepancia entre la región anatómica informada y los parámetros de tu perfil. ¿Deseas revisar antes de continuar?",
+  "offlineBannerText": "Modo Offline — Tus registros se guardarán localmente y se sincronizarán automáticamente.",
+  "offlineSyncPendingCount": "{count, plural, =1{1 registro pendiente de sincronización} other{{count} registros pendientes de sincronización}}",
+  "offlineSyncSuccessText": "Sincronización completada con éxito.",
+  "offlineModeNotice": "Estás sin conexión. Tu historial y evaluación siguen funcionando normalmente."
 }
