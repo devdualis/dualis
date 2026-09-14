@@ -46,7 +46,16 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
       }),
     };
 
-    authService = new AuthService(mockDb, mockJwtService as unknown as JwtService);
+    const mockEncryptionService = {
+      encrypt: vi.fn().mockReturnValue('encrypted-value'),
+      decrypt: vi.fn().mockImplementation((val) => `decrypted-${val}`),
+    };
+
+    authService = new AuthService(
+      mockDb,
+      mockJwtService as unknown as JwtService,
+      mockEncryptionService as any,
+    );
   });
 
   describe('Scenario 1: Happy Path Registration', () => {

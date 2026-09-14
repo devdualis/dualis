@@ -118,7 +118,7 @@ export class TriageHistoryService {
     });
 
     const logs: TriageLogItemDto[] = rows.map((row) => {
-      let parsedAnswers = null;
+      let parsedAnswers: any = null;
       if (row.stepAnswers) {
         try {
           parsedAnswers = JSON.parse(row.stepAnswers);

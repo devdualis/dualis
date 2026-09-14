@@ -11,17 +11,26 @@ import { eq, sql } from 'drizzle-orm';
 import * as crypto from 'crypto';
 import { DRIZZLE_DB } from '../../database/database.service';
 import * as schema from '../../database/schema';
-import { users, userDisclaimerConsents } from '../../database/schema';
+import {
+  users,
+  userDisclaimerConsents,
+  symptomLogs,
+  triageEmergencyEvents,
+} from '../../database/schema';
+import { EncryptionService } from '../../common/encryption/encryption.service';
 import { hashPassword, verifyPassword } from './utils/password.util';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto, SanitizedUser } from './dto/auth-response.dto';
+import { DeleteAccountDto } from './dto/delete-account.dto';
+import { UserDataExportResponseDto } from './dto/export-data.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     @Inject(DRIZZLE_DB) private readonly db: NodePgDatabase<typeof schema>,
     @Inject(JwtService) private readonly jwtService: JwtService,
+    private readonly encryptionService: EncryptionService,
   ) {}
 
   async register(
@@ -35,7 +44,6 @@ export class AuthService {
 
     const email = dto.email.toLowerCase().trim();
 
-    // Check email uniqueness within transaction with auth service setting
     const existing = await this.db.transaction(async (tx) => {
       await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
       const [record] = await tx
@@ -55,12 +63,10 @@ export class AuthService {
     const ipAddressHash = crypto.createHash('sha256').update(clientIp || '127.0.0.1').digest('hex');
 
     const created = await this.db.transaction(async (tx) => {
-      // 1. Set current user ID to satisfy users & userDisclaimerConsents RLS
       await tx.execute(
         sql`SELECT set_config('app.current_user_id', ${newUserId}, true)`,
       );
 
-      // 2. Insert into users
       const [insertedUser] = await tx
         .insert(users)
         .values({
@@ -73,7 +79,6 @@ export class AuthService {
         })
         .returning();
 
-      // 3. Atomically record consent into user_disclaimer_consents
       await tx.insert(userDisclaimerConsents).values({
         userId: newUserId,
         disclaimerVersion: dto.disclaimerVersion || '2026.1',
@@ -139,6 +144,138 @@ export class AuthService {
     return {
       ...tokens,
       user: sanitizedUser,
+    };
+  }
+
+  async exportUserData(userId: string): Promise<UserDataExportResponseDto> {
+    return this.db.transaction(async (tx) => {
+      await tx.execute(
+        sql`SELECT set_config('app.current_user_id', ${userId}, true)`,
+      );
+
+      const [userRecord] = await tx
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      if (!userRecord) {
+        throw new UnauthorizedException('Usuário não encontrado.');
+      }
+
+      const consentRecords = await tx
+        .select()
+        .from(userDisclaimerConsents)
+        .where(eq(userDisclaimerConsents.userId, userId));
+
+      const symptomRecords = await tx
+        .select()
+        .from(symptomLogs)
+        .where(eq(symptomLogs.userId, userId));
+
+      const emergencyRecords = await tx
+        .select()
+        .from(triageEmergencyEvents)
+        .where(eq(triageEmergencyEvents.userId, userId));
+
+      return {
+        metadata: {
+          exportDate: new Date().toISOString(),
+          formatVersion: '1.0',
+          legalBasis: 'LGPD Art. 18, V (Portabilidade de Dados)',
+          dataController: 'DualisCheckUp Saúde Digital Ltda.',
+        },
+        profile: {
+          id: userRecord.id,
+          name: userRecord.name,
+          email: userRecord.email,
+          gender: userRecord.gender,
+          dateOfBirth: userRecord.dateOfBirth,
+          createdAt: userRecord.createdAt.toISOString(),
+          updatedAt: userRecord.updatedAt.toISOString(),
+        },
+        consents: consentRecords.map((c) => ({
+          id: c.id,
+          disclaimerVersion: c.disclaimerVersion,
+          acceptedAt: c.acceptedAt.toISOString(),
+          ipAddressHash: c.ipAddressHash,
+          userAgent: c.userAgent,
+        })),
+        symptomLogs: symptomRecords.map((s) => {
+          let decryptedNarrative: string | null = null;
+          if (s.encryptedNarrative) {
+            try {
+              decryptedNarrative = this.encryptionService.decrypt(s.encryptedNarrative);
+            } catch {
+              decryptedNarrative = null;
+            }
+          }
+          let parsedAnswers: any = null;
+          if (s.stepAnswers) {
+            try {
+              parsedAnswers = JSON.parse(s.stepAnswers);
+            } catch {
+              parsedAnswers = s.stepAnswers;
+            }
+          }
+          return {
+            id: s.id,
+            intensity: s.intensity,
+            anatomicalSystem: s.anatomicalSystem,
+            emotionalDimension: s.emotionalDimension,
+            disposition: s.disposition,
+            decryptedNarrative,
+            stepAnswers: parsedAnswers,
+            recordedAt: s.recordedAt.toISOString(),
+          };
+        }),
+        emergencyEvents: emergencyRecords.map((e) => ({
+          id: e.id,
+          triggerCategory: e.triggerCategory,
+          severityLevel: e.severityLevel,
+          sourceVertical: e.sourceVertical,
+          actionTaken: e.actionTaken,
+          reportedAt: e.reportedAt.toISOString(),
+        })),
+      };
+    });
+  }
+
+  async deleteUserAccount(
+    userId: string,
+    dto: DeleteAccountDto,
+  ): Promise<{ success: boolean; message: string }> {
+    const user = await this.db.transaction(async (tx) => {
+      await tx.execute(
+        sql`SELECT set_config('app.current_user_id', ${userId}, true)`,
+      );
+      const [record] = await tx
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+      return record;
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Usuário não encontrado.');
+    }
+
+    const isMatch = await verifyPassword(user.passwordHash, dto.password);
+    if (!isMatch) {
+      throw new BadRequestException('Senha incorreta para confirmação de exclusão.');
+    }
+
+    await this.db.transaction(async (tx) => {
+      await tx.execute(
+        sql`SELECT set_config('app.current_user_id', ${userId}, true)`,
+      );
+      await tx.delete(users).where(eq(users.id, userId));
+    });
+
+    return {
+      success: true,
+      message: 'Conta e registros de saúde excluídos permanentemente conforme LGPD Art. 18, VI.',
     };
   }
 
