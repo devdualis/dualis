@@ -420,5 +420,86 @@
   "triageIntensityMax": "Insuportável",
   "@triageIntensityMax": {
     "description": "Intensity scale maximum label"
+  },
+  "outcomeScreenTitle": "Resultado da Triagem",
+  "@outcomeScreenTitle": {
+    "description": "Title of Screen 6 Triage Outcome"
+  },
+  "outcomeScreenSubtitle": "Avaliação preventiva baseada nas suas respostas",
+  "@outcomeScreenSubtitle": {
+    "description": "Subtitle of Screen 6 Triage Outcome"
+  },
+  "outcomeIntensityTitle": "Intensidade Calculada",
+  "@outcomeIntensityTitle": {
+    "description": "Intensity title"
+  },
+  "outcomeIntensityDescription": "Pontuação calculada na escala clínica de 1 a 5",
+  "@outcomeIntensityDescription": {
+    "description": "Intensity score description"
+  },
+  "outcomeDispositionTitle": "Recomendação de Cuidado",
+  "@outcomeDispositionTitle": {
+    "description": "Disposition title"
+  },
+  "outcomeDispositionSelfCare": "Auto-cuidado Monitorado",
+  "@outcomeDispositionSelfCare": {
+    "description": "Self-care disposition"
+  },
+  "outcomeDispositionSelfCareDesc": "Repouso, hidratação adequada e acompanhamento dos sintomas nas próximas 24 horas.",
+  "@outcomeDispositionSelfCareDesc": {
+    "description": "Self-care description"
+  },
+  "outcomeDispositionRoutine": "Consulta de Rotina",
+  "@outcomeDispositionRoutine": {
+    "description": "Routine disposition"
+  },
+  "outcomeDispositionRoutineDesc": "Agende uma consulta preventiva nos próximos dias com um profissional de saúde.",
+  "@outcomeDispositionRoutineDesc": {
+    "description": "Routine description"
+  },
+  "outcomeDispositionUrgent": "Pronto Atendimento",
+  "@outcomeDispositionUrgent": {
+    "description": "Urgent disposition"
+  },
+  "outcomeDispositionUrgentDesc": "Busque avaliação médica presencial em uma unidade de saúde em até 24 horas.",
+  "@outcomeDispositionUrgentDesc": {
+    "description": "Urgent description"
+  },
+  "outcomeDispositionEmergency": "Atendimento de Emergência",
+  "@outcomeDispositionEmergency": {
+    "description": "Emergency disposition"
+  },
+  "outcomeDispositionEmergencyDesc": "Seus sintomas exigem atenção imediata. Procure um serviço de emergência ou ligue 192.",
+  "@outcomeDispositionEmergencyDesc": {
+    "description": "Emergency description"
+  },
+  "outcomeOrganicPrimacyTitle": "Atenção: Primazia Orgânica",
+  "@outcomeOrganicPrimacyTitle": {
+    "description": "Organic primacy title"
+  },
+  "outcomeOrganicPrimacyDesc": "Sintomas físicos concomitantes ao desconforto emocional requerem avaliação médica física prioritária antes de serem atribuídos unicamente ao estresse psicológico.",
+  "@outcomeOrganicPrimacyDesc": {
+    "description": "Organic primacy description"
+  },
+  "outcomeArticlesTitle": "Artigos Médicos Recomendados",
+  "@outcomeArticlesTitle": {
+    "description": "Articles section title"
+  },
+  "outcomeArticlesSubtitle": "Conteúdos preventivos elaborados por especialistas renomados",
+  "@outcomeArticlesSubtitle": {
+    "description": "Articles section subtitle"
+  },
+  "outcomeReadTime": "{minutes} min de leitura",
+  "@outcomeReadTime": {
+    "description": "Article read time in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "outcomeDoneButton": "Concluir e Voltar ao Início",
+  "@outcomeDoneButton": {
+    "description": "Button to finish triage and return home"
   }
 }

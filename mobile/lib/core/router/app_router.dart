@@ -9,6 +9,8 @@ import '../../features/emergency/domain/emergency_trigger_category.dart';
 import '../../features/emergency/presentation/screens/emergency_screen.dart';
 import '../../features/triage/domain/triage_vertical.dart';
 import '../../features/triage/presentation/screens/triage_wizard_screen.dart';
+import '../../features/triage_outcome/domain/triage_outcome_models.dart';
+import '../../features/triage_outcome/presentation/screens/triage_outcome_screen.dart';
 import 'route_paths.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -60,6 +62,26 @@ GoRouter createRouter({String initialLocation = RoutePaths.onboarding}) {
           final vertical =
               state.extra as TriageVertical? ?? TriageVertical.psicoEmocional;
           return TriageWizardScreen(vertical: vertical);
+        },
+      ),
+      GoRoute(
+        path: RoutePaths.triageOutcome,
+        name: 'triageOutcome',
+        builder: (context, state) {
+          final outcome = state.extra as TriageOutcome? ??
+              TriageOutcome(
+                id: 'default-outcome',
+                vertical: 'physical',
+                intensityScore: 2,
+                careDisposition: CareDisposition.selfCare,
+                primaryCategory: 'geral',
+                categoryLabel: 'Avaliação Física Geral',
+                somaticMapping: 'Sintomas autolimitados',
+                organicPrimacyApplied: false,
+                recommendedArticles: const [],
+                recordedAt: DateTime.now(),
+              );
+          return TriageOutcomeScreen(outcome: outcome);
         },
       ),
     ],

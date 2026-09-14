@@ -343,4 +343,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get triageIntensityMax => 'Unbearable';
+
+  @override
+  String get outcomeScreenTitle => 'Triage Result';
+
+  @override
+  String get outcomeScreenSubtitle =>
+      'Preventive assessment based on your responses';
+
+  @override
+  String get outcomeIntensityTitle => 'Calculated Intensity';
+
+  @override
+  String get outcomeIntensityDescription =>
+      'Score calculated on the clinical scale from 1 to 5';
+
+  @override
+  String get outcomeDispositionTitle => 'Care Recommendation';
+
+  @override
+  String get outcomeDispositionSelfCare => 'Monitored Self-Care';
+
+  @override
+  String get outcomeDispositionSelfCareDesc =>
+      'Rest, adequate hydration, and symptom observation over the next 24 hours.';
+
+  @override
+  String get outcomeDispositionRoutine => 'Routine Consultation';
+
+  @override
+  String get outcomeDispositionRoutineDesc =>
+      'Schedule a preventive appointment with a healthcare professional over the coming days.';
+
+  @override
+  String get outcomeDispositionUrgent => 'Urgent Care';
+
+  @override
+  String get outcomeDispositionUrgentDesc =>
+      'Seek in-person medical evaluation at a clinical care facility within 24 hours.';
+
+  @override
+  String get outcomeDispositionEmergency => 'Emergency Care';
+
+  @override
+  String get outcomeDispositionEmergencyDesc =>
+      'Your symptoms require immediate medical attention. Visit the nearest emergency room or dial emergency services.';
+
+  @override
+  String get outcomeOrganicPrimacyTitle => 'Clinical Notice: Organic Primacy';
+
+  @override
+  String get outcomeOrganicPrimacyDesc =>
+      'Physical symptoms accompanying emotional distress require prior medical evaluation before being attributed solely to psychological stress.';
+
+  @override
+  String get outcomeArticlesTitle => 'Recommended Medical Articles';
+
+  @override
+  String get outcomeArticlesSubtitle =>
+      'Evidence-based preventive guides written by renowned medical specialists';
+
+  @override
+  String outcomeReadTime(int minutes) {
+    return '$minutes min read';
+  }
+
+  @override
+  String get outcomeDoneButton => 'Finish and Return Home';
 }

@@ -344,4 +344,71 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get triageIntensityMax => 'Insoportable';
+
+  @override
+  String get outcomeScreenTitle => 'Resultado del Triaje';
+
+  @override
+  String get outcomeScreenSubtitle =>
+      'Evaluación preventiva basada en sus respuestas';
+
+  @override
+  String get outcomeIntensityTitle => 'Intensidad Calculada';
+
+  @override
+  String get outcomeIntensityDescription =>
+      'Puntuación calculada en la escala clínica del 1 al 5';
+
+  @override
+  String get outcomeDispositionTitle => 'Recomendación de Cuidado';
+
+  @override
+  String get outcomeDispositionSelfCare => 'Autocuidado Monitoreado';
+
+  @override
+  String get outcomeDispositionSelfCareDesc =>
+      'Reposo, hidratación adecuada y seguimiento de los síntomas en las próximas 24 horas.';
+
+  @override
+  String get outcomeDispositionRoutine => 'Consulta de Rutina';
+
+  @override
+  String get outcomeDispositionRoutineDesc =>
+      'Programe una consulta preventiva en los próximos días con un profesional de la salud.';
+
+  @override
+  String get outcomeDispositionUrgent => 'Atención de Urgencia';
+
+  @override
+  String get outcomeDispositionUrgentDesc =>
+      'Busque evaluación médica presencial en un centro de salud dentro de 24 horas.';
+
+  @override
+  String get outcomeDispositionEmergency => 'Atención de Emergencia';
+
+  @override
+  String get outcomeDispositionEmergencyDesc =>
+      'Sus síntomas requieren atención médica inmediata. Acuda al centro de urgencias más cercano.';
+
+  @override
+  String get outcomeOrganicPrimacyTitle => 'Atención: Primacía Orgánica';
+
+  @override
+  String get outcomeOrganicPrimacyDesc =>
+      'Los síntomas físicos concomitantes al malestar emocional requieren evaluación médica física prioritaria antes de atribuirse únicamente al estrés psicológico.';
+
+  @override
+  String get outcomeArticlesTitle => 'Artículos Médicos Recomendados';
+
+  @override
+  String get outcomeArticlesSubtitle =>
+      'Contenidos preventivos elaborados por especialistas reconocidos';
+
+  @override
+  String outcomeReadTime(int minutes) {
+    return '$minutes min de lectura';
+  }
+
+  @override
+  String get outcomeDoneButton => 'Concluir y Volver al Inicio';
 }

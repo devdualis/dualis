@@ -711,6 +711,120 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Insuportável'**
   String get triageIntensityMax;
+
+  /// Title of Screen 6 Triage Outcome
+  ///
+  /// In pt, this message translates to:
+  /// **'Resultado da Triagem'**
+  String get outcomeScreenTitle;
+
+  /// Subtitle of Screen 6 Triage Outcome
+  ///
+  /// In pt, this message translates to:
+  /// **'Avaliação preventiva baseada nas suas respostas'**
+  String get outcomeScreenSubtitle;
+
+  /// Intensity title
+  ///
+  /// In pt, this message translates to:
+  /// **'Intensidade Calculada'**
+  String get outcomeIntensityTitle;
+
+  /// Intensity score description
+  ///
+  /// In pt, this message translates to:
+  /// **'Pontuação calculada na escala clínica de 1 a 5'**
+  String get outcomeIntensityDescription;
+
+  /// Disposition title
+  ///
+  /// In pt, this message translates to:
+  /// **'Recomendação de Cuidado'**
+  String get outcomeDispositionTitle;
+
+  /// Self-care disposition
+  ///
+  /// In pt, this message translates to:
+  /// **'Auto-cuidado Monitorado'**
+  String get outcomeDispositionSelfCare;
+
+  /// Self-care description
+  ///
+  /// In pt, this message translates to:
+  /// **'Repouso, hidratação adequada e acompanhamento dos sintomas nas próximas 24 horas.'**
+  String get outcomeDispositionSelfCareDesc;
+
+  /// Routine disposition
+  ///
+  /// In pt, this message translates to:
+  /// **'Consulta de Rotina'**
+  String get outcomeDispositionRoutine;
+
+  /// Routine description
+  ///
+  /// In pt, this message translates to:
+  /// **'Agende uma consulta preventiva nos próximos dias com um profissional de saúde.'**
+  String get outcomeDispositionRoutineDesc;
+
+  /// Urgent disposition
+  ///
+  /// In pt, this message translates to:
+  /// **'Pronto Atendimento'**
+  String get outcomeDispositionUrgent;
+
+  /// Urgent description
+  ///
+  /// In pt, this message translates to:
+  /// **'Busque avaliação médica presencial em uma unidade de saúde em até 24 horas.'**
+  String get outcomeDispositionUrgentDesc;
+
+  /// Emergency disposition
+  ///
+  /// In pt, this message translates to:
+  /// **'Atendimento de Emergência'**
+  String get outcomeDispositionEmergency;
+
+  /// Emergency description
+  ///
+  /// In pt, this message translates to:
+  /// **'Seus sintomas exigem atenção imediata. Procure um serviço de emergência ou ligue 192.'**
+  String get outcomeDispositionEmergencyDesc;
+
+  /// Organic primacy title
+  ///
+  /// In pt, this message translates to:
+  /// **'Atenção: Primazia Orgânica'**
+  String get outcomeOrganicPrimacyTitle;
+
+  /// Organic primacy description
+  ///
+  /// In pt, this message translates to:
+  /// **'Sintomas físicos concomitantes ao desconforto emocional requerem avaliação médica física prioritária antes de serem atribuídos unicamente ao estresse psicológico.'**
+  String get outcomeOrganicPrimacyDesc;
+
+  /// Articles section title
+  ///
+  /// In pt, this message translates to:
+  /// **'Artigos Médicos Recomendados'**
+  String get outcomeArticlesTitle;
+
+  /// Articles section subtitle
+  ///
+  /// In pt, this message translates to:
+  /// **'Conteúdos preventivos elaborados por especialistas renomados'**
+  String get outcomeArticlesSubtitle;
+
+  /// Article read time in minutes
+  ///
+  /// In pt, this message translates to:
+  /// **'{minutes} min de leitura'**
+  String outcomeReadTime(int minutes);
+
+  /// Button to finish triage and return home
+  ///
+  /// In pt, this message translates to:
+  /// **'Concluir e Voltar ao Início'**
+  String get outcomeDoneButton;
 }
 
 class _AppLocalizationsDelegate

@@ -5,4 +5,5 @@ class RoutePaths {
   static const String home = '/home';
   static const String emergency = '/emergency';
   static const String triage = '/triage';
+  static const String triageOutcome = '/triage-outcome';
 }

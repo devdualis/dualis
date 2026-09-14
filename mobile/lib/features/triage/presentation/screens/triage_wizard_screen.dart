@@ -15,6 +15,7 @@ import '../widgets/triage_intensity_selector.dart';
 import '../widgets/triage_option_chip.dart';
 import '../widgets/triage_preview_card.dart';
 import '../widgets/triage_step_banner.dart';
+import 'package:dualis_mobile/features/triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 
 /// Screen 4: Dynamic 5-Step Triage Wizard (RF-002 / SRS ID 02 & 03).
 /// Features 300ms chromatic palette tweening between Soft Indigo (#3F51B5)
@@ -253,19 +254,22 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        onPressed: () {
+        onPressed: () async {
+          final answers = Map<int, String>.from(state.answers);
+          final verticalStr =
+              state.activeVertical == TriageVertical.fisica ? 'physical' : 'emotional';
+
           ref.read(triageWizardNotifierProvider.notifier).advance();
-          // Conclude wizard session
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Autoavaliação concluída com sucesso.',
-                style: GoogleFonts.plusJakartaSans(),
-              ),
-              backgroundColor: activeColor,
-            ),
+
+          final dataSource = ref.read(triageOutcomeDataSourceProvider);
+          final outcome = await dataSource.submitTriage(
+            vertical: verticalStr,
+            answers: answers,
           );
-          context.go(RoutePaths.home);
+
+          if (context.mounted) {
+            context.go(RoutePaths.triageOutcome, extra: outcome);
+          }
         },
         child: Text(
           l10n.triagePreviewSubmit,

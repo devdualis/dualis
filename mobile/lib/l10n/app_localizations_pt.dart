@@ -345,4 +345,71 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get triageIntensityMax => 'Insuportável';
+
+  @override
+  String get outcomeScreenTitle => 'Resultado da Triagem';
+
+  @override
+  String get outcomeScreenSubtitle =>
+      'Avaliação preventiva baseada nas suas respostas';
+
+  @override
+  String get outcomeIntensityTitle => 'Intensidade Calculada';
+
+  @override
+  String get outcomeIntensityDescription =>
+      'Pontuação calculada na escala clínica de 1 a 5';
+
+  @override
+  String get outcomeDispositionTitle => 'Recomendação de Cuidado';
+
+  @override
+  String get outcomeDispositionSelfCare => 'Auto-cuidado Monitorado';
+
+  @override
+  String get outcomeDispositionSelfCareDesc =>
+      'Repouso, hidratação adequada e acompanhamento dos sintomas nas próximas 24 horas.';
+
+  @override
+  String get outcomeDispositionRoutine => 'Consulta de Rotina';
+
+  @override
+  String get outcomeDispositionRoutineDesc =>
+      'Agende uma consulta preventiva nos próximos dias com um profissional de saúde.';
+
+  @override
+  String get outcomeDispositionUrgent => 'Pronto Atendimento';
+
+  @override
+  String get outcomeDispositionUrgentDesc =>
+      'Busque avaliação médica presencial em uma unidade de saúde em até 24 horas.';
+
+  @override
+  String get outcomeDispositionEmergency => 'Atendimento de Emergência';
+
+  @override
+  String get outcomeDispositionEmergencyDesc =>
+      'Seus sintomas exigem atenção imediata. Procure um serviço de emergência ou ligue 192.';
+
+  @override
+  String get outcomeOrganicPrimacyTitle => 'Atenção: Primazia Orgânica';
+
+  @override
+  String get outcomeOrganicPrimacyDesc =>
+      'Sintomas físicos concomitantes ao desconforto emocional requerem avaliação médica física prioritária antes de serem atribuídos unicamente ao estresse psicológico.';
+
+  @override
+  String get outcomeArticlesTitle => 'Artigos Médicos Recomendados';
+
+  @override
+  String get outcomeArticlesSubtitle =>
+      'Conteúdos preventivos elaborados por especialistas renomados';
+
+  @override
+  String outcomeReadTime(int minutes) {
+    return '$minutes min de leitura';
+  }
+
+  @override
+  String get outcomeDoneButton => 'Concluir e Voltar ao Início';
 }
