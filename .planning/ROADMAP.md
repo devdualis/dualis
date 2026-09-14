@@ -240,8 +240,8 @@ Plans:
 
 Plans:
 
-- [ ] 09-01: Screen 7 Módulo Físico dashboard with interactive 2D Anatomical Body Map (`CustomPainter`), chromatic heat gradient, and physical Lista Retrospectiva
-- [ ] 09-02: Screen 7 Módulo Psico-Emocional dashboard with 7-day multi-line trend graph (`fl_chart`), Cards de Recorrência Crítica, emotional Lista Retrospectiva, and segmented tab bar
+- [x] 09-01: Screen 7 Módulo Físico dashboard with interactive 2D Anatomical Body Map (`CustomPainter`), chromatic heat gradient, and physical Lista Retrospectiva
+- [x] 09-02: Screen 7 Módulo Psico-Emocional dashboard with 7-day multi-line trend graph (`fl_chart`), Cards de Recorrência Crítica, emotional Lista Retrospectiva, and segmented tab bar
 
 ---
 
@@ -281,7 +281,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 4. Dynamic 5-Step Triage Wizard (Screen 4 / RF-002) | 2/2 | Complete | 2026-09-14 |
 | 5. Home & Unified Trigger Check-in (Screen 3 / RF-001) & AdMob Container | 2/2 | Complete | 2026-09-14 |
 | 6. Triage Outcome, Somatic Mapping & Article Recommendations (Screen 6 / RF-004 & RF-005) | 2/2 | Complete | 2026-09-14 |
-| 7. Antiburla Historical Verification Sheet (Screen 5 / RF-003 & UC-01) | 0/2 | Not started | - |
-| 8. Offline Caching & Outbox Synchronization | 0/2 | Not started | - |
-| 9. Historical Dashboard & 2D Body Heat Map (Screen 7 / RF-008 & Section 5.1) | 0/2 | Not started | - |
+| 7. Antiburla Historical Verification Sheet (Screen 5 / RF-003 & UC-01) | 2/2 | Complete | 2026-09-14 |
+| 8. Offline Caching & Outbox Synchronization | 2/2 | Complete | 2026-09-14 |
+| 9. Historical Dashboard & 2D Body Heat Map (Screen 7 / RF-008 & Section 5.1) | 2/2 | Complete | 2026-09-14 |
 | 10. LGPD Data Sovereignty, Account Deletion & Production Verification | 0/2 | Not started | - |

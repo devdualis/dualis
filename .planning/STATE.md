@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: "09"
-current_phase_name: historical-dashboard-2d-body-map
+current_phase: "10"
+current_phase_name: lgpd-data-sovereignty-account-deletion
 status: ready_to_plan
-stopped_at: Phase 8 executed and verified (Plans 08-01 and 08-02 complete)
-last_updated: "2026-09-14T12:42:00.000Z"
+stopped_at: Phase 9 executed and verified (Plans 09-01 and 09-02 complete)
+last_updated: "2026-09-14T13:01:00.000Z"
 last_activity: 2026-09-14
-last_activity_desc: Executed and verified Phase 8 (Plans 08-01 and 08-02)
+last_activity_desc: Executed and verified Phase 9 (Plans 09-01 and 09-02)
 progress:
   total_phases: 10
-  completed_phases: 8
-  total_plans: 18
-  completed_plans: 16
+  completed_phases: 9
+  total_plans: 20
+  completed_plans: 18
 ---
 
 # Project State
@@ -23,24 +23,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-09-14)
 
 **Core value:** Unified, safe, and clinically consistent daily health triage bridging somatic/physical symptoms and psycho-emotional states with immediate emergency escalation and 14-day anti-tampering historical verification.
-**Current focus:** Phase 09 — historical-dashboard-2d-body-map
+**Current focus:** Phase 10 — lgpd-data-sovereignty-account-deletion
 
 ## Current Position
 
-Phase: 09 (historical-dashboard-2d-body-map) — READY TO PLAN
+Phase: 10 (lgpd-data-sovereignty-account-deletion) — READY TO PLAN
 Plan: 0 of 2
-Status: Phase 08 completed and verified; Phase 09 ready to plan
-Last activity: 2026-09-14 — Executed and verified Phase 08 (Plans 08-01 and 08-02)
+Status: Phase 09 completed and verified; Phase 10 ready to plan
+Last activity: 2026-09-14 — Executed and verified Phase 09 (Plans 09-01 and 09-02)
 
-Progress: [████████░░] 80%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 16
+- Total plans completed: 18
 - Average duration: 15 min
-- Total execution time: 4.0 hours
+- Total execution time: 4.5 hours
 
 **By Phase:**
 
@@ -54,7 +54,7 @@ Progress: [████████░░] 80%
 | 6. Triage Outcome, Somatic Mapping & Article Recommendations (Screen 6 / RF-004 & RF-005) | 2/2 | 30m | 15m |
 | 7. Antiburla Historical Verification Sheet (Screen 5 / RF-003 & UC-01) | 2/2 | 25m | 12m |
 | 8. Offline Caching & Outbox Synchronization | 2/2 | 30m | 15m |
-| 9. Historical Dashboard & 2D Body Heat Map (Screen 7 / RF-008 & Section 5.1) | 0/2 | - | - |
+| 9. Historical Dashboard & 2D Body Heat Map (Screen 7 / RF-008 & Section 5.1) | 2/2 | 30m | 15m |
 | 10. LGPD Data Sovereignty, Account Deletion & Production Verification | 0/2 | - | - |
 
 **Recent Trend:**
