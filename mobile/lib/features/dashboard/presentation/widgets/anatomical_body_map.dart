@@ -168,14 +168,19 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
 
   Widget _buildLegendBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.grey.shade50,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.grey.shade200),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      child: Wrap(
+        alignment: WrapAlignment.spaceAround,
+        runAlignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 8,
+        runSpacing: 6,
         children: [
           _buildLegendItem('Sem dor', const Color(0xFFCFD8DC)),
           _buildLegendItem('Leve (1-2)', const Color(0xFFFFD54F)),
@@ -191,8 +196,8 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 12,
-          height: 12,
+          width: 10,
+          height: 10,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
@@ -202,7 +207,7 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
         const SizedBox(width: 4),
         Text(
           label,
-          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+          style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w500),
         ),
       ],
     );

@@ -147,5 +147,21 @@
   "retrospectiveFeedTitle": "Registros Anteriores",
   "emptyHistoryTitle": "Sin registros aún",
   "emptyHistorySubtitle": "Tus chequeos diarios completados aparecerán aquí.",
-  "readRecommendedArticle": "Leer Artículo Recomendado"
+  "readRecommendedArticle": "Leer Artículo Recomendado",
+  "privacyCenterTitle": "Privacidad y Datos (LGPD)",
+  "exportDataTitle": "Exportación de Datos",
+  "exportDataDesc": "Descarga una copia completa de tus datos personales e historial clínico en formato JSON según el Art. 18, V de la LGPD.",
+  "exportDataButton": "Exportar Datos (JSON)",
+  "exportSuccessMessage": "Datos exportados con éxito.",
+  "deleteAccountTitle": "Eliminación Permanente de Cuenta",
+  "deleteAccountDesc": "Elimina definitivamente tu cuenta y todos los registros de salud según el Art. 18 de la LGPD. Esta acción no se puede deshacer.",
+  "deleteAccountButton": "Eliminar Mi Cuenta",
+  "deleteConfirmTitle": "Confirmar Eliminación Definitiva",
+  "deleteConfirmDesc": "Para confirmar la eliminación irreversible de tu cuenta y todos los datos de salud, ingresa tu contraseña:",
+  "deleteSuccessMessage": "Cuenta y datos eliminados con éxito.",
+  "confirmPermanentDeletion": "Confirmar Eliminación Irreversible",
+  "enterPassword": "Contraseña de confirmación",
+  "previewDataTitle": "Vista Previa de Datos Exportados",
+  "cancel": "Cancelar",
+  "close": "Cerrar"
 }

@@ -987,6 +987,102 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ler Artigo Recomendado'**
   String get readRecommendedArticle;
+
+  /// Title for Privacy Center screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Privacidade & Dados (LGPD)'**
+  String get privacyCenterTitle;
+
+  /// Title for data export section
+  ///
+  /// In pt, this message translates to:
+  /// **'Exportação de Dados'**
+  String get exportDataTitle;
+
+  /// Description for data export section
+  ///
+  /// In pt, this message translates to:
+  /// **'Baixe uma cópia completa dos seus dados pessoais e histórico clínico em formato JSON conforme o Art. 18, V da LGPD.'**
+  String get exportDataDesc;
+
+  /// Button to export user data
+  ///
+  /// In pt, this message translates to:
+  /// **'Exportar Dados (JSON)'**
+  String get exportDataButton;
+
+  /// Success message after exporting data
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados exportados com sucesso.'**
+  String get exportSuccessMessage;
+
+  /// Title for account deletion section
+  ///
+  /// In pt, this message translates to:
+  /// **'Exclusão Permanente da Conta'**
+  String get deleteAccountTitle;
+
+  /// Description for account deletion section
+  ///
+  /// In pt, this message translates to:
+  /// **'Apague definitivamente sua conta e todos os registros de saúde conforme o Art. 18 da LGPD. Esta ação não pode ser desfeita.'**
+  String get deleteAccountDesc;
+
+  /// Button to trigger account deletion dialog
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir Minha Conta'**
+  String get deleteAccountButton;
+
+  /// Title for delete confirmation dialog
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar Exclusão Definitiva'**
+  String get deleteConfirmTitle;
+
+  /// Description for delete confirmation dialog
+  ///
+  /// In pt, this message translates to:
+  /// **'Para confirmar a exclusão irreversível da sua conta e de todos os dados de saúde, digite sua senha:'**
+  String get deleteConfirmDesc;
+
+  /// Success message after account deletion
+  ///
+  /// In pt, this message translates to:
+  /// **'Conta e dados excluídos com sucesso.'**
+  String get deleteSuccessMessage;
+
+  /// Button to confirm permanent deletion
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar Exclusão Irreversível'**
+  String get confirmPermanentDeletion;
+
+  /// Placeholder for password confirmation input
+  ///
+  /// In pt, this message translates to:
+  /// **'Senha de confirmação'**
+  String get enterPassword;
+
+  /// Title for exported JSON preview dialog
+  ///
+  /// In pt, this message translates to:
+  /// **'Prévia dos Dados Exportados'**
+  String get previewDataTitle;
+
+  /// Generic cancel button text
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar'**
+  String get cancel;
+
+  /// Generic close button text
+  ///
+  /// In pt, this message translates to:
+  /// **'Fechar'**
+  String get close;
 }
 
 class _AppLocalizationsDelegate

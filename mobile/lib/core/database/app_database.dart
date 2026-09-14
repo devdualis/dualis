@@ -33,6 +33,11 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 1;
 
+  Future<void> wipeAllLocalData() async {
+    await delete(triageOutbox).go();
+    await delete(localSymptomDrafts).go();
+  }
+
   static QueryExecutor _openConnection() {
     return driftDatabase(name: 'dualis_local_db');
   }

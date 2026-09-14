@@ -510,4 +510,55 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get readRecommendedArticle => 'Ler Artigo Recomendado';
+
+  @override
+  String get privacyCenterTitle => 'Privacidade & Dados (LGPD)';
+
+  @override
+  String get exportDataTitle => 'Exportação de Dados';
+
+  @override
+  String get exportDataDesc =>
+      'Baixe uma cópia completa dos seus dados pessoais e histórico clínico em formato JSON conforme o Art. 18, V da LGPD.';
+
+  @override
+  String get exportDataButton => 'Exportar Dados (JSON)';
+
+  @override
+  String get exportSuccessMessage => 'Dados exportados com sucesso.';
+
+  @override
+  String get deleteAccountTitle => 'Exclusão Permanente da Conta';
+
+  @override
+  String get deleteAccountDesc =>
+      'Apague definitivamente sua conta e todos os registros de saúde conforme o Art. 18 da LGPD. Esta ação não pode ser desfeita.';
+
+  @override
+  String get deleteAccountButton => 'Excluir Minha Conta';
+
+  @override
+  String get deleteConfirmTitle => 'Confirmar Exclusão Definitiva';
+
+  @override
+  String get deleteConfirmDesc =>
+      'Para confirmar a exclusão irreversível da sua conta e de todos os dados de saúde, digite sua senha:';
+
+  @override
+  String get deleteSuccessMessage => 'Conta e dados excluídos com sucesso.';
+
+  @override
+  String get confirmPermanentDeletion => 'Confirmar Exclusão Irreversível';
+
+  @override
+  String get enterPassword => 'Senha de confirmação';
+
+  @override
+  String get previewDataTitle => 'Prévia dos Dados Exportados';
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get close => 'Fechar';
 }

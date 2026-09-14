@@ -147,5 +147,21 @@
   "retrospectiveFeedTitle": "Past Records",
   "emptyHistoryTitle": "No records yet",
   "emptyHistorySubtitle": "Your completed daily check-ins will appear here.",
-  "readRecommendedArticle": "Read Recommended Article"
+  "readRecommendedArticle": "Read Recommended Article",
+  "privacyCenterTitle": "Privacy & Data (LGPD)",
+  "exportDataTitle": "Data Export",
+  "exportDataDesc": "Download a complete copy of your personal data and clinical history in JSON format under LGPD Art. 18, V.",
+  "exportDataButton": "Export Data (JSON)",
+  "exportSuccessMessage": "Data exported successfully.",
+  "deleteAccountTitle": "Permanent Account Deletion",
+  "deleteAccountDesc": "Permanently delete your account and all health records under LGPD Art. 18. This action cannot be undone.",
+  "deleteAccountButton": "Delete My Account",
+  "deleteConfirmTitle": "Confirm Permanent Deletion",
+  "deleteConfirmDesc": "To confirm the irreversible deletion of your account and all health data, enter your password:",
+  "deleteSuccessMessage": "Account and data deleted successfully.",
+  "confirmPermanentDeletion": "Confirm Permanent Deletion",
+  "enterPassword": "Confirmation password",
+  "previewDataTitle": "Exported Data Preview",
+  "cancel": "Cancel",
+  "close": "Close"
 }

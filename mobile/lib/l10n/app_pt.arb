@@ -619,5 +619,69 @@
   "readRecommendedArticle": "Ler Artigo Recomendado",
   "@readRecommendedArticle": {
     "description": "Button to read recommended article on recurrence card"
+  },
+  "privacyCenterTitle": "Privacidade & Dados (LGPD)",
+  "@privacyCenterTitle": {
+    "description": "Title for Privacy Center screen"
+  },
+  "exportDataTitle": "Exportação de Dados",
+  "@exportDataTitle": {
+    "description": "Title for data export section"
+  },
+  "exportDataDesc": "Baixe uma cópia completa dos seus dados pessoais e histórico clínico em formato JSON conforme o Art. 18, V da LGPD.",
+  "@exportDataDesc": {
+    "description": "Description for data export section"
+  },
+  "exportDataButton": "Exportar Dados (JSON)",
+  "@exportDataButton": {
+    "description": "Button to export user data"
+  },
+  "exportSuccessMessage": "Dados exportados com sucesso.",
+  "@exportSuccessMessage": {
+    "description": "Success message after exporting data"
+  },
+  "deleteAccountTitle": "Exclusão Permanente da Conta",
+  "@deleteAccountTitle": {
+    "description": "Title for account deletion section"
+  },
+  "deleteAccountDesc": "Apague definitivamente sua conta e todos os registros de saúde conforme o Art. 18 da LGPD. Esta ação não pode ser desfeita.",
+  "@deleteAccountDesc": {
+    "description": "Description for account deletion section"
+  },
+  "deleteAccountButton": "Excluir Minha Conta",
+  "@deleteAccountButton": {
+    "description": "Button to trigger account deletion dialog"
+  },
+  "deleteConfirmTitle": "Confirmar Exclusão Definitiva",
+  "@deleteConfirmTitle": {
+    "description": "Title for delete confirmation dialog"
+  },
+  "deleteConfirmDesc": "Para confirmar a exclusão irreversível da sua conta e de todos os dados de saúde, digite sua senha:",
+  "@deleteConfirmDesc": {
+    "description": "Description for delete confirmation dialog"
+  },
+  "deleteSuccessMessage": "Conta e dados excluídos com sucesso.",
+  "@deleteSuccessMessage": {
+    "description": "Success message after account deletion"
+  },
+  "confirmPermanentDeletion": "Confirmar Exclusão Irreversível",
+  "@confirmPermanentDeletion": {
+    "description": "Button to confirm permanent deletion"
+  },
+  "enterPassword": "Senha de confirmação",
+  "@enterPassword": {
+    "description": "Placeholder for password confirmation input"
+  },
+  "previewDataTitle": "Prévia dos Dados Exportados",
+  "@previewDataTitle": {
+    "description": "Title for exported JSON preview dialog"
+  },
+  "cancel": "Cancelar",
+  "@cancel": {
+    "description": "Generic cancel button text"
+  },
+  "close": "Fechar",
+  "@close": {
+    "description": "Generic close button text"
   }
 }

@@ -263,8 +263,8 @@ Plans:
 
 Plans:
 
-- [ ] 10-01: LGPD self-service data export generation and cascading permanent deletion services
-- [ ] 10-02: User-facing privacy center UI, confirmation safeguards, and end-to-end production latency/security verification suite
+- [x] 10-01: LGPD self-service data export generation and cascading permanent deletion services
+- [x] 10-02: User-facing privacy center UI, confirmation safeguards, and end-to-end production latency/security verification suite
 
 ---
 
@@ -284,4 +284,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. Antiburla Historical Verification Sheet (Screen 5 / RF-003 & UC-01) | 2/2 | Complete | 2026-09-14 |
 | 8. Offline Caching & Outbox Synchronization | 2/2 | Complete | 2026-09-14 |
 | 9. Historical Dashboard & 2D Body Heat Map (Screen 7 / RF-008 & Section 5.1) | 2/2 | Complete | 2026-09-14 |
-| 10. LGPD Data Sovereignty, Account Deletion & Production Verification | 0/2 | Not started | - |
+| 10. LGPD Data Sovereignty, Account Deletion & Production Verification | 2/2 | Complete | 2026-09-14 |
