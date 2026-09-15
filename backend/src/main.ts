@@ -13,7 +13,7 @@ async function bootstrap() {
   const fastifyAdapter = new FastifyAdapter({
     logger: false, // Pino handles structured logging via nestjs-pino
     trustProxy: true, // Necessary for reverse proxies / GCP Cloud Run
-    bodyLimit: 1048576, // 1MB payload limit
+    bodyLimit: 5242880, // 5MB payload limit for profile pictures
   });
 
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -40,7 +40,7 @@ async function bootstrap() {
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:'],
+        imgSrc: ["'self'", 'data:', 'https:'],
         scriptSrc: ["'self'"],
       },
     },

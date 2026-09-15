@@ -107,7 +107,7 @@ class TriageOutcomeRemoteDataSource {
           authorRole: 'Ortopedista e Traumatologista (HCFMUSP / CRM-SP 128.450)',
           readTimeMinutes: 5,
           summary: 'Posturas preventivas, pausas ativas a cada 50 minutos e exercícios de descompressão da coluna lombar.',
-          url: 'https://dualis.health/artigos/ergonomia-postura-coluna',
+          url: 'https://bvsms.saude.gov.br/lombalgia-dor-nas-costas/',
         ),
       ];
     } else if (matchTarget.contains('cabeca') || matchTarget.contains('enxaqueca') || matchTarget.contains('cefaleia')) {
@@ -122,7 +122,7 @@ class TriageOutcomeRemoteDataSource {
           authorRole: 'Neurologista Clínico (UNIFESP / CRM-SP 156.702)',
           readTimeMinutes: 4,
           summary: 'Diferenciação prática entre dores de cabeça causadas por tensão muscular e crises de enxaqueca pulsátil.',
-          url: 'https://dualis.health/artigos/cefaleia-e-enxaqueca',
+          url: 'https://sbcefaleia.com.br/noticias.php?id=350',
         ),
       ];
     } else if (matchTarget.contains('peito') || matchTarget.contains('coracao') || matchTarget.contains('palpitac')) {
@@ -137,7 +137,7 @@ class TriageOutcomeRemoteDataSource {
           authorRole: 'Cardiologista (InCor / CRM-SP 142.890)',
           readTimeMinutes: 4,
           summary: 'Guia clínico sobre diferenciação de palpitações benignas por estresse e arritmias que requerem eletrocardiograma imediato.',
-          url: 'https://dualis.health/artigos/palpitacoes-e-cuidados-cardiacos',
+          url: 'https://www.portal.cardiol.br/post/arritmias-cardiacas-sintomas-e-cuidados',
         ),
       ];
     } else if (matchTarget.contains('estomago') || matchTarget.contains('abdomen') || matchTarget.contains('digest')) {
@@ -152,7 +152,7 @@ class TriageOutcomeRemoteDataSource {
           authorRole: 'Gastroenterologista (FBG / CRM-SP 139.112)',
           readTimeMinutes: 5,
           summary: 'Mecanismos neuroquímicos da dispepsia funcional, gastrite nervosa e estratégias de modulação alimentar.',
-          url: 'https://dualis.health/artigos/eixo-intestino-cerebro',
+          url: 'https://bvsms.saude.gov.br/doenca-do-refluxo-gastroesofagico/',
         ),
       ];
     } else if (matchTarget.contains('ansiedade') || matchTarget.contains('agitacao') || matchTarget.contains('nervos')) {
@@ -167,7 +167,7 @@ class TriageOutcomeRemoteDataSource {
           authorRole: 'Psiquiatra Clínica (ABP / CRM-SP 165.340)',
           readTimeMinutes: 4,
           summary: 'Exercício guiado 4-7-8 para desaceleração do sistema simpático e restabelecimento do equilíbrio vagal em minutos.',
-          url: 'https://dualis.health/artigos/respiracao-diafragmatica-ansiedade',
+          url: 'https://bvsms.saude.gov.br/ansiedade/',
         ),
       ];
     } else if (matchTarget.contains('tristeza') || matchTarget.contains('desanimo') || matchTarget.contains('depress')) {
@@ -182,7 +182,7 @@ class TriageOutcomeRemoteDataSource {
           authorRole: 'Psiquiatra e Psicoterapeuta (CRM-SP 148.910)',
           readTimeMinutes: 5,
           summary: 'Estratégias práticas para reengajar em pequenas atividades diárias e restaurar gradualmente a motivação.',
-          url: 'https://dualis.health/artigos/ativacao-comportamental-desanimo',
+          url: 'https://bvsms.saude.gov.br/depressao-4/',
         ),
       ];
     } else if (matchTarget.contains('burnout') || matchTarget.contains('estresse') || matchTarget.contains('sobrecarga')) {
@@ -197,7 +197,7 @@ class TriageOutcomeRemoteDataSource {
           authorRole: 'Psicólogo Clínico (CRP-06/123456)',
           readTimeMinutes: 5,
           summary: 'Sinais precoces de esgotamento pelo trabalho e métodos de reestruturação de rotina para restauração cognitiva.',
-          url: 'https://dualis.health/artigos/prevencao-esgotamento-burnout',
+          url: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout',
         ),
       ];
     } else if (matchTarget.contains('sono') || matchTarget.contains('insonia')) {
@@ -212,7 +212,7 @@ class TriageOutcomeRemoteDataSource {
           authorRole: 'Especialista em Medicina do Sono (ABMS / CRM-SP 153.220)',
           readTimeMinutes: 4,
           summary: 'Protocolo de descompressão antes de deitar, controle da exposição à luz azul e ambiente ideal para repouso.',
-          url: 'https://dualis.health/artigos/higiene-do-sono',
+          url: 'https://absono.com.br/higiene-do-sono/',
         ),
       ];
     } else {
@@ -225,7 +225,7 @@ class TriageOutcomeRemoteDataSource {
           authorRole: 'Clínico Geral (SBCM / CRM-SP 134.800)',
           readTimeMinutes: 3,
           summary: 'Práticas fundamentais de repouso preventivo e monitoramento postural e fisiológico.',
-          url: 'https://dualis.health/artigos/autocuidado-preventivo',
+          url: 'https://www.gov.br/saude/pt-br/assuntos/saude-brasil/eu-quero-me-exercitar/noticias/2021/os-pilares-da-saude-preventiva',
         ),
       ];
     }

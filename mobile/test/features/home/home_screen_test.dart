@@ -30,6 +30,12 @@ Widget createHomeTestApp({AuthState? initialAuthState}) {
           body: Center(child: Text('Triage Screen')),
         ),
       ),
+      GoRoute(
+        path: RoutePaths.settings,
+        builder: (context, state) => const Scaffold(
+          body: Center(child: Text('Settings Screen')),
+        ),
+      ),
     ],
   );
 
@@ -76,7 +82,7 @@ void main() {
         name: 'Dr. Ricardo Rincon',
         email: 'rinconrj@gmail.com',
         gender: Gender.masculino,
-        dateOfBirth: '1990-01-01',
+        dateOfBirth: '1985-10-20',
       );
 
       const authState = AuthState(
@@ -96,12 +102,11 @@ void main() {
       // Verify LGPD badge
       expect(find.text('Prontuário Ativo & Protegido (LGPD Art. 11)'), findsOneWidget);
 
-      expect(find.byKey(const Key('home_history_card')), findsOneWidget);
-      expect(find.byKey(const Key('home_privacy_card')), findsOneWidget);
+      expect(find.byKey(const Key('home_settings_button')), findsOneWidget);
+      expect(find.byKey(const Key('home_profile_card')), findsOneWidget);
 
       // Verify CTAs
       expect(find.byKey(const Key('startTriageButton')), findsOneWidget);
-      expect(find.byKey(const Key('logoutButton')), findsOneWidget);
     });
 
     testWidgets('Tapping start triage button navigates to /triage screen',
@@ -123,7 +128,7 @@ void main() {
       expect(find.text('Triage Screen'), findsOneWidget);
     });
 
-    testWidgets('Tapping logout button opens dialog and confirms exit to onboarding',
+    testWidgets('Tapping settings button navigates to /settings screen',
         (WidgetTester tester) async {
       const mockUser = UserProfile(
         id: 'usr-123456',
@@ -142,37 +147,10 @@ void main() {
       await tester.pumpWidget(createHomeTestApp(initialAuthState: authState));
       await tester.pumpAndSettle();
 
-      // Scroll to logout button and tap
-      await tester.ensureVisible(find.byKey(const Key('logoutButton')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('logoutButton')));
+      await tester.tap(find.byKey(const Key('home_settings_button')));
       await tester.pumpAndSettle();
 
-      // Confirmation dialog should be visible
-      expect(find.byType(AlertDialog), findsOneWidget);
-      expect(
-        find.descendant(
-          of: find.byType(AlertDialog),
-          matching: find.text('Sair da Conta'),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.text('Deseja realmente encerrar sua sessão? Seus dados clínicos permanecem seguros e criptografados.'),
-        findsOneWidget,
-      );
-
-      // Tap 'Sair' within dialog
-      await tester.tap(
-        find.descendant(
-          of: find.byType(AlertDialog),
-          matching: find.text('Sair'),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      // Should have navigated to Onboarding
-      expect(find.text('Onboarding Screen'), findsOneWidget);
+      expect(find.text('Settings Screen'), findsOneWidget);
     });
   });
 }

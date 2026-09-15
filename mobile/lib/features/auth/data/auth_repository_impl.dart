@@ -12,6 +12,15 @@ abstract class AuthRepository {
     String? disclaimerVersion,
   });
 
+  Future<Map<String, dynamic>> verifyEmail({
+    required String email,
+    required String code,
+  });
+
+  Future<Map<String, dynamic>> resendVerification({
+    required String email,
+  });
+
   Future<Map<String, dynamic>> login({
     required String email,
     required String password,
@@ -59,6 +68,21 @@ class AuthRepositoryImpl implements AuthRepository {
       lgpdConsent: lgpdConsent,
       disclaimerVersion: disclaimerVersion,
     );
+  }
+
+  @override
+  Future<Map<String, dynamic>> verifyEmail({
+    required String email,
+    required String code,
+  }) {
+    return remoteDataSource.verifyEmail(email: email, code: code);
+  }
+
+  @override
+  Future<Map<String, dynamic>> resendVerification({
+    required String email,
+  }) {
+    return remoteDataSource.resendVerification(email: email);
   }
 
   @override

@@ -59,15 +59,24 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
       decrypt: vi.fn().mockImplementation((val) => `decrypted-${val}`),
     };
 
+    const mockEmailService = {
+      generateVerificationCode: vi.fn().mockReturnValue('123456'),
+      hashCode: vi.fn().mockReturnValue('mock-hash-123456'),
+      verifyCodeHash: vi.fn().mockImplementation((code: string, hash: string) => code === '123456'),
+      sendVerificationEmail: vi.fn().mockResolvedValue(undefined),
+      getLastSentCode: vi.fn().mockReturnValue('123456'),
+    };
+
     authService = new AuthService(
       mockDb,
       mockJwtService as unknown as JwtService,
       mockEncryptionService as any,
+      mockEmailService as any,
     );
   });
 
   describe('Scenario 1: Happy Path Registration', () => {
-    it('creates user with Argon2id hash, atomically logs LGPD consent, and returns auth tokens', async () => {
+    it('creates user, logs LGPD consent, generates OTP, dispatches verification email, and returns requiresVerification', async () => {
       // 1. Email check: no existing user
       const mockWhereLimit = vi.fn().mockReturnValue({
         limit: vi.fn().mockResolvedValue([]),
@@ -78,7 +87,7 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
         }),
       });
 
-      // 2. Insert into users and userDisclaimerConsents
+      // 2. Insert into users, userDisclaimerConsents, and emailVerifications
       const mockCreatedUser = {
         id: '123e4567-e89b-12d3-a456-426614174000',
         name: validRegisterDto.name,
@@ -86,6 +95,7 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
         gender: validRegisterDto.gender,
         dateOfBirth: validRegisterDto.dateOfBirth,
         picture: null,
+        isEmailVerified: false,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -94,13 +104,16 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
       const mockUserValues = vi.fn().mockReturnValue({
         returning: vi.fn().mockResolvedValue([mockCreatedUser]),
       });
+      const mockEmailVerifValues = vi.fn().mockResolvedValue(undefined);
 
       mockTxInsert.mockImplementation((table: any) => {
-        // First call is users, second is userDisclaimerConsents
         if (mockTxInsert.mock.calls.length === 1) {
           return { values: mockUserValues };
         }
-        return { values: mockConsentValues };
+        if (mockTxInsert.mock.calls.length === 2) {
+          return { values: mockConsentValues };
+        }
+        return { values: mockEmailVerifValues };
       });
 
       const result = await authService.register(
@@ -109,20 +122,16 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
         'DualisCheckUp-Flutter/1.0.0',
       );
 
-      // Verify returned tokens & sanitized user
-      expect(result).toHaveProperty('accessToken');
-      expect(result).toHaveProperty('refreshToken');
+      // Verify requiresVerification & user
+      expect(result).toHaveProperty('requiresVerification', true);
+      expect(result).toHaveProperty('email', validRegisterDto.email.toLowerCase().trim());
+      expect(result).toHaveProperty('userId', mockCreatedUser.id);
       expect(result.user).toEqual(mockCreatedUser);
       expect((result.user as any).passwordHash).toBeUndefined();
 
       // Verify DB transaction calls
-      expect(mockDb.transaction).toHaveBeenCalledTimes(2); // check uniqueness + creation
-      expect(mockTxExecute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          queryChunks: expect.any(Array),
-        }),
-      );
-      expect(mockTxInsert).toHaveBeenCalledTimes(2);
+      expect(mockDb.transaction).toHaveBeenCalledTimes(3); // check uniqueness + creation + emailVerifications
+      expect(mockTxInsert).toHaveBeenCalledTimes(3);
       expect(mockUserValues).toHaveBeenCalledWith(
         expect.objectContaining({
           name: validRegisterDto.name,
@@ -130,6 +139,7 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
           gender: validRegisterDto.gender,
           dateOfBirth: validRegisterDto.dateOfBirth,
           passwordHash: expect.stringMatching(/^\$argon2id\$/),
+          isEmailVerified: false,
         }),
       );
       expect(mockConsentValues).toHaveBeenCalledWith(
@@ -384,6 +394,159 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
           newPassword: 'NewSecurePassword456!',
         }),
       ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('Scenario 8: Login with Unverified Email', () => {
+    it('throws UnauthorizedException when isEmailVerified is false', async () => {
+      const password = 'StrongPassword123!';
+      const hashedPassword = await hashPassword(password);
+      const userRecord = {
+        id: '222e4567-e89b-12d3-a456-426614174001',
+        name: 'Maria Santos',
+        email: 'maria.unverified@example.com',
+        passwordHash: hashedPassword,
+        gender: 'feminino',
+        dateOfBirth: '1992-08-25',
+        isEmailVerified: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockTxSelect.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([userRecord]),
+          }),
+        }),
+      });
+
+      await expect(
+        authService.login({
+          email: 'maria.unverified@example.com',
+          password,
+        }),
+      ).rejects.toThrow('E-mail não verificado. Por favor, confirme seu e-mail antes de entrar.');
+    });
+  });
+
+  describe('Scenario 9: Email Verification Flow', () => {
+    it('verifies user email with valid 6-digit code and returns auth tokens', async () => {
+      const email = 'patient@example.com';
+      const userId = 'user-uuid-123';
+      const verificationRecord = {
+        id: 'verif-uuid-1',
+        userId,
+        email,
+        codeHash: 'mock-hash-123456',
+        attempts: 0,
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+        createdAt: new Date(),
+      };
+
+      mockTxSelect.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([verificationRecord]),
+            }),
+          }),
+        }),
+      });
+
+      const updatedUser = {
+        id: userId,
+        name: 'Patient Test',
+        email,
+        gender: 'masculino',
+        dateOfBirth: '1990-01-01',
+        picture: null,
+        isEmailVerified: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockTxUpdate.mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([updatedUser]),
+          }),
+        }),
+      });
+
+      mockTxDelete.mockReturnValue({
+        where: vi.fn().mockResolvedValue(undefined),
+      });
+
+      const result = await authService.verifyEmail({ email, code: '123456' });
+
+      expect(result).toHaveProperty('accessToken');
+      expect(result).toHaveProperty('refreshToken');
+      expect(result.user.isEmailVerified).toBe(true);
+      expect(result.user.id).toBe(userId);
+    });
+
+    it('rejects verification when code is expired', async () => {
+      const email = 'patient@example.com';
+      const verificationRecord = {
+        id: 'verif-uuid-1',
+        userId: 'user-uuid-123',
+        email,
+        codeHash: 'mock-hash-123456',
+        attempts: 0,
+        expiresAt: new Date(Date.now() - 1000),
+        createdAt: new Date(),
+      };
+
+      mockTxSelect.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([verificationRecord]),
+            }),
+          }),
+        }),
+      });
+
+      await expect(
+        authService.verifyEmail({ email, code: '123456' }),
+      ).rejects.toThrow('Código de verificação expirado. Solicite um novo código.');
+    });
+
+    it('rejects verification when code is incorrect and increments attempts', async () => {
+      const email = 'patient@example.com';
+      const verificationRecord = {
+        id: 'verif-uuid-1',
+        userId: 'user-uuid-123',
+        email,
+        codeHash: 'mock-hash-123456',
+        attempts: 0,
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+        createdAt: new Date(),
+      };
+
+      mockTxSelect.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([verificationRecord]),
+            }),
+          }),
+        }),
+      });
+
+      const mockSet = vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue(undefined),
+      });
+      mockTxUpdate.mockReturnValue({
+        set: mockSet,
+      });
+
+      await expect(
+        authService.verifyEmail({ email, code: '999999' }),
+      ).rejects.toThrow('Código de verificação incorreto.');
+
+      expect(mockSet).toHaveBeenCalledWith({ attempts: 1 });
     });
   });
 });

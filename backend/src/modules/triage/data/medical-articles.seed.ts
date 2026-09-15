@@ -41,7 +41,7 @@ Repetir esse ciclo por 4 a 6 vezes reduz comprovadamente a descarga adrenérgica
       'taquicardia ansiosa',
       'mente acelerada',
     ],
-    url: 'https://dualis.health/artigos/respiracao-diafragmatica-ansiedade',
+    url: 'https://bvsms.saude.gov.br/ansiedade/',
   },
   {
     id: 'art-ansiedade-02',
@@ -73,7 +73,7 @@ Lembre-se de que a crise de pânico é autolimitada e tem pico médio de 10 minu
       'tremores emocionais',
       'ansiedade aguda',
     ],
-    url: 'https://dualis.health/artigos/crises-de-panico-grounding',
+    url: 'https://bvsms.saude.gov.br/sindrome-do-panico/',
   },
 
   // 2. Depressiva / Desânimo
@@ -100,7 +100,7 @@ Defina micro-objetivos realizáveis: arrumar a cama, caminhar 5 minutos ao sol o
       'fadiga emocional',
       'abatimento',
     ],
-    url: 'https://dualis.health/artigos/ativacao-comportamental-desanimo',
+    url: 'https://bvsms.saude.gov.br/depressao-4/',
   },
   {
     id: 'art-desanimo-02',
@@ -125,7 +125,7 @@ Quadros depressivos envolvem desregulação em neurotransmissores como serotonin
       'sem energia',
       'isolamento',
     ],
-    url: 'https://dualis.health/artigos/tristeza-persistente-e-depressao',
+    url: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/d/depressao',
   },
 
   // 3. Estresse / Burnout
@@ -151,7 +151,7 @@ A primeira linha preventiva envolve estabelecer limites rígidos entre trabalho 
       'exaustao mental',
       'pressao no trabalho',
     ],
-    url: 'https://dualis.health/artigos/prevencao-esgotamento-burnout',
+    url: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout',
   },
   {
     id: 'art-burnout-02',
@@ -176,7 +176,7 @@ Para regular esse estado, recomenda-se a prática de "descarregamento mental": a
       'irritabilidade',
       'pavio curto',
     ],
-    url: 'https://dualis.health/artigos/estresse-cronico-e-cortisol',
+    url: 'https://bvsms.saude.gov.br/estresse-3/',
   },
 
   // 4. Somática (Psicossomática)
@@ -202,7 +202,7 @@ Embora desconfortáveis, essas sensações não representam lesões estruturais 
       'globo histerico',
       'tensao emocional',
     ],
-    url: 'https://dualis.health/artigos/sintomas-psicossomaticos-e-corpo',
+    url: 'https://drauziovarella.uol.com.br/psiquiatria/somatizacao/',
   },
   {
     id: 'art-somatica-02',
@@ -226,7 +226,7 @@ O tratamento eficaz combina proteção gástrica orientada por médico e regula�
       'dispepsia funcional',
       'dor no estomago por nervoso',
     ],
-    url: 'https://dualis.health/artigos/gastrite-nervosa-e-somatizacao',
+    url: 'https://drauziovarella.uol.com.br/gastroenterologia/gastrite/',
   },
 
   // 5. Sono (Insônia/Hipersônia)
@@ -252,7 +252,7 @@ A higiene do sono atua na sincronização da melatonina: desligue telas emissora
       'higiene do sono',
       'sono ruim',
     ],
-    url: 'https://dualis.health/artigos/higiene-do-sono',
+    url: 'https://absono.com.br/higiene-do-sono/',
   },
   {
     id: 'art-sono-02',
@@ -276,7 +276,7 @@ Para amenizar pesadelos e melhorar a eficiência do sono, adote rotinas de desco
       'dormir o dia todo',
       'pesadelo',
     ],
-    url: 'https://dualis.health/artigos/insonia-e-hipersonia-tratamentos',
+    url: 'https://bvsms.saude.gov.br/insonia-2/',
   },
 
   // 6. Cognitiva / Foco
@@ -303,7 +303,7 @@ Para recuperar a clareza, priorize o monofoco: realize uma atividade por vez, ut
       'cognitivo',
       'mente pesada',
     ],
-    url: 'https://dualis.health/artigos/clareza-mental-e-foco',
+    url: 'https://drauziovarella.uol.com.br/neurologia/nevoa-mental-brain-fog-o-que-e-e-quais-as-causas/',
   },
   {
     id: 'art-cognitiva-02',
@@ -327,7 +327,7 @@ Quando a mente está sobrecarregada, a informação sequer chega a ser codificad
       'mente dispersa',
       'foco e memoria',
     ],
-    url: 'https://dualis.health/artigos/esquecimento-e-memoria-cognitiva',
+    url: 'https://bvsms.saude.gov.br/perda-de-memoria/',
   },
 
   // 7. Autoestima / Autoimagem
@@ -352,7 +352,7 @@ Exercitar a diferenciação entre responsabilidade real e cobrança imaginária 
       'autoimagem fragilizada',
       'sentimento de insuficiencia',
     ],
-    url: 'https://dualis.health/artigos/culpa-excessiva-e-autoimagem',
+    url: 'https://drauziovarella.uol.com.br/psiquiatria/culpa-por-que-sentimos-e-como-lidar/',
   },
   {
     id: 'art-autoestima-02',
@@ -375,7 +375,7 @@ O desenvolvimento da autocompaixão não significa complacência, mas sim suport
       'autocompaixao',
       'culpa e autocobranca',
     ],
-    url: 'https://dualis.health/artigos/autocompaixao-e-autoestima',
+    url: 'https://bvsms.saude.gov.br/saude-mental-2/',
   },
 
   // ==========================================
@@ -404,7 +404,7 @@ No início do quadro, repousar em ambiente escuro e silencioso com hidratação 
       'cabeca pesada',
       'dor na nuca',
     ],
-    url: 'https://dualis.health/artigos/cefaleia-e-enxaqueca',
+    url: 'https://sbcefaleia.com.br/noticias.php?id=350',
   },
   {
     id: 'art-cabeca-02',
@@ -428,7 +428,7 @@ A lavagem nasal com soro fisiológico a 0,9% em alto volume alivia a pressão si
       'dor facial',
       'congestao nasal',
     ],
-    url: 'https://dualis.health/artigos/sinusite-garganta-dor-dentaria',
+    url: 'https://bvsms.saude.gov.br/sinusite-2/',
   },
 
   // 2. Cardiovascular / Tórax
@@ -454,7 +454,7 @@ No entanto, palpitações que se iniciam de modo abrupto, batimentos descompassa
       'batedeira',
       'coracao acelerado',
     ],
-    url: 'https://dualis.health/artigos/palpitacoes-e-cuidados-cardiacos',
+    url: 'https://www.portal.cardiol.br/post/arritmias-cardiacas-sintomas-e-cuidados',
   },
   {
     id: 'art-cardio-02',
@@ -478,7 +478,7 @@ Dores em pontada superficial que pioram com a respiração profunda ou com a pal
       'urgencia cardiaca',
       'pressao no peito',
     ],
-    url: 'https://dualis.health/artigos/dor-no-peito-diagnostico',
+    url: 'https://bvsms.saude.gov.br/infarto-agudo-do-miocardio/',
   },
 
   // 3. Sistema Respiratório
@@ -503,7 +503,7 @@ Em repouso, adote uma postura sentada com o tronco levemente inclinado para a fr
       'sufocamento',
       'folego curto',
     ],
-    url: 'https://dualis.health/artigos/falta-de-ar-e-ansiedade',
+    url: 'https://sbpt.org.br/portal/publico-geral/doencas/falta-de-ar-dispneia/',
   },
   {
     id: 'art-respiratorio-02',
@@ -528,7 +528,7 @@ Evite fumar ou se expor a fumaça de segunda mão, mantenha o quarto livre de á
       'broncoespasmo',
       'tosse persistente',
     ],
-    url: 'https://dualis.health/artigos/tosse-cronica-e-chiado',
+    url: 'https://sbpt.org.br/portal/publico-geral/doencas/asma/',
   },
 
   // 4. Gastrointestinal / Abdômen
@@ -554,7 +554,7 @@ Para mitigar os episódios: fracione a alimentação em porções menores ao lon
       'azia e refluxo',
       'acidez estomacal',
     ],
-    url: 'https://dualis.health/artigos/refluxo-azia-e-colicas',
+    url: 'https://bvsms.saude.gov.br/doenca-do-refluxo-gastroesofagico/',
   },
   {
     id: 'art-gastro-02',
@@ -579,7 +579,7 @@ Alimente-se com dieta branda (arroz branco, batata cozida, maçã sem casca) e e
       'barriga doendo',
       'gastroenterite',
     ],
-    url: 'https://dualis.health/artigos/eixo-intestino-cerebro',
+    url: 'https://bvsms.saude.gov.br/doencas-diarreicas-agudas-dda/',
   },
 
   // 5. Coluna e Dor Dorsal
@@ -605,7 +605,7 @@ Adote pausas a cada 50 minutos para alongamento da cadeia posterior e mobilizaç
       'dor dorsal',
       'lombar travada',
     ],
-    url: 'https://dualis.health/artigos/ergonomia-postura-coluna',
+    url: 'https://bvsms.saude.gov.br/lombalgia-dor-nas-costas/',
   },
   {
     id: 'art-coluna-02',
@@ -629,7 +629,7 @@ Nas primeiras 48 horas, a aplicação de compressas mornas por 20 minutos ajuda 
       'espasmo dorsal',
       'pescoco travado',
     ],
-    url: 'https://dualis.health/artigos/hernia-disco-e-lombalgia-aguda',
+    url: 'https://coluna.com.br/hernia-de-disco/',
   },
 
   // 6. Membros Superiores (D/E)
@@ -655,7 +655,7 @@ Ajuste a altura da cadeira para manter o antebraço a 90 graus com a mesa, com a
       'tunel do carpo',
       'digitacao',
     ],
-    url: 'https://dualis.health/artigos/prevencao-ler-dort-ombros-punhos',
+    url: 'https://bvsms.saude.gov.br/lesoes-por-esforcos-repetitivos-ler-disturbios-osteomusculares-relacionados-ao-trabalho-dort/',
   },
   {
     id: 'art-superiores-02',
@@ -678,7 +678,7 @@ Evite carregar bolsas pesadas em um único ombro e inicie fisioterapia com foco 
       'manguito rotador',
       'braco pesado',
     ],
-    url: 'https://dualis.health/artigos/ombro-tendinite-manguito-rotador',
+    url: 'https://sbcoc.org.br/lesao-do-manguito-rotador/',
   },
 
   // 7. Membros Inferiores (D/E)
@@ -708,7 +708,7 @@ Caso haja incapacidade total de apoiar o pé, deformidade articular visível ou 
       'articulacao do joelho',
       'inchaço no tornozelo',
     ],
-    url: 'https://dualis.health/artigos/cuidados-com-joelhos-tornozelos',
+    url: 'https://sbcj.org.br/lesoes-de-joelho/',
   },
   {
     id: 'art-inferiores-02',
@@ -731,7 +731,7 @@ Para melhorar o retorno venoso: repouse com as pernas elevadas por 20 minutos à
       'bursite no quadril',
       'pernas cansadas',
     ],
-    url: 'https://dualis.health/artigos/dor-quadril-e-perna-pesada',
+    url: 'https://sbacv.org.br/varizes-sintomas-e-prevencao/',
   },
 
   // 8. Sistema Neurológico
@@ -756,7 +756,7 @@ Durante uma crise: sente-se imediatamente, fixe o olhar em um ponto fixo, evite 
       'instabilidade',
       'tonturas frequentes',
     ],
-    url: 'https://dualis.health/artigos/tontura-vertigem-neurologia',
+    url: 'https://bvsms.saude.gov.br/labirintite/',
   },
   {
     id: 'art-neuro-02',
@@ -779,7 +779,7 @@ Entretanto, formigamento contínuo em formato de "meias e luvas" em ambas as mã
       'neuropatia',
       'choque nos membros',
     ],
-    url: 'https://dualis.health/artigos/formigamento-neuropatias-compressoes',
+    url: 'https://bvsms.saude.gov.br/neuropatia-periferica/',
   },
 
   // 9. Geniturinário / Pélvico
@@ -805,7 +805,7 @@ Beba de 2 a 3 litros de água diariamente e urine sem reter por longos períodos
       'dor na bexiga',
       'urina turva',
     ],
-    url: 'https://dualis.health/artigos/saude-pelvica-sintomas-urinarios',
+    url: 'https://portaldaurologia.org.br/doencas/infeccao-urinaria/',
   },
   {
     id: 'art-pelvico-02',
@@ -828,7 +828,7 @@ Quando a dor pélvica é severa, irradia para as costas e coxas ou vem associada
       'dismenorreia',
       'dor no baixo ventre',
     ],
-    url: 'https://dualis.health/artigos/colica-menstrual-e-endometriose',
+    url: 'https://www.febrasgo.org.br/pt/noticias/item/1460-endometriose-diagnostico-e-tratamento',
   },
 
   // 10. Sistema Dermatológico
@@ -854,7 +854,7 @@ Evite banhos muito quentes e demorados, use sabonetes neutros e aplique hidratan
       'placas vermelhas',
       'alergia na pele',
     ],
-    url: 'https://dualis.health/artigos/alergias-cutaneas-e-dermatites',
+    url: 'https://www.sbd.org.br/doencas/urticaria/',
   },
   {
     id: 'art-dermato-02',
@@ -877,7 +877,7 @@ Além disso, lesões em membros inferiores que não cicatrizam podem sinalizar �
       'ferida aberta',
       'dermatologia',
     ],
-    url: 'https://dualis.health/artigos/manchas-lesoes-cutaneas-urgencia',
+    url: 'https://www.sbd.org.br/doencas/cancer-da-pele/',
   },
 
   // 11. Sistema Muscular / Geral (Sistêmico)
@@ -903,7 +903,7 @@ Priorize sono de qualidade ininterrupto, beba líquidos em abundância e garanta
       'fadiga muscular',
       'sensacao de peso no corpo',
     ],
-    url: 'https://dualis.health/artigos/mialgia-e-recuperacao-sistemica',
+    url: 'https://bvsms.saude.gov.br/dor-cronica/',
   },
   {
     id: 'art-muscular-02',
@@ -927,7 +927,7 @@ O monitoramento com termômetro é fundamental: registre as temperaturas e use a
       'sindrome gripal',
       'mal-estar geral',
     ],
-    url: 'https://dualis.health/artigos/febre-calafrios-triagem-viral',
+    url: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/d/dengue',
   },
 
   // 12. Endócrino / Metabólico
@@ -953,7 +953,7 @@ Não ignore a sede persistente. Um simples exame de sangue em jejum (glicemia e 
       'desidratacao metabólica',
       'metabolico',
     ],
-    url: 'https://dualis.health/artigos/sinais-de-alerta-metabolico',
+    url: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/d/diabetes',
   },
   {
     id: 'art-endocrino-02',
@@ -977,7 +977,7 @@ Quando a perda de peso vem associada a calores súbitos, sensação de calor exc
       'tireoide',
       'hormonal',
     ],
-    url: 'https://dualis.health/artigos/perda-peso-calores-causas-hormonais',
+    url: 'https://www.endocrino.org.br/hipertireoidismo/',
   },
 
   // ==========================================
@@ -1004,6 +1004,6 @@ Registrar seus sintomas diariamente e realizar um check-up clínico e laboratori
       'bem-estar',
       'estilo de vida',
     ],
-    url: 'https://dualis.health/artigos/autocuidado-preventivo',
+    url: 'https://www.gov.br/saude/pt-br/assuntos/saude-brasil/eu-quero-me-exercitar/noticias/2021/os-pilares-da-saude-preventiva',
   },
 ];

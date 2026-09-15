@@ -121,7 +121,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         );
 
     if (success && mounted) {
-      context.go(RoutePaths.home);
+      final isAuth = ref.read(authControllerProvider).isAuthenticated;
+      if (isAuth) {
+        context.go(RoutePaths.home);
+      } else {
+        context.go(RoutePaths.verifyEmail, extra: _emailController.text.trim());
+      }
     } else if (mounted) {
       final error = ref.read(authControllerProvider).errorMessage;
       if (error != null) {

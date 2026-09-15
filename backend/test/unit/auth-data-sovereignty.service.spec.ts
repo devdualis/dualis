@@ -52,10 +52,19 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       decrypt: vi.fn().mockImplementation((val) => `decrypted:${val}`),
     };
 
+    const mockEmailService = {
+      generateVerificationCode: vi.fn().mockReturnValue('123456'),
+      hashCode: vi.fn().mockReturnValue('mock-hash-123456'),
+      verifyCodeHash: vi.fn().mockReturnValue(true),
+      sendVerificationEmail: vi.fn().mockResolvedValue(undefined),
+      getLastSentCode: vi.fn().mockReturnValue('123456'),
+    };
+
     authService = new AuthService(
       mockDb,
       mockJwtService as unknown as JwtService,
       mockEncryptionService,
+      mockEmailService as any,
     );
   });
 

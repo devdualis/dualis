@@ -40,7 +40,7 @@ class MockTriageOutcomeService {
           authorRole: 'Ortopedista',
           readTimeMinutes: 5,
           summary: 'Guia postural',
-          url: 'https://dualis.health/artigos/coluna',
+          url: 'https://bvsms.saude.gov.br/lombalgia-dor-nas-costas/',
         },
       ],
       recordedAt: new Date().toISOString(),

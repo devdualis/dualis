@@ -4,10 +4,11 @@ import {
   ConflictException,
   UnauthorizedException,
   BadRequestException,
+  Optional,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, desc } from 'drizzle-orm';
 import * as crypto from 'crypto';
 import { DRIZZLE_DB } from '../../database/database.service';
 import * as schema from '../../database/schema';
@@ -16,16 +17,21 @@ import {
   userDisclaimerConsents,
   symptomLogs,
   triageEmergencyEvents,
+  emailVerifications,
 } from '../../database/schema';
 import { EncryptionService } from '../../common/encryption/encryption.service';
+import { EmailService } from '../../common/email/email.service';
 import { hashPassword, verifyPassword } from './utils/password.util';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { AuthResponseDto, SanitizedUser } from './dto/auth-response.dto';
+import { AuthResponseDto, SanitizedUser, RegisterResponseDto } from './dto/auth-response.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
+import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
 import { UserDataExportResponseDto } from './dto/export-data.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { StorageService } from '../../common/storage/storage.service';
 
 @Injectable()
 export class AuthService {
@@ -33,13 +39,15 @@ export class AuthService {
     @Inject(DRIZZLE_DB) private readonly db: NodePgDatabase<typeof schema>,
     @Inject(JwtService) private readonly jwtService: JwtService,
     private readonly encryptionService: EncryptionService,
+    private readonly emailService: EmailService,
+    @Optional() private readonly storageService?: StorageService,
   ) {}
 
   async register(
     dto: RegisterDto,
     clientIp: string = '127.0.0.1',
     userAgent: string = 'Unknown',
-  ): Promise<AuthResponseDto> {
+  ): Promise<RegisterResponseDto> {
     if (dto.lgpdConsent !== true) {
       throw new BadRequestException('Consentimento LGPD Art. 11 é obrigatório.');
     }
@@ -78,6 +86,7 @@ export class AuthService {
           passwordHash,
           gender: dto.gender,
           dateOfBirth: dto.dateOfBirth,
+          isEmailVerified: false,
         })
         .returning();
 
@@ -91,6 +100,25 @@ export class AuthService {
       return insertedUser;
     });
 
+    // Generate 6-digit OTP code & store in email_verifications
+    const code = this.emailService.generateVerificationCode();
+    const codeHash = this.emailService.hashCode(code);
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 min expiry
+
+    await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      await tx.insert(emailVerifications).values({
+        userId: created.id,
+        email,
+        codeHash,
+        attempts: 0,
+        expiresAt,
+      });
+    });
+
+    // Send verification email via SMTP
+    await this.emailService.sendVerificationEmail(email, code, created.name);
+
     const sanitizedUser: SanitizedUser = {
       id: created.id,
       name: created.name,
@@ -98,16 +126,160 @@ export class AuthService {
       gender: created.gender,
       dateOfBirth: created.dateOfBirth,
       picture: created.picture || null,
+      isEmailVerified: false,
       createdAt: created.createdAt,
       updatedAt: created.updatedAt,
     };
 
-    const tokens = this.generateTokens(created.id, created.email);
+    return {
+      requiresVerification: true,
+      email: created.email,
+      userId: created.id,
+      message: 'Código de verificação enviado para seu e-mail.',
+      user: sanitizedUser,
+    };
+  }
 
+  async verifyEmail(dto: VerifyEmailDto): Promise<AuthResponseDto> {
+    const email = dto.email.toLowerCase().trim();
+    const code = dto.code.trim();
+
+    const verificationRecord = await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      const [record] = await tx
+        .select()
+        .from(emailVerifications)
+        .where(eq(emailVerifications.email, email))
+        .orderBy(desc(emailVerifications.createdAt))
+        .limit(1);
+      return record;
+    });
+
+    if (!verificationRecord) {
+      throw new BadRequestException('Nenhum código de verificação pendente encontrado para este e-mail.');
+    }
+
+    if (verificationRecord.expiresAt.getTime() < Date.now()) {
+      throw new BadRequestException('Código de verificação expirado. Solicite um novo código.');
+    }
+
+    if (verificationRecord.attempts >= 5) {
+      throw new BadRequestException('Limite de tentativas excedido. Solicite um novo código de verificação.');
+    }
+
+    const isValid = this.emailService.verifyCodeHash(code, verificationRecord.codeHash);
+    if (!isValid) {
+      await this.db.transaction(async (tx) => {
+        await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+        await tx
+          .update(emailVerifications)
+          .set({ attempts: verificationRecord.attempts + 1 })
+          .where(eq(emailVerifications.id, verificationRecord.id));
+      });
+      throw new BadRequestException('Código de verificação incorreto.');
+    }
+
+    // Mark user verified and remove verification entries
+    const updatedUser = await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      const [u] = await tx
+        .update(users)
+        .set({
+          isEmailVerified: true,
+          emailVerifiedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, verificationRecord.userId))
+        .returning();
+
+      await tx
+        .delete(emailVerifications)
+        .where(eq(emailVerifications.userId, verificationRecord.userId));
+
+      return u;
+    });
+
+    const sanitizedUser: SanitizedUser = {
+      id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      gender: updatedUser.gender,
+      dateOfBirth: updatedUser.dateOfBirth,
+      picture: updatedUser.picture || null,
+      isEmailVerified: updatedUser.isEmailVerified,
+      createdAt: updatedUser.createdAt,
+      updatedAt: updatedUser.updatedAt,
+    };
+
+    const tokens = this.generateTokens(updatedUser.id, updatedUser.email);
     return {
       ...tokens,
       user: sanitizedUser,
     };
+  }
+
+  async resendVerification(dto: ResendVerificationDto): Promise<{ success: boolean; message: string }> {
+    const email = dto.email.toLowerCase().trim();
+
+    const user = await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      const [u] = await tx
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+      return u;
+    });
+
+    if (!user) {
+      return { success: true, message: 'Se o e-mail estiver cadastrado, um novo código foi enviado.' };
+    }
+
+    if (user.isEmailVerified) {
+      throw new BadRequestException('Este e-mail já foi verificado. Você pode entrar diretamente.');
+    }
+
+    const latestVerification = await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      const [rec] = await tx
+        .select()
+        .from(emailVerifications)
+        .where(eq(emailVerifications.userId, user.id))
+        .orderBy(desc(emailVerifications.createdAt))
+        .limit(1);
+      return rec;
+    });
+
+    if (latestVerification) {
+      const diffMs = Date.now() - latestVerification.createdAt.getTime();
+      if (diffMs < 60 * 1000) {
+        const remainingSeconds = Math.ceil((60 * 1000 - diffMs) / 1000);
+        throw new BadRequestException(`Aguarde ${remainingSeconds} segundos antes de solicitar um novo código.`);
+      }
+    }
+
+    const code = this.emailService.generateVerificationCode();
+    const codeHash = this.emailService.hashCode(code);
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      await tx
+        .delete(emailVerifications)
+        .where(eq(emailVerifications.userId, user.id));
+
+      await tx.insert(emailVerifications).values({
+        userId: user.id,
+        email,
+        codeHash,
+        attempts: 0,
+        expiresAt,
+      });
+    });
+
+    await this.emailService.sendVerificationEmail(email, code, user.name);
+
+    return { success: true, message: 'Novo código de verificação enviado com sucesso.' };
   }
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
@@ -131,6 +303,11 @@ export class AuthService {
     if (!isMatch) {
       throw new UnauthorizedException('Credenciais inválidas.');
     }
+
+    if (user.isEmailVerified === false) {
+      throw new UnauthorizedException('E-mail não verificado. Por favor, confirme seu e-mail antes de entrar.');
+    }
+
 
     const sanitizedUser: SanitizedUser = {
       id: user.id,
@@ -288,6 +465,14 @@ export class AuthService {
     userId: string,
     dto: UpdateProfileDto,
   ): Promise<SanitizedUser> {
+    let finalPicture = dto.picture;
+    if (dto.picture && this.storageService) {
+      finalPicture = await this.storageService.processAvatarImage(
+        userId,
+        dto.picture,
+      );
+    }
+
     const updated = await this.db.transaction(async (tx) => {
       await tx.execute(
         sql`SELECT set_config('app.current_user_id', ${userId}, true)`,
@@ -298,7 +483,7 @@ export class AuthService {
       };
       if (dto.name !== undefined) updateData.name = dto.name;
       if (dto.dateOfBirth !== undefined) updateData.dateOfBirth = dto.dateOfBirth;
-      if (dto.picture !== undefined) updateData.picture = dto.picture;
+      if (dto.picture !== undefined) updateData.picture = finalPicture;
       if (dto.gender !== undefined) updateData.gender = dto.gender;
 
       const [record] = await tx

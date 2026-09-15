@@ -5,6 +5,7 @@ export interface SanitizedUser {
   gender: string;
   dateOfBirth: string | null;
   picture?: string | null;
+  isEmailVerified?: boolean;
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -14,4 +15,13 @@ export class AuthResponseDto {
   refreshToken!: string;
   user!: SanitizedUser;
 }
+
+export class RegisterResponseDto {
+  requiresVerification!: boolean;
+  email!: string;
+  userId!: string;
+  message!: string;
+  user?: SanitizedUser;
+}
+
 

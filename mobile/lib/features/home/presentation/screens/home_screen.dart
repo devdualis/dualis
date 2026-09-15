@@ -199,6 +199,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     text: buttonText,
                     onPressed: isReady
                         ? () {
+                            // If already completed today and nothing changed, do nothing.
+                            if (triggerState.isCompletedToday &&
+                                !triggerState.isModifiedAfterCompletion) {
+                              return;
+                            }
                             final outcome = triggerState.routingOutcome;
                             switch (outcome) {
                               case RoutingOutcome.wellnessConfirmation:

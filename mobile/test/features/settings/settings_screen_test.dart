@@ -46,6 +46,21 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<Map<String, dynamic>> verifyEmail({
+    required String email,
+    required String code,
+  }) async {
+    return {'user': mockUser.toJson(), 'accessToken': 'mock-access', 'refreshToken': 'mock-refresh'};
+  }
+
+  @override
+  Future<Map<String, dynamic>> resendVerification({
+    required String email,
+  }) async {
+    return {'success': true};
+  }
+
+  @override
   Future<Map<String, dynamic>> login({
     required String email,
     required String password,

@@ -78,6 +78,49 @@ class AuthController extends Notifier<AuthState> {
       );
 
       final userJson = res['user'] as Map<String, dynamic>? ?? {};
+      final user = userJson.isNotEmpty ? UserProfile.fromJson(userJson) : null;
+      final accessToken = res['accessToken'] as String?;
+      final refreshToken = res['refreshToken'] as String?;
+
+      if (accessToken != null && refreshToken != null && user != null && user.id.isNotEmpty) {
+        await _secureStorage.persistTokens(
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          userId: user.id,
+        );
+        state = state.copyWith(
+          isLoading: false,
+          isAuthenticated: true,
+          user: user,
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+        );
+      } else {
+        // Pending email verification
+        state = state.copyWith(
+          isLoading: false,
+          isAuthenticated: false,
+          user: user,
+        );
+      }
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: _extractErrorMessage(e),
+      );
+      return false;
+    }
+  }
+
+  Future<bool> verifyEmail({
+    required String email,
+    required String code,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      final res = await _repository.verifyEmail(email: email, code: code);
+      final userJson = res['user'] as Map<String, dynamic>? ?? {};
       final user = UserProfile.fromJson(userJson);
       final accessToken = res['accessToken'] as String?;
       final refreshToken = res['refreshToken'] as String?;
@@ -97,6 +140,23 @@ class AuthController extends Notifier<AuthState> {
         accessToken: accessToken,
         refreshToken: refreshToken,
       );
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: _extractErrorMessage(e),
+      );
+      return false;
+    }
+  }
+
+  Future<bool> resendVerificationCode({
+    required String email,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      await _repository.resendVerification(email: email);
+      state = state.copyWith(isLoading: false);
       return true;
     } catch (e) {
       state = state.copyWith(

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/auth/presentation/screens/email_verification_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/emergency/domain/emergency_context.dart';
@@ -33,6 +34,14 @@ GoRouter createRouter({String initialLocation = RoutePaths.onboarding}) {
         path: RoutePaths.register,
         name: 'register',
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.verifyEmail,
+        name: 'verifyEmail',
+        builder: (context, state) {
+          final email = state.extra as String? ?? '';
+          return EmailVerificationScreen(email: email);
+        },
       ),
       GoRoute(
         path: RoutePaths.login,

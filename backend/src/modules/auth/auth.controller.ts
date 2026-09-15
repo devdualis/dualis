@@ -15,7 +15,9 @@ import { FastifyRequest } from 'fastify';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { AuthResponseDto, SanitizedUser } from './dto/auth-response.dto';
+import { AuthResponseDto, SanitizedUser, RegisterResponseDto } from './dto/auth-response.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
+import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
 import { UserDataExportResponseDto } from './dto/export-data.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -35,7 +37,7 @@ export class AuthController {
   async register(
     @Body() dto: RegisterDto,
     @Req() req: FastifyRequest,
-  ): Promise<AuthResponseDto> {
+  ): Promise<RegisterResponseDto> {
     const rawIp =
       (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
       req.ip ||
@@ -43,6 +45,20 @@ export class AuthController {
     const userAgent = (req.headers['user-agent'] as string) || 'Unknown';
 
     return this.authService.register(dto, rawIp, userAgent);
+  }
+
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+  async verifyEmail(@Body() dto: VerifyEmailDto): Promise<AuthResponseDto> {
+    return this.authService.verifyEmail(dto);
+  }
+
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  async resendVerification(
+    @Body() dto: ResendVerificationDto,
+  ): Promise<{ success: boolean; message: string }> {
+    return this.authService.resendVerification(dto);
   }
 
   @Post('login')

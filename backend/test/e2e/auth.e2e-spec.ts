@@ -20,7 +20,7 @@ import { AuthService } from '../../src/modules/auth/auth.service';
 import { RegisterDto } from '../../src/modules/auth/dto/register.dto';
 import { LoginDto } from '../../src/modules/auth/dto/login.dto';
 import { hashPassword, verifyPassword } from '../../src/modules/auth/utils/password.util';
-import { SanitizedUser } from '../../src/modules/auth/dto/auth-response.dto';
+import { SanitizedUser, AuthResponseDto } from '../../src/modules/auth/dto/auth-response.dto';
 
 @Injectable()
 class MockAuthService {
@@ -168,6 +168,32 @@ class MockAuthService {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
+  }
+
+  async verifyEmail(dto: any): Promise<AuthResponseDto> {
+    const user = this.users.find((u) => u.email === dto.email.toLowerCase().trim());
+    if (!user) throw new BadRequestException('Usuário não encontrado.');
+    if (dto.code !== '123456') throw new BadRequestException('Código de verificação incorreto.');
+    (user as any).isEmailVerified = true;
+    const tokens = this.generateTokens(user.id, user.email);
+    return {
+      ...tokens,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        gender: user.gender,
+        dateOfBirth: user.dateOfBirth,
+        picture: user.picture,
+        isEmailVerified: true,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+    };
+  }
+
+  async resendVerification(dto: any): Promise<{ success: boolean; message: string }> {
+    return { success: true, message: 'Novo código de verificação enviado com sucesso.' };
   }
 
   private generateTokens(userId: string, email: string) {
@@ -391,6 +417,50 @@ describe('AuthModule E2E Integration Suite (AUTH-01 & AUTH-02)', () => {
 
     expect(correctRes.statusCode).toBe(200);
     const body = JSON.parse(correctRes.payload);
+    expect(body.success).toBe(true);
+  });
+
+  it('Scenario 9: POST /v1/auth/verify-email with valid 6-digit code returns HTTP 200 and tokens', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/verify-email',
+      payload: {
+        email: validRegistrationPayload.email,
+        code: '123456',
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = JSON.parse(res.payload);
+    expect(body).toHaveProperty('accessToken');
+    expect(body).toHaveProperty('refreshToken');
+    expect(body.user.isEmailVerified).toBe(true);
+  });
+
+  it('Scenario 10: POST /v1/auth/verify-email with incorrect code returns HTTP 400', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/verify-email',
+      payload: {
+        email: validRegistrationPayload.email,
+        code: '000000',
+      },
+    });
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('Scenario 11: POST /v1/auth/resend-verification returns HTTP 200', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/resend-verification',
+      payload: {
+        email: validRegistrationPayload.email,
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = JSON.parse(res.payload);
     expect(body.success).toBe(true);
   });
 });

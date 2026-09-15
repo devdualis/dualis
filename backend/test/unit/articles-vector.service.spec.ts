@@ -27,7 +27,7 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
               authorRole: 'Ortopedista e Traumatologista (HCFMUSP / CRM-SP 128.450)',
               readTimeMinutes: 5,
               summary: 'Posturas preventivas e exercícios de descompressão da coluna lombar.',
-              url: 'https://dualis.health/artigos/ergonomia-postura-coluna',
+              url: 'https://bvsms.saude.gov.br/lombalgia-dor-nas-costas/',
               similarity: 0.88,
             },
           ],
@@ -110,7 +110,7 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
             authorRole: 'Psiquiatra Clínica (ABP / CRM-SP 165.340)',
             readTimeMinutes: 4,
             summary: 'Exercício guiado 4-7-8 para desaceleração do sistema simpático.',
-            url: 'https://dualis.health/artigos/respiracao-diafragmatica-ansiedade',
+            url: 'https://bvsms.saude.gov.br/ansiedade/',
           },
         ],
       };
@@ -167,7 +167,8 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
       expect(article.summary.length).toBeGreaterThan(10);
       expect(article.contentMarkdown.length).toBeGreaterThan(20);
       expect(article.keywords.length).toBeGreaterThanOrEqual(4);
-      expect(article.url).toContain('https://dualis.health/artigos/');
+      expect(article.url.startsWith('https://')).toBe(true);
+      expect(article.url).not.toContain('dualis.health');
     }
   });
 });

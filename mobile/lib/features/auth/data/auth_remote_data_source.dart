@@ -34,6 +34,34 @@ class AuthRemoteDataSource {
     return response.data ?? {};
   }
 
+  Future<Map<String, dynamic>> verifyEmail({
+    required String email,
+    required String code,
+  }) async {
+    final response = await apiClient.post<Map<String, dynamic>>(
+      ApiEndpoints.verifyEmail,
+      data: {
+        'email': email.toLowerCase().trim(),
+        'code': code.trim(),
+      },
+    );
+
+    return response.data ?? {};
+  }
+
+  Future<Map<String, dynamic>> resendVerification({
+    required String email,
+  }) async {
+    final response = await apiClient.post<Map<String, dynamic>>(
+      ApiEndpoints.resendVerification,
+      data: {
+        'email': email.toLowerCase().trim(),
+      },
+    );
+
+    return response.data ?? {};
+  }
+
   Future<Map<String, dynamic>> login({
     required String email,
     required String password,

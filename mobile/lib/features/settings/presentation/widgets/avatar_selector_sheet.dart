@@ -1,4 +1,5 @@
-import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -81,27 +82,75 @@ final List<AvatarPreset> kAvatarPresets = [
 
 class UserAvatar extends StatelessWidget {
   final String? picture;
+  /// In-memory bytes for a locally picked image. Takes priority over [picture]
+  /// for local photos, avoiding stale iOS /tmp paths that get cleaned up.
+  final Uint8List? localImageBytes;
   final String fallbackInitial;
   final double radius;
 
   const UserAvatar({
     super.key,
     this.picture,
+    this.localImageBytes,
     this.fallbackInitial = 'U',
     this.radius = 26,
   });
 
+  Widget _fallback() {
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: AppColors.clinicalTealLight,
+      child: Text(
+        fallbackInitial.isNotEmpty ? fallbackInitial[0].toUpperCase() : 'U',
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: radius * 0.9,
+          fontWeight: FontWeight.bold,
+          color: AppColors.clinicalTealDark,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // 1. In-memory bytes for locally picked images during active session
+    if (localImageBytes != null && localImageBytes!.isNotEmpty) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundImage: MemoryImage(localImageBytes!),
+        onBackgroundImageError: (_, __) {},
+        child: null,
+      );
+    }
+
     if (picture != null && picture!.isNotEmpty) {
-      // Local file path (picked from camera or gallery)
-      if (picture!.startsWith('/')) {
+      // 2. Base64 data URI (stored directly in DB)
+      if (picture!.startsWith('data:image')) {
+        try {
+          final commaIndex = picture!.indexOf(',');
+          final base64Str =
+              commaIndex != -1 ? picture!.substring(commaIndex + 1) : picture!;
+          final bytes = base64Decode(base64Str);
+          return CircleAvatar(
+            radius: radius,
+            backgroundImage: MemoryImage(bytes),
+            onBackgroundImageError: (_, __) {},
+            child: null,
+          );
+        } catch (_) {}
+      }
+
+      // 3. Network URL (from Cloud / Supabase Storage CDN)
+      if (picture!.startsWith('http://') || picture!.startsWith('https://')) {
         return CircleAvatar(
           radius: radius,
-          backgroundImage: FileImage(File(picture!)),
+          backgroundImage: NetworkImage(picture!),
+          onBackgroundImageError: (_, __) {},
+          child: null,
         );
       }
 
+      // 4. Preset avatar from design system
       final preset = kAvatarPresets.where((p) => p.id == picture).firstOrNull;
       if (preset != null) {
         return CircleAvatar(
@@ -116,18 +165,8 @@ class UserAvatar extends StatelessWidget {
       }
     }
 
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: AppColors.clinicalTealLight,
-      child: Text(
-        fallbackInitial.isNotEmpty ? fallbackInitial[0].toUpperCase() : 'U',
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: radius * 0.9,
-          fontWeight: FontWeight.bold,
-          color: AppColors.clinicalTealDark,
-        ),
-      ),
-    );
+    // 5. Fallback initial
+    return _fallback();
   }
 }
 

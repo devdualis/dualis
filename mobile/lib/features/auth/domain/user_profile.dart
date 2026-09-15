@@ -26,6 +26,7 @@ class UserProfile {
   final Gender gender;
   final String? dateOfBirth;
   final String? picture;
+  final bool isEmailVerified;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -36,6 +37,7 @@ class UserProfile {
     required this.gender,
     this.dateOfBirth,
     this.picture,
+    this.isEmailVerified = false,
     this.createdAt,
     this.updatedAt,
   });
@@ -61,6 +63,7 @@ class UserProfile {
       gender: Gender.fromString(json['gender'] as String? ?? 'outro'),
       dateOfBirth: json['dateOfBirth'] as String?,
       picture: json['picture'] as String?,
+      isEmailVerified: json['isEmailVerified'] as bool? ?? false,
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'] as String)
           : null,
@@ -78,6 +81,7 @@ class UserProfile {
       'gender': gender.value,
       'dateOfBirth': dateOfBirth,
       'picture': picture,
+      'isEmailVerified': isEmailVerified,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
@@ -90,6 +94,7 @@ class UserProfile {
     Gender? gender,
     String? dateOfBirth,
     String? picture,
+    bool? isEmailVerified,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -100,6 +105,7 @@ class UserProfile {
       gender: gender ?? this.gender,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       picture: picture ?? this.picture,
+      isEmailVerified: isEmailVerified ?? this.isEmailVerified,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

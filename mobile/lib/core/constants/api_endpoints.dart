@@ -15,6 +15,8 @@ class ApiEndpoints {
   static String get baseUrl => _envBaseUrl.isNotEmpty ? _envBaseUrl : _defaultBaseUrl;
 
   static const String register = '/v1/auth/register';
+  static const String verifyEmail = '/v1/auth/verify-email';
+  static const String resendVerification = '/v1/auth/resend-verification';
   static const String login = '/v1/auth/login';
   static const String me = '/v1/auth/me';
   static const String refresh = '/v1/auth/refresh';

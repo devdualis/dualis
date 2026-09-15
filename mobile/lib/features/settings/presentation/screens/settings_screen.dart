@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -28,6 +30,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late TextEditingController _confirmPasswordController;
 
   String? _selectedPicture;
+  Uint8List? _localImageBytes; // in-memory bytes for a locally picked photo
   DateTime? _selectedDateOfBirth;
   bool _obscureCurrentPassword = true;
   bool _obscureNewPassword = true;
@@ -45,6 +48,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _confirmPasswordController = TextEditingController();
 
     _selectedPicture = user?.picture;
+    // _localImageBytes stays null on init — only populated after a new pick.
     if (user?.dateOfBirth != null && user!.dateOfBirth!.isNotEmpty) {
       _selectedDateOfBirth = DateTime.tryParse(user.dateOfBirth!);
     }
@@ -80,8 +84,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         maxHeight: 512,
       );
       if (image != null && mounted) {
+        final bytes = await image.readAsBytes();
+        final base64Image = 'data:image/jpeg;base64,${base64Encode(bytes)}';
         setState(() {
-          _selectedPicture = image.path;
+          _localImageBytes = bytes;
+          _selectedPicture = base64Image;
         });
       }
     } catch (_) {
@@ -94,6 +101,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         );
       }
     }
+  }
+
+  void _showAvatarSelectorSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => AvatarSelectorSheet(
+        currentPicture: _selectedPicture,
+        onSelected: (avatarId) {
+          setState(() {
+            _selectedPicture = avatarId;
+            _localImageBytes = null;
+          });
+        },
+      ),
+    );
   }
 
   void _showPhotoPickerSheet() {
@@ -154,6 +178,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               subtitle: 'Escolher da biblioteca de fotos',
               color: AppColors.softIndigo,
               onTap: () => _pickImage(ImageSource.gallery),
+            ),
+            const SizedBox(height: 12),
+            // Presets option
+            _PhotoOptionTile(
+              icon: Icons.palette_outlined,
+              label: 'Avatares Clínicos',
+              subtitle: 'Escolher um ícone ilustrado de autocuidado',
+              color: AppColors.clinicalTealDark,
+              onTap: () {
+                Navigator.of(context).pop();
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: Colors.transparent,
+                  isScrollControlled: true,
+                  builder: (ctx) => AvatarSelectorSheet(
+                    currentPicture: _selectedPicture,
+                    onSelected: (avatarId) {
+                      setState(() {
+                        _selectedPicture = avatarId;
+                        _localImageBytes = null;
+                      });
+                    },
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 16),
             // Cancel
@@ -230,6 +279,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     final l10n = AppLocalizations.of(context);
     if (success) {
+      final updatedUser = ref.read(authControllerProvider).user;
+      setState(() {
+        _localImageBytes = null;
+        _selectedPicture = updatedUser?.picture ?? _selectedPicture;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.profileUpdatedSuccess),
@@ -420,6 +474,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               onTap: _showPhotoPickerSheet,
                               child: UserAvatar(
                                 picture: _selectedPicture,
+                                localImageBytes: _localImageBytes,
                                 fallbackInitial: user?.name.isNotEmpty == true ? user!.name[0] : 'U',
                                 radius: 42,
                               ),
@@ -449,8 +504,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(height: 10),
                       Center(
                         child: TextButton.icon(
-                          onPressed: _showPhotoPickerSheet,
-                          icon: const Icon(Icons.photo_camera_outlined, size: 16),
+                          onPressed: _showAvatarSelectorSheet,
+                          icon: const Icon(Icons.palette_outlined, size: 16),
                           label: Text(
                             l10n.changeAvatar,
                             style: GoogleFonts.plusJakartaSans(
