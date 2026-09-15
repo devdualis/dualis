@@ -143,37 +143,11 @@ void main() {
     expect(find.text('Login Screen Target'), findsOneWidget);
   });
 
-  testWidgets(
-      'Dynamic language toggle updates strings to Spanish and English immediately',
+  testWidgets('Language picker button is not displayed on onboarding screen',
       (WidgetTester tester) async {
     await tester.pumpWidget(createTestApp());
     await tester.pumpAndSettle();
 
-    // Default: Portuguese
-    expect(find.text('Criar Conta'), findsOneWidget);
-    expect(find.text('Entrar'), findsOneWidget);
-    expect(find.text('Triagem Preventiva Unificada'), findsOneWidget);
-
-    // Switch to Spanish
-    await tester.tap(find.byIcon(Icons.language));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('🇪🇸  Español'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Crear Cuenta'), findsOneWidget);
-    expect(find.text('Iniciar Sesión'), findsOneWidget);
-    expect(find.text('Triaje Preventivo Unificado'), findsOneWidget);
-
-    // Switch to English
-    await tester.tap(find.byIcon(Icons.language));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('🇺🇸  English'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Create Account'), findsOneWidget);
-    expect(find.text('Sign In'), findsOneWidget);
-    expect(find.text('Unified Preventive Triage'), findsOneWidget);
+    expect(find.byIcon(Icons.language), findsNothing);
   });
 }
