@@ -10,6 +10,8 @@ import 'package:dualis_mobile/features/home/presentation/widgets/admob_banner_co
 import 'package:dualis_mobile/features/home/presentation/widgets/wellness_confirmation_dialog.dart';
 import 'package:dualis_mobile/features/home/domain/trigger_checkin_state.dart';
 import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
+import 'package:dualis_mobile/features/dashboard/data/triage_history_remote_data_source.dart';
+import 'package:dualis_mobile/features/dashboard/domain/models/triage_history_models.dart';
 import 'package:dualis_mobile/features/triage/domain/triage_vertical.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
@@ -319,5 +321,49 @@ void main() {
       expect(container.read(triggerCheckInProvider).isCompletedToday, isFalse);
       expect(container.read(triggerCheckInProvider).isReadyToSubmit, isFalse);
     });
+
+    test('11. Restores daily check-in status from remote history on rebuild/load', () async {
+      final now = DateTime.now();
+      final mockHistory = TriageHistoryResponse(
+        logs: [
+          TriageHistoryEntry(
+            id: 'log-1',
+            intensity: 3,
+            emotionalDimension: 'depressiva_desanimo',
+            disposition: 'consulta_rotina',
+            recordedAt: now,
+          ),
+        ],
+        physicalSummary: {},
+        emotionalSummary: [],
+        criticalRecurrences: [],
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          triageHistoryDataSourceProvider.overrideWithValue(
+            _FakeHistoryDataSource(mockHistory),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(triggerCheckInProvider.notifier);
+      await notifier.loadTodayCheckIn();
+
+      final state = container.read(triggerCheckInProvider);
+      expect(state.isCompletedToday, isTrue);
+      expect(state.emotionalStatus, TriggerStatus.soSo);
+      expect(state.physicalStatus, TriggerStatus.goodNormal);
+      expect(state.completedAt, isNotNull);
+    });
   });
+}
+
+class _FakeHistoryDataSource extends TriageHistoryRemoteDataSource {
+  final TriageHistoryResponse response;
+  _FakeHistoryDataSource(this.response);
+
+  @override
+  Future<TriageHistoryResponse> fetchHistory({int days = 14}) async => response;
 }

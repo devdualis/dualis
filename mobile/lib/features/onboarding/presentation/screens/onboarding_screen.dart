@@ -7,7 +7,6 @@ import '../../../../core/router/route_paths.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../l10n/locale_provider.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
-import '../../../../shared/widgets/language_picker_button.dart';
 import '../../domain/value_card_item.dart';
 import '../controllers/onboarding_controller.dart';
 import '../widgets/animated_page_indicator.dart';
@@ -77,12 +76,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
     final activeIndex = ref.watch(onboardingControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: null,
-        actions: const [
-          LanguagePickerButton(),
-        ],
-      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),

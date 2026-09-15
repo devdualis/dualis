@@ -1,9 +1,10 @@
-import { Injectable, Inject, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, Optional, BadRequestException } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { and, desc, gte, eq, sql } from 'drizzle-orm';
 import { DRIZZLE_DB } from '../../../database/database.service';
 import * as schema from '../../../database/schema';
 import { symptomLogs } from '../../../database/schema';
+import { EncryptionService } from '../../../common/encryption/encryption.service';
 import {
   CriticalRecurrenceDto,
   EmotionalDayDataDto,
@@ -95,6 +96,8 @@ const RECOMMENDED_ARTICLES: Record<string, { title: string; url: string }> = {
 export class TriageHistoryService {
   constructor(
     @Inject(DRIZZLE_DB) private readonly db: NodePgDatabase<typeof schema>,
+    @Optional() @Inject(EncryptionService)
+    private readonly encryptionService?: EncryptionService,
   ) {}
 
   async getHistory(
@@ -125,18 +128,42 @@ export class TriageHistoryService {
     const logs: TriageLogItemDto[] = rows.map((row) => {
       let parsedAnswers: any = null;
       if (row.stepAnswers) {
+        let rawAnswers = row.stepAnswers;
+        if (rawAnswers.startsWith('v1:') && this.encryptionService) {
+          try {
+            rawAnswers = this.encryptionService.decrypt(rawAnswers);
+          } catch {
+            // retain raw if decryption fails
+          }
+        }
         try {
-          parsedAnswers = JSON.parse(row.stepAnswers);
+          parsedAnswers = JSON.parse(rawAnswers);
         } catch {
-          parsedAnswers = { raw: row.stepAnswers };
+          parsedAnswers = { raw: rawAnswers };
         }
       }
+
+      let decryptedNarrative: string | null = null;
+      if (row.encryptedNarrative) {
+        let rawNarrative = row.encryptedNarrative;
+        if (rawNarrative.startsWith('v1:') && this.encryptionService) {
+          try {
+            decryptedNarrative = this.encryptionService.decrypt(rawNarrative);
+          } catch {
+            decryptedNarrative = rawNarrative;
+          }
+        } else {
+          decryptedNarrative = rawNarrative;
+        }
+      }
+
       return {
         id: row.id,
         intensity: row.intensity,
         anatomicalSystem: row.anatomicalSystem,
         emotionalDimension: row.emotionalDimension,
         disposition: row.disposition,
+        narrative: decryptedNarrative,
         stepAnswers: parsedAnswers,
         recordedAt: row.recordedAt.toISOString(),
       };

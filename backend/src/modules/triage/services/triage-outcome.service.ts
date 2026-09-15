@@ -13,6 +13,10 @@ import {
   SubmitTriageDto,
   TriageOutcomeResponseDto,
 } from '../dto/triage-outcome.dto';
+import {
+  SubmitDailyCheckInDto,
+  DailyCheckInResponseDto,
+} from '../dto/daily-checkin.dto';
 
 interface CategoryMapping {
   code: string;
@@ -459,6 +463,65 @@ export class TriageOutcomeService {
       organicPrimacyApplied,
       organicPrimacyNotice,
       recommendedArticles,
+      recordedAt: savedRecord.recordedAt.toISOString(),
+    };
+  }
+
+  async recordDailyCheckIn(
+    userId: string,
+    dto: SubmitDailyCheckInDto,
+  ): Promise<DailyCheckInResponseDto> {
+    if (!userId) {
+      throw new BadRequestException('ID do usuário ausente para registro de check-in diário.');
+    }
+
+    let intensity = 1;
+    let disposition: CareDisposition = 'auto_cuidado';
+    if (dto.emotionalStatus === 'badSick' || dto.physicalStatus === 'badSick') {
+      intensity = 4;
+      disposition = 'pronto_atendimento';
+    } else if (dto.emotionalStatus === 'soSo' || dto.physicalStatus === 'soSo') {
+      intensity = 3;
+      disposition = 'consulta_rotina';
+    }
+
+    const payload = {
+      type: 'daily_checkin',
+      emotionalStatus: dto.emotionalStatus,
+      physicalStatus: dto.physicalStatus,
+      naturalLanguageText: dto.naturalLanguageText || '',
+    };
+
+    const encryptedStepAnswers = this.encryptionService.encrypt(JSON.stringify(payload));
+    const encryptedNarrative = dto.naturalLanguageText
+      ? this.encryptionService.encrypt(dto.naturalLanguageText)
+      : null;
+
+    const [savedRecord] = await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`);
+      return tx
+        .insert(symptomLogs)
+        .values({
+          userId,
+          encryptedNarrative,
+          intensity,
+          anatomicalSystem: dto.physicalStatus !== 'goodNormal' ? 'geral_fisico' : null,
+          emotionalDimension: dto.emotionalStatus !== 'goodNormal' ? 'geral_emocional' : null,
+          disposition,
+          organicPrimacyApplied: false,
+          stepAnswers: encryptedStepAnswers,
+          clientSessionId: null,
+          recordedAt: new Date(),
+        })
+        .returning();
+    });
+
+    return {
+      id: savedRecord.id,
+      intensity,
+      disposition,
+      emotionalStatus: dto.emotionalStatus,
+      physicalStatus: dto.physicalStatus,
       recordedAt: savedRecord.recordedAt.toISOString(),
     };
   }

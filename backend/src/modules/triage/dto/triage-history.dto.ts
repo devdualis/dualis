@@ -16,6 +16,7 @@ export interface TriageLogItemDto {
   anatomicalSystem: string | null;
   emotionalDimension: string | null;
   disposition: string | null;
+  narrative?: string | null;
   stepAnswers: Record<string, any> | null;
   recordedAt: string;
 }

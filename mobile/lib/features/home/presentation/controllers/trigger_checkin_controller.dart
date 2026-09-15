@@ -1,13 +1,20 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/constants/api_endpoints.dart';
+import '../../../../core/network/api_client.dart';
 import '../../../../core/security/secure_storage_service.dart';
+import '../../../dashboard/data/triage_history_remote_data_source.dart';
+import '../../../dashboard/domain/models/triage_history_models.dart';
 import '../../domain/trigger_checkin_state.dart';
 
 class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
   SecureStorageService get _storage => ref.read(secureStorageServiceProvider);
+  TriageHistoryRemoteDataSource get _historyDataSource =>
+      ref.read(triageHistoryDataSourceProvider);
 
   @override
   TriggerCheckInState build() {
-    _loadTodayCheckIn();
+    Future.microtask(() => loadTodayCheckIn());
     return const TriggerCheckInState();
   }
 
@@ -19,13 +26,28 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     return '$y-$m-$day';
   }
 
-  Future<void> _loadTodayCheckIn() async {
+  TriggerStatus? _parseTriggerStatus(dynamic value) {
+    if (value == null) return null;
+    final str = value.toString();
+    for (final s in TriggerStatus.values) {
+      if (s.name == str) return s;
+    }
+    return null;
+  }
+
+  Future<void> _loadLocalTodayCheckIn([DateTime? now]) async {
     try {
       final userId = await _storage.getUserId() ?? 'anonymous';
       final saved = await _storage.getDailyCheckIn(userId);
-      if (saved == null) return;
+      if (saved == null) {
+        final today = _getTodayDateString(now);
+        if (state.checkInDate != null && state.checkInDate != today) {
+          state = const TriggerCheckInState();
+        }
+        return;
+      }
 
-      final today = _getTodayDateString();
+      final today = _getTodayDateString(now);
       final savedDate = saved['checkInDate'] as String?;
 
       if (savedDate == today) {
@@ -37,27 +59,92 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     } catch (_) {}
   }
 
-  Future<void> loadTodayCheckIn([DateTime? now]) async {
+  Future<void> _syncTodayCheckInFromRemote([DateTime? now]) async {
     try {
-      final userId = await _storage.getUserId() ?? 'anonymous';
-      final saved = await _storage.getDailyCheckIn(userId);
-      final today = _getTodayDateString(now);
+      final history = await _historyDataSource.fetchHistory(days: 1);
+      if (history.logs.isEmpty) return;
 
-      if (saved == null) {
-        if (state.checkInDate != null && state.checkInDate != today) {
-          state = const TriggerCheckInState();
+      final todayStr = _getTodayDateString(now);
+      final todayLogs = history.logs.where((log) {
+        final localDate = log.recordedAt.toLocal();
+        return _getTodayDateString(localDate) == todayStr;
+      }).toList();
+
+      if (todayLogs.isEmpty) return;
+
+      todayLogs.sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
+      final latestLog = todayLogs.first;
+
+      TriggerStatus? emotionalStatus;
+      TriggerStatus? physicalStatus;
+      String naturalLanguageText = state.naturalLanguageText;
+
+      for (final log in todayLogs) {
+        final answers = log.stepAnswers;
+        if (answers != null && answers['type'] == 'daily_checkin') {
+          emotionalStatus ??= _parseTriggerStatus(answers['emotionalStatus']);
+          physicalStatus ??= _parseTriggerStatus(answers['physicalStatus']);
+          if (answers['naturalLanguageText'] is String &&
+              (answers['naturalLanguageText'] as String).isNotEmpty) {
+            naturalLanguageText = answers['naturalLanguageText'] as String;
+          }
         }
-        return;
       }
 
-      final savedDate = saved['checkInDate'] as String?;
-      if (savedDate == today) {
-        state = TriggerCheckInState.fromJson(saved);
-      } else {
-        await _storage.clearDailyCheckIn(userId);
-        state = const TriggerCheckInState();
+      if (emotionalStatus == null || physicalStatus == null) {
+        TriageHistoryEntry? emotionalLog;
+        TriageHistoryEntry? physicalLog;
+
+        for (final log in todayLogs) {
+          if (log.emotionalDimension != null && emotionalLog == null) {
+            emotionalLog = log;
+          }
+          if (log.anatomicalSystem != null && physicalLog == null) {
+            physicalLog = log;
+          }
+        }
+
+        TriggerStatus intensityToStatus(int intensity) {
+          if (intensity <= 2) return TriggerStatus.goodNormal;
+          if (intensity == 3) return TriggerStatus.soSo;
+          return TriggerStatus.badSick;
+        }
+
+        if (emotionalStatus == null) {
+          if (emotionalLog != null) {
+            emotionalStatus = intensityToStatus(emotionalLog.intensity);
+          } else {
+            emotionalStatus = TriggerStatus.goodNormal;
+          }
+        }
+
+        if (physicalStatus == null) {
+          if (physicalLog != null) {
+            physicalStatus = intensityToStatus(physicalLog.intensity);
+          } else {
+            physicalStatus = TriggerStatus.goodNormal;
+          }
+        }
+      }
+
+      if (!state.isModifiedAfterCompletion) {
+        state = state.copyWith(
+          isCompletedToday: true,
+          completedAt: latestLog.recordedAt.toLocal(),
+          checkInDate: todayStr,
+          emotionalStatus: emotionalStatus,
+          physicalStatus: physicalStatus,
+          naturalLanguageText: naturalLanguageText,
+          isModifiedAfterCompletion: false,
+        );
+        await _persistCurrentState();
       }
     } catch (_) {}
+  }
+
+  Future<void> loadTodayCheckIn([DateTime? now]) async {
+    await _loadLocalTodayCheckIn(now);
+    await _syncTodayCheckInFromRemote(now);
   }
 
   Future<void> _persistCurrentState() async {
@@ -109,6 +196,25 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       isModifiedAfterCompletion: false,
     );
     _persistCurrentState();
+    _syncCheckInToRemote();
+  }
+
+  Future<void> _syncCheckInToRemote() async {
+    try {
+      final token = await _storage.getAccessToken();
+      if (token == null || token.isEmpty) return;
+      final apiClient = ApiClient();
+      await apiClient.post(
+        ApiEndpoints.dailyCheckIn,
+        data: {
+          'emotionalStatus': state.emotionalStatus?.name ?? 'goodNormal',
+          'physicalStatus': state.physicalStatus?.name ?? 'goodNormal',
+          if (state.naturalLanguageText.isNotEmpty)
+            'naturalLanguageText': state.naturalLanguageText,
+        },
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+    } catch (_) {}
   }
 
   void checkAndResetIfNewDay([DateTime? currentDateTime]) {

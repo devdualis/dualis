@@ -16,6 +16,10 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CheckAntiburlaDto, AntiburlaCheckResponseDto } from './dto/antiburla.dto';
 import { SubmitTriageDto, TriageOutcomeResponseDto } from './dto/triage-outcome.dto';
 import {
+  SubmitDailyCheckInDto,
+  DailyCheckInResponseDto,
+} from './dto/daily-checkin.dto';
+import {
   GetTriageHistoryQueryDto,
   TriageHistoryResponseDto,
 } from './dto/triage-history.dto';
@@ -52,6 +56,25 @@ export class TriageController {
   ): Promise<TriageOutcomeResponseDto> {
     const userId = req.user?.id || req.user?.userId || req.user?.sub;
     return this.triageOutcomeService.processOutcome(userId, dto);
+  }
+
+  @Post('daily-checkin')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      expectedType: SubmitDailyCheckInDto,
+    }),
+  )
+  async createDailyCheckIn(
+    @Request() req: any,
+    @Body() dto: SubmitDailyCheckInDto,
+  ): Promise<DailyCheckInResponseDto> {
+    const userId = req.user?.id || req.user?.userId || req.user?.sub;
+    return this.triageOutcomeService.recordDailyCheckIn(userId, dto);
   }
 
   @Post('antiburla-check')

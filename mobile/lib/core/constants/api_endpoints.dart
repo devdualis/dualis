@@ -29,6 +29,7 @@ class ApiEndpoints {
   static const String emergencyEvent = '/v1/triage/emergency-event';
 
   static const String triageOutcome = '/v1/triage/outcome';
+  static const String dailyCheckIn = '/v1/triage/daily-checkin';
 
   static const String antiburlaCheck = '/v1/triage/antiburla-check';
 

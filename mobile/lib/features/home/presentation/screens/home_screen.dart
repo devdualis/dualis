@@ -29,17 +29,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final authState = ref.read(authControllerProvider);
       if (authState.user == null) {
-        ref.read(authControllerProvider.notifier).restoreSession();
+        await ref.read(authControllerProvider.notifier).restoreSession();
       }
       ref.read(triggerCheckInProvider.notifier).checkAndResetIfNewDay();
+      ref.read(triggerCheckInProvider.notifier).loadTodayCheckIn();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(authControllerProvider, (prev, next) {
+      if ((prev == null || !prev.isAuthenticated) && next.isAuthenticated) {
+        ref.read(triggerCheckInProvider.notifier).loadTodayCheckIn();
+      }
+    });
+
     final authState = ref.watch(authControllerProvider);
     final user = authState.user;
     final userName = (user?.name != null && user!.name.isNotEmpty) ? user.name : 'Paciente';
