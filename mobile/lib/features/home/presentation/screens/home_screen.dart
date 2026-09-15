@@ -8,6 +8,8 @@ import '../../../../shared/widgets/dualis_logo.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../emergency/domain/red_flag_evaluator.dart';
+import '../../../emergency/presentation/controllers/emergency_controller.dart';
 import '../../../triage/domain/triage_vertical.dart';
 import '../../domain/trigger_checkin_state.dart';
 import '../controllers/trigger_checkin_controller.dart';
@@ -205,12 +207,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     key: const Key('startTriageButton'),
                     text: buttonText,
                     onPressed: isReady
-                        ? () {
+                        ? () async {
                             // If already completed today and nothing changed, do nothing.
                             if (triggerState.isCompletedToday &&
                                 !triggerState.isModifiedAfterCompletion) {
                               return;
                             }
+
+                            final narrative = triggerState.naturalLanguageText.trim();
+                            if (narrative.isNotEmpty) {
+                              final emergency = RedFlagEvaluator.evaluateText(narrative);
+                              if (emergency != null) {
+                                if (context.mounted) {
+                                  ref
+                                      .read(emergencyControllerProvider.notifier)
+                                      .triggerEmergency(context, emergency);
+                                }
+                                return;
+                              }
+
+                              final navArgs = await ref
+                                  .read(triggerCheckInProvider.notifier)
+                                  .resolveTextDrivenNavigation();
+                              if (navArgs != null) {
+                                if (context.mounted) {
+                                  context.push(RoutePaths.triage, extra: navArgs);
+                                }
+                                return;
+                              }
+                              // Classification failed (offline/error) — fall through to
+                              // the axis-only routing below so the user isn't stuck.
+                            }
+
+                            if (!context.mounted) return;
                             final outcome = triggerState.routingOutcome;
                             switch (outcome) {
                               case RoutingOutcome.wellnessConfirmation:

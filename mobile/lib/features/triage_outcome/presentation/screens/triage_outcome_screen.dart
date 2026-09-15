@@ -8,6 +8,7 @@ import '../widgets/intensity_meter.dart';
 import '../widgets/disposition_card.dart';
 import '../widgets/organic_primacy_banner.dart';
 import '../widgets/article_card.dart';
+import '../widgets/ai_insight_card.dart';
 
 class TriageOutcomeScreen extends StatelessWidget {
   final TriageOutcome outcome;
@@ -146,7 +147,19 @@ class TriageOutcomeScreen extends StatelessWidget {
                 OrganicPrimacyBanner(notice: outcome.organicPrimacyNotice),
                 const SizedBox(height: 16),
               ],
-              DispositionCard(disposition: outcome.careDisposition),
+              if (outcome.aiClinicalConcept != null &&
+                  outcome.aiClinicalConcept!.isNotEmpty) ...[
+                AiInsightCard(
+                  mappedLayTerm: outcome.aiMappedLayTerm,
+                  clinicalConcept: outcome.aiClinicalConcept!,
+                  source: outcome.aiSource,
+                ),
+                const SizedBox(height: 16),
+              ],
+              DispositionCard(
+                disposition: outcome.careDisposition,
+                category: outcome.primaryCategory,
+              ),
               const SizedBox(height: 24),
               Row(
                 children: [

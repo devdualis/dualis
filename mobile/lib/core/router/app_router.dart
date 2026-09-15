@@ -77,6 +77,7 @@ GoRouter createRouter({String initialLocation = RoutePaths.onboarding}) {
               vertical: args.initialVertical,
               isDual: args.isDual,
               naturalLanguageText: args.naturalLanguageText,
+              preselectedCategoryKey: args.preselectedCategoryKey,
             );
           }
           final vertical =

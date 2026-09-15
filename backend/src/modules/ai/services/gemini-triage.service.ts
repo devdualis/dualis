@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { GoogleGenAI } from '@google/genai';
 import { ClassifySymptomDto, TriageClassificationResult } from '../dto/classify-symptom.dto';
 import { IdiomDictionaryService } from './idiom-dictionary.service';
+import { SymptomVectorService } from './symptom-vector.service';
 
 @Injectable()
 export class GeminiTriageService {
@@ -14,6 +15,7 @@ export class GeminiTriageService {
   constructor(
     @Optional() @Inject(ConfigService) private readonly configService?: ConfigService,
     @Optional() @Inject(IdiomDictionaryService) idiomDictionary?: IdiomDictionaryService,
+    @Optional() @Inject(SymptomVectorService) private readonly symptomVector?: SymptomVectorService,
   ) {
     this.idiomDict = idiomDictionary ?? new IdiomDictionaryService();
     const apiKey =
@@ -57,7 +59,19 @@ export class GeminiTriageService {
       };
     }
 
-    // 3. Gemini 1.5 Flash structured output
+    // 3. Symptom vector DB match (semantic, learns over time from Gemini classifications)
+    if (this.symptomVector) {
+      const vectorMatch = await this.symptomVector.matchSymptom(dto.text);
+      if (vectorMatch) {
+        this.cache.set(cacheKey, vectorMatch);
+        return {
+          ...vectorMatch,
+          latencyMs: Math.round(performance.now() - startTime),
+        };
+      }
+    }
+
+    // 4. Gemini 1.5 Flash structured output
     if (this.client) {
       try {
         const response = await this.client.models.generateContent({
@@ -99,13 +113,14 @@ export class GeminiTriageService {
         };
 
         this.cache.set(cacheKey, result);
+        this.symptomVector?.upsertFromClassification(dto.text, result).catch(() => {});
         return result;
       } catch (err) {
         this.logger.warn(`Gemini inference failed, falling back: ${(err as Error).message}`);
       }
     }
 
-    // 4. Heuristic Fallback (<2ms)
+    // 5. Heuristic Fallback (<2ms)
     const fallback: TriageClassificationResult = {
       primaryVertical: 'physical',
       systemOrDimension: 'general_somatic',

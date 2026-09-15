@@ -4,11 +4,55 @@ import '../../domain/triage_outcome_models.dart';
 
 class DispositionCard extends StatelessWidget {
   final CareDisposition disposition;
+  final String? category;
 
   const DispositionCard({
     super.key,
     required this.disposition,
+    this.category,
   });
+
+  // Self-care advice generic enough to fit any category ("rest and hydrate")
+  // reads as wrong for e.g. a skin rash or joint pain, so this tailors it
+  // to the detected system/dimension instead of one-size-fits-all copy.
+  static const Map<String, String> _selfCareByCategory = {
+    'cabeca_pescoco':
+        'Hidrate-se, evite telas por algumas horas e descanse em ambiente com pouca luz e ruído.',
+    'cardiovascular_torax':
+        'Evite esforço físico intenso e observe se a sensação persiste ou piora nas próximas horas.',
+    'respiratorio':
+        'Mantenha-se hidratado, evite ambientes com fumaça ou poeira e observe a evolução da respiração.',
+    'gastrointestinal_abdomen':
+        'Prefira alimentos leves, hidrate-se bem e evite frituras ou álcool nas próximas 24 horas.',
+    'coluna_dor_dorsal':
+        'Evite carregar peso, mantenha uma postura ereta e aplique compressas mornas na região dolorida.',
+    'membros_superiores':
+        'Reduza o esforço repetitivo com o membro afetado e aplique compressa fria por 15 minutos.',
+    'membros_inferiores':
+        'Eleve o membro afetado, aplique compressa fria e evite esforço físico intenso.',
+    'neurologico':
+        'Hidrate-se, evite mudanças bruscas de posição e descanse em ambiente calmo.',
+    'geniturinario_pelvico':
+        'Aumente a ingestão de água e evite segurar a urina por longos períodos.',
+    'dermatologico':
+        'Evite coçar a área afetada, mantenha a pele limpa e seca, e observe se surgem novos sintomas.',
+    'muscular_geral_sistemico':
+        'Priorize o descanso, hidrate-se bem e evite esforço físico nas próximas 24 horas.',
+    'endocrino_metabolico':
+        'Mantenha uma alimentação equilibrada, hidrate-se e monitore os sintomas nos próximos dias.',
+    'ansiosa_agitacao':
+        'Pratique respiração profunda e reduza estímulos (cafeína, telas) nas próximas horas.',
+    'depressiva_desanimo':
+        'Tente manter pequenas atividades da rotina e busque contato com pessoas próximas.',
+    'estresse_burnout':
+        'Reserve pausas curtas ao longo do dia e evite acumular novas demandas hoje.',
+    'somatica':
+        'Pratique técnicas de relaxamento e observe se os sintomas físicos se intensificam.',
+    'sono': 'Mantenha um horário regular para dormir e evite telas antes de deitar.',
+    'cognitiva_foco':
+        'Faça pausas curtas e frequentes, e evite multitarefas nas próximas horas.',
+    'autoestima': 'Pratique autocompaixão e evite se cobrar excessivamente hoje.',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +68,7 @@ class DispositionCard extends StatelessWidget {
         bgColor = const Color(0xFFE0F2F1);
         icon = Icons.spa_outlined;
         title = 'Auto-cuidado Monitorado';
-        description =
+        description = _selfCareByCategory[category] ??
             'Repouso, hidratação adequada e acompanhamento dos sintomas nas próximas 24 horas.';
         break;
       case CareDisposition.routineConsultation:

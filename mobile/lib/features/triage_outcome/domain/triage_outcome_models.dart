@@ -76,6 +76,10 @@ class TriageOutcome {
   final String? secondaryCategoryLabel;
   final String? secondarySomaticMapping;
   final int? secondaryIntensityScore;
+  final String? aiMappedLayTerm;
+  final String? aiClinicalConcept;
+  final String? aiSource;
+  final double? aiConfidence;
 
   const TriageOutcome({
     required this.id,
@@ -92,6 +96,10 @@ class TriageOutcome {
     this.secondaryCategoryLabel,
     this.secondarySomaticMapping,
     this.secondaryIntensityScore,
+    this.aiMappedLayTerm,
+    this.aiClinicalConcept,
+    this.aiSource,
+    this.aiConfidence,
   });
 
   factory TriageOutcome.fromJson(Map<String, dynamic> json) {
@@ -113,6 +121,10 @@ class TriageOutcome {
       secondaryCategoryLabel: json['secondaryCategoryLabel'] as String?,
       secondarySomaticMapping: json['secondarySomaticMapping'] as String?,
       secondaryIntensityScore: (json['secondaryIntensityScore'] as num?)?.toInt(),
+      aiMappedLayTerm: json['aiMappedLayTerm'] as String?,
+      aiClinicalConcept: json['aiClinicalConcept'] as String?,
+      aiSource: json['aiSource'] as String?,
+      aiConfidence: (json['aiConfidence'] as num?)?.toDouble(),
     );
   }
 
@@ -131,6 +143,10 @@ class TriageOutcome {
     String? secondaryCategoryLabel,
     String? secondarySomaticMapping,
     int? secondaryIntensityScore,
+    String? aiMappedLayTerm,
+    String? aiClinicalConcept,
+    String? aiSource,
+    double? aiConfidence,
   }) {
     return TriageOutcome(
       id: id ?? this.id,
@@ -147,6 +163,10 @@ class TriageOutcome {
       secondaryCategoryLabel: secondaryCategoryLabel ?? this.secondaryCategoryLabel,
       secondarySomaticMapping: secondarySomaticMapping ?? this.secondarySomaticMapping,
       secondaryIntensityScore: secondaryIntensityScore ?? this.secondaryIntensityScore,
+      aiMappedLayTerm: aiMappedLayTerm ?? this.aiMappedLayTerm,
+      aiClinicalConcept: aiClinicalConcept ?? this.aiClinicalConcept,
+      aiSource: aiSource ?? this.aiSource,
+      aiConfidence: aiConfidence ?? this.aiConfidence,
     );
   }
 
@@ -165,5 +185,9 @@ class TriageOutcome {
         if (secondaryCategoryLabel != null) 'secondaryCategoryLabel': secondaryCategoryLabel,
         if (secondarySomaticMapping != null) 'secondarySomaticMapping': secondarySomaticMapping,
         if (secondaryIntensityScore != null) 'secondaryIntensityScore': secondaryIntensityScore,
+        if (aiMappedLayTerm != null) 'aiMappedLayTerm': aiMappedLayTerm,
+        if (aiClinicalConcept != null) 'aiClinicalConcept': aiClinicalConcept,
+        if (aiSource != null) 'aiSource': aiSource,
+        if (aiConfidence != null) 'aiConfidence': aiConfidence,
       };
 }

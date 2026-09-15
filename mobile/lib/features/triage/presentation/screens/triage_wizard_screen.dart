@@ -28,12 +28,14 @@ class TriageWizardScreen extends ConsumerStatefulWidget {
   final TriageVertical vertical;
   final bool isDual;
   final String? naturalLanguageText;
+  final String? preselectedCategoryKey;
 
   const TriageWizardScreen({
     super.key,
     this.vertical = TriageVertical.psicoEmocional,
     this.isDual = false,
     this.naturalLanguageText,
+    this.preselectedCategoryKey,
   });
 
   @override
@@ -52,7 +54,12 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
         : AppColors.clinicalTeal;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(triageWizardNotifierProvider.notifier).setVertical(widget.vertical);
+      final notifier = ref.read(triageWizardNotifierProvider.notifier);
+      notifier.setVertical(widget.vertical);
+      final categoryKey = widget.preselectedCategoryKey;
+      if (categoryKey != null && categoryKey.isNotEmpty) {
+        notifier.presetCategoryAndSkip(categoryKey);
+      }
     });
   }
 
@@ -148,6 +155,15 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      if (state.currentStep == 1 &&
+                          widget.preselectedCategoryKey != null) ...[
+                        _buildDetectedCategoryBanner(
+                          context,
+                          activeColor,
+                          state.answers[0] ?? widget.preselectedCategoryKey!,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                       if (!currentQuestion.isPreview) ...[
                         Text(
                           _resolveQuestionText(context, currentQuestion.questionKey),
@@ -188,6 +204,48 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildDetectedCategoryBanner(
+    BuildContext context,
+    Color activeColor,
+    String categoryKey,
+  ) {
+    final label = TriagePreviewCard.resolveAnswerLabel(context, categoryKey);
+    return Row(
+      children: [
+        Icon(Icons.auto_awesome_rounded, size: 16, color: activeColor),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            'Detectamos: $label',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              color: activeColor,
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: () =>
+              ref.read(triageWizardNotifierProvider.notifier).goBack(),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: Text(
+            'Trocar categoria',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              decoration: TextDecoration.underline,
+              color: activeColor,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

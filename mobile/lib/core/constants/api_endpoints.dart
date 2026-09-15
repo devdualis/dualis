@@ -34,6 +34,7 @@ class ApiEndpoints {
   static const String antiburlaCheck = '/v1/triage/antiburla-check';
 
   static const String triageHistory = '/v1/triage/history';
+  static const String classifySymptom = '/v1/ai/classify-symptom';
   static const String exportData = '/v1/auth/export-data';
   static const String deleteAccount = '/v1/auth/account';
 }

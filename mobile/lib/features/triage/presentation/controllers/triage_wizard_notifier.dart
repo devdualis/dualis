@@ -20,6 +20,13 @@ class TriageWizardNotifier extends _$TriageWizardNotifier {
     state = state.copyWith(activeVertical: vertical, currentStep: 0, answers: {});
   }
 
+  /// Pre-fills the step-0 category from an AI/vector classification of the typed
+  /// symptom text and jumps straight to step 1 (onset), so free text always
+  /// reaches the onset/severity questions instead of requiring a manual pick.
+  void presetCategoryAndSkip(String categoryKey) {
+    state = state.copyWith(answers: {0: categoryKey}, currentStep: 1);
+  }
+
   bool selectOption(BuildContext context, int stepIndex, String optionKey) {
     final emergency = _evaluateGate(stepIndex, optionKey);
     if (emergency != null) {

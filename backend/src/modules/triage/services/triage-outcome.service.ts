@@ -1,4 +1,4 @@
-import { Injectable, Inject, Optional, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, Optional, BadRequestException, Logger } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { sql } from 'drizzle-orm';
 import { DRIZZLE_DB } from '../../../database/database.service';
@@ -7,6 +7,7 @@ import { symptomLogs } from '../../../database/schema';
 import { EncryptionService } from '../../../common/encryption/encryption.service';
 import { ArticlesCatalogService } from './articles-catalog.service';
 import { ArticlesVectorService } from './articles-vector.service';
+import { GeminiTriageService } from '../../ai/services/gemini-triage.service';
 import {
   CareDisposition,
   RecommendedArticleDto,
@@ -26,6 +27,7 @@ interface CategoryMapping {
 
 @Injectable()
 export class TriageOutcomeService {
+  private readonly logger = new Logger(TriageOutcomeService.name);
   private readonly articlesVector?: ArticlesVectorService;
   private readonly articlesCatalog?: ArticlesCatalogService;
 
@@ -36,6 +38,8 @@ export class TriageOutcomeService {
     articlesVector?: ArticlesVectorService | ArticlesCatalogService,
     @Optional() @Inject(ArticlesCatalogService)
     articlesCatalog?: ArticlesCatalogService,
+    @Optional() @Inject(GeminiTriageService)
+    private readonly geminiTriage?: GeminiTriageService,
   ) {
     if (articlesVector && 'searchArticles' in articlesVector) {
       this.articlesVector = articlesVector as ArticlesVectorService;
@@ -391,6 +395,26 @@ export class TriageOutcomeService {
       careDisposition = 'consulta_rotina';
     }
 
+    let aiMappedLayTerm: string | undefined;
+    let aiClinicalConcept: string | undefined;
+    let aiSource: TriageOutcomeResponseDto['aiSource'];
+    let aiConfidence: number | undefined;
+
+    if (this.geminiTriage && narrative && narrative.trim().length >= 2) {
+      try {
+        const classification = await this.geminiTriage.classify({ text: narrative, language: 'pt' });
+        aiMappedLayTerm = classification.mappedLayTerm;
+        aiClinicalConcept = classification.clinicalConcept;
+        aiSource = classification.source;
+        aiConfidence = classification.confidence;
+        if (classification.isEmergencyCandidate) {
+          careDisposition = 'emergencia';
+        }
+      } catch (err) {
+        this.logger.warn(`AI classification of narrative failed: ${(err as Error).message}`);
+      }
+    }
+
     let recommendedArticles: RecommendedArticleDto[] = [];
     if (this.articlesVector) {
       recommendedArticles = await this.articlesVector.searchArticles({
@@ -426,6 +450,10 @@ export class TriageOutcomeService {
           organicPrimacyNotice,
           recommendedArticles,
           recordedAt: record.recordedAt.toISOString(),
+          aiMappedLayTerm,
+          aiClinicalConcept,
+          aiSource,
+          aiConfidence,
         };
       }
     }
@@ -464,6 +492,10 @@ export class TriageOutcomeService {
       organicPrimacyNotice,
       recommendedArticles,
       recordedAt: savedRecord.recordedAt.toISOString(),
+      aiMappedLayTerm,
+      aiClinicalConcept,
+      aiSource,
+      aiConfidence,
     };
   }
 

@@ -49,4 +49,8 @@ export interface TriageOutcomeResponseDto {
   organicPrimacyNotice?: string;
   recommendedArticles: RecommendedArticleDto[];
   recordedAt: string;
+  aiMappedLayTerm?: string;
+  aiClinicalConcept?: string;
+  aiSource?: 'gemini_flash' | 'idiom_cache' | 'dictionary_fallback' | 'vector_match';
+  aiConfidence?: number;
 }
