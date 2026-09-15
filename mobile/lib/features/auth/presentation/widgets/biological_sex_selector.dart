@@ -27,43 +27,126 @@ class BiologicalSexSelector extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        SizedBox(
-          width: double.infinity,
-          child: SegmentedButton<Gender>(
-            segments: const [
-              ButtonSegment<Gender>(
-                value: Gender.masculino,
-                label: Text('Masculino'),
-                icon: Icon(Icons.male, size: 18),
-              ),
-              ButtonSegment<Gender>(
-                value: Gender.feminino,
-                label: Text('Feminino'),
-                icon: Icon(Icons.female, size: 18),
-              ),
-              ButtonSegment<Gender>(
-                value: Gender.outro,
-                label: Text('Outro'),
-                icon: Icon(Icons.person_outline, size: 18),
-              ),
-            ],
-            selected: {selectedGender},
-            onSelectionChanged: (Set<Gender> newSelection) {
-              if (newSelection.isNotEmpty) {
-                onGenderChanged(newSelection.first);
-              }
-            },
-            style: ButtonStyle(
-              visualDensity: VisualDensity.comfortable,
-              shape: WidgetStateProperty.all(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.outlineLight, width: 1.5),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          clipBehavior: Clip.hardEdge,
+          child: IntrinsicHeight(
+            child: Row(
+              children: [
+                _GenderOption(
+                  label: 'Masculino',
+                  icon: Icons.male_rounded,
+                  value: Gender.masculino,
+                  selected: selectedGender == Gender.masculino,
+                  onTap: () => onGenderChanged(Gender.masculino),
+                  isFirst: true,
                 ),
-              ),
+                _Divider(visible: selectedGender != Gender.masculino && selectedGender != Gender.feminino),
+                _GenderOption(
+                  label: 'Feminino',
+                  icon: Icons.female_rounded,
+                  value: Gender.feminino,
+                  selected: selectedGender == Gender.feminino,
+                  onTap: () => onGenderChanged(Gender.feminino),
+                ),
+                _Divider(visible: selectedGender != Gender.feminino && selectedGender != Gender.outro),
+                _GenderOption(
+                  label: 'Outro',
+                  icon: Icons.person_outline_rounded,
+                  value: Gender.outro,
+                  selected: selectedGender == Gender.outro,
+                  onTap: () => onGenderChanged(Gender.outro),
+                  isLast: true,
+                ),
+              ],
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _Divider extends StatelessWidget {
+  final bool visible;
+  const _Divider({required this.visible});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: 1,
+      color: visible ? AppColors.outlineLight : Colors.transparent,
+    );
+  }
+}
+
+class _GenderOption extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Gender value;
+  final bool selected;
+  final VoidCallback onTap;
+  final bool isFirst;
+  final bool isLast;
+
+  const _GenderOption({
+    required this.label,
+    required this.icon,
+    required this.value,
+    required this.selected,
+    required this.onTap,
+    this.isFirst = false,
+    this.isLast = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.horizontal(
+      left: isFirst ? const Radius.circular(11) : Radius.zero,
+      right: isLast ? const Radius.circular(11) : Radius.zero,
+    );
+
+    return Expanded(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        color: selected ? AppColors.softIndigo : Colors.transparent,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: borderRadius,
+            splashColor: AppColors.softIndigo.withValues(alpha: 0.15),
+            highlightColor: AppColors.softIndigo.withValues(alpha: 0.08),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
+                    size: 18,
+                    color: selected ? Colors.white : AppColors.textSecondaryLight,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    label,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                      color: selected ? Colors.white : AppColors.textSecondaryLight,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -4,6 +4,7 @@ export interface ExportedProfileDto {
   email: string;
   gender: string;
   dateOfBirth: string | null;
+  picture?: string | null;
   createdAt: string;
   updatedAt: string;
 }

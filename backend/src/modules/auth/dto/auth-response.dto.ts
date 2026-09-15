@@ -4,6 +4,7 @@ export interface SanitizedUser {
   email: string;
   gender: string;
   dateOfBirth: string | null;
+  picture?: string | null;
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -13,3 +14,4 @@ export class AuthResponseDto {
   refreshToken!: string;
   user!: SanitizedUser;
 }
+

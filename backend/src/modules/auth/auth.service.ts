@@ -24,6 +24,8 @@ import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto, SanitizedUser } from './dto/auth-response.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
 import { UserDataExportResponseDto } from './dto/export-data.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -95,6 +97,7 @@ export class AuthService {
       email: created.email,
       gender: created.gender,
       dateOfBirth: created.dateOfBirth,
+      picture: created.picture || null,
       createdAt: created.createdAt,
       updatedAt: created.updatedAt,
     };
@@ -135,6 +138,7 @@ export class AuthService {
       email: user.email,
       gender: user.gender,
       dateOfBirth: user.dateOfBirth,
+      picture: user.picture || null,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -191,6 +195,7 @@ export class AuthService {
           email: userRecord.email,
           gender: userRecord.gender,
           dateOfBirth: userRecord.dateOfBirth,
+          picture: userRecord.picture || null,
           createdAt: userRecord.createdAt.toISOString(),
           updatedAt: userRecord.updatedAt.toISOString(),
         },
@@ -279,6 +284,94 @@ export class AuthService {
     };
   }
 
+  async updateProfile(
+    userId: string,
+    dto: UpdateProfileDto,
+  ): Promise<SanitizedUser> {
+    const updated = await this.db.transaction(async (tx) => {
+      await tx.execute(
+        sql`SELECT set_config('app.current_user_id', ${userId}, true)`,
+      );
+
+      const updateData: Partial<typeof users.$inferInsert> = {
+        updatedAt: new Date(),
+      };
+      if (dto.name !== undefined) updateData.name = dto.name;
+      if (dto.dateOfBirth !== undefined) updateData.dateOfBirth = dto.dateOfBirth;
+      if (dto.picture !== undefined) updateData.picture = dto.picture;
+      if (dto.gender !== undefined) updateData.gender = dto.gender;
+
+      const [record] = await tx
+        .update(users)
+        .set(updateData)
+        .where(eq(users.id, userId))
+        .returning();
+
+      return record;
+    });
+
+    if (!updated) {
+      throw new UnauthorizedException('Usuário não encontrado.');
+    }
+
+    return {
+      id: updated.id,
+      name: updated.name,
+      email: updated.email,
+      gender: updated.gender,
+      dateOfBirth: updated.dateOfBirth,
+      picture: updated.picture || null,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
+    };
+  }
+
+  async changePassword(
+    userId: string,
+    dto: ChangePasswordDto,
+  ): Promise<{ success: boolean; message: string }> {
+    const user = await this.db.transaction(async (tx) => {
+      await tx.execute(
+        sql`SELECT set_config('app.current_user_id', ${userId}, true)`,
+      );
+      const [record] = await tx
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+      return record;
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Usuário não encontrado.');
+    }
+
+    const isMatch = await verifyPassword(user.passwordHash, dto.currentPassword);
+    if (!isMatch) {
+      throw new UnauthorizedException('A senha atual fornecida está incorreta.');
+    }
+
+    const newPasswordHash = await hashPassword(dto.newPassword);
+
+    await this.db.transaction(async (tx) => {
+      await tx.execute(
+        sql`SELECT set_config('app.current_user_id', ${userId}, true)`,
+      );
+      await tx
+        .update(users)
+        .set({
+          passwordHash: newPasswordHash,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, userId));
+    });
+
+    return {
+      success: true,
+      message: 'Senha alterada com sucesso.',
+    };
+  }
+
   async validateUserById(id: string): Promise<SanitizedUser | null> {
     const user = await this.db.transaction(async (tx) => {
       await tx.execute(
@@ -300,6 +393,7 @@ export class AuthService {
       email: user.email,
       gender: user.gender,
       dateOfBirth: user.dateOfBirth,
+      picture: user.picture || null,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

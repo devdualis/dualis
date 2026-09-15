@@ -8,4 +8,5 @@ class RoutePaths {
   static const String triageOutcome = '/triage-outcome';
   static const String history = '/history';
   static const String privacyCenter = '/privacy-center';
+  static const String settings = '/settings';
 }

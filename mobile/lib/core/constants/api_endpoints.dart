@@ -10,28 +10,24 @@ class ApiEndpoints {
     return 'http://localhost:3000';
   }
 
-  // Base URL (defaults to platform-specific localhost, can be overridden via dart-define)
   static const String _envBaseUrl = String.fromEnvironment('API_BASE_URL');
 
   static String get baseUrl => _envBaseUrl.isNotEmpty ? _envBaseUrl : _defaultBaseUrl;
 
-  // Authentication Endpoints
   static const String register = '/v1/auth/register';
   static const String login = '/v1/auth/login';
   static const String me = '/v1/auth/me';
   static const String refresh = '/v1/auth/refresh';
+  static const String updateProfile = '/v1/auth/profile';
+  static const String changePassword = '/v1/auth/change-password';
 
-  // Legal & Regulatory Endpoints
   static const String disclaimer = '/v1/legal/disclaimer';
   static const String consent = '/v1/legal/consent';
 
-  // Triage Emergency Audit Endpoints
   static const String emergencyEvent = '/v1/triage/emergency-event';
 
-  // Triage Outcome Endpoints
   static const String triageOutcome = '/v1/triage/outcome';
 
-  // Antiburla Endpoints
   static const String antiburlaCheck = '/v1/triage/antiburla-check';
 
   static const String triageHistory = '/v1/triage/history';

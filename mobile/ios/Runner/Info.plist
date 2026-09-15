@@ -4,6 +4,10 @@
 <dict>
 	<key>NSFaceIDUsageDescription</key>
 	<string>O DualisCheckUp utiliza biometria para proteger o acesso aos seus dados médicos confidenciais e registros de triagem.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Usamos a câmera para sua foto de perfil.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Usamos sua galeria para sua foto de perfil.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>

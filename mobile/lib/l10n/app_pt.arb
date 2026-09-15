@@ -759,5 +759,127 @@
   "close": "Fechar",
   "@close": {
     "description": "Generic close button text"
+  },
+  "settingsTitle": "Configurações",
+  "@settingsTitle": {
+    "description": "Title for the settings and profile management screen"
+  },
+  "profileSection": "Perfil e Identificação",
+  "@profileSection": {
+    "description": "Section header for user profile details"
+  },
+  "changeAvatar": "Alterar Foto",
+  "@changeAvatar": {
+    "description": "Action button to change user avatar"
+  },
+  "selectAvatar": "Escolha seu Avatar",
+  "@selectAvatar": {
+    "description": "Title for avatar selection modal"
+  },
+  "nameLabel": "Nome Completo",
+  "@nameLabel": {
+    "description": "Label for full name input field"
+  },
+  "dateOfBirthLabel": "Data de Nascimento",
+  "@dateOfBirthLabel": {
+    "description": "Label for date of birth picker field"
+  },
+  "ageLabel": "Idade",
+  "@ageLabel": {
+    "description": "Label for calculated age display"
+  },
+  "yearsOld": "{age} anos",
+  "@yearsOld": {
+    "description": "Display text for age in years",
+    "placeholders": {
+      "age": {
+        "type": "int"
+      }
+    }
+  },
+  "saveProfile": "Salvar Alterações",
+  "@saveProfile": {
+    "description": "Button to save profile modifications"
+  },
+  "profileUpdatedSuccess": "Perfil atualizado com sucesso!",
+  "@profileUpdatedSuccess": {
+    "description": "Snackbar message when profile is successfully updated"
+  },
+  "securitySection": "Segurança e Acesso",
+  "@securitySection": {
+    "description": "Section header for security settings"
+  },
+  "changePassword": "Alterar Senha",
+  "@changePassword": {
+    "description": "Title and button for password change"
+  },
+  "currentPassword": "Senha Atual",
+  "@currentPassword": {
+    "description": "Label for current password input"
+  },
+  "newPassword": "Nova Senha",
+  "@newPassword": {
+    "description": "Label for new password input"
+  },
+  "confirmNewPassword": "Confirmar Nova Senha",
+  "@confirmNewPassword": {
+    "description": "Label for new password confirmation input"
+  },
+  "passwordChangedSuccess": "Senha alterada com sucesso!",
+  "@passwordChangedSuccess": {
+    "description": "Snackbar message when password is successfully changed"
+  },
+  "passwordsDoNotMatch": "As novas senhas não coincidem.",
+  "@passwordsDoNotMatch": {
+    "description": "Error message when new password and confirmation do not match"
+  },
+  "passwordComplexityHint": "Mínimo de 8 caracteres, com letra maiúscula, minúscula, número e símbolo.",
+  "@passwordComplexityHint": {
+    "description": "Hint describing password complexity requirements"
+  },
+  "privacyShortcut": "Central de Privacidade e LGPD",
+  "@privacyShortcut": {
+    "description": "Navigation link to privacy center"
+  },
+  "logoutButton": "Sair da Conta",
+  "@logoutButton": {
+    "description": "Button to securely log out from application"
+  },
+  "settingsLanguageSection": "Idioma do Aplicativo",
+  "@settingsLanguageSection": {
+    "description": "Section header for language selection in settings"
+  },
+  "settingsLanguagePortuguese": "Português (Brasil)",
+  "@settingsLanguagePortuguese": {
+    "description": "Portuguese language option"
+  },
+  "settingsLanguageSpanish": "Español",
+  "@settingsLanguageSpanish": {
+    "description": "Spanish language option"
+  },
+  "settingsLanguageEnglish": "English",
+  "@settingsLanguageEnglish": {
+    "description": "English language option"
+  },
+  "settingsPrivacySection": "Privacidade e Dados",
+  "@settingsPrivacySection": {
+    "description": "Section header for privacy and data in settings"
+  },
+  "settingsPrivacyCenterTile": "Central de Privacidade e LGPD",
+  "@settingsPrivacyCenterTile": {
+    "description": "Tile to navigate to full privacy center"
+  },
+  "settingsPrivacyCenterSubtitle": "Acesse e gerencie seus dados de saúde",
+  "@settingsPrivacyCenterSubtitle": {
+    "description": "Subtitle for privacy center tile"
+  },
+  "settingsDataHistoryTile": "Histórico e Tendências",
+  "@settingsDataHistoryTile": {
+    "description": "Tile to navigate to historical dashboard"
+  },
+  "settingsDataHistorySubtitle": "Visualize seu histórico de triagens",
+  "@settingsDataHistorySubtitle": {
+    "description": "Subtitle for history tile"
   }
 }
+

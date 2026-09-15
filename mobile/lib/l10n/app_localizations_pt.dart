@@ -618,4 +618,96 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get close => 'Fechar';
+
+  @override
+  String get settingsTitle => 'Configurações';
+
+  @override
+  String get profileSection => 'Perfil e Identificação';
+
+  @override
+  String get changeAvatar => 'Alterar Foto';
+
+  @override
+  String get selectAvatar => 'Escolha seu Avatar';
+
+  @override
+  String get nameLabel => 'Nome Completo';
+
+  @override
+  String get dateOfBirthLabel => 'Data de Nascimento';
+
+  @override
+  String get ageLabel => 'Idade';
+
+  @override
+  String yearsOld(int age) {
+    return '$age anos';
+  }
+
+  @override
+  String get saveProfile => 'Salvar Alterações';
+
+  @override
+  String get profileUpdatedSuccess => 'Perfil atualizado com sucesso!';
+
+  @override
+  String get securitySection => 'Segurança e Acesso';
+
+  @override
+  String get changePassword => 'Alterar Senha';
+
+  @override
+  String get currentPassword => 'Senha Atual';
+
+  @override
+  String get newPassword => 'Nova Senha';
+
+  @override
+  String get confirmNewPassword => 'Confirmar Nova Senha';
+
+  @override
+  String get passwordChangedSuccess => 'Senha alterada com sucesso!';
+
+  @override
+  String get passwordsDoNotMatch => 'As novas senhas não coincidem.';
+
+  @override
+  String get passwordComplexityHint =>
+      'Mínimo de 8 caracteres, com letra maiúscula, minúscula, número e símbolo.';
+
+  @override
+  String get privacyShortcut => 'Central de Privacidade e LGPD';
+
+  @override
+  String get logoutButton => 'Sair da Conta';
+
+  @override
+  String get settingsLanguageSection => 'Idioma do Aplicativo';
+
+  @override
+  String get settingsLanguagePortuguese => 'Português (Brasil)';
+
+  @override
+  String get settingsLanguageSpanish => 'Español';
+
+  @override
+  String get settingsLanguageEnglish => 'English';
+
+  @override
+  String get settingsPrivacySection => 'Privacidade e Dados';
+
+  @override
+  String get settingsPrivacyCenterTile => 'Central de Privacidade e LGPD';
+
+  @override
+  String get settingsPrivacyCenterSubtitle =>
+      'Acesse e gerencie seus dados de saúde';
+
+  @override
+  String get settingsDataHistoryTile => 'Histórico e Tendências';
+
+  @override
+  String get settingsDataHistorySubtitle =>
+      'Visualize seu histórico de triagens';
 }

@@ -18,6 +18,20 @@ abstract class AuthRepository {
   });
 
   Future<UserProfile> getProfile({required String token});
+
+  Future<UserProfile> updateProfile({
+    required String token,
+    String? name,
+    String? dateOfBirth,
+    String? picture,
+    String? gender,
+  });
+
+  Future<void> changePassword({
+    required String token,
+    required String currentPassword,
+    required String newPassword,
+  });
 }
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -58,5 +72,35 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<UserProfile> getProfile({required String token}) {
     return remoteDataSource.getProfile(token: token);
+  }
+
+  @override
+  Future<UserProfile> updateProfile({
+    required String token,
+    String? name,
+    String? dateOfBirth,
+    String? picture,
+    String? gender,
+  }) {
+    return remoteDataSource.updateProfile(
+      token: token,
+      name: name,
+      dateOfBirth: dateOfBirth,
+      picture: picture,
+      gender: gender,
+    );
+  }
+
+  @override
+  Future<void> changePassword({
+    required String token,
+    required String currentPassword,
+    required String newPassword,
+  }) {
+    return remoteDataSource.changePassword(
+      token: token,
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+    );
   }
 }

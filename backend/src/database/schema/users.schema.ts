@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, date, timestamp, pgPolicy } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, date, timestamp, pgPolicy, text } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 export const users = pgTable(
@@ -10,6 +10,7 @@ export const users = pgTable(
     passwordHash: varchar('password_hash', { length: 255 }).notNull(),
     gender: varchar('gender', { length: 50 }).notNull(),
     dateOfBirth: date('date_of_birth'),
+    picture: text('picture'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
@@ -21,3 +22,4 @@ export const users = pgTable(
     }),
   ],
 );
+

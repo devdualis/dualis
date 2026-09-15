@@ -13,6 +13,7 @@ import '../../features/triage_outcome/domain/triage_outcome_models.dart';
 import '../../features/triage_outcome/presentation/screens/triage_outcome_screen.dart';
 import '../../features/dashboard/presentation/screens/historical_dashboard_screen.dart';
 import '../../features/privacy/presentation/screens/privacy_center_screen.dart';
+import '../../features/settings/presentation/screens/settings_screen.dart';
 import 'route_paths.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -103,6 +104,11 @@ GoRouter createRouter({String initialLocation = RoutePaths.onboarding}) {
         path: RoutePaths.privacyCenter,
         name: 'privacyCenter',
         builder: (context, state) => const PrivacyCenterScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.settings,
+        name: 'settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );

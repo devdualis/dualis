@@ -144,6 +144,77 @@ class AuthController extends Notifier<AuthState> {
     }
   }
 
+  Future<bool> updateProfile({
+    String? name,
+    String? dateOfBirth,
+    String? picture,
+    String? gender,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      final token = state.accessToken ?? await _secureStorage.getAccessToken();
+      if (token == null || token.isEmpty) {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: 'Sessão expirada. Faça login novamente.',
+        );
+        return false;
+      }
+
+      final updated = await _repository.updateProfile(
+        token: token,
+        name: name,
+        dateOfBirth: dateOfBirth,
+        picture: picture,
+        gender: gender,
+      );
+
+      state = state.copyWith(
+        isLoading: false,
+        user: updated,
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: _extractErrorMessage(e),
+      );
+      return false;
+    }
+  }
+
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      final token = state.accessToken ?? await _secureStorage.getAccessToken();
+      if (token == null || token.isEmpty) {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: 'Sessão expirada. Faça login novamente.',
+        );
+        return false;
+      }
+
+      await _repository.changePassword(
+        token: token,
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+
+      state = state.copyWith(isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: _extractErrorMessage(e),
+      );
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     await _secureStorage.clearAll();
     state = const AuthState.initial();

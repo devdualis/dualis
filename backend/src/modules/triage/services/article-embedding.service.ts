@@ -27,31 +27,23 @@ export class ArticleEmbeddingService {
 
   async embed(text: string): Promise<number[]> {
     if (this.client) {
-      try {
-        const response = await this.client.models.embedContent({
-          model: 'gemini-embedding-2',
-          contents: text,
-          config: { outputDimensionality: 768 },
-        });
-        const values = (response as any)?.embeddings?.[0]?.values || (response as any)?.embedding?.values;
-        if (Array.isArray(values) && values.length > 0) {
-          return values;
-        }
-      } catch (err) {
+      const models = ['gemini-embedding-001', 'gemini-embedding-2', 'text-embedding-004'];
+      for (const model of models) {
         try {
-          const fallbackRes = await this.client.models.embedContent({
-            model: 'gemini-embedding-001',
+          const response = await this.client.models.embedContent({
+            model,
             contents: text,
             config: { outputDimensionality: 768 },
           });
-          const values = (fallbackRes as any)?.embeddings?.[0]?.values || (fallbackRes as any)?.embedding?.values;
+          const values = (response as any)?.embeddings?.[0]?.values || (response as any)?.embedding?.values;
           if (Array.isArray(values) && values.length > 0) {
             return values;
           }
-        } catch (innerErr) {
-          this.logger.warn(`Gemini embedding failed, falling back to clinical vector projection: ${(innerErr as Error).message}`);
+        } catch (err) {
+          // Try next model in list
         }
       }
+      this.logger.warn('Gemini embedding models failed, falling back to clinical vector projection');
     }
     return this.generateDeterministicEmbedding(text);
   }

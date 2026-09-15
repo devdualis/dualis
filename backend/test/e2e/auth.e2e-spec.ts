@@ -31,6 +31,7 @@ class MockAuthService {
     passwordHash: string;
     gender: string;
     dateOfBirth: string | null;
+    picture: string | null;
     createdAt: Date;
     updatedAt: Date;
   }> = [];
@@ -60,6 +61,7 @@ class MockAuthService {
       passwordHash,
       gender: dto.gender,
       dateOfBirth: dto.dateOfBirth,
+      picture: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -72,6 +74,7 @@ class MockAuthService {
       email: user.email,
       gender: user.gender,
       dateOfBirth: user.dateOfBirth,
+      picture: user.picture,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -102,6 +105,7 @@ class MockAuthService {
       email: user.email,
       gender: user.gender,
       dateOfBirth: user.dateOfBirth,
+      picture: user.picture,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -111,6 +115,43 @@ class MockAuthService {
       ...tokens,
       user: sanitizedUser,
     };
+  }
+
+  async updateProfile(userId: string, dto: any): Promise<SanitizedUser> {
+    const user = this.users.find((u) => u.id === userId);
+    if (!user) {
+      throw new UnauthorizedException('Usuário não encontrado.');
+    }
+    if (dto.name !== undefined) user.name = dto.name;
+    if (dto.dateOfBirth !== undefined) user.dateOfBirth = dto.dateOfBirth;
+    if (dto.picture !== undefined) user.picture = dto.picture;
+    if (dto.gender !== undefined) user.gender = dto.gender;
+    user.updatedAt = new Date();
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      gender: user.gender,
+      dateOfBirth: user.dateOfBirth,
+      picture: user.picture,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+
+  async changePassword(userId: string, dto: any): Promise<{ success: boolean; message: string }> {
+    const user = this.users.find((u) => u.id === userId);
+    if (!user) {
+      throw new UnauthorizedException('Usuário não encontrado.');
+    }
+    const isMatch = await verifyPassword(user.passwordHash, dto.currentPassword);
+    if (!isMatch) {
+      throw new UnauthorizedException('A senha atual fornecida está incorreta.');
+    }
+    user.passwordHash = await hashPassword(dto.newPassword);
+    user.updatedAt = new Date();
+    return { success: true, message: 'Senha alterada com sucesso.' };
   }
 
   async validateUserById(id: string): Promise<SanitizedUser | null> {
@@ -123,6 +164,7 @@ class MockAuthService {
       email: user.email,
       gender: user.gender,
       dateOfBirth: user.dateOfBirth,
+      picture: user.picture,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -295,5 +337,60 @@ describe('AuthModule E2E Integration Suite (AUTH-01 & AUTH-02)', () => {
     expect(body.email).toBe(validRegistrationPayload.email);
     expect(body.name).toBe(validRegistrationPayload.name);
     expect(body.passwordHash).toBeUndefined();
+  });
+
+  it('Scenario 7: PATCH /v1/auth/profile with Bearer token updates name, dateOfBirth, picture and returns HTTP 200', async () => {
+    const updatePayload = {
+      name: 'Carlos Alberto Modificado',
+      dateOfBirth: '1989-11-20',
+      picture: 'avatar_clinical_teal_02',
+    };
+
+    const res = await app.inject({
+      method: 'PATCH',
+      url: '/v1/auth/profile',
+      headers: {
+        authorization: `Bearer ${validAccessToken}`,
+      },
+      payload: updatePayload,
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = JSON.parse(res.payload);
+    expect(body.name).toBe(updatePayload.name);
+    expect(body.dateOfBirth).toBe(updatePayload.dateOfBirth);
+    expect(body.picture).toBe(updatePayload.picture);
+  });
+
+  it('Scenario 8: POST /v1/auth/change-password with correct current password returns HTTP 200; with wrong password returns HTTP 401', async () => {
+    const wrongRes = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/change-password',
+      headers: {
+        authorization: `Bearer ${validAccessToken}`,
+      },
+      payload: {
+        currentPassword: 'WrongPassword999!',
+        newPassword: 'BrandNewSecurePassword123!',
+      },
+    });
+
+    expect(wrongRes.statusCode).toBe(401);
+
+    const correctRes = await app.inject({
+      method: 'POST',
+      url: '/v1/auth/change-password',
+      headers: {
+        authorization: `Bearer ${validAccessToken}`,
+      },
+      payload: {
+        currentPassword: validRegistrationPayload.password,
+        newPassword: 'BrandNewSecurePassword123!',
+      },
+    });
+
+    expect(correctRes.statusCode).toBe(200);
+    const body = JSON.parse(correctRes.payload);
+    expect(body.success).toBe(true);
   });
 });

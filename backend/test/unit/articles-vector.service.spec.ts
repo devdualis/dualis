@@ -125,4 +125,49 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
     expect(articles[0].id).toBe('art-ansiedade-01');
     expect(articles[0].author).toContain('Dra. Camila Prado');
   });
+
+  it('6. Seed catalog comprehensively covers all 7 emotional dimensions and 12 physical systems', () => {
+    expect(vectorService.seedArticles).toHaveLength(39);
+
+    const emotionalCategories = [
+      'ansiosa_agitacao',
+      'depressiva_desanimo',
+      'estresse_burnout',
+      'somatica',
+      'sono',
+      'cognitiva_foco',
+      'autoestima',
+    ];
+
+    const physicalCategories = [
+      'cabeca_pescoco',
+      'cardiovascular_torax',
+      'respiratorio',
+      'gastrointestinal_abdomen',
+      'coluna_dor_dorsal',
+      'membros_superiores',
+      'membros_inferiores',
+      'neurologico',
+      'geniturinario_pelvico',
+      'dermatologico',
+      'muscular_geral_sistemico',
+      'endocrino_metabolico',
+    ];
+
+    for (const cat of [...emotionalCategories, ...physicalCategories]) {
+      const matching = vectorService.seedArticles.filter((a) => a.category === cat);
+      expect(matching.length).toBeGreaterThanOrEqual(2);
+    }
+
+    const general = vectorService.seedArticles.filter((a) => a.category === 'geral');
+    expect(general).toHaveLength(1);
+
+    for (const article of vectorService.seedArticles) {
+      expect(article.title.length).toBeGreaterThan(5);
+      expect(article.summary.length).toBeGreaterThan(10);
+      expect(article.contentMarkdown.length).toBeGreaterThan(20);
+      expect(article.keywords.length).toBeGreaterThanOrEqual(4);
+      expect(article.url).toContain('https://dualis.health/artigos/');
+    }
+  });
 });

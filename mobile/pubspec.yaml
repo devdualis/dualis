@@ -37,6 +37,9 @@ dependencies:
   # Device & Telephony Intents
   url_launcher: ^6.3.2
 
+  # Media Picker (Gallery & Camera)
+  image_picker: ^1.1.2
+
   # Offline Storage & Outbox Sync (Drift SQLite)
   drift: ^2.35.0
   drift_flutter: ^0.3.1

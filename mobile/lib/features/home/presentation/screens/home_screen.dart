@@ -6,7 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
-import '../../../../shared/widgets/language_picker_button.dart';
+
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../triage/domain/triage_vertical.dart';
 import '../../domain/trigger_checkin_state.dart';
@@ -16,6 +16,7 @@ import '../widgets/dual_axis_trigger_card.dart';
 import '../widgets/wellness_confirmation_dialog.dart';
 import '../../../sync/presentation/widgets/offline_indicator_banner.dart';
 import '../../../sync/presentation/controllers/sync_outbox_worker.dart';
+import '../../../settings/presentation/widgets/avatar_selector_sheet.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -35,49 +36,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
       ref.read(triggerCheckInProvider.notifier).checkAndResetIfNewDay();
     });
-  }
-
-  Future<void> _handleLogout() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(
-          'Sair da Conta',
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          'Deseja realmente encerrar sua sessão? Seus dados clínicos permanecem seguros e criptografados.',
-          style: GoogleFonts.plusJakartaSans(fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(
-              'Cancelar',
-              style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondaryLight),
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.emergencyCrimson,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(
-              'Sair',
-              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true && mounted) {
-      await ref.read(authControllerProvider.notifier).logout();
-      if (mounted) {
-        context.go(RoutePaths.onboarding);
-      }
-    }
   }
 
   @override
@@ -103,25 +61,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         actions: [
           _AppBarIconButton(
-            key: const Key('home_privacy_button'),
-            icon: Icons.shield_outlined,
-            color: AppColors.clinicalTeal,
-            tooltip: 'Privacidade & Dados (LGPD)',
-            onTap: () => context.push(RoutePaths.privacyCenter),
+            key: const Key('home_settings_button'),
+            icon: Icons.settings_outlined,
+            color: AppColors.clinicalTealDark,
+            tooltip: 'Configurações',
+            onTap: () => context.push(RoutePaths.settings),
           ),
-          const SizedBox(width: 4),
-          _AppBarIconButton(
-            key: const Key('home_history_button'),
-            icon: Icons.analytics_outlined,
-            color: AppColors.softIndigo,
-            tooltip: 'Histórico & Tendências',
-            onTap: () => context.push(RoutePaths.history),
-          ),
-          const SizedBox(width: 4),
-          const Padding(
-            padding: EdgeInsets.only(right: 8.0),
-            child: LanguagePickerButton(),
-          ),
+          const SizedBox(width: 8),
         ],
       ),
       body: SafeArea(
@@ -134,74 +80,75 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.clinicalTeal, AppColors.softIndigo],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.softIndigo.withValues(alpha: 0.25),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
+              GestureDetector(
+                key: const Key('home_profile_card'),
+                onTap: () => context.push(RoutePaths.settings),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.clinicalTeal, AppColors.softIndigo],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 26,
-                          backgroundColor: Colors.white.withValues(alpha: 0.2),
-                          child: Text(
-                            userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.softIndigo.withValues(alpha: 0.25),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          UserAvatar(
+                            picture: user?.picture,
+                            fallbackInitial: userName,
+                            radius: 26,
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Olá, $userName',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  userEmail,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13,
+                                    color: Colors.white.withValues(alpha: 0.85),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Olá, $userName',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                userEmail,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 13,
-                                  color: Colors.white.withValues(alpha: 0.85),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                          const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 14,
+                            color: Colors.white70,
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 18),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
@@ -225,6 +172,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ],
                 ),
+              ),
               ),
               const SizedBox(height: 24),
 
@@ -359,91 +307,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           color: AppColors.textSecondaryLight,
                         ),
                       ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Card(
-                elevation: 0.5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: AppColors.clinicalTeal.withValues(alpha: 0.2)),
-                ),
-                child: InkWell(
-                  key: const Key('home_privacy_card'),
-                  onTap: () => context.push(RoutePaths.privacyCenter),
-                  borderRadius: BorderRadius.circular(16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: AppColors.clinicalTeal.withValues(alpha: 0.12),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.security_rounded,
-                            color: AppColors.clinicalTeal,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Central de Privacidade & LGPD',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimaryLight,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Exportação de dados e exclusão permanente',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondaryLight,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 16,
-                          color: AppColors.textSecondaryLight,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: OutlinedButton.icon(
-                  key: const Key('logoutButton'),
-                  onPressed: _handleLogout,
-                  icon: const Icon(Icons.logout, color: AppColors.emergencyCrimson, size: 20),
-                  label: Text(
-                    'Sair da Conta',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.emergencyCrimson,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.emergencyCrimson),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),

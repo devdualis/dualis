@@ -4,6 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../../src/modules/auth/auth.service';
 import { RegisterDto } from '../../src/modules/auth/dto/register.dto';
 import { LoginDto } from '../../src/modules/auth/dto/login.dto';
+import { UpdateProfileDto } from '../../src/modules/auth/dto/update-profile.dto';
+import { ChangePasswordDto } from '../../src/modules/auth/dto/change-password.dto';
 import { hashPassword } from '../../src/modules/auth/utils/password.util';
 
 describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
@@ -13,6 +15,8 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
   let mockTxExecute: ReturnType<typeof vi.fn>;
   let mockTxSelect: ReturnType<typeof vi.fn>;
   let mockTxInsert: ReturnType<typeof vi.fn>;
+  let mockTxUpdate: ReturnType<typeof vi.fn>;
+  let mockTxDelete: ReturnType<typeof vi.fn>;
 
   const validRegisterDto: RegisterDto = {
     name: 'Carlos Oliveira',
@@ -28,6 +32,8 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
     mockTxExecute = vi.fn().mockResolvedValue(undefined);
     mockTxSelect = vi.fn();
     mockTxInsert = vi.fn();
+    mockTxUpdate = vi.fn();
+    mockTxDelete = vi.fn();
 
     mockDb = {
       transaction: vi.fn().mockImplementation(async (callback) => {
@@ -35,6 +41,8 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
           execute: mockTxExecute,
           select: mockTxSelect,
           insert: mockTxInsert,
+          update: mockTxUpdate,
+          delete: mockTxDelete,
         };
         return callback(mockTx);
       }),
@@ -77,6 +85,7 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
         email: validRegisterDto.email.toLowerCase().trim(),
         gender: validRegisterDto.gender,
         dateOfBirth: validRegisterDto.dateOfBirth,
+        picture: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -252,6 +261,129 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
       };
 
       await expect(authService.login(loginDto)).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('Scenario 6: Update Profile', () => {
+    it('updates user profile fields under RLS context and returns sanitized user', async () => {
+      const userId = '444e4567-e89b-12d3-a456-426614174003';
+      const updateDto: UpdateProfileDto = {
+        name: 'Carlos Oliveira Atualizado',
+        dateOfBirth: '1988-04-15',
+        picture: 'avatar_clinical_teal_01',
+      };
+
+      const updatedRecord = {
+        id: userId,
+        name: updateDto.name!,
+        email: 'carlos.oliveira@example.com',
+        gender: 'masculino',
+        dateOfBirth: updateDto.dateOfBirth!,
+        picture: updateDto.picture!,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockTxUpdate.mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([updatedRecord]),
+          }),
+        }),
+      });
+
+      const result = await authService.updateProfile(userId, updateDto);
+
+      expect(result.id).toBe(userId);
+      expect(result.name).toBe(updateDto.name);
+      expect(result.dateOfBirth).toBe(updateDto.dateOfBirth);
+      expect(result.picture).toBe(updateDto.picture);
+      expect(mockTxExecute).toHaveBeenCalled();
+    });
+
+    it('throws UnauthorizedException when user to update is not found', async () => {
+      const userId = 'nonexistent-user-id';
+      const updateDto: UpdateProfileDto = { name: 'Novo Nome' };
+
+      mockTxUpdate.mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([]),
+          }),
+        }),
+      });
+
+      await expect(authService.updateProfile(userId, updateDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+  });
+
+  describe('Scenario 7: Change Password', () => {
+    it('verifies current password, updates password hash and returns success', async () => {
+      const userId = '555e4567-e89b-12d3-a456-426614174004';
+      const currentPassword = 'OldPassword123!';
+      const newPassword = 'NewSecurePassword456!';
+      const currentHash = await hashPassword(currentPassword);
+
+      const userRecord = {
+        id: userId,
+        email: 'carlos@example.com',
+        passwordHash: currentHash,
+      };
+
+      mockTxSelect.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([userRecord]),
+          }),
+        }),
+      });
+
+      const mockSet = vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue(undefined),
+      });
+      mockTxUpdate.mockReturnValue({
+        set: mockSet,
+      });
+
+      const result = await authService.changePassword(userId, {
+        currentPassword,
+        newPassword,
+      });
+
+      expect(result.success).toBe(true);
+      expect(mockSet).toHaveBeenCalledWith(
+        expect.objectContaining({
+          passwordHash: expect.stringMatching(/^\$argon2id\$/),
+        }),
+      );
+    });
+
+    it('throws UnauthorizedException when current password does not match', async () => {
+      const userId = '555e4567-e89b-12d3-a456-426614174004';
+      const currentHash = await hashPassword('CorrectCurrentPassword123!');
+
+      const userRecord = {
+        id: userId,
+        email: 'carlos@example.com',
+        passwordHash: currentHash,
+      };
+
+      mockTxSelect.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([userRecord]),
+          }),
+        }),
+      });
+
+      await expect(
+        authService.changePassword(userId, {
+          currentPassword: 'WrongCurrentPassword!',
+          newPassword: 'NewSecurePassword456!',
+        }),
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 });

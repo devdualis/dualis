@@ -1197,6 +1197,180 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Fechar'**
   String get close;
+
+  /// Title for the settings and profile management screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Configurações'**
+  String get settingsTitle;
+
+  /// Section header for user profile details
+  ///
+  /// In pt, this message translates to:
+  /// **'Perfil e Identificação'**
+  String get profileSection;
+
+  /// Action button to change user avatar
+  ///
+  /// In pt, this message translates to:
+  /// **'Alterar Foto'**
+  String get changeAvatar;
+
+  /// Title for avatar selection modal
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha seu Avatar'**
+  String get selectAvatar;
+
+  /// Label for full name input field
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome Completo'**
+  String get nameLabel;
+
+  /// Label for date of birth picker field
+  ///
+  /// In pt, this message translates to:
+  /// **'Data de Nascimento'**
+  String get dateOfBirthLabel;
+
+  /// Label for calculated age display
+  ///
+  /// In pt, this message translates to:
+  /// **'Idade'**
+  String get ageLabel;
+
+  /// Display text for age in years
+  ///
+  /// In pt, this message translates to:
+  /// **'{age} anos'**
+  String yearsOld(int age);
+
+  /// Button to save profile modifications
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar Alterações'**
+  String get saveProfile;
+
+  /// Snackbar message when profile is successfully updated
+  ///
+  /// In pt, this message translates to:
+  /// **'Perfil atualizado com sucesso!'**
+  String get profileUpdatedSuccess;
+
+  /// Section header for security settings
+  ///
+  /// In pt, this message translates to:
+  /// **'Segurança e Acesso'**
+  String get securitySection;
+
+  /// Title and button for password change
+  ///
+  /// In pt, this message translates to:
+  /// **'Alterar Senha'**
+  String get changePassword;
+
+  /// Label for current password input
+  ///
+  /// In pt, this message translates to:
+  /// **'Senha Atual'**
+  String get currentPassword;
+
+  /// Label for new password input
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova Senha'**
+  String get newPassword;
+
+  /// Label for new password confirmation input
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar Nova Senha'**
+  String get confirmNewPassword;
+
+  /// Snackbar message when password is successfully changed
+  ///
+  /// In pt, this message translates to:
+  /// **'Senha alterada com sucesso!'**
+  String get passwordChangedSuccess;
+
+  /// Error message when new password and confirmation do not match
+  ///
+  /// In pt, this message translates to:
+  /// **'As novas senhas não coincidem.'**
+  String get passwordsDoNotMatch;
+
+  /// Hint describing password complexity requirements
+  ///
+  /// In pt, this message translates to:
+  /// **'Mínimo de 8 caracteres, com letra maiúscula, minúscula, número e símbolo.'**
+  String get passwordComplexityHint;
+
+  /// Navigation link to privacy center
+  ///
+  /// In pt, this message translates to:
+  /// **'Central de Privacidade e LGPD'**
+  String get privacyShortcut;
+
+  /// Button to securely log out from application
+  ///
+  /// In pt, this message translates to:
+  /// **'Sair da Conta'**
+  String get logoutButton;
+
+  /// Section header for language selection in settings
+  ///
+  /// In pt, this message translates to:
+  /// **'Idioma do Aplicativo'**
+  String get settingsLanguageSection;
+
+  /// Portuguese language option
+  ///
+  /// In pt, this message translates to:
+  /// **'Português (Brasil)'**
+  String get settingsLanguagePortuguese;
+
+  /// Spanish language option
+  ///
+  /// In pt, this message translates to:
+  /// **'Español'**
+  String get settingsLanguageSpanish;
+
+  /// English language option
+  ///
+  /// In pt, this message translates to:
+  /// **'English'**
+  String get settingsLanguageEnglish;
+
+  /// Section header for privacy and data in settings
+  ///
+  /// In pt, this message translates to:
+  /// **'Privacidade e Dados'**
+  String get settingsPrivacySection;
+
+  /// Tile to navigate to full privacy center
+  ///
+  /// In pt, this message translates to:
+  /// **'Central de Privacidade e LGPD'**
+  String get settingsPrivacyCenterTile;
+
+  /// Subtitle for privacy center tile
+  ///
+  /// In pt, this message translates to:
+  /// **'Acesse e gerencie seus dados de saúde'**
+  String get settingsPrivacyCenterSubtitle;
+
+  /// Tile to navigate to historical dashboard
+  ///
+  /// In pt, this message translates to:
+  /// **'Histórico e Tendências'**
+  String get settingsDataHistoryTile;
+
+  /// Subtitle for history tile
+  ///
+  /// In pt, this message translates to:
+  /// **'Visualize seu histórico de triagens'**
+  String get settingsDataHistorySubtitle;
 }
 
 class _AppLocalizationsDelegate

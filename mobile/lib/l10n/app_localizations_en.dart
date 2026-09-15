@@ -616,4 +616,95 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get close => 'Close';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get profileSection => 'Profile & Identity';
+
+  @override
+  String get changeAvatar => 'Change Picture';
+
+  @override
+  String get selectAvatar => 'Choose your Avatar';
+
+  @override
+  String get nameLabel => 'Full Name';
+
+  @override
+  String get dateOfBirthLabel => 'Date of Birth';
+
+  @override
+  String get ageLabel => 'Age';
+
+  @override
+  String yearsOld(int age) {
+    return '$age years old';
+  }
+
+  @override
+  String get saveProfile => 'Save Changes';
+
+  @override
+  String get profileUpdatedSuccess => 'Profile updated successfully!';
+
+  @override
+  String get securitySection => 'Security & Access';
+
+  @override
+  String get changePassword => 'Change Password';
+
+  @override
+  String get currentPassword => 'Current Password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get passwordChangedSuccess => 'Password changed successfully!';
+
+  @override
+  String get passwordsDoNotMatch => 'The new passwords do not match.';
+
+  @override
+  String get passwordComplexityHint =>
+      'Minimum 8 characters, with uppercase, lowercase, number, and special character.';
+
+  @override
+  String get privacyShortcut => 'Privacy & Data Center (LGPD)';
+
+  @override
+  String get logoutButton => 'Log Out';
+
+  @override
+  String get settingsLanguageSection => 'App Language';
+
+  @override
+  String get settingsLanguagePortuguese => 'Português (Brasil)';
+
+  @override
+  String get settingsLanguageSpanish => 'Español';
+
+  @override
+  String get settingsLanguageEnglish => 'English';
+
+  @override
+  String get settingsPrivacySection => 'Privacy & Data';
+
+  @override
+  String get settingsPrivacyCenterTile => 'Privacy & Data Center (LGPD)';
+
+  @override
+  String get settingsPrivacyCenterSubtitle =>
+      'Access and manage your health data';
+
+  @override
+  String get settingsDataHistoryTile => 'History & Trends';
+
+  @override
+  String get settingsDataHistorySubtitle => 'View your triage history';
 }
