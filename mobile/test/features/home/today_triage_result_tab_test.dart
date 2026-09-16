@@ -106,7 +106,7 @@ void main() {
             authorRole: 'Fisioterapeuta Especialista em Coluna',
             readTimeMinutes: 4,
             summary: 'Exercícios práticos para alívio de sobrecarga postural.',
-            url: 'https://dualis.health/artigos/coluna-alongamento',
+            url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
           ),
         ],
         recordedAt: DateTime.now(),

@@ -197,9 +197,10 @@ class MockAuthService {
   }
 
   private generateTokens(userId: string, email: string) {
-    const payload = { sub: userId, email };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+    const accessPayload = { sub: userId, email, type: 'access' };
+    const refreshPayload = { sub: userId, email, type: 'refresh' };
+    const accessToken = this.jwtService.sign(accessPayload, { expiresIn: '15m' });
+    const refreshToken = this.jwtService.sign(refreshPayload, { expiresIn: '7d' });
     return { accessToken, refreshToken };
   }
 }

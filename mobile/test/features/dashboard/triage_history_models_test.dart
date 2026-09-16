@@ -37,7 +37,7 @@ void main() {
         'frequencyCount': 6,
         'windowDays': 10,
         'recommendedArticleTitle': 'Manejo do Burnout',
-        'recommendedArticleUrl': 'https://dualis.app/artigos/burnout-manejo',
+        'recommendedArticleUrl': 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout',
       };
 
       final item = CriticalRecurrenceItem.fromJson(json);
@@ -84,7 +84,7 @@ void main() {
             'frequencyCount': 3,
             'windowDays': 10,
             'recommendedArticleTitle': 'Burnout',
-            'recommendedArticleUrl': 'https://dualis.app',
+            'recommendedArticleUrl': 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout',
           }
         ],
       };

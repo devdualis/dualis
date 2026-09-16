@@ -50,7 +50,7 @@ describe('AI Symptom Classification E2E (POST /v1/ai/classify-symptom)', () => {
 
     jwtService = app.get<JwtService>(JwtService);
     validToken = jwtService.sign(
-      { sub: 'usr-test-123456', email: 'test@dualis.com' },
+      { sub: 'usr-test-123456', email: 'test@dualis.com', type: 'access' },
       {
         secret:
           process.env.JWT_SECRET ||

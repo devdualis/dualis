@@ -72,7 +72,7 @@ class MockTriageHistoryService {
           frequencyCount: 6,
           windowDays: 10,
           recommendedArticleTitle: 'Manejo do Burnout',
-          recommendedArticleUrl: 'https://dualis.app/artigos/burnout-manejo',
+          recommendedArticleUrl: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout',
         },
       ],
     };
@@ -95,7 +95,7 @@ describe('Triage History E2E Suite (DASH-01, DASH-02, DASH-03, DASH-04, SEC-01)'
 
     jwtService = moduleRef.get<JwtService>(JwtService);
     validAccessToken = jwtService.sign(
-      { sub: mockUserId, email: 'history.patient@example.com' },
+      { sub: mockUserId, email: 'history.patient@example.com', type: 'access' },
       { expiresIn: '15m' },
     );
 

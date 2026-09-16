@@ -63,7 +63,7 @@ describe('Antiburla Historical Verification E2E Suite (ANTI-01, ANTI-02, ANTI-03
 
     jwtService = moduleRef.get<JwtService>(JwtService);
     validAccessToken = jwtService.sign(
-      { sub: mockUserId, email: 'antiburla.patient@example.com' },
+      { sub: mockUserId, email: 'antiburla.patient@example.com', type: 'access' },
       { expiresIn: '15m' },
     );
 

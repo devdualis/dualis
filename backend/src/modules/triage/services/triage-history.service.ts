@@ -45,6 +45,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   gastrointestinal_abdomen: 'Gastrointestinal / Abdômen',
   coluna_dorsal: 'Coluna e Dor Dorsal',
   coluna_dor_dorsal: 'Coluna e Dor Dorsal',
+  coluna_dor_lombar: 'Coluna e Dor Lombar',
   membros_superiores_d: 'Membros Superiores (D)',
   membros_superiores_e: 'Membros Superiores (E)',
   membros_inferiores_d: 'Membros Inferiores (D)',
@@ -52,6 +53,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   neurologico: 'Neurológico',
   geniturinario_pelvico: 'Geniturinário / Pélvico',
   dermatologico: 'Dermatológico',
+  geral_fisico: 'Saúde Física Geral',
   ansiosa_agitacao: 'Ansiosa / Agitação',
   depressiva_desanimo: 'Depressiva / Desânimo',
   estresse_burnout: 'Estresse / Burnout',
@@ -59,36 +61,110 @@ const CATEGORY_LABELS: Record<string, string> = {
   sono: 'Sono e Ritmo Circadiano',
   cognitiva_foco: 'Cognitiva / Foco',
   autoestima: 'Autoestima / Autoimagem',
+  geral_emocional: 'Saúde Emocional Geral',
+  geral: 'Saúde Geral e Bem-Estar',
 };
 
 const RECOMMENDED_ARTICLES: Record<string, { title: string; url: string }> = {
   estresse_burnout: {
     title: 'Manejo do Burnout e Técnicas de Descompressão Diária',
-    url: 'https://dualis.app/artigos/burnout-manejo',
+    url: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout',
   },
   ansiosa_agitacao: {
-    title: 'Protocolos de Respiração Diafragmática na Crise de Ansiedade',
-    url: 'https://dualis.app/artigos/ansiedade-respiracao',
+    title: 'Protocolos de Respiração e Manejo da Ansiedade',
+    url: 'https://drauziovarella.uol.com.br/saude-mental/transtornos-de-ansiedade-nao-sao-todos-iguais-entenda-as-caracteristicas-de-cada-tipo/',
   },
   depressiva_desanimo: {
-    title: 'Ativação Comportamental e Rotina Saudável',
-    url: 'https://dualis.app/artigos/ativacao-comportamental',
+    title: 'Ativação Comportamental e Cuidados na Depressão',
+    url: 'https://www.paho.org/pt/topicos/depressao',
+  },
+  somatica: {
+    title: 'Conexão Mente e Corpo: Sintomas Psicossomáticos',
+    url: 'https://drauziovarella.uol.com.br/psiquiatria/conexao-entre-mente-e-corpo-como-as-emocoes-afetam-a-saude/',
   },
   sono: {
     title: 'Guia Completo de Higiene do Sono e Ritmo Circadiano',
-    url: 'https://dualis.app/artigos/higiene-sono',
+    url: 'https://drauziovarella.uol.com.br/neurologia/higiene-do-sono-conheca-11-dicas-para-dormir-melhor/',
+  },
+  cognitiva_foco: {
+    title: 'Estímulo Cognitivo, Clareza Mental e Foco',
+    url: 'https://drauziovarella.uol.com.br/neurologia/como-estimular-o-cerebro-no-dia-a-dia/',
+  },
+  autoestima: {
+    title: 'Fortalecimento da Autoestima e Bem-Estar Psicológico',
+    url: 'https://www.paho.org/pt/topicos/saude-mental',
+  },
+  geral_emocional: {
+    title: 'Guia de Saúde Mental e Equilíbrio Emocional',
+    url: 'https://www.paho.org/pt/topicos/saude-mental',
+  },
+  cabeca_pescoco: {
+    title: 'Prevenção de Cefaleias Tensionais e Cuidados Cervicais',
+    url: 'https://sbcefaleia.com.br/noticias.php?id=350',
+  },
+  cardiovascular_torax: {
+    title: 'Saúde Cardiovascular e Reconhecimento de Sinais de Alerta',
+    url: 'https://drauziovarella.uol.com.br/entrevistas-2/arritmia-cardiaca-entrevista/',
+  },
+  respiratorio: {
+    title: 'Cuidados Respiratórios e Manejo de Falta de Ar',
+    url: 'https://sbpt.org.br/portal/publico-geral/doencas/falta-de-ar/',
+  },
+  gastrointestinal_abdomen: {
+    title: 'Saúde Digestiva e Prevenção do Refluxo Gastroesofágico',
+    url: 'https://drauziovarella.uol.com.br/gastroenterologia/refluxo-saiba-o-que-e-os-sintomas-e-as-formas-de-tratamento/',
   },
   coluna_dorsal: {
     title: 'Postura Laboral e Exercícios Preventivos para a Coluna',
-    url: 'https://dualis.app/artigos/coluna-postura',
+    url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
   },
   coluna_dor_dorsal: {
     title: 'Postura Laboral e Exercícios Preventivos para a Coluna',
-    url: 'https://dualis.app/artigos/coluna-postura',
+    url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
+  },
+  coluna_dor_lombar: {
+    title: 'Cuidados Posturais e Descompressão Lombar',
+    url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
+  },
+  membros_superiores_d: {
+    title: 'Prevenção de Tendinites e Sobrecarga em Braços e Ombros',
+    url: 'https://drauziovarella.uol.com.br/podcasts/tendinite/',
+  },
+  membros_superiores_e: {
+    title: 'Prevenção de Tendinites e Sobrecarga em Braços e Ombros',
+    url: 'https://drauziovarella.uol.com.br/podcasts/tendinite/',
+  },
+  membros_inferiores_d: {
+    title: 'Prevenção de Lesões Articulares e Entorses',
+    url: 'https://sbot.org.br/entorse-de-tornozelo/',
+  },
+  membros_inferiores_e: {
+    title: 'Prevenção de Lesões Articulares e Entorses',
+    url: 'https://sbot.org.br/entorse-de-tornozelo/',
+  },
+  neurologico: {
+    title: 'Prevenção e Cuidados com o Sistema Neurológico',
+    url: 'https://drauziovarella.uol.com.br/neurologia/neuropatia-periferica-doenca-dos-nervos-exige-atencao-e-controle-das-causas/',
+  },
+  geniturinario_pelvico: {
+    title: 'Saúde do Trato Urinário e Prevenção de Infecções',
+    url: 'https://portaldaurologia.org.br/doencas/infeccao-urinaria/',
+  },
+  dermatologico: {
+    title: 'Cuidados com a Barreira Cutânea e Alívio de Irritações',
+    url: 'https://www.sbd.org.br/doencas/urticaria/',
+  },
+  geral_fisico: {
+    title: 'Guia de Prevenção e Hábitos para a Saúde Integral',
+    url: 'https://www.paho.org/pt/topicos/curso-vida-saudavel',
+  },
+  geral: {
+    title: 'Guia de Prevenção e Autocuidado Consciente',
+    url: 'https://www.paho.org/pt/topicos/curso-vida-saudavel',
   },
   default: {
     title: 'Guia de Prevenção e Autocuidado Consciente',
-    url: 'https://dualis.app/artigos/prevencao-autocuidado',
+    url: 'https://www.paho.org/pt/topicos/curso-vida-saudavel',
   },
 };
 

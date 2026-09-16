@@ -134,7 +134,7 @@ describe('Auth LGPD Data Sovereignty E2E (SEC-03)', () => {
     await app.getHttpAdapter().getInstance().ready();
 
     jwtService = moduleRef.get<JwtService>(JwtService);
-    validToken = jwtService.sign({ sub: testUserId, email: testUserEmail });
+    validToken = jwtService.sign({ sub: testUserId, email: testUserEmail, type: 'access' });
   });
 
   afterAll(async () => {

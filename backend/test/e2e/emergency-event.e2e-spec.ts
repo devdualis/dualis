@@ -63,7 +63,7 @@ describe('Triage Emergency Audit E2E Suite (EMRG-01, EMRG-03, SEC-01)', () => {
 
     jwtService = moduleRef.get<JwtService>(JwtService);
     validAccessToken = jwtService.sign(
-      { sub: mockUserId, email: 'patient@example.com' },
+      { sub: mockUserId, email: 'patient@example.com', type: 'access' },
       { expiresIn: '15m' },
     );
 

@@ -11,12 +11,43 @@ class CriticalRecurrenceCard extends StatelessWidget {
   });
 
   Future<void> _launchArticle(BuildContext context, String url) async {
-    final uri = Uri.parse(url);
-    try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+    final trimmed = url.trim();
+    final uri = Uri.tryParse(trimmed);
+    if (uri == null || !uri.hasScheme) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Link do artigo não disponível.')),
+        );
       }
-    } catch (_) {}
+      return;
+    }
+
+    try {
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        final inAppLaunched = await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
+        if (!inAppLaunched && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Não foi possível abrir: $trimmed')),
+          );
+        }
+      }
+    } catch (_) {
+      try {
+        final basicLaunched = await launchUrl(uri);
+        if (!basicLaunched && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Não foi possível abrir: $trimmed')),
+          );
+        }
+      } catch (_) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Não foi possível abrir: $trimmed')),
+          );
+        }
+      }
+    }
   }
 
   @override

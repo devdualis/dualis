@@ -51,7 +51,7 @@ export class LegalService {
         normativeAct: 'RDC nº 657/2022',
         summary:
           'Regulamenta Software como Dispositivo Médico (SaMD); a plataforma atua estritamente em monitoramento preventivo e estratificação de risco sem exercer diagnóstico autônomo.',
-        url: 'https://www.in.gov.br/en/web/dou/-/resolucao-rdc-n-657-de-24-de-marco-de-2022-389025000',
+        url: 'https://www.in.gov.br/web/dou/-/resolucao-de-diretoria-colegiada-rdc-n-657-de-24-de-marco-de-2022-389603457',
       },
       {
         regulatoryBody: 'Conselho Federal de Medicina (CFM)',
@@ -99,7 +99,7 @@ export class LegalService {
         normativeAct: 'RDC nº 657/2022',
         summary:
           'Regulación de Software como Dispositivo Médico (SaMD); la plataforma actúa exclusivamente en monitoreo preventivo y estratificación de riesgo sin emitir diagnósticos autónomos.',
-        url: 'https://www.in.gov.br/en/web/dou/-/resolucao-rdc-n-657-de-24-de-marco-de-2022-389025000',
+        url: 'https://www.in.gov.br/web/dou/-/resolucao-de-diretoria-colegiada-rdc-n-657-de-24-de-marco-de-2022-389603457',
       },
       {
         regulatoryBody: 'Consejo Federal de Medicina (CFM)',
@@ -147,7 +147,7 @@ export class LegalService {
         normativeAct: 'RDC 657/2022',
         summary:
           'Regulates Software as a Medical Device (SaMD); this platform operates strictly as an auxiliary preventive wellness and risk stratification tool without claiming autonomous diagnostic authority.',
-        url: 'https://www.in.gov.br/en/web/dou/-/resolucao-rdc-n-657-de-24-de-marco-de-2022-389025000',
+        url: 'https://www.in.gov.br/en/web/dou/-/resolucao-de-diretoria-colegiada-rdc-n-657-de-24-de-marco-de-2022-389603457',
       },
       {
         regulatoryBody: 'Federal Council of Medicine (CFM)',

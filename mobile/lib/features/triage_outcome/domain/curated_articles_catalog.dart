@@ -10,7 +10,7 @@ class CuratedArticlesCatalog {
     readTimeMinutes: 4,
     summary:
         'Entenda como ciclos regulares de sono consolidam a imunidade celular e estabilizam os neurotransmissores do humor.',
-    url: 'https://dualis.health/artigos/higiene-sono',
+    url: 'https://drauziovarella.uol.com.br/neurologia/higiene-do-sono-conheca-11-dicas-para-dormir-melhor/',
   );
 
   static const RecommendedArticle hydrationAndFocus = RecommendedArticle(
@@ -22,7 +22,7 @@ class CuratedArticlesCatalog {
     readTimeMinutes: 3,
     summary:
         'A hidratação adequada ao longo do dia previne cefaleias tensionais transitórias e otimiza a performance cognitiva.',
-    url: 'https://dualis.health/artigos/hidratacao-foco',
+    url: 'https://www.paho.org/pt/topicos/curso-vida-saudavel',
   );
 
   static const RecommendedArticle breathingTechnique = RecommendedArticle(
@@ -34,7 +34,7 @@ class CuratedArticlesCatalog {
     readTimeMinutes: 5,
     summary:
         'Três minutos de respiração compassada ativam o tônus vagal e previnem picos de cortisol mesmo em dias exigentes.',
-    url: 'https://dualis.health/artigos/respiracao-diafragmatica',
+    url: 'https://drauziovarella.uol.com.br/saude-mental/transtornos-de-ansiedade-nao-sao-todos-iguais-entenda-as-caracteristicas-de-cada-tipo/',
   );
 
   static const RecommendedArticle skinPruritus = RecommendedArticle(

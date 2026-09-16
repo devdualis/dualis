@@ -18,7 +18,7 @@ void main() {
         frequencyCount: 6,
         windowDays: 10,
         recommendedArticleTitle: 'Manejo do Burnout',
-        recommendedArticleUrl: 'https://dualis.app/artigos/burnout',
+        recommendedArticleUrl: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout',
       );
 
       await tester.pumpWidget(

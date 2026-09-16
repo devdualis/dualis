@@ -58,7 +58,7 @@ describe('Outbox Idempotency E2E Suite (SYNC-01)', () => {
 
     jwtService = moduleRef.get<JwtService>(JwtService);
     validAccessToken = jwtService.sign(
-      { sub: mockUserId, email: 'sync.patient@example.com' },
+      { sub: mockUserId, email: 'sync.patient@example.com', type: 'access' },
       { expiresIn: '15m' },
     );
 
