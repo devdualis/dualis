@@ -40,7 +40,7 @@ class MockTriageOutcomeService {
           authorRole: 'Ortopedista',
           readTimeMinutes: 5,
           summary: 'Guia postural',
-          url: 'https://bvsms.saude.gov.br/lombalgia-dor-nas-costas/',
+          url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
         },
       ],
       recordedAt: new Date().toISOString(),
@@ -64,7 +64,7 @@ describe('Triage Outcome E2E Suite (SOM-01, SOM-02, OUT-01, REC-01)', () => {
 
     jwtService = moduleRef.get<JwtService>(JwtService);
     validAccessToken = jwtService.sign(
-      { sub: mockUserId, email: 'triage.patient@example.com' },
+      { sub: mockUserId, email: 'triage.patient@example.com', type: 'access' },
       { expiresIn: '15m' },
     );
 

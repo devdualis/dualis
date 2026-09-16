@@ -27,7 +27,7 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
               authorRole: 'Ortopedista e Traumatologista (HCFMUSP / CRM-SP 128.450)',
               readTimeMinutes: 5,
               summary: 'Posturas preventivas e exercícios de descompressão da coluna lombar.',
-              url: 'https://bvsms.saude.gov.br/lombalgia-dor-nas-costas/',
+              url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
               similarity: 0.88,
             },
           ],
@@ -110,7 +110,7 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
             authorRole: 'Psiquiatra Clínica (ABP / CRM-SP 165.340)',
             readTimeMinutes: 4,
             summary: 'Exercício guiado 4-7-8 para desaceleração do sistema simpático.',
-            url: 'https://bvsms.saude.gov.br/ansiedade/',
+            url: 'https://drauziovarella.uol.com.br/saude-mental/transtornos-de-ansiedade-nao-sao-todos-iguais-entenda-as-caracteristicas-de-cada-tipo/',
           },
         ],
       };

@@ -46,7 +46,7 @@ class CuratedArticlesCatalog {
     readTimeMinutes: 4,
     summary:
         'Manejo de irritações dérmicas, cuidados com a barreira cutânea e sinais de alerta para reações alérgicas agudas.',
-    url: 'https://bvsms.saude.gov.br/alergia-na-pele/',
+    url: 'https://www.sbd.org.br/doencas/urticaria/',
   );
 
   static const RecommendedArticle upperLimbsOverload = RecommendedArticle(
@@ -58,7 +58,7 @@ class CuratedArticlesCatalog {
     readTimeMinutes: 4,
     summary:
         'Identificação de tensões mecânicas, tendinopatias e orientações posturais para alívio de desconfortos nos braços.',
-    url: 'https://bvsms.saude.gov.br/lesoes-por-esforcos-repetitivos-ler-disturbios-osteomusculares-relacionados-ao-trabalho-dort/',
+    url: 'https://drauziovarella.uol.com.br/podcasts/tendinite/',
   );
 
   static const RecommendedArticle moodDepression = RecommendedArticle(
@@ -70,7 +70,7 @@ class CuratedArticlesCatalog {
     readTimeMinutes: 5,
     summary:
         'Estratégias baseadas em evidências para regulação do humor, rotinas de ativação comportamental e quando buscar suporte.',
-    url: 'https://bvsms.saude.gov.br/depressao-4/',
+    url: 'https://www.paho.org/pt/topicos/depressao',
   );
 
   static const RecommendedArticle acuteAnxiety = RecommendedArticle(
@@ -82,7 +82,7 @@ class CuratedArticlesCatalog {
     readTimeMinutes: 4,
     summary:
         'Exercício guiado de regulação autonômica em episódios de angústia, nervosismo e pensamentos acelerados.',
-    url: 'https://bvsms.saude.gov.br/ansiedade/',
+    url: 'https://drauziovarella.uol.com.br/saude-mental/transtornos-de-ansiedade-nao-sao-todos-iguais-entenda-as-caracteristicas-de-cada-tipo/',
   );
 
   static const RecommendedArticle tensionHeadache = RecommendedArticle(
@@ -94,7 +94,7 @@ class CuratedArticlesCatalog {
     readTimeMinutes: 4,
     summary:
         'Gatilhos posturais e de estresse para dores de cabeça tensionais e técnicas ergonômicas de descompressão.',
-    url: 'https://bvsms.saude.gov.br/dor-de-cabeca-cefaleia/',
+    url: 'https://sbcefaleia.com.br/noticias.php?id=350',
   );
 
   static const RecommendedArticle lumbarSpine = RecommendedArticle(
@@ -106,7 +106,7 @@ class CuratedArticlesCatalog {
     readTimeMinutes: 4,
     summary:
         'Exercícios de mobilidade diária para alívio de dor lombar e prevenção de contraturas musculares.',
-    url: 'https://bvsms.saude.gov.br/dor-na-coluna/',
+    url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
   );
 
   static const RecommendedArticle burnoutStress = RecommendedArticle(
@@ -118,7 +118,7 @@ class CuratedArticlesCatalog {
     readTimeMinutes: 5,
     summary:
         'Reconhecimento precoce de sinais de exaustão emocional, distanciamento afetivo e limites saudáveis de produtividade.',
-    url: 'https://bvsms.saude.gov.br/sindrome-de-burnout/',
+    url: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout',
   );
 
   static List<RecommendedArticle> get wellnessArticles => const [

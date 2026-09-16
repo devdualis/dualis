@@ -41,7 +41,7 @@ Repetir esse ciclo por 4 a 6 vezes reduz comprovadamente a descarga adrenérgica
       'taquicardia ansiosa',
       'mente acelerada',
     ],
-    url: 'https://bvsms.saude.gov.br/ansiedade/',
+    url: 'https://drauziovarella.uol.com.br/saude-mental/transtornos-de-ansiedade-nao-sao-todos-iguais-entenda-as-caracteristicas-de-cada-tipo/',
   },
   {
     id: 'art-ansiedade-02',
@@ -73,7 +73,7 @@ Lembre-se de que a crise de pânico é autolimitada e tem pico médio de 10 minu
       'tremores emocionais',
       'ansiedade aguda',
     ],
-    url: 'https://bvsms.saude.gov.br/sindrome-do-panico/',
+    url: 'https://drauziovarella.uol.com.br/psiquiatria/sindrome-do-panico/',
   },
 
   // 2. Depressiva / Desânimo
@@ -100,7 +100,7 @@ Defina micro-objetivos realizáveis: arrumar a cama, caminhar 5 minutos ao sol o
       'fadiga emocional',
       'abatimento',
     ],
-    url: 'https://bvsms.saude.gov.br/depressao-4/',
+    url: 'https://www.paho.org/pt/topicos/depressao',
   },
   {
     id: 'art-desanimo-02',
@@ -176,7 +176,7 @@ Para regular esse estado, recomenda-se a prática de "descarregamento mental": a
       'irritabilidade',
       'pavio curto',
     ],
-    url: 'https://bvsms.saude.gov.br/estresse-3/',
+    url: 'https://drauziovarella.uol.com.br/entrevistas-2/estresse-entrevista/',
   },
 
   // 4. Somática (Psicossomática)
@@ -202,7 +202,7 @@ Embora desconfortáveis, essas sensações não representam lesões estruturais 
       'globo histerico',
       'tensao emocional',
     ],
-    url: 'https://drauziovarella.uol.com.br/psiquiatria/somatizacao/',
+    url: 'https://drauziovarella.uol.com.br/psiquiatria/conexao-entre-mente-e-corpo-como-as-emocoes-afetam-a-saude/',
   },
   {
     id: 'art-somatica-02',
@@ -252,7 +252,7 @@ A higiene do sono atua na sincronização da melatonina: desligue telas emissora
       'higiene do sono',
       'sono ruim',
     ],
-    url: 'https://absono.com.br/higiene-do-sono/',
+    url: 'https://drauziovarella.uol.com.br/neurologia/higiene-do-sono-conheca-11-dicas-para-dormir-melhor/',
   },
   {
     id: 'art-sono-02',
@@ -276,7 +276,7 @@ Para amenizar pesadelos e melhorar a eficiência do sono, adote rotinas de desco
       'dormir o dia todo',
       'pesadelo',
     ],
-    url: 'https://bvsms.saude.gov.br/insonia-2/',
+    url: 'https://drauziovarella.uol.com.br/doencas-e-sintomas/insonia/',
   },
 
   // 6. Cognitiva / Foco
@@ -303,7 +303,7 @@ Para recuperar a clareza, priorize o monofoco: realize uma atividade por vez, ut
       'cognitivo',
       'mente pesada',
     ],
-    url: 'https://drauziovarella.uol.com.br/neurologia/nevoa-mental-brain-fog-o-que-e-e-quais-as-causas/',
+    url: 'https://drauziovarella.uol.com.br/neurologia/como-estimular-o-cerebro-no-dia-a-dia/',
   },
   {
     id: 'art-cognitiva-02',
@@ -327,7 +327,7 @@ Quando a mente está sobrecarregada, a informação sequer chega a ser codificad
       'mente dispersa',
       'foco e memoria',
     ],
-    url: 'https://bvsms.saude.gov.br/perda-de-memoria/',
+    url: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/a/alzheimer',
   },
 
   // 7. Autoestima / Autoimagem
@@ -352,7 +352,7 @@ Exercitar a diferenciação entre responsabilidade real e cobrança imaginária 
       'autoimagem fragilizada',
       'sentimento de insuficiencia',
     ],
-    url: 'https://drauziovarella.uol.com.br/psiquiatria/culpa-por-que-sentimos-e-como-lidar/',
+    url: 'https://www.paho.org/pt/topicos/saude-mental',
   },
   {
     id: 'art-autoestima-02',
@@ -375,7 +375,7 @@ O desenvolvimento da autocompaixão não significa complacência, mas sim suport
       'autocompaixao',
       'culpa e autocobranca',
     ],
-    url: 'https://bvsms.saude.gov.br/saude-mental-2/',
+    url: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/saude-mental',
   },
 
   // ==========================================
@@ -428,7 +428,7 @@ A lavagem nasal com soro fisiológico a 0,9% em alto volume alivia a pressão si
       'dor facial',
       'congestao nasal',
     ],
-    url: 'https://bvsms.saude.gov.br/sinusite-2/',
+    url: 'https://drauziovarella.uol.com.br/doencas-e-sintomas/sinusite/',
   },
 
   // 2. Cardiovascular / Tórax
@@ -454,7 +454,7 @@ No entanto, palpitações que se iniciam de modo abrupto, batimentos descompassa
       'batedeira',
       'coracao acelerado',
     ],
-    url: 'https://www.portal.cardiol.br/post/arritmias-cardiacas-sintomas-e-cuidados',
+    url: 'https://drauziovarella.uol.com.br/entrevistas-2/arritmia-cardiaca-entrevista/',
   },
   {
     id: 'art-cardio-02',
@@ -478,7 +478,7 @@ Dores em pontada superficial que pioram com a respiração profunda ou com a pal
       'urgencia cardiaca',
       'pressao no peito',
     ],
-    url: 'https://bvsms.saude.gov.br/infarto-agudo-do-miocardio/',
+    url: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/i/infarto',
   },
 
   // 3. Sistema Respiratório
@@ -503,7 +503,7 @@ Em repouso, adote uma postura sentada com o tronco levemente inclinado para a fr
       'sufocamento',
       'folego curto',
     ],
-    url: 'https://sbpt.org.br/portal/publico-geral/doencas/falta-de-ar-dispneia/',
+    url: 'https://sbpt.org.br/portal/publico-geral/doencas/falta-de-ar/',
   },
   {
     id: 'art-respiratorio-02',
@@ -554,7 +554,7 @@ Para mitigar os episódios: fracione a alimentação em porções menores ao lon
       'azia e refluxo',
       'acidez estomacal',
     ],
-    url: 'https://bvsms.saude.gov.br/doenca-do-refluxo-gastroesofagico/',
+    url: 'https://drauziovarella.uol.com.br/gastroenterologia/refluxo-saiba-o-que-e-os-sintomas-e-as-formas-de-tratamento/',
   },
   {
     id: 'art-gastro-02',
@@ -579,7 +579,7 @@ Alimente-se com dieta branda (arroz branco, batata cozida, maçã sem casca) e e
       'barriga doendo',
       'gastroenterite',
     ],
-    url: 'https://bvsms.saude.gov.br/doencas-diarreicas-agudas-dda/',
+    url: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/d/dda',
   },
 
   // 5. Coluna e Dor Dorsal
@@ -605,7 +605,7 @@ Adote pausas a cada 50 minutos para alongamento da cadeia posterior e mobilizaç
       'dor dorsal',
       'lombar travada',
     ],
-    url: 'https://bvsms.saude.gov.br/lombalgia-dor-nas-costas/',
+    url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
   },
   {
     id: 'art-coluna-02',
@@ -629,7 +629,7 @@ Nas primeiras 48 horas, a aplicação de compressas mornas por 20 minutos ajuda 
       'espasmo dorsal',
       'pescoco travado',
     ],
-    url: 'https://coluna.com.br/hernia-de-disco/',
+    url: 'https://drauziovarella.uol.com.br/entrevistas-2/hernia-de-disco-entrevista/',
   },
 
   // 6. Membros Superiores (D/E)
@@ -655,7 +655,7 @@ Ajuste a altura da cadeira para manter o antebraço a 90 graus com a mesa, com a
       'tunel do carpo',
       'digitacao',
     ],
-    url: 'https://bvsms.saude.gov.br/lesoes-por-esforcos-repetitivos-ler-disturbios-osteomusculares-relacionados-ao-trabalho-dort/',
+    url: 'https://drauziovarella.uol.com.br/podcasts/tendinite/',
   },
   {
     id: 'art-superiores-02',
@@ -678,7 +678,7 @@ Evite carregar bolsas pesadas em um único ombro e inicie fisioterapia com foco 
       'manguito rotador',
       'braco pesado',
     ],
-    url: 'https://sbcoc.org.br/lesao-do-manguito-rotador/',
+    url: 'https://sbot.org.br/lesao-do-manguito-rotador/',
   },
 
   // 7. Membros Inferiores (D/E)
@@ -708,7 +708,7 @@ Caso haja incapacidade total de apoiar o pé, deformidade articular visível ou 
       'articulacao do joelho',
       'inchaço no tornozelo',
     ],
-    url: 'https://sbcj.org.br/lesoes-de-joelho/',
+    url: 'https://sbot.org.br/entorse-de-tornozelo/',
   },
   {
     id: 'art-inferiores-02',
@@ -731,7 +731,7 @@ Para melhorar o retorno venoso: repouse com as pernas elevadas por 20 minutos à
       'bursite no quadril',
       'pernas cansadas',
     ],
-    url: 'https://sbacv.org.br/varizes-sintomas-e-prevencao/',
+    url: 'https://drauziovarella.uol.com.br/doencas-e-sintomas/varizes/',
   },
 
   // 8. Sistema Neurológico
@@ -756,7 +756,7 @@ Durante uma crise: sente-se imediatamente, fixe o olhar em um ponto fixo, evite 
       'instabilidade',
       'tonturas frequentes',
     ],
-    url: 'https://bvsms.saude.gov.br/labirintite/',
+    url: 'https://drauziovarella.uol.com.br/doencas-e-sintomas/labirintite/',
   },
   {
     id: 'art-neuro-02',
@@ -779,7 +779,7 @@ Entretanto, formigamento contínuo em formato de "meias e luvas" em ambas as mã
       'neuropatia',
       'choque nos membros',
     ],
-    url: 'https://bvsms.saude.gov.br/neuropatia-periferica/',
+    url: 'https://drauziovarella.uol.com.br/neurologia/neuropatia-periferica-doenca-dos-nervos-exige-atencao-e-controle-das-causas/',
   },
 
   // 9. Geniturinário / Pélvico
@@ -828,7 +828,7 @@ Quando a dor pélvica é severa, irradia para as costas e coxas ou vem associada
       'dismenorreia',
       'dor no baixo ventre',
     ],
-    url: 'https://www.febrasgo.org.br/pt/noticias/item/1460-endometriose-diagnostico-e-tratamento',
+    url: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/e/endometriose',
   },
 
   // 10. Sistema Dermatológico
@@ -903,7 +903,7 @@ Priorize sono de qualidade ininterrupto, beba líquidos em abundância e garanta
       'fadiga muscular',
       'sensacao de peso no corpo',
     ],
-    url: 'https://bvsms.saude.gov.br/dor-cronica/',
+    url: 'https://drauziovarella.uol.com.br/drauzio/dores-cronicas-artigo/',
   },
   {
     id: 'art-muscular-02',
@@ -1004,6 +1004,6 @@ Registrar seus sintomas diariamente e realizar um check-up clínico e laboratori
       'bem-estar',
       'estilo de vida',
     ],
-    url: 'https://www.gov.br/saude/pt-br/assuntos/saude-brasil/eu-quero-me-exercitar/noticias/2021/os-pilares-da-saude-preventiva',
+    url: 'https://www.paho.org/pt/topicos/curso-vida-saudavel',
   },
 ];
