@@ -17,6 +17,7 @@ import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 Widget createTriggerCheckInTestApp({
   void Function(TriageVertical vertical)? onTriageNavigated,
+  ProviderContainer? container,
 }) {
   final router = GoRouter(
     initialLocation: RoutePaths.home,
@@ -47,19 +48,21 @@ Widget createTriggerCheckInTestApp({
     ],
   );
 
-  return ProviderScope(
-    child: MaterialApp.router(
-      routerConfig: router,
-      locale: const Locale('pt', 'BR'),
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: AppLocalizations.supportedLocales,
-    ),
+  final app = MaterialApp.router(
+    routerConfig: router,
+    locale: const Locale('pt', 'BR'),
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: AppLocalizations.supportedLocales,
   );
+
+  return container != null
+      ? UncontrolledProviderScope(container: container, child: app)
+      : ProviderScope(child: app);
 }
 
 void main() {
@@ -320,6 +323,45 @@ void main() {
       expect(container.read(triggerCheckInProvider).physicalStatus, isNull);
       expect(container.read(triggerCheckInProvider).isCompletedToday, isFalse);
       expect(container.read(triggerCheckInProvider).isReadyToSubmit, isFalse);
+    });
+
+    testWidgets(
+        '12. Editing only the emotional axis after completion routes to emotional-only, '
+        'even when physical was already distressed', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1200, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      // Simulate an already-completed check-in from earlier today: physical
+      // axis is "medium" (soSo) and the check-in was finished/synced, so
+      // isCompletedToday is true and nothing is "touched" yet this session.
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final notifier = container.read(triggerCheckInProvider.notifier);
+      notifier.setEmotionalStatus(TriggerStatus.goodNormal);
+      notifier.setPhysicalStatus(TriggerStatus.soSo);
+      notifier.markCompletedToday();
+
+      TriageVertical? navigatedVertical;
+
+      await tester.pumpWidget(createTriggerCheckInTestApp(
+        container: container,
+        onTriageNavigated: (v) => navigatedVertical = v,
+      ));
+      await tester.pumpAndSettle();
+
+      // Later, only the emotional axis is changed — physical stays "soSo"
+      // and untouched.
+      await tester.tap(find.byKey(const Key('emotional_badSick')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('startTriageButton')));
+      await tester.pumpAndSettle();
+
+      // Must route to the emotional axis only, not the combined/dual flow.
+      expect(find.text('Triage Screen: psicoEmocional'), findsOneWidget);
+      expect(navigatedVertical, equals(TriageVertical.psicoEmocional));
     });
 
     test('11. Restores daily check-in status from remote history on rebuild/load', () async {

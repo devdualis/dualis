@@ -229,21 +229,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 return;
                               }
 
-                              setState(() => _isResolvingNavigation = true);
-                              final navArgs = await ref
-                                  .read(triggerCheckInProvider.notifier)
-                                  .resolveTextDrivenNavigation();
-                              if (mounted) {
-                                setState(() => _isResolvingNavigation = false);
-                              }
-                              if (navArgs != null) {
-                                if (context.mounted) {
-                                  context.push(RoutePaths.triage, extra: navArgs);
+                              // Only let free text steer routing when it's new this
+                              // session — editing an already-completed check-in must
+                              // not resurrect a stale, previously-submitted description.
+                              final useTextDrivenNav = !triggerState.isCompletedToday ||
+                                  triggerState.textTouched;
+                              if (useTextDrivenNav) {
+                                setState(() => _isResolvingNavigation = true);
+                                final navArgs = await ref
+                                    .read(triggerCheckInProvider.notifier)
+                                    .resolveTextDrivenNavigation();
+                                if (mounted) {
+                                  setState(() => _isResolvingNavigation = false);
                                 }
-                                return;
+                                if (navArgs != null) {
+                                  if (context.mounted) {
+                                    context.push(RoutePaths.triage, extra: navArgs);
+                                  }
+                                  return;
+                                }
+                                // Classification failed (offline/error) — fall through
+                                // to the axis-only routing below so the user isn't stuck.
                               }
-                              // Classification failed (offline/error) — fall through to
-                              // the axis-only routing below so the user isn't stuck.
                             }
 
                             if (!context.mounted) return;

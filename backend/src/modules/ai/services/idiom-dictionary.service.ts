@@ -96,7 +96,7 @@ export class IdiomDictionaryService {
       isEmergencyCandidate: false,
     },
     {
-      pattern: /(ombro|bra[cç]o|punho|tendinite|cotovelo|m[aã]os)/i,
+      pattern: /\b(ombro|bra[cç]o|punho|tendinite|cotovelo)\b/i,
       vertical: 'physical',
       systemOrDimension: 'membros_superiores',
       urgencyScore: 2,
@@ -204,7 +204,7 @@ export class IdiomDictionaryService {
       isEmergencyCandidate: false,
     },
     {
-      pattern: /(n[eé]voa\s+mental|brain\s+fog|sem\s+foco|mente\s+lerda|cansa[cç]o\s+mental|esgotado|mente\s+pesada|fadiga|mental\s+fatigue|exhausted)/i,
+      pattern: /(n[eé]voa\s+mental|brain\s+fog|sem\s+foco|mente\s+lerda|cansa[cç]o\s+mental|fadiga\s+mental|mente\s+pesada|mental\s+fatigue)/i,
       vertical: 'emotional',
       systemOrDimension: 'cognitiva_foco',
       urgencyScore: 2,

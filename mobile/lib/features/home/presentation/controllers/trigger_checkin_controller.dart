@@ -145,6 +145,9 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
           physicalStatus: physicalStatus,
           naturalLanguageText: naturalLanguageText,
           isModifiedAfterCompletion: false,
+          emotionalTouched: false,
+          physicalTouched: false,
+          textTouched: false,
         );
         await _persistCurrentState();
       }
@@ -173,6 +176,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     state = state.copyWith(
       emotionalStatus: status,
       isModifiedAfterCompletion: modified || state.isModifiedAfterCompletion,
+      emotionalTouched: true,
       checkInDate: _getTodayDateString(),
     );
     _persistCurrentState();
@@ -183,6 +187,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     state = state.copyWith(
       physicalStatus: status,
       isModifiedAfterCompletion: modified || state.isModifiedAfterCompletion,
+      physicalTouched: true,
       checkInDate: _getTodayDateString(),
     );
     _persistCurrentState();
@@ -191,6 +196,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
   void setNaturalLanguageText(String text) {
     state = state.copyWith(
       naturalLanguageText: text,
+      textTouched: true,
       checkInDate: _getTodayDateString(),
     );
     _persistCurrentState();
@@ -232,6 +238,9 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       completedAt: DateTime.now(),
       checkInDate: today,
       isModifiedAfterCompletion: false,
+      emotionalTouched: false,
+      physicalTouched: false,
+      textTouched: false,
     );
     _persistCurrentState();
     _syncCheckInToRemote();

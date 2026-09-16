@@ -24,6 +24,9 @@ class TriggerCheckInState {
   final DateTime? completedAt;
   final String? checkInDate;
   final bool isModifiedAfterCompletion;
+  final bool emotionalTouched;
+  final bool physicalTouched;
+  final bool textTouched;
 
   const TriggerCheckInState({
     this.emotionalStatus,
@@ -34,12 +37,29 @@ class TriggerCheckInState {
     this.completedAt,
     this.checkInDate,
     this.isModifiedAfterCompletion = false,
+    this.emotionalTouched = false,
+    this.physicalTouched = false,
+    this.textTouched = false,
   });
 
   bool get isReadyToSubmit => emotionalStatus != null && physicalStatus != null;
 
+  /// When editing an already-completed check-in, only the axis the user
+  /// actually touched this session should drive routing — the other axis's
+  /// carried-over value must not pull it into a combined/dual outcome.
   RoutingOutcome get routingOutcome {
     if (!isReadyToSubmit) return RoutingOutcome.none;
+
+    if (isCompletedToday && emotionalTouched != physicalTouched) {
+      final touchedEmotional = emotionalTouched;
+      final touchedStatus = touchedEmotional ? emotionalStatus : physicalStatus;
+      if (touchedStatus == TriggerStatus.goodNormal) {
+        return RoutingOutcome.none;
+      }
+      return touchedEmotional
+          ? RoutingOutcome.psicoEmocionalOnly
+          : RoutingOutcome.fisicaOnly;
+    }
 
     final emotionalOk = emotionalStatus == TriggerStatus.goodNormal;
     final physicalOk = physicalStatus == TriggerStatus.goodNormal;
@@ -65,6 +85,9 @@ class TriggerCheckInState {
     DateTime? completedAt,
     String? checkInDate,
     bool? isModifiedAfterCompletion,
+    bool? emotionalTouched,
+    bool? physicalTouched,
+    bool? textTouched,
   }) {
     return TriggerCheckInState(
       emotionalStatus: emotionalStatus ?? this.emotionalStatus,
@@ -76,6 +99,9 @@ class TriggerCheckInState {
       checkInDate: checkInDate ?? this.checkInDate,
       isModifiedAfterCompletion:
           isModifiedAfterCompletion ?? this.isModifiedAfterCompletion,
+      emotionalTouched: emotionalTouched ?? this.emotionalTouched,
+      physicalTouched: physicalTouched ?? this.physicalTouched,
+      textTouched: textTouched ?? this.textTouched,
     );
   }
 
@@ -88,6 +114,9 @@ class TriggerCheckInState {
       'completedAt': completedAt?.toIso8601String(),
       'checkInDate': checkInDate,
       'isModifiedAfterCompletion': isModifiedAfterCompletion,
+      'emotionalTouched': emotionalTouched,
+      'physicalTouched': physicalTouched,
+      'textTouched': textTouched,
     };
   }
 
@@ -113,6 +142,9 @@ class TriggerCheckInState {
       checkInDate: json['checkInDate'] as String?,
       isModifiedAfterCompletion:
           (json['isModifiedAfterCompletion'] as bool?) ?? false,
+      emotionalTouched: (json['emotionalTouched'] as bool?) ?? false,
+      physicalTouched: (json['physicalTouched'] as bool?) ?? false,
+      textTouched: (json['textTouched'] as bool?) ?? false,
     );
   }
 }
