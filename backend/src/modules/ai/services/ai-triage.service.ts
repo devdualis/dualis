@@ -1,14 +1,16 @@
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenAI } from '@google/genai';
+import OpenAI from 'openai';
 import { ClassifySymptomDto, TriageClassificationResult } from '../dto/classify-symptom.dto';
 import { IdiomDictionaryService } from './idiom-dictionary.service';
 import { SymptomVectorService } from './symptom-vector.service';
 
+const CLASSIFICATION_MODEL = 'gpt-4o-mini';
+
 @Injectable()
-export class GeminiTriageService {
-  private readonly logger = new Logger(GeminiTriageService.name);
-  private readonly client: GoogleGenAI | null = null;
+export class AiTriageService {
+  private readonly logger = new Logger(AiTriageService.name);
+  private readonly client: OpenAI | null = null;
   private readonly cache = new Map<string, TriageClassificationResult>();
   private readonly idiomDict: IdiomDictionaryService;
 
@@ -19,19 +21,16 @@ export class GeminiTriageService {
   ) {
     this.idiomDict = idiomDictionary ?? new IdiomDictionaryService();
     const apiKey =
-      this.configService?.get<string>('GEMINI_API') ||
-      this.configService?.get<string>('GEMINI_API_KEY') ||
-      process.env.GEMINI_API ||
-      process.env.GEMINI_API_KEY;
-    if (apiKey && apiKey !== 'mock-gemini-key') {
+      this.configService?.get<string>('OPENAI_KEY') || process.env.OPENAI_KEY;
+    if (apiKey && apiKey !== 'mock-openai-key') {
       try {
-        this.client = new GoogleGenAI({ apiKey });
-        this.logger.log('Gemini 1.5 Flash client initialized successfully');
+        this.client = new OpenAI({ apiKey });
+        this.logger.log('OpenAI client initialized successfully');
       } catch (err) {
-        this.logger.warn(`Failed to initialize GoogleGenAI client: ${(err as Error).message}`);
+        this.logger.warn(`Failed to initialize OpenAI client: ${(err as Error).message}`);
       }
     } else {
-      this.logger.log('GEMINI_API / GEMINI_API_KEY not provided or mock; operating with deterministic clinical dictionary engine');
+      this.logger.log('OPENAI_KEY not provided or mock; operating with deterministic clinical dictionary engine');
     }
   }
 
@@ -59,7 +58,7 @@ export class GeminiTriageService {
       };
     }
 
-    // 3. Symptom vector DB match (semantic, learns over time from Gemini classifications)
+    // 3. Symptom vector DB match (semantic, learns over time from OpenAI classifications)
     if (this.symptomVector) {
       const vectorMatch = await this.symptomVector.matchSymptom(dto.text);
       if (vectorMatch) {
@@ -71,33 +70,27 @@ export class GeminiTriageService {
       }
     }
 
-    // 4. Gemini 1.5 Flash structured output
+    // 4. OpenAI structured output
     if (this.client) {
       try {
-        const response = await this.client.models.generateContent({
-          model: 'gemini-1.5-flash',
-          contents: [
+        const response = await this.client.chat.completions.create({
+          model: CLASSIFICATION_MODEL,
+          response_format: { type: 'json_object' },
+          messages: [
             {
               role: 'user',
-              parts: [
-                {
-                  text: `Você é o motor de triagem médica preventiva do DualisCheckUp. Classifique a seguinte descrição clínica do usuário: "${dto.text}". Retorne em JSON estrito com:
-                  - vertical: "physical" ou "emotional"
-                  - systemOrDimension: chave do sistema anatômico ou dimensão emocional
-                  - urgencyScore: número inteiro de 1 a 5
-                  - mappedLayTerm: termo leigo identificado
-                  - clinicalConcept: conceito médico formal correspondente
-                  - isEmergencyCandidate: booleano indicando se preenche critérios Manchester/ESI nível 1-2`,
-                },
-              ],
+              content: `Você é o motor de triagem médica preventiva do DualisCheckUp. Classifique a seguinte descrição clínica do usuário: "${dto.text}". Retorne em JSON estrito com:
+              - vertical: "physical" ou "emotional"
+              - systemOrDimension: chave do sistema anatômico ou dimensão emocional
+              - urgencyScore: número inteiro de 1 a 5
+              - mappedLayTerm: termo leigo identificado
+              - clinicalConcept: conceito médico formal correspondente
+              - isEmergencyCandidate: booleano indicando se preenche critérios Manchester/ESI nível 1-2`,
             },
           ],
-          config: {
-            responseMimeType: 'application/json',
-          },
         });
 
-        const rawText = response.text || '{}';
+        const rawText = response.choices[0]?.message?.content || '{}';
         const parsed = JSON.parse(rawText);
 
         const result: TriageClassificationResult = {
@@ -108,7 +101,7 @@ export class GeminiTriageService {
           clinicalConcept: parsed.clinicalConcept || 'sintoma inespecífico',
           isEmergencyCandidate: parsed.isEmergencyCandidate === true,
           confidence: 0.90,
-          source: 'gemini_flash',
+          source: 'openai_gpt',
           latencyMs: Math.round(performance.now() - startTime),
         };
 
@@ -116,7 +109,7 @@ export class GeminiTriageService {
         this.symptomVector?.upsertFromClassification(dto.text, result).catch(() => {});
         return result;
       } catch (err) {
-        this.logger.warn(`Gemini inference failed, falling back: ${(err as Error).message}`);
+        this.logger.warn(`OpenAI inference failed, falling back: ${(err as Error).message}`);
       }
     }
 

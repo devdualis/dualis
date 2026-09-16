@@ -1,49 +1,45 @@
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenAI } from '@google/genai';
+import OpenAI from 'openai';
+
+const EMBEDDING_MODEL = 'text-embedding-3-small';
+const EMBEDDING_DIMENSIONS = 768;
 
 @Injectable()
 export class ArticleEmbeddingService {
   private readonly logger = new Logger(ArticleEmbeddingService.name);
-  private readonly client: GoogleGenAI | null = null;
+  private readonly client: OpenAI | null = null;
 
   constructor(
     @Optional() @Inject(ConfigService) private readonly configService?: ConfigService,
   ) {
     const apiKey =
-      this.configService?.get<string>('GEMINI_API') ||
-      this.configService?.get<string>('GEMINI_API_KEY') ||
-      process.env.GEMINI_API ||
-      process.env.GEMINI_API_KEY;
+      this.configService?.get<string>('OPENAI_KEY') || process.env.OPENAI_KEY;
 
-    if (apiKey && apiKey !== 'mock-gemini-key') {
+    if (apiKey && apiKey !== 'mock-openai-key') {
       try {
-        this.client = new GoogleGenAI({ apiKey });
+        this.client = new OpenAI({ apiKey });
       } catch (err) {
-        this.logger.warn(`Failed to initialize GoogleGenAI for embeddings: ${(err as Error).message}`);
+        this.logger.warn(`Failed to initialize OpenAI client for embeddings: ${(err as Error).message}`);
       }
     }
   }
 
   async embed(text: string): Promise<number[]> {
     if (this.client) {
-      const models = ['gemini-embedding-001', 'gemini-embedding-2', 'text-embedding-004'];
-      for (const model of models) {
-        try {
-          const response = await this.client.models.embedContent({
-            model,
-            contents: text,
-            config: { outputDimensionality: 768 },
-          });
-          const values = (response as any)?.embeddings?.[0]?.values || (response as any)?.embedding?.values;
-          if (Array.isArray(values) && values.length > 0) {
-            return values;
-          }
-        } catch (err) {
-          // Try next model in list
+      try {
+        const response = await this.client.embeddings.create({
+          model: EMBEDDING_MODEL,
+          input: text,
+          dimensions: EMBEDDING_DIMENSIONS,
+        });
+        const values = response.data?.[0]?.embedding;
+        if (Array.isArray(values) && values.length > 0) {
+          return values;
         }
+      } catch (err) {
+        this.logger.warn(`OpenAI embedding failed, falling back to clinical vector projection: ${(err as Error).message}`);
       }
-      this.logger.warn('Gemini embedding models failed, falling back to clinical vector projection');
     }
     return this.generateDeterministicEmbedding(text);
   }

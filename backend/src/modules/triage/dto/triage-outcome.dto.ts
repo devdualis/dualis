@@ -51,6 +51,6 @@ export interface TriageOutcomeResponseDto {
   recordedAt: string;
   aiMappedLayTerm?: string;
   aiClinicalConcept?: string;
-  aiSource?: 'gemini_flash' | 'idiom_cache' | 'dictionary_fallback' | 'vector_match';
+  aiSource?: 'openai_gpt' | 'idiom_cache' | 'dictionary_fallback' | 'vector_match';
   aiConfidence?: number;
 }

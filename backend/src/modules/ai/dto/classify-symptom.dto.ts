@@ -21,6 +21,6 @@ export interface TriageClassificationResult {
   clinicalConcept: string;
   isEmergencyCandidate: boolean;
   confidence: number;
-  source: 'gemini_flash' | 'idiom_cache' | 'dictionary_fallback' | 'vector_match';
+  source: 'openai_gpt' | 'idiom_cache' | 'dictionary_fallback' | 'vector_match';
   latencyMs: number;
 }

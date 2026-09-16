@@ -1,16 +1,17 @@
 import { Client } from 'pg';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import { GoogleGenAI } from '@google/genai';
+import OpenAI from 'openai';
 import { MEDICAL_ARTICLES_SEED } from '../src/modules/triage/data/medical-articles.seed';
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-const apiKey =
-  process.env.GEMINI_API ||
-  process.env.GEMINI_API_KEY;
+const EMBEDDING_MODEL = 'text-embedding-3-small';
+const EMBEDDING_DIMENSIONS = 768;
 
-const client = apiKey && apiKey !== 'mock-gemini-key' ? new GoogleGenAI({ apiKey }) : null;
+const apiKey = process.env.OPENAI_KEY;
+
+const client = apiKey && apiKey !== 'mock-openai-key' ? new OpenAI({ apiKey }) : null;
 
 function generateDeterministicEmbedding(text: string): number[] {
   const vector = new Array(768).fill(0);
@@ -41,22 +42,18 @@ function generateDeterministicEmbedding(text: string): number[] {
 
 async function getEmbedding(text: string): Promise<number[]> {
   if (client) {
-    const models = ['gemini-embedding-001', 'gemini-embedding-2', 'text-embedding-004'];
-    for (const model of models) {
-      try {
-        const response = await client.models.embedContent({
-          model,
-          contents: text,
-          config: { outputDimensionality: 768 },
-        });
-        const values =
-          (response as any)?.embeddings?.[0]?.values || (response as any)?.embedding?.values;
-        if (Array.isArray(values) && values.length === 768) {
-          return values;
-        }
-      } catch (e) {
-        // Try next model
+    try {
+      const response = await client.embeddings.create({
+        model: EMBEDDING_MODEL,
+        input: text,
+        dimensions: EMBEDDING_DIMENSIONS,
+      });
+      const values = response.data?.[0]?.embedding;
+      if (Array.isArray(values) && values.length === EMBEDDING_DIMENSIONS) {
+        return values;
       }
+    } catch (e) {
+      // Fall through to deterministic embedding
     }
   }
   console.warn('Falling back to deterministic clinical embedding for:', text.slice(0, 40));

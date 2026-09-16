@@ -7,7 +7,7 @@ import { symptomLogs } from '../../../database/schema';
 import { EncryptionService } from '../../../common/encryption/encryption.service';
 import { ArticlesCatalogService } from './articles-catalog.service';
 import { ArticlesVectorService } from './articles-vector.service';
-import { GeminiTriageService } from '../../ai/services/gemini-triage.service';
+import { AiTriageService } from '../../ai/services/ai-triage.service';
 import {
   CareDisposition,
   RecommendedArticleDto,
@@ -38,8 +38,8 @@ export class TriageOutcomeService {
     articlesVector?: ArticlesVectorService | ArticlesCatalogService,
     @Optional() @Inject(ArticlesCatalogService)
     articlesCatalog?: ArticlesCatalogService,
-    @Optional() @Inject(GeminiTriageService)
-    private readonly geminiTriage?: GeminiTriageService,
+    @Optional() @Inject(AiTriageService)
+    private readonly aiTriage?: AiTriageService,
   ) {
     if (articlesVector && 'searchArticles' in articlesVector) {
       this.articlesVector = articlesVector as ArticlesVectorService;
@@ -400,9 +400,9 @@ export class TriageOutcomeService {
     let aiSource: TriageOutcomeResponseDto['aiSource'];
     let aiConfidence: number | undefined;
 
-    if (this.geminiTriage && narrative && narrative.trim().length >= 2) {
+    if (this.aiTriage && narrative && narrative.trim().length >= 2) {
       try {
-        const classification = await this.geminiTriage.classify({ text: narrative, language: 'pt' });
+        const classification = await this.aiTriage.classify({ text: narrative, language: 'pt' });
         aiMappedLayTerm = classification.mappedLayTerm;
         aiClinicalConcept = classification.clinicalConcept;
         aiSource = classification.source;

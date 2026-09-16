@@ -1,18 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ConfigService } from '@nestjs/config';
 import { IdiomDictionaryService } from '../../src/modules/ai/services/idiom-dictionary.service';
-import { GeminiTriageService } from '../../src/modules/ai/services/gemini-triage.service';
+import { AiTriageService } from '../../src/modules/ai/services/ai-triage.service';
 
 describe('AI Classification Engine (TRG-02 / I18N-02 / RNF-002)', () => {
   let idiomService: IdiomDictionaryService;
-  let geminiService: GeminiTriageService;
+  let aiTriageService: AiTriageService;
 
   beforeEach(() => {
     idiomService = new IdiomDictionaryService();
     const configService = {
-      get: (key: string) => (key === 'GEMINI_API_KEY' ? 'mock-gemini-key' : null),
+      get: (key: string) => (key === 'OPENAI_KEY' ? 'mock-openai-key' : null),
     } as unknown as ConfigService;
-    geminiService = new GeminiTriageService(configService, idiomService);
+    aiTriageService = new AiTriageService(configService, idiomService);
   });
 
   describe('IdiomDictionaryService', () => {
@@ -83,9 +83,9 @@ describe('AI Classification Engine (TRG-02 / I18N-02 / RNF-002)', () => {
     });
   });
 
-  describe('GeminiTriageService & SLA Benchmark', () => {
+  describe('AiTriageService & SLA Benchmark', () => {
     it('8. Serves query with sub-2s latency SLA (RNF-002)', async () => {
-      const result = await geminiService.classify({
+      const result = await aiTriageService.classify({
         text: 'Estou com muita dor de cabeça e enxaqueca',
       });
 
@@ -97,16 +97,16 @@ describe('AI Classification Engine (TRG-02 / I18N-02 / RNF-002)', () => {
 
     it('9. Caches repeated queries and returns from memory cache', async () => {
       const query = { text: 'Estresse e cansaço mental do trabalho' };
-      const first = await geminiService.classify(query);
+      const first = await aiTriageService.classify(query);
       expect(first.source).toBe('dictionary_fallback');
 
-      const second = await geminiService.classify(query);
+      const second = await aiTriageService.classify(query);
       expect(second.source).toBe('idiom_cache');
       expect(second.latencyMs).toBeLessThan(5);
     });
 
     it('10. Handles unfamiliar input via fallback with zero crash', async () => {
-      const result = await geminiService.classify({
+      const result = await aiTriageService.classify({
         text: 'xyz123 algo completamente atípico e sem padrão conhecido',
       });
 
