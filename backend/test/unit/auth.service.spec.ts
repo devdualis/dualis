@@ -52,6 +52,7 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
       sign: vi.fn().mockImplementation((payload, options) => {
         return `mock-jwt-token-for-${payload.sub}-${options?.expiresIn}`;
       }),
+      verifyAsync: vi.fn(),
     };
 
     const mockEncryptionService = {
@@ -547,6 +548,90 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
       ).rejects.toThrow('Código de verificação incorreto.');
 
       expect(mockSet).toHaveBeenCalledWith({ attempts: 1 });
+    });
+  });
+
+  describe('Scenario 10: Token Refresh', () => {
+    const userRecord = {
+      id: '555e4567-e89b-12d3-a456-426614174004',
+      name: 'Ana Souza',
+      email: 'ana.souza@example.com',
+      gender: 'feminino',
+      dateOfBirth: '1990-01-01',
+      picture: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    it('issues a new token pair when the refresh token is valid', async () => {
+      mockJwtService.verifyAsync.mockResolvedValue({
+        sub: userRecord.id,
+        email: userRecord.email,
+        type: 'refresh',
+      });
+
+      mockTxSelect.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([userRecord]),
+          }),
+        }),
+      });
+
+      const result = await authService.refreshTokens('valid-refresh-token');
+
+      expect(mockJwtService.verifyAsync).toHaveBeenCalledWith('valid-refresh-token');
+      expect(result).toHaveProperty('accessToken');
+      expect(result).toHaveProperty('refreshToken');
+      expect(result.user.id).toBe(userRecord.id);
+      expect(mockJwtService.sign).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'access' }),
+        { expiresIn: '15m' },
+      );
+      expect(mockJwtService.sign).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'refresh' }),
+        { expiresIn: '7d' },
+      );
+    });
+
+    it('throws UnauthorizedException when the token is expired or malformed', async () => {
+      mockJwtService.verifyAsync.mockRejectedValue(new Error('jwt expired'));
+
+      await expect(authService.refreshTokens('expired-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('throws UnauthorizedException when an access token is presented instead of a refresh token', async () => {
+      mockJwtService.verifyAsync.mockResolvedValue({
+        sub: userRecord.id,
+        email: userRecord.email,
+        type: 'access',
+      });
+
+      await expect(authService.refreshTokens('access-token-not-refresh')).rejects.toThrow(
+        'Token de atualização inválido.',
+      );
+    });
+
+    it('throws UnauthorizedException when the user no longer exists', async () => {
+      mockJwtService.verifyAsync.mockResolvedValue({
+        sub: 'deleted-user-id',
+        email: 'ghost@example.com',
+        type: 'refresh',
+      });
+
+      mockTxSelect.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([]),
+          }),
+        }),
+      });
+
+      await expect(authService.refreshTokens('valid-token-deleted-user')).rejects.toThrow(
+        'Usuário não encontrado.',
+      );
     });
   });
 });

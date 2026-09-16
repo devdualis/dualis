@@ -32,6 +32,7 @@ import { UserDataExportResponseDto } from './dto/export-data.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { StorageService } from '../../common/storage/storage.service';
+import { JwtPayload } from './strategies/jwt.strategy';
 
 @Injectable()
 export class AuthService {
@@ -584,10 +585,32 @@ export class AuthService {
     };
   }
 
+  async refreshTokens(refreshToken: string): Promise<AuthResponseDto> {
+    let payload: JwtPayload;
+    try {
+      payload = await this.jwtService.verifyAsync<JwtPayload>(refreshToken);
+    } catch {
+      throw new UnauthorizedException('Token de atualização inválido ou expirado.');
+    }
+
+    if (payload.type !== 'refresh') {
+      throw new UnauthorizedException('Token de atualização inválido.');
+    }
+
+    const user = await this.validateUserById(payload.sub);
+    if (!user) {
+      throw new UnauthorizedException('Usuário não encontrado.');
+    }
+
+    const tokens = this.generateTokens(user.id, user.email);
+    return { ...tokens, user };
+  }
+
   private generateTokens(userId: string, email: string) {
-    const payload = { sub: userId, email };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+    const accessPayload: JwtPayload = { sub: userId, email, type: 'access' };
+    const refreshPayload: JwtPayload = { sub: userId, email, type: 'refresh' };
+    const accessToken = this.jwtService.sign(accessPayload, { expiresIn: '15m' });
+    const refreshToken = this.jwtService.sign(refreshPayload, { expiresIn: '7d' });
     return { accessToken, refreshToken };
   }
 }

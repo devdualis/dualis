@@ -7,6 +7,7 @@ import { AuthService } from '../auth.service';
 export interface JwtPayload {
   sub: string;
   email: string;
+  type: 'access' | 'refresh';
 }
 
 @Injectable()
@@ -25,6 +26,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
+    if (payload.type !== 'access') {
+      throw new UnauthorizedException('Token inválido.');
+    }
+
     const user = await this.authService.validateUserById(payload.sub);
     if (!user) {
       throw new UnauthorizedException('Usuário não encontrado ou token inválido.');
