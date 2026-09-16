@@ -208,6 +208,44 @@ class TriageQuestionBank {
     ),
   ];
 
-  static List<TriageQuestion> forVertical(TriageVertical v) =>
-      v == TriageVertical.psicoEmocional ? psicoEmocional : fisica;
+  static const TriageQuestion _fisicaStep3Dermatologica = TriageQuestion(
+    stepIndex: 3,
+    questionKey: 'triageQ4Dermatological',
+    options: [
+      TriageOption(
+        key: 'sim_produto_novo',
+        labelKey: 'triageOptSimProdutoNovo',
+      ),
+      TriageOption(
+        key: 'sim_exposicao_sol_calor',
+        labelKey: 'triageOptSimExposicaoSolCalor',
+      ),
+      TriageOption(
+        key: 'sim_picada_contato',
+        labelKey: 'triageOptSimPicadaContato',
+      ),
+      TriageOption(
+        key: 'nao_comecou_do_nada',
+        labelKey: 'triageOptNaoComecouNada',
+      ),
+    ],
+  );
+
+  /// Returns the question set for [v]. For the physical vertical, [systemKey]
+  /// (the step-0 answer) swaps in a system-appropriate step-3 question — e.g.
+  /// dermatological complaints ask about triggers like new products or sun
+  /// exposure instead of the generic exercise/fall question.
+  static List<TriageQuestion> forVertical(TriageVertical v, {String? systemKey}) {
+    if (v == TriageVertical.psicoEmocional) return psicoEmocional;
+    if (systemKey == 'dermatologico') {
+      return [
+        fisica[0],
+        fisica[1],
+        fisica[2],
+        _fisicaStep3Dermatologica,
+        fisica[4],
+      ];
+    }
+    return fisica;
+  }
 }

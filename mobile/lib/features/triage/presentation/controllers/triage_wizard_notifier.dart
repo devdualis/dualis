@@ -45,7 +45,11 @@ class TriageWizardNotifier extends _$TriageWizardNotifier {
 
   void advance() {
     if (!state.canAdvance) return;
-    final maxStep = TriageQuestionBank.forVertical(state.activeVertical).length - 1;
+    final maxStep = TriageQuestionBank.forVertical(
+          state.activeVertical,
+          systemKey: state.answers[0],
+        ).length -
+        1;
     if (state.currentStep < maxStep) {
       state = state.copyWith(currentStep: state.currentStep + 1);
     } else {

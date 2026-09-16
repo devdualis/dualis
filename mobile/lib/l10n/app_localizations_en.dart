@@ -388,6 +388,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get triageOptNaoComecouNada => 'No, started out of nowhere';
 
   @override
+  String get triageQ4Dermatological =>
+      'Did you notice anything that might have triggered this, like a new product, sun/heat exposure, or contact with something (plant, insect, substance)?';
+
+  @override
+  String get triageOptSimProdutoNovo =>
+      'Yes, I used a new product (cosmetic, soap, etc.)';
+
+  @override
+  String get triageOptSimExposicaoSolCalor =>
+      'Yes, there was sun exposure, heat, or intense sweating';
+
+  @override
+  String get triageOptSimPicadaContato =>
+      'Yes, I had contact with a plant, insect, or substance';
+
+  @override
   String get triagePreviewPhysical => 'Review of your Physical Assessment';
 
   @override

@@ -94,6 +94,7 @@ export class ArticlesVectorService implements OnModuleInit {
             url,
             1 - (embedding <=> ${vectorString}::vector) AS similarity
           FROM medical_articles
+          WHERE category = ${params.category}
           ORDER BY embedding <=> ${vectorString}::vector ASC
           LIMIT ${limit}
         `);

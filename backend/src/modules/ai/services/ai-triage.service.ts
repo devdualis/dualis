@@ -7,6 +7,33 @@ import { SymptomVectorService } from './symptom-vector.service';
 
 const CLASSIFICATION_MODEL = 'gpt-4o-mini';
 
+// Canonical systemOrDimension keys (must match idiom-dictionary.service.ts and the
+// mobile app's triage question bank / wizard category aliases). OpenAI is constrained
+// to this vocabulary so free-form output doesn't produce keys the app can't route on.
+const PHYSICAL_SYSTEMS = [
+  'cardiovascular_chest',
+  'head_neck',
+  'respiratory',
+  'neurological',
+  'musculoskeletal_back',
+  'membros_superiores',
+  'membros_inferiores',
+  'gastrointestinal',
+  'geniturinario_pelvico',
+  'dermatologico',
+  'muscular_geral_sistemico',
+  'endocrino_metabolico',
+];
+const EMOTIONAL_SYSTEMS = [
+  'depressive_hopelessness',
+  'anxious_agitation',
+  'stress_burnout',
+  'somatica',
+  'sono',
+  'cognitiva_foco',
+  'autoestima',
+];
+
 @Injectable()
 export class AiTriageService {
   private readonly logger = new Logger(AiTriageService.name);
@@ -81,9 +108,11 @@ export class AiTriageService {
               role: 'user',
               content: `Você é o motor de triagem médica preventiva do DualisCheckUp. Classifique a seguinte descrição clínica do usuário: "${dto.text}". Retorne em JSON estrito com:
               - vertical: "physical" ou "emotional"
-              - systemOrDimension: chave do sistema anatômico ou dimensão emocional
+              - systemOrDimension: escolha EXATAMENTE uma destas chaves, de acordo com o "vertical" escolhido (nunca invente uma chave nova):
+                se vertical = "physical": ${PHYSICAL_SYSTEMS.join(', ')}
+                se vertical = "emotional": ${EMOTIONAL_SYSTEMS.join(', ')}
               - urgencyScore: número inteiro de 1 a 5
-              - mappedLayTerm: termo leigo identificado
+              - mappedLayTerm: termo leigo identificado, refletindo o sintoma relatado (ex.: coceira, tontura, dor) e não assumindo que é dor quando não for
               - clinicalConcept: conceito médico formal correspondente
               - isEmergencyCandidate: booleano indicando se preenche critérios Manchester/ESI nível 1-2`,
             },
@@ -93,9 +122,17 @@ export class AiTriageService {
         const rawText = response.choices[0]?.message?.content || '{}';
         const parsed = JSON.parse(rawText);
 
+        const primaryVertical = parsed.vertical === 'emotional' ? 'emotional' : 'physical';
+        const validSystems = primaryVertical === 'emotional' ? EMOTIONAL_SYSTEMS : PHYSICAL_SYSTEMS;
+        const systemOrDimension = validSystems.includes(parsed.systemOrDimension)
+          ? parsed.systemOrDimension
+          : primaryVertical === 'emotional'
+            ? 'cognitiva_foco'
+            : 'general_somatic';
+
         const result: TriageClassificationResult = {
-          primaryVertical: parsed.vertical === 'emotional' ? 'emotional' : 'physical',
-          systemOrDimension: parsed.systemOrDimension || 'general_somatic',
+          primaryVertical,
+          systemOrDimension,
           urgencyScore: typeof parsed.urgencyScore === 'number' ? parsed.urgencyScore : 2,
           mappedLayTerm: parsed.mappedLayTerm || dto.text,
           clinicalConcept: parsed.clinicalConcept || 'sintoma inespecífico',

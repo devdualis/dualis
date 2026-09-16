@@ -28,6 +28,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool _isResolvingNavigation = false;
+
   @override
   void initState() {
     super.initState();
@@ -206,7 +208,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   return DualisPrimaryButton(
                     key: const Key('startTriageButton'),
                     text: buttonText,
-                    onPressed: isReady
+                    isLoading: _isResolvingNavigation,
+                    onPressed: isReady && !_isResolvingNavigation
                         ? () async {
                             // If already completed today and nothing changed, do nothing.
                             if (triggerState.isCompletedToday &&
@@ -226,9 +229,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 return;
                               }
 
+                              setState(() => _isResolvingNavigation = true);
                               final navArgs = await ref
                                   .read(triggerCheckInProvider.notifier)
                                   .resolveTextDrivenNavigation();
+                              if (mounted) {
+                                setState(() => _isResolvingNavigation = false);
+                              }
                               if (navArgs != null) {
                                 if (context.mounted) {
                                   context.push(RoutePaths.triage, extra: navArgs);

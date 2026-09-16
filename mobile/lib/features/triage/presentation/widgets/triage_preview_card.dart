@@ -112,12 +112,43 @@ class TriagePreviewCard extends StatelessWidget {
       case 'nao_comecou_do_nada':
         return l10n.triageOptNaoComecouNada;
 
+      case 'sim_produto_novo':
+        return l10n.triageOptSimProdutoNovo;
+      case 'sim_exposicao_sol_calor':
+        return l10n.triageOptSimExposicaoSolCalor;
+      case 'sim_picada_contato':
+        return l10n.triageOptSimPicadaContato;
+
       default:
         final intVal = int.tryParse(key);
         if (intVal != null) {
           return l10n.triageIntensityLabel(intVal);
         }
         return key;
+    }
+  }
+
+  static String _physicalTriggerLabel(String? systemOrDimension) {
+    switch (systemOrDimension) {
+      case 'dermatologico':
+        return 'Possível Gatilho / Exposição';
+      default:
+        return 'Histórico de Esforço / Queda';
+    }
+  }
+
+  static String _physicalLocationLabel(String? systemOrDimension) {
+    switch (systemOrDimension) {
+      case 'dermatologico':
+        return 'Localização da Coceira / Lesão';
+      case 'gastrointestinal_abdomen':
+      case 'respiratorio':
+      case 'neurologico':
+      case 'geniturinario_pelvico':
+      case 'endocrino_metabolico':
+        return 'Localização do Desconforto';
+      default:
+        return 'Localização da Dor';
     }
   }
 
@@ -136,10 +167,10 @@ class TriagePreviewCard extends StatelessWidget {
             'Motivo / Gatilho',
           ]
         : [
-            'Localização da Dor',
+            _physicalLocationLabel(answers[0]),
             'Tempo / Persistência',
             'Intensidade Relatada',
-            'Histórico de Esforço / Queda',
+            _physicalTriggerLabel(answers[0]),
           ];
 
     return Card(

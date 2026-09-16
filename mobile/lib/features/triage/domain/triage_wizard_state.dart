@@ -18,7 +18,8 @@ abstract class TriageWizardState with _$TriageWizardState {
 
   /// Whether the current step has been answered and wizard can advance.
   bool get canAdvance {
-    final questions = TriageQuestionBank.forVertical(activeVertical);
+    final questions =
+        TriageQuestionBank.forVertical(activeVertical, systemKey: answers[0]);
     if (currentStep >= questions.length) return true;
     final q = questions[currentStep];
     if (q.isPreview) return true;

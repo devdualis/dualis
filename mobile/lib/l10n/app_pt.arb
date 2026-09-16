@@ -476,6 +476,22 @@
   "@triageOptNaoComecouNada": {
     "description": "Physical trigger: Started out of nowhere"
   },
+  "triageQ4Dermatological": "Você notou algo que possa ter causado isso, como um produto novo, exposição ao sol/calor ou contato com algo (planta, inseto, substância)?",
+  "@triageQ4Dermatological": {
+    "description": "Question 4 dermatological"
+  },
+  "triageOptSimProdutoNovo": "Sim, usei um produto novo (cosmético, sabonete, etc.)",
+  "@triageOptSimProdutoNovo": {
+    "description": "Dermatological trigger: New product"
+  },
+  "triageOptSimExposicaoSolCalor": "Sim, houve exposição ao sol, calor ou suor intenso",
+  "@triageOptSimExposicaoSolCalor": {
+    "description": "Dermatological trigger: Sun/heat exposure"
+  },
+  "triageOptSimPicadaContato": "Sim, tive contato com planta, inseto ou substância",
+  "@triageOptSimPicadaContato": {
+    "description": "Dermatological trigger: Insect/plant/substance contact"
+  },
   "triagePreviewPhysical": "Revisão da sua Avaliação Física",
   "@triagePreviewPhysical": {
     "description": "Physical preview step description"

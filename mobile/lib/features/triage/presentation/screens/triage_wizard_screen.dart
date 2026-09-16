@@ -93,6 +93,8 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
         return l10n.triageQ3Physical;
       case 'triageQ4Physical':
         return l10n.triageQ4Physical;
+      case 'triageQ4Dermatological':
+        return l10n.triageQ4Dermatological;
       case 'triagePreviewPhysical':
         return l10n.triagePreviewPhysical;
       default:
@@ -107,7 +109,10 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     final state = ref.watch(triageWizardNotifierProvider);
-    final questions = TriageQuestionBank.forVertical(state.activeVertical);
+    final questions = TriageQuestionBank.forVertical(
+      state.activeVertical,
+      systemKey: state.answers[0],
+    );
     final currentQuestion = state.currentStep < questions.length
         ? questions[state.currentStep]
         : questions.last;

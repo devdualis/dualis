@@ -802,6 +802,30 @@ abstract class AppLocalizations {
   /// **'Não, começou do nada'**
   String get triageOptNaoComecouNada;
 
+  /// Question 4 dermatological
+  ///
+  /// In pt, this message translates to:
+  /// **'Você notou algo que possa ter causado isso, como um produto novo, exposição ao sol/calor ou contato com algo (planta, inseto, substância)?'**
+  String get triageQ4Dermatological;
+
+  /// Dermatological trigger: New product
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim, usei um produto novo (cosmético, sabonete, etc.)'**
+  String get triageOptSimProdutoNovo;
+
+  /// Dermatological trigger: Sun/heat exposure
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim, houve exposição ao sol, calor ou suor intenso'**
+  String get triageOptSimExposicaoSolCalor;
+
+  /// Dermatological trigger: Insect/plant/substance contact
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim, tive contato com planta, inseto ou substância'**
+  String get triageOptSimPicadaContato;
+
   /// Physical preview step description
   ///
   /// In pt, this message translates to:
