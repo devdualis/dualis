@@ -133,4 +133,79 @@ describe('TriageOutcomeService Unit Tests', () => {
     expect(mockEncryptionService.encrypt).toHaveBeenCalledWith('Dor lombar aguda incapacitante');
     expect(mockDb.transaction).toHaveBeenCalled();
   });
+
+  it('6. recommends articles for both physical and emotional axes when a daily check-in flags both', async () => {
+    const outcome = await service.recordDailyCheckIn('user-1', {
+      physicalStatus: 'badSick',
+      emotionalStatus: 'badSick',
+      naturalLanguageText: 'Dor nas costas e muito estresse essa semana',
+    });
+
+    expect(outcome.recommendedArticles).toBeDefined();
+    expect(
+      outcome.recommendedArticles!.some((a) => a.category === 'coluna_dor_dorsal'),
+    ).toBe(true);
+    expect(
+      outcome.recommendedArticles!.some((a) => a.category === 'estresse_burnout'),
+    ).toBe(true);
+  });
+
+  it('7. classifies daily check-in narratives into every one of the 12 physical dimensions with matching articles', async () => {
+    const cases: Array<[string, string]> = [
+      ['Estou com dor de cabeça e enxaqueca forte', 'cabeca_pescoco'],
+      ['Sinto o coração disparado e batedeira no peito', 'cardiovascular_torax'],
+      ['Estou com falta de ar e cansaço ao respirar', 'respiratorio'],
+      ['Tenho azia e queimação no estômago', 'gastrointestinal_abdomen'],
+      ['Estou com dor nas costas e dor na lombar', 'coluna_dor_dorsal'],
+      ['Sinto dor no pulso e tendinite na mão', 'membros_superiores'],
+      ['Torci o tornozelo e sinto dor no joelho', 'membros_inferiores'],
+      ['Estou com tontura e labirintite', 'neurologico'],
+      ['Sinto dor ao urinar e infecção de urina', 'geniturinario_pelvico'],
+      ['Estou com coceira na pele e manchas vermelhas', 'dermatologico'],
+      ['Meu corpo está quebrado, com fadiga física intensa', 'muscular_geral_sistemico'],
+      ['Tenho sede excessiva e perdi muito peso sem motivo', 'endocrino_metabolico'],
+    ];
+
+    for (const [naturalLanguageText, expectedCategory] of cases) {
+      const outcome = await service.recordDailyCheckIn('user-1', {
+        physicalStatus: 'badSick',
+        emotionalStatus: 'goodNormal',
+        naturalLanguageText,
+      });
+
+      expect(outcome.recommendedArticles!.length).toBeGreaterThan(0);
+      expect(
+        outcome.recommendedArticles!.every((a) => a.category === expectedCategory || a.category === 'geral'),
+        `expected "${naturalLanguageText}" to classify as ${expectedCategory}, got ${outcome.recommendedArticles!.map((a) => a.category)}`,
+      ).toBe(true);
+      expect(outcome.recommendedArticles!.some((a) => a.category === expectedCategory)).toBe(true);
+    }
+  });
+
+  it('8. classifies daily check-in narratives into every one of the 7 emotional dimensions with matching articles', async () => {
+    const cases: Array<[string, string]> = [
+      ['Estou com crise de pânico e hiperventilação', 'ansiosa_agitacao'],
+      ['Sinto tristeza persistente e vontade de chorar', 'depressiva_desanimo'],
+      ['Estou esgotado e sobrecarregado no trabalho', 'estresse_burnout'],
+      ['Sinto um nó na garganta por nervoso e aperto no peito emocional', 'somatica'],
+      ['Não durmo bem e tenho insônia todas as noites', 'sono'],
+      ['Estou com névoa mental, mente lerda e sem foco', 'cognitiva_foco'],
+      ['Sinto muita autocrítica severa e sensação de incapacidade', 'autoestima'],
+    ];
+
+    for (const [naturalLanguageText, expectedCategory] of cases) {
+      const outcome = await service.recordDailyCheckIn('user-1', {
+        physicalStatus: 'goodNormal',
+        emotionalStatus: 'badSick',
+        naturalLanguageText,
+      });
+
+      expect(outcome.recommendedArticles!.length).toBeGreaterThan(0);
+      expect(
+        outcome.recommendedArticles!.every((a) => a.category === expectedCategory || a.category === 'geral'),
+        `expected "${naturalLanguageText}" to classify as ${expectedCategory}, got ${outcome.recommendedArticles!.map((a) => a.category)}`,
+      ).toBe(true);
+      expect(outcome.recommendedArticles!.some((a) => a.category === expectedCategory)).toBe(true);
+    }
+  });
 });

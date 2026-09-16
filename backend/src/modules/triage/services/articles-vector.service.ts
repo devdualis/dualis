@@ -30,35 +30,62 @@ export class ArticlesVectorService implements OnModuleInit {
   }
 
   async ensureSeedArticles(): Promise<void> {
-    const existing = await this.db.select({ id: schema.medicalArticles.id }).from(schema.medicalArticles);
-    const existingIds = new Set(existing.map((e) => e.id));
+    const existing = await this.db.select().from(schema.medicalArticles);
+    const existingById = new Map(existing.map((row) => [row.id, row]));
 
     for (const article of this.seedArticles) {
-      if (existingIds.has(article.id)) {
+      const current = existingById.get(article.id);
+
+      if (current && this.matchesSeedContent(current, article)) {
         continue;
       }
 
       const textToEmbed = `${article.title} ${article.category} ${article.keywords.join(' ')} ${article.summary}`;
       const embeddingVector = await this.embeddingService.embed(textToEmbed);
 
-      await this.db
-        .insert(schema.medicalArticles)
-        .values({
-          id: article.id,
-          title: article.title,
-          category: article.category,
-          somaticSystem: article.somaticSystem ?? null,
-          author: article.author,
-          authorRole: article.authorRole,
-          readTimeMinutes: article.readTimeMinutes,
-          summary: article.summary,
-          contentMarkdown: article.contentMarkdown,
-          keywords: article.keywords,
-          url: article.url,
-          embedding: embeddingVector,
-        })
-        .onConflictDoNothing();
+      const values = {
+        id: article.id,
+        title: article.title,
+        category: article.category,
+        somaticSystem: article.somaticSystem ?? null,
+        author: article.author,
+        authorRole: article.authorRole,
+        readTimeMinutes: article.readTimeMinutes,
+        summary: article.summary,
+        contentMarkdown: article.contentMarkdown,
+        keywords: article.keywords,
+        url: article.url,
+        embedding: embeddingVector,
+      };
+
+      if (current) {
+        this.logger.log(`Re-seeding medical article '${article.id}': source content changed since last boot.`);
+        await this.db
+          .update(schema.medicalArticles)
+          .set(values)
+          .where(sql`${schema.medicalArticles.id} = ${article.id}`);
+      } else {
+        await this.db.insert(schema.medicalArticles).values(values).onConflictDoNothing();
+      }
     }
+  }
+
+  private matchesSeedContent(
+    row: typeof schema.medicalArticles.$inferSelect,
+    article: SeedArticleDefinition,
+  ): boolean {
+    return (
+      row.title === article.title &&
+      row.category === article.category &&
+      (row.somaticSystem ?? null) === (article.somaticSystem ?? null) &&
+      row.author === article.author &&
+      row.authorRole === article.authorRole &&
+      row.readTimeMinutes === article.readTimeMinutes &&
+      row.summary === article.summary &&
+      row.contentMarkdown === article.contentMarkdown &&
+      row.url === article.url &&
+      JSON.stringify(row.keywords) === JSON.stringify(article.keywords)
+    );
   }
 
   async searchArticles(params: {

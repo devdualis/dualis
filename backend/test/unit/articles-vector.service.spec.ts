@@ -171,4 +171,106 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
       expect(article.url).not.toContain('dualis.health');
     }
   });
+
+  describe('ensureSeedArticles re-seeding behavior', () => {
+    function buildSeedRow(overrides: Record<string, unknown> = {}) {
+      const seed = vectorService.seedArticles[0];
+      return {
+        id: seed.id,
+        title: seed.title,
+        category: seed.category,
+        somaticSystem: seed.somaticSystem ?? null,
+        author: seed.author,
+        authorRole: seed.authorRole,
+        readTimeMinutes: seed.readTimeMinutes,
+        summary: seed.summary,
+        contentMarkdown: seed.contentMarkdown,
+        keywords: seed.keywords,
+        url: seed.url,
+        ...overrides,
+      };
+    }
+
+    it('7. skips rows whose stored content already matches the seed source', async () => {
+      const upToDateRow = buildSeedRow();
+      const otherIds = new Set(vectorService.seedArticles.slice(1).map((a) => a.id));
+
+      mockDb.select = vi.fn().mockReturnValue({
+        from: vi.fn().mockResolvedValue([
+          upToDateRow,
+          ...vectorService.seedArticles
+            .filter((a) => otherIds.has(a.id))
+            .map((a) => buildSeedRowFor(a)),
+        ]),
+      });
+      mockDb.insert = vi.fn();
+      mockDb.update = vi.fn();
+
+      function buildSeedRowFor(seed: (typeof vectorService.seedArticles)[number]) {
+        return {
+          id: seed.id,
+          title: seed.title,
+          category: seed.category,
+          somaticSystem: seed.somaticSystem ?? null,
+          author: seed.author,
+          authorRole: seed.authorRole,
+          readTimeMinutes: seed.readTimeMinutes,
+          summary: seed.summary,
+          contentMarkdown: seed.contentMarkdown,
+          keywords: seed.keywords,
+          url: seed.url,
+        };
+      }
+
+      await vectorService.ensureSeedArticles();
+
+      expect(mockDb.insert).not.toHaveBeenCalled();
+      expect(mockDb.update).not.toHaveBeenCalled();
+    });
+
+    it('8. re-embeds and updates a row whose stored URL/content drifted from the seed source (stale seed regression)', async () => {
+      const staleRow = buildSeedRow({ url: 'https://old-outdated-url.example.com/moved' });
+      const restRows = vectorService.seedArticles.slice(1).map((seed) => ({
+        id: seed.id,
+        title: seed.title,
+        category: seed.category,
+        somaticSystem: seed.somaticSystem ?? null,
+        author: seed.author,
+        authorRole: seed.authorRole,
+        readTimeMinutes: seed.readTimeMinutes,
+        summary: seed.summary,
+        contentMarkdown: seed.contentMarkdown,
+        keywords: seed.keywords,
+        url: seed.url,
+      }));
+
+      mockDb.select = vi.fn().mockReturnValue({
+        from: vi.fn().mockResolvedValue([staleRow, ...restRows]),
+      });
+
+      const setMock = vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) });
+      mockDb.update = vi.fn().mockReturnValue({ set: setMock });
+      mockDb.insert = vi.fn();
+
+      await vectorService.ensureSeedArticles();
+
+      expect(mockDb.update).toHaveBeenCalledTimes(1);
+      expect(setMock).toHaveBeenCalledWith(
+        expect.objectContaining({ id: vectorService.seedArticles[0].id, url: vectorService.seedArticles[0].url }),
+      );
+      expect(mockDb.insert).not.toHaveBeenCalled();
+    });
+
+    it('9. inserts rows for seed articles missing from the database', async () => {
+      mockDb.select = vi.fn().mockReturnValue({ from: vi.fn().mockResolvedValue([]) });
+      const valuesMock = vi.fn().mockReturnValue({ onConflictDoNothing: vi.fn().mockResolvedValue(undefined) });
+      mockDb.insert = vi.fn().mockReturnValue({ values: valuesMock });
+      mockDb.update = vi.fn();
+
+      await vectorService.ensureSeedArticles();
+
+      expect(mockDb.insert).toHaveBeenCalledTimes(vectorService.seedArticles.length);
+      expect(mockDb.update).not.toHaveBeenCalled();
+    });
+  });
 });

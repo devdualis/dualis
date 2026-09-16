@@ -7,6 +7,7 @@ import { symptomLogs } from '../../../database/schema';
 import { EncryptionService } from '../../../common/encryption/encryption.service';
 import { ArticlesCatalogService } from './articles-catalog.service';
 import { ArticlesVectorService } from './articles-vector.service';
+import { MEDICAL_ARTICLES_SEED } from '../data/medical-articles.seed';
 import { AiTriageService } from '../../ai/services/ai-triage.service';
 import {
   CareDisposition,
@@ -314,6 +315,69 @@ export class TriageOutcomeService {
     },
   };
 
+  private readonly categoryKeywords: Record<string, string[]> = MEDICAL_ARTICLES_SEED.reduce(
+    (acc, article) => {
+      if (article.category === 'geral') {
+        return acc;
+      }
+      if (!acc[article.category]) {
+        acc[article.category] = [];
+      }
+      acc[article.category].push(
+        this.normalizeText(article.title),
+        ...article.keywords.map((k) => this.normalizeText(k)),
+      );
+      return acc;
+    },
+    {} as Record<string, string[]>,
+  );
+
+  private normalizeText(text: string): string {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '');
+  }
+
+  /**
+   * Scores the free-text narrative against every real article category's keyword set
+   * (sourced from the medical articles seed) so daily check-ins map to an actual
+   * clinical dimension instead of a placeholder category with no matching content.
+   */
+  private classifyCategory(text: string, vertical: 'physical' | 'emotional'): string {
+    const defaultCategory = vertical === 'physical' ? 'muscular_geral_sistemico' : 'estresse_burnout';
+    const normalized = this.normalizeText(text || '');
+    if (!normalized) {
+      return defaultCategory;
+    }
+
+    const candidateCategories = [
+      ...new Set(
+        Object.values(vertical === 'physical' ? this.physicalMappings : this.emotionalMappings).map(
+          (m) => m.code,
+        ),
+      ),
+    ];
+
+    let bestCategory = defaultCategory;
+    let bestScore = 0;
+    for (const category of candidateCategories) {
+      const keywords = this.categoryKeywords[category] || [];
+      let score = 0;
+      for (const keyword of keywords) {
+        if (keyword.length >= 3 && normalized.includes(keyword)) {
+          score += 1;
+        }
+      }
+      if (score > bestScore) {
+        bestScore = score;
+        bestCategory = category;
+      }
+    }
+
+    return bestCategory;
+  }
+
   async processOutcome(
     userId: string,
     dto: SubmitTriageDto,
@@ -529,6 +593,12 @@ export class TriageOutcomeService {
       ? this.encryptionService.encrypt(dto.naturalLanguageText)
       : null;
 
+    const narrative = dto.naturalLanguageText?.trim() || '';
+    const physicalCategory =
+      dto.physicalStatus !== 'goodNormal' ? this.classifyCategory(narrative, 'physical') : null;
+    const emotionalCategory =
+      dto.emotionalStatus !== 'goodNormal' ? this.classifyCategory(narrative, 'emotional') : null;
+
     const [savedRecord] = await this.db.transaction(async (tx) => {
       await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`);
       return tx
@@ -537,8 +607,8 @@ export class TriageOutcomeService {
           userId,
           encryptedNarrative,
           intensity,
-          anatomicalSystem: dto.physicalStatus !== 'goodNormal' ? 'geral_fisico' : null,
-          emotionalDimension: dto.emotionalStatus !== 'goodNormal' ? 'geral_emocional' : null,
+          anatomicalSystem: physicalCategory,
+          emotionalDimension: emotionalCategory,
           disposition,
           organicPrimacyApplied: false,
           stepAnswers: encryptedStepAnswers,
@@ -549,42 +619,59 @@ export class TriageOutcomeService {
     });
 
     let recommendedArticles: RecommendedArticleDto[] = [];
-    const narrative = dto.naturalLanguageText?.trim();
-    if (this.articlesVector && narrative && narrative.length >= 2) {
+    if (this.articlesVector && narrative.length >= 2) {
       try {
-        const queryVertical = dto.physicalStatus !== 'goodNormal' ? 'physical' : 'emotional';
-        const queryCategory = dto.physicalStatus !== 'goodNormal' ? 'geral_fisico' : 'geral_emocional';
-        recommendedArticles = await this.articlesVector.searchArticles({
-          queryText: narrative,
-          category: queryCategory,
-          vertical: queryVertical,
-        });
+        const searches: Promise<RecommendedArticleDto[]>[] = [];
+        if (physicalCategory) {
+          searches.push(
+            this.articlesVector.searchArticles({
+              queryText: narrative,
+              category: physicalCategory,
+              vertical: 'physical',
+            }),
+          );
+        }
+        if (emotionalCategory) {
+          searches.push(
+            this.articlesVector.searchArticles({
+              queryText: narrative,
+              category: emotionalCategory,
+              vertical: 'emotional',
+            }),
+          );
+        }
+
+        const resultsPerVertical = await Promise.all(searches);
+        const maxLen = Math.max(0, ...resultsPerVertical.map((r) => r.length));
+        for (let i = 0; i < maxLen; i++) {
+          for (const list of resultsPerVertical) {
+            if (list[i]) recommendedArticles.push(list[i]);
+          }
+        }
       } catch (err) {
         this.logger.warn(`Vector search failed for daily check-in: ${(err as Error).message}`);
       }
     }
 
     if (recommendedArticles.length === 0 && this.articlesCatalog) {
-      if (dto.physicalStatus !== 'goodNormal') {
-        const lower = (narrative || '').toLowerCase();
-        let cat = 'muscular_geral_sistemico';
-        if (lower.includes('coceira') || lower.includes('pele') || lower.includes('alergia') || lower.includes('mancha')) {
-          cat = 'dermatologico';
-        } else if (lower.includes('braco') || lower.includes('braço') || lower.includes('ombro') || lower.includes('mao') || lower.includes('mão')) {
-          cat = 'membros_superiores';
-        } else if (lower.includes('cabeca') || lower.includes('cabeça')) {
-          cat = 'cabeca_pescoco';
-        } else if (lower.includes('coluna') || lower.includes('lombar') || lower.includes('costas')) {
-          cat = 'coluna_dor_lombar';
+      const catalogResultsPerVertical: RecommendedArticleDto[][] = [];
+
+      if (physicalCategory) {
+        catalogResultsPerVertical.push(this.articlesCatalog.getArticlesForCategory(physicalCategory));
+      }
+      if (emotionalCategory) {
+        catalogResultsPerVertical.push(this.articlesCatalog.getArticlesForCategory(emotionalCategory));
+      }
+
+      const maxCatalogLen = Math.max(0, ...catalogResultsPerVertical.map((r) => r.length));
+      for (let i = 0; i < maxCatalogLen; i++) {
+        for (const list of catalogResultsPerVertical) {
+          if (list[i]) recommendedArticles.push(list[i]);
         }
-        recommendedArticles.push(...this.articlesCatalog.getArticlesForCategory(cat));
       }
-      if (dto.emotionalStatus !== 'goodNormal') {
-        const emoCat = dto.emotionalStatus === 'badSick' ? 'depressiva_desanimo' : 'ansiosa_agitacao';
-        recommendedArticles.push(...this.articlesCatalog.getArticlesForCategory(emoCat));
-      }
+
       if (recommendedArticles.length === 0) {
-        recommendedArticles.push(...this.articlesCatalog.getArticlesForCategory('sono_vigilia'));
+        recommendedArticles.push(...this.articlesCatalog.getArticlesForCategory('geral'));
       }
     }
 
