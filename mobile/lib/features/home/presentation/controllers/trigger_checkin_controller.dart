@@ -7,6 +7,8 @@ import '../../../dashboard/data/triage_history_remote_data_source.dart';
 import '../../../dashboard/domain/models/triage_history_models.dart';
 import '../../../triage/data/symptom_classification_remote_data_source.dart';
 import '../../../triage/domain/triage_vertical.dart';
+import '../../../triage_outcome/domain/triage_outcome_models.dart';
+import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import '../../domain/trigger_checkin_state.dart';
 
 final symptomClassificationDataSourceProvider =
@@ -150,6 +152,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
           textTouched: false,
         );
         await _persistCurrentState();
+        ref.read(triageOutcomeProvider.notifier).loadTodayOutcome();
       }
     } catch (_) {}
   }
@@ -194,9 +197,11 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
   }
 
   void setNaturalLanguageText(String text) {
+    final modified = state.isCompletedToday && text.trim() != state.naturalLanguageText.trim();
     state = state.copyWith(
       naturalLanguageText: text,
       textTouched: true,
+      isModifiedAfterCompletion: modified || state.isModifiedAfterCompletion,
       checkInDate: _getTodayDateString(),
     );
     _persistCurrentState();
@@ -225,6 +230,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
         isDual: isDual,
         naturalLanguageText: state.naturalLanguageText,
         preselectedCategoryKey: classification.wizardCategoryKey,
+        isOffTopic: classification.isOffTopic,
       );
     } catch (_) {
       return null;
@@ -243,6 +249,33 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       textTouched: false,
     );
     _persistCurrentState();
+
+    final isSymptomCheckIn = state.emotionalStatus != TriggerStatus.goodNormal ||
+        state.physicalStatus != TriggerStatus.goodNormal ||
+        state.naturalLanguageText.trim().isNotEmpty;
+
+    if (isSymptomCheckIn) {
+      final intensity = (state.emotionalStatus == TriggerStatus.badSick ||
+              state.physicalStatus == TriggerStatus.badSick)
+          ? 4
+          : ((state.emotionalStatus == TriggerStatus.soSo ||
+                  state.physicalStatus == TriggerStatus.soSo)
+              ? 3
+              : 1);
+      final disposition = intensity == 4
+          ? 'pronto_atendimento'
+          : (intensity == 3 ? 'consulta_rotina' : 'auto_cuidado');
+
+      ref.read(triageOutcomeProvider.notifier).setOutcomeFromCheckIn(
+            id: 'checkin-${DateTime.now().millisecondsSinceEpoch}',
+            intensity: intensity,
+            disposition: disposition,
+            emotionalStatus: state.emotionalStatus?.name ?? 'goodNormal',
+            physicalStatus: state.physicalStatus?.name ?? 'goodNormal',
+            naturalLanguageText: state.naturalLanguageText,
+          );
+    }
+
     _syncCheckInToRemote();
   }
 
@@ -251,7 +284,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       final token = await _storage.getAccessToken();
       if (token == null || token.isEmpty) return;
       final apiClient = ApiClient();
-      await apiClient.post(
+      final response = await apiClient.post(
         ApiEndpoints.dailyCheckIn,
         data: {
           'emotionalStatus': state.emotionalStatus?.name ?? 'goodNormal',
@@ -261,6 +294,35 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
         },
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
+
+      if (response.data is Map<String, dynamic>) {
+        final data = response.data as Map<String, dynamic>;
+        final id = data['id'] as String? ?? 'checkin-${DateTime.now().millisecondsSinceEpoch}';
+        final intensity = (data['intensity'] as num?)?.toInt() ?? 1;
+        final disposition = data['disposition'] as String? ?? 'auto_cuidado';
+        List<RecommendedArticle>? articles;
+        if (data['recommendedArticles'] is List) {
+          articles = (data['recommendedArticles'] as List)
+              .map((e) => RecommendedArticle.fromJson(e as Map<String, dynamic>))
+              .toList();
+        }
+
+        final isSymptomCheckIn = state.emotionalStatus != TriggerStatus.goodNormal ||
+            state.physicalStatus != TriggerStatus.goodNormal ||
+            state.naturalLanguageText.trim().isNotEmpty;
+
+        if (isSymptomCheckIn) {
+          ref.read(triageOutcomeProvider.notifier).setOutcomeFromCheckIn(
+                id: id,
+                intensity: intensity,
+                disposition: disposition,
+                emotionalStatus: state.emotionalStatus?.name ?? 'goodNormal',
+                physicalStatus: state.physicalStatus?.name ?? 'goodNormal',
+                naturalLanguageText: state.naturalLanguageText,
+                articles: articles,
+              );
+        }
+      }
     } catch (_) {}
   }
 

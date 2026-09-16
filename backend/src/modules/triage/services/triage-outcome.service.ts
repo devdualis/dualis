@@ -548,6 +548,46 @@ export class TriageOutcomeService {
         .returning();
     });
 
+    let recommendedArticles: RecommendedArticleDto[] = [];
+    const narrative = dto.naturalLanguageText?.trim();
+    if (this.articlesVector && narrative && narrative.length >= 2) {
+      try {
+        const queryVertical = dto.physicalStatus !== 'goodNormal' ? 'physical' : 'emotional';
+        const queryCategory = dto.physicalStatus !== 'goodNormal' ? 'geral_fisico' : 'geral_emocional';
+        recommendedArticles = await this.articlesVector.searchArticles({
+          queryText: narrative,
+          category: queryCategory,
+          vertical: queryVertical,
+        });
+      } catch (err) {
+        this.logger.warn(`Vector search failed for daily check-in: ${(err as Error).message}`);
+      }
+    }
+
+    if (recommendedArticles.length === 0 && this.articlesCatalog) {
+      if (dto.physicalStatus !== 'goodNormal') {
+        const lower = (narrative || '').toLowerCase();
+        let cat = 'muscular_geral_sistemico';
+        if (lower.includes('coceira') || lower.includes('pele') || lower.includes('alergia') || lower.includes('mancha')) {
+          cat = 'dermatologico';
+        } else if (lower.includes('braco') || lower.includes('braço') || lower.includes('ombro') || lower.includes('mao') || lower.includes('mão')) {
+          cat = 'membros_superiores';
+        } else if (lower.includes('cabeca') || lower.includes('cabeça')) {
+          cat = 'cabeca_pescoco';
+        } else if (lower.includes('coluna') || lower.includes('lombar') || lower.includes('costas')) {
+          cat = 'coluna_dor_lombar';
+        }
+        recommendedArticles.push(...this.articlesCatalog.getArticlesForCategory(cat));
+      }
+      if (dto.emotionalStatus !== 'goodNormal') {
+        const emoCat = dto.emotionalStatus === 'badSick' ? 'depressiva_desanimo' : 'ansiosa_agitacao';
+        recommendedArticles.push(...this.articlesCatalog.getArticlesForCategory(emoCat));
+      }
+      if (recommendedArticles.length === 0) {
+        recommendedArticles.push(...this.articlesCatalog.getArticlesForCategory('sono_vigilia'));
+      }
+    }
+
     return {
       id: savedRecord.id,
       intensity,
@@ -555,6 +595,7 @@ export class TriageOutcomeService {
       emotionalStatus: dto.emotionalStatus,
       physicalStatus: dto.physicalStatus,
       recordedAt: savedRecord.recordedAt.toISOString(),
+      recommendedArticles: recommendedArticles.slice(0, 3),
     };
   }
 }

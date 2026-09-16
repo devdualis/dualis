@@ -17,12 +17,20 @@ class EmergencyContext {
   final DateTime detectedAt;
   final String? rawTriggerPhrase;
 
+  /// Structured wizard vertical ('physical' | 'emotional') and answers snapshot
+  /// captured at the moment this emergency was detected, so the intercepted
+  /// triage session can still be persisted as a real record if the user exits.
+  final String? sourceVertical;
+  final Map<int, String>? sourceAnswers;
+
   const EmergencyContext({
     required this.category,
     required this.severityLevel,
     required this.isEmotional,
     required this.detectedAt,
     this.rawTriggerPhrase,
+    this.sourceVertical,
+    this.sourceAnswers,
   });
 
   /// Primary emergency dispatch service recommended for this triage event.
@@ -35,6 +43,8 @@ class EmergencyContext {
     bool? isEmotional,
     DateTime? detectedAt,
     String? rawTriggerPhrase,
+    String? sourceVertical,
+    Map<int, String>? sourceAnswers,
   }) {
     return EmergencyContext(
       category: category ?? this.category,
@@ -42,6 +52,8 @@ class EmergencyContext {
       isEmotional: isEmotional ?? this.isEmotional,
       detectedAt: detectedAt ?? this.detectedAt,
       rawTriggerPhrase: rawTriggerPhrase ?? this.rawTriggerPhrase,
+      sourceVertical: sourceVertical ?? this.sourceVertical,
+      sourceAnswers: sourceAnswers ?? this.sourceAnswers,
     );
   }
 

@@ -1012,6 +1012,30 @@ abstract class AppLocalizations {
   /// **'Notamos uma divergência entre a anatomia informada e os parâmetros do seu perfil. Deseja revisar antes de prosseguir?'**
   String get antiburlaBiologicalDiscordanceDesc;
 
+  /// Title for the off-topic narrative confirmation bottom sheet
+  ///
+  /// In pt, this message translates to:
+  /// **'Isso parece um sintoma?'**
+  String get offTopicNarrativeTitle;
+
+  /// Body text for the off-topic narrative confirmation bottom sheet
+  ///
+  /// In pt, this message translates to:
+  /// **'O texto que você escreveu não parece descrever um sintoma físico ou emocional. Deseja revisar sua descrição ou continuar mesmo assim?'**
+  String get offTopicNarrativeDesc;
+
+  /// Button to go back and edit the free-text narrative
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar Descrição'**
+  String get offTopicNarrativeEditButton;
+
+  /// Button to proceed despite the off-topic narrative warning
+  ///
+  /// In pt, this message translates to:
+  /// **'Continuar Mesmo Assim'**
+  String get offTopicNarrativeContinueButton;
+
   /// Notice banner when device is offline
   ///
   /// In pt, this message translates to:

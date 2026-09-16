@@ -106,7 +106,8 @@ export class AiTriageService {
           messages: [
             {
               role: 'user',
-              content: `Você é o motor de triagem médica preventiva do DualisCheckUp. Classifique a seguinte descrição clínica do usuário: "${dto.text}". Retorne em JSON estrito com:
+              content: `Você é o motor de triagem médica preventiva do DualisCheckUp. Classifique a seguinte descrição do usuário: "${dto.text}". Retorne em JSON estrito com:
+              - isOffTopic: booleano indicando se o texto NÃO descreve um sintoma físico ou emocional real (ex.: piadas, textos aleatórios, spam, pedidos não relacionados à saúde). Se true, ainda assim preencha os demais campos com os valores mais neutros/plausíveis abaixo.
               - vertical: "physical" ou "emotional"
               - systemOrDimension: escolha EXATAMENTE uma destas chaves, de acordo com o "vertical" escolhido (nunca invente uma chave nova):
                 se vertical = "physical": ${PHYSICAL_SYSTEMS.join(', ')}
@@ -137,13 +138,16 @@ export class AiTriageService {
           mappedLayTerm: parsed.mappedLayTerm || dto.text,
           clinicalConcept: parsed.clinicalConcept || 'sintoma inespecífico',
           isEmergencyCandidate: parsed.isEmergencyCandidate === true,
+          isOffTopic: parsed.isOffTopic === true,
           confidence: 0.90,
           source: 'openai_gpt',
           latencyMs: Math.round(performance.now() - startTime),
         };
 
         this.cache.set(cacheKey, result);
-        this.symptomVector?.upsertFromClassification(dto.text, result).catch(() => {});
+        if (!result.isOffTopic) {
+          this.symptomVector?.upsertFromClassification(dto.text, result).catch(() => {});
+        }
         return result;
       } catch (err) {
         this.logger.warn(`OpenAI inference failed, falling back: ${(err as Error).message}`);

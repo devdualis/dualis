@@ -32,7 +32,7 @@ class EmergencyScreen extends ConsumerWidget {
             emergencyContext,
             actionTaken: 'DISMISSED_CONFIRMED',
           );
-      ref.read(emergencyControllerProvider.notifier).recordExitConfirmed(context);
+      await ref.read(emergencyControllerProvider.notifier).recordExitConfirmed(context);
     }
   }
 

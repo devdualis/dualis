@@ -11,6 +11,7 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../emergency/domain/red_flag_evaluator.dart';
 import '../../../emergency/presentation/controllers/emergency_controller.dart';
 import '../../../triage/domain/triage_vertical.dart';
+import '../../../triage/presentation/widgets/off_topic_narrative_confirmation_bottom_sheet.dart';
 import '../../domain/trigger_checkin_state.dart';
 import '../controllers/trigger_checkin_controller.dart';
 import '../widgets/admob_banner_container.dart';
@@ -19,6 +20,11 @@ import '../widgets/wellness_confirmation_dialog.dart';
 import '../../../sync/presentation/widgets/offline_indicator_banner.dart';
 import '../../../sync/presentation/controllers/sync_outbox_worker.dart';
 import '../../../settings/presentation/widgets/avatar_selector_sheet.dart';
+import '../widgets/dualis_bottom_nav_bar.dart';
+import '../widgets/today_triage_result_tab.dart';
+import '../../../dashboard/presentation/screens/historical_dashboard_screen.dart';
+import '../../../dashboard/presentation/controllers/dashboard_controller.dart';
+import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -29,6 +35,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _isResolvingNavigation = false;
+  int _currentTabIndex = 0;
 
   @override
   void initState() {
@@ -40,6 +47,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
       ref.read(triggerCheckInProvider.notifier).checkAndResetIfNewDay();
       ref.read(triggerCheckInProvider.notifier).loadTodayCheckIn();
+      ref.read(triageOutcomeProvider.notifier).loadTodayOutcome();
     });
   }
 
@@ -57,36 +65,141 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final userEmail = (user?.email != null && user!.email.isNotEmpty) ? user.email : 'Sessão ativa';
     ref.watch(syncOutboxWorkerProvider);
 
+    final triggerState = ref.watch(triggerCheckInProvider);
+
+    Widget appBarTitle;
+    List<Widget> appBarActions = [];
+
+    if (_currentTabIndex == 0) {
+      appBarTitle = const DualisLogo(
+        variant: DualisLogoVariant.emblemOnly,
+        emblemSize: 28,
+        withEmblemContainer: false,
+      );
+      appBarActions = [
+        _AppBarIconButton(
+          key: const Key('home_settings_button'),
+          icon: Icons.settings_outlined,
+          color: AppColors.clinicalTealDark,
+          tooltip: 'Configurações',
+          onTap: () => context.push(RoutePaths.settings),
+        ),
+        const SizedBox(width: 8),
+      ];
+    } else if (_currentTabIndex == 1) {
+      appBarTitle = Text(
+        'Resultado do Dia',
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimaryLight,
+        ),
+      );
+      appBarActions = [
+        _AppBarIconButton(
+          key: const Key('home_settings_button'),
+          icon: Icons.settings_outlined,
+          color: AppColors.clinicalTealDark,
+          tooltip: 'Configurações',
+          onTap: () => context.push(RoutePaths.settings),
+        ),
+        const SizedBox(width: 8),
+      ];
+    } else {
+      appBarTitle = Text(
+        'Histórico & Tendências',
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimaryLight,
+        ),
+      );
+      appBarActions = [
+        _AppBarIconButton(
+          key: const Key('home_refresh_history_button'),
+          icon: Icons.refresh_rounded,
+          color: AppColors.clinicalTealDark,
+          tooltip: 'Atualizar',
+          onTap: () => ref.read(dashboardControllerProvider.notifier).refreshHistory(),
+        ),
+        const SizedBox(width: 4),
+        _AppBarIconButton(
+          key: const Key('home_settings_button'),
+          icon: Icons.settings_outlined,
+          color: AppColors.clinicalTealDark,
+          tooltip: 'Configurações',
+          onTap: () => context.push(RoutePaths.settings),
+        ),
+        const SizedBox(width: 8),
+      ];
+    }
+
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         backgroundColor: AppColors.surfaceLight,
         elevation: 0,
         scrolledUnderElevation: 1,
-        centerTitle: false,
+        centerTitle: _currentTabIndex != 0,
         titleSpacing: 16,
-        title: const DualisLogo(
-          variant: DualisLogoVariant.emblemOnly,
-          emblemSize: 28,
-          withEmblemContainer: false,
-        ),
-        actions: [
-          _AppBarIconButton(
-            key: const Key('home_settings_button'),
-            icon: Icons.settings_outlined,
-            color: AppColors.clinicalTealDark,
-            tooltip: 'Configurações',
-            onTap: () => context.push(RoutePaths.settings),
-          ),
-          const SizedBox(width: 8),
-        ],
+        title: appBarTitle,
+        actions: appBarActions,
       ),
       body: SafeArea(
         child: Column(
           children: [
             const OfflineIndicatorBanner(),
             Expanded(
-              child: SingleChildScrollView(
+              child: _buildCurrentTab(
+                context,
+                user,
+                userName,
+                userEmail,
+                triggerState,
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: DualisBottomNavBar(
+        currentIndex: _currentTabIndex,
+        hasCompletedToday: triggerState.isCompletedToday,
+        onTap: (index) {
+          setState(() => _currentTabIndex = index);
+        },
+      ),
+    );
+  }
+
+  Widget _buildCurrentTab(
+    BuildContext context,
+    dynamic user,
+    String userName,
+    String userEmail,
+    TriggerCheckInState triggerState,
+  ) {
+    switch (_currentTabIndex) {
+      case 0:
+        return _buildHomeTab(context, user, userName, userEmail, triggerState);
+      case 1:
+        return TodayTriageResultTab(
+          onGoToCheckIn: () => setState(() => _currentTabIndex = 0),
+        );
+      case 2:
+        return const HistoricalDashboardScreen(isEmbedded: true);
+      default:
+        return _buildHomeTab(context, user, userName, userEmail, triggerState);
+    }
+  }
+
+  Widget _buildHomeTab(
+    BuildContext context,
+    dynamic user,
+    String userName,
+    String userEmail,
+    TriggerCheckInState triggerState,
+  ) {
+    return SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,6 +356,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   setState(() => _isResolvingNavigation = false);
                                 }
                                 if (navArgs != null) {
+                                  if (navArgs.isOffTopic) {
+                                    if (!context.mounted) return;
+                                    final shouldContinue =
+                                        await OffTopicNarrativeConfirmationBottomSheet.show(
+                                      context,
+                                    );
+                                    if (shouldContinue != true) return;
+                                  }
                                   if (context.mounted) {
                                     context.push(RoutePaths.triage, extra: navArgs);
                                   }
@@ -314,7 +435,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 child: InkWell(
                   key: const Key('home_history_card'),
-                  onTap: () => context.push(RoutePaths.history),
+                  onTap: () {
+                    setState(() => _currentTabIndex = 2);
+                  },
                   borderRadius: BorderRadius.circular(16),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -369,12 +492,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 24),
             ],
           ),
-        ),
-      ),
-    ],
-  ),
-),
-);
+        );
   }
 }
 

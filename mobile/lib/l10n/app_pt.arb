@@ -631,6 +631,22 @@
   "@antiburlaBiologicalDiscordanceDesc": {
     "description": "Description for biological discordance alert"
   },
+  "offTopicNarrativeTitle": "Isso parece um sintoma?",
+  "@offTopicNarrativeTitle": {
+    "description": "Title for the off-topic narrative confirmation bottom sheet"
+  },
+  "offTopicNarrativeDesc": "O texto que você escreveu não parece descrever um sintoma físico ou emocional. Deseja revisar sua descrição ou continuar mesmo assim?",
+  "@offTopicNarrativeDesc": {
+    "description": "Body text for the off-topic narrative confirmation bottom sheet"
+  },
+  "offTopicNarrativeEditButton": "Editar Descrição",
+  "@offTopicNarrativeEditButton": {
+    "description": "Button to go back and edit the free-text narrative"
+  },
+  "offTopicNarrativeContinueButton": "Continuar Mesmo Assim",
+  "@offTopicNarrativeContinueButton": {
+    "description": "Button to proceed despite the off-topic narrative warning"
+  },
   "offlineBannerText": "Modo Offline — Seus check-ins serão salvos localmente e sincronizados automaticamente.",
   "@offlineBannerText": {
     "description": "Notice banner when device is offline"

@@ -1,4 +1,5 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { RecommendedArticleDto } from './triage-outcome.dto';
 
 export type TriggerStatusType = 'goodNormal' | 'soSo' | 'badSick';
 
@@ -27,4 +28,5 @@ export interface DailyCheckInResponseDto {
   emotionalStatus: TriggerStatusType;
   physicalStatus: TriggerStatusType;
   recordedAt: string;
+  recommendedArticles?: RecommendedArticleDto[];
 }

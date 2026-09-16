@@ -392,7 +392,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
               secondaryIntensityScore: outcome.intensityScore,
             );
           }
-
+          ref.read(triageOutcomeProvider.notifier).setOutcome(finalOutcome);
           ref.read(triggerCheckInProvider.notifier).markCompletedToday();
 
           if (context.mounted) {

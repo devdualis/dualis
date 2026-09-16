@@ -5,6 +5,7 @@ class SymptomClassification {
   final String mappedLayTerm;
   final String clinicalConcept;
   final bool isEmergencyCandidate;
+  final bool isOffTopic;
   final double confidence;
   final String source;
 
@@ -15,6 +16,7 @@ class SymptomClassification {
     required this.mappedLayTerm,
     required this.clinicalConcept,
     required this.isEmergencyCandidate,
+    this.isOffTopic = false,
     required this.confidence,
     required this.source,
   });
@@ -27,6 +29,7 @@ class SymptomClassification {
       mappedLayTerm: json['mappedLayTerm'] as String? ?? '',
       clinicalConcept: json['clinicalConcept'] as String? ?? '',
       isEmergencyCandidate: json['isEmergencyCandidate'] as bool? ?? false,
+      isOffTopic: json['isOffTopic'] as bool? ?? false,
       confidence: (json['confidence'] as num?)?.toDouble() ?? 0.7,
       source: json['source'] as String? ?? 'dictionary_fallback',
     );

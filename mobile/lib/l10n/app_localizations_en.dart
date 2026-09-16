@@ -514,6 +514,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'We noticed a discrepancy between the anatomical region selected and your profile parameters. Would you like to review before proceeding?';
 
   @override
+  String get offTopicNarrativeTitle => 'Does this look like a symptom?';
+
+  @override
+  String get offTopicNarrativeDesc =>
+      'The text you wrote doesn\'t seem to describe a physical or emotional symptom. Would you like to review your description or continue anyway?';
+
+  @override
+  String get offTopicNarrativeEditButton => 'Edit Description';
+
+  @override
+  String get offTopicNarrativeContinueButton => 'Continue Anyway';
+
+  @override
   String get offlineBannerText =>
       'Offline Mode — Your check-ins will be saved locally and synced automatically once connection is restored.';
 

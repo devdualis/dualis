@@ -84,5 +84,35 @@ class SecureStorageService {
     await _storage.delete(key: key);
   }
 
+  static const String _prefixTodayTriageOutcome = 'dualis_today_triage_outcome_';
+
+  Future<void> saveTodayTriageOutcome({
+    required String userId,
+    required Map<String, dynamic> data,
+  }) async {
+    final key = '$_prefixTodayTriageOutcome$userId';
+    await _storage.write(key: key, value: jsonEncode(data));
+  }
+
+  Future<Map<String, dynamic>?> getTodayTriageOutcome(String userId) async {
+    final key = '$_prefixTodayTriageOutcome$userId';
+    final raw = await _storage.read(key: key);
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> clearTodayTriageOutcome(String userId) async {
+    final key = '$_prefixTodayTriageOutcome$userId';
+    await _storage.delete(key: key);
+  }
+
   Future<void> clearAll() => _storage.deleteAll();
 }

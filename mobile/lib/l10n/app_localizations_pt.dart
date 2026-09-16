@@ -517,6 +517,19 @@ class AppLocalizationsPt extends AppLocalizations {
       'Notamos uma divergência entre a anatomia informada e os parâmetros do seu perfil. Deseja revisar antes de prosseguir?';
 
   @override
+  String get offTopicNarrativeTitle => 'Isso parece um sintoma?';
+
+  @override
+  String get offTopicNarrativeDesc =>
+      'O texto que você escreveu não parece descrever um sintoma físico ou emocional. Deseja revisar sua descrição ou continuar mesmo assim?';
+
+  @override
+  String get offTopicNarrativeEditButton => 'Editar Descrição';
+
+  @override
+  String get offTopicNarrativeContinueButton => 'Continuar Mesmo Assim';
+
+  @override
   String get offlineBannerText =>
       'Modo Offline — Seus check-ins serão salvos localmente e sincronizados automaticamente.';
 

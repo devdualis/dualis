@@ -30,9 +30,16 @@ class TriageWizardNotifier extends _$TriageWizardNotifier {
   bool selectOption(BuildContext context, int stepIndex, String optionKey) {
     final emergency = _evaluateGate(stepIndex, optionKey);
     if (emergency != null) {
-      ref
-          .read(emergencyControllerProvider.notifier)
-          .triggerEmergency(context, emergency);
+      final verticalStr =
+          state.activeVertical == TriageVertical.fisica ? 'physical' : 'emotional';
+      final snapshotAnswers = {...state.answers, stepIndex: optionKey};
+      ref.read(emergencyControllerProvider.notifier).triggerEmergency(
+            context,
+            emergency.copyWith(
+              sourceVertical: verticalStr,
+              sourceAnswers: snapshotAnswers,
+            ),
+          );
       return true;
     }
     state = state.copyWith(answers: {...state.answers, stepIndex: optionKey});

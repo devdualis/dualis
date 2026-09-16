@@ -20,6 +20,11 @@ export interface TriageClassificationResult {
   mappedLayTerm: string;
   clinicalConcept: string;
   isEmergencyCandidate: boolean;
+  /** True when the text does not actually describe a physical/emotional symptom
+   * (off-topic, joke, spam, etc). Only ever set by the OpenAI path — deterministic
+   * matches (idiom dictionary, vector, cache) are by construction on-topic, and the
+   * no-AI heuristic fallback cannot make this judgment, so both default to false. */
+  isOffTopic?: boolean;
   confidence: number;
   source: 'openai_gpt' | 'idiom_cache' | 'dictionary_fallback' | 'vector_match';
   latencyMs: number;

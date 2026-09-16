@@ -8,32 +8,14 @@ import '../widgets/emotional_trend_chart.dart';
 import '../widgets/retrospective_list_view.dart';
 
 class HistoricalDashboardScreen extends ConsumerWidget {
-  const HistoricalDashboardScreen({super.key});
+  final bool isEmbedded;
+  const HistoricalDashboardScreen({super.key, this.isEmbedded = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboardAsync = ref.watch(dashboardControllerProvider);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: const Text(
-          'Histórico & Tendências',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF1E293B),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: () =>
-                ref.read(dashboardControllerProvider.notifier).refreshHistory(),
-          ),
-        ],
-      ),
-      body: dashboardAsync.when(
+    final content = dashboardAsync.when(
         loading: () => const Center(
           child: CircularProgressIndicator(),
         ),
@@ -213,7 +195,32 @@ class HistoricalDashboardScreen extends ConsumerWidget {
             ),
           );
         },
+      );
+
+    if (isEmbedded) {
+      return content;
+    }
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        title: const Text(
+          'Histórico & Tendências',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1E293B),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded),
+            onPressed: () =>
+                ref.read(dashboardControllerProvider.notifier).refreshHistory(),
+          ),
+        ],
       ),
+      body: content,
     );
   }
 }
