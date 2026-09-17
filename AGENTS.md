@@ -252,24 +252,24 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 El proyecto cuenta con una batería de agentes especializados para el desarrollo, auditoría clínica y control de calidad automatizado:
 
 ### 1. Agente Orquestador (`orchestrator_agent`)
-- **Directorio:** `agents/orchestrator/system_prompt.md`
+- **Directorio:** `.agents/agents/orchestrator/system_prompt.md`
 - **Rol:** Coordinador maestro del flujo de trabajo, ejecución de la batería de pruebas multi-agente (`npm run test:battery`), recolección de métricas y generación de reportes diagnósticos ejecutivos (`agents/agent-battery-report.json` y `agents/agent-battery-report.md`).
 
 ### 2. Agente Médico Clínico (`doctor_agent`)
-- **Directorio:** `agents/doctor/system_prompt.md`
-- **Casos de Prueba:** `agents/doctor/clinical_test_cases.json`
+- **Directorio:** `.agents/agents/doctor/system_prompt.md`
+- **Casos de Prueba:** `.agents/agents/doctor/clinical_test_cases.json`
 - **Rol:** Auditor de seguridad clínica y protocolos de triaje (Manchester Triage System, ESI, SUS Brasil). Valida el mapeo en los 12 sistemas somáticos y 7 dimensiones psico-emocionales, y garantiza la regla de oro de **cero tolerancia a fallos en emergencias críticas (Nivel 5)** con acionamiento de SAMU 192 y CVV 188.
 
 ### 3. Agente Revisor y Calibrador de IA (`ai_reviewer_agent`)
-- **Directorio:** `agents/ai_reviewer/system_prompt.md`
+- **Directorio:** `.agents/agents/ai_reviewer/system_prompt.md`
 - **Rol:** Auditor de las salidas del motor de IA (`AiTriageService`). Verifica cumplimiento estricto del JSON Schema, latencia (<2s), ausencia de prescripciones o diagnósticos definitivos indebidos, y genera recomendaciones de calibración para `IdiomDictionaryService` y `SymptomVectorService`.
 
 ### 4. Agente Backend (`backend_agent`)
-- **Directorio:** `agents/backend/system_prompt.md`
+- **Directorio:** `.agents/agents/backend/system_prompt.md`
 - **Rol:** Responsable de la plataforma NestJS 12, Fastify, Drizzle ORM, PostgreSQL con RLS (`app.current_user_id`), Redis y ejecución de pruebas de servidor (`npm test`, `npm run test:rls`, `npm run test:e2e`).
 
 ### 5. Agente Frontend (`frontend_agent`)
-- **Directorio:** `agents/frontend/system_prompt.md`
+- **Directorio:** `.agents/agents/frontend/system_prompt.md`
 - **Rol:** Responsable de la aplicación cliente Flutter 3.29+ / Dart 3.7+, Riverpod 3, base local Drift SQLite, wizard dinámico de 5 pasos, pantalla roja de emergencia y suite de pruebas de widgets e interfaz (`flutter test`).
 
 ### Ejecución de la Batería de Pruebas Multi-Agente
