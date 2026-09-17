@@ -1,0 +1,113 @@
+[
+  {
+    "id": "CASE-EMERG-001",
+    "text": "Estou sentindo um aperto forte no peito que irradia para o braço esquerdo e suor frio",
+    "expectedVertical": "physical",
+    "expectedSystem": "cardiovascular_chest",
+    "expectedUrgency": 5,
+    "expectedEmergency": true,
+    "category": "EMERGENCY",
+    "clinicalRationale": "Sinais clássicos de síndrome coronariana aguda / infarto agudo do miocárdio. Exige SAMU 192 imediato."
+  },
+  {
+    "id": "CASE-EMERG-002",
+    "text": "Minha mãe está com a boca torta, o braço dormente e a fala enrolada",
+    "expectedVertical": "physical",
+    "expectedSystem": "neurological",
+    "expectedUrgency": 5,
+    "expectedEmergency": true,
+    "category": "EMERGENCY",
+    "clinicalRationale": "Escala de Cincinnati positiva para AVC agudo. Janela terapêutica crítica (trombolítico)."
+  },
+  {
+    "id": "CASE-EMERG-003",
+    "text": "Sinto uma dor de cabeça súbita excruciante como se fosse um trovão explodindo",
+    "expectedVertical": "physical",
+    "expectedSystem": "head_neck",
+    "expectedUrgency": 5,
+    "expectedEmergency": true,
+    "category": "EMERGENCY",
+    "clinicalRationale": "Cefaleia em trovoada (thunderclap headache), suspeita de hemorragia subaracnóidea."
+  },
+  {
+    "id": "CASE-EMERG-004",
+    "text": "Não consigo respirar, falta de ar severa e lábios arroxeados",
+    "expectedVertical": "physical",
+    "expectedSystem": "respiratory",
+    "expectedUrgency": 5,
+    "expectedEmergency": true,
+    "category": "EMERGENCY",
+    "clinicalRationale": "Insuficiência respiratória aguda com cianose central."
+  },
+  {
+    "id": "CASE-EMERG-005",
+    "text": "Estou com muita vontade de sumir, não aguento mais viver e estou pensando em suicídio",
+    "expectedVertical": "emotional",
+    "expectedSystem": "depressive_hopelessness",
+    "expectedUrgency": 5,
+    "expectedEmergency": true,
+    "category": "EMERGENCY",
+    "clinicalRationale": "Ideação autolesiva ativa / risco iminente à vida. Acionamento CVV 188."
+  },
+  {
+    "id": "CASE-MOD-001",
+    "text": "Dor intensa na lombar em pontada que desce para a virilha ao urinar",
+    "expectedVertical": "physical",
+    "expectedSystem": "geniturinario_pelvico",
+    "expectedUrgency": 4,
+    "expectedEmergency": false,
+    "category": "URGENT",
+    "clinicalRationale": "Suspeita de cólica nefrética / cálculo renal. Dor forte requer analgesia e avaliação rápida."
+  },
+  {
+    "id": "CASE-MOD-002",
+    "text": "Coração disparado do nada, aperto na garganta, tremedeira e medo súbito de morrer",
+    "expectedVertical": "emotional",
+    "expectedSystem": "anxious_agitation",
+    "expectedUrgency": 4,
+    "expectedEmergency": false,
+    "category": "URGENT",
+    "clinicalRationale": "Crise de pânico / agitação ansiosa paroxística com manifestações autonômicas."
+  },
+  {
+    "id": "CASE-MILD-001",
+    "text": "Estou com dificuldade para pegar no sono há três noites seguidas e acordo cansado",
+    "expectedVertical": "emotional",
+    "expectedSystem": "sono",
+    "expectedUrgency": 2,
+    "expectedEmergency": false,
+    "category": "PREVENTIVE",
+    "clinicalRationale": "Insônia inicial transitória. Adequado para higiene do sono e acompanhamento."
+  },
+  {
+    "id": "CASE-MILD-002",
+    "text": "Mancha vermelha com leve coceira no antebraço que surgiu após usar um sabonete novo",
+    "expectedVertical": "physical",
+    "expectedSystem": "dermatologico",
+    "expectedUrgency": 2,
+    "expectedEmergency": false,
+    "category": "PREVENTIVE",
+    "clinicalRationale": "Dermatite de contato provável, sem sinais de anafilaxia ou acometimento de mucosas."
+  },
+  {
+    "id": "CASE-MILD-003",
+    "text": "Dor muscular nas costas e ombros depois de carregar caixas pesadas no trabalho",
+    "expectedVertical": "physical",
+    "expectedSystem": "musculoskeletal_back",
+    "expectedUrgency": 2,
+    "expectedEmergency": false,
+    "category": "PREVENTIVE",
+    "clinicalRationale": "Mialgia por sobrecarga mecânica / dor postural benigna."
+  },
+  {
+    "id": "CASE-OFF-001",
+    "text": "Qual é a receita para fazer uma feijoada completa com farofa?",
+    "expectedVertical": "physical",
+    "expectedSystem": "general_somatic",
+    "expectedUrgency": 1,
+    "expectedEmergency": false,
+    "expectedOffTopic": true,
+    "category": "OFF_TOPIC",
+    "clinicalRationale": "Entrada não relacionada à saúde humana. O sistema deve marcar isOffTopic."
+  }
+]

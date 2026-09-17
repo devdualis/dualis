@@ -1,0 +1,322 @@
+{
+  "timestamp": "2026-09-17T13:15:54.986Z",
+  "orchestrator": "orchestrator_agent",
+  "metrics": {
+    "clinicalSafetyRate": "100%",
+    "clinicalConcordanceRate": "100.0%",
+    "averageLatencyMs": 0.1,
+    "backendTestsPassed": true,
+    "frontendTestsPassed": true,
+    "overallStatus": "PASSED"
+  },
+  "evaluations": [
+    {
+      "id": "CASE-EMERG-001",
+      "text": "Estou sentindo um aperto forte no peito que irradia para o braço esquerdo e suor frio",
+      "category": "EMERGENCY",
+      "result": {
+        "primaryVertical": "physical",
+        "systemOrDimension": "cardiovascular_chest",
+        "urgencyScore": 5,
+        "mappedLayTerm": "dor / aperto no peito",
+        "clinicalConcept": "precordialgia / suspeita de síndrome coronariana aguda",
+        "isEmergencyCandidate": true,
+        "confidence": 0.95,
+        "source": "dictionary_fallback",
+        "latencyMs": 0
+      },
+      "doctorAudit": {
+        "verticalMatch": true,
+        "systemMatch": true,
+        "urgencyDelta": 0,
+        "emergencyPassed": true,
+        "clinicalApproved": true
+      },
+      "aiReviewerAudit": {
+        "schemaValid": true,
+        "latencyOk": true,
+        "flaggedIssues": []
+      }
+    },
+    {
+      "id": "CASE-EMERG-002",
+      "text": "Minha mãe está com a boca torta, o braço dormente e a fala enrolada",
+      "category": "EMERGENCY",
+      "result": {
+        "primaryVertical": "physical",
+        "systemOrDimension": "neurological",
+        "urgencyScore": 5,
+        "mappedLayTerm": "déficit neurológico focal súbito",
+        "clinicalConcept": "suspeita de acidente vascular cerebral (AVC)",
+        "isEmergencyCandidate": true,
+        "confidence": 0.95,
+        "source": "dictionary_fallback",
+        "latencyMs": 0
+      },
+      "doctorAudit": {
+        "verticalMatch": true,
+        "systemMatch": true,
+        "urgencyDelta": 0,
+        "emergencyPassed": true,
+        "clinicalApproved": true
+      },
+      "aiReviewerAudit": {
+        "schemaValid": true,
+        "latencyOk": true,
+        "flaggedIssues": []
+      }
+    },
+    {
+      "id": "CASE-EMERG-003",
+      "text": "Sinto uma dor de cabeça súbita excruciante como se fosse um trovão explodindo",
+      "category": "EMERGENCY",
+      "result": {
+        "primaryVertical": "physical",
+        "systemOrDimension": "head_neck",
+        "urgencyScore": 5,
+        "mappedLayTerm": "dor de cabeça súbita e excruciante",
+        "clinicalConcept": "cefaleia em trovoada / suspeita de hemorragia subaracnóidea",
+        "isEmergencyCandidate": true,
+        "confidence": 0.95,
+        "source": "dictionary_fallback",
+        "latencyMs": 0
+      },
+      "doctorAudit": {
+        "verticalMatch": true,
+        "systemMatch": true,
+        "urgencyDelta": 0,
+        "emergencyPassed": true,
+        "clinicalApproved": true
+      },
+      "aiReviewerAudit": {
+        "schemaValid": true,
+        "latencyOk": true,
+        "flaggedIssues": []
+      }
+    },
+    {
+      "id": "CASE-EMERG-004",
+      "text": "Não consigo respirar, falta de ar severa e lábios arroxeados",
+      "category": "EMERGENCY",
+      "result": {
+        "primaryVertical": "physical",
+        "systemOrDimension": "respiratory",
+        "urgencyScore": 5,
+        "mappedLayTerm": "falta de ar aguda",
+        "clinicalConcept": "dispneia aguda / insuficiência respiratória",
+        "isEmergencyCandidate": true,
+        "confidence": 0.95,
+        "source": "dictionary_fallback",
+        "latencyMs": 0
+      },
+      "doctorAudit": {
+        "verticalMatch": true,
+        "systemMatch": true,
+        "urgencyDelta": 0,
+        "emergencyPassed": true,
+        "clinicalApproved": true
+      },
+      "aiReviewerAudit": {
+        "schemaValid": true,
+        "latencyOk": true,
+        "flaggedIssues": []
+      }
+    },
+    {
+      "id": "CASE-EMERG-005",
+      "text": "Estou com muita vontade de sumir, não aguento mais viver e estou pensando em suicídio",
+      "category": "EMERGENCY",
+      "result": {
+        "primaryVertical": "emotional",
+        "systemOrDimension": "depressive_hopelessness",
+        "urgencyScore": 5,
+        "mappedLayTerm": "ideação autolesiva / desesperança profunda",
+        "clinicalConcept": "crise suicida aguda / risco à integridade física",
+        "isEmergencyCandidate": true,
+        "confidence": 0.95,
+        "source": "dictionary_fallback",
+        "latencyMs": 0
+      },
+      "doctorAudit": {
+        "verticalMatch": true,
+        "systemMatch": true,
+        "urgencyDelta": 0,
+        "emergencyPassed": true,
+        "clinicalApproved": true
+      },
+      "aiReviewerAudit": {
+        "schemaValid": true,
+        "latencyOk": true,
+        "flaggedIssues": []
+      }
+    },
+    {
+      "id": "CASE-MOD-001",
+      "text": "Dor intensa na lombar em pontada que desce para a virilha ao urinar",
+      "category": "URGENT",
+      "result": {
+        "primaryVertical": "physical",
+        "systemOrDimension": "geniturinario_pelvico",
+        "urgencyScore": 4,
+        "mappedLayTerm": "cólica renal aguda",
+        "clinicalConcept": "cólica nefrética / suspeita de cálculo renal",
+        "isEmergencyCandidate": false,
+        "confidence": 0.95,
+        "source": "dictionary_fallback",
+        "latencyMs": 0
+      },
+      "doctorAudit": {
+        "verticalMatch": true,
+        "systemMatch": true,
+        "urgencyDelta": 0,
+        "emergencyPassed": true,
+        "clinicalApproved": true
+      },
+      "aiReviewerAudit": {
+        "schemaValid": true,
+        "latencyOk": true,
+        "flaggedIssues": []
+      }
+    },
+    {
+      "id": "CASE-MOD-002",
+      "text": "Coração disparado do nada, aperto na garganta, tremedeira e medo súbito de morrer",
+      "category": "URGENT",
+      "result": {
+        "primaryVertical": "emotional",
+        "systemOrDimension": "anxious_agitation",
+        "urgencyScore": 4,
+        "mappedLayTerm": "crise aguda de pânico",
+        "clinicalConcept": "transtorno de ansiedade / crise de pânico paroxística",
+        "isEmergencyCandidate": true,
+        "confidence": 0.95,
+        "source": "dictionary_fallback",
+        "latencyMs": 0
+      },
+      "doctorAudit": {
+        "verticalMatch": true,
+        "systemMatch": true,
+        "urgencyDelta": 0,
+        "emergencyPassed": true,
+        "clinicalApproved": true
+      },
+      "aiReviewerAudit": {
+        "schemaValid": true,
+        "latencyOk": true,
+        "flaggedIssues": []
+      }
+    },
+    {
+      "id": "CASE-MILD-001",
+      "text": "Estou com dificuldade para pegar no sono há três noites seguidas e acordo cansado",
+      "category": "PREVENTIVE",
+      "result": {
+        "primaryVertical": "emotional",
+        "systemOrDimension": "sono",
+        "urgencyScore": 2,
+        "mappedLayTerm": "distúrbio do sono",
+        "clinicalConcept": "insônia / alteração do padrão de repouso",
+        "isEmergencyCandidate": false,
+        "confidence": 0.95,
+        "source": "dictionary_fallback",
+        "latencyMs": 1
+      },
+      "doctorAudit": {
+        "verticalMatch": true,
+        "systemMatch": true,
+        "urgencyDelta": 0,
+        "emergencyPassed": true,
+        "clinicalApproved": true
+      },
+      "aiReviewerAudit": {
+        "schemaValid": true,
+        "latencyOk": true,
+        "flaggedIssues": []
+      }
+    },
+    {
+      "id": "CASE-MILD-002",
+      "text": "Mancha vermelha com leve coceira no antebraço que surgiu após usar um sabonete novo",
+      "category": "PREVENTIVE",
+      "result": {
+        "primaryVertical": "physical",
+        "systemOrDimension": "dermatologico",
+        "urgencyScore": 2,
+        "mappedLayTerm": "alergia / lesão de pele",
+        "clinicalConcept": "dermatite / reação alérgica cutânea",
+        "isEmergencyCandidate": false,
+        "confidence": 0.95,
+        "source": "dictionary_fallback",
+        "latencyMs": 0
+      },
+      "doctorAudit": {
+        "verticalMatch": true,
+        "systemMatch": true,
+        "urgencyDelta": 0,
+        "emergencyPassed": true,
+        "clinicalApproved": true
+      },
+      "aiReviewerAudit": {
+        "schemaValid": true,
+        "latencyOk": true,
+        "flaggedIssues": []
+      }
+    },
+    {
+      "id": "CASE-MILD-003",
+      "text": "Dor muscular nas costas e ombros depois de carregar caixas pesadas no trabalho",
+      "category": "PREVENTIVE",
+      "result": {
+        "primaryVertical": "physical",
+        "systemOrDimension": "musculoskeletal_back",
+        "urgencyScore": 2,
+        "mappedLayTerm": "dor nas costas / coluna",
+        "clinicalConcept": "lombalgia mecânica / cervicalgia",
+        "isEmergencyCandidate": false,
+        "confidence": 0.95,
+        "source": "dictionary_fallback",
+        "latencyMs": 0
+      },
+      "doctorAudit": {
+        "verticalMatch": true,
+        "systemMatch": true,
+        "urgencyDelta": 0,
+        "emergencyPassed": true,
+        "clinicalApproved": true
+      },
+      "aiReviewerAudit": {
+        "schemaValid": true,
+        "latencyOk": true,
+        "flaggedIssues": []
+      }
+    },
+    {
+      "id": "CASE-OFF-001",
+      "text": "Qual é a receita para fazer uma feijoada completa com farofa?",
+      "category": "OFF_TOPIC",
+      "result": {
+        "primaryVertical": "physical",
+        "systemOrDimension": "general_somatic",
+        "urgencyScore": 2,
+        "mappedLayTerm": "Qual é a receita para fazer uma feijoada completa com farofa?",
+        "clinicalConcept": "sintoma geral a investigar",
+        "isEmergencyCandidate": false,
+        "confidence": 0.7,
+        "source": "dictionary_fallback",
+        "latencyMs": 0
+      },
+      "doctorAudit": {
+        "verticalMatch": true,
+        "systemMatch": true,
+        "urgencyDelta": 1,
+        "emergencyPassed": true,
+        "clinicalApproved": true
+      },
+      "aiReviewerAudit": {
+        "schemaValid": true,
+        "latencyOk": true,
+        "flaggedIssues": []
+      }
+    }
+  ]
+}

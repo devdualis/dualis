@@ -15,7 +15,7 @@ interface IdiomEntry {
 export class IdiomDictionaryService {
   private readonly entries: IdiomEntry[] = [
     {
-      pattern: /(dor\s+no\s+peito|peito\s+apertado|press[aã]o\s+no\s+peito|queima[cç][aã]o\s+no\s+peito|dolor\s+en\s+el\s+pecho|chest\s+pain|pressure\s+in\s+chest)/i,
+      pattern: /(dor(\s+\w+)?\s+no\s+peito|aperto(\s+\w+)?\s+no\s+peito|peito(\s+\w+)?\s+apertado|press[aã]o\s+no\s+peito|queima[cç][aã]o\s+no\s+peito|dolor\s+en\s+el\s+pecho|chest\s+pain|pressure\s+in\s+chest|precordialgia)/i,
       vertical: 'physical',
       systemOrDimension: 'cardiovascular_chest',
       urgencyScore: 5,
@@ -60,7 +60,7 @@ export class IdiomDictionaryService {
       isEmergencyCandidate: true,
     },
     {
-      pattern: /(crise\s+de\s+p[aâ]nico|ataque\s+de\s+p[aâ]nico|cora[cç][aã]o\s+disparado\s+de\s+medo|sensa[cç][aã]o\s+de\s+morte|panic\s+attack)/i,
+      pattern: /(crise\s+de\s+p[aâ]nico|ataque\s+de\s+p[aâ]nico|cora[cç][aã]o\s+disparado|sensa[cç][aã]o\s+de\s+morte|medo\s+s[uú]bito\s+de\s+morrer|panic\s+attack)/i,
       vertical: 'emotional',
       systemOrDimension: 'anxious_agitation',
       urgencyScore: 4,
@@ -78,7 +78,16 @@ export class IdiomDictionaryService {
       isEmergencyCandidate: false,
     },
     {
-      pattern: /(dor\s+nas\s+costas|coluna|lombar|lombalgia|espalda|back\s+pain)/i,
+      pattern: /(c[oó]lica\s+renal|c[aá]lculo\s+renal|pedra\s+nos\s+rins|virilha\s+ao\s+urinar|desce\s+para\s+a\s+virilha)/i,
+      vertical: 'physical',
+      systemOrDimension: 'geniturinario_pelvico',
+      urgencyScore: 4,
+      mappedLayTerm: 'cólica renal aguda',
+      clinicalConcept: 'cólica nefrética / suspeita de cálculo renal',
+      isEmergencyCandidate: false,
+    },
+    {
+      pattern: /(dor(\s+\w+)?\s+nas\s+costas|dor\s+muscular\s+nas\s+costas|coluna|lombar|lombalgia|espalda|back\s+pain)/i,
       vertical: 'physical',
       systemOrDimension: 'musculoskeletal_back',
       urgencyScore: 2,
@@ -195,7 +204,7 @@ export class IdiomDictionaryService {
       isEmergencyCandidate: false,
     },
     {
-      pattern: /(ins[oô]nia|sono\s+ruim|acordo\s+de\s+madrugada|pesadelo|durmo\s+demais)/i,
+      pattern: /(ins[oô]nia|sono\s+ruim|acordo\s+de\s+madrugada|pesadelo|durmo\s+demais|pegar\s+no\s+sono|dificuldade\s+para\s+.*sono)/i,
       vertical: 'emotional',
       systemOrDimension: 'sono',
       urgencyScore: 2,
