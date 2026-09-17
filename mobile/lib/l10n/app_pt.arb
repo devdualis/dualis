@@ -1292,6 +1292,106 @@
   "deleteAction": "Descartar",
   "@deleteAction": {
     "description": "Action button text to discard/delete"
+  },
+  "errorNetworkConnection": "Não foi possível conectar ao servidor. Verifique sua conexão com a internet.",
+  "@errorNetworkConnection": {
+    "description": "Friendly network connection error"
+  },
+  "errorConnectionTimeout": "A comunicação com o servidor demorou muito. Tente novamente.",
+  "@errorConnectionTimeout": {
+    "description": "Friendly connection timeout error"
+  },
+  "errorInvalidCredentials": "E-mail ou senha incorretos. Por favor, verifique suas credenciais.",
+  "@errorInvalidCredentials": {
+    "description": "Friendly invalid credentials error"
+  },
+  "errorEmailAlreadyExists": "Este e-mail já está cadastrado em nossa plataforma.",
+  "@errorEmailAlreadyExists": {
+    "description": "Friendly duplicate email error"
+  },
+  "errorSessionExpired": "Sua sessão expirou. Por favor, acesse novamente.",
+  "@errorSessionExpired": {
+    "description": "Friendly session expired error"
+  },
+  "errorEmailVerificationCodeInvalid": "Código de verificação incorreto ou expirado. Verifique os dígitos ou solicite um novo código.",
+  "@errorEmailVerificationCodeInvalid": {
+    "description": "Friendly verification code error"
+  },
+  "emailVerificationSuccess": "E-mail verificado com sucesso! Bem-vindo ao DualisCheckUp.",
+  "@emailVerificationSuccess": {
+    "description": "Email verification success message"
+  },
+  "newCodeSentSuccess": "Novo código enviado para seu e-mail.",
+  "@newCodeSentSuccess": {
+    "description": "Resend code success message"
+  },
+  "errorUpdateProfile": "Não foi possível atualizar o perfil. Tente novamente.",
+  "@errorUpdateProfile": {
+    "description": "Profile update error"
+  },
+  "errorChangePassword": "Não foi possível alterar a senha. Verifique sua senha atual.",
+  "@errorChangePassword": {
+    "description": "Change password error"
+  },
+  "errorCameraGalleryAccess": "Não foi possível acessar a câmera ou galeria do dispositivo.",
+  "@errorCameraGalleryAccess": {
+    "description": "Camera/gallery access error"
+  },
+  "errorFieldRequired": "Este campo é obrigatório.",
+  "@errorFieldRequired": {
+    "description": "Generic required field error"
+  },
+  "errorCurrentPasswordRequired": "Informe sua senha atual.",
+  "@errorCurrentPasswordRequired": {
+    "description": "Current password required error"
+  },
+  "errorNewPasswordMinLength": "A nova senha deve ter pelo menos 8 caracteres.",
+  "@errorNewPasswordMinLength": {
+    "description": "New password minimum length error"
+  },
+  "errorPasswordLettersAndDigits": "A senha deve conter letras e números.",
+  "@errorPasswordLettersAndDigits": {
+    "description": "Password letters and numbers requirement error"
+  },
+  "errorNameMinLength": "Nome deve ter pelo menos 2 caracteres.",
+  "@errorNameMinLength": {
+    "description": "Name minimum length error"
+  },
+  "selectDateOfBirthHint": "Selecione sua data de nascimento",
+  "@selectDateOfBirthHint": {
+    "description": "Hint for date of birth selection"
+  },
+  "errorLoadHistory": "Não foi possível carregar o histórico de triagens no momento.",
+  "@errorLoadHistory": {
+    "description": "Error loading triage history"
+  },
+  "errorArticleLinkUnavailable": "Link do artigo preventivo não disponível.",
+  "@errorArticleLinkUnavailable": {
+    "description": "Article link unavailable"
+  },
+  "errorUnableToOpenLink": "Não foi possível abrir o link solicitado.",
+  "@errorUnableToOpenLink": {
+    "description": "Unable to open link error"
+  },
+  "errorServerInternal": "Nossos serviços estão passando por uma instabilidade temporária. Tente novamente em instantes.",
+  "@errorServerInternal": {
+    "description": "Server internal error"
+  },
+  "errorUnexpected": "Ocorreu uma instabilidade inesperada. Por favor, tente novamente.",
+  "@errorUnexpected": {
+    "description": "Unexpected generic error"
+  },
+  "navHome": "Início",
+  "@navHome": {
+    "description": "Bottom navigation Home label"
+  },
+  "navTodayOutcome": "Resultado do Dia",
+  "@navTodayOutcome": {
+    "description": "Bottom navigation Today Outcome label"
+  },
+  "navHistory": "Histórico & Mapa",
+  "@navHistory": {
+    "description": "Bottom navigation History label"
   }
 }
 

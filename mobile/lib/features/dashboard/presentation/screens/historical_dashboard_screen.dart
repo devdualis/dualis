@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/utils/error_message_resolver.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/anatomical_body_map.dart';
 import '../widgets/critical_recurrence_card.dart';
@@ -19,39 +21,45 @@ class HistoricalDashboardScreen extends ConsumerWidget {
         loading: () => const Center(
           child: CircularProgressIndicator(),
         ),
-        error: (err, stack) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.error_outline_rounded,
-                    size: 48, color: Colors.red),
-                const SizedBox(height: 12),
-                Text(
-                  'Não foi possível carregar o histórico',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade800,
+        error: (err, stack) {
+          final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+          final errorText = l10n != null
+              ? ErrorMessageResolver.resolve(err, l10n)
+              : (l10n?.errorLoadHistory ?? 'Não foi possível carregar o histórico de triagens.');
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline_rounded,
+                      size: 48, color: Colors.red),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Não foi possível carregar o histórico',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade800,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  err.toString(),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                ),
-                const SizedBox(height: 16),
-                FilledButton.tonal(
-                  onPressed: () =>
-                      ref.read(dashboardControllerProvider.notifier).refreshHistory(),
-                  child: const Text('Tentar novamente'),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    errorText,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton.tonal(
+                    onPressed: () =>
+                        ref.read(dashboardControllerProvider.notifier).refreshHistory(),
+                    child: const Text('Tentar novamente'),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
         data: (state) {
           final tab = state.selectedTab;
           final isEmotional = tab == DashboardTab.emotional;

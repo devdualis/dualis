@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/security/secure_storage_service.dart';
 import '../../../dashboard/data/triage_history_remote_data_source.dart';
@@ -304,7 +305,15 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
       state = state.copyWith(isLoading: false, outcome: outcome);
       await _persistOutcome(outcome);
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      String cleanError = 'Não foi possível carregar o resultado da triagem.';
+      if (e is DioException) {
+        if (e.type == DioExceptionType.connectionError ||
+            e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.receiveTimeout) {
+          cleanError = 'Não foi possível conectar ao servidor. Verifique sua conexão.';
+        }
+      }
+      state = state.copyWith(isLoading: false, errorMessage: cleanError);
     }
   }
 

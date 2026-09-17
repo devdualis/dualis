@@ -1109,4 +1109,96 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get deleteAction => 'Descartar';
+
+  @override
+  String get errorNetworkConnection =>
+      'Não foi possível conectar ao servidor. Verifique sua conexão com a internet.';
+
+  @override
+  String get errorConnectionTimeout =>
+      'A comunicação com o servidor demorou muito. Tente novamente.';
+
+  @override
+  String get errorInvalidCredentials =>
+      'E-mail ou senha incorretos. Por favor, verifique suas credenciais.';
+
+  @override
+  String get errorEmailAlreadyExists =>
+      'Este e-mail já está cadastrado em nossa plataforma.';
+
+  @override
+  String get errorSessionExpired =>
+      'Sua sessão expirou. Por favor, acesse novamente.';
+
+  @override
+  String get errorEmailVerificationCodeInvalid =>
+      'Código de verificação incorreto ou expirado. Verifique os dígitos ou solicite um novo código.';
+
+  @override
+  String get emailVerificationSuccess =>
+      'E-mail verificado com sucesso! Bem-vindo ao DualisCheckUp.';
+
+  @override
+  String get newCodeSentSuccess => 'Novo código enviado para seu e-mail.';
+
+  @override
+  String get errorUpdateProfile =>
+      'Não foi possível atualizar o perfil. Tente novamente.';
+
+  @override
+  String get errorChangePassword =>
+      'Não foi possível alterar a senha. Verifique sua senha atual.';
+
+  @override
+  String get errorCameraGalleryAccess =>
+      'Não foi possível acessar a câmera ou galeria do dispositivo.';
+
+  @override
+  String get errorFieldRequired => 'Este campo é obrigatório.';
+
+  @override
+  String get errorCurrentPasswordRequired => 'Informe sua senha atual.';
+
+  @override
+  String get errorNewPasswordMinLength =>
+      'A nova senha deve ter pelo menos 8 caracteres.';
+
+  @override
+  String get errorPasswordLettersAndDigits =>
+      'A senha deve conter letras e números.';
+
+  @override
+  String get errorNameMinLength => 'Nome deve ter pelo menos 2 caracteres.';
+
+  @override
+  String get selectDateOfBirthHint => 'Selecione sua data de nascimento';
+
+  @override
+  String get errorLoadHistory =>
+      'Não foi possível carregar o histórico de triagens no momento.';
+
+  @override
+  String get errorArticleLinkUnavailable =>
+      'Link do artigo preventivo não disponível.';
+
+  @override
+  String get errorUnableToOpenLink =>
+      'Não foi possível abrir o link solicitado.';
+
+  @override
+  String get errorServerInternal =>
+      'Nossos serviços estão passando por uma instabilidade temporária. Tente novamente em instantes.';
+
+  @override
+  String get errorUnexpected =>
+      'Ocorreu uma instabilidade inesperada. Por favor, tente novamente.';
+
+  @override
+  String get navHome => 'Início';
+
+  @override
+  String get navTodayOutcome => 'Resultado do Dia';
+
+  @override
+  String get navHistory => 'Histórico & Mapa';
 }

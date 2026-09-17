@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../core/utils/date_input_formatter.dart';
+import '../../../../core/utils/error_message_resolver.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
 import '../../../../shared/widgets/dualis_text_field.dart';
@@ -130,12 +132,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     } else if (mounted) {
       final error = ref.read(authControllerProvider).errorMessage;
       if (error != null) {
-        final isConflict = error.toLowerCase().contains('já cadastrado') ||
+        final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+        final resolvedError = l10n != null ? ErrorMessageResolver.resolve(error, l10n) : error;
+        final isConflict = resolvedError == l10n?.errorEmailAlreadyExists ||
+            error.toLowerCase().contains('já cadastrado') ||
             error.toLowerCase().contains('already') ||
             error.toLowerCase().contains('registrado');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(error),
+            content: Text(resolvedError),
             backgroundColor: AppColors.emergencyCrimson,
             duration: Duration(seconds: isConflict ? 6 : 4),
             action: isConflict
@@ -313,6 +318,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 // 8. Link to Login
                 Center(
                   child: TextButton(
+                    key: const Key('goToLoginButton'),
                     onPressed: () => context.go(RoutePaths.login),
                     child: Text.rich(
                       TextSpan(

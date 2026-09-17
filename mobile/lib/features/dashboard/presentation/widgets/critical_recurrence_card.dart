@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/triage_history_models.dart';
 
 class CriticalRecurrenceCard extends StatelessWidget {
@@ -11,12 +12,16 @@ class CriticalRecurrenceCard extends StatelessWidget {
   });
 
   Future<void> _launchArticle(BuildContext context, String url) async {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final fallbackUnavailable = l10n?.errorArticleLinkUnavailable ?? 'Link do artigo não disponível.';
+    final fallbackCannotOpen = l10n?.errorUnableToOpenLink ?? 'Não foi possível abrir o link solicitado.';
+
     final trimmed = url.trim();
     final uri = Uri.tryParse(trimmed);
     if (uri == null || !uri.hasScheme) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Link do artigo não disponível.')),
+          SnackBar(content: Text(fallbackUnavailable)),
         );
       }
       return;
@@ -28,7 +33,7 @@ class CriticalRecurrenceCard extends StatelessWidget {
         final inAppLaunched = await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
         if (!inAppLaunched && context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Não foi possível abrir: $trimmed')),
+            SnackBar(content: Text('$fallbackCannotOpen: $trimmed')),
           );
         }
       }
@@ -37,13 +42,13 @@ class CriticalRecurrenceCard extends StatelessWidget {
         final basicLaunched = await launchUrl(uri);
         if (!basicLaunched && context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Não foi possível abrir: $trimmed')),
+            SnackBar(content: Text('$fallbackCannotOpen: $trimmed')),
           );
         }
       } catch (_) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Não foi possível abrir: $trimmed')),
+            SnackBar(content: Text('$fallbackCannotOpen: $trimmed')),
           );
         }
       }
@@ -51,6 +56,7 @@ class CriticalRecurrenceCard extends StatelessWidget {
   }
 
   static final Map<String, String> _categoryTranslations = {
+    'muscular_geral_sistemico': 'Muscular Geral e Sistêmico',
     'cabeca_pescoco': 'Cabeça e Pescoço',
     'cardiovascular_torax': 'Cardiovascular / Tórax',
     'respiratorio': 'Respiratório',
@@ -79,8 +85,10 @@ class CriticalRecurrenceCard extends StatelessWidget {
 
   static String _formatText(String raw) {
     String formatted = raw;
-    for (final entry in _categoryTranslations.entries) {
-      formatted = formatted.replaceAll(entry.key, entry.value);
+    final sortedKeys = _categoryTranslations.keys.toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+    for (final key in sortedKeys) {
+      formatted = formatted.replaceAll(key, _categoryTranslations[key]!);
     }
     return formatted;
   }

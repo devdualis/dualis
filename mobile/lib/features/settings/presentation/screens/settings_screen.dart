@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
+import '../../../../core/utils/error_message_resolver.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../l10n/locale_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
@@ -93,9 +94,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
     } catch (_) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Não foi possível acessar a câmera ou galeria.'),
+          SnackBar(
+            content: Text(l10n.errorCameraGalleryAccess),
             backgroundColor: AppColors.emergencyCrimson,
           ),
         );
@@ -291,10 +293,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
       );
     } else {
-      final error = ref.read(authControllerProvider).errorMessage;
+      final l10n = AppLocalizations.of(context);
+      final rawError = ref.read(authControllerProvider).errorMessage;
+      final error = rawError != null ? ErrorMessageResolver.resolve(rawError, l10n) : l10n.errorUpdateProfile;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(error ?? 'Erro ao atualizar perfil.'),
+          content: Text(error),
           backgroundColor: AppColors.emergencyCrimson,
         ),
       );
@@ -345,10 +349,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
       );
     } else {
-      final error = ref.read(authControllerProvider).errorMessage;
+      final rawError = ref.read(authControllerProvider).errorMessage;
+      final error = rawError != null ? ErrorMessageResolver.resolve(rawError, l10n) : l10n.errorChangePassword;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(error ?? 'Erro ao alterar senha.'),
+          content: Text(error),
           backgroundColor: AppColors.emergencyCrimson,
         ),
       );
@@ -552,7 +557,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.trim().length < 2) {
-                            return 'Nome deve ter pelo menos 2 caracteres.';
+                            return l10n.errorNameMinLength;
                           }
                           return null;
                         },
@@ -735,7 +740,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Informe sua senha atual.';
+                            return l10n.errorCurrentPasswordRequired;
                           }
                           return null;
                         },
@@ -786,12 +791,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.length < 8) {
-                            return 'A nova senha deve ter pelo menos 8 caracteres.';
+                            return l10n.errorNewPasswordMinLength;
                           }
                           final hasLetters = RegExp(r'[A-Za-z]').hasMatch(value);
                           final hasDigits = RegExp(r'\d').hasMatch(value);
                           if (!hasLetters || !hasDigits) {
-                            return 'A senha deve conter letras e números.';
+                            return l10n.errorPasswordLettersAndDigits;
                           }
                           return null;
                         },

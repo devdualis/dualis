@@ -1096,8 +1096,99 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteHistoryItemSuccess => 'Record removed successfully.';
 
   @override
-  String get deleteHistoryItemError => 'Could not remove record.';
+  String get deleteHistoryItemError => 'Não foi possível remover o registro.';
 
   @override
   String get deleteAction => 'Delete';
+
+  @override
+  String get errorNetworkConnection =>
+      'Unable to connect to the server. Please check your internet connection.';
+
+  @override
+  String get errorConnectionTimeout =>
+      'The server took too long to respond. Please try again.';
+
+  @override
+  String get errorInvalidCredentials =>
+      'Incorrect email or password. Please verify your credentials.';
+
+  @override
+  String get errorEmailAlreadyExists =>
+      'This email address is already registered on our platform.';
+
+  @override
+  String get errorSessionExpired =>
+      'Your session has expired. Please log in again.';
+
+  @override
+  String get errorEmailVerificationCodeInvalid =>
+      'Incorrect or expired verification code. Check the digits or request a new code.';
+
+  @override
+  String get emailVerificationSuccess =>
+      'Email verified successfully! Welcome to DualisCheckUp.';
+
+  @override
+  String get newCodeSentSuccess => 'A new code has been sent to your email.';
+
+  @override
+  String get errorUpdateProfile =>
+      'Could not update profile. Please try again.';
+
+  @override
+  String get errorChangePassword =>
+      'Could not change password. Please verify your current password.';
+
+  @override
+  String get errorCameraGalleryAccess =>
+      'Could not access camera or photo gallery on device.';
+
+  @override
+  String get errorFieldRequired => 'This field is required.';
+
+  @override
+  String get errorCurrentPasswordRequired => 'Enter your current password.';
+
+  @override
+  String get errorNewPasswordMinLength =>
+      'New password must be at least 8 characters.';
+
+  @override
+  String get errorPasswordLettersAndDigits =>
+      'Password must contain letters and numbers.';
+
+  @override
+  String get errorNameMinLength => 'Name must have at least 2 characters.';
+
+  @override
+  String get selectDateOfBirthHint => 'Select your date of birth';
+
+  @override
+  String get errorLoadHistory =>
+      'Unable to load triage history at this moment.';
+
+  @override
+  String get errorArticleLinkUnavailable =>
+      'Preventive article link unavailable.';
+
+  @override
+  String get errorUnableToOpenLink => 'Could not open the requested link.';
+
+  @override
+  String get errorServerInternal =>
+      'Our services are experiencing temporary instability. Please try again shortly.';
+
+  @override
+  String get errorUnexpected =>
+      'An unexpected error occurred. Please try again.';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navTodayOutcome => 'Today\'s Result';
+
+  @override
+  String get navHistory => 'History & Map';
 }

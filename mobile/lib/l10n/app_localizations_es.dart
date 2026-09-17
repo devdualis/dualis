@@ -1101,8 +1101,101 @@ class AppLocalizationsEs extends AppLocalizations {
   String get deleteHistoryItemSuccess => 'Registro eliminado con éxito.';
 
   @override
-  String get deleteHistoryItemError => 'No se pudo eliminar el registro.';
+  String get deleteHistoryItemError => 'Não foi possível remover o registro.';
 
   @override
   String get deleteAction => 'Eliminar';
+
+  @override
+  String get errorNetworkConnection =>
+      'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+
+  @override
+  String get errorConnectionTimeout =>
+      'La comunicación con el servidor tardó demasiado. Intenta nuevamente.';
+
+  @override
+  String get errorInvalidCredentials =>
+      'Correo o contraseña incorrectos. Por favor, verifica tus credenciales.';
+
+  @override
+  String get errorEmailAlreadyExists =>
+      'Este correo electrónico ya está registrado en nuestra plataforma.';
+
+  @override
+  String get errorSessionExpired =>
+      'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
+
+  @override
+  String get errorEmailVerificationCodeInvalid =>
+      'Código de verificación incorrecto o expirado. Verifica los dígitos o solicita un nuevo código.';
+
+  @override
+  String get emailVerificationSuccess =>
+      '¡Correo electrónico verificado con éxito! Bienvenido a DualisCheckUp.';
+
+  @override
+  String get newCodeSentSuccess =>
+      'Nuevo código enviado a tu correo electrónico.';
+
+  @override
+  String get errorUpdateProfile =>
+      'No se pudo actualizar el perfil. Intenta nuevamente.';
+
+  @override
+  String get errorChangePassword =>
+      'No se pudo cambiar la contraseña. Verifica tu contraseña actual.';
+
+  @override
+  String get errorCameraGalleryAccess =>
+      'No se pudo acceder a la cámara o galería del dispositivo.';
+
+  @override
+  String get errorFieldRequired => 'Este campo es obligatorio.';
+
+  @override
+  String get errorCurrentPasswordRequired => 'Ingresa tu contraseña actual.';
+
+  @override
+  String get errorNewPasswordMinLength =>
+      'La nueva contraseña debe tener al menos 8 caracteres.';
+
+  @override
+  String get errorPasswordLettersAndDigits =>
+      'La contraseña debe contener letras y números.';
+
+  @override
+  String get errorNameMinLength =>
+      'El nombre debe tener al menos 2 caracteres.';
+
+  @override
+  String get selectDateOfBirthHint => 'Selecciona tu fecha de nacimiento';
+
+  @override
+  String get errorLoadHistory =>
+      'No se pudo cargar el historial de triajes en este momento.';
+
+  @override
+  String get errorArticleLinkUnavailable =>
+      'Enlace del artículo preventivo no disponible.';
+
+  @override
+  String get errorUnableToOpenLink => 'No se pudo abrir el enlace solicitado.';
+
+  @override
+  String get errorServerInternal =>
+      'Nuestros servicios experimentan una inestabilidad temporal. Intenta nuevamente en unos instantes.';
+
+  @override
+  String get errorUnexpected =>
+      'Ocurrió una inestabilidad inesperada. Por favor, intenta de nuevo.';
+
+  @override
+  String get navHome => 'Inicio';
+
+  @override
+  String get navTodayOutcome => 'Resultado del Día';
+
+  @override
+  String get navHistory => 'Historial y Mapa';
 }

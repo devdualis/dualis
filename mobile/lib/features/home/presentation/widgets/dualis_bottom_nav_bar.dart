@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 
 enum DualisNavTab {
   home,
@@ -25,6 +26,11 @@ class DualisBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final homeLabel = l10n?.navHome ?? 'Início';
+    final todayOutcomeLabel = l10n?.navTodayOutcome ?? 'Resultado do Dia';
+    final historyLabel = l10n?.navHistory ?? 'Histórico & Mapa';
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surfaceLight,
@@ -45,11 +51,11 @@ class DualisBottomNavBar extends StatelessWidget {
         height: 68,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         destinations: [
-          const NavigationDestination(
-            key: Key('nav_destination_home'),
-            icon: Icon(Icons.home_outlined, color: AppColors.textSecondaryLight),
-            selectedIcon: Icon(Icons.home_rounded, color: AppColors.clinicalTealDark),
-            label: 'Início',
+          NavigationDestination(
+            key: const Key('nav_destination_home'),
+            icon: const Icon(Icons.home_outlined, color: AppColors.textSecondaryLight),
+            selectedIcon: const Icon(Icons.home_rounded, color: AppColors.clinicalTealDark),
+            label: homeLabel,
           ),
           NavigationDestination(
             key: const Key('nav_destination_today_outcome'),
@@ -65,13 +71,13 @@ class DualisBottomNavBar extends StatelessWidget {
               backgroundColor: AppColors.clinicalTeal,
               child: const Icon(Icons.assessment_rounded, color: AppColors.clinicalTealDark),
             ),
-            label: 'Resultado do Dia',
+            label: todayOutcomeLabel,
           ),
-          const NavigationDestination(
-            key: Key('nav_destination_history'),
-            icon: Icon(Icons.insights_outlined, color: AppColors.textSecondaryLight),
-            selectedIcon: Icon(Icons.insights_rounded, color: AppColors.clinicalTealDark),
-            label: 'Histórico & Mapa',
+          NavigationDestination(
+            key: const Key('nav_destination_history'),
+            icon: const Icon(Icons.insights_outlined, color: AppColors.textSecondaryLight),
+            selectedIcon: const Icon(Icons.insights_rounded, color: AppColors.clinicalTealDark),
+            label: historyLabel,
           ),
         ],
       ),

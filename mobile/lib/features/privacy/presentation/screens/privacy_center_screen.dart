@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
+import '../../../../core/utils/error_message_resolver.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../controllers/privacy_controller.dart';
 
@@ -154,9 +155,12 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
 
     ref.listen<PrivacyState>(privacyControllerProvider, (prev, next) {
       if (next.errorMessage != null && next.errorMessage != prev?.errorMessage) {
+        final errorText = l10n != null
+            ? ErrorMessageResolver.resolve(next.errorMessage!, l10n)
+            : next.errorMessage!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(next.errorMessage!),
+            content: Text(errorText),
             backgroundColor: AppColors.emergencyCrimson,
           ),
         );

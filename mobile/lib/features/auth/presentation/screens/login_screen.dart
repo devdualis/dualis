@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
+import '../../../../core/utils/error_message_resolver.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
 import '../../../../shared/widgets/dualis_text_field.dart';
@@ -43,10 +45,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } else if (mounted) {
       final rawError = ref.read(authControllerProvider).errorMessage;
       if (rawError != null) {
-        final errorText = (rawError.toLowerCase().contains('unauthorized') ||
-                rawError.toLowerCase().contains('401'))
-            ? 'Credenciais inválidas. Verifique seu e-mail e senha.'
-            : rawError;
+        final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+        final errorText = l10n != null
+            ? ErrorMessageResolver.resolve(rawError, l10n)
+            : ((rawError.toLowerCase().contains('unauthorized') ||
+                    rawError.toLowerCase().contains('401'))
+                ? 'Credenciais inválidas. Verifique seu e-mail e senha.'
+                : rawError);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorText),
@@ -146,6 +151,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 16),
                 Center(
                   child: TextButton(
+                    key: const Key('goToRegisterButton'),
                     onPressed: () => context.go(RoutePaths.register),
                     child: Text.rich(
                       TextSpan(

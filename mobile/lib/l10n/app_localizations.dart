@@ -1989,6 +1989,156 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Descartar'**
   String get deleteAction;
+
+  /// Friendly network connection error
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível conectar ao servidor. Verifique sua conexão com a internet.'**
+  String get errorNetworkConnection;
+
+  /// Friendly connection timeout error
+  ///
+  /// In pt, this message translates to:
+  /// **'A comunicação com o servidor demorou muito. Tente novamente.'**
+  String get errorConnectionTimeout;
+
+  /// Friendly invalid credentials error
+  ///
+  /// In pt, this message translates to:
+  /// **'E-mail ou senha incorretos. Por favor, verifique suas credenciais.'**
+  String get errorInvalidCredentials;
+
+  /// Friendly duplicate email error
+  ///
+  /// In pt, this message translates to:
+  /// **'Este e-mail já está cadastrado em nossa plataforma.'**
+  String get errorEmailAlreadyExists;
+
+  /// Friendly session expired error
+  ///
+  /// In pt, this message translates to:
+  /// **'Sua sessão expirou. Por favor, acesse novamente.'**
+  String get errorSessionExpired;
+
+  /// Friendly verification code error
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de verificação incorreto ou expirado. Verifique os dígitos ou solicite um novo código.'**
+  String get errorEmailVerificationCodeInvalid;
+
+  /// Email verification success message
+  ///
+  /// In pt, this message translates to:
+  /// **'E-mail verificado com sucesso! Bem-vindo ao DualisCheckUp.'**
+  String get emailVerificationSuccess;
+
+  /// Resend code success message
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo código enviado para seu e-mail.'**
+  String get newCodeSentSuccess;
+
+  /// Profile update error
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível atualizar o perfil. Tente novamente.'**
+  String get errorUpdateProfile;
+
+  /// Change password error
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível alterar a senha. Verifique sua senha atual.'**
+  String get errorChangePassword;
+
+  /// Camera/gallery access error
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível acessar a câmera ou galeria do dispositivo.'**
+  String get errorCameraGalleryAccess;
+
+  /// Generic required field error
+  ///
+  /// In pt, this message translates to:
+  /// **'Este campo é obrigatório.'**
+  String get errorFieldRequired;
+
+  /// Current password required error
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe sua senha atual.'**
+  String get errorCurrentPasswordRequired;
+
+  /// New password minimum length error
+  ///
+  /// In pt, this message translates to:
+  /// **'A nova senha deve ter pelo menos 8 caracteres.'**
+  String get errorNewPasswordMinLength;
+
+  /// Password letters and numbers requirement error
+  ///
+  /// In pt, this message translates to:
+  /// **'A senha deve conter letras e números.'**
+  String get errorPasswordLettersAndDigits;
+
+  /// Name minimum length error
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome deve ter pelo menos 2 caracteres.'**
+  String get errorNameMinLength;
+
+  /// Hint for date of birth selection
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione sua data de nascimento'**
+  String get selectDateOfBirthHint;
+
+  /// Error loading triage history
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar o histórico de triagens no momento.'**
+  String get errorLoadHistory;
+
+  /// Article link unavailable
+  ///
+  /// In pt, this message translates to:
+  /// **'Link do artigo preventivo não disponível.'**
+  String get errorArticleLinkUnavailable;
+
+  /// Unable to open link error
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível abrir o link solicitado.'**
+  String get errorUnableToOpenLink;
+
+  /// Server internal error
+  ///
+  /// In pt, this message translates to:
+  /// **'Nossos serviços estão passando por uma instabilidade temporária. Tente novamente em instantes.'**
+  String get errorServerInternal;
+
+  /// Unexpected generic error
+  ///
+  /// In pt, this message translates to:
+  /// **'Ocorreu uma instabilidade inesperada. Por favor, tente novamente.'**
+  String get errorUnexpected;
+
+  /// Bottom navigation Home label
+  ///
+  /// In pt, this message translates to:
+  /// **'Início'**
+  String get navHome;
+
+  /// Bottom navigation Today Outcome label
+  ///
+  /// In pt, this message translates to:
+  /// **'Resultado do Dia'**
+  String get navTodayOutcome;
+
+  /// Bottom navigation History label
+  ///
+  /// In pt, this message translates to:
+  /// **'Histórico & Mapa'**
+  String get navHistory;
 }
 
 class _AppLocalizationsDelegate
