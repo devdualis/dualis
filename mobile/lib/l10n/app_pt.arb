@@ -350,7 +350,35 @@
   },
   "triageQ4Emotional": "Você consegue identificar se existe um motivo principal para isso estar acontecendo hoje?",
   "@triageQ4Emotional": {
-    "description": "Question 4 emotional"
+    "description": "Question 4 emotional generic"
+  },
+  "triageQ4Ansiedade": "O que parece estar disparando essa sensação de ansiedade, agitação ou aperto?",
+  "@triageQ4Ansiedade": {
+    "description": "Question 4 anxiety and agitation"
+  },
+  "triageQ4Depressao": "Você consegue identificar se algum acontecimento recente ou sentimento pesou mais no seu desânimo?",
+  "@triageQ4Depressao": {
+    "description": "Question 4 depression and discouragement"
+  },
+  "triageQ4EstresseBurnout": "De onde vem a maior parte da pressão ou esgotamento que você está sentindo?",
+  "@triageQ4EstresseBurnout": {
+    "description": "Question 4 stress and burnout"
+  },
+  "triageQ4Somatica": "Essa tensão no corpo ou aperto físico costuma piorar em quais situações?",
+  "@triageQ4Somatica": {
+    "description": "Question 4 somatic tension"
+  },
+  "triageQ4Sono": "Qual tem sido a principal dificuldade que atrapalha suas noites de sono?",
+  "@triageQ4Sono": {
+    "description": "Question 4 sleep disturbances"
+  },
+  "triageQ4CognitivaFoco": "O que mais parece estar prejudicando sua concentração ou clareza mental?",
+  "@triageQ4CognitivaFoco": {
+    "description": "Question 4 cognitive focus"
+  },
+  "triageQ4Autoestima": "O que tem despertado com mais intensidade essa sensação de insegurança ou autocrítica?",
+  "@triageQ4Autoestima": {
+    "description": "Question 4 self-esteem"
   },
   "triageOptTrabalho": "Trabalho / Estudos",
   "@triageOptTrabalho": {
@@ -367,6 +395,122 @@
   "triageOptNaoSei": "Não sei dizer",
   "@triageOptNaoSei": {
     "description": "Trigger option: Cannot tell"
+  },
+  "triageOptSimCobrancaPrazos": "Sobrecarga de tarefas, prazos ou expectativas",
+  "@triageOptSimCobrancaPrazos": {
+    "description": "Emotional trigger: Overwhelmed by tasks or deadlines"
+  },
+  "triageOptSimConflitoRelacionamento": "Conflito ou discussão com pessoa próxima",
+  "@triageOptSimConflitoRelacionamento": {
+    "description": "Emotional trigger: Interpersonal conflict"
+  },
+  "triageOptSimIncertezaFuturo": "Medo de mudanças, notícias ou incerteza futura",
+  "@triageOptSimIncertezaFuturo": {
+    "description": "Emotional trigger: Uncertainty or fear of change"
+  },
+  "triageOptSimExcessoEstimulantes": "Excesso de café, energéticos ou ambiente agitado",
+  "@triageOptSimExcessoEstimulantes": {
+    "description": "Emotional trigger: Excess caffeine or agitation"
+  },
+  "triageOptNaoSeiDizerEmocional": "Não sei identificar, surgiu de repente",
+  "@triageOptNaoSeiDizerEmocional": {
+    "description": "Emotional trigger: Cannot identify, sudden onset"
+  },
+  "triageOptSimPerdaLuto": "Perda, término de relacionamento ou luto",
+  "@triageOptSimPerdaLuto": {
+    "description": "Emotional trigger: Loss, breakup or grief"
+  },
+  "triageOptSimSolidaoIsolamento": "Sensação de solidão, isolamento ou incompreensão",
+  "@triageOptSimSolidaoIsolamento": {
+    "description": "Emotional trigger: Loneliness or isolation"
+  },
+  "triageOptSimFrustracaoDesilusao": "Frustração com algo que não saiu como esperado",
+  "@triageOptSimFrustracaoDesilusao": {
+    "description": "Emotional trigger: Frustration or disappointment"
+  },
+  "triageOptSimCansacoAcumulado": "Cansaço prolongado sem pausas para recuperação",
+  "@triageOptSimCansacoAcumulado": {
+    "description": "Emotional trigger: Accumulated exhaustion without breaks"
+  },
+  "triageOptSimPressaoTrabalho": "Excesso de carga horária, cobranças ou prazos no trabalho",
+  "@triageOptSimPressaoTrabalho": {
+    "description": "Emotional trigger: Work pressure or excessive hours"
+  },
+  "triageOptSimResponsabilidadesCasa": "Cuidados familiares, finanças ou tarefas domésticas",
+  "@triageOptSimResponsabilidadesCasa": {
+    "description": "Emotional trigger: Family, financial or domestic strain"
+  },
+  "triageOptSimFaltaDescanso": "Sem tempo livre para lazer, repouso ou desconectar",
+  "@triageOptSimFaltaDescanso": {
+    "description": "Emotional trigger: Lack of rest or downtime"
+  },
+  "triageOptSimAmbienteToxico": "Relações difíceis ou ambiente diário desgastante",
+  "@triageOptSimAmbienteToxico": {
+    "description": "Emotional trigger: Toxic or straining environment"
+  },
+  "triageOptSimDuranteTrabalho": "Durante a jornada de trabalho ou momentos de pressão",
+  "@triageOptSimDuranteTrabalho": {
+    "description": "Emotional trigger: During work or intense pressure"
+  },
+  "triageOptSimDiscussaoConflito": "Logo após discussões, desentendimentos ou sustos",
+  "@triageOptSimDiscussaoConflito": {
+    "description": "Emotional trigger: After conflict or fright"
+  },
+  "triageOptSimFinalDoDia": "No fim do dia, ao tentar relaxar ou deitar",
+  "@triageOptSimFinalDoDia": {
+    "description": "Emotional trigger: End of day when attempting to rest"
+  },
+  "triageOptSimPreocupacaoConstante": "Em qualquer momento ao pensar nos problemas",
+  "@triageOptSimPreocupacaoConstante": {
+    "description": "Emotional trigger: Whenever thinking about issues"
+  },
+  "triageOptSimDificuldadePegarSono": "Cabeça acelerada / pensamentos na hora de dormir",
+  "@triageOptSimDificuldadePegarSono": {
+    "description": "Emotional trigger: Racing thoughts at bedtime"
+  },
+  "triageOptSimAcordaMadrugada": "Acordar no meio da noite e não conseguir voltar a dormir",
+  "@triageOptSimAcordaMadrugada": {
+    "description": "Emotional trigger: Middle of the night awakening"
+  },
+  "triageOptSimSonoAgitadoPesadelos": "Sono leve, agitado, com pesadelos ou despertares",
+  "@triageOptSimSonoAgitadoPesadelos": {
+    "description": "Emotional trigger: Restless sleep or nightmares"
+  },
+  "triageOptSimHorarioIrregularTelas": "Uso de celular/telas até tarde ou horários irregulares",
+  "@triageOptSimHorarioIrregularTelas": {
+    "description": "Emotional trigger: Late screens or irregular sleep habits"
+  },
+  "triageOptSimSobrecargaMultitarefas": "Muitas coisas para fazer ao mesmo tempo / excesso de estímulos",
+  "@triageOptSimSobrecargaMultitarefas": {
+    "description": "Emotional trigger: Multitasking overload"
+  },
+  "triageOptSimPreocupacaoIntrusiva": "Pensamentos de preocupação que interrompem o raciocínio",
+  "@triageOptSimPreocupacaoIntrusiva": {
+    "description": "Emotional trigger: Intrusive worried thoughts"
+  },
+  "triageOptSimExaustaoMental": "Cansaço mental acumulado após muitas horas de esforço",
+  "@triageOptSimExaustaoMental": {
+    "description": "Emotional trigger: Accumulated mental exhaustion"
+  },
+  "triageOptSimFaltaMotivacao": "Desinteresse, falta de energia ou apatia com as tarefas",
+  "@triageOptSimFaltaMotivacao": {
+    "description": "Emotional trigger: Lack of motivation or apathy"
+  },
+  "triageOptSimComparacaoRedes": "Comparação com outras pessoas (redes sociais ou colegas)",
+  "@triageOptSimComparacaoRedes": {
+    "description": "Emotional trigger: Comparison on social media or peers"
+  },
+  "triageOptSimMedoFalharJulgamento": "Medo de errar, não corresponder ou ser julgado",
+  "@triageOptSimMedoFalharJulgamento": {
+    "description": "Emotional trigger: Fear of failure or judgment"
+  },
+  "triageOptSimCriticaRejeicao": "Crítica recente recebida ou sensação de rejeição",
+  "@triageOptSimCriticaRejeicao": {
+    "description": "Emotional trigger: Recent criticism or rejection"
+  },
+  "triageOptSimDesvalorizacaoPropria": "Dificuldade em reconhecer suas próprias conquistas",
+  "@triageOptSimDesvalorizacaoPropria": {
+    "description": "Emotional trigger: Difficulty acknowledging own achievements"
   },
   "triagePreviewEmotional": "Revisão da sua Autoavaliação Psico-Emocional",
   "@triagePreviewEmotional": {
@@ -462,7 +606,55 @@
   },
   "triageQ4Physical": "Você lembra de ter feito algum esforço atípico, exercício pesado ou sofrido alguma batida/queda recentemente?",
   "@triageQ4Physical": {
-    "description": "Question 4 physical"
+    "description": "Question 4 physical generic"
+  },
+  "triageQ4CabecaPescoco": "Você notou algum fator associado, como estresse intenso, muitas horas em telas, noite mal dormida ou sinusite/resfriado?",
+  "@triageQ4CabecaPescoco": {
+    "description": "Question 4 head and neck"
+  },
+  "triageQ4CardiovascularTorax": "O desconforto no peito ou palpitação começou após esforço físico, estresse emocional ou consumo de estimulantes?",
+  "@triageQ4CardiovascularTorax": {
+    "description": "Question 4 cardiovascular and chest"
+  },
+  "triageQ4Respiratorio": "Você teve contato com poeira, fumaça, ar frio ou está com sintomas de gripe/resfriado?",
+  "@triageQ4Respiratorio": {
+    "description": "Question 4 respiratory"
+  },
+  "triageQ4Gastrointestinal": "Você ingeriu algum alimento diferente ou pesado, tomou remédios recentes ou ficou muito tempo em jejum?",
+  "@triageQ4Gastrointestinal": {
+    "description": "Question 4 gastrointestinal"
+  },
+  "triageQ4ColunaDorDorsal": "Você carregou peso excessivo, permaneceu muito tempo em má postura ou sofreu algum impacto/queda?",
+  "@triageQ4ColunaDorDorsal": {
+    "description": "Question 4 spine and back"
+  },
+  "triageQ4MembrosSuperiores": "Você realizou movimentos repetitivos (digitação, esforço manual), treino de braço/ombro ou sofreu impacto/queda?",
+  "@triageQ4MembrosSuperiores": {
+    "description": "Question 4 upper limbs"
+  },
+  "triageQ4MembrosInferiores": "Você fez caminhada longa, corrida, ficou muito tempo em pé/sentado ou sofreu torção/tropeço?",
+  "@triageQ4MembrosInferiores": {
+    "description": "Question 4 lower limbs"
+  },
+  "triageQ4Neurologico": "O sintoma surgiu após levantar-se rápido, ficar sem comer/beber água, crise de ansiedade ou posição desconfortável?",
+  "@triageQ4Neurologico": {
+    "description": "Question 4 neurological"
+  },
+  "triageQ4Geniturinario": "Você percebeu relação com pouca água/reter urina, ciclo menstrual, relação íntima ou uso de roupas úmidas?",
+  "@triageQ4Geniturinario": {
+    "description": "Question 4 genitourinary and pelvic"
+  },
+  "triageQ4Dermatological": "Você notou algo que possa ter causado isso, como um produto novo, exposição ao sol/calor ou contato com algo (planta, inseto, substância)?",
+  "@triageQ4Dermatological": {
+    "description": "Question 4 dermatological"
+  },
+  "triageQ4MuscularGeral": "Você sente isso associado a cansaço extremo, início de gripe/virose, falta de descanso ou desidratação?",
+  "@triageQ4MuscularGeral": {
+    "description": "Question 4 muscular general"
+  },
+  "triageQ4EndocrinoMetabolico": "Você notou relação com jejum prolongado, refeição açucarada, alteração de medicamento ou calor excessivo?",
+  "@triageQ4EndocrinoMetabolico": {
+    "description": "Question 4 endocrine and metabolic"
   },
   "triageOptSimExercicio": "Sim, exercício intenso",
   "@triageOptSimExercicio": {
@@ -476,10 +668,6 @@
   "@triageOptNaoComecouNada": {
     "description": "Physical trigger: Started out of nowhere"
   },
-  "triageQ4Dermatological": "Você notou algo que possa ter causado isso, como um produto novo, exposição ao sol/calor ou contato com algo (planta, inseto, substância)?",
-  "@triageQ4Dermatological": {
-    "description": "Question 4 dermatological"
-  },
   "triageOptSimProdutoNovo": "Sim, usei um produto novo (cosmético, sabonete, etc.)",
   "@triageOptSimProdutoNovo": {
     "description": "Dermatological trigger: New product"
@@ -491,6 +679,166 @@
   "triageOptSimPicadaContato": "Sim, tive contato com planta, inseto ou substância",
   "@triageOptSimPicadaContato": {
     "description": "Dermatological trigger: Insect/plant/substance contact"
+  },
+  "triageOptSimEstresseSono": "Estresse ou sono irregular",
+  "@triageOptSimEstresseSono": {
+    "description": "Trigger: Stress or irregular sleep"
+  },
+  "triageOptSimTelasEsforcoVisual": "Muitas horas em telas / esforço visual",
+  "@triageOptSimTelasEsforcoVisual": {
+    "description": "Trigger: Screen time / eye strain"
+  },
+  "triageOptSimPosturaPescoco": "Tensão muscular ou má postura no pescoço",
+  "@triageOptSimPosturaPescoco": {
+    "description": "Trigger: Muscle tension / neck posture"
+  },
+  "triageOptSimResfriadoSinusite": "Sintomas de resfriado ou sinusite",
+  "@triageOptSimResfriadoSinusite": {
+    "description": "Trigger: Cold or sinusitis"
+  },
+  "triageOptSimEsforcoFisico": "Logo após esforço físico ou caminhada",
+  "@triageOptSimEsforcoFisico": {
+    "description": "Trigger: After physical exertion"
+  },
+  "triageOptSimEstresseAnsiedade": "Momento de forte ansiedade ou estresse",
+  "@triageOptSimEstresseAnsiedade": {
+    "description": "Trigger: Anxiety or acute stress"
+  },
+  "triageOptSimCafeinaEstimulante": "Consumo de café, energético ou estimulante",
+  "@triageOptSimCafeinaEstimulante": {
+    "description": "Trigger: Caffeine or stimulant intake"
+  },
+  "triageOptNaoSurgiuEmRepouso": "Não, surgiu espontaneamente ou em repouso",
+  "@triageOptNaoSurgiuEmRepouso": {
+    "description": "Trigger: At rest or spontaneous"
+  },
+  "triageOptSimAlergiaAmbiente": "Exposição a poeira, mofo, fumaça ou ar-condicionado",
+  "@triageOptSimAlergiaAmbiente": {
+    "description": "Trigger: Dust, smoke, allergen exposure"
+  },
+  "triageOptSimGripeInfeccao": "Sintomas de gripe, resfriado ou dor de garganta",
+  "@triageOptSimGripeInfeccao": {
+    "description": "Trigger: Flu or respiratory infection"
+  },
+  "triageOptSimMudancaClima": "Mudança brusca de temperatura ou ar frio",
+  "@triageOptSimMudancaClima": {
+    "description": "Trigger: Weather change or cold air"
+  },
+  "triageOptSimAlimentacaoDiferente": "Alimento diferente, pesado ou suspeito",
+  "@triageOptSimAlimentacaoDiferente": {
+    "description": "Trigger: Unusual or heavy food"
+  },
+  "triageOptSimMedicamentoRecente": "Uso recente de medicamento ou anti-inflamatório",
+  "@triageOptSimMedicamentoRecente": {
+    "description": "Trigger: Recent medication"
+  },
+  "triageOptSimJejumEstresse": "Longo período de jejum ou estresse intenso",
+  "@triageOptSimJejumEstresse": {
+    "description": "Trigger: Fasting or severe stress"
+  },
+  "triageOptNaoSemRelacaoAlimento": "Não, começou sem relação com alimentação",
+  "@triageOptNaoSemRelacaoAlimento": {
+    "description": "Trigger: Unrelated to food"
+  },
+  "triageOptSimCarregouPeso": "Pegou peso ou fez esforço lombar",
+  "@triageOptSimCarregouPeso": {
+    "description": "Trigger: Heavy lifting"
+  },
+  "triageOptSimPosturaProlongada": "Muito tempo sentado ou má postura ao dormir",
+  "@triageOptSimPosturaProlongada": {
+    "description": "Trigger: Prolonged sitting or poor posture"
+  },
+  "triageOptSimMauJeitoQueda": "Movimento brusco ('mau jeito') ou impacto/queda",
+  "@triageOptSimMauJeitoQueda": {
+    "description": "Trigger: Awkward movement or impact"
+  },
+  "triageOptSimMovimentoRepetitivo": "Movimentos repetitivos (digitação, celular, trabalho manual)",
+  "@triageOptSimMovimentoRepetitivo": {
+    "description": "Trigger: Repetitive motions"
+  },
+  "triageOptSimTreinoSobrecarga": "Exercício físico ou sobrecarga nos braços/ombros",
+  "@triageOptSimTreinoSobrecarga": {
+    "description": "Trigger: Arm/shoulder workout or strain"
+  },
+  "triageOptSimTraumaPancada": "Pancada, queda ou dormiu de mau jeito sobre o braço",
+  "@triageOptSimTraumaPancada": {
+    "description": "Trigger: Direct impact or slept on arm"
+  },
+  "triageOptSimCaminhadaCorrida": "Caminhada longa, corrida ou esporte recente",
+  "@triageOptSimCaminhadaCorrida": {
+    "description": "Trigger: Long walk or sports"
+  },
+  "triageOptSimTempoEmPeSentado": "Muitas horas em pé ou muito tempo sentado",
+  "@triageOptSimTempoEmPeSentado": {
+    "description": "Trigger: Long standing or sitting"
+  },
+  "triageOptSimTorcaoTropeco": "Torção no tornozelo/joelho, tropeço ou queda",
+  "@triageOptSimTorcaoTropeco": {
+    "description": "Trigger: Sprain, stumble, or fall"
+  },
+  "triageOptSimLevantarRapido": "Ao levantar-se rapidamente ou mudar de posição",
+  "@triageOptSimLevantarRapido": {
+    "description": "Trigger: Standing up quickly"
+  },
+  "triageOptSimJejumDesidratacao": "Horas sem se alimentar ou pouca ingestão de água",
+  "@triageOptSimJejumDesidratacao": {
+    "description": "Trigger: Fasting or dehydration"
+  },
+  "triageOptSimAnsiedadeHiperventilacao": "Durante momento de tensão ou respiração acelerada",
+  "@triageOptSimAnsiedadeHiperventilacao": {
+    "description": "Trigger: Tension or hyperventilation"
+  },
+  "triageOptSimCompressaoPostural": "Membro pressionado ou postura comprimindo nervo",
+  "@triageOptSimCompressaoPostural": {
+    "description": "Trigger: Nerve compression posture"
+  },
+  "triageOptSimBaixaIngestaoUrina": "Pouca ingestão de água ou segurou urina por muito tempo",
+  "@triageOptSimBaixaIngestaoUrina": {
+    "description": "Trigger: Low water or held urine"
+  },
+  "triageOptSimCicloMenstrual": "Período pré-menstrual ou menstrual",
+  "@triageOptSimCicloMenstrual": {
+    "description": "Trigger: Menstrual cycle"
+  },
+  "triageOptSimPosRelacaoIntima": "Após relação íntima ou troca de produtos íntimos",
+  "@triageOptSimPosRelacaoIntima": {
+    "description": "Trigger: Post intimacy or intimate product"
+  },
+  "triageOptSimRoupasUmidas": "Uso de roupas úmidas ou muito apertadas",
+  "@triageOptSimRoupasUmidas": {
+    "description": "Trigger: Damp or tight clothing"
+  },
+  "triageOptSimCansacoEsgotamento": "Cansaço extremo, sobrecarga ou noites sem dormir",
+  "@triageOptSimCansacoEsgotamento": {
+    "description": "Trigger: Extreme fatigue or sleepless nights"
+  },
+  "triageOptSimSintomasGripeVirose": "Sensação de febre, calafrio ou início de virose",
+  "@triageOptSimSintomasGripeVirose": {
+    "description": "Trigger: Fever or viral symptoms"
+  },
+  "triageOptSimAtividadeGlobal": "Atividade física atípica (mudança, faxina pesada)",
+  "@triageOptSimAtividadeGlobal": {
+    "description": "Trigger: Atypical whole-body activity"
+  },
+  "triageOptSimDesidratacaoCalor": "Pouca hidratação ou exposição prolongada ao calor",
+  "@triageOptSimDesidratacaoCalor": {
+    "description": "Trigger: Dehydration or prolonged heat"
+  },
+  "triageOptSimJejumAlimentacao": "Horas sem comer ou após refeição pesada/açucarada",
+  "@triageOptSimJejumAlimentacao": {
+    "description": "Trigger: Fasting or heavy sugary meal"
+  },
+  "triageOptSimAjusteMedicamento": "Esqueceu ou alterou dose de medicamento habitual",
+  "@triageOptSimAjusteMedicamento": {
+    "description": "Trigger: Missed or altered medication"
+  },
+  "triageOptSimCalorDesidratacao": "Ambiente muito quente ou baixa ingestão de líquidos",
+  "@triageOptSimCalorDesidratacao": {
+    "description": "Trigger: High heat or low fluids"
+  },
+  "triageOptSimEstresseSobrecarga": "Pico recente de estresse ou quebra de rotina",
+  "@triageOptSimEstresseSobrecarga": {
+    "description": "Trigger: Acute stress or routine disruption"
   },
   "triagePreviewPhysical": "Revisão da sua Avaliação Física",
   "@triagePreviewPhysical": {

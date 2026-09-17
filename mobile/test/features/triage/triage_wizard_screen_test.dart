@@ -193,7 +193,9 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Trabalho / Estudos'));
+      final anxietyTriggerChip = find.text('Sobrecarga de tarefas, prazos ou expectativas');
+      await tester.ensureVisible(anxietyTriggerChip);
+      await tester.tap(anxietyTriggerChip);
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();
@@ -201,6 +203,91 @@ void main() {
       expect(find.text('Passo 5 de 5'), findsOneWidget);
       expect(find.byType(TriagePreviewCard), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Confirmar e Finalizar'), findsOneWidget);
+    });
+
+    testWidgets('9. Step 4 in Physical vertical renders gastrointestinal trigger question when gastrointestinal is selected',
+        (tester) async {
+      await tester.pumpWidget(createTriageTestWidget(
+        vertical: TriageVertical.fisica,
+      ));
+      await tester.pumpAndSettle();
+
+      final gastroChip = find.text('Gastrointestinal / Abdômen');
+      await tester.ensureVisible(gastroChip);
+      await tester.tap(gastroChip);
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Começou agora'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
+      await tester.pumpAndSettle();
+
+      // Step 3 (Intensity)
+      expect(find.text('Passo 3 de 5'), findsOneWidget);
+      await tester.tap(find.text('2'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
+      await tester.pumpAndSettle();
+
+      // Step 4 (Trigger / Gatilho)
+      expect(find.text('Passo 4 de 5'), findsOneWidget);
+      expect(
+        find.text('Você ingeriu algum alimento diferente ou pesado, tomou remédios recentes ou ficou muito tempo em jejum?'),
+        findsOneWidget,
+      );
+      expect(find.text('Alimento diferente, pesado ou suspeito'), findsOneWidget);
+      expect(find.text('Uso recente de medicamento ou anti-inflamatório'), findsOneWidget);
+      expect(find.text('Longo período de jejum ou estresse intenso'), findsOneWidget);
+      expect(find.text('Não, começou sem relação com alimentação'), findsOneWidget);
+
+      // Verify the generic exercise / fall options are NOT present
+      expect(find.text('Sim, exercício intenso'), findsNothing);
+      expect(find.text('Sim, sofri uma queda'), findsNothing);
+    });
+
+    testWidgets('10. Step 4 in Emotional vertical renders specialized sleep trigger question when Sono is selected',
+        (tester) async {
+      await tester.pumpWidget(createTriageTestWidget(
+        vertical: TriageVertical.psicoEmocional,
+      ));
+      await tester.pumpAndSettle();
+
+      final sonoChip = find.text('Sono (Insônia / Hipersônia)');
+      await tester.ensureVisible(sonoChip);
+      await tester.tap(sonoChip);
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Começou hoje'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
+      await tester.pumpAndSettle();
+
+      // Step 3 (Intensity)
+      expect(find.text('Passo 3 de 5'), findsOneWidget);
+      await tester.tap(find.text('Moderada'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
+      await tester.pumpAndSettle();
+
+      // Step 4 (Trigger / Gatilho for Sleep)
+      expect(find.text('Passo 4 de 5'), findsOneWidget);
+      expect(
+        find.text('Qual tem sido a principal dificuldade que atrapalha suas noites de sono?'),
+        findsOneWidget,
+      );
+      expect(find.text('Cabeça acelerada / pensamentos na hora de dormir'), findsOneWidget);
+      expect(find.text('Acordar no meio da noite e não conseguir voltar a dormir'), findsOneWidget);
+      expect(find.text('Sono leve, agitado, com pesadelos ou despertares'), findsOneWidget);
+      expect(find.text('Uso de celular/telas até tarde ou horários irregulares'), findsOneWidget);
+      expect(find.text('Não sei identificar, surgiu de repente'), findsOneWidget);
+
+      // Verify generic emotional options are NOT present
+      expect(find.text('Trabalho / Estudos'), findsNothing);
+      expect(find.text('Família / Relacionamentos'), findsNothing);
     });
   });
 }

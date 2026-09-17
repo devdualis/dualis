@@ -610,11 +610,53 @@ abstract class AppLocalizations {
   /// **'Muito forte e difícil de segurar'**
   String get triageOptMuitoForte;
 
-  /// Question 4 emotional
+  /// Question 4 emotional generic
   ///
   /// In pt, this message translates to:
   /// **'Você consegue identificar se existe um motivo principal para isso estar acontecendo hoje?'**
   String get triageQ4Emotional;
+
+  /// Question 4 anxiety and agitation
+  ///
+  /// In pt, this message translates to:
+  /// **'O que parece estar disparando essa sensação de ansiedade, agitação ou aperto?'**
+  String get triageQ4Ansiedade;
+
+  /// Question 4 depression and discouragement
+  ///
+  /// In pt, this message translates to:
+  /// **'Você consegue identificar se algum acontecimento recente ou sentimento pesou mais no seu desânimo?'**
+  String get triageQ4Depressao;
+
+  /// Question 4 stress and burnout
+  ///
+  /// In pt, this message translates to:
+  /// **'De onde vem a maior parte da pressão ou esgotamento que você está sentindo?'**
+  String get triageQ4EstresseBurnout;
+
+  /// Question 4 somatic tension
+  ///
+  /// In pt, this message translates to:
+  /// **'Essa tensão no corpo ou aperto físico costuma piorar em quais situações?'**
+  String get triageQ4Somatica;
+
+  /// Question 4 sleep disturbances
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual tem sido a principal dificuldade que atrapalha suas noites de sono?'**
+  String get triageQ4Sono;
+
+  /// Question 4 cognitive focus
+  ///
+  /// In pt, this message translates to:
+  /// **'O que mais parece estar prejudicando sua concentração ou clareza mental?'**
+  String get triageQ4CognitivaFoco;
+
+  /// Question 4 self-esteem
+  ///
+  /// In pt, this message translates to:
+  /// **'O que tem despertado com mais intensidade essa sensação de insegurança ou autocrítica?'**
+  String get triageQ4Autoestima;
 
   /// Trigger option: Work/Studies
   ///
@@ -639,6 +681,180 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não sei dizer'**
   String get triageOptNaoSei;
+
+  /// Emotional trigger: Overwhelmed by tasks or deadlines
+  ///
+  /// In pt, this message translates to:
+  /// **'Sobrecarga de tarefas, prazos ou expectativas'**
+  String get triageOptSimCobrancaPrazos;
+
+  /// Emotional trigger: Interpersonal conflict
+  ///
+  /// In pt, this message translates to:
+  /// **'Conflito ou discussão com pessoa próxima'**
+  String get triageOptSimConflitoRelacionamento;
+
+  /// Emotional trigger: Uncertainty or fear of change
+  ///
+  /// In pt, this message translates to:
+  /// **'Medo de mudanças, notícias ou incerteza futura'**
+  String get triageOptSimIncertezaFuturo;
+
+  /// Emotional trigger: Excess caffeine or agitation
+  ///
+  /// In pt, this message translates to:
+  /// **'Excesso de café, energéticos ou ambiente agitado'**
+  String get triageOptSimExcessoEstimulantes;
+
+  /// Emotional trigger: Cannot identify, sudden onset
+  ///
+  /// In pt, this message translates to:
+  /// **'Não sei identificar, surgiu de repente'**
+  String get triageOptNaoSeiDizerEmocional;
+
+  /// Emotional trigger: Loss, breakup or grief
+  ///
+  /// In pt, this message translates to:
+  /// **'Perda, término de relacionamento ou luto'**
+  String get triageOptSimPerdaLuto;
+
+  /// Emotional trigger: Loneliness or isolation
+  ///
+  /// In pt, this message translates to:
+  /// **'Sensação de solidão, isolamento ou incompreensão'**
+  String get triageOptSimSolidaoIsolamento;
+
+  /// Emotional trigger: Frustration or disappointment
+  ///
+  /// In pt, this message translates to:
+  /// **'Frustração com algo que não saiu como esperado'**
+  String get triageOptSimFrustracaoDesilusao;
+
+  /// Emotional trigger: Accumulated exhaustion without breaks
+  ///
+  /// In pt, this message translates to:
+  /// **'Cansaço prolongado sem pausas para recuperação'**
+  String get triageOptSimCansacoAcumulado;
+
+  /// Emotional trigger: Work pressure or excessive hours
+  ///
+  /// In pt, this message translates to:
+  /// **'Excesso de carga horária, cobranças ou prazos no trabalho'**
+  String get triageOptSimPressaoTrabalho;
+
+  /// Emotional trigger: Family, financial or domestic strain
+  ///
+  /// In pt, this message translates to:
+  /// **'Cuidados familiares, finanças ou tarefas domésticas'**
+  String get triageOptSimResponsabilidadesCasa;
+
+  /// Emotional trigger: Lack of rest or downtime
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem tempo livre para lazer, repouso ou desconectar'**
+  String get triageOptSimFaltaDescanso;
+
+  /// Emotional trigger: Toxic or straining environment
+  ///
+  /// In pt, this message translates to:
+  /// **'Relações difíceis ou ambiente diário desgastante'**
+  String get triageOptSimAmbienteToxico;
+
+  /// Emotional trigger: During work or intense pressure
+  ///
+  /// In pt, this message translates to:
+  /// **'Durante a jornada de trabalho ou momentos de pressão'**
+  String get triageOptSimDuranteTrabalho;
+
+  /// Emotional trigger: After conflict or fright
+  ///
+  /// In pt, this message translates to:
+  /// **'Logo após discussões, desentendimentos ou sustos'**
+  String get triageOptSimDiscussaoConflito;
+
+  /// Emotional trigger: End of day when attempting to rest
+  ///
+  /// In pt, this message translates to:
+  /// **'No fim do dia, ao tentar relaxar ou deitar'**
+  String get triageOptSimFinalDoDia;
+
+  /// Emotional trigger: Whenever thinking about issues
+  ///
+  /// In pt, this message translates to:
+  /// **'Em qualquer momento ao pensar nos problemas'**
+  String get triageOptSimPreocupacaoConstante;
+
+  /// Emotional trigger: Racing thoughts at bedtime
+  ///
+  /// In pt, this message translates to:
+  /// **'Cabeça acelerada / pensamentos na hora de dormir'**
+  String get triageOptSimDificuldadePegarSono;
+
+  /// Emotional trigger: Middle of the night awakening
+  ///
+  /// In pt, this message translates to:
+  /// **'Acordar no meio da noite e não conseguir voltar a dormir'**
+  String get triageOptSimAcordaMadrugada;
+
+  /// Emotional trigger: Restless sleep or nightmares
+  ///
+  /// In pt, this message translates to:
+  /// **'Sono leve, agitado, com pesadelos ou despertares'**
+  String get triageOptSimSonoAgitadoPesadelos;
+
+  /// Emotional trigger: Late screens or irregular sleep habits
+  ///
+  /// In pt, this message translates to:
+  /// **'Uso de celular/telas até tarde ou horários irregulares'**
+  String get triageOptSimHorarioIrregularTelas;
+
+  /// Emotional trigger: Multitasking overload
+  ///
+  /// In pt, this message translates to:
+  /// **'Muitas coisas para fazer ao mesmo tempo / excesso de estímulos'**
+  String get triageOptSimSobrecargaMultitarefas;
+
+  /// Emotional trigger: Intrusive worried thoughts
+  ///
+  /// In pt, this message translates to:
+  /// **'Pensamentos de preocupação que interrompem o raciocínio'**
+  String get triageOptSimPreocupacaoIntrusiva;
+
+  /// Emotional trigger: Accumulated mental exhaustion
+  ///
+  /// In pt, this message translates to:
+  /// **'Cansaço mental acumulado após muitas horas de esforço'**
+  String get triageOptSimExaustaoMental;
+
+  /// Emotional trigger: Lack of motivation or apathy
+  ///
+  /// In pt, this message translates to:
+  /// **'Desinteresse, falta de energia ou apatia com as tarefas'**
+  String get triageOptSimFaltaMotivacao;
+
+  /// Emotional trigger: Comparison on social media or peers
+  ///
+  /// In pt, this message translates to:
+  /// **'Comparação com outras pessoas (redes sociais ou colegas)'**
+  String get triageOptSimComparacaoRedes;
+
+  /// Emotional trigger: Fear of failure or judgment
+  ///
+  /// In pt, this message translates to:
+  /// **'Medo de errar, não corresponder ou ser julgado'**
+  String get triageOptSimMedoFalharJulgamento;
+
+  /// Emotional trigger: Recent criticism or rejection
+  ///
+  /// In pt, this message translates to:
+  /// **'Crítica recente recebida ou sensação de rejeição'**
+  String get triageOptSimCriticaRejeicao;
+
+  /// Emotional trigger: Difficulty acknowledging own achievements
+  ///
+  /// In pt, this message translates to:
+  /// **'Dificuldade em reconhecer suas próprias conquistas'**
+  String get triageOptSimDesvalorizacaoPropria;
 
   /// Emotional preview step description
   ///
@@ -778,11 +994,83 @@ abstract class AppLocalizations {
   /// **'Em uma escala de 1 a 5 (onde 1 é quase imperceptível e 5 é insuportável), como está agora?'**
   String get triageQ3Physical;
 
-  /// Question 4 physical
+  /// Question 4 physical generic
   ///
   /// In pt, this message translates to:
   /// **'Você lembra de ter feito algum esforço atípico, exercício pesado ou sofrido alguma batida/queda recentemente?'**
   String get triageQ4Physical;
+
+  /// Question 4 head and neck
+  ///
+  /// In pt, this message translates to:
+  /// **'Você notou algum fator associado, como estresse intenso, muitas horas em telas, noite mal dormida ou sinusite/resfriado?'**
+  String get triageQ4CabecaPescoco;
+
+  /// Question 4 cardiovascular and chest
+  ///
+  /// In pt, this message translates to:
+  /// **'O desconforto no peito ou palpitação começou após esforço físico, estresse emocional ou consumo de estimulantes?'**
+  String get triageQ4CardiovascularTorax;
+
+  /// Question 4 respiratory
+  ///
+  /// In pt, this message translates to:
+  /// **'Você teve contato com poeira, fumaça, ar frio ou está com sintomas de gripe/resfriado?'**
+  String get triageQ4Respiratorio;
+
+  /// Question 4 gastrointestinal
+  ///
+  /// In pt, this message translates to:
+  /// **'Você ingeriu algum alimento diferente ou pesado, tomou remédios recentes ou ficou muito tempo em jejum?'**
+  String get triageQ4Gastrointestinal;
+
+  /// Question 4 spine and back
+  ///
+  /// In pt, this message translates to:
+  /// **'Você carregou peso excessivo, permaneceu muito tempo em má postura ou sofreu algum impacto/queda?'**
+  String get triageQ4ColunaDorDorsal;
+
+  /// Question 4 upper limbs
+  ///
+  /// In pt, this message translates to:
+  /// **'Você realizou movimentos repetitivos (digitação, esforço manual), treino de braço/ombro ou sofreu impacto/queda?'**
+  String get triageQ4MembrosSuperiores;
+
+  /// Question 4 lower limbs
+  ///
+  /// In pt, this message translates to:
+  /// **'Você fez caminhada longa, corrida, ficou muito tempo em pé/sentado ou sofreu torção/tropeço?'**
+  String get triageQ4MembrosInferiores;
+
+  /// Question 4 neurological
+  ///
+  /// In pt, this message translates to:
+  /// **'O sintoma surgiu após levantar-se rápido, ficar sem comer/beber água, crise de ansiedade ou posição desconfortável?'**
+  String get triageQ4Neurologico;
+
+  /// Question 4 genitourinary and pelvic
+  ///
+  /// In pt, this message translates to:
+  /// **'Você percebeu relação com pouca água/reter urina, ciclo menstrual, relação íntima ou uso de roupas úmidas?'**
+  String get triageQ4Geniturinario;
+
+  /// Question 4 dermatological
+  ///
+  /// In pt, this message translates to:
+  /// **'Você notou algo que possa ter causado isso, como um produto novo, exposição ao sol/calor ou contato com algo (planta, inseto, substância)?'**
+  String get triageQ4Dermatological;
+
+  /// Question 4 muscular general
+  ///
+  /// In pt, this message translates to:
+  /// **'Você sente isso associado a cansaço extremo, início de gripe/virose, falta de descanso ou desidratação?'**
+  String get triageQ4MuscularGeral;
+
+  /// Question 4 endocrine and metabolic
+  ///
+  /// In pt, this message translates to:
+  /// **'Você notou relação com jejum prolongado, refeição açucarada, alteração de medicamento ou calor excessivo?'**
+  String get triageQ4EndocrinoMetabolico;
 
   /// Physical trigger: Intense exercise
   ///
@@ -802,12 +1090,6 @@ abstract class AppLocalizations {
   /// **'Não, começou do nada'**
   String get triageOptNaoComecouNada;
 
-  /// Question 4 dermatological
-  ///
-  /// In pt, this message translates to:
-  /// **'Você notou algo que possa ter causado isso, como um produto novo, exposição ao sol/calor ou contato com algo (planta, inseto, substância)?'**
-  String get triageQ4Dermatological;
-
   /// Dermatological trigger: New product
   ///
   /// In pt, this message translates to:
@@ -825,6 +1107,246 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Sim, tive contato com planta, inseto ou substância'**
   String get triageOptSimPicadaContato;
+
+  /// Trigger: Stress or irregular sleep
+  ///
+  /// In pt, this message translates to:
+  /// **'Estresse ou sono irregular'**
+  String get triageOptSimEstresseSono;
+
+  /// Trigger: Screen time / eye strain
+  ///
+  /// In pt, this message translates to:
+  /// **'Muitas horas em telas / esforço visual'**
+  String get triageOptSimTelasEsforcoVisual;
+
+  /// Trigger: Muscle tension / neck posture
+  ///
+  /// In pt, this message translates to:
+  /// **'Tensão muscular ou má postura no pescoço'**
+  String get triageOptSimPosturaPescoco;
+
+  /// Trigger: Cold or sinusitis
+  ///
+  /// In pt, this message translates to:
+  /// **'Sintomas de resfriado ou sinusite'**
+  String get triageOptSimResfriadoSinusite;
+
+  /// Trigger: After physical exertion
+  ///
+  /// In pt, this message translates to:
+  /// **'Logo após esforço físico ou caminhada'**
+  String get triageOptSimEsforcoFisico;
+
+  /// Trigger: Anxiety or acute stress
+  ///
+  /// In pt, this message translates to:
+  /// **'Momento de forte ansiedade ou estresse'**
+  String get triageOptSimEstresseAnsiedade;
+
+  /// Trigger: Caffeine or stimulant intake
+  ///
+  /// In pt, this message translates to:
+  /// **'Consumo de café, energético ou estimulante'**
+  String get triageOptSimCafeinaEstimulante;
+
+  /// Trigger: At rest or spontaneous
+  ///
+  /// In pt, this message translates to:
+  /// **'Não, surgiu espontaneamente ou em repouso'**
+  String get triageOptNaoSurgiuEmRepouso;
+
+  /// Trigger: Dust, smoke, allergen exposure
+  ///
+  /// In pt, this message translates to:
+  /// **'Exposição a poeira, mofo, fumaça ou ar-condicionado'**
+  String get triageOptSimAlergiaAmbiente;
+
+  /// Trigger: Flu or respiratory infection
+  ///
+  /// In pt, this message translates to:
+  /// **'Sintomas de gripe, resfriado ou dor de garganta'**
+  String get triageOptSimGripeInfeccao;
+
+  /// Trigger: Weather change or cold air
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudança brusca de temperatura ou ar frio'**
+  String get triageOptSimMudancaClima;
+
+  /// Trigger: Unusual or heavy food
+  ///
+  /// In pt, this message translates to:
+  /// **'Alimento diferente, pesado ou suspeito'**
+  String get triageOptSimAlimentacaoDiferente;
+
+  /// Trigger: Recent medication
+  ///
+  /// In pt, this message translates to:
+  /// **'Uso recente de medicamento ou anti-inflamatório'**
+  String get triageOptSimMedicamentoRecente;
+
+  /// Trigger: Fasting or severe stress
+  ///
+  /// In pt, this message translates to:
+  /// **'Longo período de jejum ou estresse intenso'**
+  String get triageOptSimJejumEstresse;
+
+  /// Trigger: Unrelated to food
+  ///
+  /// In pt, this message translates to:
+  /// **'Não, começou sem relação com alimentação'**
+  String get triageOptNaoSemRelacaoAlimento;
+
+  /// Trigger: Heavy lifting
+  ///
+  /// In pt, this message translates to:
+  /// **'Pegou peso ou fez esforço lombar'**
+  String get triageOptSimCarregouPeso;
+
+  /// Trigger: Prolonged sitting or poor posture
+  ///
+  /// In pt, this message translates to:
+  /// **'Muito tempo sentado ou má postura ao dormir'**
+  String get triageOptSimPosturaProlongada;
+
+  /// Trigger: Awkward movement or impact
+  ///
+  /// In pt, this message translates to:
+  /// **'Movimento brusco (\'mau jeito\') ou impacto/queda'**
+  String get triageOptSimMauJeitoQueda;
+
+  /// Trigger: Repetitive motions
+  ///
+  /// In pt, this message translates to:
+  /// **'Movimentos repetitivos (digitação, celular, trabalho manual)'**
+  String get triageOptSimMovimentoRepetitivo;
+
+  /// Trigger: Arm/shoulder workout or strain
+  ///
+  /// In pt, this message translates to:
+  /// **'Exercício físico ou sobrecarga nos braços/ombros'**
+  String get triageOptSimTreinoSobrecarga;
+
+  /// Trigger: Direct impact or slept on arm
+  ///
+  /// In pt, this message translates to:
+  /// **'Pancada, queda ou dormiu de mau jeito sobre o braço'**
+  String get triageOptSimTraumaPancada;
+
+  /// Trigger: Long walk or sports
+  ///
+  /// In pt, this message translates to:
+  /// **'Caminhada longa, corrida ou esporte recente'**
+  String get triageOptSimCaminhadaCorrida;
+
+  /// Trigger: Long standing or sitting
+  ///
+  /// In pt, this message translates to:
+  /// **'Muitas horas em pé ou muito tempo sentado'**
+  String get triageOptSimTempoEmPeSentado;
+
+  /// Trigger: Sprain, stumble, or fall
+  ///
+  /// In pt, this message translates to:
+  /// **'Torção no tornozelo/joelho, tropeço ou queda'**
+  String get triageOptSimTorcaoTropeco;
+
+  /// Trigger: Standing up quickly
+  ///
+  /// In pt, this message translates to:
+  /// **'Ao levantar-se rapidamente ou mudar de posição'**
+  String get triageOptSimLevantarRapido;
+
+  /// Trigger: Fasting or dehydration
+  ///
+  /// In pt, this message translates to:
+  /// **'Horas sem se alimentar ou pouca ingestão de água'**
+  String get triageOptSimJejumDesidratacao;
+
+  /// Trigger: Tension or hyperventilation
+  ///
+  /// In pt, this message translates to:
+  /// **'Durante momento de tensão ou respiração acelerada'**
+  String get triageOptSimAnsiedadeHiperventilacao;
+
+  /// Trigger: Nerve compression posture
+  ///
+  /// In pt, this message translates to:
+  /// **'Membro pressionado ou postura comprimindo nervo'**
+  String get triageOptSimCompressaoPostural;
+
+  /// Trigger: Low water or held urine
+  ///
+  /// In pt, this message translates to:
+  /// **'Pouca ingestão de água ou segurou urina por muito tempo'**
+  String get triageOptSimBaixaIngestaoUrina;
+
+  /// Trigger: Menstrual cycle
+  ///
+  /// In pt, this message translates to:
+  /// **'Período pré-menstrual ou menstrual'**
+  String get triageOptSimCicloMenstrual;
+
+  /// Trigger: Post intimacy or intimate product
+  ///
+  /// In pt, this message translates to:
+  /// **'Após relação íntima ou troca de produtos íntimos'**
+  String get triageOptSimPosRelacaoIntima;
+
+  /// Trigger: Damp or tight clothing
+  ///
+  /// In pt, this message translates to:
+  /// **'Uso de roupas úmidas ou muito apertadas'**
+  String get triageOptSimRoupasUmidas;
+
+  /// Trigger: Extreme fatigue or sleepless nights
+  ///
+  /// In pt, this message translates to:
+  /// **'Cansaço extremo, sobrecarga ou noites sem dormir'**
+  String get triageOptSimCansacoEsgotamento;
+
+  /// Trigger: Fever or viral symptoms
+  ///
+  /// In pt, this message translates to:
+  /// **'Sensação de febre, calafrio ou início de virose'**
+  String get triageOptSimSintomasGripeVirose;
+
+  /// Trigger: Atypical whole-body activity
+  ///
+  /// In pt, this message translates to:
+  /// **'Atividade física atípica (mudança, faxina pesada)'**
+  String get triageOptSimAtividadeGlobal;
+
+  /// Trigger: Dehydration or prolonged heat
+  ///
+  /// In pt, this message translates to:
+  /// **'Pouca hidratação ou exposição prolongada ao calor'**
+  String get triageOptSimDesidratacaoCalor;
+
+  /// Trigger: Fasting or heavy sugary meal
+  ///
+  /// In pt, this message translates to:
+  /// **'Horas sem comer ou após refeição pesada/açucarada'**
+  String get triageOptSimJejumAlimentacao;
+
+  /// Trigger: Missed or altered medication
+  ///
+  /// In pt, this message translates to:
+  /// **'Esqueceu ou alterou dose de medicamento habitual'**
+  String get triageOptSimAjusteMedicamento;
+
+  /// Trigger: High heat or low fluids
+  ///
+  /// In pt, this message translates to:
+  /// **'Ambiente muito quente ou baixa ingestão de líquidos'**
+  String get triageOptSimCalorDesidratacao;
+
+  /// Trigger: Acute stress or routine disruption
+  ///
+  /// In pt, this message translates to:
+  /// **'Pico recente de estresse ou quebra de rotina'**
+  String get triageOptSimEstresseSobrecarga;
 
   /// Physical preview step description
   ///

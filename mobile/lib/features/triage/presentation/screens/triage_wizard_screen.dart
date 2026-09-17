@@ -83,6 +83,20 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
         return l10n.triageQ3Emotional;
       case 'triageQ4Emotional':
         return l10n.triageQ4Emotional;
+      case 'triageQ4Ansiedade':
+        return l10n.triageQ4Ansiedade;
+      case 'triageQ4Depressao':
+        return l10n.triageQ4Depressao;
+      case 'triageQ4EstresseBurnout':
+        return l10n.triageQ4EstresseBurnout;
+      case 'triageQ4Somatica':
+        return l10n.triageQ4Somatica;
+      case 'triageQ4Sono':
+        return l10n.triageQ4Sono;
+      case 'triageQ4CognitivaFoco':
+        return l10n.triageQ4CognitivaFoco;
+      case 'triageQ4Autoestima':
+        return l10n.triageQ4Autoestima;
       case 'triagePreviewEmotional':
         return l10n.triagePreviewEmotional;
       case 'triageQ1Physical':
@@ -93,8 +107,30 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
         return l10n.triageQ3Physical;
       case 'triageQ4Physical':
         return l10n.triageQ4Physical;
+      case 'triageQ4CabecaPescoco':
+        return l10n.triageQ4CabecaPescoco;
+      case 'triageQ4CardiovascularTorax':
+        return l10n.triageQ4CardiovascularTorax;
+      case 'triageQ4Respiratorio':
+        return l10n.triageQ4Respiratorio;
+      case 'triageQ4Gastrointestinal':
+        return l10n.triageQ4Gastrointestinal;
+      case 'triageQ4ColunaDorDorsal':
+        return l10n.triageQ4ColunaDorDorsal;
+      case 'triageQ4MembrosSuperiores':
+        return l10n.triageQ4MembrosSuperiores;
+      case 'triageQ4MembrosInferiores':
+        return l10n.triageQ4MembrosInferiores;
+      case 'triageQ4Neurologico':
+        return l10n.triageQ4Neurologico;
+      case 'triageQ4Geniturinario':
+        return l10n.triageQ4Geniturinario;
       case 'triageQ4Dermatological':
         return l10n.triageQ4Dermatological;
+      case 'triageQ4MuscularGeral':
+        return l10n.triageQ4MuscularGeral;
+      case 'triageQ4EndocrinoMetabolico':
+        return l10n.triageQ4EndocrinoMetabolico;
       case 'triagePreviewPhysical':
         return l10n.triagePreviewPhysical;
       default:

@@ -291,6 +291,34 @@ class AppLocalizationsEn extends AppLocalizations {
       'Can you identify if there is a primary reason for this happening today?';
 
   @override
+  String get triageQ4Ansiedade =>
+      'What seems to be triggering this feeling of anxiety, restlessness, or tension?';
+
+  @override
+  String get triageQ4Depressao =>
+      'Can you identify if a recent event or specific feeling contributed to this low mood?';
+
+  @override
+  String get triageQ4EstresseBurnout =>
+      'Where is most of the pressure or exhaustion you are experiencing coming from?';
+
+  @override
+  String get triageQ4Somatica =>
+      'In which situations does this physical tension or body discomfort tend to worsen?';
+
+  @override
+  String get triageQ4Sono =>
+      'What has been the main issue disrupting your sleep?';
+
+  @override
+  String get triageQ4CognitivaFoco =>
+      'What seems to be interfering most with your concentration or mental clarity?';
+
+  @override
+  String get triageQ4Autoestima =>
+      'What has been triggering this sense of self-doubt or self-criticism most intensely?';
+
+  @override
   String get triageOptTrabalho => 'Work / Studies';
 
   @override
@@ -301,6 +329,121 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get triageOptNaoSei => 'Cannot tell';
+
+  @override
+  String get triageOptSimCobrancaPrazos =>
+      'Overwhelmed by tasks, deadlines, or expectations';
+
+  @override
+  String get triageOptSimConflitoRelacionamento =>
+      'Conflict or argument with someone close';
+
+  @override
+  String get triageOptSimIncertezaFuturo =>
+      'Fear of changes, news, or future uncertainty';
+
+  @override
+  String get triageOptSimExcessoEstimulantes =>
+      'Excess coffee, energy drinks, or noisy environment';
+
+  @override
+  String get triageOptNaoSeiDizerEmocional =>
+      'Cannot identify, started suddenly';
+
+  @override
+  String get triageOptSimPerdaLuto => 'Loss, breakup, or grieving';
+
+  @override
+  String get triageOptSimSolidaoIsolamento =>
+      'Feeling lonely, isolated, or misunderstood';
+
+  @override
+  String get triageOptSimFrustracaoDesilusao =>
+      'Disappointment when things did not go as hoped';
+
+  @override
+  String get triageOptSimCansacoAcumulado =>
+      'Prolonged fatigue without recovery breaks';
+
+  @override
+  String get triageOptSimPressaoTrabalho =>
+      'Excessive workload, demands, or tight deadlines';
+
+  @override
+  String get triageOptSimResponsabilidadesCasa =>
+      'Family caregiving, finances, or household chores';
+
+  @override
+  String get triageOptSimFaltaDescanso =>
+      'Lack of free time for leisure, rest, or disconnecting';
+
+  @override
+  String get triageOptSimAmbienteToxico =>
+      'Difficult interpersonal dynamics or stressful routine';
+
+  @override
+  String get triageOptSimDuranteTrabalho =>
+      'During work shifts or high-pressure moments';
+
+  @override
+  String get triageOptSimDiscussaoConflito =>
+      'Immediately after arguments, conflicts, or shock';
+
+  @override
+  String get triageOptSimFinalDoDia =>
+      'At the end of the day when attempting to rest or sleep';
+
+  @override
+  String get triageOptSimPreocupacaoConstante =>
+      'Whenever thinking about challenging issues';
+
+  @override
+  String get triageOptSimDificuldadePegarSono =>
+      'Racing thoughts or active mind at bedtime';
+
+  @override
+  String get triageOptSimAcordaMadrugada =>
+      'Waking up in the middle of the night and unable to sleep';
+
+  @override
+  String get triageOptSimSonoAgitadoPesadelos =>
+      'Restless, light sleep with nightmares or frequent waking';
+
+  @override
+  String get triageOptSimHorarioIrregularTelas =>
+      'Late-night screen use or irregular sleep schedule';
+
+  @override
+  String get triageOptSimSobrecargaMultitarefas =>
+      'Multitasking overload or too many stimuli at once';
+
+  @override
+  String get triageOptSimPreocupacaoIntrusiva =>
+      'Intrusive worry thoughts interrupting focus';
+
+  @override
+  String get triageOptSimExaustaoMental =>
+      'Mental exhaustion accumulated after prolonged effort';
+
+  @override
+  String get triageOptSimFaltaMotivacao =>
+      'Disinterest, lack of energy, or apathy toward tasks';
+
+  @override
+  String get triageOptSimComparacaoRedes =>
+      'Comparing yourself to others on social media or peers';
+
+  @override
+  String get triageOptSimMedoFalharJulgamento =>
+      'Fear of failing, falling short, or being judged';
+
+  @override
+  String get triageOptSimCriticaRejeicao =>
+      'Recent criticism received or feeling rejected';
+
+  @override
+  String get triageOptSimDesvalorizacaoPropria =>
+      'Difficulty acknowledging your own accomplishments';
 
   @override
   String get triagePreviewEmotional =>
@@ -379,6 +522,54 @@ class AppLocalizationsEn extends AppLocalizations {
       'Do you recall doing atypical strenuous exercise, heavy exertion, or suffering a fall/impact recently?';
 
   @override
+  String get triageQ4CabecaPescoco =>
+      'Did you notice any contributing factor, such as intense stress, prolonged screen time, poor sleep, or a cold/sinus issue?';
+
+  @override
+  String get triageQ4CardiovascularTorax =>
+      'Did the chest discomfort or palpitations start after physical exertion, emotional stress, or stimulant intake?';
+
+  @override
+  String get triageQ4Respiratorio =>
+      'Were you exposed to dust, smoke, cold air, or do you have symptoms of a cold or flu?';
+
+  @override
+  String get triageQ4Gastrointestinal =>
+      'Did you eat something unusual or heavy, take medications recently, or fast for a prolonged period?';
+
+  @override
+  String get triageQ4ColunaDorDorsal =>
+      'Did you lift heavy objects, remain in poor posture for a long time, or experience an impact/fall?';
+
+  @override
+  String get triageQ4MembrosSuperiores =>
+      'Did you perform repetitive motions (typing, manual work), upper body training, or suffer an impact/fall?';
+
+  @override
+  String get triageQ4MembrosInferiores =>
+      'Did you go on a long walk/run, stand or sit for many hours, or suffer a twist/trip/fall?';
+
+  @override
+  String get triageQ4Neurologico =>
+      'Did the symptom occur after standing up quickly, skipping meals/water, anxiety, or an awkward posture?';
+
+  @override
+  String get triageQ4Geniturinario =>
+      'Did you notice any link to low hydration, holding urine, menstrual cycle, intimacy, or wet/tight clothing?';
+
+  @override
+  String get triageQ4Dermatological =>
+      'Did you notice anything that might have triggered this, like a new product, sun/heat exposure, or contact with something (plant, insect, substance)?';
+
+  @override
+  String get triageQ4MuscularGeral =>
+      'Is this associated with extreme fatigue, early cold/flu symptoms, lack of rest, or dehydration?';
+
+  @override
+  String get triageQ4EndocrinoMetabolico =>
+      'Did you notice any connection to prolonged fasting, sugary meals, medication changes, or intense heat?';
+
+  @override
   String get triageOptSimExercicio => 'Yes, intense exercise';
 
   @override
@@ -386,10 +577,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get triageOptNaoComecouNada => 'No, started out of nowhere';
-
-  @override
-  String get triageQ4Dermatological =>
-      'Did you notice anything that might have triggered this, like a new product, sun/heat exposure, or contact with something (plant, insect, substance)?';
 
   @override
   String get triageOptSimProdutoNovo =>
@@ -402,6 +589,158 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get triageOptSimPicadaContato =>
       'Yes, I had contact with a plant, insect, or substance';
+
+  @override
+  String get triageOptSimEstresseSono => 'Stress or irregular sleep';
+
+  @override
+  String get triageOptSimTelasEsforcoVisual =>
+      'Prolonged screen time / eye strain';
+
+  @override
+  String get triageOptSimPosturaPescoco =>
+      'Muscle tension or poor neck posture';
+
+  @override
+  String get triageOptSimResfriadoSinusite => 'Cold or sinusitis symptoms';
+
+  @override
+  String get triageOptSimEsforcoFisico =>
+      'Right after physical exertion or walking';
+
+  @override
+  String get triageOptSimEstresseAnsiedade =>
+      'During intense anxiety or stress';
+
+  @override
+  String get triageOptSimCafeinaEstimulante =>
+      'After coffee, energy drink, or stimulant';
+
+  @override
+  String get triageOptNaoSurgiuEmRepouso =>
+      'No, started spontaneously or at rest';
+
+  @override
+  String get triageOptSimAlergiaAmbiente =>
+      'Exposure to dust, mold, smoke, or AC';
+
+  @override
+  String get triageOptSimGripeInfeccao => 'Cold, flu, or sore throat symptoms';
+
+  @override
+  String get triageOptSimMudancaClima => 'Sudden weather change or cold air';
+
+  @override
+  String get triageOptSimAlimentacaoDiferente =>
+      'Unusual, heavy, or suspicious food';
+
+  @override
+  String get triageOptSimMedicamentoRecente =>
+      'Recent medication or anti-inflammatory use';
+
+  @override
+  String get triageOptSimJejumEstresse => 'Prolonged fasting or intense stress';
+
+  @override
+  String get triageOptNaoSemRelacaoAlimento =>
+      'No, started with no relation to food';
+
+  @override
+  String get triageOptSimCarregouPeso =>
+      'Lifted heavy weight or strained lower back';
+
+  @override
+  String get triageOptSimPosturaProlongada =>
+      'Prolonged sitting or poor sleeping posture';
+
+  @override
+  String get triageOptSimMauJeitoQueda =>
+      'Awkward sudden movement or impact/fall';
+
+  @override
+  String get triageOptSimMovimentoRepetitivo =>
+      'Repetitive motions (typing, phone, manual work)';
+
+  @override
+  String get triageOptSimTreinoSobrecarga =>
+      'Exercise or strain on arms/shoulders';
+
+  @override
+  String get triageOptSimTraumaPancada =>
+      'Impact, fall, or slept awkwardly on arm';
+
+  @override
+  String get triageOptSimCaminhadaCorrida => 'Long walk, run, or recent sports';
+
+  @override
+  String get triageOptSimTempoEmPeSentado =>
+      'Many hours standing or prolonged sitting';
+
+  @override
+  String get triageOptSimTorcaoTropeco =>
+      'Twisted ankle/knee, stumble, or fall';
+
+  @override
+  String get triageOptSimLevantarRapido =>
+      'Standing up quickly or changing posture';
+
+  @override
+  String get triageOptSimJejumDesidratacao =>
+      'Hours without eating or low water intake';
+
+  @override
+  String get triageOptSimAnsiedadeHiperventilacao =>
+      'During moments of tension or rapid breathing';
+
+  @override
+  String get triageOptSimCompressaoPostural =>
+      'Pressed limb or posture pinching a nerve';
+
+  @override
+  String get triageOptSimBaixaIngestaoUrina =>
+      'Low water intake or held urine for too long';
+
+  @override
+  String get triageOptSimCicloMenstrual => 'Premenstrual or menstrual phase';
+
+  @override
+  String get triageOptSimPosRelacaoIntima =>
+      'After sexual intercourse or new intimate products';
+
+  @override
+  String get triageOptSimRoupasUmidas => 'Wearing damp or very tight clothing';
+
+  @override
+  String get triageOptSimCansacoEsgotamento =>
+      'Extreme tiredness, burnout, or sleepless nights';
+
+  @override
+  String get triageOptSimSintomasGripeVirose =>
+      'Feverish feeling, chills, or viral illness';
+
+  @override
+  String get triageOptSimAtividadeGlobal =>
+      'Unusual whole-body activity (moving, heavy chores)';
+
+  @override
+  String get triageOptSimDesidratacaoCalor =>
+      'Low hydration or prolonged heat exposure';
+
+  @override
+  String get triageOptSimJejumAlimentacao =>
+      'Hours without eating or after sugary/heavy food';
+
+  @override
+  String get triageOptSimAjusteMedicamento =>
+      'Missed or adjusted regular medication dose';
+
+  @override
+  String get triageOptSimCalorDesidratacao =>
+      'Very hot environment or low fluid intake';
+
+  @override
+  String get triageOptSimEstresseSobrecarga =>
+      'Recent stress peak or disrupted routine';
 
   @override
   String get triagePreviewPhysical => 'Review of your Physical Assessment';
