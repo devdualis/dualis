@@ -1,10 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Inject,
+  Param,
+  ParseUUIDPipe,
   Post,
   Query,
   Request,
@@ -113,5 +116,16 @@ export class TriageController {
   ): Promise<TriageHistoryResponseDto> {
     const userId = req.user?.id || req.user?.userId || req.user?.sub;
     return this.triageHistoryService.getHistory(userId, query);
+  }
+
+  @Delete('history/:id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  async deleteHistoryItem(
+    @Request() req: any,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<{ success: boolean; id: string }> {
+    const userId = req.user?.id || req.user?.userId || req.user?.sub;
+    return this.triageHistoryService.deleteHistoryItem(userId, id);
   }
 }

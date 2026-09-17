@@ -185,6 +185,9 @@ class HistoricalDashboardScreen extends ConsumerWidget {
                           entries: state.history.logs,
                           verticalFilter:
                               isEmotional ? 'emotional' : 'physical',
+                          onDeleteEntry: (id) => ref
+                              .read(dashboardControllerProvider.notifier)
+                              .deleteHistoryEntry(id),
                         ),
                         const SizedBox(height: 32),
                       ],

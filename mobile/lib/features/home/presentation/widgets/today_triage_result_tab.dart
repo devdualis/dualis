@@ -10,6 +10,7 @@ import '../../../triage_outcome/presentation/widgets/article_card.dart';
 import '../../../triage_outcome/presentation/widgets/disposition_card.dart';
 import '../../../triage_outcome/presentation/widgets/intensity_meter.dart';
 import '../../../triage_outcome/presentation/widgets/organic_primacy_banner.dart';
+import '../../../triage_outcome/presentation/widgets/ai_insight_card.dart';
 import '../../domain/trigger_checkin_state.dart';
 import '../controllers/trigger_checkin_controller.dart';
 
@@ -48,12 +49,12 @@ class TodayTriageResultTab extends ConsumerWidget {
             isTrueWellness: isTrueWellness,
           ),
           const SizedBox(height: 16),
-          if (outcome != null) ...[
-            _buildFullOutcomeView(context, outcome),
-          ] else if (isCompletedToday && !isTrueWellness) ...[
-            _buildSymptomCheckInView(context, triggerState),
+          if (outcome != null && !isTrueWellness) ...[
+            _buildFullOutcomeView(context, ref, outcome),
           ] else if (isCompletedToday && isTrueWellness) ...[
             _buildWellnessCheckInView(context, triggerState),
+          ] else if (isCompletedToday && !isTrueWellness) ...[
+            _buildSymptomCheckInView(context, triggerState),
           ] else ...[
             _buildPendingCheckInView(context),
           ],
@@ -182,7 +183,11 @@ class TodayTriageResultTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildFullOutcomeView(BuildContext context, TriageOutcome outcome) {
+  Widget _buildFullOutcomeView(
+    BuildContext context,
+    WidgetRef ref,
+    TriageOutcome outcome,
+  ) {
     final isPhysical = outcome.vertical == 'physical';
     final verticalColor = isPhysical ? AppColors.clinicalTeal : AppColors.softIndigo;
     final articles = outcome.recommendedArticles.isNotEmpty
@@ -260,13 +265,29 @@ class TodayTriageResultTab extends ConsumerWidget {
                 const Icon(Icons.psychology_rounded, color: AppColors.softIndigo, size: 22),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(
-                    'Componente Associado: ${outcome.secondaryCategoryLabel}',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.softIndigo,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Componente Associado: ${outcome.secondaryCategoryLabel}',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.softIndigo,
+                        ),
+                      ),
+                      if (outcome.secondarySomaticMapping != null &&
+                          outcome.secondarySomaticMapping!.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          outcome.secondarySomaticMapping!,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ],
@@ -276,6 +297,15 @@ class TodayTriageResultTab extends ConsumerWidget {
         const SizedBox(height: 16),
         IntensityMeter(score: outcome.intensityScore),
         const SizedBox(height: 16),
+        if (outcome.aiClinicalConcept != null &&
+            outcome.aiClinicalConcept!.isNotEmpty) ...[
+          AiInsightCard(
+            mappedLayTerm: outcome.aiMappedLayTerm,
+            clinicalConcept: outcome.aiClinicalConcept!,
+            source: outcome.aiSource,
+          ),
+          const SizedBox(height: 16),
+        ],
         DispositionCard(disposition: outcome.careDisposition),
         const SizedBox(height: 24),
         Row(
@@ -307,7 +337,10 @@ class TodayTriageResultTab extends ConsumerWidget {
         Center(
           child: TextButton.icon(
             key: const Key('today_retake_triage_button'),
-            onPressed: onGoToCheckIn,
+            onPressed: () {
+              ref.read(triggerCheckInProvider.notifier).prepareForUpdate();
+              onGoToCheckIn();
+            },
             icon: const Icon(Icons.refresh_rounded, size: 18),
             label: const Text('Atualizar Triagem de Hoje'),
           ),

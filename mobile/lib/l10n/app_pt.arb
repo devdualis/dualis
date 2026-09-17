@@ -1272,6 +1272,26 @@
   "settingsDataHistorySubtitle": "Visualize seu histórico de triagens",
   "@settingsDataHistorySubtitle": {
     "description": "Subtitle for history tile"
+  },
+  "deleteHistoryItemTitle": "Descartar registro do histórico",
+  "@deleteHistoryItemTitle": {
+    "description": "Title of the delete history item confirmation dialog"
+  },
+  "deleteHistoryItemConfirm": "Tem certeza de que deseja descartar este registro de triagem do seu histórico? Esta ação é irreversível.",
+  "@deleteHistoryItemConfirm": {
+    "description": "Confirmation message when discarding a history entry"
+  },
+  "deleteHistoryItemSuccess": "Registro removido com sucesso.",
+  "@deleteHistoryItemSuccess": {
+    "description": "Success snackbar message when record is deleted"
+  },
+  "deleteHistoryItemError": "Não foi possível remover o registro.",
+  "@deleteHistoryItemError": {
+    "description": "Error snackbar message when record deletion fails"
+  },
+  "deleteAction": "Descartar",
+  "@deleteAction": {
+    "description": "Action button text to discard/delete"
   }
 }
 

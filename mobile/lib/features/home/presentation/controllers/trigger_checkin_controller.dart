@@ -237,6 +237,57 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     }
   }
 
+  void markCompletedWithOutcome(TriageOutcome outcome) {
+    final today = _getTodayDateString(outcome.recordedAt);
+    final isPhysical = outcome.vertical == 'physical';
+
+    TriggerStatus statusFromIntensity(int intensity) {
+      if (intensity <= 2) return TriggerStatus.goodNormal;
+      if (intensity == 3) return TriggerStatus.soSo;
+      return TriggerStatus.badSick;
+    }
+
+    TriggerStatus emotionalStatus;
+    TriggerStatus physicalStatus;
+
+    if (isPhysical) {
+      physicalStatus = statusFromIntensity(outcome.intensityScore);
+      if (outcome.secondaryCategoryLabel != null) {
+        final secScore = outcome.secondaryIntensityScore ?? outcome.intensityScore;
+        emotionalStatus = statusFromIntensity(secScore);
+      } else {
+        emotionalStatus = TriggerStatus.goodNormal;
+      }
+    } else {
+      emotionalStatus = statusFromIntensity(outcome.intensityScore);
+      if (outcome.organicPrimacyApplied) {
+        physicalStatus = TriggerStatus.soSo;
+      } else {
+        physicalStatus = TriggerStatus.goodNormal;
+      }
+    }
+
+    state = state.copyWith(
+      isCompletedToday: true,
+      completedAt: outcome.recordedAt,
+      checkInDate: today,
+      isModifiedAfterCompletion: false,
+      emotionalStatus: emotionalStatus,
+      physicalStatus: physicalStatus,
+      naturalLanguageText: outcome.aiMappedLayTerm ?? state.naturalLanguageText,
+      emotionalTouched: false,
+      physicalTouched: false,
+      textTouched: false,
+    );
+    _persistCurrentState();
+  }
+
+  void prepareForUpdate() {
+    state = state.copyWith(
+      isModifiedAfterCompletion: true,
+    );
+  }
+
   void markCompletedToday() {
     final today = _getTodayDateString();
     state = state.copyWith(
@@ -254,7 +305,8 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
         state.physicalStatus != TriggerStatus.goodNormal ||
         state.naturalLanguageText.trim().isNotEmpty;
 
-    if (isSymptomCheckIn) {
+    final existingOutcome = ref.read(triageOutcomeProvider).outcome;
+    if (isSymptomCheckIn && existingOutcome == null) {
       final intensity = (state.emotionalStatus == TriggerStatus.badSick ||
               state.physicalStatus == TriggerStatus.badSick)
           ? 4
@@ -311,7 +363,8 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
             state.physicalStatus != TriggerStatus.goodNormal ||
             state.naturalLanguageText.trim().isNotEmpty;
 
-        if (isSymptomCheckIn) {
+        final existingOutcome = ref.read(triageOutcomeProvider).outcome;
+        if (isSymptomCheckIn && existingOutcome == null) {
           ref.read(triageOutcomeProvider.notifier).setOutcomeFromCheckIn(
                 id: id,
                 intensity: intensity,

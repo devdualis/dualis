@@ -309,6 +309,11 @@
   "settingsPrivacyCenterTile": "Centro de Privacidad y LGPD",
   "settingsPrivacyCenterSubtitle": "Accede y gestiona tus datos de salud",
   "settingsDataHistoryTile": "Historial y Tendencias",
-  "settingsDataHistorySubtitle": "Visualiza tu historial de triajes"
+  "settingsDataHistorySubtitle": "Visualiza tu historial de triajes",
+  "deleteHistoryItemTitle": "Eliminar registro del historial",
+  "deleteHistoryItemConfirm": "¿Estás seguro de que deseas descartar este registro de triaje de tu historial? Esta acción no se puede deshacer.",
+  "deleteHistoryItemSuccess": "Registro eliminado con éxito.",
+  "deleteHistoryItemError": "No se pudo eliminar el registro.",
+  "deleteAction": "Eliminar"
 }
 

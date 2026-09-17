@@ -41,4 +41,19 @@ class TriageHistoryRemoteDataSource {
       return TriageHistoryResponse.empty();
     }
   }
+
+  Future<bool> deleteHistoryItem(String id) async {
+    try {
+      final token = await _secureStorage.getAccessToken();
+      final response = await _apiClient.delete(
+        ApiEndpoints.triageHistoryItem(id),
+        options: token != null
+            ? Options(headers: {'Authorization': 'Bearer $token'})
+            : null,
+      );
+      return response.statusCode == 200 || response.statusCode == 204;
+    } catch (_) {
+      return false;
+    }
+  }
 }

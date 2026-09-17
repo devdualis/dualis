@@ -153,4 +153,53 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
     expect(recurrence.frequencyCount).toBe(2);
     expect(recurrence.recommendedArticleTitle).toBeDefined();
   });
+
+  it('4. deletes existing history item and returns success (LGPD / User Data Discard)', async () => {
+    const mockRow = {
+      id: 'log-delete-1',
+      userId: 'usr-1',
+      intensity: 3,
+    };
+
+    const deleteMock = vi.fn().mockReturnValue({
+      where: vi.fn().mockResolvedValue([{ id: 'log-delete-1' }]),
+    });
+
+    mockDb.transaction.mockImplementation(async (callback: any) => {
+      const tx = {
+        execute: vi.fn().mockResolvedValue(true),
+        select: vi.fn().mockReturnValue({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockResolvedValue([mockRow]),
+          }),
+        }),
+        delete: deleteMock,
+      };
+      return callback(tx);
+    });
+
+    const result = await service.deleteHistoryItem('usr-1', 'log-delete-1');
+
+    expect(result).toEqual({ success: true, id: 'log-delete-1' });
+    expect(deleteMock).toHaveBeenCalled();
+  });
+
+  it('5. throws NotFoundException when deleting non-existent history item', async () => {
+    mockDb.transaction.mockImplementation(async (callback: any) => {
+      const tx = {
+        execute: vi.fn().mockResolvedValue(true),
+        select: vi.fn().mockReturnValue({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockResolvedValue([]),
+          }),
+        }),
+        delete: vi.fn(),
+      };
+      return callback(tx);
+    });
+
+    await expect(service.deleteHistoryItem('usr-1', 'non-existent-log')).rejects.toThrow(
+      'Registro de histórico não encontrado.',
+    );
+  });
 });

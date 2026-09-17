@@ -309,6 +309,11 @@
   "settingsPrivacyCenterTile": "Privacy & Data Center (LGPD)",
   "settingsPrivacyCenterSubtitle": "Access and manage your health data",
   "settingsDataHistoryTile": "History & Trends",
-  "settingsDataHistorySubtitle": "View your triage history"
+  "settingsDataHistorySubtitle": "View your triage history",
+  "deleteHistoryItemTitle": "Delete history record",
+  "deleteHistoryItemConfirm": "Are you sure you want to discard this triage record from your history? This action cannot be undone.",
+  "deleteHistoryItemSuccess": "Record removed successfully.",
+  "deleteHistoryItemError": "Could not remove record.",
+  "deleteAction": "Delete"
 }
 

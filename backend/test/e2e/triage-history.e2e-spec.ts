@@ -77,6 +77,13 @@ class MockTriageHistoryService {
       ],
     };
   }
+
+  async deleteHistoryItem(
+    userId: string,
+    id: string,
+  ): Promise<{ success: boolean; id: string }> {
+    return { success: true, id };
+  }
 }
 
 describe('Triage History E2E Suite (DASH-01, DASH-02, DASH-03, DASH-04, SEC-01)', () => {
@@ -176,5 +183,41 @@ describe('Triage History E2E Suite (DASH-01, DASH-02, DASH-03, DASH-04, SEC-01)'
     });
 
     expect(res.statusCode).toBe(400);
+  });
+
+  it('4. DELETE /v1/triage/history/:id without Bearer token returns 401 Unauthorized', async () => {
+    const res = await app.inject({
+      method: 'DELETE',
+      url: '/v1/triage/history/11111111-1111-1111-1111-111111111111',
+    });
+
+    expect(res.statusCode).toBe(401);
+  });
+
+  it('5. DELETE /v1/triage/history/:id with invalid UUID returns 400 Bad Request', async () => {
+    const res = await app.inject({
+      method: 'DELETE',
+      url: '/v1/triage/history/not-a-valid-uuid',
+      headers: {
+        authorization: `Bearer ${validAccessToken}`,
+      },
+    });
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('6. DELETE /v1/triage/history/:id with valid token and UUID returns 200 with success payload', async () => {
+    const testId = '11111111-1111-1111-1111-111111111111';
+    const res = await app.inject({
+      method: 'DELETE',
+      url: `/v1/triage/history/${testId}`,
+      headers: {
+        authorization: `Bearer ${validAccessToken}`,
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = JSON.parse(res.payload);
+    expect(body).toEqual({ success: true, id: testId });
   });
 });

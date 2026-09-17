@@ -1084,4 +1084,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsDataHistorySubtitle => 'View your triage history';
+
+  @override
+  String get deleteHistoryItemTitle => 'Delete history record';
+
+  @override
+  String get deleteHistoryItemConfirm =>
+      'Are you sure you want to discard this triage record from your history? This action cannot be undone.';
+
+  @override
+  String get deleteHistoryItemSuccess => 'Record removed successfully.';
+
+  @override
+  String get deleteHistoryItemError => 'Could not remove record.';
+
+  @override
+  String get deleteAction => 'Delete';
 }

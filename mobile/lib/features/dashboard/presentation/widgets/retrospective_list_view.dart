@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/triage_history_models.dart';
 
 class RetrospectiveListView extends StatelessWidget {
   final List<TriageHistoryEntry> entries;
   final String verticalFilter;
   final VoidCallback? onRefresh;
+  final Future<bool> Function(String id)? onDeleteEntry;
 
   const RetrospectiveListView({
     super.key,
     required this.entries,
     required this.verticalFilter,
     this.onRefresh,
+    this.onDeleteEntry,
   });
 
   static Color getIntensityColor(int intensity) {
@@ -93,8 +97,70 @@ class RetrospectiveListView extends StatelessWidget {
     return '$day/$month/$year $hour:$minute';
   }
 
+  Future<void> _confirmAndDelete(BuildContext context, String id) async {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(
+              Icons.delete_outline_rounded,
+              color: AppColors.emergencyCrimson,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                l10n?.deleteHistoryItemTitle ?? 'Descartar registro do histórico',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          l10n?.deleteHistoryItemConfirm ??
+              'Tem certeza de que deseja descartar este registro de triagem do seu histórico? Esta ação é irreversível.',
+          style: const TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n?.cancel ?? 'Cancelar'),
+          ),
+          FilledButton(
+            key: const Key('confirm_delete_history_item_button'),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.emergencyCrimson,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n?.deleteAction ?? 'Descartar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted && onDeleteEntry != null) {
+      final success = await onDeleteEntry!(id);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success
+                  ? (l10n?.deleteHistoryItemSuccess ?? 'Registro removido com sucesso.')
+                  : (l10n?.deleteHistoryItemError ?? 'Não foi possível remover o registro.'),
+            ),
+            backgroundColor:
+                success ? AppColors.clinicalTeal : AppColors.emergencyCrimson,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final filtered = entries.where((e) {
       if (verticalFilter == 'physical') {
         return e.anatomicalSystem != null;
@@ -172,23 +238,44 @@ class RetrospectiveListView extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: intensityColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        'Nível ${entry.intensity}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: intensityColor,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: intensityColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'Nível ${entry.intensity}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: intensityColor,
+                            ),
+                          ),
                         ),
-                      ),
+                        if (onDeleteEntry != null) ...[
+                          const SizedBox(width: 4),
+                          IconButton(
+                            key: Key('delete_history_item_${entry.id}'),
+                            icon: Icon(
+                              Icons.delete_outline_rounded,
+                              size: 18,
+                              color: Colors.grey.shade500,
+                            ),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                            splashRadius: 18,
+                            tooltip: l10n?.deleteHistoryItemTitle ?? 'Descartar registro',
+                            onPressed: () => _confirmAndDelete(context, entry.id),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),

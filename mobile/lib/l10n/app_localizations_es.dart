@@ -1089,4 +1089,20 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsDataHistorySubtitle => 'Visualiza tu historial de triajes';
+
+  @override
+  String get deleteHistoryItemTitle => 'Eliminar registro del historial';
+
+  @override
+  String get deleteHistoryItemConfirm =>
+      '¿Estás seguro de que deseas descartar este registro de triaje de tu historial? Esta acción no se puede deshacer.';
+
+  @override
+  String get deleteHistoryItemSuccess => 'Registro eliminado con éxito.';
+
+  @override
+  String get deleteHistoryItemError => 'No se pudo eliminar el registro.';
+
+  @override
+  String get deleteAction => 'Eliminar';
 }

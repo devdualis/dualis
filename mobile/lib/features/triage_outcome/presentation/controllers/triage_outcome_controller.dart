@@ -88,9 +88,12 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
       if (todayLogs.isEmpty) return;
 
       todayLogs.sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
-      final latestLog = todayLogs.first;
+      final triageLogs = todayLogs
+          .where((log) => log.stepAnswers?['type'] != 'daily_checkin')
+          .toList();
+      final targetLog = triageLogs.isNotEmpty ? triageLogs.first : todayLogs.first;
 
-      final outcome = _buildOutcomeFromHistoryEntry(latestLog);
+      final outcome = _buildOutcomeFromHistoryEntry(targetLog);
       if (outcome != null) {
         state = state.copyWith(outcome: outcome);
         await _persistOutcome(outcome);

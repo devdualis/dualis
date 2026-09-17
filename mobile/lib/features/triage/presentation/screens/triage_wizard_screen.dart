@@ -429,7 +429,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
             );
           }
           ref.read(triageOutcomeProvider.notifier).setOutcome(finalOutcome);
-          ref.read(triggerCheckInProvider.notifier).markCompletedToday();
+          ref.read(triggerCheckInProvider.notifier).markCompletedWithOutcome(finalOutcome);
 
           if (context.mounted) {
             context.go(RoutePaths.triageOutcome, extra: finalOutcome);

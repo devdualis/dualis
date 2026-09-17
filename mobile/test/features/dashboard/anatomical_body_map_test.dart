@@ -132,5 +132,51 @@ void main() {
       expect(find.text('Nenhum registro anterior'), findsOneWidget);
       expect(find.text('Os seus check-ins diários concluídos aparecerão aqui.'), findsOneWidget);
     });
+
+    testWidgets('5. RetrospectiveListView renders delete icon when onDeleteEntry is provided', (tester) async {
+      String? deletedId;
+      final entries = [
+        TriageHistoryEntry(
+          id: 'log-delete-target',
+          intensity: 3,
+          anatomicalSystem: 'coluna_dorsal',
+          emotionalDimension: null,
+          disposition: 'consulta_rotina',
+          stepAnswers: {'causes': 'dor nas costas'},
+          recordedAt: DateTime.parse('2026-09-14T10:30:00.000Z'),
+        ),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: RetrospectiveListView(
+                entries: entries,
+                verticalFilter: 'physical',
+                onDeleteEntry: (id) async {
+                  deletedId = id;
+                  return true;
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final deleteButton = find.byKey(const Key('delete_history_item_log-delete-target'));
+      expect(deleteButton, findsOneWidget);
+
+      await tester.tap(deleteButton);
+      await tester.pumpAndSettle();
+
+      final confirmButton = find.byKey(const Key('confirm_delete_history_item_button'));
+      expect(confirmButton, findsOneWidget);
+
+      await tester.tap(confirmButton);
+      await tester.pumpAndSettle();
+
+      expect(deletedId, equals('log-delete-target'));
+    });
   });
 }

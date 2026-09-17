@@ -1,4 +1,4 @@
-import { Injectable, Inject, Optional, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, Optional, BadRequestException, NotFoundException } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { and, desc, gte, eq, sql } from 'drizzle-orm';
 import { DRIZZLE_DB } from '../../../database/database.service';
@@ -271,6 +271,46 @@ export class TriageHistoryService {
       emotionalSummary,
       criticalRecurrences,
     };
+  }
+
+  async deleteHistoryItem(
+    userId: string,
+    id: string,
+  ): Promise<{ success: boolean; id: string }> {
+    if (!userId) {
+      throw new BadRequestException('ID do usuário ausente para exclusão de registro.');
+    }
+    if (!id) {
+      throw new BadRequestException('ID do registro ausente.');
+    }
+
+    return this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`);
+      const [existing] = await tx
+        .select()
+        .from(symptomLogs)
+        .where(
+          and(
+            eq(symptomLogs.id, id),
+            eq(symptomLogs.userId, userId),
+          ),
+        );
+
+      if (!existing) {
+        throw new NotFoundException('Registro de histórico não encontrado.');
+      }
+
+      await tx
+        .delete(symptomLogs)
+        .where(
+          and(
+            eq(symptomLogs.id, id),
+            eq(symptomLogs.userId, userId),
+          ),
+        );
+
+      return { success: true, id };
+    });
   }
 
   private buildEmotionalSummary(rows: Array<typeof symptomLogs.$inferSelect>): EmotionalDayDataDto[] {

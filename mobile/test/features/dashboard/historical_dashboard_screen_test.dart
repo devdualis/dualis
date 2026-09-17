@@ -9,12 +9,19 @@ import 'package:dualis_mobile/features/dashboard/presentation/widgets/emotional_
 
 class MockTriageHistoryRemoteDataSource implements TriageHistoryRemoteDataSource {
   final TriageHistoryResponse mockResponse;
+  String? lastDeletedId;
 
   MockTriageHistoryRemoteDataSource(this.mockResponse);
 
   @override
   Future<TriageHistoryResponse> fetchHistory({int days = 14}) async {
     return mockResponse;
+  }
+
+  @override
+  Future<bool> deleteHistoryItem(String id) async {
+    lastDeletedId = id;
+    return true;
   }
 }
 
@@ -134,6 +141,40 @@ void main() {
       expect(find.text('Mapa Corporal 2D (Últimos 14 Dias)'), findsOneWidget);
       expect(find.text('Registros Físicos Recentes'), findsOneWidget);
       expect(find.text('COLUNA DORSAL'), findsOneWidget);
+    });
+
+    testWidgets('3. Tapping delete icon opens confirmation dialog and confirms deletion', (tester) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final mockDataSource = MockTriageHistoryRemoteDataSource(testResponse);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            triageHistoryDataSourceProvider.overrideWithValue(mockDataSource),
+          ],
+          child: const MaterialApp(
+            home: HistoricalDashboardScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final deleteButton = find.byKey(const Key('delete_history_item_log-2'));
+      expect(deleteButton, findsOneWidget);
+
+      await tester.tap(deleteButton);
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('confirm_delete_history_item_button')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('confirm_delete_history_item_button')));
+      await tester.pumpAndSettle();
+
+      expect(mockDataSource.lastDeletedId, equals('log-2'));
     });
   });
 }

@@ -62,6 +62,16 @@ class DashboardNotifier extends AsyncNotifier<DashboardState> {
       );
     });
   }
+
+  Future<bool> deleteHistoryEntry(String id) async {
+    final dataSource = ref.read(triageHistoryDataSourceProvider);
+    final success = await dataSource.deleteHistoryItem(id);
+    if (success) {
+      await refreshHistory();
+      return true;
+    }
+    return false;
+  }
 }
 
 final dashboardControllerProvider =

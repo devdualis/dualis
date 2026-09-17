@@ -183,7 +183,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return _buildHomeTab(context, user, userName, userEmail, triggerState);
       case 1:
         return TodayTriageResultTab(
-          onGoToCheckIn: () => setState(() => _currentTabIndex = 0),
+          onGoToCheckIn: () {
+            ref.read(triggerCheckInProvider.notifier).prepareForUpdate();
+            setState(() => _currentTabIndex = 0);
+          },
         );
       case 2:
         return const HistoricalDashboardScreen(isEmbedded: true);

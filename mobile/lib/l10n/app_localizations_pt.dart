@@ -1093,4 +1093,20 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get settingsDataHistorySubtitle =>
       'Visualize seu histórico de triagens';
+
+  @override
+  String get deleteHistoryItemTitle => 'Descartar registro do histórico';
+
+  @override
+  String get deleteHistoryItemConfirm =>
+      'Tem certeza de que deseja descartar este registro de triagem do seu histórico? Esta ação é irreversível.';
+
+  @override
+  String get deleteHistoryItemSuccess => 'Registro removido com sucesso.';
+
+  @override
+  String get deleteHistoryItemError => 'Não foi possível remover o registro.';
+
+  @override
+  String get deleteAction => 'Descartar';
 }

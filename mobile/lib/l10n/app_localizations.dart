@@ -1959,6 +1959,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Visualize seu histórico de triagens'**
   String get settingsDataHistorySubtitle;
+
+  /// Title of the delete history item confirmation dialog
+  ///
+  /// In pt, this message translates to:
+  /// **'Descartar registro do histórico'**
+  String get deleteHistoryItemTitle;
+
+  /// Confirmation message when discarding a history entry
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza de que deseja descartar este registro de triagem do seu histórico? Esta ação é irreversível.'**
+  String get deleteHistoryItemConfirm;
+
+  /// Success snackbar message when record is deleted
+  ///
+  /// In pt, this message translates to:
+  /// **'Registro removido com sucesso.'**
+  String get deleteHistoryItemSuccess;
+
+  /// Error snackbar message when record deletion fails
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível remover o registro.'**
+  String get deleteHistoryItemError;
+
+  /// Action button text to discard/delete
+  ///
+  /// In pt, this message translates to:
+  /// **'Descartar'**
+  String get deleteAction;
 }
 
 class _AppLocalizationsDelegate
