@@ -68,7 +68,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 const RECOMMENDED_ARTICLES: Record<string, { title: string; url: string }> = {
   estresse_burnout: {
     title: 'Manejo do Burnout e Técnicas de Descompressão Diária',
-    url: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout',
+    url: 'https://drauziovarella.uol.com.br/psiquiatria/sindrome-de-burnout-esgotamento-profissional/',
   },
   ansiosa_agitacao: {
     title: 'Protocolos de Respiração e Manejo da Ansiedade',

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/controllers/auth_controller.dart';
+import 'features/emergency/presentation/controllers/emergency_controller.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/locale_provider.dart';
 import 'shared/widgets/privacy_veil_overlay.dart';
@@ -54,7 +55,10 @@ class _DualisAppState extends ConsumerState<DualisApp> {
       ],
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) {
+        final emergencyState = ref.watch(emergencyControllerProvider);
+        final isEmergency = emergencyState.value != null;
         return PrivacyVeilOverlay(
+          isBypassed: isEmergency,
           child: child ?? const SizedBox.shrink(),
         );
       },

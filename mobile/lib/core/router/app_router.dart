@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/email_verification_screen.dart';
@@ -17,13 +19,51 @@ import '../../features/privacy/presentation/screens/privacy_center_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import 'route_paths.dart';
 
+class RouterNotifier extends ChangeNotifier {
+  final Ref _ref;
+  RouterNotifier(this._ref) {
+    _ref.listen(authControllerProvider, (_, __) => notifyListeners());
+  }
+}
+
+final routerNotifierProvider =
+    Provider<RouterNotifier>((ref) => RouterNotifier(ref));
+
 final appRouterProvider = Provider<GoRouter>((ref) {
-  return createRouter();
+  final notifier = ref.watch(routerNotifierProvider);
+  return createRouter(
+    refreshListenable: notifier,
+    redirect: (context, state) {
+      final authState = ref.read(authControllerProvider);
+      if (authState.isLoading) return null;
+
+      final isLoggedIn = authState.isAuthenticated;
+      final currentLoc = state.uri.toString();
+      final isAuthRoute = currentLoc == RoutePaths.onboarding ||
+          currentLoc == RoutePaths.login ||
+          currentLoc == RoutePaths.register ||
+          currentLoc == RoutePaths.verifyEmail;
+
+      if (isLoggedIn && isAuthRoute) {
+        return RoutePaths.home;
+      }
+      if (!isLoggedIn && !isAuthRoute && currentLoc != RoutePaths.emergency) {
+        return RoutePaths.onboarding;
+      }
+      return null;
+    },
+  );
 });
 
-GoRouter createRouter({String initialLocation = RoutePaths.onboarding}) {
+GoRouter createRouter({
+  String initialLocation = RoutePaths.onboarding,
+  Listenable? refreshListenable,
+  GoRouterRedirect? redirect,
+}) {
   return GoRouter(
     initialLocation: initialLocation,
+    refreshListenable: refreshListenable,
+    redirect: redirect,
     routes: [
       GoRoute(
         path: RoutePaths.onboarding,

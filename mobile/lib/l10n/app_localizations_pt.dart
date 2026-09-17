@@ -696,6 +696,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get confirmNewPassword => 'Confirmar Nova Senha';
 
   @override
+  String get currentPasswordHint => 'Digite sua senha atual';
+
+  @override
+  String get newPasswordHint => 'Nova senha segura';
+
+  @override
+  String get confirmPasswordHint => 'Repita a nova senha';
+
+  @override
   String get passwordChangedSuccess => 'Senha alterada com sucesso!';
 
   @override

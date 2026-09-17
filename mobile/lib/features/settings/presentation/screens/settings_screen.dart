@@ -705,7 +705,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         obscureText: _obscureCurrentPassword,
                         style: GoogleFonts.plusJakartaSans(fontSize: 14),
                         decoration: InputDecoration(
-                          hintText: 'Digite sua senha atual',
+                          hintText: l10n.currentPasswordHint,
                           prefixIcon: const Icon(Icons.key_outlined, color: AppColors.softIndigo),
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -756,7 +756,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         obscureText: _obscureNewPassword,
                         style: GoogleFonts.plusJakartaSans(fontSize: 14),
                         decoration: InputDecoration(
-                          hintText: 'Nova senha segura',
+                          hintText: l10n.newPasswordHint,
                           prefixIcon: const Icon(Icons.lock_reset_rounded, color: AppColors.softIndigo),
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -812,7 +812,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         obscureText: _obscureConfirmPassword,
                         style: GoogleFonts.plusJakartaSans(fontSize: 14),
                         decoration: InputDecoration(
-                          hintText: 'Repita a nova senha',
+                          hintText: l10n.confirmPasswordHint,
                           prefixIcon: const Icon(Icons.check_circle_outline_rounded, color: AppColors.softIndigo),
                           suffixIcon: IconButton(
                             icon: Icon(

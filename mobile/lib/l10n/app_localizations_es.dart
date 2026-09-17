@@ -636,7 +636,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get confirmPermanentDeletion => 'Confirmar Eliminación Irreversible';
 
   @override
-  String get enterPassword => 'Contraseña de confirmación';
+  String get enterPassword => 'Tu contraseña';
 
   @override
   String get previewDataTitle => 'Vista Previa de Datos Exportados';
@@ -693,6 +693,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get confirmNewPassword => 'Confirmar Nueva Contraseña';
+
+  @override
+  String get currentPasswordHint => 'Ingresa tu contraseña actual';
+
+  @override
+  String get newPasswordHint => 'Nueva contraseña segura';
+
+  @override
+  String get confirmPasswordHint => 'Repite la nueva contraseña';
 
   @override
   String get passwordChangedSuccess => '¡Contraseña cambiada con éxito!';

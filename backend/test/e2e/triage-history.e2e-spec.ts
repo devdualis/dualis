@@ -72,7 +72,7 @@ class MockTriageHistoryService {
           frequencyCount: 6,
           windowDays: 10,
           recommendedArticleTitle: 'Manejo do Burnout',
-          recommendedArticleUrl: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout',
+          recommendedArticleUrl: 'https://drauziovarella.uol.com.br/psiquiatria/sindrome-de-burnout-esgotamento-profissional/',
         },
       ],
     };

@@ -10,6 +10,7 @@ class PrivacyVeilOverlay extends StatefulWidget {
   final Widget child;
   final BiometricService? biometricService;
   final bool initialLocked;
+  final bool isBypassed;
   final VoidCallback? onUnlocked;
 
   const PrivacyVeilOverlay({
@@ -17,6 +18,7 @@ class PrivacyVeilOverlay extends StatefulWidget {
     required this.child,
     this.biometricService,
     this.initialLocked = false,
+    this.isBypassed = false,
     this.onUnlocked,
   });
 
@@ -28,6 +30,7 @@ class PrivacyVeilOverlayState extends State<PrivacyVeilOverlay> {
   late final BiometricService _biometricService;
   late final AppLifecycleObserver _lifecycleObserver;
   bool _isLocked = false;
+  bool _showManualFallback = false;
 
   bool get isLocked => _isLocked;
   AppLifecycleObserver get lifecycleObserver => _lifecycleObserver;
@@ -58,16 +61,29 @@ class PrivacyVeilOverlayState extends State<PrivacyVeilOverlay> {
   }
 
   Future<void> unlock() async {
-    final success = await _biometricService.authenticate(
-      localizedReason: 'Autentique-se para acessar seus dados de saúde confidenciais.',
-    );
+    try {
+      final success = await _biometricService.authenticate(
+        localizedReason: 'Autentique-se para acessar seus dados de saúde confidenciais.',
+      );
 
-    if (success && mounted) {
-      _lifecycleObserver.unlock();
-      setState(() {
-        _isLocked = false;
-      });
-      widget.onUnlocked?.call();
+      if (success && mounted) {
+        _lifecycleObserver.unlock();
+        setState(() {
+          _isLocked = false;
+          _showManualFallback = false;
+        });
+        widget.onUnlocked?.call();
+      } else if (mounted) {
+        setState(() {
+          _showManualFallback = true;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _showManualFallback = true;
+        });
+      }
     }
   }
 
@@ -82,17 +98,19 @@ class PrivacyVeilOverlayState extends State<PrivacyVeilOverlay> {
     _lifecycleObserver.unlock();
     setState(() {
       _isLocked = false;
+      _showManualFallback = false;
     });
     widget.onUnlocked?.call();
   }
 
   @override
   Widget build(BuildContext context) {
+    final showVeil = _isLocked && !widget.isBypassed;
     return Stack(
       textDirection: TextDirection.ltr,
       children: [
         widget.child,
-        if (_isLocked)
+        if (showVeil)
           Positioned.fill(
             child: BackdropFilter(
               key: const Key('privacyVeilBackdrop'),
@@ -157,6 +175,22 @@ class PrivacyVeilOverlayState extends State<PrivacyVeilOverlay> {
                           ),
                         ),
                       ),
+                      if (_showManualFallback) ...[
+                        const SizedBox(height: 12),
+                        TextButton(
+                          key: const Key('privacyVeilFallbackButton'),
+                          onPressed: forceUnlock,
+                          child: Text(
+                            'Desbloquear manualmente',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 14,
+                              color: AppColors.clinicalTeal,
+                              fontWeight: FontWeight.w600,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

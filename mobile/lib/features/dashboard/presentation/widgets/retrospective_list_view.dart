@@ -34,14 +34,52 @@ class RetrospectiveListView extends StatelessWidget {
     }
   }
 
-  static String formatCategory(TriageHistoryEntry entry) {
+  static final Map<String, String> _categoryLabels = {
+    'cabeca_pescoco': 'Cabeça e Pescoço',
+    'cardiovascular_torax': 'Cardiovascular / Tórax',
+    'respiratorio': 'Respiratório',
+    'gastrointestinal_abdomen': 'Gastrointestinal / Abdômen',
+    'coluna_dorsal': 'Coluna Dorsal',
+    'coluna_dor_dorsal': 'Coluna Dorsal',
+    'coluna_dor_lombar': 'Coluna Lombar',
+    'membros_superiores_d': 'Membros Superiores (D)',
+    'membros_superiores_e': 'Membros Superiores (E)',
+    'membros_inferiores_d': 'Membros Inferiores (D)',
+    'membros_inferiores_e': 'Membros Inferiores (E)',
+    'neurologico': 'Neurológico',
+    'geniturinario_pelvico': 'Geniturinário / Pélvico',
+    'dermatologico': 'Dermatológico',
+    'geral_fisico': 'Saúde Física Geral',
+    'ansiosa_agitacao': 'Ansiosa / Agitação',
+    'depressiva_desanimo': 'Depressiva / Desânimo',
+    'estresse_burnout': 'Estresse / Burnout',
+    'somatica': 'Somática (Psicossomática)',
+    'sono': 'Sono e Ritmo Circadiano',
+    'cognitiva_foco': 'Cognitiva / Foco',
+    'autoestima': 'Autoestima / Autoimagem',
+    'geral_emocional': 'Saúde Emocional Geral',
+    'geral': 'Saúde Geral e Bem-Estar',
+  };
+
+  static String _formatCategoryKey(String key) {
+    if (_categoryLabels.containsKey(key)) {
+      return _categoryLabels[key]!.toUpperCase();
+    }
+    return key.replaceAll('_', ' ').toUpperCase();
+  }
+
+  static String formatCategory(TriageHistoryEntry entry, [String? verticalFilter]) {
+    if (verticalFilter == 'emotional' && entry.emotionalDimension != null) {
+      return _formatCategoryKey(entry.emotionalDimension!);
+    }
+    if (verticalFilter == 'physical' && entry.anatomicalSystem != null) {
+      return _formatCategoryKey(entry.anatomicalSystem!);
+    }
     if (entry.anatomicalSystem != null) {
-      final key = entry.anatomicalSystem!;
-      return key.replaceAll('_', ' ').toUpperCase();
+      return _formatCategoryKey(entry.anatomicalSystem!);
     }
     if (entry.emotionalDimension != null) {
-      final key = entry.emotionalDimension!;
-      return key.replaceAll('_', ' ').toUpperCase();
+      return _formatCategoryKey(entry.emotionalDimension!);
     }
     return 'GERAL';
   }
@@ -167,7 +205,7 @@ class RetrospectiveListView extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        formatCategory(entry),
+                        formatCategory(entry, verticalFilter),
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,

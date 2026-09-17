@@ -118,7 +118,7 @@ class CuratedArticlesCatalog {
     readTimeMinutes: 5,
     summary:
         'Reconhecimento precoce de sinais de exaustão emocional, distanciamento afetivo e limites saudáveis de produtividade.',
-    url: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout',
+    url: 'https://drauziovarella.uol.com.br/psiquiatria/sindrome-de-burnout-esgotamento-profissional/',
   );
 
   static List<RecommendedArticle> get wellnessArticles => const [

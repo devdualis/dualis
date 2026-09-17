@@ -1336,6 +1336,24 @@ abstract class AppLocalizations {
   /// **'Confirmar Nova Senha'**
   String get confirmNewPassword;
 
+  /// Placeholder for current password input
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite sua senha atual'**
+  String get currentPasswordHint;
+
+  /// Placeholder for new password input
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova senha segura'**
+  String get newPasswordHint;
+
+  /// Placeholder for confirming new password input
+  ///
+  /// In pt, this message translates to:
+  /// **'Repita a nova senha'**
+  String get confirmPasswordHint;
+
   /// Snackbar message when password is successfully changed
   ///
   /// In pt, this message translates to:

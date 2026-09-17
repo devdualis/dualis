@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 
 class BiometricService {
@@ -12,7 +11,7 @@ class BiometricService {
       final canCheck = await _auth.canCheckBiometrics;
       final isDeviceSupported = await _auth.isDeviceSupported();
       return canCheck || isDeviceSupported;
-    } on PlatformException {
+    } catch (_) {
       return false;
     }
   }
@@ -20,7 +19,7 @@ class BiometricService {
   Future<List<BiometricType>> getAvailableBiometrics() async {
     try {
       return await _auth.getAvailableBiometrics();
-    } on PlatformException {
+    } catch (_) {
       return const [];
     }
   }
@@ -32,7 +31,7 @@ class BiometricService {
         persistAcrossBackgrounding: true,
         biometricOnly: false,
       );
-    } on PlatformException {
+    } catch (_) {
       return false;
     }
   }

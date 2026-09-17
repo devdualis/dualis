@@ -50,6 +50,41 @@ class CriticalRecurrenceCard extends StatelessWidget {
     }
   }
 
+  static final Map<String, String> _categoryTranslations = {
+    'cabeca_pescoco': 'Cabeça e Pescoço',
+    'cardiovascular_torax': 'Cardiovascular / Tórax',
+    'respiratorio': 'Respiratório',
+    'gastrointestinal_abdomen': 'Gastrointestinal / Abdômen',
+    'coluna_dorsal': 'Coluna e Dor Dorsal',
+    'coluna_dor_dorsal': 'Coluna e Dor Dorsal',
+    'coluna_dor_lombar': 'Coluna e Dor Lombar',
+    'membros_superiores_d': 'Membros Superiores (D)',
+    'membros_superiores_e': 'Membros Superiores (E)',
+    'membros_inferiores_d': 'Membros Inferiores (D)',
+    'membros_inferiores_e': 'Membros Inferiores (E)',
+    'neurologico': 'Neurológico',
+    'geniturinario_pelvico': 'Geniturinário / Pélvico',
+    'dermatologico': 'Dermatológico',
+    'geral_fisico': 'Saúde Física Geral',
+    'ansiosa_agitacao': 'Ansiosa / Agitação',
+    'depressiva_desanimo': 'Depressiva / Desânimo',
+    'estresse_burnout': 'Estresse / Burnout',
+    'somatica': 'Somática (Psicossomática)',
+    'sono': 'Sono e Ritmo Circadiano',
+    'cognitiva_foco': 'Cognitiva / Foco',
+    'autoestima': 'Autoestima / Autoimagem',
+    'geral_emocional': 'Saúde Emocional Geral',
+    'geral': 'Saúde Geral e Bem-Estar',
+  };
+
+  static String _formatText(String raw) {
+    String formatted = raw;
+    for (final entry in _categoryTranslations.entries) {
+      formatted = formatted.replaceAll(entry.key, entry.value);
+    }
+    return formatted;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -75,7 +110,7 @@ class CriticalRecurrenceCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    item.title,
+                    _formatText(item.title),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -102,7 +137,7 @@ class CriticalRecurrenceCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              item.description,
+              _formatText(item.description),
               style: const TextStyle(
                 fontSize: 13,
                 color: Color(0xFF4E342E),

@@ -151,7 +151,7 @@ A primeira linha preventiva envolve estabelecer limites rígidos entre trabalho 
       'exaustao mental',
       'pressao no trabalho',
     ],
-    url: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout',
+    url: 'https://drauziovarella.uol.com.br/psiquiatria/sindrome-de-burnout-esgotamento-profissional/',
   },
   {
     id: 'art-burnout-02',

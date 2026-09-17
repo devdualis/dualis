@@ -857,6 +857,18 @@
   "@confirmNewPassword": {
     "description": "Label for new password confirmation input"
   },
+  "currentPasswordHint": "Digite sua senha atual",
+  "@currentPasswordHint": {
+    "description": "Placeholder for current password input"
+  },
+  "newPasswordHint": "Nova senha segura",
+  "@newPasswordHint": {
+    "description": "Placeholder for new password input"
+  },
+  "confirmPasswordHint": "Repita a nova senha",
+  "@confirmPasswordHint": {
+    "description": "Placeholder for confirming new password input"
+  },
   "passwordChangedSuccess": "Senha alterada com sucesso!",
   "@passwordChangedSuccess": {
     "description": "Snackbar message when password is successfully changed"

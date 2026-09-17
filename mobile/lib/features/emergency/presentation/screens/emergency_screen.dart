@@ -12,7 +12,7 @@ import '../widgets/emergency_exit_confirmation_dialog.dart';
 import '../widgets/emergency_instructions_card.dart';
 import '../widgets/telephony_fallback_dialog.dart';
 
-class EmergencyScreen extends ConsumerWidget {
+class EmergencyScreen extends ConsumerStatefulWidget {
   final EmergencyContext emergencyContext;
 
   const EmergencyScreen({
@@ -20,7 +20,22 @@ class EmergencyScreen extends ConsumerWidget {
     required this.emergencyContext,
   });
 
-  Future<void> _handlePopAttempt(BuildContext context, WidgetRef ref) async {
+  @override
+  ConsumerState<EmergencyScreen> createState() => _EmergencyScreenState();
+}
+
+class _EmergencyScreenState extends ConsumerState<EmergencyScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(emergencyControllerProvider.notifier)
+          .setEmergency(widget.emergencyContext);
+    });
+  }
+
+  Future<void> _handlePopAttempt(BuildContext context) async {
     final shouldExit = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -29,7 +44,7 @@ class EmergencyScreen extends ConsumerWidget {
 
     if (shouldExit == true && context.mounted) {
       ref.read(emergencyAuditServiceProvider).reportEventFireAndForget(
-            emergencyContext,
+            widget.emergencyContext,
             actionTaken: 'DISMISSED_CONFIRMED',
           );
       await ref.read(emergencyControllerProvider.notifier).recordExitConfirmed(context);
@@ -38,13 +53,12 @@ class EmergencyScreen extends ConsumerWidget {
 
   Future<void> _dialOrFallback({
     required BuildContext context,
-    required WidgetRef ref,
     required TelephonyService telephonyService,
     required String number,
     required String serviceName,
   }) async {
     ref.read(emergencyAuditServiceProvider).reportEventFireAndForget(
-          emergencyContext,
+          widget.emergencyContext,
           actionTaken: 'DIALED_$number',
         );
     final launched = await telephonyService.callNumber(number);
@@ -60,16 +74,16 @@ class EmergencyScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final telephonyService = ref.watch(telephonyServiceProvider);
-    final isEmotional = emergencyContext.isEmotional;
+    final isEmotional = widget.emergencyContext.isEmotional;
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        await _handlePopAttempt(context, ref);
+        await _handlePopAttempt(context);
       },
       child: Scaffold(
         backgroundColor: AppColors.emergencyCrimson,
@@ -94,7 +108,7 @@ class EmergencyScreen extends ConsumerWidget {
                 ),
               ),
               tooltip: loc.emergencyExitButton,
-              onPressed: () => _handlePopAttempt(context, ref),
+              onPressed: () => _handlePopAttempt(context),
             ),
             const SizedBox(width: 8),
           ],
@@ -124,7 +138,7 @@ class EmergencyScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 Center(
-                  child: EmergencyBadge(category: emergencyContext.category),
+                  child: EmergencyBadge(category: widget.emergencyContext.category),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -157,7 +171,6 @@ class EmergencyScreen extends ConsumerWidget {
                   isPrimary: true,
                   onPressed: () => _dialOrFallback(
                     context: context,
-                    ref: ref,
                     telephonyService: telephonyService,
                     number: isEmotional ? '188' : '192',
                     serviceName: isEmotional ? 'CVV' : 'SAMU',
@@ -170,7 +183,6 @@ class EmergencyScreen extends ConsumerWidget {
                   isOutlined: true,
                   onPressed: () => _dialOrFallback(
                     context: context,
-                    ref: ref,
                     telephonyService: telephonyService,
                     number: isEmotional ? '192' : '193',
                     serviceName: isEmotional ? 'SAMU' : 'Bombeiros',
@@ -183,7 +195,7 @@ class EmergencyScreen extends ConsumerWidget {
                   isOutlined: true,
                   onPressed: () async {
                     ref.read(emergencyAuditServiceProvider).reportEventFireAndForget(
-                          emergencyContext,
+                          widget.emergencyContext,
                           actionTaken: 'OPENED_MAPS',
                         );
                     await telephonyService.openNearestEmergencyRoom();
@@ -203,7 +215,7 @@ class EmergencyScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
                 Center(
                   child: TextButton(
-                    onPressed: () => _handlePopAttempt(context, ref),
+                    onPressed: () => _handlePopAttempt(context),
                     child: Text(
                       loc.emergencyExitButton,
                       style: TextStyle(

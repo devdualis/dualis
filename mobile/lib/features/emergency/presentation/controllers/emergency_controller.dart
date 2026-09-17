@@ -1,4 +1,5 @@
-import 'package:flutter/widgets.dart';
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
@@ -16,21 +17,21 @@ class EmergencyController extends Notifier<AsyncValue<EmergencyContext?>> {
     return const AsyncValue.data(null);
   }
 
-  /// Sets active emergency context and immediately redirects to the emergency screen.
+  /// Triggers an immediate transition to the emergency screen.
   void triggerEmergency(BuildContext context, EmergencyContext emergencyContext) {
     state = AsyncValue.data(emergencyContext);
-    context.push(RoutePaths.emergency, extra: emergencyContext);
+    context.go(RoutePaths.emergency, extra: emergencyContext);
   }
 
-  /// Persists the intercepted triage session, marks today's check-in complete,
-  /// resets active emergency state, and returns the user to the home screen
-  /// after they've confirmed exit risks.
+  /// Patient confirmed exit from emergency screen after warning dialog.
   Future<void> recordExitConfirmed([BuildContext? context]) async {
     final emergency = state.value;
     state = const AsyncValue.data(null);
 
     if (emergency != null) {
-      await _persistEmergencyTriage(emergency);
+      unawaited(
+        _persistEmergencyTriage(emergency).catchError((_) {}),
+      );
     }
 
     if (context != null && context.mounted) {
@@ -74,6 +75,11 @@ class EmergencyController extends Notifier<AsyncValue<EmergencyContext?>> {
     }
 
     ref.read(triggerCheckInProvider.notifier).markCompletedToday();
+  }
+
+  /// Sets or updates the active emergency context in memory.
+  void setEmergency(EmergencyContext context) {
+    state = AsyncValue.data(context);
   }
 
   /// Clears in-memory emergency state without navigation side effects.
