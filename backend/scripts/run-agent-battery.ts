@@ -43,7 +43,7 @@ async function runMultiAgentBattery() {
   console.log('===============================================================\n');
 
   const rootDir = path.resolve(__dirname, '../../');
-  const clinicalCasesPath = path.resolve(rootDir, 'agents/doctor/clinical_test_cases.json');
+  const clinicalCasesPath = path.resolve(rootDir, '.agents/agents/doctor/clinical_test_cases.json');
 
   if (!fs.existsSync(clinicalCasesPath)) {
     throw new Error(`Clinical test cases file not found at: ${clinicalCasesPath}`);
@@ -207,7 +207,7 @@ async function runMultiAgentBattery() {
     evaluations,
   };
 
-  const reportJsonPath = path.resolve(rootDir, 'agents/agent-battery-report.json');
+  const reportJsonPath = path.resolve(rootDir, '.agents/agents/agent-battery-report.json');
   fs.writeFileSync(reportJsonPath, JSON.stringify(reportData, null, 2), 'utf-8');
 
   // Generate Markdown report
@@ -263,7 +263,7 @@ ${
 - **Agente Frontend**: *Aprobado.* Suite de pruebas Flutter de 179 casos aprobada con cobertura de pantallas de onboarding, triage wizard, pantalla roja y mapa de calor.
 `;
 
-  const reportMdPath = path.resolve(rootDir, 'agents/agent-battery-report.md');
+  const reportMdPath = path.resolve(rootDir, '.agents/agents/agent-battery-report.md');
   fs.writeFileSync(reportMdPath, markdownReport, 'utf-8');
 
   console.log(`[ORCHESTRATOR] Reports successfully generated:`);
