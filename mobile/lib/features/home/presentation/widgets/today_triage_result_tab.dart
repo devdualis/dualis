@@ -49,7 +49,7 @@ class TodayTriageResultTab extends ConsumerWidget {
             isTrueWellness: isTrueWellness,
           ),
           const SizedBox(height: 16),
-          if (outcome != null && !isTrueWellness) ...[
+          if (outcome != null) ...[
             _buildFullOutcomeView(context, ref, outcome),
           ] else if (isCompletedToday && isTrueWellness) ...[
             _buildWellnessCheckInView(context, triggerState),
@@ -202,8 +202,8 @@ class TodayTriageResultTab extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (outcome.organicPrimacyApplied && outcome.organicPrimacyNotice != null) ...[
-          OrganicPrimacyBanner(notice: outcome.organicPrimacyNotice!),
+        if (outcome.organicPrimacyApplied) ...[
+          OrganicPrimacyBanner(notice: outcome.organicPrimacyNotice),
           const SizedBox(height: 16),
         ],
         Container(

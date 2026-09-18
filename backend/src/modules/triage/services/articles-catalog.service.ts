@@ -4,8 +4,9 @@ import { MEDICAL_ARTICLES_SEED } from '../data/medical-articles.seed';
 
 @Injectable()
 export class ArticlesCatalogService {
-  private readonly articles: RecommendedArticleDto[] = MEDICAL_ARTICLES_SEED.map((a) => ({
+  private readonly articles: (RecommendedArticleDto & { language: string })[] = MEDICAL_ARTICLES_SEED.map((a) => ({
     id: a.id,
+    language: a.language || 'pt',
     title: a.title,
     category: a.category,
     author: a.author,
@@ -15,11 +16,17 @@ export class ArticlesCatalogService {
     url: a.url,
   }));
 
-  getArticlesForCategory(category: string): RecommendedArticleDto[] {
-    const matched = this.articles.filter((a) => a.category === category);
+  getArticlesForCategory(category: string, language: string = 'pt'): RecommendedArticleDto[] {
+    const lang = (language || 'pt').toLowerCase();
+    const matched = this.articles.filter((a) => a.category === category && a.language === lang);
     if (matched.length > 0) {
-      const general = this.articles.find((a) => a.category === 'geral');
+      const general = this.articles.find((a) => a.category === 'geral' && a.language === lang);
       return general && !matched.includes(general) ? [...matched, general] : matched;
+    }
+
+    const fallbackLang = this.articles.filter((a) => a.language === lang);
+    if (fallbackLang.length > 0) {
+      return fallbackLang.slice(0, 2);
     }
 
     return this.articles.slice(0, 2);

@@ -399,6 +399,60 @@ void main() {
       expect(state.physicalStatus, TriggerStatus.goodNormal);
       expect(state.completedAt, isNotNull);
     });
+
+    test('13. Remote history with older daily_checkin and newer triage prioritizes the triage (Bug Regression)', () async {
+      final earlier = DateTime.now().subtract(const Duration(hours: 2));
+      final later = DateTime.now();
+
+      final mockHistory = TriageHistoryResponse(
+        logs: [
+          // Newer triage entry
+          TriageHistoryEntry(
+            id: 'triage-log-newer',
+            intensity: 3,
+            emotionalDimension: 'somatica',
+            disposition: 'consulta_rotina',
+            organicPrimacyApplied: true,
+            narrative: 'aperto no peito e garganta',
+            stepAnswers: {'type': 'triage_checkin'},
+            recordedAt: later,
+          ),
+          // Older checkin entry
+          TriageHistoryEntry(
+            id: 'checkin-log-older',
+            intensity: 1,
+            disposition: 'autocuidado',
+            stepAnswers: {
+              'type': 'daily_checkin',
+              'emotionalStatus': 'goodNormal',
+              'physicalStatus': 'goodNormal',
+            },
+            recordedAt: earlier,
+          ),
+        ],
+        physicalSummary: {},
+        emotionalSummary: [],
+        criticalRecurrences: [],
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          triageHistoryDataSourceProvider.overrideWithValue(
+            _FakeHistoryDataSource(mockHistory),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(triggerCheckInProvider.notifier);
+      await notifier.loadTodayCheckIn();
+
+      final state = container.read(triggerCheckInProvider);
+      expect(state.isCompletedToday, isTrue);
+      // It must be derived from the newer triage (somatica / intensity 3), NOT goodNormal from the old checkin!
+      expect(state.emotionalStatus, TriggerStatus.soSo);
+      expect(state.naturalLanguageText, 'aperto no peito e garganta');
+    });
   });
 }
 

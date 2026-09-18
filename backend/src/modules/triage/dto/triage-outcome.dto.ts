@@ -24,6 +24,10 @@ export class SubmitTriageDto {
   @IsString()
   @IsOptional()
   clientSessionId?: string;
+
+  @IsString()
+  @IsOptional()
+  language?: string;
 }
 
 export interface RecommendedArticleDto {

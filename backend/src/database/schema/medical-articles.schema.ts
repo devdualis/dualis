@@ -5,6 +5,7 @@ export const medicalArticles = pgTable(
   'medical_articles',
   {
     id: varchar('id', { length: 64 }).primaryKey(),
+    language: varchar('language', { length: 10 }).default('pt').notNull(),
     title: text('title').notNull(),
     category: varchar('category', { length: 64 }).notNull(),
     somaticSystem: varchar('somatic_system', { length: 64 }),
@@ -20,6 +21,8 @@ export const medicalArticles = pgTable(
   },
   (table) => [
     index('idx_medical_articles_category').on(table.category),
+    index('idx_medical_articles_language').on(table.language),
+    index('idx_medical_articles_category_lang').on(table.category, table.language),
     index('idx_medical_articles_embedding').using('hnsw', table.embedding.op('vector_cosine_ops')),
   ],
 );

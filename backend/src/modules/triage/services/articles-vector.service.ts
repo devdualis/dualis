@@ -45,6 +45,7 @@ export class ArticlesVectorService implements OnModuleInit {
 
       const values = {
         id: article.id,
+        language: article.language || 'pt',
         title: article.title,
         category: article.category,
         somaticSystem: article.somaticSystem ?? null,
@@ -75,6 +76,7 @@ export class ArticlesVectorService implements OnModuleInit {
     article: SeedArticleDefinition,
   ): boolean {
     return (
+      (row.language ?? 'pt') === (article.language ?? 'pt') &&
       row.title === article.title &&
       row.category === article.category &&
       (row.somaticSystem ?? null) === (article.somaticSystem ?? null) &&
@@ -92,11 +94,13 @@ export class ArticlesVectorService implements OnModuleInit {
     queryText?: string;
     category: string;
     vertical: string;
+    language?: string;
     limit?: number;
   }): Promise<RecommendedArticleDto[]> {
+    const lang = (params.language || 'pt').toLowerCase();
     const limit = params.limit ?? 2;
     const sanitizedNarrative = (params.queryText || '').trim().toLowerCase();
-    const cacheKey = `${params.vertical}:${params.category}:${sanitizedNarrative}`;
+    const cacheKey = `${lang}:${params.vertical}:${params.category}:${sanitizedNarrative}`;
 
     if (this.semanticCache.has(cacheKey)) {
       return this.semanticCache.get(cacheKey)!;
@@ -121,7 +125,7 @@ export class ArticlesVectorService implements OnModuleInit {
             url,
             1 - (embedding <=> ${vectorString}::vector) AS similarity
           FROM medical_articles
-          WHERE category = ${params.category}
+          WHERE category = ${params.category} AND language = ${lang}
           ORDER BY embedding <=> ${vectorString}::vector ASC
           LIMIT ${limit}
         `);
@@ -153,7 +157,7 @@ export class ArticlesVectorService implements OnModuleInit {
           id, title, category, author, author_role AS "authorRole",
           read_time_minutes AS "readTimeMinutes", summary, url
         FROM medical_articles
-        WHERE category = ${params.category}
+        WHERE category = ${params.category} AND language = ${lang}
         LIMIT ${limit}
       `);
 
@@ -173,7 +177,7 @@ export class ArticlesVectorService implements OnModuleInit {
     }
 
     if (results.length === 0) {
-      const matched = this.seedArticles.filter((a) => a.category === params.category);
+      const matched = this.seedArticles.filter((a) => a.category === params.category && (a.language || 'pt') === lang);
       if (matched.length > 0) {
         results = matched.slice(0, limit).map((a) => ({
           id: a.id,
@@ -186,7 +190,8 @@ export class ArticlesVectorService implements OnModuleInit {
           url: a.url,
         }));
       } else {
-        const general = this.seedArticles.find((a) => a.id === 'art-geral-01') || this.seedArticles[0];
+        const general = this.seedArticles.find((a) => a.category === 'geral' && (a.language || 'pt') === lang) ||
+          this.seedArticles.find((a) => a.id === 'art-geral-01') || this.seedArticles[0];
         results = [
           {
             id: general.id,

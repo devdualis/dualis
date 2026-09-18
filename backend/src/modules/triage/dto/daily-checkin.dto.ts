@@ -19,6 +19,10 @@ export class SubmitDailyCheckInDto {
   @IsString()
   @IsOptional()
   naturalLanguageText?: string;
+
+  @IsString()
+  @IsOptional()
+  language?: string;
 }
 
 export interface DailyCheckInResponseDto {

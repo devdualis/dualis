@@ -97,12 +97,13 @@ async function runSeed() {
     await pgClient.query(
       `
       INSERT INTO medical_articles (
-        id, title, category, somatic_system, author, author_role,
+        id, language, title, category, somatic_system, author, author_role,
         read_time_minutes, summary, content_markdown, keywords, url, embedding
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::vector
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::vector
       )
       ON CONFLICT (id) DO UPDATE SET
+        language = EXCLUDED.language,
         title = EXCLUDED.title,
         category = EXCLUDED.category,
         somatic_system = EXCLUDED.somatic_system,
@@ -118,6 +119,7 @@ async function runSeed() {
       `,
       [
         article.id,
+        article.language || 'pt',
         article.title,
         article.category,
         article.somaticSystem || null,
@@ -146,38 +148,42 @@ async function runSeed() {
 
   // Validation
   const countRes = await pgClient.query(`
-    SELECT count(*) as total, count(embedding) as with_embedding
-    FROM medical_articles;
+    SELECT language, count(*) as total, count(embedding) as with_embedding
+    FROM medical_articles
+    GROUP BY language
+    ORDER BY language;
   `);
-  console.log('Database verification:', countRes.rows[0]);
+  console.log('Database verification by language:');
+  console.table(countRes.rows);
 
-  // Semantic test
-  console.log('\n--- Running Semantic Verification Queries ---');
+  // Semantic test across PT, ES, EN
+  console.log('\n--- Running Multilingual Semantic Verification Queries ---');
   const testQueries = [
-    'travei o pescoço e a lombar não consigo me mexer',
-    'acordo de madrugada com pesadelo e insônia',
-    'dor ao urinar e ardência forte na bexiga',
-    'sede excessiva e perdi muito peso sem motivo',
-    'ferida que não fecha na perna há semanas',
+    { text: 'travei o pescoço e a lombar não consigo me mexer', lang: 'pt' },
+    { text: 'se me trabó el cuello y la espalda baja no me puedo mover', lang: 'es' },
+    { text: 'locked neck and lower back pain cannot move', lang: 'en' },
+    { text: 'ataque de panico palpitaciones y miedo a perder el control', lang: 'es' },
+    { text: 'severe chest pressure and heart palpitations', lang: 'en' },
   ];
 
-  for (const q of testQueries) {
+  for (const { text: q, lang } of testQueries) {
     const qEmbedding = await getEmbedding(q);
     const qVector = `[${qEmbedding.join(',')}]`;
 
     const matchRes = await pgClient.query(
       `
-      SELECT id, title, category, 1 - (embedding <=> $1::vector) as similarity
+      SELECT id, language, title, category, 1 - (embedding <=> $1::vector) as similarity
       FROM medical_articles
+      WHERE language = $2
       ORDER BY embedding <=> $1::vector ASC
       LIMIT 2;
     `,
-      [qVector],
+      [qVector, lang],
     );
 
-    console.log(`\nQuery: "${q}"`);
+    console.log(`\nQuery (${lang}): "${q}"`);
     for (const r of matchRes.rows) {
-      console.log(`  -> [${r.category}] ${r.title} (similarity: ${(Number(r.similarity) * 100).toFixed(1)}%)`);
+      console.log(`  -> [${r.language}] [${r.category}] ${r.title} (similarity: ${(Number(r.similarity) * 100).toFixed(1)}%)`);
     }
   }
 

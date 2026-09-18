@@ -20,6 +20,7 @@ class TriageOutcomeRemoteDataSource {
     String? narrative,
     String? token,
     String? clientSessionId,
+    String? language,
   }) async {
     try {
       final authToken = token ?? await _secureStorage.getAccessToken();
@@ -31,6 +32,7 @@ class TriageOutcomeRemoteDataSource {
           if (narrative != null && narrative.isNotEmpty) 'narrative': narrative,
           if (clientSessionId != null && clientSessionId.isNotEmpty)
             'clientSessionId': clientSessionId,
+          if (language != null && language.isNotEmpty) 'language': language,
         },
         options: authToken != null
             ? Options(headers: {'Authorization': 'Bearer $authToken'})
@@ -42,15 +44,16 @@ class TriageOutcomeRemoteDataSource {
       }
       throw Exception('Formato de resposta de desfecho inesperado.');
     } catch (_) {
-      return generateOfflineFallback(vertical, answers, narrative);
+      return generateOfflineFallback(vertical, answers, narrative, language: language);
     }
   }
 
   TriageOutcome generateOfflineFallback(
     String vertical,
     Map<int, String> answers,
-    String? narrative,
-  ) {
+    String? narrative, {
+    String? language,
+  }) {
     final isZeroIndexed = answers.containsKey(0);
     final step1 = (isZeroIndexed ? answers[0] : answers[1]) ?? '';
     final step3 = (isZeroIndexed ? answers[2] : answers[3]) ?? '2';
@@ -87,59 +90,167 @@ class TriageOutcomeRemoteDataSource {
       disposition = CareDisposition.routineConsultation;
     }
 
-    String categoryLabel = vertical == 'physical' ? 'Avaliação Física' : 'Autoavaliação Psico-Emocional';
-    String somaticDesc = 'Avaliação clínica preliminar em modo desconectado';
-    List<RecommendedArticle> articles;
+    final lang = (language ?? 'pt').toLowerCase();
+    String categoryLabel;
+    String somaticDesc;
 
+    if (lang == 'es') {
+      categoryLabel = vertical == 'physical' ? 'Evaluación Física' : 'Autoevaluación Psicoemocional';
+      somaticDesc = 'Evaluación clínica preliminar en modo fuera de línea';
+    } else if (lang == 'en') {
+      categoryLabel = vertical == 'physical' ? 'Physical Assessment' : 'Psycho-Emotional Assessment';
+      somaticDesc = 'Preliminary clinical assessment in offline mode';
+    } else {
+      categoryLabel = vertical == 'physical' ? 'Avaliação Física' : 'Autoavaliação Psico-Emocional';
+      somaticDesc = 'Avaliação clínica preliminar em modo desconectado';
+    }
+
+    List<RecommendedArticle> articles;
     final lowerStep1 = step1.toLowerCase();
     final lowerNarrative = (narrative ?? '').toLowerCase();
     final matchTarget = '$lowerStep1 $lowerNarrative';
 
-    if (matchTarget.contains('costas') || matchTarget.contains('coluna') || matchTarget.contains('lombar')) {
-      categoryLabel = 'Coluna e Dor Dorsal';
-      somaticDesc = 'Dor lombar / Tensão paravertebral postural (modo desconectado)';
-      articles = const [
-        RecommendedArticle(
-          id: 'art-coluna-01',
-          title: 'Ergonomia no Trabalho e Prevenção de Dores Lombares e Cervicais',
-          category: 'coluna_dor_dorsal',
-          author: 'Dr. Marcelo Mendes',
-          authorRole: 'Ortopedista e Traumatologista (HCFMUSP / CRM-SP 128.450)',
-          readTimeMinutes: 5,
-          summary: 'Posturas preventivas, pausas ativas a cada 50 minutos e exercícios de descompressão da coluna lombar.',
-          url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
-        ),
-      ];
-    } else if (matchTarget.contains('cabeca') || matchTarget.contains('enxaqueca') || matchTarget.contains('cefaleia')) {
-      categoryLabel = 'Cabeça e Pescoço';
-      somaticDesc = 'Cefaleia / Desconforto crânio-cervical (modo desconectado)';
-      articles = const [
-        RecommendedArticle(
-          id: 'art-cabeca-01',
-          title: 'Cefaleia Tensional vs. Enxaqueca: Como Identificar os Primeiros Sinais',
-          category: 'cabeca_pescoco',
-          author: 'Dr. Thiago Albuquerque',
-          authorRole: 'Neurologista Clínico (UNIFESP / CRM-SP 156.702)',
-          readTimeMinutes: 4,
-          summary: 'Diferenciação prática entre dores de cabeça causadas por tensão muscular e crises de enxaqueca pulsátil.',
-          url: 'https://sbcefaleia.com.br/noticias.php?id=350',
-        ),
-      ];
-    } else if (matchTarget.contains('peito') || matchTarget.contains('coracao') || matchTarget.contains('palpitac')) {
-      categoryLabel = 'Cardiovascular e Tórax';
-      somaticDesc = 'Sensação de palpitação / Tensão torácica (modo desconectado)';
-      articles = const [
-        RecommendedArticle(
-          id: 'art-cardio-01',
-          title: 'Compreendendo as Palpitações e Quando Procurar um Cardiologista',
-          category: 'cardiovascular_torax',
-          author: 'Dra. Beatriz Silva',
-          authorRole: 'Cardiologista (InCor / CRM-SP 142.890)',
-          readTimeMinutes: 4,
-          summary: 'Guia clínico sobre diferenciação de palpitações benignas por estresse e arritmias que requerem eletrocardiograma imediato.',
-          url: 'https://drauziovarella.uol.com.br/entrevistas-2/arritmia-cardiaca-entrevista/',
-        ),
-      ];
+    if (matchTarget.contains('costas') || matchTarget.contains('coluna') || matchTarget.contains('lombar') || matchTarget.contains('espalda') || matchTarget.contains('back')) {
+      if (lang == 'es') {
+        categoryLabel = 'Columna y Dolor Dorsal';
+        somaticDesc = 'Dolor lumbar / Tensión paravertebral postural';
+        articles = const [
+          RecommendedArticle(
+            id: 'art-coluna-01-es',
+            title: 'Dolor Lumbar y Ergonomía Postural',
+            category: 'coluna_dor_dorsal',
+            author: 'Dr. Marcelo Mendes',
+            authorRole: 'Ortopedista y Traumatólogo',
+            readTimeMinutes: 5,
+            summary: 'Higiene postural, pausas activas y desmitificación del reposo prolongado en cama.',
+            url: 'https://medlineplus.gov/spanish/backpain.html',
+          ),
+        ];
+      } else if (lang == 'en') {
+        categoryLabel = 'Spine & Back Pain';
+        somaticDesc = 'Low back pain / Postural paravertebral strain';
+        articles = const [
+          RecommendedArticle(
+            id: 'art-coluna-01-en',
+            title: 'Back Pain and Lumbar Strain: Posture and Ergonomics',
+            category: 'coluna_dor_dorsal',
+            author: 'Dr. Marcelo Mendes',
+            authorRole: 'Orthopedic Spine Surgeon',
+            readTimeMinutes: 5,
+            summary: 'Postural ergonomics, active breaks for desk workers, and avoiding prolonged bed rest.',
+            url: 'https://medlineplus.gov/backpain.html',
+          ),
+        ];
+      } else {
+        categoryLabel = 'Coluna e Dor Dorsal';
+        somaticDesc = 'Dor lombar / Tensão paravertebral postural (modo desconectado)';
+        articles = const [
+          RecommendedArticle(
+            id: 'art-coluna-01',
+            title: 'Ergonomia no Trabalho e Prevenção de Dores Lombares e Cervicais',
+            category: 'coluna_dor_dorsal',
+            author: 'Dr. Marcelo Mendes',
+            authorRole: 'Ortopedista e Traumatologista (HCFMUSP / CRM-SP 128.450)',
+            readTimeMinutes: 5,
+            summary: 'Posturas preventivas, pausas ativas a cada 50 minutos e exercícios de descompressão da coluna lombar.',
+            url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
+          ),
+        ];
+      }
+    } else if (matchTarget.contains('cabeca') || matchTarget.contains('cabeza') || matchTarget.contains('head') || matchTarget.contains('migraine') || matchTarget.contains('enxaqueca') || matchTarget.contains('cefaleia')) {
+      if (lang == 'es') {
+        categoryLabel = 'Cabeza y Cuello';
+        somaticDesc = 'Cefalea / Tensión craneocervical';
+        articles = const [
+          RecommendedArticle(
+            id: 'art-cabeca-01-es',
+            title: 'Dolor de Cabeza y Migraña: Cuidados Iniciales',
+            category: 'cabeca_pescoco',
+            author: 'Dr. Fernando Siqueira',
+            authorRole: 'Neurólogo Clínico',
+            readTimeMinutes: 4,
+            summary: 'Identificación de cefalea tensional y migraña pulsátil con pautas de descanso.',
+            url: 'https://medlineplus.gov/spanish/headache.html',
+          ),
+        ];
+      } else if (lang == 'en') {
+        categoryLabel = 'Head & Neck';
+        somaticDesc = 'Headache / Cranio-cervical discomfort';
+        articles = const [
+          RecommendedArticle(
+            id: 'art-cabeca-01-en',
+            title: 'Headaches and Migraines: Initial Care Guide',
+            category: 'cabeca_pescoco',
+            author: 'Dr. Fernando Siqueira',
+            authorRole: 'Consultant Clinical Neurologist',
+            readTimeMinutes: 4,
+            summary: 'Distinguishing tension headaches from pulsating migraines with hydration and rest.',
+            url: 'https://medlineplus.gov/headache.html',
+          ),
+        ];
+      } else {
+        categoryLabel = 'Cabeça e Pescoço';
+        somaticDesc = 'Cefaleia / Desconforto crânio-cervical (modo desconectado)';
+        articles = const [
+          RecommendedArticle(
+            id: 'art-cabeca-01',
+            title: 'Cefaleia Tensional vs. Enxaqueca: Como Identificar os Primeiros Sinais',
+            category: 'cabeca_pescoco',
+            author: 'Dr. Thiago Albuquerque',
+            authorRole: 'Neurologista Clínico (UNIFESP / CRM-SP 156.702)',
+            readTimeMinutes: 4,
+            summary: 'Diferenciação prática entre dores de cabeça causadas por tensão muscular e crises de enxaqueca pulsátil.',
+            url: 'https://sbcefaleia.com.br/noticias.php?id=350',
+          ),
+        ];
+      }
+    } else if (matchTarget.contains('peito') || matchTarget.contains('pecho') || matchTarget.contains('chest') || matchTarget.contains('coracao') || matchTarget.contains('heart') || matchTarget.contains('palpitac')) {
+      if (lang == 'es') {
+        categoryLabel = 'Cardiovascular y Tórax';
+        somaticDesc = 'Palpitaciones / Tensión torácica funcional';
+        articles = const [
+          RecommendedArticle(
+            id: 'art-cardio-01-es',
+            title: 'Palpitaciones y Taquicardia: Comprendiendo los Latidos Rápidos',
+            category: 'cardiovascular_torax',
+            author: 'Dra. Beatriz Silva',
+            authorRole: 'Cardióloga Clínica',
+            readTimeMinutes: 4,
+            summary: 'Pautas sobre palpitaciones por estrés y cuándo acudir a valoración cardiológica.',
+            url: 'https://medlineplus.gov/spanish/heartpalpitations.html',
+          ),
+        ];
+      } else if (lang == 'en') {
+        categoryLabel = 'Cardiovascular & Thorax';
+        somaticDesc = 'Palpitations / Functional chest tightness';
+        articles = const [
+          RecommendedArticle(
+            id: 'art-cardio-01-en',
+            title: 'Heart Racing and Palpitations: Understanding Rapid Heartbeats',
+            category: 'cardiovascular_torax',
+            author: 'Dr. Beatriz Silva',
+            authorRole: 'Consultant Cardiologist',
+            readTimeMinutes: 4,
+            summary: 'Clinical guide on stress palpitations versus arrhythmias needing prompt assessment.',
+            url: 'https://medlineplus.gov/heartpalpitations.html',
+          ),
+        ];
+      } else {
+        categoryLabel = 'Cardiovascular e Tórax';
+        somaticDesc = 'Sensação de palpitação / Tensão torácica (modo desconectado)';
+        articles = const [
+          RecommendedArticle(
+            id: 'art-cardio-01',
+            title: 'Compreendendo as Palpitações e Quando Procurar um Cardiologista',
+            category: 'cardiovascular_torax',
+            author: 'Dra. Beatriz Silva',
+            authorRole: 'Cardiologista (InCor / CRM-SP 142.890)',
+            readTimeMinutes: 4,
+            summary: 'Guia clínico sobre diferenciação de palpitações benignas por estresse e arritmias que requerem eletrocardiograma imediato.',
+            url: 'https://drauziovarella.uol.com.br/entrevistas-2/arritmia-cardiaca-entrevista/',
+          ),
+        ];
+      }
     } else if (matchTarget.contains('estomago') || matchTarget.contains('abdomen') || matchTarget.contains('digest')) {
       categoryLabel = 'Gastrointestinal e Abdômen';
       somaticDesc = 'Desconforto digestivo funcional (modo desconectado)';

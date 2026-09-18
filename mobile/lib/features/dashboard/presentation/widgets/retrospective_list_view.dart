@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/triage_history_models.dart';
+import 'triage_history_detail_modal.dart';
 
 class RetrospectiveListView extends StatelessWidget {
   final List<TriageHistoryEntry> entries;
@@ -214,124 +215,163 @@ class RetrospectiveListView extends StatelessWidget {
         final causes = entry.stepAnswers?['causes'] ??
             entry.stepAnswers?['gatilhos'] ??
             entry.stepAnswers?['motivo'];
+        final narrative = entry.narrative ??
+            entry.stepAnswers?['naturalLanguageText'] as String? ??
+            entry.stepAnswers?['narrative'] as String?;
 
         return Card(
+          key: Key('history_item_${entry.id}'),
           margin: EdgeInsets.zero,
           elevation: 0.5,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(color: Colors.grey.shade200),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _formatDateTime(entry.recordedAt),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => TriageHistoryDetailModal.show(context, entry),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: intensityColor.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            'Nível ${entry.intensity}',
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              _formatDateTime(entry.recordedAt),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: intensityColor.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'Nível ${entry.intensity}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: intensityColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  formatCategory(entry, verticalFilter),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            if (entry.disposition != null)
+                              Flexible(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF00796B).withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    formatDisposition(entry.disposition),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Color(0xFF00796B),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        if (causes != null && causes.toString().isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            'Motivo informado: $causes',
                             style: TextStyle(
                               fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: intensityColor,
+                              color: Colors.grey.shade700,
                             ),
                           ),
-                        ),
-                        if (onDeleteEntry != null) ...[
-                          const SizedBox(width: 4),
-                          IconButton(
-                            key: Key('delete_history_item_${entry.id}'),
-                            icon: Icon(
-                              Icons.delete_outline_rounded,
-                              size: 18,
-                              color: Colors.grey.shade500,
+                        ],
+                        if (narrative != null && narrative.toString().trim().isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            'Relato: "${narrative.trim()}"',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontStyle: FontStyle.italic,
+                              color: Colors.grey.shade600,
                             ),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                            splashRadius: 18,
-                            tooltip: l10n?.deleteHistoryItemTitle ?? 'Descartar registro',
-                            onPressed: () => _confirmAndDelete(context, entry.id),
                           ),
                         ],
                       ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        formatCategory(entry, verticalFilter),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (entry.disposition != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF00796B).withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          formatDisposition(entry.disposition),
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Color(0xFF00796B),
-                            fontWeight: FontWeight.w500,
+                  ),
+                  const SizedBox(width: 8),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (onDeleteEntry != null)
+                        IconButton(
+                          key: Key('delete_history_item_${entry.id}'),
+                          icon: Icon(
+                            Icons.delete_outline_rounded,
+                            size: 18,
+                            color: Colors.grey.shade500,
                           ),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                          splashRadius: 18,
+                          tooltip: l10n?.deleteHistoryItemTitle ?? 'Descartar registro',
+                          onPressed: () => _confirmAndDelete(context, entry.id),
                         ),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 20,
+                        color: Colors.grey.shade400,
                       ),
-                  ],
-                ),
-                if (causes != null && causes.toString().isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    'Motivo informado: $causes',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade700,
-                    ),
+                    ],
                   ),
                 ],
-              ],
+              ),
             ),
           ),
         );

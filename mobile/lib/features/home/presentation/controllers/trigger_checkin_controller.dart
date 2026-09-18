@@ -90,53 +90,54 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       TriggerStatus? physicalStatus;
       String naturalLanguageText = state.naturalLanguageText;
 
-      for (final log in todayLogs) {
-        final answers = log.stepAnswers;
-        if (answers != null && answers['type'] == 'daily_checkin') {
-          emotionalStatus ??= _parseTriggerStatus(answers['emotionalStatus']);
-          physicalStatus ??= _parseTriggerStatus(answers['physicalStatus']);
+      TriggerStatus intensityToStatus(int intensity) {
+        if (intensity <= 2) return TriggerStatus.goodNormal;
+        if (intensity == 3) return TriggerStatus.soSo;
+        return TriggerStatus.badSick;
+      }
+
+      final isLatestDailyCheckIn = latestLog.stepAnswers?['type'] == 'daily_checkin';
+
+      if (isLatestDailyCheckIn) {
+        final answers = latestLog.stepAnswers;
+        if (answers != null) {
+          emotionalStatus = _parseTriggerStatus(answers['emotionalStatus']);
+          physicalStatus = _parseTriggerStatus(answers['physicalStatus']);
           if (answers['naturalLanguageText'] is String &&
               (answers['naturalLanguageText'] as String).isNotEmpty) {
             naturalLanguageText = answers['naturalLanguageText'] as String;
           }
         }
-      }
+      } else {
+        // The most recent record today is a full clinical triage
+        final isPhysical = latestLog.anatomicalSystem != null &&
+            latestLog.anatomicalSystem != 'geral_emocional';
+        final intensity = latestLog.intensity;
 
-      if (emotionalStatus == null || physicalStatus == null) {
-        TriageHistoryEntry? emotionalLog;
-        TriageHistoryEntry? physicalLog;
-
-        for (final log in todayLogs) {
-          if (log.emotionalDimension != null && emotionalLog == null) {
-            emotionalLog = log;
-          }
-          if (log.anatomicalSystem != null && physicalLog == null) {
-            physicalLog = log;
-          }
+        if (isPhysical) {
+          physicalStatus = intensityToStatus(intensity);
+          emotionalStatus = latestLog.emotionalDimension != null
+              ? intensityToStatus(intensity)
+              : TriggerStatus.goodNormal;
+        } else {
+          emotionalStatus = intensityToStatus(intensity);
+          physicalStatus = (latestLog.organicPrimacyApplied ||
+                  (latestLog.anatomicalSystem != null &&
+                      latestLog.anatomicalSystem != 'geral_emocional'))
+              ? TriggerStatus.soSo
+              : TriggerStatus.goodNormal;
         }
 
-        TriggerStatus intensityToStatus(int intensity) {
-          if (intensity <= 2) return TriggerStatus.goodNormal;
-          if (intensity == 3) return TriggerStatus.soSo;
-          return TriggerStatus.badSick;
-        }
-
-        if (emotionalStatus == null) {
-          if (emotionalLog != null) {
-            emotionalStatus = intensityToStatus(emotionalLog.intensity);
-          } else {
-            emotionalStatus = TriggerStatus.goodNormal;
-          }
-        }
-
-        if (physicalStatus == null) {
-          if (physicalLog != null) {
-            physicalStatus = intensityToStatus(physicalLog.intensity);
-          } else {
-            physicalStatus = TriggerStatus.goodNormal;
-          }
+        if (latestLog.narrative != null && latestLog.narrative!.isNotEmpty) {
+          naturalLanguageText = latestLog.narrative!;
+        } else if (latestLog.stepAnswers?['naturalLanguageText'] is String &&
+            (latestLog.stepAnswers!['naturalLanguageText'] as String).isNotEmpty) {
+          naturalLanguageText = latestLog.stepAnswers!['naturalLanguageText'] as String;
         }
       }
+
+      emotionalStatus ??= TriggerStatus.goodNormal;
+      physicalStatus ??= TriggerStatus.goodNormal;
 
       if (!state.isModifiedAfterCompletion) {
         state = state.copyWith(

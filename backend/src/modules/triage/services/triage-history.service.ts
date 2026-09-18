@@ -239,6 +239,7 @@ export class TriageHistoryService {
         anatomicalSystem: row.anatomicalSystem,
         emotionalDimension: row.emotionalDimension,
         disposition: row.disposition,
+        organicPrimacyApplied: row.organicPrimacyApplied,
         narrative: decryptedNarrative,
         stepAnswers: parsedAnswers,
         recordedAt: row.recordedAt.toISOString(),

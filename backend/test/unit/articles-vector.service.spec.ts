@@ -126,8 +126,8 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
     expect(articles[0].author).toContain('Dra. Camila Prado');
   });
 
-  it('6. Seed catalog comprehensively covers all 7 emotional dimensions and 12 physical systems', () => {
-    expect(vectorService.seedArticles).toHaveLength(39);
+  it('6. Seed catalog comprehensively covers all 7 emotional dimensions and 12 physical systems across PT, ES, and EN', () => {
+    expect(vectorService.seedArticles).toHaveLength(117);
 
     const emotionalCategories = [
       'ansiosa_agitacao',
@@ -154,13 +154,18 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
       'endocrino_metabolico',
     ];
 
-    for (const cat of [...emotionalCategories, ...physicalCategories]) {
-      const matching = vectorService.seedArticles.filter((a) => a.category === cat);
-      expect(matching.length).toBeGreaterThanOrEqual(2);
-    }
+    for (const lang of ['pt', 'es', 'en']) {
+      const langArticles = vectorService.seedArticles.filter((a) => (a.language || 'pt') === lang);
+      expect(langArticles).toHaveLength(39);
 
-    const general = vectorService.seedArticles.filter((a) => a.category === 'geral');
-    expect(general).toHaveLength(1);
+      for (const cat of [...emotionalCategories, ...physicalCategories]) {
+        const matching = langArticles.filter((a) => a.category === cat);
+        expect(matching.length).toBeGreaterThanOrEqual(2);
+      }
+
+      const general = langArticles.filter((a) => a.category === 'geral');
+      expect(general).toHaveLength(1);
+    }
 
     for (const article of vectorService.seedArticles) {
       expect(article.title.length).toBeGreaterThan(5);
@@ -177,6 +182,7 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
       const seed = vectorService.seedArticles[0];
       return {
         id: seed.id,
+        language: seed.language || 'pt',
         title: seed.title,
         category: seed.category,
         somaticSystem: seed.somaticSystem ?? null,
@@ -209,6 +215,7 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
       function buildSeedRowFor(seed: (typeof vectorService.seedArticles)[number]) {
         return {
           id: seed.id,
+          language: seed.language || 'pt',
           title: seed.title,
           category: seed.category,
           somaticSystem: seed.somaticSystem ?? null,
@@ -232,6 +239,7 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
       const staleRow = buildSeedRow({ url: 'https://old-outdated-url.example.com/moved' });
       const restRows = vectorService.seedArticles.slice(1).map((seed) => ({
         id: seed.id,
+        language: seed.language || 'pt',
         title: seed.title,
         category: seed.category,
         somaticSystem: seed.somaticSystem ?? null,
@@ -271,6 +279,28 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
 
       expect(mockDb.insert).toHaveBeenCalledTimes(vectorService.seedArticles.length);
       expect(mockDb.update).not.toHaveBeenCalled();
+    });
+
+    it('10. fallback by category respects the requested language (ES, EN, PT)', async () => {
+      mockDb.execute = vi.fn().mockResolvedValue({ rows: [] });
+
+      const esResult = await vectorService.searchArticles({
+        category: 'coluna_dor_dorsal',
+        vertical: 'physical',
+        language: 'es',
+      });
+      expect(esResult.length).toBeGreaterThanOrEqual(1);
+      expect(esResult[0].id).toContain('-es');
+      expect(esResult[0].title).toContain('Dolor');
+
+      const enResult = await vectorService.searchArticles({
+        category: 'ansiosa_agitacao',
+        vertical: 'emotional',
+        language: 'en',
+      });
+      expect(enResult.length).toBeGreaterThanOrEqual(1);
+      expect(enResult[0].id).toContain('-en');
+      expect(enResult[0].title).toContain('Anxiety');
     });
   });
 });

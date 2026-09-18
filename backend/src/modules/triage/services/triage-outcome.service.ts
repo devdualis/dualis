@@ -464,9 +464,11 @@ export class TriageOutcomeService {
     let aiSource: TriageOutcomeResponseDto['aiSource'];
     let aiConfidence: number | undefined;
 
+    const userLang = (dto.language || 'pt').toLowerCase();
+
     if (this.aiTriage && narrative && narrative.trim().length >= 2) {
       try {
-        const classification = await this.aiTriage.classify({ text: narrative, language: 'pt' });
+        const classification = await this.aiTriage.classify({ text: narrative, language: userLang as any });
         aiMappedLayTerm = classification.mappedLayTerm;
         aiClinicalConcept = classification.clinicalConcept;
         aiSource = classification.source;
@@ -485,9 +487,10 @@ export class TriageOutcomeService {
         queryText: narrative,
         category: mapping.code,
         vertical,
+        language: userLang,
       });
     } else if (this.articlesCatalog) {
-      recommendedArticles = this.articlesCatalog.getArticlesForCategory(mapping.code);
+      recommendedArticles = this.articlesCatalog.getArticlesForCategory(mapping.code, userLang);
     }
 
     if (dto.clientSessionId) {
@@ -618,6 +621,7 @@ export class TriageOutcomeService {
         .returning();
     });
 
+    const userLang = (dto.language || 'pt').toLowerCase();
     let recommendedArticles: RecommendedArticleDto[] = [];
     if (this.articlesVector && narrative.length >= 2) {
       try {
@@ -628,6 +632,7 @@ export class TriageOutcomeService {
               queryText: narrative,
               category: physicalCategory,
               vertical: 'physical',
+              language: userLang,
             }),
           );
         }
@@ -637,6 +642,7 @@ export class TriageOutcomeService {
               queryText: narrative,
               category: emotionalCategory,
               vertical: 'emotional',
+              language: userLang,
             }),
           );
         }
@@ -657,10 +663,10 @@ export class TriageOutcomeService {
       const catalogResultsPerVertical: RecommendedArticleDto[][] = [];
 
       if (physicalCategory) {
-        catalogResultsPerVertical.push(this.articlesCatalog.getArticlesForCategory(physicalCategory));
+        catalogResultsPerVertical.push(this.articlesCatalog.getArticlesForCategory(physicalCategory, userLang));
       }
       if (emotionalCategory) {
-        catalogResultsPerVertical.push(this.articlesCatalog.getArticlesForCategory(emotionalCategory));
+        catalogResultsPerVertical.push(this.articlesCatalog.getArticlesForCategory(emotionalCategory, userLang));
       }
 
       const maxCatalogLen = Math.max(0, ...catalogResultsPerVertical.map((r) => r.length));
@@ -671,7 +677,7 @@ export class TriageOutcomeService {
       }
 
       if (recommendedArticles.length === 0) {
-        recommendedArticles.push(...this.articlesCatalog.getArticlesForCategory('geral'));
+        recommendedArticles.push(...this.articlesCatalog.getArticlesForCategory('geral', userLang));
       }
     }
 

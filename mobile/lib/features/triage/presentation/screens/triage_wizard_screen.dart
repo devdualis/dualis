@@ -22,6 +22,7 @@ import 'package:dualis_mobile/features/triage_outcome/domain/triage_outcome_mode
 import 'package:dualis_mobile/features/sync/data/triage_outbox_repository.dart';
 import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
 import '../../../../core/network/connectivity_service.dart';
+import '../../../../l10n/locale_provider.dart';
 import 'package:uuid/uuid.dart';
 
 class TriageWizardScreen extends ConsumerStatefulWidget {
@@ -376,6 +377,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
           final isOnline = await connectivity.checkOnline();
           final clientSessionId = const Uuid().v4();
 
+          final langCode = ref.read(localeProvider).languageCode;
           TriageOutcome outcome;
           if (isOnline) {
             try {
@@ -384,6 +386,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
                 answers: answers,
                 narrative: widget.naturalLanguageText,
                 clientSessionId: clientSessionId,
+                language: langCode,
               );
             } catch (_) {
               await ref.read(triageOutboxRepositoryProvider).enqueueTriageCheckIn(
@@ -395,6 +398,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
                 verticalStr,
                 answers,
                 widget.naturalLanguageText,
+                language: langCode,
               );
             }
           } else {
@@ -407,6 +411,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
               verticalStr,
               answers,
               widget.naturalLanguageText,
+              language: langCode,
             );
           }
 

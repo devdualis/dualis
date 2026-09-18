@@ -4,6 +4,8 @@ class TriageHistoryEntry {
   final String? anatomicalSystem;
   final String? emotionalDimension;
   final String? disposition;
+  final bool organicPrimacyApplied;
+  final String? narrative;
   final Map<String, dynamic>? stepAnswers;
   final DateTime recordedAt;
 
@@ -13,6 +15,8 @@ class TriageHistoryEntry {
     this.anatomicalSystem,
     this.emotionalDimension,
     this.disposition,
+    this.organicPrimacyApplied = false,
+    this.narrative,
     this.stepAnswers,
     required this.recordedAt,
   });
@@ -24,6 +28,8 @@ class TriageHistoryEntry {
       anatomicalSystem: json['anatomicalSystem'] as String?,
       emotionalDimension: json['emotionalDimension'] as String?,
       disposition: json['disposition'] as String?,
+      organicPrimacyApplied: json['organicPrimacyApplied'] as bool? ?? false,
+      narrative: json['narrative'] as String?,
       stepAnswers: json['stepAnswers'] != null && json['stepAnswers'] is Map
           ? Map<String, dynamic>.from(json['stepAnswers'] as Map)
           : null,
@@ -38,6 +44,8 @@ class TriageHistoryEntry {
       'anatomicalSystem': anatomicalSystem,
       'emotionalDimension': emotionalDimension,
       'disposition': disposition,
+      'organicPrimacyApplied': organicPrimacyApplied,
+      if (narrative != null) 'narrative': narrative,
       'stepAnswers': stepAnswers,
       'recordedAt': recordedAt.toIso8601String(),
     };

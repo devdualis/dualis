@@ -6,6 +6,7 @@ import '../../../dashboard/domain/models/triage_history_models.dart';
 import '../../data/triage_outcome_remote_data_source.dart';
 import '../../domain/curated_articles_catalog.dart';
 import '../../domain/triage_outcome_models.dart';
+import '../../../../l10n/locale_provider.dart';
 
 final triageOutcomeDataSourceProvider = Provider<TriageOutcomeRemoteDataSource>((ref) {
   final secureStorage = ref.watch(secureStorageServiceProvider);
@@ -105,9 +106,10 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
   TriageOutcome? _buildOutcomeFromHistoryEntry(TriageHistoryEntry log) {
     final isPhysical = log.anatomicalSystem != null && log.anatomicalSystem != 'geral_emocional';
     final isDual = log.anatomicalSystem != null && log.emotionalDimension != null;
+    final isOrganicPrimacy = log.organicPrimacyApplied || isDual;
 
     final primaryCode = log.anatomicalSystem ?? log.emotionalDimension ?? 'geral';
-    final narrative = log.stepAnswers?['naturalLanguageText'] as String? ?? '';
+    final narrative = log.narrative ?? log.stepAnswers?['naturalLanguageText'] as String? ?? '';
 
     final articles = CuratedArticlesCatalog.getArticlesForSymptoms(
       queryText: narrative,
@@ -125,8 +127,8 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
       primaryCategory: primaryCode,
       categoryLabel: _mapCategoryLabel(primaryCode),
       somaticMapping: _mapSomaticDescription(primaryCode),
-      organicPrimacyApplied: isDual,
-      organicPrimacyNotice: isDual
+      organicPrimacyApplied: isOrganicPrimacy,
+      organicPrimacyNotice: isOrganicPrimacy
           ? 'Atenção Clínica (Primazia Orgânica): Sintomas físicos concorrentes exigem que causas orgânicas sejam avaliadas presencialmente por um médico antes de atribuí-los unicamente ao estresse psicológico.'
           : null,
       recommendedArticles: articles,
@@ -158,6 +160,9 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
       case 'coluna_dor_lombar':
       case 'coluna':
         return 'Coluna e Dor Lombar';
+      case 'coluna_dor_dorsal':
+      case 'coluna_dorsal':
+        return 'Coluna e Dor Dorsal';
       case 'membros_superiores':
         return 'Membros Superiores e Articulações';
       case 'membros_inferiores':
@@ -165,6 +170,7 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
       case 'dermatologico':
         return 'Dermatológico / Pele';
       case 'muscular_geral_sistemico':
+        return 'Sistema Muscular / Geral Sistêmico';
       case 'geral_fisico':
         return 'Avaliação Física Geral';
       case 'ansiosa_agitacao':
@@ -179,9 +185,14 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
       case 'cognitiva_foco':
         return 'Cognição e Foco';
       case 'sono_vigilia':
-        return 'Sono e Vigília';
+      case 'sono':
+        return 'Sono e Ritmo Circadiano';
+      case 'somatica':
+      case 'somatico':
       case 'somatizacao_tensao':
-        return 'Somatização e Tensão Corporal';
+        return 'Dimensão Somática (Psicossomática)';
+      case 'autoestima':
+        return 'Autoestima e Autoimagem';
       case 'geral_emocional':
         return 'Avaliação Psico-Emocional Geral';
       default:
@@ -195,21 +206,49 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
         return 'Prurido cutâneo / Desconforto na pele';
       case 'membros_superiores':
         return 'Desconforto musculoesquelético nos braços e ombros';
+      case 'membros_inferiores':
+        return 'Desconforto musculoesquelético nos membros inferiores';
       case 'cabeca_pescoco':
       case 'cabeca':
         return 'Cefaleia / Desconforto crânio-cervical';
       case 'cardiovascular_torax':
+      case 'cardiovascular':
         return 'Sensação de aperto torácico ou palpitação funcional';
+      case 'respiratorio':
+        return 'Desconforto respiratório ou cansaço aos esforços';
+      case 'gastrointestinal_abdomen':
+      case 'abdomen':
+        return 'Desconforto abdominal ou queixa digestiva';
       case 'coluna_dor_lombar':
+      case 'coluna':
         return 'Desconforto na coluna / Lombalgia tensional';
+      case 'coluna_dor_dorsal':
+      case 'coluna_dorsal':
+        return 'Desconforto musculoesquelético dorsal / Tensão escapular';
+      case 'muscular_geral_sistemico':
+        return 'Dores musculares difusas ou tensão corporal';
       case 'geral_fisico':
         return 'Desconforto somático ou queixa física reportada';
       case 'depressiva_desanimo':
+      case 'tristeza':
         return 'Desânimo / Fadiga emocional transitória';
       case 'ansiosa_agitacao':
+      case 'ansiedade':
         return 'Tensão psicomotora / Ansiedade antecipatória';
       case 'estresse_burnout':
+      case 'estresse':
         return 'Exaustão emocional / Sobrecarga de estresse';
+      case 'cognitiva_foco':
+        return 'Dificuldade de concentração ou sobrecarga cognitiva';
+      case 'sono_vigilia':
+      case 'sono':
+        return 'Desregulação do padrão de sono / Fadiga circadiana';
+      case 'somatica':
+      case 'somatico':
+      case 'somatizacao_tensao':
+        return 'Manifestação somatizada de sobrecarga emocional (nó na garganta / aperto torácico)';
+      case 'autoestima':
+        return 'Insegurança emocional / Autocrítica acentuada';
       case 'geral_emocional':
         return 'Alteração no bem-estar psico-emocional';
       default:
@@ -292,15 +331,18 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
     required Map<int, String> answers,
     String? narrative,
     String? token,
+    String? language,
   }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final dataSource = ref.read(triageOutcomeDataSourceProvider);
+      final lang = language ?? ref.read(localeProvider).languageCode;
       final outcome = await dataSource.submitTriage(
         vertical: vertical,
         answers: answers,
         narrative: narrative,
         token: token,
+        language: lang,
       );
       state = state.copyWith(isLoading: false, outcome: outcome);
       await _persistOutcome(outcome);

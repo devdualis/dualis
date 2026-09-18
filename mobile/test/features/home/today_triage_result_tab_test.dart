@@ -193,5 +193,42 @@ void main() {
       await tester.pumpAndSettle();
       expect(calledGoToCheckIn, isTrue);
     });
+
+    testWidgets('Renders full triage outcome even when triggerCheckInState is goodNormal (Bug Regression)',
+        (WidgetTester tester) async {
+      final mockOutcome = TriageOutcome(
+        id: 'out-regression-1',
+        vertical: 'emotional',
+        intensityScore: 3,
+        careDisposition: CareDisposition.routineConsultation,
+        primaryCategory: 'somatica',
+        categoryLabel: 'Dimensão Somática (Psicossomática)',
+        somaticMapping: 'Manifestação somatizada de sobrecarga emocional (nó na garganta / aperto torácico)',
+        organicPrimacyApplied: true,
+        organicPrimacyNotice: 'Atenção Clínica (Primazia Orgânica): Sintomas físicos concorrentes exigem que causas orgânicas sejam avaliadas presencialmente por um médico antes de atribuí-los unicamente ao estresse psicológico.',
+        recommendedArticles: const [],
+        recordedAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(
+        createTestWrapper(
+          child: TodayTriageResultTab(onGoToCheckIn: () {}),
+          outcome: mockOutcome,
+          // Even if triggerCheckInState is goodNormal (wellness), outcome takes precedence!
+          triggerCheckInState: const TriggerCheckInState(
+            isCompletedToday: true,
+            emotionalStatus: TriggerStatus.goodNormal,
+            physicalStatus: TriggerStatus.goodNormal,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Must render full outcome, NOT wellness view
+      expect(find.text('Dimensão Somática (Psicossomática)'), findsOneWidget);
+      expect(find.text('Triagem Concluída'), findsOneWidget);
+      expect(find.textContaining('Primazia Orgânica'), findsWidgets);
+      expect(find.text('Check-in de Bem-Estar Confirmado'), findsNothing);
+    });
   });
 }
