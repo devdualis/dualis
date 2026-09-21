@@ -19,11 +19,13 @@ class WaterConsumptionChart extends StatelessWidget {
       return _buildEmptyState();
     }
 
-    final entries = last7DaysTotals.entries.toList()
-      ..sort((a, b) => a.key.compareTo(b.key));
+    final entries =
+        last7DaysTotals.entries.toList()
+          ..sort((a, b) => a.key.compareTo(b.key));
 
     final totalMlSum = entries.fold<int>(0, (sum, e) => sum + e.value);
-    final averageMl = entries.isNotEmpty ? (totalMlSum / entries.length).round() : 0;
+    final averageMl =
+        entries.isNotEmpty ? (totalMlSum / entries.length).round() : 0;
     final daysGoalMet = entries.where((e) => e.value >= dailyTargetMl).length;
 
     final maxVal = entries.fold<int>(
@@ -42,9 +44,14 @@ class WaterConsumptionChart extends StatelessWidget {
           barRods: [
             BarChartRodData(
               toY: item.value.toDouble(),
-              color: isMet ? AppColors.clinicalTealDark : AppColors.clinicalTeal.withValues(alpha: 0.75),
+              color:
+                  isMet
+                      ? AppColors.clinicalTealDark
+                      : AppColors.clinicalTeal.withValues(alpha: 0.75),
               width: 16,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(6),
+              ),
               backDrawRodData: BackgroundBarChartRodData(
                 show: true,
                 toY: maxY,
@@ -76,52 +83,66 @@ class WaterConsumptionChart extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.clinicalTeal.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(
-                            Icons.bar_chart_rounded,
-                            color: AppColors.clinicalTealDark,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Consumo de Água (7 Dias)',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimaryLight,
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppColors.clinicalTeal.withValues(
+                                alpha: 0.12,
                               ),
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            Text(
-                              'Meta diária: $dailyTargetMl ml',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                color: AppColors.textSecondaryLight,
-                              ),
+                            child: const Icon(
+                              Icons.bar_chart_rounded,
+                              color: AppColors.clinicalTealDark,
+                              size: 20,
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Consumo de Água (7 Dias)',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textPrimaryLight,
+                                  ),
+                                ),
+                                Text(
+                                  'Meta diária: $dailyTargetMl ml',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondaryLight,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.softIndigo.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.check_circle_outline, size: 14, color: AppColors.softIndigo),
+                          const Icon(
+                            Icons.check_circle_outline,
+                            size: 14,
+                            color: AppColors.softIndigo,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             '$daysGoalMet/7 metas',
@@ -166,8 +187,12 @@ class WaterConsumptionChart extends StatelessWidget {
                       ),
                       titlesData: FlTitlesData(
                         show: true,
-                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
                         leftTitles: AxisTitles(
                           sideTitles: SideTitles(
                             showTitles: true,
@@ -194,21 +219,35 @@ class WaterConsumptionChart extends StatelessWidget {
                                 return const SizedBox.shrink();
                               }
                               final date = entries[idx].key;
-                              const ptWeekdays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-                              final dayName = ptWeekdays[(date.weekday - 1).clamp(0, 6)];
-                              final dayNum = date.day.toString().padLeft(2, '0');
+                              const ptWeekdays = [
+                                'Seg',
+                                'Ter',
+                                'Qua',
+                                'Qui',
+                                'Sex',
+                                'Sáb',
+                                'Dom',
+                              ];
+                              final dayName =
+                                  ptWeekdays[(date.weekday - 1).clamp(0, 6)];
+                              final dayNum = date.day.toString().padLeft(
+                                2,
+                                '0',
+                              );
                               return Padding(
                                 padding: const EdgeInsets.only(top: 6),
                                 child: Text(
                                   '$dayName $dayNum',
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 10,
-                                    fontWeight: idx == entries.length - 1
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    color: idx == entries.length - 1
-                                        ? AppColors.clinicalTealDark
-                                        : AppColors.textSecondaryLight,
+                                    fontWeight:
+                                        idx == entries.length - 1
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                    color:
+                                        idx == entries.length - 1
+                                            ? AppColors.clinicalTealDark
+                                            : AppColors.textSecondaryLight,
                                   ),
                                 ),
                               );
@@ -223,9 +262,11 @@ class WaterConsumptionChart extends StatelessWidget {
                           getTooltipColor: (group) => AppColors.surfaceDark,
                           getTooltipItem: (group, groupIndex, rod, rodIndex) {
                             final date = entries[group.x].key;
-                            final dateFormatted = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}';
+                            final dateFormatted =
+                                '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}';
                             final val = rod.toY.toInt();
-                            final percentage = ((val / dailyTargetMl) * 100).round();
+                            final percentage =
+                                ((val / dailyTargetMl) * 100).round();
                             return BarTooltipItem(
                               '$dateFormatted\n$val ml ($percentage%)',
                               GoogleFonts.plusJakartaSans(
@@ -247,10 +288,21 @@ class WaterConsumptionChart extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildMetricCol('Hoje', '${entries.isNotEmpty ? entries.last.value : 0} ml'),
-                    Container(height: 24, width: 1, color: Colors.grey.shade300),
+                    _buildMetricCol(
+                      'Hoje',
+                      '${entries.isNotEmpty ? entries.last.value : 0} ml',
+                    ),
+                    Container(
+                      height: 24,
+                      width: 1,
+                      color: Colors.grey.shade300,
+                    ),
                     _buildMetricCol('Média 7 dias', '$averageMl ml'),
-                    Container(height: 24, width: 1, color: Colors.grey.shade300),
+                    Container(
+                      height: 24,
+                      width: 1,
+                      color: Colors.grey.shade300,
+                    ),
                     _buildMetricCol('Meta', '$dailyTargetMl ml'),
                   ],
                 ),
@@ -294,7 +346,11 @@ class WaterConsumptionChart extends StatelessWidget {
         child: Center(
           child: Column(
             children: [
-              const Icon(Icons.water_drop_outlined, size: 40, color: Colors.grey),
+              const Icon(
+                Icons.water_drop_outlined,
+                size: 40,
+                color: Colors.grey,
+              ),
               const SizedBox(height: 8),
               Text(
                 'Nenhum registro de consumo de água ainda.',
