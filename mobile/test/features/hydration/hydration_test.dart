@@ -7,6 +7,7 @@ import 'package:dualis_mobile/features/hydration/presentation/controllers/hydrat
 import 'package:dualis_mobile/features/hydration/presentation/widgets/water_consumption_chart.dart';
 import 'package:dualis_mobile/features/hydration/presentation/widgets/water_intake_modal.dart';
 import 'package:dualis_mobile/features/home/presentation/widgets/home_hydration_card.dart';
+import 'package:dualis_mobile/core/notifications/hydration_notification_service.dart';
 
 class FakeHydrationController extends HydrationController {
   final HydrationState _initialState;
@@ -347,6 +348,24 @@ void main() {
       expect(find.text('750 de 2000 ml atingidos hoje (38%)'), findsOneWidget);
       expect(find.text('+250 ml (Copo)'), findsOneWidget);
       expect(find.byIcon(Icons.water_drop_rounded), findsWidgets);
+    });
+  });
+
+  group('HydrationNotificationService', () {
+    test('canScheduleExactAlarms returns false safely when plugin is uninitialized', () async {
+      final service = HydrationNotificationService();
+      final result = await service.canScheduleExactAlarms();
+      expect(result, isFalse);
+    });
+
+    test('scheduleHydrationReminders when disabled does not throw', () async {
+      final service = HydrationNotificationService();
+      const settings = HydrationSettings(reminderEnabled: false);
+      // Should complete normally without throwing
+      await expectLater(
+        service.scheduleHydrationReminders(settings),
+        completes,
+      );
     });
   });
 }

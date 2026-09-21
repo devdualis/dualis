@@ -9,6 +9,7 @@ import { ArticlesCatalogService } from './articles-catalog.service';
 import { ArticlesVectorService } from './articles-vector.service';
 import { MEDICAL_ARTICLES_SEED } from '../data/medical-articles.seed';
 import { AiTriageService } from '../../ai/services/ai-triage.service';
+import { TriageClassificationResult } from '../../ai/dto/classify-symptom.dto';
 import {
   CareDisposition,
   RecommendedArticleDto,
@@ -431,17 +432,92 @@ export class TriageOutcomeService {
       }
     }
 
+    const userLang = (dto.language || 'pt').toLowerCase();
+
+    let aiMappedLayTerm: string | undefined;
+    let aiClinicalConcept: string | undefined;
+    let aiSource: TriageOutcomeResponseDto['aiSource'];
+    let aiConfidence: number | undefined;
+    let classification: TriageClassificationResult | undefined;
+
+    if (this.aiTriage && narrative && narrative.trim().length >= 2) {
+      try {
+        classification = await this.aiTriage.classify({ text: narrative, language: userLang as any });
+        aiMappedLayTerm = classification.mappedLayTerm;
+        aiClinicalConcept = classification.clinicalConcept;
+        aiSource = classification.source;
+        aiConfidence = classification.confidence;
+      } catch (err) {
+        this.logger.warn(`AI classification of narrative failed: ${(err as Error).message}`);
+      }
+    }
+
     let organicPrimacyApplied = false;
     let organicPrimacyNotice: string | undefined;
+    let secondaryCategoryLabel: string | undefined;
+    let secondarySomaticMapping: string | undefined;
+    let secondaryIntensityScore: number | undefined;
+    let isCrossVerticalSomatic = false;
+    let crossVerticalContextNote: string | undefined;
 
-    const somaticKeywords = ['peito', 'coraç', 'ar', 'respir', 'garganta', 'estômago', 'nó', 'aperto'];
+    const somaticKeywords = ['peito', 'coraç', 'ar', 'respir', 'garganta', 'estômago', 'nó', 'aperto', 'cabeça', 'cabeca', 'dor'];
     const narrativeHasSomatic = narrative && somaticKeywords.some((kw) => narrative.toLowerCase().includes(kw));
     const isPsychosomaticDimension = step1 === 'somatico' || step1 === 'somatica';
+    const narrativeIsPhysical = classification?.primaryVertical === 'physical';
 
-    if (vertical === 'emotional' && (narrativeHasSomatic || isPsychosomaticDimension)) {
-      organicPrimacyApplied = true;
-      organicPrimacyNotice =
-        'Atenção Clínica (Primazia Orgânica): Sintomas físicos concorrentes exigem que causas orgânicas sejam avaliadas presencialmente por um médico antes de atribuí-los unicamente ao estresse psicológico.';
+    if (vertical === 'emotional') {
+      if (narrativeIsPhysical || narrativeHasSomatic || isPsychosomaticDimension) {
+        organicPrimacyApplied = true;
+        organicPrimacyNotice =
+          'Atenção Clínica (Primazia Orgânica): Sintomas físicos concorrentes exigem que causas orgânicas sejam avaliadas presencialmente por um médico antes de atribuí-los unicamente ao estresse psicológico.';
+      }
+
+      if (narrativeIsPhysical && classification) {
+        const physicalCategory = this.physicalMappings[classification.systemOrDimension];
+        if (physicalCategory) {
+          secondaryCategoryLabel = physicalCategory.label;
+          secondarySomaticMapping = physicalCategory.somaticNormalized;
+        } else {
+          secondaryCategoryLabel = 'Avaliação Física';
+          secondarySomaticMapping = 'Sintoma físico relatado';
+        }
+        secondaryIntensityScore = classification.urgencyScore ?? intensityScore;
+        isCrossVerticalSomatic = true;
+        if (userLang === 'es') {
+          crossVerticalContextNote =
+            'Manifestación física concurrente identificada en el relato. En cuadros de ansiedad y tensión psicomotora, las cefaleas y dolores musculares son frecuentes como somatización, pero requieren valoración médica para descartar causas orgánicas primarias.';
+        } else if (userLang === 'en') {
+          crossVerticalContextNote =
+            'Concurrent physical symptom identified in narrative. In cases of anxiety and psychomotor tension, headaches and muscle tension are common somatic manifestations, but require medical evaluation to rule out primary organic causes.';
+        } else {
+          crossVerticalContextNote =
+            'Manifestação física concorrente identificada no relato. Em quadros de ansiedade e tensão psicomotora, cefaleias e dores musculares são frequentes como somatização, mas exigem avaliação clínica para descartar causas orgânicas primárias.';
+        }
+      }
+    } else if (vertical === 'physical') {
+      const narrativeIsEmotional = classification?.primaryVertical === 'emotional';
+      if (narrativeIsEmotional && classification) {
+        const emotionalCategory = this.emotionalMappings[classification.systemOrDimension];
+        if (emotionalCategory) {
+          secondaryCategoryLabel = emotionalCategory.label;
+          secondarySomaticMapping = emotionalCategory.somaticNormalized;
+        } else {
+          secondaryCategoryLabel = 'Dimensão Emocional';
+          secondarySomaticMapping = 'Componente emocional relatado';
+        }
+        secondaryIntensityScore = classification.urgencyScore ?? intensityScore;
+        isCrossVerticalSomatic = true;
+        if (userLang === 'es') {
+          crossVerticalContextNote =
+            'Factor psicoemocional concurrente identificado en el relato que puede amplificar la percepción del malestar físico.';
+        } else if (userLang === 'en') {
+          crossVerticalContextNote =
+            'Concurrent psycho-emotional factor identified in narrative that may amplify physical discomfort perception.';
+        } else {
+          crossVerticalContextNote =
+            'Fator psicoemocional concorrente identificado no relato que pode amplificar a percepção de desconforto físico.';
+        }
+      }
     }
 
     let careDisposition: CareDisposition;
@@ -459,26 +535,8 @@ export class TriageOutcomeService {
       careDisposition = 'consulta_rotina';
     }
 
-    let aiMappedLayTerm: string | undefined;
-    let aiClinicalConcept: string | undefined;
-    let aiSource: TriageOutcomeResponseDto['aiSource'];
-    let aiConfidence: number | undefined;
-
-    const userLang = (dto.language || 'pt').toLowerCase();
-
-    if (this.aiTriage && narrative && narrative.trim().length >= 2) {
-      try {
-        const classification = await this.aiTriage.classify({ text: narrative, language: userLang as any });
-        aiMappedLayTerm = classification.mappedLayTerm;
-        aiClinicalConcept = classification.clinicalConcept;
-        aiSource = classification.source;
-        aiConfidence = classification.confidence;
-        if (classification.isEmergencyCandidate) {
-          careDisposition = 'emergencia';
-        }
-      } catch (err) {
-        this.logger.warn(`AI classification of narrative failed: ${(err as Error).message}`);
-      }
+    if (classification?.isEmergencyCandidate) {
+      careDisposition = 'emergencia';
     }
 
     let recommendedArticles: RecommendedArticleDto[] = [];
@@ -517,6 +575,11 @@ export class TriageOutcomeService {
           organicPrimacyNotice,
           recommendedArticles,
           recordedAt: record.recordedAt.toISOString(),
+          secondaryCategoryLabel,
+          secondarySomaticMapping,
+          secondaryIntensityScore,
+          isCrossVerticalSomatic,
+          crossVerticalContextNote,
           aiMappedLayTerm,
           aiClinicalConcept,
           aiSource,
@@ -536,8 +599,12 @@ export class TriageOutcomeService {
           userId,
           encryptedNarrative,
           intensity: intensityScore,
-          anatomicalSystem: vertical === 'physical' ? mapping.code : null,
-          emotionalDimension: vertical === 'emotional' ? mapping.code : null,
+          anatomicalSystem: vertical === 'physical'
+            ? mapping.code
+            : (isCrossVerticalSomatic && classification ? classification.systemOrDimension : null),
+          emotionalDimension: vertical === 'emotional'
+            ? mapping.code
+            : (isCrossVerticalSomatic && classification ? classification.systemOrDimension : null),
           disposition: careDisposition,
           organicPrimacyApplied,
           stepAnswers: encryptedStepAnswers,
@@ -559,6 +626,11 @@ export class TriageOutcomeService {
       organicPrimacyNotice,
       recommendedArticles,
       recordedAt: savedRecord.recordedAt.toISOString(),
+      secondaryCategoryLabel,
+      secondarySomaticMapping,
+      secondaryIntensityScore,
+      isCrossVerticalSomatic,
+      crossVerticalContextNote,
       aiMappedLayTerm,
       aiClinicalConcept,
       aiSource,

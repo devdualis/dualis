@@ -113,18 +113,49 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
             latestLog.anatomicalSystem != 'geral_emocional';
         final intensity = latestLog.intensity;
 
+        TriggerStatus? findOtherAxisInTodayLogs(bool lookForPhysical) {
+          for (final log in todayLogs) {
+            if (log.id == latestLog.id) continue;
+            if (lookForPhysical) {
+              if (log.stepAnswers?['type'] == 'daily_checkin' &&
+                  log.stepAnswers?['physicalStatus'] != null) {
+                return _parseTriggerStatus(log.stepAnswers!['physicalStatus']);
+              }
+              if ((log.anatomicalSystem != null &&
+                      log.anatomicalSystem != 'geral_emocional') ||
+                  log.organicPrimacyApplied) {
+                return intensityToStatus(log.intensity);
+              }
+            } else {
+              if (log.stepAnswers?['type'] == 'daily_checkin' &&
+                  log.stepAnswers?['emotionalStatus'] != null) {
+                return _parseTriggerStatus(log.stepAnswers!['emotionalStatus']);
+              }
+              if (log.emotionalDimension != null ||
+                  log.anatomicalSystem == 'geral_emocional') {
+                return intensityToStatus(log.intensity);
+              }
+            }
+          }
+          return null;
+        }
+
         if (isPhysical) {
           physicalStatus = intensityToStatus(intensity);
           emotionalStatus = latestLog.emotionalDimension != null
               ? intensityToStatus(intensity)
-              : TriggerStatus.goodNormal;
+              : (findOtherAxisInTodayLogs(false) ??
+                  state.emotionalStatus ??
+                  TriggerStatus.goodNormal);
         } else {
           emotionalStatus = intensityToStatus(intensity);
           physicalStatus = (latestLog.organicPrimacyApplied ||
                   (latestLog.anatomicalSystem != null &&
                       latestLog.anatomicalSystem != 'geral_emocional'))
               ? intensityToStatus(intensity)
-              : TriggerStatus.goodNormal;
+              : (findOtherAxisInTodayLogs(true) ??
+                  state.physicalStatus ??
+                  TriggerStatus.goodNormal);
         }
 
         if (latestLog.narrative != null && latestLog.narrative!.isNotEmpty) {
@@ -222,8 +253,16 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       final vertical = classification.primaryVertical == 'emotional'
           ? TriageVertical.psicoEmocional
           : TriageVertical.fisica;
-      final isDual = state.emotionalStatus != TriggerStatus.goodNormal &&
-          state.physicalStatus != TriggerStatus.goodNormal;
+      final hasCrossVertical = (classification.primaryVertical == 'physical' &&
+              state.emotionalStatus != null &&
+              state.emotionalStatus != TriggerStatus.goodNormal) ||
+          (classification.primaryVertical == 'emotional' &&
+              state.physicalStatus != null &&
+              state.physicalStatus != TriggerStatus.goodNormal);
+
+      final isDual = (state.emotionalStatus != TriggerStatus.goodNormal &&
+              state.physicalStatus != TriggerStatus.goodNormal) ||
+          hasCrossVertical;
 
       return TriageNavigationArgs(
         initialVertical: vertical,
@@ -256,7 +295,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
         final secScore = outcome.secondaryIntensityScore ?? outcome.intensityScore;
         emotionalStatus = statusFromIntensity(secScore);
       } else {
-        emotionalStatus = TriggerStatus.goodNormal;
+        emotionalStatus = state.emotionalStatus ?? TriggerStatus.goodNormal;
       }
     } else {
       emotionalStatus = statusFromIntensity(outcome.intensityScore);
@@ -264,7 +303,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
         final secScore = outcome.secondaryIntensityScore ?? outcome.intensityScore;
         physicalStatus = statusFromIntensity(secScore);
       } else {
-        physicalStatus = TriggerStatus.goodNormal;
+        physicalStatus = state.physicalStatus ?? TriggerStatus.goodNormal;
       }
     }
 

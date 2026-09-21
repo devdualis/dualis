@@ -72,8 +72,24 @@ class TriageOutcomeRemoteDataSource {
       }
     }
 
+    final somaticKeywords = [
+      'peito',
+      'coraç',
+      'ar',
+      'respir',
+      'garganta',
+      'estômago',
+      'nó',
+      'aperto',
+      'cabeça',
+      'cabeca',
+      'costas',
+      'dor',
+    ];
     final isSomatic = vertical == 'emotional' &&
-        (step1 == 'somatico' || (narrative != null && narrative.toLowerCase().contains('peito')));
+        (step1 == 'somatico' ||
+            (narrative != null &&
+                somaticKeywords.any((kw) => narrative.toLowerCase().contains(kw))));
 
     CareDisposition disposition;
     if (score <= 2) {
@@ -341,6 +357,40 @@ class TriageOutcomeRemoteDataSource {
       ];
     }
 
+    String? secondaryCategoryLabel;
+    String? secondarySomaticMapping;
+    String? aiClinicalConcept;
+    String? aiMappedLayTerm;
+    bool isCrossVerticalSomatic = false;
+    String? crossVerticalContextNote;
+
+    if (vertical == 'emotional') {
+      if (matchTarget.contains('cabeca') ||
+          matchTarget.contains('cabeza') ||
+          matchTarget.contains('head') ||
+          matchTarget.contains('migraine') ||
+          matchTarget.contains('enxaqueca') ||
+          matchTarget.contains('cefaleia')) {
+        secondaryCategoryLabel = 'Cabeça e Pescoço';
+        secondarySomaticMapping = 'Cefaleia / Desconforto crânio-cervical';
+        aiClinicalConcept = 'cefaleia tensional / migrânea';
+        aiMappedLayTerm = 'dor de cabeça';
+        isCrossVerticalSomatic = true;
+        crossVerticalContextNote =
+            'Manifestação física concorrente identificada no relato. Em quadros de ansiedade e tensão psicomotora, cefaleias e dores musculares são frequentes como somatização, mas exigem avaliação clínica para descartar causas orgânicas primárias.';
+      } else if (matchTarget.contains('costas') ||
+          matchTarget.contains('coluna') ||
+          matchTarget.contains('lombar')) {
+        secondaryCategoryLabel = 'Coluna e Dor Dorsal';
+        secondarySomaticMapping = 'Dor lombar / Tensão paravertebral postural';
+        aiClinicalConcept = 'lombalgia mecânica / postural';
+        aiMappedLayTerm = 'dor nas costas';
+        isCrossVerticalSomatic = true;
+        crossVerticalContextNote =
+            'Manifestação física concorrente identificada no relato. Exige avaliação clínica para descartar causas orgânicas primárias.';
+      }
+    }
+
     return TriageOutcome(
       id: 'offline-${DateTime.now().millisecondsSinceEpoch}',
       vertical: vertical,
@@ -355,6 +405,12 @@ class TriageOutcomeRemoteDataSource {
           : null,
       recommendedArticles: articles,
       recordedAt: DateTime.now(),
+      secondaryCategoryLabel: secondaryCategoryLabel,
+      secondarySomaticMapping: secondarySomaticMapping,
+      aiClinicalConcept: aiClinicalConcept,
+      aiMappedLayTerm: aiMappedLayTerm,
+      isCrossVerticalSomatic: isCrossVerticalSomatic,
+      crossVerticalContextNote: crossVerticalContextNote,
     );
   }
 }

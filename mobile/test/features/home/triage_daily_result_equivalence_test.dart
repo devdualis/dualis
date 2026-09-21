@@ -75,6 +75,8 @@ TriageOutcome createBaseMockOutcome({
   String? aiMappedLayTerm,
   String? aiClinicalConcept,
   String? aiSource,
+  bool isCrossVerticalSomatic = false,
+  String? crossVerticalContextNote,
   List<RecommendedArticle>? recommendedArticles,
   DateTime? recordedAt,
 }) {
@@ -94,6 +96,8 @@ TriageOutcome createBaseMockOutcome({
     aiMappedLayTerm: aiMappedLayTerm,
     aiClinicalConcept: aiClinicalConcept,
     aiSource: aiSource,
+    isCrossVerticalSomatic: isCrossVerticalSomatic,
+    crossVerticalContextNote: crossVerticalContextNote,
     recommendedArticles: recommendedArticles ??
         const [
           RecommendedArticle(
@@ -1041,6 +1045,8 @@ void main() {
         aiClinicalConcept: 'Broncoespasmo Funcional Leve',
         aiMappedLayTerm: 'falta de ar ao cansar',
         aiSource: 'gemini',
+        isCrossVerticalSomatic: true,
+        crossVerticalContextNote: 'Nota de contexto cruzado',
       );
 
       final json = original.toJson();
@@ -1061,8 +1067,53 @@ void main() {
       expect(restored.aiClinicalConcept, original.aiClinicalConcept);
       expect(restored.aiMappedLayTerm, original.aiMappedLayTerm);
       expect(restored.aiSource, original.aiSource);
+      expect(restored.isCrossVerticalSomatic, original.isCrossVerticalSomatic);
+      expect(restored.crossVerticalContextNote, original.crossVerticalContextNote);
       expect(restored.recommendedArticles.length, original.recommendedArticles.length);
       expect(restored.recordedAt.toIso8601String(), original.recordedAt.toIso8601String());
+    });
+
+    testWidgets(
+        '36. AiInsightCard renders Manifestação Somática Concomitante and crossVerticalContextNote when isCrossVerticalSomatic is true on both screens',
+        (WidgetTester tester) async {
+      final outcome = createBaseMockOutcome(
+        vertical: 'emotional',
+        primaryCategory: 'ansiedade_agitacao',
+        categoryLabel: 'Dimensão Ansiosa / Agitação',
+        somaticMapping: 'Ansiedade antecipatória / Tensão psicomotora',
+        aiClinicalConcept: 'cefaleia tensional / migrânea',
+        aiMappedLayTerm: 'dor de cabeça',
+        aiSource: 'gemini',
+        isCrossVerticalSomatic: true,
+        crossVerticalContextNote:
+            'A cefaleia foi identificada como manifestação somática concomitante à tensão psicomotora.',
+      );
+
+      await tester.pumpWidget(createDualEquivalenceWrapper(
+        child: TodayTriageResultTab(onGoToCheckIn: () {}),
+        outcome: outcome,
+      ));
+      await tester.pumpAndSettle();
+      expect(find.text('Manifestação Somática Concomitante'), findsOneWidget);
+      expect(
+        find.text(
+            'A cefaleia foi identificada como manifestação somática concomitante à tensão psicomotora.'),
+        findsOneWidget,
+      );
+      expect(find.text('Sintoma físico relatado no check-in'), findsOneWidget);
+
+      await tester.pumpWidget(createDualEquivalenceWrapper(
+        child: TriageOutcomeScreen(outcome: outcome),
+        outcome: outcome,
+      ));
+      await tester.pumpAndSettle();
+      expect(find.text('Manifestação Somática Concomitante'), findsOneWidget);
+      expect(
+        find.text(
+            'A cefaleia foi identificada como manifestação somática concomitante à tensão psicomotora.'),
+        findsOneWidget,
+      );
+      expect(find.text('Sintoma físico relatado no check-in'), findsOneWidget);
     });
   });
 }

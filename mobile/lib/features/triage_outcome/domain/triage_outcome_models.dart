@@ -80,6 +80,8 @@ class TriageOutcome {
   final String? aiClinicalConcept;
   final String? aiSource;
   final double? aiConfidence;
+  final bool isCrossVerticalSomatic;
+  final String? crossVerticalContextNote;
 
   const TriageOutcome({
     required this.id,
@@ -100,6 +102,8 @@ class TriageOutcome {
     this.aiClinicalConcept,
     this.aiSource,
     this.aiConfidence,
+    this.isCrossVerticalSomatic = false,
+    this.crossVerticalContextNote,
   });
 
   factory TriageOutcome.fromJson(Map<String, dynamic> json) {
@@ -125,6 +129,8 @@ class TriageOutcome {
       aiClinicalConcept: json['aiClinicalConcept'] as String?,
       aiSource: json['aiSource'] as String?,
       aiConfidence: (json['aiConfidence'] as num?)?.toDouble(),
+      isCrossVerticalSomatic: json['isCrossVerticalSomatic'] as bool? ?? false,
+      crossVerticalContextNote: json['crossVerticalContextNote'] as String?,
     );
   }
 
@@ -147,6 +153,8 @@ class TriageOutcome {
     String? aiClinicalConcept,
     String? aiSource,
     double? aiConfidence,
+    bool? isCrossVerticalSomatic,
+    String? crossVerticalContextNote,
   }) {
     return TriageOutcome(
       id: id ?? this.id,
@@ -167,6 +175,8 @@ class TriageOutcome {
       aiClinicalConcept: aiClinicalConcept ?? this.aiClinicalConcept,
       aiSource: aiSource ?? this.aiSource,
       aiConfidence: aiConfidence ?? this.aiConfidence,
+      isCrossVerticalSomatic: isCrossVerticalSomatic ?? this.isCrossVerticalSomatic,
+      crossVerticalContextNote: crossVerticalContextNote ?? this.crossVerticalContextNote,
     );
   }
 
@@ -189,5 +199,7 @@ class TriageOutcome {
         if (aiClinicalConcept != null) 'aiClinicalConcept': aiClinicalConcept,
         if (aiSource != null) 'aiSource': aiSource,
         if (aiConfidence != null) 'aiConfidence': aiConfidence,
+        if (isCrossVerticalSomatic) 'isCrossVerticalSomatic': isCrossVerticalSomatic,
+        if (crossVerticalContextNote != null) 'crossVerticalContextNote': crossVerticalContextNote,
       };
 }

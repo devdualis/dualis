@@ -153,6 +153,8 @@ class TriageOutcomeScreen extends StatelessWidget {
                   mappedLayTerm: outcome.aiMappedLayTerm,
                   clinicalConcept: outcome.aiClinicalConcept!,
                   source: outcome.aiSource,
+                  isCrossVerticalSomatic: outcome.isCrossVerticalSomatic,
+                  contextNote: outcome.crossVerticalContextNote,
                 ),
                 const SizedBox(height: 16),
               ],

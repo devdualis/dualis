@@ -1,12 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TriageOutcomeService } from '../../src/modules/triage/services/triage-outcome.service';
 import { ArticlesCatalogService } from '../../src/modules/triage/services/articles-catalog.service';
+import { AiTriageService } from '../../src/modules/ai/services/ai-triage.service';
+import { IdiomDictionaryService } from '../../src/modules/ai/services/idiom-dictionary.service';
 
 describe('TriageOutcomeService Unit Tests', () => {
   let service: TriageOutcomeService;
   let mockDb: any;
   let mockEncryptionService: any;
   let articlesCatalog: ArticlesCatalogService;
+  let aiTriage: AiTriageService;
 
   beforeEach(() => {
     mockDb = {
@@ -36,11 +39,14 @@ describe('TriageOutcomeService Unit Tests', () => {
     };
 
     articlesCatalog = new ArticlesCatalogService();
+    aiTriage = new AiTriageService(undefined, new IdiomDictionaryService());
 
     service = new TriageOutcomeService(
       mockDb,
       mockEncryptionService,
       articlesCatalog,
+      articlesCatalog,
+      aiTriage,
     );
   });
 
@@ -92,7 +98,7 @@ describe('TriageOutcomeService Unit Tests', () => {
         2: 'alguns_dias',
         3: 'leve_controlavel',
       },
-      narrative: 'Sinto muita ansiedade e um aperto no peito estranho',
+      narrative: 'Sinto muita ansiedade e dor muscular nas costas',
     });
 
     expect(outcome.organicPrimacyApplied).toBe(true);
@@ -207,5 +213,31 @@ describe('TriageOutcomeService Unit Tests', () => {
       ).toBe(true);
       expect(outcome.recommendedArticles!.some((a) => a.category === expectedCategory)).toBe(true);
     }
+  });
+
+  it('9. bridges cross-vertical physical symptom in emotional triage with organic primacy and associated component', async () => {
+    const outcome = await service.processOutcome('user-1', {
+      vertical: 'emotional',
+      answers: {
+        1: 'ansiedade',
+        2: 'comecou_hoje',
+        3: 'moderada',
+      },
+      narrative: 'dor de cabeça',
+    });
+
+    expect(outcome.vertical).toBe('emotional');
+    expect(outcome.primaryCategory).toBe('ansiosa_agitacao');
+    expect(outcome.categoryLabel).toBe('Dimensão Ansiosa / Agitação');
+    expect(outcome.organicPrimacyApplied).toBe(true);
+    expect(outcome.organicPrimacyNotice).toContain('Primazia Orgânica');
+    expect(outcome.secondaryCategoryLabel).toBe('Cabeça e Pescoço');
+    expect(outcome.secondarySomaticMapping).toBe('Cefaleia / Desconforto crânio-cervical');
+    expect(outcome.isCrossVerticalSomatic).toBe(true);
+    expect(outcome.crossVerticalContextNote).toBeDefined();
+    expect(outcome.crossVerticalContextNote).toContain('Manifestação física concorrente');
+    expect(outcome.aiClinicalConcept).toBe('cefaleia tensional / migrânea');
+    expect(outcome.aiMappedLayTerm).toBe('dor de cabeça');
+    expect(outcome.careDisposition).toBe('consulta_rotina');
   });
 });

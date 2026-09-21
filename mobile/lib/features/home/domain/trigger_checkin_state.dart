@@ -50,6 +50,13 @@ class TriggerCheckInState {
   RoutingOutcome get routingOutcome {
     if (!isReadyToSubmit) return RoutingOutcome.none;
 
+    final emotionalOk = emotionalStatus == TriggerStatus.goodNormal;
+    final physicalOk = physicalStatus == TriggerStatus.goodNormal;
+
+    if (emotionalOk && physicalOk) {
+      return RoutingOutcome.wellnessConfirmation;
+    }
+
     if (isCompletedToday && emotionalTouched != physicalTouched) {
       final touchedEmotional = emotionalTouched;
       final touchedStatus = touchedEmotional ? emotionalStatus : physicalStatus;
@@ -61,12 +68,6 @@ class TriggerCheckInState {
           : RoutingOutcome.fisicaOnly;
     }
 
-    final emotionalOk = emotionalStatus == TriggerStatus.goodNormal;
-    final physicalOk = physicalStatus == TriggerStatus.goodNormal;
-
-    if (emotionalOk && physicalOk) {
-      return RoutingOutcome.wellnessConfirmation;
-    }
     if (!emotionalOk && physicalOk) {
       return RoutingOutcome.psicoEmocionalOnly;
     }

@@ -203,5 +203,108 @@ void main() {
       final textField = tester.widget<TextField>(find.byKey(const Key('naturalLanguageInput')));
       expect(textField.controller?.text, 'Dor de cabeça');
     });
+
+    test('6. Qualifying physical axis preserves pre-existing emotionalStatus (never resets to goodNormal)', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(triggerCheckInProvider.notifier);
+      // User previously had an active emotional status (e.g. anxiety / badSick or soSo)
+      notifier.setEmotionalStatus(TriggerStatus.badSick);
+
+      final outcome = TriageOutcome(
+        id: 'physical-only-headache',
+        vertical: 'physical',
+        intensityScore: 2, // Dor de cabeça leve/moderada -> soSo
+        careDisposition: CareDisposition.routineConsultation,
+        primaryCategory: 'cabeca_pescoco',
+        categoryLabel: 'Cabeça e Pescoço',
+        somaticMapping: 'Cefaleia',
+        organicPrimacyApplied: false,
+        recommendedArticles: const [],
+        recordedAt: DateTime.now(),
+        secondaryCategoryLabel: null,
+      );
+
+      notifier.markCompletedWithOutcome(outcome);
+
+      final state = container.read(triggerCheckInProvider);
+      expect(state.physicalStatus, TriggerStatus.soSo);
+      // Emotional status must NOT be reset to goodNormal; it must preserve badSick!
+      expect(state.emotionalStatus, TriggerStatus.badSick);
+    });
+
+    test('7. Qualifying emotional axis preserves pre-existing physicalStatus (never resets to goodNormal)', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(triggerCheckInProvider.notifier);
+      // User previously had an active physical status (e.g. back pain / soSo)
+      notifier.setPhysicalStatus(TriggerStatus.soSo);
+
+      final outcome = TriageOutcome(
+        id: 'emotional-only-anxiety',
+        vertical: 'emotional',
+        intensityScore: 4, // Severe anxiety -> badSick
+        careDisposition: CareDisposition.urgentCare,
+        primaryCategory: 'ansiosa_agitacao',
+        categoryLabel: 'Ansiedade e Agitação',
+        somaticMapping: 'Angústia e inquietação psíquica',
+        organicPrimacyApplied: false,
+        recommendedArticles: const [],
+        recordedAt: DateTime.now(),
+        secondaryCategoryLabel: null,
+      );
+
+      notifier.markCompletedWithOutcome(outcome);
+
+      final state = container.read(triggerCheckInProvider);
+      expect(state.emotionalStatus, TriggerStatus.badSick);
+      // Physical status must NOT be reset to goodNormal; it must preserve soSo!
+      expect(state.physicalStatus, TriggerStatus.soSo);
+    });
+
+    test('8. Remote sync preserves other axis from earlier today logs instead of goodNormal', () async {
+      final now = DateTime.now();
+      // Log 1: earlier emotional check-in today (intensity 3 -> soSo)
+      final log1 = TriageHistoryEntry(
+        id: 'log-1-emotional',
+        intensity: 3,
+        emotionalDimension: 'sono_vigilia',
+        disposition: 'consulta_rotina',
+        recordedAt: now.subtract(const Duration(hours: 3)),
+      );
+      // Log 2: latest physical triage today (intensity 2 -> soSo)
+      final log2 = TriageHistoryEntry(
+        id: 'log-2-physical',
+        intensity: 2,
+        anatomicalSystem: 'cabeca_pescoco',
+        disposition: 'auto_cuidado',
+        recordedAt: now.subtract(const Duration(minutes: 30)),
+      );
+
+      final fakeHistory = TriageHistoryResponse(
+        logs: [log2, log1],
+        physicalSummary: const {},
+        emotionalSummary: const [],
+        criticalRecurrences: const [],
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          triageHistoryDataSourceProvider.overrideWithValue(_FakeHistoryDataSource(fakeHistory)),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(triggerCheckInProvider.notifier).loadTodayCheckIn(now);
+
+      final state = container.read(triggerCheckInProvider);
+      expect(state.isCompletedToday, isTrue);
+      // Physical comes from log2 (soSo)
+      expect(state.physicalStatus, TriggerStatus.soSo);
+      // Emotional comes from log1 (soSo) and is NOT lost / wiped to goodNormal!
+      expect(state.emotionalStatus, TriggerStatus.soSo);
+    });
   });
 }

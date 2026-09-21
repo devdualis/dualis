@@ -53,6 +53,11 @@ export interface TriageOutcomeResponseDto {
   organicPrimacyNotice?: string;
   recommendedArticles: RecommendedArticleDto[];
   recordedAt: string;
+  secondaryCategoryLabel?: string;
+  secondarySomaticMapping?: string;
+  secondaryIntensityScore?: number;
+  isCrossVerticalSomatic?: boolean;
+  crossVerticalContextNote?: string;
   aiMappedLayTerm?: string;
   aiClinicalConcept?: string;
   aiSource?: 'openai_gpt' | 'idiom_cache' | 'dictionary_fallback' | 'vector_match';

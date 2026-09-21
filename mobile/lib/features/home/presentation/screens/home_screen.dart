@@ -443,6 +443,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 );
                                 break;
                               case RoutingOutcome.none:
+                                if (triggerState.isCompletedToday && triggerState.isModifiedAfterCompletion) {
+                                  ref.read(triggerCheckInProvider.notifier).markCompletedToday();
+                                }
                                 break;
                             }
                           }

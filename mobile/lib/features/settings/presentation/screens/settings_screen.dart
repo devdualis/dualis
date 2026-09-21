@@ -14,6 +14,7 @@ import '../../../../l10n/locale_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../hydration/domain/models/hydration_settings.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
+import '../../../../core/notifications/hydration_notification_service.dart';
 import '../widgets/avatar_selector_sheet.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -1083,6 +1084,44 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ),
                             trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
                             onTap: () => context.push(RoutePaths.hydration),
+                          ),
+                          const Divider(height: 1, color: AppColors.outlineLight),
+                          ListTile(
+                            key: const Key('settings_test_notification_tile'),
+                            leading: const Icon(Icons.notifications_active_outlined, color: AppColors.clinicalTeal),
+                            title: Text(
+                              'Testar Notificação Agora',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: AppColors.textPrimaryLight,
+                              ),
+                            ),
+                            subtitle: Text(
+                              'Dispara um alerta imediato na barra de notificações',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12,
+                                color: AppColors.textSecondaryLight,
+                              ),
+                            ),
+                            trailing: const Icon(Icons.send_rounded, color: AppColors.clinicalTeal, size: 20),
+                            onTap: () async {
+                              final service = ref.read(hydrationNotificationServiceProvider);
+                              await service.showImmediateReminder(
+                                style: settings.reminderSoundStyle,
+                                trackingEnabled: settings.trackingEnabled,
+                                customBody: '💧 Teste: Hora de Beber Água! Toque para interagir.',
+                              );
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Notificação de teste enviada! Verifique a barra de notificações.'),
+                                    backgroundColor: AppColors.clinicalTeal,
+                                    duration: Duration(seconds: 3),
+                                  ),
+                                );
+                              }
+                            },
                           ),
                         ],
                       ),
