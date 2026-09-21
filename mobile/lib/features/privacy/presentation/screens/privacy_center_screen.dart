@@ -155,9 +155,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
 
     ref.listen<PrivacyState>(privacyControllerProvider, (prev, next) {
       if (next.errorMessage != null && next.errorMessage != prev?.errorMessage) {
-        final errorText = l10n != null
-            ? ErrorMessageResolver.resolve(next.errorMessage!, l10n)
-            : next.errorMessage!;
+        final errorText = ErrorMessageResolver.resolve(next.errorMessage!, l10n);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorText),

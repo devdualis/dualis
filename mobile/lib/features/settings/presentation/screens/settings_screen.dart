@@ -12,6 +12,8 @@ import '../../../../core/utils/error_message_resolver.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../l10n/locale_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../hydration/domain/models/hydration_settings.dart';
+import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../widgets/avatar_selector_sheet.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -892,6 +894,201 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ],
                   ),
                 ),
+              ),
+              const SizedBox(height: 20),
+              _SectionLabel(
+                icon: Icons.water_drop_rounded,
+                label: 'Hidratação & Lembretes de Água',
+                color: AppColors.clinicalTeal,
+              ),
+              const SizedBox(height: 10),
+              Consumer(
+                builder: (context, ref, child) {
+                  final hydrationState = ref.watch(hydrationControllerProvider);
+                  final hydrationNotifier = ref.read(hydrationControllerProvider.notifier);
+                  final settings = hydrationState.settings;
+
+                  return Material(
+                    color: AppColors.surfaceLight,
+                    borderRadius: BorderRadius.circular(16),
+                    clipBehavior: Clip.antiAlias,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.outlineLight),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SwitchListTile(
+                            key: const Key('settings_water_reminder_switch'),
+                            title: Text(
+                              'Lembrete a cada 2h (8h, 10h...)',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: AppColors.textPrimaryLight,
+                              ),
+                            ),
+                            subtitle: Text(
+                              'Alertas nos horários pares: 8h, 10h, 12h, 14h, 16h, 18h, 20h',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12,
+                                color: AppColors.textSecondaryLight,
+                              ),
+                            ),
+                            value: settings.reminderEnabled,
+                            activeThumbColor: AppColors.clinicalTeal,
+                            onChanged: (val) => hydrationNotifier.toggleReminders(val),
+                          ),
+                          if (settings.reminderEnabled) ...[
+                            const Divider(height: 1, color: AppColors.outlineLight),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Estilo do Lembrete:',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                      color: AppColors.textPrimaryLight,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: ChoiceChip(
+                                          key: const Key('settings_sound_style_chime'),
+                                          label: const Text('Aviso Suave (Mensagem)'),
+                                          selected: settings.reminderSoundStyle == ReminderSoundStyle.whatsappChime,
+                                          selectedColor: AppColors.clinicalTealDark,
+                                          labelStyle: GoogleFonts.plusJakartaSans(
+                                            fontSize: 11,
+                                            color: settings.reminderSoundStyle == ReminderSoundStyle.whatsappChime
+                                                ? Colors.white
+                                                : AppColors.textPrimaryLight,
+                                          ),
+                                          onSelected: (val) {
+                                            if (val) {
+                                              hydrationNotifier.setSoundStyle(ReminderSoundStyle.whatsappChime);
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: ChoiceChip(
+                                          key: const Key('settings_sound_style_alarm'),
+                                          label: const Text('Alarme Telefônico'),
+                                          selected: settings.reminderSoundStyle == ReminderSoundStyle.phoneAlarm,
+                                          selectedColor: AppColors.clinicalTealDark,
+                                          labelStyle: GoogleFonts.plusJakartaSans(
+                                            fontSize: 11,
+                                            color: settings.reminderSoundStyle == ReminderSoundStyle.phoneAlarm
+                                                ? Colors.white
+                                                : AppColors.textPrimaryLight,
+                                          ),
+                                          onSelected: (val) {
+                                            if (val) {
+                                              hydrationNotifier.setSoundStyle(ReminderSoundStyle.phoneAlarm);
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Divider(height: 1, color: AppColors.outlineLight),
+                            SwitchListTile(
+                              key: const Key('settings_water_tracking_switch'),
+                              title: Text(
+                                'Controle de quantidade consumida',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  color: AppColors.textPrimaryLight,
+                                ),
+                              ),
+                              subtitle: Text(
+                                settings.trackingEnabled
+                                    ? 'Abre tela para registrar ml consumidos no alerta'
+                                    : 'Apenas soa alarme no horário, sem registrar',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondaryLight,
+                                ),
+                              ),
+                              value: settings.trackingEnabled,
+                              activeThumbColor: AppColors.clinicalTeal,
+                              onChanged: (val) => hydrationNotifier.toggleTracking(val),
+                            ),
+                            const Divider(height: 1, color: AppColors.outlineLight),
+                            ListTile(
+                              leading: const Icon(Icons.flag_outlined, color: AppColors.clinicalTeal),
+                              title: Text(
+                                'Meta Diária de Hidratação',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  color: AppColors.textPrimaryLight,
+                                ),
+                              ),
+                              subtitle: Text(
+                                '${settings.dailyTargetMl} ml por dia',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondaryLight,
+                                ),
+                              ),
+                              trailing: DropdownButton<int>(
+                                value: settings.dailyTargetMl,
+                                underline: const SizedBox.shrink(),
+                                items: const [1500, 2000, 2500, 3000].map((val) {
+                                  return DropdownMenuItem<int>(
+                                    value: val,
+                                    child: Text('$val ml'),
+                                  );
+                                }).toList(),
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    hydrationNotifier.setDailyTarget(val);
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                          const Divider(height: 1, color: AppColors.outlineLight),
+                          ListTile(
+                            key: const Key('settings_open_hydration_chart_tile'),
+                            leading: const Icon(Icons.bar_chart_rounded, color: AppColors.softIndigo),
+                            title: Text(
+                              'Visualizar Gráfico de Consumo',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: AppColors.textPrimaryLight,
+                              ),
+                            ),
+                            subtitle: Text(
+                              'Evolução dos últimos 7 dias e histórico',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12,
+                                color: AppColors.textSecondaryLight,
+                              ),
+                            ),
+                            trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
+                            onTap: () => context.push(RoutePaths.hydration),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 20),
               _SectionLabel(

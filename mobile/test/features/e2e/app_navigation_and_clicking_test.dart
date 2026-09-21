@@ -321,6 +321,7 @@ void main() {
       final emotionalBad = find.byKey(const Key('emotional_badSick'));
 
       expect(emotionalGood, findsOneWidget);
+      expect(emotionalBad, findsOneWidget);
       await tester.tap(emotionalModerate);
       await tester.pumpAndSettle();
 
@@ -330,6 +331,7 @@ void main() {
       final physicalBad = find.byKey(const Key('physical_badSick'));
 
       expect(physicalGood, findsOneWidget);
+      expect(physicalBad, findsOneWidget);
       await tester.tap(physicalModerate);
       await tester.pumpAndSettle();
 

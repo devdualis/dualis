@@ -17,6 +17,7 @@ import '../../features/triage_outcome/presentation/screens/triage_outcome_screen
 import '../../features/dashboard/presentation/screens/historical_dashboard_screen.dart';
 import '../../features/privacy/presentation/screens/privacy_center_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/hydration/presentation/screens/hydration_dashboard_screen.dart';
 import 'route_paths.dart';
 
 class RouterNotifier extends ChangeNotifier {
@@ -159,6 +160,11 @@ GoRouter createRouter({
         path: RoutePaths.settings,
         name: 'settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.hydration,
+        name: 'hydration',
+        builder: (context, state) => const HydrationDashboardScreen(),
       ),
     ],
   );

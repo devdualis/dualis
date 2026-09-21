@@ -26,16 +26,39 @@ class LocalSymptomDrafts extends Table {
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
-@DriftDatabase(tables: [TriageOutbox, LocalSymptomDrafts])
+class WaterIntakeLogs extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get userId => text()();
+  IntColumn get amountMl => integer()();
+  DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get source => text().withDefault(const Constant('manual'))();
+}
+
+@DriftDatabase(tables: [TriageOutbox, LocalSymptomDrafts, WaterIntakeLogs])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onCreate: (Migrator m) async {
+        await m.createAll();
+      },
+      onUpgrade: (Migrator m, int from, int to) async {
+        if (from < 2) {
+          await m.createTable(waterIntakeLogs);
+        }
+      },
+    );
+  }
 
   Future<void> wipeAllLocalData() async {
     await delete(triageOutbox).go();
     await delete(localSymptomDrafts).go();
+    await delete(waterIntakeLogs).go();
   }
 
   static QueryExecutor _openConnection() {

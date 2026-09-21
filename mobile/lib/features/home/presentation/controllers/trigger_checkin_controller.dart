@@ -4,7 +4,6 @@ import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/security/secure_storage_service.dart';
 import '../../../dashboard/data/triage_history_remote_data_source.dart';
-import '../../../dashboard/domain/models/triage_history_models.dart';
 import '../../../triage/data/symptom_classification_remote_data_source.dart';
 import '../../../triage/domain/triage_vertical.dart';
 import '../../../triage_outcome/domain/triage_outcome_models.dart';

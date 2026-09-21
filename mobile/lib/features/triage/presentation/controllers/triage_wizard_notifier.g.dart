@@ -42,7 +42,7 @@ final class TriageWizardNotifierProvider
 }
 
 String _$triageWizardNotifierHash() =>
-    r'574da2deecbecc742c2de87e5b6c106bad9f8ef7';
+    r'181c29dc730eb27b329b200ca2f4959baf6591c5';
 
 abstract class _$TriageWizardNotifier extends $Notifier<TriageWizardState> {
   TriageWizardState build();

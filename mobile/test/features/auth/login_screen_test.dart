@@ -4,7 +4,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:dualis_mobile/core/constants/app_colors.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/auth/data/auth_repository_impl.dart';
@@ -12,7 +11,6 @@ import 'package:dualis_mobile/features/auth/domain/user_profile.dart';
 import 'package:dualis_mobile/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:dualis_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
-import 'package:dualis_mobile/shared/widgets/dualis_primary_button.dart';
 
 class MockAuthRepository implements AuthRepository {
   bool loginCalled = false;

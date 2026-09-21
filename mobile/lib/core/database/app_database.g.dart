@@ -1039,12 +1039,364 @@ class LocalSymptomDraftsCompanion extends UpdateCompanion<LocalSymptomDraft> {
   }
 }
 
+class $WaterIntakeLogsTable extends WaterIntakeLogs
+    with TableInfo<$WaterIntakeLogsTable, WaterIntakeLog> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $WaterIntakeLogsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMlMeta = const VerificationMeta(
+    'amountMl',
+  );
+  @override
+  late final GeneratedColumn<int> amountMl = GeneratedColumn<int>(
+    'amount_ml',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _timestampMeta = const VerificationMeta(
+    'timestamp',
+  );
+  @override
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('manual'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    userId,
+    amountMl,
+    timestamp,
+    source,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'water_intake_logs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<WaterIntakeLog> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('amount_ml')) {
+      context.handle(
+        _amountMlMeta,
+        amountMl.isAcceptableOrUnknown(data['amount_ml']!, _amountMlMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMlMeta);
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  WaterIntakeLog map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return WaterIntakeLog(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}id'],
+          )!,
+      userId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}user_id'],
+          )!,
+      amountMl:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}amount_ml'],
+          )!,
+      timestamp:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}timestamp'],
+          )!,
+      source:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}source'],
+          )!,
+    );
+  }
+
+  @override
+  $WaterIntakeLogsTable createAlias(String alias) {
+    return $WaterIntakeLogsTable(attachedDatabase, alias);
+  }
+}
+
+class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
+  final int id;
+  final String userId;
+  final int amountMl;
+  final DateTime timestamp;
+  final String source;
+  const WaterIntakeLog({
+    required this.id,
+    required this.userId,
+    required this.amountMl,
+    required this.timestamp,
+    required this.source,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['user_id'] = Variable<String>(userId);
+    map['amount_ml'] = Variable<int>(amountMl);
+    map['timestamp'] = Variable<DateTime>(timestamp);
+    map['source'] = Variable<String>(source);
+    return map;
+  }
+
+  WaterIntakeLogsCompanion toCompanion(bool nullToAbsent) {
+    return WaterIntakeLogsCompanion(
+      id: Value(id),
+      userId: Value(userId),
+      amountMl: Value(amountMl),
+      timestamp: Value(timestamp),
+      source: Value(source),
+    );
+  }
+
+  factory WaterIntakeLog.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return WaterIntakeLog(
+      id: serializer.fromJson<int>(json['id']),
+      userId: serializer.fromJson<String>(json['userId']),
+      amountMl: serializer.fromJson<int>(json['amountMl']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+      source: serializer.fromJson<String>(json['source']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'userId': serializer.toJson<String>(userId),
+      'amountMl': serializer.toJson<int>(amountMl),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
+      'source': serializer.toJson<String>(source),
+    };
+  }
+
+  WaterIntakeLog copyWith({
+    int? id,
+    String? userId,
+    int? amountMl,
+    DateTime? timestamp,
+    String? source,
+  }) => WaterIntakeLog(
+    id: id ?? this.id,
+    userId: userId ?? this.userId,
+    amountMl: amountMl ?? this.amountMl,
+    timestamp: timestamp ?? this.timestamp,
+    source: source ?? this.source,
+  );
+  WaterIntakeLog copyWithCompanion(WaterIntakeLogsCompanion data) {
+    return WaterIntakeLog(
+      id: data.id.present ? data.id.value : this.id,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      amountMl: data.amountMl.present ? data.amountMl.value : this.amountMl,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+      source: data.source.present ? data.source.value : this.source,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WaterIntakeLog(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('amountMl: $amountMl, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('source: $source')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, userId, amountMl, timestamp, source);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is WaterIntakeLog &&
+          other.id == this.id &&
+          other.userId == this.userId &&
+          other.amountMl == this.amountMl &&
+          other.timestamp == this.timestamp &&
+          other.source == this.source);
+}
+
+class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
+  final Value<int> id;
+  final Value<String> userId;
+  final Value<int> amountMl;
+  final Value<DateTime> timestamp;
+  final Value<String> source;
+  const WaterIntakeLogsCompanion({
+    this.id = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.amountMl = const Value.absent(),
+    this.timestamp = const Value.absent(),
+    this.source = const Value.absent(),
+  });
+  WaterIntakeLogsCompanion.insert({
+    this.id = const Value.absent(),
+    required String userId,
+    required int amountMl,
+    this.timestamp = const Value.absent(),
+    this.source = const Value.absent(),
+  }) : userId = Value(userId),
+       amountMl = Value(amountMl);
+  static Insertable<WaterIntakeLog> custom({
+    Expression<int>? id,
+    Expression<String>? userId,
+    Expression<int>? amountMl,
+    Expression<DateTime>? timestamp,
+    Expression<String>? source,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
+      if (amountMl != null) 'amount_ml': amountMl,
+      if (timestamp != null) 'timestamp': timestamp,
+      if (source != null) 'source': source,
+    });
+  }
+
+  WaterIntakeLogsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? userId,
+    Value<int>? amountMl,
+    Value<DateTime>? timestamp,
+    Value<String>? source,
+  }) {
+    return WaterIntakeLogsCompanion(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      amountMl: amountMl ?? this.amountMl,
+      timestamp: timestamp ?? this.timestamp,
+      source: source ?? this.source,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (amountMl.present) {
+      map['amount_ml'] = Variable<int>(amountMl.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WaterIntakeLogsCompanion(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('amountMl: $amountMl, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('source: $source')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $TriageOutboxTable triageOutbox = $TriageOutboxTable(this);
   late final $LocalSymptomDraftsTable localSymptomDrafts =
       $LocalSymptomDraftsTable(this);
+  late final $WaterIntakeLogsTable waterIntakeLogs = $WaterIntakeLogsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1052,6 +1404,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     triageOutbox,
     localSymptomDrafts,
+    waterIntakeLogs,
   ];
 }
 
@@ -1612,6 +1965,226 @@ typedef $$LocalSymptomDraftsTableProcessedTableManager =
       LocalSymptomDraft,
       PrefetchHooks Function()
     >;
+typedef $$WaterIntakeLogsTableCreateCompanionBuilder =
+    WaterIntakeLogsCompanion Function({
+      Value<int> id,
+      required String userId,
+      required int amountMl,
+      Value<DateTime> timestamp,
+      Value<String> source,
+    });
+typedef $$WaterIntakeLogsTableUpdateCompanionBuilder =
+    WaterIntakeLogsCompanion Function({
+      Value<int> id,
+      Value<String> userId,
+      Value<int> amountMl,
+      Value<DateTime> timestamp,
+      Value<String> source,
+    });
+
+class $$WaterIntakeLogsTableFilterComposer
+    extends Composer<_$AppDatabase, $WaterIntakeLogsTable> {
+  $$WaterIntakeLogsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get amountMl => $composableBuilder(
+    column: $table.amountMl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$WaterIntakeLogsTableOrderingComposer
+    extends Composer<_$AppDatabase, $WaterIntakeLogsTable> {
+  $$WaterIntakeLogsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amountMl => $composableBuilder(
+    column: $table.amountMl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$WaterIntakeLogsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $WaterIntakeLogsTable> {
+  $$WaterIntakeLogsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<int> get amountMl =>
+      $composableBuilder(column: $table.amountMl, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+}
+
+class $$WaterIntakeLogsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $WaterIntakeLogsTable,
+          WaterIntakeLog,
+          $$WaterIntakeLogsTableFilterComposer,
+          $$WaterIntakeLogsTableOrderingComposer,
+          $$WaterIntakeLogsTableAnnotationComposer,
+          $$WaterIntakeLogsTableCreateCompanionBuilder,
+          $$WaterIntakeLogsTableUpdateCompanionBuilder,
+          (
+            WaterIntakeLog,
+            BaseReferences<
+              _$AppDatabase,
+              $WaterIntakeLogsTable,
+              WaterIntakeLog
+            >,
+          ),
+          WaterIntakeLog,
+          PrefetchHooks Function()
+        > {
+  $$WaterIntakeLogsTableTableManager(
+    _$AppDatabase db,
+    $WaterIntakeLogsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () =>
+                  $$WaterIntakeLogsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $$WaterIntakeLogsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer:
+              () => $$WaterIntakeLogsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> userId = const Value.absent(),
+                Value<int> amountMl = const Value.absent(),
+                Value<DateTime> timestamp = const Value.absent(),
+                Value<String> source = const Value.absent(),
+              }) => WaterIntakeLogsCompanion(
+                id: id,
+                userId: userId,
+                amountMl: amountMl,
+                timestamp: timestamp,
+                source: source,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String userId,
+                required int amountMl,
+                Value<DateTime> timestamp = const Value.absent(),
+                Value<String> source = const Value.absent(),
+              }) => WaterIntakeLogsCompanion.insert(
+                id: id,
+                userId: userId,
+                amountMl: amountMl,
+                timestamp: timestamp,
+                source: source,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable<$WaterIntakeLogsTable, WaterIntakeLog>(
+                            table,
+                          ),
+                          BaseReferences<
+                            _$AppDatabase,
+                            $WaterIntakeLogsTable,
+                            WaterIntakeLog
+                          >(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$WaterIntakeLogsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $WaterIntakeLogsTable,
+      WaterIntakeLog,
+      $$WaterIntakeLogsTableFilterComposer,
+      $$WaterIntakeLogsTableOrderingComposer,
+      $$WaterIntakeLogsTableAnnotationComposer,
+      $$WaterIntakeLogsTableCreateCompanionBuilder,
+      $$WaterIntakeLogsTableUpdateCompanionBuilder,
+      (
+        WaterIntakeLog,
+        BaseReferences<_$AppDatabase, $WaterIntakeLogsTable, WaterIntakeLog>,
+      ),
+      WaterIntakeLog,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1620,4 +2193,6 @@ class $AppDatabaseManager {
       $$TriageOutboxTableTableManager(_db, _db.triageOutbox);
   $$LocalSymptomDraftsTableTableManager get localSymptomDrafts =>
       $$LocalSymptomDraftsTableTableManager(_db, _db.localSymptomDrafts);
+  $$WaterIntakeLogsTableTableManager get waterIntakeLogs =>
+      $$WaterIntakeLogsTableTableManager(_db, _db.waterIntakeLogs);
 }

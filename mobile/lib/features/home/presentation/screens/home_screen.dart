@@ -22,9 +22,14 @@ import '../../../sync/presentation/controllers/sync_outbox_worker.dart';
 import '../../../settings/presentation/widgets/avatar_selector_sheet.dart';
 import '../widgets/dualis_bottom_nav_bar.dart';
 import '../widgets/today_triage_result_tab.dart';
+import 'dart:async';
 import '../../../dashboard/presentation/screens/historical_dashboard_screen.dart';
 import '../../../dashboard/presentation/controllers/dashboard_controller.dart';
 import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
+import '../../../../core/notifications/hydration_notification_service.dart';
+import '../../../hydration/presentation/controllers/hydration_controller.dart';
+import '../../../hydration/presentation/widgets/water_intake_modal.dart';
+import '../widgets/home_hydration_card.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -36,10 +41,23 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _isResolvingNavigation = false;
   int _currentTabIndex = 0;
+  StreamSubscription<String>? _notificationSub;
 
   @override
   void initState() {
     super.initState();
+    _notificationSub = ref
+        .read(hydrationNotificationServiceProvider)
+        .onNotificationOpened
+        .listen((payload) {
+      if (payload == 'open_water_modal' && mounted) {
+        final settings = ref.read(hydrationControllerProvider).settings;
+        if (settings.trackingEnabled) {
+          WaterIntakeModal.show(context, source: 'reminder_alarm');
+        }
+      }
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final authState = ref.read(authControllerProvider);
       if (authState.user == null) {
@@ -49,6 +67,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(triggerCheckInProvider.notifier).loadTodayCheckIn();
       ref.read(triageOutcomeProvider.notifier).loadTodayOutcome();
     });
+  }
+
+  @override
+  void dispose() {
+    _notificationSub?.cancel();
+    super.dispose();
   }
 
   @override
@@ -426,6 +450,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   );
                 },
               ),
+              const SizedBox(height: 20),
+              const HomeHydrationCard(),
               const SizedBox(height: 20),
               const AdMobBannerContainer(),
               const SizedBox(height: 16),
