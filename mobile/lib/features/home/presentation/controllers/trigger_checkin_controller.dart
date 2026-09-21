@@ -90,9 +90,9 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       String naturalLanguageText = state.naturalLanguageText;
 
       TriggerStatus intensityToStatus(int intensity) {
-        if (intensity <= 2) return TriggerStatus.goodNormal;
-        if (intensity == 3) return TriggerStatus.soSo;
-        return TriggerStatus.badSick;
+        if (intensity >= 4) return TriggerStatus.badSick;
+        if (intensity >= 1) return TriggerStatus.soSo;
+        return TriggerStatus.goodNormal;
       }
 
       final isLatestDailyCheckIn = latestLog.stepAnswers?['type'] == 'daily_checkin';
@@ -123,7 +123,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
           physicalStatus = (latestLog.organicPrimacyApplied ||
                   (latestLog.anatomicalSystem != null &&
                       latestLog.anatomicalSystem != 'geral_emocional'))
-              ? TriggerStatus.soSo
+              ? intensityToStatus(intensity)
               : TriggerStatus.goodNormal;
         }
 
@@ -242,9 +242,9 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     final isPhysical = outcome.vertical == 'physical';
 
     TriggerStatus statusFromIntensity(int intensity) {
-      if (intensity <= 2) return TriggerStatus.goodNormal;
-      if (intensity == 3) return TriggerStatus.soSo;
-      return TriggerStatus.badSick;
+      if (intensity >= 4) return TriggerStatus.badSick;
+      if (intensity >= 1) return TriggerStatus.soSo;
+      return TriggerStatus.goodNormal;
     }
 
     TriggerStatus emotionalStatus;
@@ -260,8 +260,9 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       }
     } else {
       emotionalStatus = statusFromIntensity(outcome.intensityScore);
-      if (outcome.organicPrimacyApplied) {
-        physicalStatus = TriggerStatus.soSo;
+      if (outcome.organicPrimacyApplied || outcome.secondaryCategoryLabel != null) {
+        final secScore = outcome.secondaryIntensityScore ?? outcome.intensityScore;
+        physicalStatus = statusFromIntensity(secScore);
       } else {
         physicalStatus = TriggerStatus.goodNormal;
       }
