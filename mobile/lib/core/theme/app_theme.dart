@@ -18,34 +18,40 @@ class AppTheme {
       error: AppColors.emergencyCrimson,
     );
 
-    final textTheme = GoogleFonts.plusJakartaSansTextTheme().copyWith(
-      displayLarge: GoogleFonts.plusJakartaSans(
+    final textTheme = GoogleFonts.interTextTheme().copyWith(
+      displayLarge: GoogleFonts.inter(
         fontSize: 32,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600, // Inter SemiBold as mandated by Brand Manual
         height: 1.2,
-        color: AppColors.textPrimaryLight,
+        color: AppColors.dualisNavy,
       ),
-      headlineMedium: GoogleFonts.plusJakartaSans(
+      headlineMedium: GoogleFonts.inter(
         fontSize: 24,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w600, // Inter SemiBold
         height: 1.3,
+        color: AppColors.dualisNavy,
+      ),
+      titleMedium: GoogleFonts.inter(
+        fontSize: 18,
+        fontWeight: FontWeight.w500, // Inter Medium for subtitles
+        height: 1.35,
         color: AppColors.textPrimaryLight,
       ),
-      bodyLarge: GoogleFonts.plusJakartaSans(
+      bodyLarge: GoogleFonts.inter(
         fontSize: 16,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w400, // Inter Regular for body
         height: 1.5,
         color: AppColors.textPrimaryLight,
       ),
-      bodyMedium: GoogleFonts.plusJakartaSans(
+      bodyMedium: GoogleFonts.inter(
         fontSize: 14,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w400, // Inter Regular
         height: 1.5,
         color: AppColors.textSecondaryLight,
       ),
-      labelLarge: GoogleFonts.plusJakartaSans(
+      labelLarge: GoogleFonts.inter(
         fontSize: 14,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w500, // Inter Medium
         height: 1.4,
         color: AppColors.textPrimaryLight,
       ),
@@ -70,7 +76,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: GoogleFonts.plusJakartaSans(
+          textStyle: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -84,7 +90,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: GoogleFonts.plusJakartaSans(
+          textStyle: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -145,34 +151,40 @@ class AppTheme {
       error: AppColors.emergencyCrimson,
     );
 
-    final textTheme = GoogleFonts.plusJakartaSansTextTheme().copyWith(
-      displayLarge: GoogleFonts.plusJakartaSans(
+    final textTheme = GoogleFonts.interTextTheme().copyWith(
+      displayLarge: GoogleFonts.inter(
         fontSize: 32,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600, // Inter SemiBold
         height: 1.2,
         color: AppColors.textPrimaryDark,
       ),
-      headlineMedium: GoogleFonts.plusJakartaSans(
+      headlineMedium: GoogleFonts.inter(
         fontSize: 24,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w600, // Inter SemiBold
         height: 1.3,
         color: AppColors.textPrimaryDark,
       ),
-      bodyLarge: GoogleFonts.plusJakartaSans(
+      titleMedium: GoogleFonts.inter(
+        fontSize: 18,
+        fontWeight: FontWeight.w500, // Inter Medium
+        height: 1.35,
+        color: AppColors.textPrimaryDark,
+      ),
+      bodyLarge: GoogleFonts.inter(
         fontSize: 16,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w400, // Inter Regular
         height: 1.5,
         color: AppColors.textPrimaryDark,
       ),
-      bodyMedium: GoogleFonts.plusJakartaSans(
+      bodyMedium: GoogleFonts.inter(
         fontSize: 14,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w400, // Inter Regular
         height: 1.5,
         color: AppColors.textSecondaryDark,
       ),
-      labelLarge: GoogleFonts.plusJakartaSans(
+      labelLarge: GoogleFonts.inter(
         fontSize: 14,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w500, // Inter Medium
         height: 1.4,
         color: AppColors.textPrimaryDark,
       ),
@@ -197,7 +209,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: GoogleFonts.plusJakartaSans(
+          textStyle: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -211,7 +223,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: GoogleFonts.plusJakartaSans(
+          textStyle: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),

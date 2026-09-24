@@ -59,11 +59,8 @@ void main() {
     await tester.pumpWidget(createTestApp());
     await tester.pumpAndSettle();
 
-    // Brand and Shield Emblem Header
+    // Brand Header (Official Dualis Logo per Brand Manual)
     expect(find.byType(DualisLogo), findsOneWidget);
-    expect(find.byType(DualisEmblem), findsOneWidget);
-    expect(find.textContaining('Dualis'), findsWidgets);
-    expect(find.textContaining('CheckUp'), findsWidgets);
 
     // Initial Card 1
     expect(find.text('Triagem Preventiva Unificada'), findsOneWidget);

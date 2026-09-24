@@ -202,12 +202,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               children: [
                 const Center(
                   child: Padding(
-                    padding: EdgeInsets.only(top: 4, bottom: 20),
+                    padding: EdgeInsets.only(top: 4, bottom: 16),
                     child: DualisLogo(
                       key: Key('registerBrandLogo'),
                       variant: DualisLogoVariant.horizontal,
-                      emblemSize: 36,
-                      fontSize: 20,
+                      width: 170,
+                      withProtectionArea: true,
                     ),
                   ),
                 ),

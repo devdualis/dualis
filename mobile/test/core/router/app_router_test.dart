@@ -12,6 +12,7 @@ import 'package:dualis_mobile/l10n/app_localizations.dart';
 import 'package:dualis_mobile/l10n/locale_provider.dart';
 import 'package:dualis_mobile/shared/widgets/dualis_primary_button.dart';
 import 'package:dualis_mobile/shared/widgets/dualis_text_field.dart';
+import 'package:dualis_mobile/shared/widgets/dualis_logo.dart';
 
 Widget createRouterTestApp({String initialLocation = RoutePaths.onboarding}) {
   final router = createRouter(initialLocation: initialLocation);
@@ -53,7 +54,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(OnboardingScreen), findsOneWidget);
-      expect(find.text('DualisCheckUp'), findsOneWidget);
+      expect(find.byType(DualisLogo), findsOneWidget);
     });
 
     testWidgets('navigates directly to /register',

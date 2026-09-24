@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { DatabaseModule } from './database/database.module';
 import { EncryptionModule } from './common/encryption/encryption.module';
+import { AiCoreModule } from './common/ai/ai-core.module';
 import { LegalModule } from './modules/legal/legal.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TriageAuditModule } from './modules/triage-audit/triage-audit.module';
@@ -50,6 +51,7 @@ import { TriageModule } from './modules/triage/triage.module';
     }),
     DatabaseModule,
     EncryptionModule,
+    AiCoreModule,
     LegalModule,
     AuthModule,
     TriageAuditModule,

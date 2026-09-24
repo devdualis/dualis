@@ -88,8 +88,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                 child: const DualisLogo(
                   key: Key('onboarding_brand_header'),
                   variant: DualisLogoVariant.horizontal,
-                  emblemSize: 36,
-                  fontSize: 22,
+                  width: 180,
+                  withProtectionArea: true,
                 ),
               ),
               const SizedBox(height: 16),

@@ -95,10 +95,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     List<Widget> appBarActions = [];
 
     if (_currentTabIndex == 0) {
-      appBarTitle = const DualisLogo(
-        variant: DualisLogoVariant.emblemOnly,
-        emblemSize: 28,
-        withEmblemContainer: false,
+      appBarTitle = DualisLogo(
+        variant: DualisLogoVariant.horizontal,
+        width: 160,
+        withProtectionArea: false,
+        onTap: () {
+          if (_currentTabIndex != 0) {
+            setState(() {
+              _currentTabIndex = 0;
+            });
+          }
+        },
       );
       appBarActions = [
         _AppBarIconButton(

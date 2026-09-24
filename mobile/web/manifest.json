@@ -4,7 +4,7 @@
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FFFFFF",
-    "theme_color": "#00364B",
+    "theme_color": "#0E3E6C",
     "description": "DualisCheckUp Mobile Preventive Health Platform",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,

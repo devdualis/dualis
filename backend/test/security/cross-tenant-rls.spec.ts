@@ -79,6 +79,9 @@ describe('Security Regression: PostgreSQL Cross-Tenant RLS Isolation (SEC-01)', 
           FOR ALL
           USING (user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid)
           WITH CHECK (user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid);
+
+        GRANT USAGE ON SCHEMA public TO authenticated;
+        GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated;
       `);
     } catch (err) {
       console.warn(
@@ -126,6 +129,7 @@ describe('Security Regression: PostgreSQL Cross-Tenant RLS Isolation (SEC-01)', 
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
+      await client.query('SET LOCAL ROLE authenticated');
       await client.query(`SELECT set_config('app.current_user_id', $1, true)`, [userA_Id]);
 
       const res = await client.query('SELECT * FROM symptom_logs');
@@ -148,6 +152,7 @@ describe('Security Regression: PostgreSQL Cross-Tenant RLS Isolation (SEC-01)', 
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
+      await client.query('SET LOCAL ROLE authenticated');
       await client.query(`SELECT set_config('app.current_user_id', $1, true)`, [userA_Id]);
 
       // User A explicitly queries for User B's log ID
@@ -173,6 +178,7 @@ describe('Security Regression: PostgreSQL Cross-Tenant RLS Isolation (SEC-01)', 
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
+      await client.query('SET LOCAL ROLE authenticated');
       await client.query(`SELECT set_config('app.current_user_id', $1, true)`, [userA_Id]);
 
       const res = await client.query(
@@ -200,6 +206,7 @@ describe('Security Regression: PostgreSQL Cross-Tenant RLS Isolation (SEC-01)', 
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
+      await client.query('SET LOCAL ROLE authenticated');
       await client.query(`SELECT set_config('app.current_user_id', $1, true)`, [userA_Id]);
 
       const res = await client.query('DELETE FROM symptom_logs WHERE id = $1', [userB_LogId]);
@@ -224,6 +231,7 @@ describe('Security Regression: PostgreSQL Cross-Tenant RLS Isolation (SEC-01)', 
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
+      await client.query('SET LOCAL ROLE authenticated');
       // No set_config executed
 
       const res = await client.query('SELECT * FROM symptom_logs');
@@ -244,6 +252,7 @@ describe('Security Regression: PostgreSQL Cross-Tenant RLS Isolation (SEC-01)', 
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
+      await client.query('SET LOCAL ROLE authenticated');
       await client.query(`SELECT set_config('app.current_user_id', $1, true)`, [userA_Id]);
 
       // Malicious query attempting to bypass WHERE clause with OR '1'='1'

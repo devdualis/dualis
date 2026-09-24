@@ -1,27 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
 
-/// Presentation variants for [DualisLogo].
+/// Presentation variants for [DualisLogo] according to the Dualis Brand Manual.
 enum DualisLogoVariant {
-  /// Horizontal layout: emblem on left, brand typography on right.
+  /// Horizontal layout: symbol on left, brand typography on right (Primary authorized version).
   horizontal,
 
-  /// Vertical layout: emblem on top, brand typography centered below.
+  /// Vertical layout: symbol on top, brand typography centered below (Secondary authorized version).
   vertical,
 
-  /// Emblem only without brand text.
+  /// Continuous loop symbol only without brand text (for avatars, app icons, and minimal spaces).
+  symbolOnly,
+
+  /// Synonym for [symbolOnly] for backward compatibility.
   emblemOnly,
 }
 
-/// Standalone medical shield emblem for DualisCheckUp.
+/// Color reproduction variants according to Manual Section 6.
+enum DualisLogoColorScheme {
+  /// Automatically matches system/theme brightness (color on light, white on dark).
+  auto,
+
+  /// Official polychromatic authorized brand version (color symbol, navy text, light blue tagline).
+  fullColor,
+
+  /// Monochrome Dualis Navy (#0E3E6C).
+  monochromeNavy,
+
+  /// Reverse white (#FFFFFF) for dark backgrounds.
+  whiteReversed,
+}
+
+/// Official Dualis continuous loop brand symbol.
 class DualisEmblem extends StatelessWidget {
-  /// Width and height of the emblem or its inner SVG.
+  /// Width and height of the symbol.
   final double size;
 
-  /// Whether to enclose the emblem inside a soft-glow branded badge container.
+  /// Whether to enclose the symbol inside a branded container.
   final bool withContainer;
 
   /// Shape of the badge container if [withContainer] is true.
@@ -45,27 +61,27 @@ class DualisEmblem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final assetPath = isDark ? AppAssets.logoSymbolWhite : AppAssets.logoSymbol;
 
-    final svgWidget = SvgPicture.asset(
-      AppAssets.emblem,
-      width: size,
-      height: size,
-      fit: BoxFit.contain,
-      semanticsLabel: 'DualisCheckUp Emblem',
+    final imageWidget = Semantics(
+      label: 'Dualis — continuous check up',
+      child: Image.asset(
+        assetPath,
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        semanticLabel: 'Dualis Symbol',
+      ),
     );
 
     if (!withContainer) {
-      return svgWidget;
+      return imageWidget;
     }
 
     final effectiveColor = containerColor ??
         (isDark
-            ? AppColors.softIndigoDark.withAlpha(50)
-            : AppColors.softIndigo.withAlpha(20));
-
-    final effectiveBorderColor = isDark
-        ? AppColors.clinicalTeal.withAlpha(60)
-        : AppColors.softIndigo.withAlpha(35);
+            ? AppColors.dualisNavy.withAlpha(80)
+            : AppColors.brandBgLightBlue);
 
     return Container(
       width: size + 16,
@@ -77,152 +93,200 @@ class DualisEmblem extends StatelessWidget {
         borderRadius: shape == BoxShape.rectangle
             ? (borderRadius ?? BorderRadius.circular(16))
             : null,
-        border: Border.all(
-          color: effectiveBorderColor,
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: (isDark ? AppColors.clinicalTeal : AppColors.softIndigo)
-                .withAlpha(isDark ? 35 : 20),
-            blurRadius: 16,
-            spreadRadius: 1,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
-      child: Center(child: svgWidget),
+      child: Center(child: imageWidget),
     );
   }
 }
 
-/// The official DualisCheckUp brand logo component.
+/// The official Dualis brand logo component.
 ///
-/// Combines the clinical shield emblem with brand typography.
+/// Implements the guidelines from the **Manual de Uso da Marca Dualis** (Versão 1.0):
+/// - Punto 1: Composição única (símbolo contínuo entrelaçado, logotipo Dualis, tagline continuous check up).
+/// - Punto 2: Versões autorizadas (Horizontal principal e Vertical secundária).
+/// - Punto 3: Área de proteção calculada proporcionalmente à altura da letra 'a'.
+/// - Punto 4: Tamanho mínimo digital (150 px horizontal, 120 px vertical) com fallback sem tagline.
+/// - Punto 5/6: Versões a cores, monocromática azul-marinho (#0E3E6C) e reversa branca (#FFFFFF).
+/// - Punto 8: Ausência de distorções, sombras ou resplandores impróprios.
+/// - Punto 9: Semantics label "Dualis — continuous check up" e suporte a clique institucional.
 class DualisLogo extends StatelessWidget {
   /// Logo presentation variant: [DualisLogoVariant.horizontal],
-  /// [DualisLogoVariant.vertical], or [DualisLogoVariant.emblemOnly].
+  /// [DualisLogoVariant.vertical], or [DualisLogoVariant.symbolOnly].
   final DualisLogoVariant variant;
 
-  /// Size of the emblem inside the logo.
+  /// Explicit width of the logo.
+  /// Minimum recommended digital widths: 150 px (horizontal), 120 px (vertical).
+  final double? width;
+
+  /// Explicit height of the logo. If omitted, aspect ratio is preserved.
+  final double? height;
+
+  /// Emblem/symbol size when in [DualisLogoVariant.symbolOnly] or [DualisLogoVariant.emblemOnly].
   final double emblemSize;
 
-  /// Font size of the "DualisCheckUp" title text.
+  /// Font size compatibility parameter (kept for backward compatibility).
   final double? fontSize;
 
-  /// Whether to display a subtitle tagline underneath the brand name.
+  /// Whether to display the tagline ("continuous check up").
+  /// Note: If width is below the digital minimum (150px horizontal, 120px vertical),
+  /// the tagline is automatically omitted for readability per Section 4.
   final bool showTagline;
 
-  /// Custom tagline text (defaults to "Triagem Preventiva Unificada").
+  /// Custom tagline override (if needed).
   final String? tagline;
 
-  /// Whether to place the emblem inside a glowing branded container.
+  /// Whether to enclose the standalone emblem in a container (for symbolOnly/emblemOnly).
   final bool withEmblemContainer;
 
   /// Alignment of children across the layout axis.
   final MainAxisAlignment mainAxisAlignment;
 
+  /// Color reproduction mode. Defaults to [DualisLogoColorScheme.auto].
+  final DualisLogoColorScheme colorScheme;
+
+  /// Whether to apply the protective safe area padding around the logo per Section 3.
+  final bool withProtectionArea;
+
+  /// Whether this is a high-visibility hero presentation (applies 2x protection area).
+  final bool isHighVisibility;
+
+  /// Optional click callback (e.g. to navigate to home per Section 9.3).
+  final VoidCallback? onTap;
+
   const DualisLogo({
     super.key,
     this.variant = DualisLogoVariant.horizontal,
+    this.width,
+    this.height,
     this.emblemSize = 38,
     this.fontSize,
-    this.showTagline = false,
+    this.showTagline = true,
     this.tagline,
-    this.withEmblemContainer = true,
+    this.withEmblemContainer = false,
     this.mainAxisAlignment = MainAxisAlignment.center,
+    this.colorScheme = DualisLogoColorScheme.auto,
+    this.withProtectionArea = false,
+    this.isHighVisibility = false,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final effectiveFontSize = fontSize ?? (variant == DualisLogoVariant.vertical ? 24 : 20);
 
-    final emblem = DualisEmblem(
-      size: emblemSize,
-      withContainer: withEmblemContainer,
-    );
+    // Resolve color mode
+    final effectiveColorScheme = colorScheme == DualisLogoColorScheme.auto
+        ? (isDark ? DualisLogoColorScheme.whiteReversed : DualisLogoColorScheme.fullColor)
+        : colorScheme;
 
-    if (variant == DualisLogoVariant.emblemOnly) {
-      return emblem;
-    }
+    final isWhiteReversed = effectiveColorScheme == DualisLogoColorScheme.whiteReversed;
+    final isMonoNavy = effectiveColorScheme == DualisLogoColorScheme.monochromeNavy;
 
-    final brandTitle = Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(
-            text: 'Dualis',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: effectiveFontSize,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.5,
-              color: isDark ? AppColors.textPrimaryDark : AppColors.softIndigo,
-            ),
-          ),
-          TextSpan(
-            text: 'CheckUp',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: effectiveFontSize,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-              color: AppColors.clinicalTeal,
-            ),
-          ),
-        ],
-      ),
-      textAlign: variant == DualisLogoVariant.vertical ? TextAlign.center : TextAlign.start,
-      overflow: TextOverflow.ellipsis,
-      maxLines: 1,
-    );
+    // Handle symbol/emblem only
+    if (variant == DualisLogoVariant.symbolOnly || variant == DualisLogoVariant.emblemOnly) {
+      final symbolWidget = DualisEmblem(
+        size: width ?? emblemSize,
+        withContainer: withEmblemContainer,
+      );
 
-    final taglineWidget = showTagline
-        ? Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Text(
-              tagline ?? 'Triagem Preventiva Inteligente',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: (effectiveFontSize * 0.48).clamp(10.0, 13.0),
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.2,
-                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
-              ),
-              textAlign: variant == DualisLogoVariant.vertical ? TextAlign.center : TextAlign.start,
-            ),
-          )
-        : null;
-
-    if (variant == DualisLogoVariant.vertical) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: mainAxisAlignment,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          emblem,
-          const SizedBox(height: 12),
-          brandTitle,
-          if (taglineWidget != null) taglineWidget,
-        ],
+      return _wrapInteractivityAndPadding(
+        context: context,
+        child: symbolWidget,
+        resolvedWidth: width ?? emblemSize,
       );
     }
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: mainAxisAlignment,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        emblem,
-        const SizedBox(width: 12),
-        Flexible(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              brandTitle,
-              if (taglineWidget != null) taglineWidget,
-            ],
-          ),
-        ),
-      ],
+    // Horizontal Layout (Primary Authorized Version)
+    if (variant == DualisLogoVariant.horizontal) {
+      final effectiveWidth = width ?? 180.0;
+      // Section 4 minimum: 150px for horizontal with tagline
+      final canShowTagline = showTagline && effectiveWidth >= 150.0;
+
+      String assetPath;
+      if (isWhiteReversed) {
+        assetPath = AppAssets.logoReverseWhite;
+      } else if (isMonoNavy) {
+        assetPath = AppAssets.logoMonochromeNavy;
+      } else if (canShowTagline) {
+        assetPath = AppAssets.logoHorizontal;
+      } else {
+        assetPath = AppAssets.logoHorizontalNoTag;
+      }
+
+      final logoImage = Image.asset(
+        assetPath,
+        width: effectiveWidth,
+        height: height,
+        fit: BoxFit.contain,
+        excludeFromSemantics: true,
+      );
+
+      return _wrapInteractivityAndPadding(
+        context: context,
+        child: logoImage,
+        resolvedWidth: effectiveWidth,
+      );
+    }
+
+    // Vertical Layout (Secondary Authorized Version)
+    final effectiveWidth = width ?? 150.0;
+    // Section 4 minimum: 120px for vertical with tagline
+    final canShowTagline = showTagline && effectiveWidth >= 120.0;
+
+    String assetPath;
+    if (isWhiteReversed) {
+      assetPath = AppAssets.logoVerticalReverseWhite;
+    } else if (canShowTagline) {
+      assetPath = AppAssets.logoVertical;
+    } else {
+      assetPath = AppAssets.logoVerticalNoTag;
+    }
+
+    final logoImage = Image.asset(
+      assetPath,
+      width: effectiveWidth,
+      height: height,
+      fit: BoxFit.contain,
+      excludeFromSemantics: true,
     );
+
+    return _wrapInteractivityAndPadding(
+      context: context,
+      child: logoImage,
+      resolvedWidth: effectiveWidth,
+    );
+  }
+
+  Widget _wrapInteractivityAndPadding({
+    required BuildContext context,
+    required Widget child,
+    required double resolvedWidth,
+  }) {
+    Widget content = Semantics(
+      label: 'Dualis — continuous check up',
+      button: onTap != null,
+      child: child,
+    );
+
+    if (onTap != null) {
+      content = GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: content,
+      );
+    }
+
+    if (withProtectionArea) {
+      // Section 3: Protection area = height of lowercase 'a' (approx 6-8% of width)
+      final baseProtection = (resolvedWidth * 0.06).clamp(8.0, 24.0);
+      final protectionMargin = isHighVisibility ? baseProtection * 2.0 : baseProtection;
+
+      content = Padding(
+        padding: EdgeInsets.all(protectionMargin),
+        child: content,
+      );
+    }
+
+    return content;
   }
 }

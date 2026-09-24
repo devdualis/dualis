@@ -60,6 +60,6 @@ export interface TriageOutcomeResponseDto {
   crossVerticalContextNote?: string;
   aiMappedLayTerm?: string;
   aiClinicalConcept?: string;
-  aiSource?: 'openai_gpt' | 'idiom_cache' | 'dictionary_fallback' | 'vector_match';
+  aiSource?: 'gemini' | 'idiom_cache' | 'dictionary_fallback' | 'vector_match';
   aiConfidence?: number;
 }

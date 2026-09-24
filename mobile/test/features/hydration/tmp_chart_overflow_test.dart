@@ -21,6 +21,10 @@ void main() {
       ),
     ));
     await tester.pump();
-    final e = tester.takeException(); if (e is FlutterError) { debugPrint(e.toStringDeep()); } expect(e, isNull);
+    final e = tester.takeException();
+    if (e is FlutterError) {
+      debugPrint(e.toStringDeep());
+    }
+    expect(e, isNull);
   });
 }

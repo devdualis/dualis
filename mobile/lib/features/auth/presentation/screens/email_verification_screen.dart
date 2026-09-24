@@ -267,12 +267,12 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Padding(
-                padding: EdgeInsets.only(top: 8, bottom: 24),
+                padding: EdgeInsets.only(top: 8, bottom: 20),
                 child: DualisLogo(
                   key: Key('verificationBrandLogo'),
                   variant: DualisLogoVariant.horizontal,
-                  emblemSize: 40,
-                  fontSize: 22,
+                  width: 170,
+                  withProtectionArea: true,
                 ),
               ),
               Container(

@@ -114,7 +114,7 @@ export class SymptomVectorService implements OnModuleInit {
         clinicalConcept: result.clinicalConcept,
         isEmergencyCandidate: result.isEmergencyCandidate,
         confidence: result.confidence,
-        source: 'openai_gpt',
+        source: 'gemini',
         embedding: embeddingVector,
       });
     } catch (err) {

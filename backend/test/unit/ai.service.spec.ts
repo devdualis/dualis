@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ConfigService } from '@nestjs/config';
+import { GeminiService } from '../../src/common/ai/gemini.service';
 import { IdiomDictionaryService } from '../../src/modules/ai/services/idiom-dictionary.service';
 import { AiTriageService } from '../../src/modules/ai/services/ai-triage.service';
 
@@ -10,9 +11,9 @@ describe('AI Classification Engine (TRG-02 / I18N-02 / RNF-002)', () => {
   beforeEach(() => {
     idiomService = new IdiomDictionaryService();
     const configService = {
-      get: (key: string) => (key === 'OPENAI_KEY' ? 'mock-openai-key' : null),
+      get: (key: string) => (key === 'GEMINI_API_KEY' ? 'mock-gemini-key' : null),
     } as unknown as ConfigService;
-    aiTriageService = new AiTriageService(configService, idiomService);
+    aiTriageService = new AiTriageService(new GeminiService(configService), idiomService);
   });
 
   describe('IdiomDictionaryService', () => {

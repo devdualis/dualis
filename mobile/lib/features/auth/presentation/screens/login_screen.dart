@@ -87,27 +87,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 const Center(
                   child: Padding(
-                    padding: EdgeInsets.only(top: 4, bottom: 24),
+                    padding: EdgeInsets.only(top: 4, bottom: 16),
                     child: DualisLogo(
                       key: Key('loginBrandLogo'),
                       variant: DualisLogoVariant.vertical,
-                      emblemSize: 48,
-                      showTagline: true,
+                      width: 160,
+                      withProtectionArea: true,
+                      isHighVisibility: true,
                     ),
                   ),
                 ),
                 Text(
                   'Entrar no DualisCheckUp',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimaryLight,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.dualisNavy,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Acesse seu prontuário e histórico de triagens preventivas com segurança.',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     color: AppColors.textSecondaryLight,
                     height: 1.4,

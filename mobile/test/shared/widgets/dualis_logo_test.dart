@@ -1,25 +1,21 @@
 import 'package:dualis_mobile/core/constants/app_assets.dart';
 import 'package:dualis_mobile/shared/widgets/dualis_logo.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('DualisLogo and DualisEmblem Tests', () {
-    testWidgets('SvgPicture.asset loads centered-minimalist-medical-emblem', (tester) async {
+    testWidgets('DualisEmblem loads official brand symbol asset', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
-            body: SvgPicture.asset(
-              AppAssets.emblem,
-              width: 48,
-              height: 48,
-            ),
+            body: DualisEmblem(size: 48),
           ),
         ),
       );
 
-      expect(find.byType(SvgPicture), findsOneWidget);
+      expect(find.byType(Image), findsOneWidget);
+      expect(find.byType(DualisEmblem), findsOneWidget);
     });
 
     testWidgets('DualisEmblem renders standalone and within container', (tester) async {
@@ -38,48 +34,53 @@ void main() {
 
       expect(find.byKey(const Key('rawEmblem')), findsOneWidget);
       expect(find.byKey(const Key('badgeEmblem')), findsOneWidget);
-      expect(find.byType(SvgPicture), findsNWidgets(2));
+      expect(find.byType(Image), findsNWidgets(2));
     });
 
-    testWidgets('DualisLogo horizontal variant renders emblem and brand typography', (tester) async {
+    testWidgets('DualisLogo horizontal variant renders official horizontal asset', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
             body: DualisLogo(
               variant: DualisLogoVariant.horizontal,
-              emblemSize: 36,
+              width: 180,
             ),
           ),
         ),
       );
 
       expect(find.byType(DualisLogo), findsOneWidget);
-      expect(find.byType(DualisEmblem), findsOneWidget);
-      expect(find.textContaining('Dualis'), findsOneWidget);
-      expect(find.textContaining('CheckUp'), findsOneWidget);
+      final imageFinder = find.byType(Image);
+      expect(imageFinder, findsOneWidget);
+
+      final Image imageWidget = tester.widget(imageFinder);
+      final AssetImage assetImage = imageWidget.image as AssetImage;
+      expect(assetImage.assetName, AppAssets.logoHorizontal);
     });
 
-    testWidgets('DualisLogo vertical variant renders emblem, typography and tagline', (tester) async {
+    testWidgets('DualisLogo vertical variant renders official vertical asset', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
             body: DualisLogo(
               variant: DualisLogoVariant.vertical,
-              emblemSize: 52,
+              width: 160,
               showTagline: true,
-              tagline: 'Triagem Preventiva Inteligente',
             ),
           ),
         ),
       );
 
       expect(find.byType(DualisLogo), findsOneWidget);
-      expect(find.textContaining('Dualis'), findsOneWidget);
-      expect(find.textContaining('CheckUp'), findsOneWidget);
-      expect(find.text('Triagem Preventiva Inteligente'), findsOneWidget);
+      final imageFinder = find.byType(Image);
+      expect(imageFinder, findsOneWidget);
+
+      final Image imageWidget = tester.widget(imageFinder);
+      final AssetImage assetImage = imageWidget.image as AssetImage;
+      expect(assetImage.assetName, AppAssets.logoVertical);
     });
 
-    testWidgets('DualisLogo emblemOnly variant renders only emblem without text', (tester) async {
+    testWidgets('DualisLogo emblemOnly variant renders only symbol without text', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -92,8 +93,32 @@ void main() {
       );
 
       expect(find.byType(DualisEmblem), findsOneWidget);
-      expect(find.textContaining('Dualis'), findsNothing);
-      expect(find.textContaining('CheckUp'), findsNothing);
+      final imageFinder = find.byType(Image);
+      expect(imageFinder, findsOneWidget);
+
+      final Image imageWidget = tester.widget(imageFinder);
+      final AssetImage assetImage = imageWidget.image as AssetImage;
+      expect(assetImage.assetName, AppAssets.logoSymbol);
+    });
+
+    testWidgets('DualisLogo automatically falls back to no-tagline below minimum width 150px (Punto 4)', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: DualisLogo(
+              variant: DualisLogoVariant.horizontal,
+              width: 140, // Below 150px minimum
+            ),
+          ),
+        ),
+      );
+
+      final imageFinder = find.byType(Image);
+      expect(imageFinder, findsOneWidget);
+
+      final Image imageWidget = tester.widget(imageFinder);
+      final AssetImage assetImage = imageWidget.image as AssetImage;
+      expect(assetImage.assetName, AppAssets.logoHorizontalNoTag);
     });
   });
 }

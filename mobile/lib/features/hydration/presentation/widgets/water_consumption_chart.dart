@@ -288,22 +288,28 @@ class WaterConsumptionChart extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildMetricCol(
-                      'Hoje',
-                      '${entries.isNotEmpty ? entries.last.value : 0} ml',
+                    Expanded(
+                      child: _buildMetricCol(
+                        'Hoje',
+                        '${entries.isNotEmpty ? entries.last.value : 0} ml',
+                      ),
                     ),
                     Container(
                       height: 24,
                       width: 1,
                       color: Colors.grey.shade300,
                     ),
-                    _buildMetricCol('Média 7 dias', '$averageMl ml'),
+                    Expanded(
+                      child: _buildMetricCol('Média 7 dias', '$averageMl ml'),
+                    ),
                     Container(
                       height: 24,
                       width: 1,
                       color: Colors.grey.shade300,
                     ),
-                    _buildMetricCol('Meta', '$dailyTargetMl ml'),
+                    Expanded(
+                      child: _buildMetricCol('Meta', '$dailyTargetMl ml'),
+                    ),
                   ],
                 ),
               ],

@@ -1,17 +1,12 @@
 import { Client } from 'pg';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import OpenAI from 'openai';
+import { GeminiService } from '../src/common/ai/gemini.service';
 import { MEDICAL_ARTICLES_SEED } from '../src/modules/triage/data/medical-articles.seed';
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-const EMBEDDING_MODEL = 'text-embedding-3-small';
-const EMBEDDING_DIMENSIONS = 768;
-
-const apiKey = process.env.OPENAI_KEY;
-
-const client = apiKey && apiKey !== 'mock-openai-key' ? new OpenAI({ apiKey }) : null;
+const gemini = new GeminiService();
 
 function generateDeterministicEmbedding(text: string): number[] {
   const vector = new Array(768).fill(0);
@@ -41,21 +36,8 @@ function generateDeterministicEmbedding(text: string): number[] {
 }
 
 async function getEmbedding(text: string): Promise<number[]> {
-  if (client) {
-    try {
-      const response = await client.embeddings.create({
-        model: EMBEDDING_MODEL,
-        input: text,
-        dimensions: EMBEDDING_DIMENSIONS,
-      });
-      const values = response.data?.[0]?.embedding;
-      if (Array.isArray(values) && values.length === EMBEDDING_DIMENSIONS) {
-        return values;
-      }
-    } catch (e) {
-      // Fall through to deterministic embedding
-    }
-  }
+  const values = await gemini.embed(text);
+  if (values) return values;
   console.warn('Falling back to deterministic clinical embedding for:', text.slice(0, 40));
   return generateDeterministicEmbedding(text);
 }
@@ -138,7 +120,7 @@ async function runSeed() {
     console.log(`Done (${embedding.length} dims)`);
 
     // Subtle rate-limiting delay between Gemini API calls to prevent 429 RPM limit
-    if (client && i < total - 1) {
+    if (gemini.isAvailable && i < total - 1) {
       await new Promise((resolve) => setTimeout(resolve, 150));
     }
   }

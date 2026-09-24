@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, integer, timestamp, pgPolicy, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, integer, timestamp, pgPolicy, boolean, index, uniqueIndex } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { users } from './users.schema';
 
@@ -22,6 +22,8 @@ export const symptomLogs = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
+    index('idx_symptom_logs_user_recorded').on(table.userId, table.recordedAt.desc()),
+    uniqueIndex('idx_symptom_logs_user_client_session').on(table.userId, table.clientSessionId),
     pgPolicy('symptom_logs_patient_isolation', {
       for: 'all',
       using: sql`user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`,

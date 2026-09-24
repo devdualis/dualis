@@ -1,14 +1,11 @@
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import OpenAI from 'openai';
+import { GeminiService } from '../../../common/ai/gemini.service';
 import { ClassifySymptomDto, TriageClassificationResult } from '../dto/classify-symptom.dto';
 import { IdiomDictionaryService } from './idiom-dictionary.service';
 import { SymptomVectorService } from './symptom-vector.service';
 
-const CLASSIFICATION_MODEL = 'gpt-4o-mini';
-
 // Canonical systemOrDimension keys (must match idiom-dictionary.service.ts and the
-// mobile app's triage question bank / wizard category aliases). OpenAI is constrained
+// mobile app's triage question bank / wizard category aliases). Gemini is constrained
 // to this vocabulary so free-form output doesn't produce keys the app can't route on.
 const PHYSICAL_SYSTEMS = [
   'cardiovascular_chest',
@@ -34,31 +31,40 @@ const EMOTIONAL_SYSTEMS = [
   'autoestima',
 ];
 
+const CLASSIFICATION_SCHEMA = {
+  type: 'object',
+  properties: {
+    isOffTopic: { type: 'boolean' },
+    vertical: { type: 'string', enum: ['physical', 'emotional'] },
+    systemOrDimension: { type: 'string', enum: [...PHYSICAL_SYSTEMS, ...EMOTIONAL_SYSTEMS] },
+    urgencyScore: { type: 'integer', minimum: 1, maximum: 5 },
+    mappedLayTerm: { type: 'string' },
+    clinicalConcept: { type: 'string' },
+    isEmergencyCandidate: { type: 'boolean' },
+  },
+  required: [
+    'isOffTopic',
+    'vertical',
+    'systemOrDimension',
+    'urgencyScore',
+    'mappedLayTerm',
+    'clinicalConcept',
+    'isEmergencyCandidate',
+  ],
+};
+
 @Injectable()
 export class AiTriageService {
   private readonly logger = new Logger(AiTriageService.name);
-  private readonly client: OpenAI | null = null;
   private readonly cache = new Map<string, TriageClassificationResult>();
   private readonly idiomDict: IdiomDictionaryService;
 
   constructor(
-    @Optional() @Inject(ConfigService) private readonly configService?: ConfigService,
+    @Optional() @Inject(GeminiService) private readonly gemini?: GeminiService,
     @Optional() @Inject(IdiomDictionaryService) idiomDictionary?: IdiomDictionaryService,
     @Optional() @Inject(SymptomVectorService) private readonly symptomVector?: SymptomVectorService,
   ) {
     this.idiomDict = idiomDictionary ?? new IdiomDictionaryService();
-    const apiKey =
-      this.configService?.get<string>('OPENAI_KEY') || process.env.OPENAI_KEY;
-    if (apiKey && apiKey !== 'mock-openai-key') {
-      try {
-        this.client = new OpenAI({ apiKey });
-        this.logger.log('OpenAI client initialized successfully');
-      } catch (err) {
-        this.logger.warn(`Failed to initialize OpenAI client: ${(err as Error).message}`);
-      }
-    } else {
-      this.logger.log('OPENAI_KEY not provided or mock; operating with deterministic clinical dictionary engine');
-    }
   }
 
   async classify(dto: ClassifySymptomDto): Promise<TriageClassificationResult> {
@@ -85,7 +91,7 @@ export class AiTriageService {
       };
     }
 
-    // 3. Symptom vector DB match (semantic, learns over time from OpenAI classifications)
+    // 3. Symptom vector DB match (semantic, learns over time from Gemini classifications)
     if (this.symptomVector) {
       const vectorMatch = await this.symptomVector.matchSymptom(dto.text);
       if (vectorMatch) {
@@ -97,16 +103,12 @@ export class AiTriageService {
       }
     }
 
-    // 4. OpenAI structured output
-    if (this.client) {
+    // 4. Gemini structured output
+    if (this.gemini?.isAvailable) {
       try {
-        const response = await this.client.chat.completions.create({
-          model: CLASSIFICATION_MODEL,
-          response_format: { type: 'json_object' },
-          messages: [
-            {
-              role: 'user',
-              content: `Você é o motor de triagem médica preventiva do DualisCheckUp. Classifique a seguinte descrição do usuário: "${dto.text}". Retorne em JSON estrito com:
+        const parsed = await this.gemini.generateJson<Record<string, any>>({
+          schema: CLASSIFICATION_SCHEMA,
+          prompt: `Você é o motor de triagem médica preventiva do DualisCheckUp. Classifique a seguinte descrição do usuário: "${dto.text}". Retorne em JSON estrito com:
               - isOffTopic: booleano indicando se o texto NÃO descreve um sintoma físico ou emocional real (ex.: piadas, textos aleatórios, spam, pedidos não relacionados à saúde). Se true, ainda assim preencha os demais campos com os valores mais neutros/plausíveis abaixo.
               - vertical: "physical" ou "emotional"
               - systemOrDimension: escolha EXATAMENTE uma destas chaves, de acordo com o "vertical" escolhido (nunca invente uma chave nova):
@@ -116,12 +118,7 @@ export class AiTriageService {
               - mappedLayTerm: termo leigo identificado, refletindo o sintoma relatado (ex.: coceira, tontura, dor) e não assumindo que é dor quando não for
               - clinicalConcept: conceito médico formal correspondente
               - isEmergencyCandidate: booleano indicando se preenche critérios Manchester/ESI nível 1-2`,
-            },
-          ],
         });
-
-        const rawText = response.choices[0]?.message?.content || '{}';
-        const parsed = JSON.parse(rawText);
 
         const primaryVertical = parsed.vertical === 'emotional' ? 'emotional' : 'physical';
         const validSystems = primaryVertical === 'emotional' ? EMOTIONAL_SYSTEMS : PHYSICAL_SYSTEMS;
@@ -140,7 +137,7 @@ export class AiTriageService {
           isEmergencyCandidate: parsed.isEmergencyCandidate === true,
           isOffTopic: parsed.isOffTopic === true,
           confidence: 0.90,
-          source: 'openai_gpt',
+          source: 'gemini',
           latencyMs: Math.round(performance.now() - startTime),
         };
 
@@ -150,7 +147,7 @@ export class AiTriageService {
         }
         return result;
       } catch (err) {
-        this.logger.warn(`OpenAI inference failed, falling back: ${(err as Error).message}`);
+        this.logger.warn(`Gemini inference failed, falling back: ${(err as Error).message}`);
       }
     }
 

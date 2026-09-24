@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, integer, timestamp, pgPolicy } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, integer, timestamp, pgPolicy, index } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { users } from './users.schema';
 
@@ -15,6 +15,8 @@ export const triageEmergencyEvents = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
+    index('idx_triage_emergency_events_user_id').on(table.userId),
+    index('idx_triage_emergency_events_reported_at').on(table.reportedAt),
     pgPolicy('triage_emergency_events_isolation', {
       for: 'all',
       using: sql`user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`,

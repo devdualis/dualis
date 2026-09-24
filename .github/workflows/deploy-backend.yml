@@ -1,0 +1,253 @@
+name: Backend - Deploy to Google Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+    inputs:
+      deploy_target:
+        description: 'Target Cloud Run Environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+      region:
+        description: 'Google Cloud Region (default: southamerica-east1)'
+        required: false
+        default: 'southamerica-east1'
+        type: string
+
+# Permissions required for Workload Identity Federation & Container Registry
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID || secrets.GCP_PROJECT_ID }}
+  GCP_REGION: ${{ inputs.region || vars.GCP_REGION || 'southamerica-east1' }}
+  GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY || 'dualis' }}
+  SERVICE_NAME: ${{ vars.GCP_SERVICE_NAME || 'dualis-backend' }}
+
+jobs:
+  test:
+    name: Lint & Test Backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile TypeScript bundle
+        run: npm run build
+
+      - name: Run unit tests
+        run: npm run test
+
+  deploy:
+    name: Build & Deploy to Cloud Run
+    needs: test
+    # Deploy only on push to main or manual workflow_dispatch, not on pull requests
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ------------------------------------------------------------------------
+      # Google Cloud Authentication
+      # Supports both Workload Identity Federation (Recommended) and SA Key JSON
+      # ------------------------------------------------------------------------
+      - name: Authenticate to Google Cloud (Service Account Key)
+        if: ${{ secrets.GCP_SA_KEY != '' }}
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Authenticate to Google Cloud (Workload Identity Federation)
+        if: ${{ secrets.GCP_SA_KEY == '' && secrets.GCP_WORKLOAD_IDENTITY_PROVIDER != '' }}
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Ensure Artifact Registry repository exists
+        run: |
+          if ! gcloud artifacts repositories describe ${{ env.GAR_REPOSITORY }} --location=${{ env.GCP_REGION }} --project=${{ env.GCP_PROJECT_ID }} >/dev/null 2>&1; then
+            echo "Creating Artifact Registry repository '${{ env.GAR_REPOSITORY }}' in '${{ env.GCP_REGION }}'..."
+            gcloud artifacts repositories create ${{ env.GAR_REPOSITORY }} \
+              --repository-format=docker \
+              --location=${{ env.GCP_REGION }} \
+              --project=${{ env.GCP_PROJECT_ID }} \
+              --description="DualisCheckUp Docker Images" \
+              --quiet
+          fi
+
+      - name: Configure Docker authentication with Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Docker image
+        id: docker_build
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+            ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ------------------------------------------------------------------------
+      # Environment Variables Preparation
+      # Supports:
+      #  1. Full .env contents pasted into BACKEND_ENV secret
+      #  2. Individual GitHub Secrets (DATABASE_URL, GEMINI_API_KEY, etc.)
+      #  3. Preserving existing Cloud Run environment variables if none passed
+      # ------------------------------------------------------------------------
+      - name: Prepare Cloud Run Environment Variables
+        id: prepare_env
+        env:
+          RAW_ENV: ${{ secrets.BACKEND_ENV }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ENCRYPTION_MASTER_KEY: ${{ secrets.ENCRYPTION_MASTER_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          DISCLAIMER_VERSION: ${{ vars.DISCLAIMER_VERSION }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_AVATAR_BUCKET: ${{ vars.SUPABASE_AVATAR_BUCKET }}
+        run: |
+          node -e "
+            const fs = require('fs');
+            const envMap = {};
+
+            // 1. Bulk raw .env content from BACKEND_ENV secret
+            if (process.env.RAW_ENV) {
+              const lines = process.env.RAW_ENV.split('\n');
+              for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+                  const idx = trimmed.indexOf('=');
+                  const k = trimmed.slice(0, idx).trim();
+                  let v = trimmed.slice(idx + 1).trim();
+                  if ((v.startsWith('\"') && v.endsWith('\"')) || (v.startsWith(\"'\") && v.endsWith(\"'\"))) {
+                    v = v.slice(1, -1);
+                  }
+                  envMap[k] = v;
+                }
+              }
+            }
+
+            // 2. Individual secrets override or supplement
+            const individualKeys = [
+              'DATABASE_URL', 'ENCRYPTION_MASTER_KEY', 'GEMINI_API_KEY',
+              'DISCLAIMER_VERSION', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER',
+              'SMTP_PASS', 'MAIL_FROM', 'SUPABASE_URL', 'SUPABASE_ANON_KEY',
+              'SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_AVATAR_BUCKET'
+            ];
+            for (const key of individualKeys) {
+              if (process.env[key] && process.env[key].trim() !== '') {
+                envMap[key] = process.env[key].trim();
+              }
+            }
+
+            // Always enforce production mode
+            envMap['NODE_ENV'] = 'production';
+
+            if (Object.keys(envMap).length > 1) {
+              const yamlEntries = Object.entries(envMap).map(([k, v]) => \`\${k}: \${JSON.stringify(v)}\`);
+              fs.writeFileSync('cloudrun-env.yaml', yamlEntries.join('\n'));
+              console.log('✅ Generated cloudrun-env.yaml with ' + Object.keys(envMap).length + ' environment variables.');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'has_env_file=true\n');
+            } else {
+              console.log('ℹ️ No custom environment secrets provided in GitHub. Cloud Run will retain its currently configured service environment variables.');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'has_env_file=false\n');
+            }
+          "
+
+      # ------------------------------------------------------------------------
+      # Deploy to Google Cloud Run
+      # ------------------------------------------------------------------------
+      - name: Deploy to Google Cloud Run
+        id: deploy_cloud_run
+        env:
+          HAS_ENV_FILE: ${{ steps.prepare_env.outputs.has_env_file }}
+        run: |
+          DEPLOY_CMD=(
+            gcloud run deploy "${{ env.SERVICE_NAME }}"
+            "--image=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+            "--region=${{ env.GCP_REGION }}"
+            "--project=${{ env.GCP_PROJECT_ID }}"
+            "--allow-unauthenticated"
+            "--memory=512Mi"
+            "--cpu=1"
+            "--min-instances=0"
+            "--max-instances=10"
+            "--port=8080"
+          )
+
+          if [ "$HAS_ENV_FILE" = "true" ]; then
+            echo "Applying environment variables from cloudrun-env.yaml..."
+            DEPLOY_CMD+=("--env-vars-file=cloudrun-env.yaml")
+          fi
+
+          echo "Running deployment..."
+          "${DEPLOY_CMD[@]}" --quiet
+
+          # Retrieve deployed URL
+          SERVICE_URL=$(gcloud run services describe "${{ env.SERVICE_NAME }}" \
+            --region="${{ env.GCP_REGION }}" \
+            --project="${{ env.GCP_PROJECT_ID }}" \
+            --format='value(status.url)')
+          echo "url=$SERVICE_URL" >> $GITHUB_OUTPUT
+
+      - name: Summary & Deployed URL
+        run: |
+          echo "### 🚀 Google Cloud Run Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "- **Service Name:** \`${{ env.SERVICE_NAME }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Region:** \`${{ env.GCP_REGION }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image Tag:** \`${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Live URL:** [${{ steps.deploy_cloud_run.outputs.url }}](${{ steps.deploy_cloud_run.outputs.url }})" >> $GITHUB_STEP_SUMMARY
