@@ -77,6 +77,10 @@ jobs:
     defaults:
       run:
         working-directory: ./backend
+    # `secrets` is not available in step-level `if`, so expose presence flags via env
+    env:
+      HAS_GCP_SA_KEY: ${{ secrets.GCP_SA_KEY != '' }}
+      HAS_GCP_WIF: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER != '' }}
 
     steps:
       - name: Checkout repository
@@ -87,13 +91,13 @@ jobs:
       # Supports both Workload Identity Federation (Recommended) and SA Key JSON
       # ------------------------------------------------------------------------
       - name: Authenticate to Google Cloud (Service Account Key)
-        if: ${{ secrets.GCP_SA_KEY != '' }}
+        if: env.HAS_GCP_SA_KEY == 'true'
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Authenticate to Google Cloud (Workload Identity Federation)
-        if: ${{ secrets.GCP_SA_KEY == '' && secrets.GCP_WORKLOAD_IDENTITY_PROVIDER != '' }}
+        if: env.HAS_GCP_SA_KEY != 'true' && env.HAS_GCP_WIF == 'true'
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
