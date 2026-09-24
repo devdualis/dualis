@@ -1,18 +1,14 @@
 name: Backend - Deploy to Google Cloud Run
 
+# PR validation lives in backend-ci.yml; this workflow only ships main.
 on:
   push:
     branches:
       - main
     paths:
       - 'backend/**'
-      - '.github/workflows/deploy-backend.yml'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'backend/**'
-      - '.github/workflows/deploy-backend.yml'
+      - '.github/workflows/backend-ci.yml'
+      - '.github/workflows/backend-deploy.yml'
   workflow_dispatch:
     inputs:
       deploy_target:
@@ -34,6 +30,11 @@ permissions:
   contents: read
   id-token: write
 
+# Never run two deploys at once; queue instead of cancelling a rollout mid-flight
+concurrency:
+  group: backend-deploy
+  cancel-in-progress: false
+
 env:
   GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID || secrets.GCP_PROJECT_ID }}
   GCP_REGION: ${{ inputs.region || vars.GCP_REGION || 'southamerica-east1' }}
@@ -42,37 +43,12 @@ env:
 
 jobs:
   test:
-    name: Lint & Test Backend
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js 22 LTS
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Compile TypeScript bundle
-        run: npm run build
-
-      - name: Run unit tests
-        run: npm run test
+    name: CI
+    uses: ./.github/workflows/backend-ci.yml
 
   deploy:
     name: Build & Deploy to Cloud Run
     needs: test
-    # Deploy only on push to main or manual workflow_dispatch, not on pull requests
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     defaults:
       run:

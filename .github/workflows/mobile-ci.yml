@@ -1,0 +1,46 @@
+name: Mobile - CI
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+  # Reused by mobile-release.yml as its test gate
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Analyze & Test Mobile
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./mobile
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+          cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run code generation (Build Runner)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Analyze code (flutter analyze)
+        run: flutter analyze
+
+      - name: Run test suite
+        run: flutter test

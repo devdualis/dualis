@@ -1,14 +1,21 @@
 # DualisCheckUp — CI/CD Pipeline & Environment Configuration Guide
 
-This repository contains automated Continuous Integration and Continuous Deployment (CI/CD) workflows powered by **GitHub Actions**:
+This repository contains automated Continuous Integration and Continuous Deployment (CI/CD) workflows powered by **GitHub Actions**, split per project and per stage:
 
-1. **Backend Deployment to Google Cloud Run** (`.github/workflows/deploy-backend.yml`):
+| Workflow | Triggers | Purpose |
+|---|---|---|
+| `backend-ci.yml` | PRs touching `backend/**`; called by `backend-deploy.yml` | Build + unit tests |
+| `backend-deploy.yml` | Push to `main` touching `backend/**`; manual | Runs backend CI, then deploys to Cloud Run |
+| `mobile-ci.yml` | PRs touching `mobile/**`; called by `mobile-release.yml` | Code generation, `flutter analyze`, `flutter test` |
+| `mobile-release.yml` | Push to `main` touching `mobile/**`; GitHub Release; manual | Runs mobile CI, then builds the APK |
+
+1. **Backend Deployment to Google Cloud Run** (`.github/workflows/backend-deploy.yml`):
    - Multi-stage Docker containerization of the NestJS Fastify backend.
    - Pushes images to Google Artifact Registry.
    - Automatically injects environment variables/secrets.
    - Deploys the service to Google Cloud Run (`southamerica-east1` region for Brazilian LGPD compliance).
-2. **Mobile Android APK Build** (`.github/workflows/build-mobile-apk.yml`):
-   - Runs Flutter analysis and test suites.
+2. **Mobile Android APK Build** (`.github/workflows/mobile-release.yml`):
+   - Gated on the Flutter analysis and test suites in `mobile-ci.yml`.
    - Injects the backend `API_BASE_URL` at compile time via `--dart-define`.
    - Compiles release (or debug) Android APK (`app-release.apk`).
    - Uploads APK directly as a downloadable GitHub Actions artifact and attaches it to GitHub Releases.
