@@ -35,12 +35,6 @@ concurrency:
   group: backend-deploy
   cancel-in-progress: false
 
-env:
-  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID || secrets.GCP_PROJECT_ID }}
-  GCP_REGION: ${{ inputs.region || vars.GCP_REGION || 'southamerica-east1' }}
-  GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY || 'dualis' }}
-  SERVICE_NAME: ${{ vars.GCP_SERVICE_NAME || 'dualis-backend' }}
-
 jobs:
   test:
     name: CI
@@ -50,11 +44,18 @@ jobs:
     name: Build & Deploy to Cloud Run
     needs: test
     runs-on: ubuntu-latest
+    # Binds the job to a GitHub Environment so its scoped vars/secrets resolve
+    environment: ${{ inputs.deploy_target || 'production' }}
     defaults:
       run:
         working-directory: ./backend
+    # Environment-scoped `vars`/`secrets` only resolve at job level (not workflow-level env).
     # `secrets` is not available in step-level `if`, so expose presence flags via env
     env:
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID || secrets.GCP_PROJECT_ID }}
+      GCP_REGION: ${{ inputs.region || vars.GCP_REGION || 'southamerica-east1' }}
+      GAR_REPOSITORY: ${{ vars.GAR_REPOSITORY || 'dualis' }}
+      SERVICE_NAME: ${{ vars.GCP_SERVICE_NAME || 'dualis-backend' }}
       HAS_GCP_SA_KEY: ${{ secrets.GCP_SA_KEY != '' }}
       HAS_GCP_WIF: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER != '' }}
 
@@ -66,6 +67,17 @@ jobs:
       # Google Cloud Authentication
       # Supports both Workload Identity Federation (Recommended) and SA Key JSON
       # ------------------------------------------------------------------------
+      - name: Verify deploy configuration
+        run: |
+          if [ -z "$GCP_PROJECT_ID" ]; then
+            echo "::error::GCP_PROJECT_ID is empty. Set it as a variable on the '${{ inputs.deploy_target || 'production' }}' environment."
+            exit 1
+          fi
+          if [ "$HAS_GCP_SA_KEY" != "true" ] && [ "$HAS_GCP_WIF" != "true" ]; then
+            echo "::error::No GCP credentials. Add GCP_SA_KEY (or GCP_WORKLOAD_IDENTITY_PROVIDER + GCP_SERVICE_ACCOUNT) to the environment."
+            exit 1
+          fi
+
       - name: Authenticate to Google Cloud (Service Account Key)
         if: env.HAS_GCP_SA_KEY == 'true'
         uses: google-github-actions/auth@v2
