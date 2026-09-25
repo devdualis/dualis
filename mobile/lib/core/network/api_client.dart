@@ -1,6 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/api_endpoints.dart';
 import '../security/secure_storage_service.dart';
+
+final apiClientProvider = Provider<ApiClient>((ref) {
+  final secureStorage = ref.watch(secureStorageServiceProvider);
+  return ApiClient(secureStorage: secureStorage);
+});
 
 class ApiClient {
   final Dio dio;
@@ -19,6 +25,7 @@ class ApiClient {
                 headers: {
                   'Content-Type': 'application/json',
                   'Accept': 'application/json',
+                  'Accept-Encoding': 'gzip, deflate, br',
                 },
               ),
             ),

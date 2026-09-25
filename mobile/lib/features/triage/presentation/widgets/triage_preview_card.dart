@@ -276,6 +276,58 @@ class TriagePreviewCard extends StatelessWidget {
       case 'sim_desvalorizacao_propria':
         return l10n.triageOptSimDesvalorizacaoPropria;
 
+      // Membros Superiores
+      case 'ombro_direito':
+        return 'Ombro Direito';
+      case 'ombro_esquerdo':
+        return 'Ombro Esquerdo';
+      case 'braco_direito':
+        return 'Braço Direito';
+      case 'braco_esquerdo':
+        return 'Braço Esquerdo';
+      case 'cotovelo_direito':
+        return 'Cotovelo Direito';
+      case 'cotovelo_esquerdo':
+        return 'Cotovelo Esquerdo';
+      case 'antebraco_direito':
+        return 'Antebraço Direito';
+      case 'antebraco_esquerdo':
+        return 'Antebraço Esquerdo';
+      case 'punho_direito':
+        return 'Punho Direito';
+      case 'punho_esquerdo':
+        return 'Punho Esquerdo';
+      case 'mao_dedos_direito':
+        return 'Mão / Dedos Direito';
+      case 'mao_dedos_esquerdo':
+        return 'Mão / Dedos Esquerdo';
+      case 'membros_superiores_bilateral':
+        return 'Ambos os Membros Superiores (Bilateral)';
+
+      // Membros Inferiores
+      case 'coxa_quadril_direito':
+        return 'Coxa / Quadril Direito';
+      case 'coxa_quadril_esquerdo':
+        return 'Coxa / Quadril Esquerdo';
+      case 'joelho_direito':
+        return 'Joelho Direito';
+      case 'joelho_esquerdo':
+        return 'Joelho Esquerdo';
+      case 'canela_panturrilha_direito':
+        return 'Canela / Panturrilha Direita';
+      case 'canela_panturrilha_esquerdo':
+        return 'Canela / Panturrilha Esquerda';
+      case 'tornozelo_direito':
+        return 'Tornozelo Direito';
+      case 'tornozelo_esquerdo':
+        return 'Tornozelo Esquerdo';
+      case 'pe_dedos_direito':
+        return 'Pé / Dedos Direito';
+      case 'pe_dedos_esquerdo':
+        return 'Pé / Dedos Esquerdo';
+      case 'membros_inferiores_bilateral':
+        return 'Ambos os Membros Inferiores (Bilateral)';
+
       default:
         final intVal = int.tryParse(key);
         if (intVal != null) {
@@ -350,7 +402,9 @@ class TriagePreviewCard extends StatelessWidget {
       case 'general_somatic':
         return 'Contexto / Causa Provável';
       case 'membros_superiores':
+        return 'Região e Lateralidade (Superiores)';
       case 'membros_inferiores':
+        return 'Região e Lateralidade (Inferiores)';
       case 'coluna_dor_dorsal':
       case 'coluna_dorsal':
       case 'costas':
@@ -386,14 +440,14 @@ class TriagePreviewCard extends StatelessWidget {
         ? [
             'Natureza do Sintoma',
             'Tempo / Persistência',
-            'Intensidade Relatada',
             _emotionalTriggerLabel(answers[0]),
+            'Intensidade Relatada',
           ]
         : [
             _physicalLocationLabel(answers[0]),
             'Tempo / Persistência',
-            'Intensidade Relatada',
             _physicalTriggerLabel(answers[0]),
+            'Intensidade Relatada',
           ];
 
     return Card(

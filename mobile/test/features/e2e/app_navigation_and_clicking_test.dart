@@ -18,6 +18,7 @@ import 'package:dualis_mobile/features/dashboard/domain/models/triage_history_mo
 import 'package:dualis_mobile/features/dashboard/presentation/screens/historical_dashboard_screen.dart';
 import 'package:dualis_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:dualis_mobile/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:dualis_mobile/features/hydration/presentation/screens/hydration_dashboard_screen.dart';
 import 'package:dualis_mobile/features/privacy/data/privacy_remote_data_source.dart';
 import 'package:dualis_mobile/features/privacy/presentation/screens/privacy_center_screen.dart';
 import 'package:dualis_mobile/features/settings/presentation/screens/settings_screen.dart';
@@ -196,6 +197,10 @@ Widget createFullAppWalkthrough({
         path: RoutePaths.history,
         builder: (context, state) => const HistoricalDashboardScreen(),
       ),
+      GoRoute(
+        path: RoutePaths.hydration,
+        builder: (context, state) => const HydrationDashboardScreen(),
+      ),
     ],
   );
 
@@ -313,34 +318,26 @@ void main() {
       // 4. HOME SCREEN & BOTTOM NAVIGATION
       // =========================================================================
       expect(find.byKey(const Key('home_profile_card')), findsOneWidget);
-      expect(find.text('Como você está se sentindo hoje?'), findsOneWidget);
+      expect(find.text('Como você está hoje?'), findsOneWidget);
 
-      // Click on Emotional Axis status buttons
-      final emotionalGood = find.byKey(const Key('emotional_goodNormal'));
-      final emotionalModerate = find.byKey(const Key('emotional_soSo'));
-      final emotionalBad = find.byKey(const Key('emotional_badSick'));
+      // Verify Stage Action Cards
+      expect(find.byKey(const Key('start_psicoemocional_triage_button')), findsOneWidget);
+      expect(find.byKey(const Key('start_fisica_triage_button')), findsOneWidget);
 
-      expect(emotionalGood, findsOneWidget);
-      expect(emotionalBad, findsOneWidget);
-      await tester.tap(emotionalModerate);
-      await tester.pumpAndSettle();
+      // Verify Hydration Navigation from Bottom Navigation
+      final hydrationNavBtn = find.byKey(const Key('nav_destination_hydration'));
+      expect(hydrationNavBtn, findsOneWidget);
+      await tester.tap(hydrationNavBtn);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
-      // Click on Physical Axis status buttons
-      final physicalGood = find.byKey(const Key('physical_goodNormal'));
-      final physicalModerate = find.byKey(const Key('physical_soSo'));
-      final physicalBad = find.byKey(const Key('physical_badSick'));
+      expect(find.byType(HydrationDashboardScreen), findsOneWidget);
 
-      expect(physicalGood, findsOneWidget);
-      expect(physicalBad, findsOneWidget);
-      await tester.tap(physicalModerate);
-      await tester.pumpAndSettle();
-
-      // Enter symptom narrative
-      final narrativeField = find.byKey(const Key('naturalLanguageInput'));
-      if (narrativeField.evaluate().isNotEmpty) {
-        await tester.enterText(narrativeField, 'Cansaço e leve dor nas costas');
-        await tester.pumpAndSettle();
-      }
+      // Return to Tab 1: "Início"
+      final navHomeFromHydration = find.byKey(const Key('nav_destination_home'));
+      await tester.tap(navHomeFromHydration);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       // Click Bottom Navigation Tab 2: "Resultado do Dia"
       final tabResultado = find.byKey(const Key('nav_destination_today_outcome'));

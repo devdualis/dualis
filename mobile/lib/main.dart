@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'core/notifications/app_notification_center.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/controllers/auth_controller.dart';
@@ -31,6 +34,10 @@ class _DualisAppState extends ConsumerState<DualisApp> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(authControllerProvider.notifier).restoreSession();
+      // Single owner of the notification plugin: registers the one tap
+      // handler and captures the tap that launched the app (cold start),
+      // before any feature schedules reminders.
+      unawaited(ref.read(appNotificationCenterProvider).initialize());
     });
   }
 

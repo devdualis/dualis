@@ -2139,6 +2139,96 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Histórico & Mapa'**
   String get navHistory;
+
+  /// Bottom navigation Hydration label
+  ///
+  /// In pt, this message translates to:
+  /// **'Água'**
+  String get navHydration;
+
+  /// Water reminder notification title (immediate reminder)
+  ///
+  /// In pt, this message translates to:
+  /// **'💧 Hora de Beber Água'**
+  String get notifWaterTitle;
+
+  /// Scheduled water reminder notification title
+  ///
+  /// In pt, this message translates to:
+  /// **'💧 Hora de Beber Água ({time})'**
+  String notifWaterTitleAt(String time);
+
+  /// Water reminder body when intake tracking is enabled
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque para registrar a quantidade de água consumida.'**
+  String get notifWaterBodyTracking;
+
+  /// Water reminder body when intake tracking is disabled
+  ///
+  /// In pt, this message translates to:
+  /// **'Mantenha seu corpo hidratado e saudável!'**
+  String get notifWaterBodyReminder;
+
+  /// Android notification channel name, soft water reminders
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembretes de Água (Aviso Suave)'**
+  String get notifWaterChimeChannelName;
+
+  /// Android notification channel description, soft water reminders
+  ///
+  /// In pt, this message translates to:
+  /// **'Aviso de chegada estilo mensagem para lembrete de hidratação'**
+  String get notifWaterChimeChannelDescription;
+
+  /// Android notification channel name, alarm-style water reminders
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembretes de Água (Alarme Sonoro)'**
+  String get notifWaterAlarmChannelName;
+
+  /// Android notification channel description, alarm-style water reminders
+  ///
+  /// In pt, this message translates to:
+  /// **'Alarme sonoro para lembrar de beber água a cada 2 horas'**
+  String get notifWaterAlarmChannelDescription;
+
+  /// Scheduled daily check-in reminder notification title
+  ///
+  /// In pt, this message translates to:
+  /// **'🩺 Check-in Diário Dualis ({time})'**
+  String notifCheckinTitleAt(String time);
+
+  /// Daily check-in reminder notification body
+  ///
+  /// In pt, this message translates to:
+  /// **'Você ainda não atualizou seu estado de saúde hoje. Toque para realizar seu check-in!'**
+  String get notifCheckinBody;
+
+  /// Android notification channel name, daily check-in reminders
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembretes de Check-in Diário'**
+  String get notifCheckinChannelName;
+
+  /// Android notification channel description, daily check-in reminders
+  ///
+  /// In pt, this message translates to:
+  /// **'Notificações a cada 2 horas para lembrar de atualizar seu check-in diário de saúde'**
+  String get notifCheckinChannelDescription;
+
+  /// Today's result, dual view: label of the first (physical) axis card
+  ///
+  /// In pt, this message translates to:
+  /// **'1. Eixo Avaliação Física'**
+  String get outcomeAxisPhysicalNumbered;
+
+  /// Today's result, dual view: label of the second (psycho-emotional / associated component) axis card
+  ///
+  /// In pt, this message translates to:
+  /// **'2. Eixo Avaliação Psico-emocional'**
+  String get outcomeAxisEmotionalNumbered;
 }
 
 class _AppLocalizationsDelegate

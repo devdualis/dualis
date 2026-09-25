@@ -131,4 +131,4 @@ class PrivacyController extends Notifier<PrivacyState> {
 }
 
 final privacyControllerProvider =
-    NotifierProvider<PrivacyController, PrivacyState>(PrivacyController.new);
+    NotifierProvider.autoDispose<PrivacyController, PrivacyState>(PrivacyController.new);

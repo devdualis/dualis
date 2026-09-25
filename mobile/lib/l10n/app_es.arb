@@ -338,6 +338,21 @@
   "errorUnexpected": "Ocurrió una inestabilidad inesperada. Por favor, intenta de nuevo.",
   "navHome": "Inicio",
   "navTodayOutcome": "Resultado del Día",
-  "navHistory": "Historial y Mapa"
+  "navHistory": "Historial y Mapa",
+  "navHydration": "Agua",
+  "notifWaterTitle": "💧 Hora de beber agua",
+  "notifWaterTitleAt": "💧 Hora de beber agua ({time})",
+  "notifWaterBodyTracking": "Toca para registrar la cantidad de agua consumida.",
+  "notifWaterBodyReminder": "¡Mantén tu cuerpo hidratado y saludable!",
+  "notifWaterChimeChannelName": "Recordatorios de agua (aviso suave)",
+  "notifWaterChimeChannelDescription": "Aviso tipo mensaje para recordarte que te hidrates",
+  "notifWaterAlarmChannelName": "Recordatorios de agua (alarma sonora)",
+  "notifWaterAlarmChannelDescription": "Alarma sonora para recordarte beber agua cada 2 horas",
+  "notifCheckinTitleAt": "🩺 Check-in diario Dualis ({time})",
+  "notifCheckinBody": "Aún no has actualizado tu estado de salud hoy. ¡Toca para hacer tu check-in!",
+  "notifCheckinChannelName": "Recordatorios de check-in diario",
+  "notifCheckinChannelDescription": "Notificaciones cada 2 horas para recordarte actualizar tu check-in diario de salud",
+  "outcomeAxisPhysicalNumbered": "1. Eje de Evaluación Física",
+  "outcomeAxisEmotionalNumbered": "2. Eje de Evaluación Psicoemocional"
 }
 

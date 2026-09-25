@@ -55,6 +55,19 @@ class ArticleCard extends StatelessWidget {
     }
   }
 
+  bool get _isEmotional =>
+      article.category == 'ansiosa_agitacao' ||
+      article.category == 'depressiva_desanimo' ||
+      article.category == 'estresse_burnout' ||
+      article.category == 'respiracao' ||
+      article.category == 'sono';
+
+  String get _categoryLabel {
+    if (_isEmotional) return 'Saúde Emocional';
+    if (article.category == 'nutricao') return 'Nutrição e Foco';
+    return 'Saúde Física';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -76,37 +89,67 @@ class ArticleCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            alignment: WrapAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE0F2F1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  '${article.readTimeMinutes} min de leitura',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF00796B),
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                    decoration: BoxDecoration(
+                      color: _isEmotional ? const Color(0xFFEDE7F6) : const Color(0xFFE0F2F1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      _categoryLabel,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: _isEmotional ? const Color(0xFF5E35B1) : const Color(0xFF00796B),
+                      ),
+                    ),
                   ),
-                ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      '${article.readTimeMinutes} min de leitura',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const Spacer(),
-              const Icon(
-                Icons.verified_outlined,
-                color: Color(0xFF00796B),
-                size: 16,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                'Revisado por especialista',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF00796B),
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.verified_outlined,
+                    color: Color(0xFF00796B),
+                    size: 15,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Revisado',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF00796B),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -149,12 +192,15 @@ class ArticleCard extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    'Ler Artigo Completo',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF00796B),
+                  Flexible(
+                    child: Text(
+                      'Ler Artigo Completo',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF00796B),
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   const SizedBox(width: 4),

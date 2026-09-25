@@ -61,6 +61,11 @@ class _EmergencyScreenState extends ConsumerState<EmergencyScreen> {
           widget.emergencyContext,
           actionTaken: 'DIALED_$number',
         );
+    final emergencyWithLevel5 = widget.emergencyContext.copyWith(severityLevel: 5);
+    ref
+        .read(emergencyControllerProvider.notifier)
+        .persistEmergencyTriage(emergencyWithLevel5);
+
     final launched = await telephonyService.callNumber(number);
     if (!launched && context.mounted) {
       showDialog(

@@ -8,8 +8,6 @@ import '../widgets/critical_recurrence_card.dart';
 import '../widgets/dashboard_segmented_tab.dart';
 import '../widgets/emotional_trend_chart.dart';
 import '../widgets/retrospective_list_view.dart';
-import '../../../hydration/presentation/controllers/hydration_controller.dart';
-import '../../../hydration/presentation/widgets/water_consumption_chart.dart';
 
 class HistoricalDashboardScreen extends ConsumerWidget {
   final bool isEmbedded;
@@ -169,16 +167,6 @@ class HistoricalDashboardScreen extends ConsumerWidget {
                             (r) => CriticalRecurrenceCard(item: r),
                           ),
                         ],
-                        const SizedBox(height: 16),
-                        Consumer(
-                          builder: (context, ref, child) {
-                            final hydrationState = ref.watch(hydrationControllerProvider);
-                            return WaterConsumptionChart(
-                              last7DaysTotals: hydrationState.last7DaysTotals,
-                              dailyTargetMl: hydrationState.dailyTargetMl,
-                            );
-                          },
-                        ),
                         const SizedBox(height: 20),
                         Row(
                           children: [

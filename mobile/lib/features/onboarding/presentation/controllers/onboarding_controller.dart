@@ -10,4 +10,4 @@ class OnboardingController extends Notifier<int> {
 }
 
 final onboardingControllerProvider =
-    NotifierProvider<OnboardingController, int>(OnboardingController.new);
+    NotifierProvider.autoDispose<OnboardingController, int>(OnboardingController.new);

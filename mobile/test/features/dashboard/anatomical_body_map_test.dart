@@ -85,6 +85,148 @@ void main() {
       expect(find.textContaining('Nível 3'), findsOneWidget);
     });
 
+    testWidgets('2c. Supports general membros_superiores key in physicalSummary as fallback', (tester) async {
+      final summary = {
+        'membros_superiores': 3,
+      };
+
+      String? tappedKey;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AnatomicalBodyMap(
+              physicalSummary: summary,
+              onRegionSelected: (key) => tappedKey = key,
+            ),
+          ),
+        ),
+      );
+
+      final gestureDetector = find.byKey(const Key('body_map_gesture_detector'));
+      final topLeft = tester.getTopLeft(gestureDetector);
+      final size = tester.getSize(gestureDetector);
+      // Tap on left arm (relativeBounds LTWH(0.18, 0.18, 0.16, 0.32))
+      await tester.tapAt(Offset(topLeft.dx + size.width * 0.25, topLeft.dy + size.height * 0.25));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('body_map_detail_card')), findsOneWidget);
+      expect(tappedKey, equals('membros_superiores_d'));
+      expect(find.text('Membros Superiores (D)'), findsOneWidget);
+      expect(find.textContaining('Nível 3'), findsOneWidget);
+    });
+
+    testWidgets('2d. Tapping left arm (E) when right arm (D) has level 3 displays cross-limb notice and switch action', (tester) async {
+      final summary = {
+        'membros_superiores_d': 3,
+        'membros_superiores_e': 0,
+      };
+
+      String? tappedKey;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AnatomicalBodyMap(
+              physicalSummary: summary,
+              onRegionSelected: (key) => tappedKey = key,
+            ),
+          ),
+        ),
+      );
+
+      final gestureDetector = find.byKey(const Key('body_map_gesture_detector'));
+      final topLeft = tester.getTopLeft(gestureDetector);
+      final size = tester.getSize(gestureDetector);
+      // Tap on right arm from viewer perspective / left arm of body: relativeBounds LTWH(0.66, 0.18, 0.16, 0.32)
+      await tester.tapAt(Offset(topLeft.dx + size.width * 0.72, topLeft.dy + size.height * 0.25));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('body_map_detail_card')), findsOneWidget);
+      expect(tappedKey, equals('membros_superiores_e'));
+      expect(find.text('Membros Superiores (E)'), findsOneWidget);
+      expect(find.textContaining('Membro Superior Direito possui registro Nível 3'), findsOneWidget);
+
+      // Tap on switch action to select right arm
+      await tester.tap(find.text('Ver Membro Direito (D)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Membros Superiores (D)'), findsOneWidget);
+      expect(find.textContaining('Nível 3'), findsOneWidget);
+      expect(find.text('3/5'), findsOneWidget);
+    });
+
+    testWidgets('2e. Tapping systemic chip (Endócrino / Pele / Muscular) updates detail card with correct level', (tester) async {
+      final summary = {
+        'endocrino_metabolico': 2,
+        'muscular_geral_sistemico': 3,
+        'dermatologico': 1,
+      };
+
+      String? tappedKey;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: AnatomicalBodyMap(
+                physicalSummary: summary,
+                onRegionSelected: (key) => tappedKey = key,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Endócrino'), findsOneWidget);
+      await tester.tap(find.text('Endócrino'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('body_map_detail_card')), findsOneWidget);
+      expect(tappedKey, equals('endocrino_metabolico'));
+      expect(find.text('Endócrino / Metabólico'), findsOneWidget);
+      expect(find.textContaining('Nível 2'), findsOneWidget);
+      expect(find.descendant(of: find.byKey(const Key('body_map_detail_card')), matching: find.text('2/5')), findsOneWidget);
+    });
+
+    testWidgets('2f. Switching to Todos os 12 Sistemas displays full matrix and selects any system', (tester) async {
+      final summary = {
+        'respiratorio': 2,
+        'neurologico': 3,
+        'endocrino_metabolico': 2,
+      };
+
+      String? tappedKey;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: AnatomicalBodyMap(
+                physicalSummary: summary,
+                onRegionSelected: (key) => tappedKey = key,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Switch to Todos os 12 Sistemas view
+      await tester.tap(find.text('Todos os 12 Sistemas'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cabeça & Nervos'), findsOneWidget);
+      expect(find.text('Tórax & Tronco'), findsOneWidget);
+      expect(find.text('Membros'), findsOneWidget);
+      expect(find.text('Sistêmico & Pele'), findsOneWidget);
+      expect(find.text('Respiratório (Pulmões)'), findsOneWidget);
+      expect(find.text('Neurológico (Cranial)'), findsOneWidget);
+
+      // Tap on Respiratório
+      await tester.tap(find.text('Respiratório (Pulmões)'));
+      await tester.pumpAndSettle();
+
+      expect(tappedKey, equals('respiratorio'));
+      expect(find.byKey(const Key('body_map_detail_card')), findsOneWidget);
+      expect(find.textContaining('Nível 2'), findsOneWidget);
+    });
+
     testWidgets('3. RetrospectiveListView renders entries with formatted date and category', (tester) async {
       final entries = [
         TriageHistoryEntry(

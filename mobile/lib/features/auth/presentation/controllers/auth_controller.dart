@@ -1,12 +1,17 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/network/api_client.dart';
+import '../../../../core/notifications/daily_checkin_notification_service.dart';
+import '../../../../core/notifications/hydration_notification_service.dart';
 import '../../../../core/security/secure_storage_service.dart';
+import '../../data/auth_remote_data_source.dart';
 import '../../data/auth_repository_impl.dart';
 import '../../domain/auth_state.dart';
 import '../../domain/user_profile.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepositoryImpl();
+  final apiClient = ref.watch(apiClientProvider);
+  return AuthRepositoryImpl(remoteSource: AuthRemoteDataSource(client: apiClient));
 });
 
 class AuthController extends Notifier<AuthState> {
@@ -276,8 +281,23 @@ class AuthController extends Notifier<AuthState> {
   }
 
   Future<void> logout() async {
+    await _cancelLocalReminders();
     await _secureStorage.clearAll();
     state = const AuthState.initial();
+  }
+
+  /// Reminders belong to the signed-in user: none may keep firing after
+  /// logout. (Hydration state resets itself: HydrationController rebuilds
+  /// when the signed-in user changes.)
+  Future<void> _cancelLocalReminders() async {
+    try {
+      await ref.read(hydrationNotificationServiceProvider).cancelAllReminders();
+    } catch (_) {}
+    try {
+      await ref
+          .read(dailyCheckinNotificationServiceProvider)
+          .cancelAllCheckInReminders();
+    } catch (_) {}
   }
 }
 

@@ -5,11 +5,8 @@ import '../../../../l10n/app_localizations.dart';
 enum DualisNavTab {
   home,
   todayOutcome,
-  history;
-
-  // Future features can be easily enabled here:
-  // medicationReminders,
-  // profile,
+  history,
+  hydration;
 }
 
 class DualisBottomNavBar extends StatelessWidget {
@@ -30,6 +27,7 @@ class DualisBottomNavBar extends StatelessWidget {
     final homeLabel = l10n?.navHome ?? 'Início';
     final todayOutcomeLabel = l10n?.navTodayOutcome ?? 'Resultado do Dia';
     final historyLabel = l10n?.navHistory ?? 'Histórico & Mapa';
+    final hydrationLabel = l10n?.navHydration ?? 'Água';
 
     return Container(
       decoration: BoxDecoration(
@@ -48,14 +46,15 @@ class DualisBottomNavBar extends StatelessWidget {
         backgroundColor: AppColors.surfaceLight,
         indicatorColor: AppColors.clinicalTeal.withValues(alpha: 0.18),
         elevation: 0,
-        height: 68,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        height: 60,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
         destinations: [
           NavigationDestination(
             key: const Key('nav_destination_home'),
             icon: const Icon(Icons.home_outlined, color: AppColors.textSecondaryLight),
             selectedIcon: const Icon(Icons.home_rounded, color: AppColors.clinicalTealDark),
-            label: homeLabel,
+            label: '',
+            tooltip: homeLabel,
           ),
           NavigationDestination(
             key: const Key('nav_destination_today_outcome'),
@@ -71,13 +70,22 @@ class DualisBottomNavBar extends StatelessWidget {
               backgroundColor: AppColors.clinicalTeal,
               child: const Icon(Icons.assessment_rounded, color: AppColors.clinicalTealDark),
             ),
-            label: todayOutcomeLabel,
+            label: '',
+            tooltip: todayOutcomeLabel,
           ),
           NavigationDestination(
             key: const Key('nav_destination_history'),
             icon: const Icon(Icons.insights_outlined, color: AppColors.textSecondaryLight),
             selectedIcon: const Icon(Icons.insights_rounded, color: AppColors.clinicalTealDark),
-            label: historyLabel,
+            label: '',
+            tooltip: historyLabel,
+          ),
+          NavigationDestination(
+            key: const Key('nav_destination_hydration'),
+            icon: const Icon(Icons.water_drop_outlined, color: AppColors.textSecondaryLight),
+            selectedIcon: const Icon(Icons.water_drop_rounded, color: AppColors.clinicalTealDark),
+            label: '',
+            tooltip: hydrationLabel,
           ),
         ],
       ),

@@ -6,8 +6,9 @@ import '../../../../core/security/secure_storage_service.dart';
 import '../domain/models/triage_history_models.dart';
 
 final triageHistoryDataSourceProvider = Provider<TriageHistoryRemoteDataSource>((ref) {
+  final apiClient = ref.watch(apiClientProvider);
   final secureStorage = ref.watch(secureStorageServiceProvider);
-  return TriageHistoryRemoteDataSource(secureStorage: secureStorage);
+  return TriageHistoryRemoteDataSource(apiClient: apiClient, secureStorage: secureStorage);
 });
 
 class TriageHistoryRemoteDataSource {

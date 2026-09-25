@@ -583,7 +583,8 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Componente Associado: Estresse e Burnout'), findsOneWidget);
+      expect(find.text('2. Eixo Avaliação Psico-emocional'), findsOneWidget);
+      expect(find.text('Estresse e Burnout'), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),

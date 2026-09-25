@@ -338,6 +338,21 @@
   "errorUnexpected": "An unexpected error occurred. Please try again.",
   "navHome": "Home",
   "navTodayOutcome": "Today's Result",
-  "navHistory": "History & Map"
+  "navHistory": "History & Map",
+  "navHydration": "Water",
+  "notifWaterTitle": "💧 Time to Drink Water",
+  "notifWaterTitleAt": "💧 Time to Drink Water ({time})",
+  "notifWaterBodyTracking": "Tap to log how much water you drank.",
+  "notifWaterBodyReminder": "Keep your body hydrated and healthy!",
+  "notifWaterChimeChannelName": "Water Reminders (Soft Chime)",
+  "notifWaterChimeChannelDescription": "Message-style alert reminding you to stay hydrated",
+  "notifWaterAlarmChannelName": "Water Reminders (Alarm Sound)",
+  "notifWaterAlarmChannelDescription": "Alarm sound reminding you to drink water every 2 hours",
+  "notifCheckinTitleAt": "🩺 Dualis Daily Check-in ({time})",
+  "notifCheckinBody": "You haven't updated your health status today. Tap to do your check-in!",
+  "notifCheckinChannelName": "Daily Check-in Reminders",
+  "notifCheckinChannelDescription": "Notifications every 2 hours reminding you to update your daily health check-in",
+  "outcomeAxisPhysicalNumbered": "1. Physical Assessment Axis",
+  "outcomeAxisEmotionalNumbered": "2. Psycho-emotional Assessment Axis"
 }
 

@@ -1392,6 +1392,76 @@
   "navHistory": "Histórico & Mapa",
   "@navHistory": {
     "description": "Bottom navigation History label"
+  },
+  "navHydration": "Água",
+  "@navHydration": {
+    "description": "Bottom navigation Hydration label"
+  },
+  "notifWaterTitle": "💧 Hora de Beber Água",
+  "@notifWaterTitle": {
+    "description": "Water reminder notification title (immediate reminder)"
+  },
+  "notifWaterTitleAt": "💧 Hora de Beber Água ({time})",
+  "@notifWaterTitleAt": {
+    "description": "Scheduled water reminder notification title",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "notifWaterBodyTracking": "Toque para registrar a quantidade de água consumida.",
+  "@notifWaterBodyTracking": {
+    "description": "Water reminder body when intake tracking is enabled"
+  },
+  "notifWaterBodyReminder": "Mantenha seu corpo hidratado e saudável!",
+  "@notifWaterBodyReminder": {
+    "description": "Water reminder body when intake tracking is disabled"
+  },
+  "notifWaterChimeChannelName": "Lembretes de Água (Aviso Suave)",
+  "@notifWaterChimeChannelName": {
+    "description": "Android notification channel name, soft water reminders"
+  },
+  "notifWaterChimeChannelDescription": "Aviso de chegada estilo mensagem para lembrete de hidratação",
+  "@notifWaterChimeChannelDescription": {
+    "description": "Android notification channel description, soft water reminders"
+  },
+  "notifWaterAlarmChannelName": "Lembretes de Água (Alarme Sonoro)",
+  "@notifWaterAlarmChannelName": {
+    "description": "Android notification channel name, alarm-style water reminders"
+  },
+  "notifWaterAlarmChannelDescription": "Alarme sonoro para lembrar de beber água a cada 2 horas",
+  "@notifWaterAlarmChannelDescription": {
+    "description": "Android notification channel description, alarm-style water reminders"
+  },
+  "notifCheckinTitleAt": "🩺 Check-in Diário Dualis ({time})",
+  "@notifCheckinTitleAt": {
+    "description": "Scheduled daily check-in reminder notification title",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "notifCheckinBody": "Você ainda não atualizou seu estado de saúde hoje. Toque para realizar seu check-in!",
+  "@notifCheckinBody": {
+    "description": "Daily check-in reminder notification body"
+  },
+  "notifCheckinChannelName": "Lembretes de Check-in Diário",
+  "@notifCheckinChannelName": {
+    "description": "Android notification channel name, daily check-in reminders"
+  },
+  "notifCheckinChannelDescription": "Notificações a cada 2 horas para lembrar de atualizar seu check-in diário de saúde",
+  "@notifCheckinChannelDescription": {
+    "description": "Android notification channel description, daily check-in reminders"
+  },
+  "outcomeAxisPhysicalNumbered": "1. Eixo Avaliação Física",
+  "@outcomeAxisPhysicalNumbered": {
+    "description": "Today's result, dual view: label of the first (physical) axis card"
+  },
+  "outcomeAxisEmotionalNumbered": "2. Eixo Avaliação Psico-emocional",
+  "@outcomeAxisEmotionalNumbered": {
+    "description": "Today's result, dual view: label of the second (psycho-emotional / associated component) axis card"
   }
 }
 

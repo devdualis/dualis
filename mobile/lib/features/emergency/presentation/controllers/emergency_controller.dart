@@ -20,32 +20,36 @@ class EmergencyController extends Notifier<AsyncValue<EmergencyContext?>> {
   /// Triggers an immediate transition to the emergency screen.
   void triggerEmergency(BuildContext context, EmergencyContext emergencyContext) {
     state = AsyncValue.data(emergencyContext);
-    context.go(RoutePaths.emergency, extra: emergencyContext);
+    context.push(RoutePaths.emergency, extra: emergencyContext);
   }
 
   /// Patient confirmed exit from emergency screen after warning dialog.
+  /// Returns to triage wizard without discarding in-progress answers so
+  /// the user can finish and save their triage.
   Future<void> recordExitConfirmed([BuildContext? context]) async {
-    final emergency = state.value;
     state = const AsyncValue.data(null);
 
-    if (emergency != null) {
-      unawaited(
-        _persistEmergencyTriage(emergency).catchError((_) {}),
-      );
-    }
-
     if (context != null && context.mounted) {
-      context.go(RoutePaths.home);
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.go(RoutePaths.home);
+      }
     }
   }
 
-  /// Records the emergency-flagged session as a real triage record (falling back
-  /// to the offline outbox when unreachable) so it appears in history like any
-  /// other completed check-in, then marks today's check-in as done.
-  Future<void> _persistEmergencyTriage(EmergencyContext emergency) async {
+  /// Records the emergency-flagged session with severity 5 in database/outbox
+  /// and marks today's check-in as done.
+  Future<void> persistEmergencyTriage(EmergencyContext emergency) async {
+    ref.read(triggerCheckInProvider.notifier).markCompletedToday();
+
     final vertical = emergency.sourceVertical ?? (emergency.isEmotional ? 'emotional' : 'physical');
-    final answers = emergency.sourceAnswers ??
-        {0: emergency.category.name, 2: emergency.severityLevel.toString()};
+    final answers = Map<int, String>.from(emergency.sourceAnswers ?? {});
+    answers[3] = '5';
+    answers[2] = answers[2] ?? '5';
+    if (!answers.containsKey(0)) {
+      answers[0] = emergency.category.name;
+    }
     final clientSessionId = const Uuid().v4();
 
     try {
@@ -54,14 +58,14 @@ class EmergencyController extends Notifier<AsyncValue<EmergencyContext?>> {
         await ref.read(triageOutcomeDataSourceProvider).submitTriage(
               vertical: vertical,
               answers: answers,
-              narrative: emergency.rawTriggerPhrase,
+              narrative: emergency.rawTriggerPhrase ?? 'Chamada de emergência acionada',
               clientSessionId: clientSessionId,
             );
       } else {
         await ref.read(triageOutboxRepositoryProvider).enqueueTriageCheckIn(
               vertical: vertical,
               answers: answers,
-              narrative: emergency.rawTriggerPhrase,
+              narrative: emergency.rawTriggerPhrase ?? 'Chamada de emergência acionada',
               clientSessionId: clientSessionId,
             );
       }
@@ -69,7 +73,7 @@ class EmergencyController extends Notifier<AsyncValue<EmergencyContext?>> {
       await ref.read(triageOutboxRepositoryProvider).enqueueTriageCheckIn(
             vertical: vertical,
             answers: answers,
-            narrative: emergency.rawTriggerPhrase,
+            narrative: emergency.rawTriggerPhrase ?? 'Chamada de emergência acionada',
             clientSessionId: clientSessionId,
           );
     }
