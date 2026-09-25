@@ -156,10 +156,132 @@ export class TriageOutcomeService {
       label: 'Membros Superiores D/E',
       somaticNormalized: 'Desconforto musculoarticular nos membros superiores',
     },
+    // Subpartes detalhadas - Membros Superiores
+    ombro_direito: {
+      code: 'membros_superiores',
+      label: 'Membros Superiores (Ombro Direito)',
+      somaticNormalized: 'Dor / Desconforto no ombro direito',
+    },
+    ombro_esquerdo: {
+      code: 'membros_superiores',
+      label: 'Membros Superiores (Ombro Esquerdo)',
+      somaticNormalized: 'Dor / Desconforto no ombro esquerdo',
+    },
+    braco_direito: {
+      code: 'membros_superiores',
+      label: 'Membros Superiores (Braço Direito)',
+      somaticNormalized: 'Dor muscular no braço direito',
+    },
+    braco_esquerdo: {
+      code: 'membros_superiores',
+      label: 'Membros Superiores (Braço Esquerdo)',
+      somaticNormalized: 'Dor muscular no braço esquerdo',
+    },
+    cotovelo_direito: {
+      code: 'membros_superiores',
+      label: 'Membros Superiores (Cotovelo Direito)',
+      somaticNormalized: 'Dor articular no cotovelo direito',
+    },
+    cotovelo_esquerdo: {
+      code: 'membros_superiores',
+      label: 'Membros Superiores (Cotovelo Esquerdo)',
+      somaticNormalized: 'Dor articular no cotovelo esquerdo',
+    },
+    antebraco_direito: {
+      code: 'membros_superiores',
+      label: 'Membros Superiores (Antebraço Direito)',
+      somaticNormalized: 'Dor muscular no antebraço direito',
+    },
+    antebraco_esquerdo: {
+      code: 'membros_superiores',
+      label: 'Membros Superiores (Antebraço Esquerdo)',
+      somaticNormalized: 'Dor muscular no antebraço esquerdo',
+    },
+    punho_direito: {
+      code: 'membros_superiores',
+      label: 'Membros Superiores (Punho Direito)',
+      somaticNormalized: 'Dor ou sobrecarga no punho direito',
+    },
+    punho_esquerdo: {
+      code: 'membros_superiores',
+      label: 'Membros Superiores (Punho Esquerdo)',
+      somaticNormalized: 'Dor ou sobrecarga no punho esquerdo',
+    },
+    mao_dedos_direito: {
+      code: 'membros_superiores',
+      label: 'Membros Superiores (Mão e Dedos Direito)',
+      somaticNormalized: 'Desconforto na mão ou dedos direitos',
+    },
+    mao_dedos_esquerdo: {
+      code: 'membros_superiores',
+      label: 'Membros Superiores (Mão e Dedos Esquerdo)',
+      somaticNormalized: 'Desconforto na mão ou dedos esquerdos',
+    },
+    membros_superiores_bilateral: {
+      code: 'membros_superiores',
+      label: 'Membros Superiores (Bilateral)',
+      somaticNormalized: 'Dor musculoarticular em ambos os membros superiores',
+    },
     membros_inferiores: {
       code: 'membros_inferiores',
       label: 'Membros Inferiores D/E',
       somaticNormalized: 'Desconforto musculoarticular nos membros inferiores',
+    },
+    // Subpartes detalhadas - Membros Inferiores
+    coxa_quadril_direito: {
+      code: 'membros_inferiores',
+      label: 'Membros Inferiores (Coxa / Quadril Direito)',
+      somaticNormalized: 'Dor musculoarticular no quadril ou coxa direita',
+    },
+    coxa_quadril_esquerdo: {
+      code: 'membros_inferiores',
+      label: 'Membros Inferiores (Coxa / Quadril Esquerdo)',
+      somaticNormalized: 'Dor musculoarticular no quadril ou coxa esquerda',
+    },
+    joelho_direito: {
+      code: 'membros_inferiores',
+      label: 'Membros Inferiores (Joelho Direito)',
+      somaticNormalized: 'Dor articular no joelho direito',
+    },
+    joelho_esquerdo: {
+      code: 'membros_inferiores',
+      label: 'Membros Inferiores (Joelho Esquerdo)',
+      somaticNormalized: 'Dor articular no joelho esquerdo',
+    },
+    canela_panturrilha_direito: {
+      code: 'membros_inferiores',
+      label: 'Membros Inferiores (Canela / Panturrilha Direita)',
+      somaticNormalized: 'Sobrecarga ou dor na panturrilha/canela direita',
+    },
+    canela_panturrilha_esquerdo: {
+      code: 'membros_inferiores',
+      label: 'Membros Inferiores (Canela / Panturrilha Esquerda)',
+      somaticNormalized: 'Sobrecarga ou dor na panturrilha/canela esquerda',
+    },
+    tornozelo_direito: {
+      code: 'membros_inferiores',
+      label: 'Membros Inferiores (Tornozelo Direito)',
+      somaticNormalized: 'Entorse ou dor no tornozelo direito',
+    },
+    tornozelo_esquerdo: {
+      code: 'membros_inferiores',
+      label: 'Membros Inferiores (Tornozelo Esquerdo)',
+      somaticNormalized: 'Entorse ou dor no tornozelo esquerdo',
+    },
+    pe_dedos_direito: {
+      code: 'membros_inferiores',
+      label: 'Membros Inferiores (Pé / Dedos Direito)',
+      somaticNormalized: 'Dor no pé ou dedos do pé direito',
+    },
+    pe_dedos_esquerdo: {
+      code: 'membros_inferiores',
+      label: 'Membros Inferiores (Pé / Dedos Esquerdo)',
+      somaticNormalized: 'Dor no pé ou dedos do pé esquerdo',
+    },
+    membros_inferiores_bilateral: {
+      code: 'membros_inferiores',
+      label: 'Membros Inferiores (Bilateral)',
+      somaticNormalized: 'Sobrecarga ou dor musculoarticular em ambos os membros inferiores',
     },
     articulacoes: {
       code: 'membros_superiores',
@@ -390,7 +512,7 @@ export class TriageOutcomeService {
     const { vertical, answers, narrative } = dto;
     const isZeroIndexed = answers[0] !== undefined || answers['0'] !== undefined;
     const step1 = ((isZeroIndexed ? (answers[0] || answers['0']) : (answers[1] || answers['1'])) || '').toLowerCase();
-    const step3 = (isZeroIndexed ? (answers[2] || answers['2']) : (answers[3] || answers['3'])) || '';
+    const subPart = ((isZeroIndexed ? (answers[2] || answers['2']) : (answers[3] || answers['3'])) || '').toLowerCase();
 
     let mapping: CategoryMapping | undefined;
     if (vertical === 'physical') {
@@ -401,6 +523,13 @@ export class TriageOutcomeService {
           code: 'muscular_geral_sistemico',
           label: 'Avaliação Física Sistêmica',
           somaticNormalized: 'Desconforto corporal geral',
+        };
+      }
+      if (subPart && this.physicalMappings[subPart]) {
+        mapping = {
+          ...mapping,
+          label: this.physicalMappings[subPart].label,
+          somaticNormalized: this.physicalMappings[subPart].somaticNormalized,
         };
       }
     } else {
@@ -415,19 +544,29 @@ export class TriageOutcomeService {
       }
     }
 
+    // Intensity extraction: handles step 3 (new 4-step wizard) or step 2 (legacy 3-step wizard)
+    let intensityRaw = (answers[3] || answers['3'] || answers[2] || answers['2'] || '').toString();
+    const ans3 = (answers[3] ?? answers['3'] ?? '').toString();
+    const ans2 = (answers[2] ?? answers['2'] ?? '').toString();
+    if (ans3 && (/^[1-5]$/.test(ans3.trim()) || ['leve_controlavel', 'moderada', 'muito_forte', 'grave', 'crise'].includes(ans3.toLowerCase().trim()))) {
+      intensityRaw = ans3;
+    } else if (ans2 && (/^[1-5]$/.test(ans2.trim()) || ['leve_controlavel', 'moderada', 'muito_forte', 'grave', 'crise'].includes(ans2.toLowerCase().trim()))) {
+      intensityRaw = ans2;
+    }
+
     let intensityScore = 2;
     if (vertical === 'physical') {
-      const numeric = parseInt(step3, 10);
+      const numeric = parseInt(intensityRaw, 10);
       if (!isNaN(numeric) && numeric >= 1 && numeric <= 5) {
         intensityScore = numeric;
       }
     } else {
-      const lower3 = step3.toLowerCase();
-      if (lower3.includes('muito_forte') || lower3.includes('grave') || lower3.includes('crise') || lower3 === '4' || lower3 === '5') {
+      const lowerRaw = intensityRaw.toLowerCase();
+      if (lowerRaw.includes('muito_forte') || lowerRaw.includes('grave') || lowerRaw.includes('crise') || lowerRaw === '4' || lowerRaw === '5') {
         intensityScore = 4;
-      } else if (lower3.includes('moderada') || lower3 === '3') {
+      } else if (lowerRaw.includes('moderada') || lowerRaw === '3') {
         intensityScore = 3;
-      } else if (lower3.includes('leve') || lower3 === '1' || lower3 === '2') {
+      } else if (lowerRaw.includes('leve') || lowerRaw === '1' || lowerRaw === '2') {
         intensityScore = 2;
       }
     }
@@ -481,7 +620,7 @@ export class TriageOutcomeService {
           secondaryCategoryLabel = 'Avaliação Física';
           secondarySomaticMapping = 'Sintoma físico relatado';
         }
-        secondaryIntensityScore = classification.urgencyScore ?? intensityScore;
+        secondaryIntensityScore = intensityScore;
         isCrossVerticalSomatic = true;
         if (userLang === 'es') {
           crossVerticalContextNote =
@@ -505,7 +644,7 @@ export class TriageOutcomeService {
           secondaryCategoryLabel = 'Dimensão Emocional';
           secondarySomaticMapping = 'Componente emocional relatado';
         }
-        secondaryIntensityScore = classification.urgencyScore ?? intensityScore;
+        secondaryIntensityScore = intensityScore;
         isCrossVerticalSomatic = true;
         if (userLang === 'es') {
           crossVerticalContextNote =

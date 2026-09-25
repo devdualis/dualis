@@ -1,19 +1,20 @@
 ---
-gsd_state_version: 1.0
+gsd_state_version: "1.0"
 milestone: v1.0
-milestone_name: milestone
-current_phase: "10"
+current_phase: 10
 current_phase_name: lgpd-data-sovereignty-account-deletion
 status: complete
 stopped_at: Milestone v1.0 fully executed and verified (Phases 1-10 complete)
-last_updated: "2026-09-14T14:28:00.000Z"
-last_activity: 2026-09-14
+last_updated: "2026-09-25T21:22:07.256Z"
+last_activity: 2026-09-25
 last_activity_desc: Executed and verified Phase 10 (Plans 10-01 and 10-02)
+state_head: b5c32a0d186af36fa536912db003d8c87a99408a
 progress:
   total_phases: 10
   completed_phases: 10
   total_plans: 20
   completed_plans: 20
+milestone_name: milestone
 ---
 
 # Project State
@@ -30,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 10 (lgpd-data-sovereignty-account-deletion) — COMPLETE
 Plan: 2 of 2
 Status: Milestone v1.0 Complete — 100% requirements verified
-Last activity: 2026-09-14 — Executed and verified Phase 10 (Plans 10-01 and 10-02)
+Last activity: 2026-09-25 - Completed quick task 260925-np5: Fix psycho-emotional intensity badge showing Intensa (4-5) for level 3 records on Today result and Home check-in cards
 
 Progress: [██████████] 100%
 
@@ -87,6 +88,13 @@ None yet.
 ### Blockers/Concerns
 
 None yet.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260925-np5 | Fix psycho-emotional intensity badge showing Intensa (4-5) for level 3 records on Today result and Home check-in cards | 2026-09-25 | uncommitted | [260925-np5-fix-psycho-emotional-intensity-badge-sho](./quick/260925-np5-fix-psycho-emotional-intensity-badge-sho/) |
+| 2 | Fix Home check-in card showing stale/AI-derived description; only show text typed in that axis's triage (b5c32a0) | 2026-09-25 | b5c32a0 | — |
 
 ## Deferred Items
 

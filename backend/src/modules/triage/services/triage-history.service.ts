@@ -26,6 +26,8 @@ const PHYSICAL_SYSTEM_KEYS = [
   'neurologico',
   'geniturinario_pelvico',
   'dermatologico',
+  'muscular_geral_sistemico',
+  'endocrino_metabolico',
 ];
 
 const EMOTIONAL_DIMENSION_KEYS = [
@@ -46,10 +48,14 @@ const CATEGORY_LABELS: Record<string, string> = {
   coluna_dorsal: 'Coluna e Dor Dorsal',
   coluna_dor_dorsal: 'Coluna e Dor Dorsal',
   coluna_dor_lombar: 'Coluna e Dor Lombar',
+  membros_superiores: 'Membros Superiores',
   membros_superiores_d: 'Membros Superiores (D)',
   membros_superiores_e: 'Membros Superiores (E)',
+  membros_inferiores: 'Membros Inferiores',
   membros_inferiores_d: 'Membros Inferiores (D)',
   membros_inferiores_e: 'Membros Inferiores (E)',
+  muscular_geral_sistemico: 'Muscular Geral e Sistêmico',
+  endocrino_metabolico: 'Endócrino / Metabólico',
   neurologico: 'Neurológico',
   geniturinario_pelvico: 'Geniturinário / Pélvico',
   dermatologico: 'Dermatológico',
@@ -126,6 +132,10 @@ const RECOMMENDED_ARTICLES: Record<string, { title: string; url: string }> = {
     title: 'Cuidados Posturais e Descompressão Lombar',
     url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
   },
+  membros_superiores: {
+    title: 'Prevenção de Tendinites e Sobrecarga em Braços e Ombros',
+    url: 'https://drauziovarella.uol.com.br/podcasts/tendinite/',
+  },
   membros_superiores_d: {
     title: 'Prevenção de Tendinites e Sobrecarga em Braços e Ombros',
     url: 'https://drauziovarella.uol.com.br/podcasts/tendinite/',
@@ -134,6 +144,10 @@ const RECOMMENDED_ARTICLES: Record<string, { title: string; url: string }> = {
     title: 'Prevenção de Tendinites e Sobrecarga em Braços e Ombros',
     url: 'https://drauziovarella.uol.com.br/podcasts/tendinite/',
   },
+  membros_inferiores: {
+    title: 'Prevenção de Lesões Articulares e Entorses',
+    url: 'https://sbot.org.br/entorse-de-tornozelo/',
+  },
   membros_inferiores_d: {
     title: 'Prevenção de Lesões Articulares e Entorses',
     url: 'https://sbot.org.br/entorse-de-tornozelo/',
@@ -141,6 +155,14 @@ const RECOMMENDED_ARTICLES: Record<string, { title: string; url: string }> = {
   membros_inferiores_e: {
     title: 'Prevenção de Lesões Articulares e Entorses',
     url: 'https://sbot.org.br/entorse-de-tornozelo/',
+  },
+  muscular_geral_sistemico: {
+    title: 'Recuperação Muscular e Prevenção de Fadiga Corporal',
+    url: 'https://drauziovarella.uol.com.br/ortopedia/dor-muscular/',
+  },
+  endocrino_metabolico: {
+    title: 'Saúde Metabólica, Energia e Equilíbrio Hormonal',
+    url: 'https://www.endocrino.org.br/diabetes/',
   },
   neurologico: {
     title: 'Prevenção e Cuidados com o Sistema Neurológico',
@@ -251,14 +273,59 @@ export class TriageHistoryService {
       physicalSummary[sys] = 0;
     }
 
-    for (const row of rows) {
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const log = logs[i];
       if (row.anatomicalSystem) {
         const key = row.anatomicalSystem;
         const currentMax = physicalSummary[key] || 0;
         physicalSummary[key] = Math.max(currentMax, row.intensity);
+
         if (key === 'coluna_dor_dorsal' || key === 'coluna_dorsal') {
           physicalSummary['coluna_dorsal'] = Math.max(physicalSummary['coluna_dorsal'] || 0, row.intensity);
           physicalSummary['coluna_dor_dorsal'] = Math.max(physicalSummary['coluna_dor_dorsal'] || 0, row.intensity);
+        }
+
+        if (key === 'membros_superiores' || key.startsWith('membros_superiores')) {
+          physicalSummary['membros_superiores'] = Math.max(physicalSummary['membros_superiores'] || 0, row.intensity);
+
+          const answersStr = JSON.stringify(log?.stepAnswers || row.stepAnswers || '').toLowerCase();
+          const isRight = answersStr.includes('direito') || key === 'membros_superiores_d';
+          const isLeft = answersStr.includes('esquerdo') || key === 'membros_superiores_e';
+          const isBilateral = answersStr.includes('bilateral');
+
+          if (isBilateral || (isRight && isLeft) || (!isRight && !isLeft)) {
+            // Both limbs
+            physicalSummary['membros_superiores_d'] = Math.max(physicalSummary['membros_superiores_d'] || 0, row.intensity);
+            physicalSummary['membros_superiores_e'] = Math.max(physicalSummary['membros_superiores_e'] || 0, row.intensity);
+          } else if (isRight) {
+            physicalSummary['membros_superiores_d'] = Math.max(physicalSummary['membros_superiores_d'] || 0, row.intensity);
+          } else if (isLeft) {
+            physicalSummary['membros_superiores_e'] = Math.max(physicalSummary['membros_superiores_e'] || 0, row.intensity);
+          }
+        }
+
+        if (key === 'membros_inferiores' || key.startsWith('membros_inferiores')) {
+          physicalSummary['membros_inferiores'] = Math.max(physicalSummary['membros_inferiores'] || 0, row.intensity);
+
+          const answersStr = JSON.stringify(log?.stepAnswers || row.stepAnswers || '').toLowerCase();
+          const isRightLeg = answersStr.includes('direito') || key === 'membros_inferiores_d';
+          const isLeftLeg = answersStr.includes('esquerdo') || key === 'membros_inferiores_e';
+          const isBilateralLeg = answersStr.includes('bilateral');
+
+          if (isBilateralLeg || (isRightLeg && isLeftLeg) || (!isRightLeg && !isLeftLeg)) {
+            // Both limbs
+            physicalSummary['membros_inferiores_d'] = Math.max(physicalSummary['membros_inferiores_d'] || 0, row.intensity);
+            physicalSummary['membros_inferiores_e'] = Math.max(physicalSummary['membros_inferiores_e'] || 0, row.intensity);
+          } else if (isRightLeg) {
+            physicalSummary['membros_inferiores_d'] = Math.max(physicalSummary['membros_inferiores_d'] || 0, row.intensity);
+          } else if (isLeftLeg) {
+            physicalSummary['membros_inferiores_e'] = Math.max(physicalSummary['membros_inferiores_e'] || 0, row.intensity);
+          }
+        }
+
+        if (key === 'muscular_geral_sistemico') {
+          physicalSummary['muscular_geral_sistemico'] = Math.max(physicalSummary['muscular_geral_sistemico'] || 0, row.intensity);
         }
       }
     }
