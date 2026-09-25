@@ -47,7 +47,7 @@ void main() {
       );
 
       final notifier = container.read(triggerCheckInProvider.notifier);
-      notifier.markCompletedWithOutcome(outcome);
+      notifier.markCompletedWithOutcome(outcome, narrative: 'Dor de cabeça');
 
       final state = container.read(triggerCheckInProvider);
       expect(state.isCompletedToday, isTrue);
@@ -167,7 +167,8 @@ void main() {
         aiMappedLayTerm: 'Dor de cabeça',
       );
 
-      container.read(triggerCheckInProvider.notifier).markCompletedWithOutcome(outcome);
+      container.read(triggerCheckInProvider.notifier)
+          .markCompletedWithOutcome(outcome, narrative: 'Dor de cabeça');
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
@@ -190,18 +191,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Check-in banner is shown
-      expect(find.byKey(const Key('dailyCheckInCompletedBanner')), findsOneWidget);
-
-      // Verify that "Mais ou menos" is selected, and "Bem / Normal" is NOT selected
-      final emotionalSoSo = tester.widget<InkWell>(find.byKey(const Key('emotional_soSo')));
-      final physicalSoSo = tester.widget<InkWell>(find.byKey(const Key('physical_soSo')));
-      expect(emotionalSoSo, isNotNull);
-      expect(physicalSoSo, isNotNull);
-
-      // Text input contains "Dor de cabeça"
-      final textField = tester.widget<TextField>(find.byKey(const Key('naturalLanguageInput')));
-      expect(textField.controller?.text, 'Dor de cabeça');
+      // Verify completed physical stage card and uncompleted emotional stage button
+      expect(find.byKey(const Key('fisica_completed_card')), findsOneWidget);
+      expect(find.text('Leve (1-2)'), findsOneWidget);
+      expect(find.text('“Dor de cabeça”'), findsOneWidget);
+      expect(find.byKey(const Key('start_psicoemocional_triage_button')), findsOneWidget);
     });
 
     test('6. Qualifying physical axis preserves pre-existing emotionalStatus (never resets to goodNormal)', () {

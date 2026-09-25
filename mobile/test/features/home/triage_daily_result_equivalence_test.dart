@@ -904,7 +904,7 @@ void main() {
       );
 
       final notifier = container.read(triggerCheckInProvider.notifier);
-      notifier.markCompletedWithOutcome(mockOutcome);
+      notifier.markCompletedWithOutcome(mockOutcome, narrative: 'aperto no peito');
 
       final checkInState = container.read(triggerCheckInProvider);
       expect(checkInState.isCompletedToday, isTrue);
