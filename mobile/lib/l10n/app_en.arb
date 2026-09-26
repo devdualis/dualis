@@ -313,6 +313,7 @@
   "deleteHistoryItemTitle": "Delete history record",
   "deleteHistoryItemConfirm": "Are you sure you want to discard this triage record from your history? This action cannot be undone.",
   "deleteHistoryItemSuccess": "Record removed successfully.",
+  "deleteHistoryItemError": "Could not remove the record.",
   "deleteAction": "Delete",
   "errorNetworkConnection": "Unable to connect to the server. Please check your internet connection.",
   "errorConnectionTimeout": "The server took too long to respond. Please try again.",

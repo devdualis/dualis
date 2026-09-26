@@ -313,6 +313,7 @@
   "deleteHistoryItemTitle": "Eliminar registro del historial",
   "deleteHistoryItemConfirm": "¿Estás seguro de que deseas descartar este registro de triaje de tu historial? Esta acción no se puede deshacer.",
   "deleteHistoryItemSuccess": "Registro eliminado con éxito.",
+  "deleteHistoryItemError": "No fue posible eliminar el registro.",
   "deleteAction": "Eliminar",
   "errorNetworkConnection": "No se pudo conectar con el servidor. Verifica tu conexión a internet.",
   "errorConnectionTimeout": "La comunicación con el servidor tardó demasiado. Intenta nuevamente.",
