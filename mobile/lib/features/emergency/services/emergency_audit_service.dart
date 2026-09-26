@@ -57,5 +57,6 @@ class EmergencyAuditService {
 
 /// Riverpod provider for [EmergencyAuditService].
 final emergencyAuditServiceProvider = Provider<EmergencyAuditService>((ref) {
-  return EmergencyAuditService();
+  final apiClient = ref.watch(apiClientProvider);
+  return EmergencyAuditService(apiClient: apiClient);
 });

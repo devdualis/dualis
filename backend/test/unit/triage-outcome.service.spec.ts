@@ -3,6 +3,7 @@ import { TriageOutcomeService } from '../../src/modules/triage/services/triage-o
 import { ArticlesCatalogService } from '../../src/modules/triage/services/articles-catalog.service';
 import { AiTriageService } from '../../src/modules/ai/services/ai-triage.service';
 import { IdiomDictionaryService } from '../../src/modules/ai/services/idiom-dictionary.service';
+import type { TriageClassificationResult } from '../../src/modules/ai/dto/classify-symptom.dto';
 
 describe('TriageOutcomeService Unit Tests', () => {
   let service: TriageOutcomeService;
@@ -239,5 +240,70 @@ describe('TriageOutcomeService Unit Tests', () => {
     expect(outcome.aiClinicalConcept).toBe('cefaleia tensional / migrânea');
     expect(outcome.aiMappedLayTerm).toBe('dor de cabeça');
     expect(outcome.careDisposition).toBe('consulta_rotina');
+  });
+
+  describe('D-01: user-reported intensity is the only intensity source', () => {
+    const classification = (overrides: Partial<TriageClassificationResult>): TriageClassificationResult => ({
+      primaryVertical: 'emotional',
+      systemOrDimension: 'estresse_burnout',
+      urgencyScore: 4,
+      mappedLayTerm: 'estresse',
+      clinicalConcept: 'sobrecarga emocional',
+      isEmergencyCandidate: false,
+      confidence: 0.9,
+      source: 'gemini',
+      latencyMs: 120,
+      ...overrides,
+    });
+
+    it('10. physical vertical: cross-vertical secondaryIntensityScore equals the user intensity, not the AI score', async () => {
+      vi.spyOn(aiTriage, 'classify').mockResolvedValue(
+        classification({ primaryVertical: 'emotional', systemOrDimension: 'estresse_burnout' }),
+      );
+
+      const outcome = await service.processOutcome('user-1', {
+        vertical: 'physical',
+        answers: { 1: 'cabeca', 2: 'comecou_hoje', 3: '2' },
+        narrative: 'muito estresse no trabalho',
+      });
+
+      expect(outcome.intensityScore).toBe(2);
+      expect(outcome.secondaryIntensityScore).toBe(2);
+      expect(outcome.isCrossVerticalSomatic).toBe(true);
+    });
+
+    it('11. emotional vertical: cross-vertical secondaryIntensityScore equals the user intensity, not the AI score', async () => {
+      vi.spyOn(aiTriage, 'classify').mockResolvedValue(
+        classification({ primaryVertical: 'physical', systemOrDimension: 'cabeca_pescoco' }),
+      );
+
+      const outcome = await service.processOutcome('user-1', {
+        vertical: 'emotional',
+        answers: { 1: 'ansiedade', 2: 'comecou_hoje', 3: 'leve_controlavel' },
+        narrative: 'dor de cabeça',
+      });
+
+      expect(outcome.intensityScore).toBe(2);
+      expect(outcome.secondaryIntensityScore).toBe(2);
+    });
+
+    it('12. emergency gate is unchanged and does not inflate intensity', async () => {
+      vi.spyOn(aiTriage, 'classify').mockResolvedValue(
+        classification({
+          primaryVertical: 'physical',
+          systemOrDimension: 'cardiovascular',
+          isEmergencyCandidate: true,
+        }),
+      );
+
+      const outcome = await service.processOutcome('user-1', {
+        vertical: 'physical',
+        answers: { 1: 'peito', 2: 'comecou_hoje', 3: '2' },
+        narrative: 'dor no peito forte',
+      });
+
+      expect(outcome.careDisposition).toBe('emergencia');
+      expect(outcome.intensityScore).toBe(2);
+    });
   });
 });

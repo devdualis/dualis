@@ -4,7 +4,8 @@ import '../../../core/constants/api_endpoints.dart';
 import '../../../core/network/api_client.dart';
 
 final privacyRemoteDataSourceProvider = Provider<PrivacyRemoteDataSource>((ref) {
-  return PrivacyRemoteDataSource();
+  final apiClient = ref.watch(apiClientProvider);
+  return PrivacyRemoteDataSource(client: apiClient);
 });
 
 class PrivacyRemoteDataSource {

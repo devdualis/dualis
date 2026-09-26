@@ -28,11 +28,13 @@ class TriageWizardNotifier extends _$TriageWizardNotifier {
   }
 
   bool selectOption(BuildContext context, int stepIndex, String optionKey) {
+    final snapshotAnswers = {...state.answers, stepIndex: optionKey};
+    state = state.copyWith(answers: snapshotAnswers);
+
     final emergency = _evaluateGate(stepIndex, optionKey);
     if (emergency != null) {
       final verticalStr =
           state.activeVertical == TriageVertical.fisica ? 'physical' : 'emotional';
-      final snapshotAnswers = {...state.answers, stepIndex: optionKey};
       ref.read(emergencyControllerProvider.notifier).triggerEmergency(
             context,
             emergency.copyWith(
@@ -42,7 +44,6 @@ class TriageWizardNotifier extends _$TriageWizardNotifier {
           );
       return true;
     }
-    state = state.copyWith(answers: {...state.answers, stepIndex: optionKey});
     return false;
   }
 
@@ -78,13 +79,15 @@ class TriageWizardNotifier extends _$TriageWizardNotifier {
     final vertical = state.activeVertical;
 
     if (vertical == TriageVertical.psicoEmocional) {
-      if (stepIndex == 2) {
+      if (stepIndex == 3 || stepIndex == 2) {
         final intensityMap = {
           'leve_controlavel': 2,
           'moderada': 3,
           'muito_forte': 4,
+          '4': 4,
+          '5': 5,
         };
-        final intensity = intensityMap[optionKey] ?? 2;
+        final intensity = intensityMap[optionKey] ?? int.tryParse(optionKey) ?? 2;
         final dim = _emotionalDimensionFromStep0();
         return RedFlagEvaluator.evaluateStructured(
           systemOrDimension: dim,
@@ -94,7 +97,7 @@ class TriageWizardNotifier extends _$TriageWizardNotifier {
         );
       }
     } else {
-      if (stepIndex == 2) {
+      if (stepIndex == 3 || stepIndex == 2) {
         final intensity = int.tryParse(optionKey) ?? 1;
         final sys = _physicalSystemFromStep0();
         return RedFlagEvaluator.evaluateStructured(

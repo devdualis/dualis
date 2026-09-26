@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
-import '../../../../l10n/app_localizations.dart';
 import '../../../triage/domain/triage_vertical.dart';
 import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import '../../domain/axis_intensity_resolver.dart';
@@ -499,35 +498,4 @@ class DualAxisTriggerCard extends ConsumerWidget {
     }
     return status?.tier ?? ClinicalIntensityTier.none;
   }
-
-  static _StatusDisplayData _resolveStatusData({
-    BuildContext? context,
-    int? intensity,
-    TriggerStatus? status,
-  }) {
-    final tier = resolveTier(intensity: intensity, status: status);
-    return _StatusDisplayData(
-      label: tier.label,
-      color: tier.color,
-      textColor: tier.textColor,
-      bgColor: tier.cardBgColor,
-      borderColor: tier.borderColor,
-    );
-  }
-}
-
-class _StatusDisplayData {
-  final String label;
-  final Color color;
-  final Color textColor;
-  final Color bgColor;
-  final Color borderColor;
-
-  _StatusDisplayData({
-    required this.label,
-    required this.color,
-    required this.textColor,
-    required this.bgColor,
-    required this.borderColor,
-  });
 }

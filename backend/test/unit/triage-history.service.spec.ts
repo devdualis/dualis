@@ -99,6 +99,59 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
     expect(result.logs[0].stepAnswers).toEqual({ causes: 'stress' });
   });
 
+  it('2b. aggregates upper and lower limbs with side discernment in physicalSummary', async () => {
+    const today = new Date();
+    const mockRows = [
+      {
+        id: 'log-arm-right',
+        userId: 'usr-1',
+        intensity: 3,
+        anatomicalSystem: 'membros_superiores',
+        emotionalDimension: null,
+        disposition: 'consulta_rotina',
+        stepAnswers: '{"0":"membros_superiores","1":"comecou_agora","2":"mao_dedos_direito","3":"3"}',
+        recordedAt: today,
+        createdAt: today,
+        updatedAt: today,
+      },
+      {
+        id: 'log-leg-left',
+        userId: 'usr-1',
+        intensity: 2,
+        anatomicalSystem: 'membros_inferiores',
+        emotionalDimension: null,
+        disposition: 'auto_cuidado',
+        stepAnswers: '{"0":"membros_inferiores","1":"comecou_agora","2":"joelho_esquerdo","3":"2"}',
+        recordedAt: new Date(today.getTime() - 24 * 3600 * 1000),
+        createdAt: today,
+        updatedAt: today,
+      },
+    ];
+
+    mockDb.transaction.mockImplementation(async (callback: any) => {
+      const tx = {
+        execute: vi.fn().mockResolvedValue(true),
+        select: vi.fn().mockReturnValue({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              orderBy: vi.fn().mockResolvedValue(mockRows),
+            }),
+          }),
+        }),
+      };
+      return callback(tx);
+    });
+
+    const result = await service.getHistory('usr-1', { days: 14 });
+
+    expect(result.physicalSummary.membros_superiores).toBe(3);
+    expect(result.physicalSummary.membros_superiores_d).toBe(3);
+    expect(result.physicalSummary.membros_superiores_e).toBe(0);
+    expect(result.physicalSummary.membros_inferiores).toBe(2);
+    expect(result.physicalSummary.membros_inferiores_e).toBe(2);
+    expect(result.physicalSummary.membros_inferiores_d).toBe(0);
+  });
+
   it('3. detects critical recurrences when dimension intensity >= 4 on multiple days (DASH-04)', async () => {
     const today = new Date();
     const mockRows = [

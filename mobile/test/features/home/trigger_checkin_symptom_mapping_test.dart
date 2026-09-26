@@ -259,7 +259,10 @@ void main() {
     });
 
     test('8. Remote sync preserves other axis from earlier today logs instead of goodNormal', () async {
-      final now = DateTime.now();
+      // Anchored to midday so "3 hours earlier" never crosses midnight (CI
+      // runs in UTC and would otherwise fail between 00:00 and 03:00).
+      final today = DateTime.now();
+      final now = DateTime(today.year, today.month, today.day, 12);
       // Log 1: earlier emotional check-in today (intensity 3 -> soSo)
       final log1 = TriageHistoryEntry(
         id: 'log-1-emotional',

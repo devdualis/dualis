@@ -5,18 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
-import '../../../../shared/widgets/dualis_primary_button.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../../emergency/domain/red_flag_evaluator.dart';
-import '../../../emergency/presentation/controllers/emergency_controller.dart';
-import '../../../triage/domain/triage_vertical.dart';
-import '../../../triage/presentation/widgets/off_topic_narrative_confirmation_bottom_sheet.dart';
 import '../../domain/trigger_checkin_state.dart';
 import '../controllers/trigger_checkin_controller.dart';
 import '../widgets/admob_banner_container.dart';
 import '../widgets/dual_axis_trigger_card.dart';
-import '../widgets/wellness_confirmation_dialog.dart';
+import '../widgets/today_triage_summary_card.dart';
 import '../../../sync/presentation/widgets/offline_indicator_banner.dart';
 import '../../../sync/presentation/controllers/sync_outbox_worker.dart';
 import '../../../settings/presentation/widgets/avatar_selector_sheet.dart';
@@ -27,9 +22,10 @@ import '../../../dashboard/presentation/screens/historical_dashboard_screen.dart
 import '../../../dashboard/presentation/controllers/dashboard_controller.dart';
 import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import '../../../../core/notifications/hydration_notification_service.dart';
+import '../../../../core/notifications/daily_checkin_notification_service.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
+import '../../../hydration/presentation/screens/hydration_dashboard_screen.dart';
 import '../../../hydration/presentation/widgets/water_intake_modal.dart';
-import '../widgets/home_hydration_card.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -39,9 +35,9 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  bool _isResolvingNavigation = false;
   int _currentTabIndex = 0;
   StreamSubscription<String>? _notificationSub;
+  StreamSubscription<String>? _checkinNotificationSub;
 
   @override
   void initState() {
@@ -55,6 +51,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         if (settings.trackingEnabled) {
           WaterIntakeModal.show(context, source: 'reminder_alarm');
         }
+      }
+    });
+
+    _checkinNotificationSub = ref
+        .read(dailyCheckinNotificationServiceProvider)
+        .onNotificationOpened
+        .listen((payload) {
+      if (payload == 'open_checkin' && mounted) {
+        setState(() => _currentTabIndex = 0);
       }
     });
 
@@ -72,6 +77,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void dispose() {
     _notificationSub?.cancel();
+    _checkinNotificationSub?.cancel();
     super.dispose();
   }
 
@@ -136,7 +142,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         const SizedBox(width: 8),
       ];
-    } else {
+    } else if (_currentTabIndex == 2) {
       appBarTitle = Text(
         'Histórico & Tendências',
         style: GoogleFonts.plusJakartaSans(
@@ -154,6 +160,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           onTap: () => ref.read(dashboardControllerProvider.notifier).refreshHistory(),
         ),
         const SizedBox(width: 4),
+        _AppBarIconButton(
+          key: const Key('home_settings_button'),
+          icon: Icons.settings_outlined,
+          color: AppColors.clinicalTealDark,
+          tooltip: 'Configurações',
+          onTap: () => context.push(RoutePaths.settings),
+        ),
+        const SizedBox(width: 8),
+      ];
+    } else {
+      appBarTitle = Text(
+        'Controle de Hidratação 💧',
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimaryLight,
+        ),
+      );
+      appBarActions = [
         _AppBarIconButton(
           key: const Key('home_settings_button'),
           icon: Icons.settings_outlined,
@@ -221,6 +246,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         );
       case 2:
         return const HistoricalDashboardScreen(isEmbedded: true);
+      case 3:
+        return const HydrationDashboardScreen(isEmbedded: true);
       default:
         return _buildHomeTab(context, user, userName, userEmail, triggerState);
     }
@@ -233,6 +260,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     String userEmail,
     TriggerCheckInState triggerState,
   ) {
+    final outcomeState = ref.watch(triageOutcomeProvider);
+    final outcome = outcomeState.outcome;
+
     return SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Column(
@@ -332,136 +362,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
+
+              if (outcome != null) ...[
+                TodayTriageSummaryCard(
+                  outcome: outcome,
+                  onViewFullResult: () {
+                    setState(() => _currentTabIndex = 1);
+                  },
+                  onRetake: () {
+                    ref.read(triggerCheckInProvider.notifier).prepareForUpdate();
+                    setState(() => _currentTabIndex = 1);
+                  },
+                ),
+                const SizedBox(height: 20),
+              ],
 
               const DualAxisTriggerCard(),
-              const SizedBox(height: 16),
-              Consumer(
-                builder: (context, ref, child) {
-                  final triggerState = ref.watch(triggerCheckInProvider);
-                  final isReady = triggerState.isReadyToSubmit;
-
-                  String buttonText;
-                  if (!isReady) {
-                    buttonText = 'Selecione os Dois Eixos';
-                  } else if (triggerState.isCompletedToday && !triggerState.isModifiedAfterCompletion) {
-                    buttonText = 'Check-in de Hoje Concluído';
-                  } else if (triggerState.isCompletedToday && triggerState.isModifiedAfterCompletion) {
-                    buttonText = 'Atualizar Check-in de Hoje';
-                  } else {
-                    buttonText = 'Confirmar Check-in';
-                  }
-
-                  return DualisPrimaryButton(
-                    key: const Key('startTriageButton'),
-                    text: buttonText,
-                    isLoading: _isResolvingNavigation,
-                    onPressed: isReady && !_isResolvingNavigation
-                        ? () async {
-                            // If already completed today and nothing changed, do nothing.
-                            if (triggerState.isCompletedToday &&
-                                !triggerState.isModifiedAfterCompletion) {
-                              return;
-                            }
-
-                            final narrative = triggerState.naturalLanguageText.trim();
-                            if (narrative.isNotEmpty) {
-                              final emergency = RedFlagEvaluator.evaluateText(narrative);
-                              if (emergency != null) {
-                                if (context.mounted) {
-                                  ref
-                                      .read(emergencyControllerProvider.notifier)
-                                      .triggerEmergency(context, emergency);
-                                }
-                                return;
-                              }
-
-                              // Only let free text steer routing when it's new this
-                              // session — editing an already-completed check-in must
-                              // not resurrect a stale, previously-submitted description.
-                              final useTextDrivenNav = !triggerState.isCompletedToday ||
-                                  triggerState.textTouched;
-                              if (useTextDrivenNav) {
-                                setState(() => _isResolvingNavigation = true);
-                                final navArgs = await ref
-                                    .read(triggerCheckInProvider.notifier)
-                                    .resolveTextDrivenNavigation();
-                                if (mounted) {
-                                  setState(() => _isResolvingNavigation = false);
-                                }
-                                if (navArgs != null) {
-                                  if (navArgs.isOffTopic) {
-                                    if (!context.mounted) return;
-                                    final shouldContinue =
-                                        await OffTopicNarrativeConfirmationBottomSheet.show(
-                                      context,
-                                    );
-                                    if (shouldContinue != true) return;
-                                  }
-                                  if (context.mounted) {
-                                    context.push(RoutePaths.triage, extra: navArgs);
-                                  }
-                                  return;
-                                }
-                                // Classification failed (offline/error) — fall through
-                                // to the axis-only routing below so the user isn't stuck.
-                              }
-                            }
-
-                            if (!context.mounted) return;
-                            final outcome = triggerState.routingOutcome;
-                            switch (outcome) {
-                              case RoutingOutcome.wellnessConfirmation:
-                                WellnessConfirmationDialog.show(
-                                  context,
-                                  onDismiss: () {
-                                    ref.read(triggerCheckInProvider.notifier).markCompletedToday();
-                                  },
-                                );
-                                break;
-                              case RoutingOutcome.psicoEmocionalOnly:
-                                context.push(
-                                  RoutePaths.triage,
-                                  extra: TriageNavigationArgs(
-                                    initialVertical: TriageVertical.psicoEmocional,
-                                    isDual: false,
-                                    naturalLanguageText: triggerState.naturalLanguageText,
-                                  ),
-                                );
-                                break;
-                              case RoutingOutcome.fisicaOnly:
-                                context.push(
-                                  RoutePaths.triage,
-                                  extra: TriageNavigationArgs(
-                                    initialVertical: TriageVertical.fisica,
-                                    isDual: false,
-                                    naturalLanguageText: triggerState.naturalLanguageText,
-                                  ),
-                                );
-                                break;
-                              case RoutingOutcome.dualOrganicPrimacy:
-                                context.push(
-                                  RoutePaths.triage,
-                                  extra: TriageNavigationArgs(
-                                    initialVertical: TriageVertical.fisica,
-                                    isDual: true,
-                                    naturalLanguageText: triggerState.naturalLanguageText,
-                                  ),
-                                );
-                                break;
-                              case RoutingOutcome.none:
-                                if (triggerState.isCompletedToday && triggerState.isModifiedAfterCompletion) {
-                                  ref.read(triggerCheckInProvider.notifier).markCompletedToday();
-                                }
-                                break;
-                            }
-                          }
-                        : null,
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
-              const HomeHydrationCard(),
               const SizedBox(height: 20),
               const AdMobBannerContainer(),
               const SizedBox(height: 16),

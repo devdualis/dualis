@@ -183,5 +183,86 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgets('4. Bug Regression: Numeric intensity in step 3 is NOT displayed as Fator Associado / Sintoma, and step 2 factor is formatted', (tester) async {
+      final entryWithNumericStep3 = TriageHistoryEntry(
+        id: 'log-numeric-step3',
+        intensity: 2,
+        anatomicalSystem: 'neurologico',
+        disposition: 'auto_cuidado',
+        narrative: null,
+        stepAnswers: {
+          '0': 'neurologico',
+          '1': 'comecou_agora',
+          '2': 'sim_levantar_rapido',
+          '3': '2', // Intensity 2! Must NOT be shown as symptom / factor
+        },
+        recordedAt: DateTime.parse('2026-09-25T12:00:00.000Z'),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () => TriageHistoryDetailModal.show(context, entryWithNumericStep3),
+                child: const Text('Open Modal'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Modal'));
+      await tester.pumpAndSettle();
+
+      // "2" should NEVER appear as the value of "Fator Associado / Sintoma"
+      expect(find.text('Fator Associado / Sintoma'), findsOneWidget);
+      expect(find.text('Ao levantar rápido / postural'), findsOneWidget);
+      expect(find.widgetWithText(Row, '2'), findsNothing);
+
+      // Now verify if only step '3': '2' exists without step 2:
+      // It should NOT show Fator Associado / Sintoma at all
+    });
+
+    testWidgets('5. Bug Regression: Numeric narrative string (e.g. "5") is rejected and shows default empty message', (tester) async {
+      final entryWithNumericNarrative = TriageHistoryEntry(
+        id: 'log-numeric-narrative',
+        intensity: 5,
+        anatomicalSystem: 'cabeca_pescoco',
+        disposition: 'emergencia_imediata',
+        narrative: '5', // Leaked intensity/number instead of actual description
+        stepAnswers: {
+          '0': 'cabeca_pescoco',
+          '1': 'comecou_agora',
+          '2': 'sim_telas_esforco_visual',
+          'naturalLanguageText': '5',
+        },
+        recordedAt: DateTime.parse('2026-09-25T12:00:00.000Z'),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () => TriageHistoryDetailModal.show(context, entryWithNumericNarrative),
+                child: const Text('Open Modal'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Modal'));
+      await tester.pumpAndSettle();
+
+      // The narrative should NOT display "5"
+      expect(find.text('5'), findsNothing);
+      expect(
+        find.text('Nenhuma descrição adicional relatada pelo paciente nesta triagem.'),
+        findsOneWidget,
+      );
+    });
   });
 }

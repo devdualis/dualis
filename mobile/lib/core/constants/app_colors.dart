@@ -52,4 +52,29 @@ class AppColors {
   // Borders & Dividers
   static const Color outlineLight = Color(0xFFE2E8F0);
   static const Color outlineDark = Color(0xFF334155);
+
+  // Clinical Intensity & Heat Scale Palette (Single Source of Truth)
+  /// Tier 0: Sem dor / Ausência de sintomas
+  static const Color intensityNone = Color(0xFFCFD8DC);
+  static const Color intensityNoneText = Color(0xFF37474F);
+  static const Color intensityNoneBg = Color(0xFFF5F7F8);
+  static const Color intensityNoneBorder = Color(0xFFCFD8DC);
+
+  /// Tier 1-2: Leve
+  static const Color intensityMild = Color(0xFFFFD54F);
+  static const Color intensityMildText = Color(0xFF3E2723);
+  static const Color intensityMildBg = Color(0xFFFFFDE7);
+  static const Color intensityMildBorder = Color(0xFFFFE082);
+
+  /// Tier 3: Moderada
+  static const Color intensityModerate = Color(0xFFFF8A65);
+  static const Color intensityModerateText = Color(0xFFFFFFFF);
+  static const Color intensityModerateBg = Color(0xFFFBE9E7);
+  static const Color intensityModerateBorder = Color(0xFFFFAB91);
+
+  /// Tier 4-5: Intensa / Crítico
+  static const Color intensityIntense = Color(0xFFE53935);
+  static const Color intensityIntenseText = Color(0xFFFFFFFF);
+  static const Color intensityIntenseBg = Color(0xFFFFEBEE);
+  static const Color intensityIntenseBorder = Color(0xFFEF9A9A);
 }

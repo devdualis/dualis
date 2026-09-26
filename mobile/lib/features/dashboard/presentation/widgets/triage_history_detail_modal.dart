@@ -122,13 +122,29 @@ class TriageHistoryDetailModal extends StatelessWidget {
       'sim_sobrecarga_multitarefas': 'Sobrecarga de tarefas / cansaço mental',
       'sim_dificuldade_pegar_sono': 'Dificuldade para adormecer',
       'sim_acorda_madrugada': 'Despertares frequentes na madrugada',
+      'sim_levantar_rapido': 'Ao levantar rápido / postural',
+      'sim_baixa_ingestao_urina': 'Pouca ingestão de água / segurar urina',
+      'sim_produto_novo': 'Uso de produto novo / cosmético',
+      'sim_cansaco_esgotamento': 'Cansaço físico / esgotamento',
+      'sim_jejum_alimentacao': 'Jejum prolongado / alimentação irregular',
+      'trabalho_estudos': 'Trabalho / Estudos',
+      'familia_relacionamentos': 'Família / Relacionamentos',
+      'noite_ruim_sono': 'Noite ruim de sono',
+      'nao_sei_dizer': 'Não sei dizer / Sem causa aparente',
+      'sim_perda_luto': 'Perda significativa / luto',
+      'sim_pressao_trabalho': 'Pressão profissional / sobrecarga',
+      'sim_durante_trabalho': 'Sintomas durante o trabalho',
+      'sim_comparacao_redes': 'Cobrança pessoal / redes sociais',
+      'sim_alergia_ambiente': 'Exposição a poeira / alérgenos',
       'goodNormal': 'Bem / Normal',
       'soSo': 'Mais ou menos',
       'badSick': 'Mal / Ruim',
     };
 
     if (map.containsKey(key)) return map[key]!;
-    return key.replaceAll('_', ' ');
+    final formatted = key.replaceAll('_', ' ');
+    if (formatted.isEmpty) return '';
+    return formatted[0].toUpperCase() + formatted.substring(1);
   }
 
   @override
@@ -141,9 +157,14 @@ class TriageHistoryDetailModal extends StatelessWidget {
     final intensityColor = RetrospectiveListView.getIntensityColor(entry.intensity);
     final dispositionColor = getDispositionColor(entry.disposition);
 
-    final narrative = entry.narrative ??
+    final rawNarrative = entry.narrative ??
         entry.stepAnswers?['naturalLanguageText'] as String? ??
         entry.stepAnswers?['narrative'] as String?;
+    final narrative = (rawNarrative != null &&
+            rawNarrative.trim().isNotEmpty &&
+            int.tryParse(rawNarrative.trim()) == null)
+        ? rawNarrative.trim()
+        : null;
 
     final causes = entry.stepAnswers?['causes'] ??
         entry.stepAnswers?['gatilhos'] ??
@@ -615,9 +636,11 @@ class TriageHistoryDetailModal extends StatelessWidget {
   Widget _buildWizardStepRows(Map<String, dynamic> stepAnswers) {
     final rows = <Widget>[];
 
-    // Check step 1 (persistence)
+    // Check step 1 (persistence / onset duration)
     final step1 = stepAnswers['1'] ?? stepAnswers['step_1'];
-    if (step1 != null) {
+    if (step1 != null &&
+        step1.toString().trim().isNotEmpty &&
+        int.tryParse(step1.toString().trim()) == null) {
       rows.add(const SizedBox(height: 10));
       rows.add(
         _buildAnswerRow(
@@ -628,15 +651,26 @@ class TriageHistoryDetailModal extends StatelessWidget {
       );
     }
 
-    // Check step 3 (triggers/symptoms)
-    final step3 = stepAnswers['3'] ?? stepAnswers['step_3'];
-    if (step3 != null) {
+    // Check step 2 (associated factor / trigger / symptom)
+    // Note: Step 2 is the trigger / factor in TriageQuestionBank.
+    // If not found at '2', check '3' only if non-numeric for backward compatibility.
+    dynamic step2Raw = stepAnswers['2'] ?? stepAnswers['step_2'];
+    if (step2Raw == null) {
+      final candidate3 = stepAnswers['3'] ?? stepAnswers['step_3'];
+      if (candidate3 != null && int.tryParse(candidate3.toString().trim()) == null) {
+        step2Raw = candidate3;
+      }
+    }
+
+    if (step2Raw != null &&
+        step2Raw.toString().trim().isNotEmpty &&
+        int.tryParse(step2Raw.toString().trim()) == null) {
       rows.add(const SizedBox(height: 10));
       rows.add(
         _buildAnswerRow(
           icon: Icons.bubble_chart_outlined,
           label: 'Fator Associado / Sintoma',
-          value: _formatAnswerValue(step3.toString()),
+          value: _formatAnswerValue(step2Raw.toString()),
         ),
       );
     }

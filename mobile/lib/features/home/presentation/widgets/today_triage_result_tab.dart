@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../triage_outcome/domain/curated_articles_catalog.dart';
 import '../../../triage_outcome/domain/triage_outcome_models.dart';
 import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
@@ -11,6 +12,7 @@ import '../../../triage_outcome/presentation/widgets/disposition_card.dart';
 import '../../../triage_outcome/presentation/widgets/intensity_meter.dart';
 import '../../../triage_outcome/presentation/widgets/organic_primacy_banner.dart';
 import '../../../triage_outcome/presentation/widgets/ai_insight_card.dart';
+import '../../domain/axis_intensity_resolver.dart';
 import '../../domain/trigger_checkin_state.dart';
 import '../controllers/trigger_checkin_controller.dart';
 
@@ -188,16 +190,136 @@ class TodayTriageResultTab extends ConsumerWidget {
     WidgetRef ref,
     TriageOutcome outcome,
   ) {
+    final triggerState = ref.watch(triggerCheckInProvider);
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isPhysical = outcome.vertical == 'physical';
-    final verticalColor = isPhysical ? AppColors.clinicalTeal : AppColors.softIndigo;
-    final articles = outcome.recommendedArticles.isNotEmpty
-        ? outcome.recommendedArticles
-        : CuratedArticlesCatalog.getArticlesForSymptoms(
-            queryText: outcome.aiMappedLayTerm,
-            anatomicalSystem: outcome.primaryCategory,
-            isPhysicalDistressed: isPhysical,
-            isEmotionalDistressed: !isPhysical || outcome.organicPrimacyApplied,
-          );
+
+    final hasEmotionalOutcome = !isPhysical ||
+        triggerState.isEmotionalCompleted ||
+        outcome.secondaryCategoryLabel != null;
+
+    final hasPhysicalOutcome = isPhysical ||
+        triggerState.isPhysicalCompleted ||
+        (outcome.secondaryCategoryLabel != null && !isPhysical);
+
+    final physicalTitle = isPhysical
+        ? outcome.categoryLabel
+        : (triggerState.physicalSummary ?? outcome.secondaryCategoryLabel ?? 'Avaliação Física');
+    final physicalDescription = isPhysical
+        ? outcome.somaticMapping
+        : (triggerState.physicalNarrative ??
+            outcome.secondarySomaticMapping ??
+            'Desconforto musculoesquelético ou somático registrado.');
+    final physicalIntensity = AxisIntensityResolver.resolveDisplayIntensity(
+      axis: CheckInAxis.physical,
+      state: triggerState,
+      outcome: outcome,
+    );
+    final physicalStatus = isPhysical
+        ? triggerStatusFromIntensity(outcome.intensityScore)
+        : (triggerState.physicalStatus ?? TriggerStatus.goodNormal);
+
+    final emotionalTitle = !isPhysical
+        ? outcome.categoryLabel
+        : (triggerState.emotionalSummary ?? outcome.secondaryCategoryLabel ?? 'Avaliação Psicoemocional');
+    final emotionalDescription = !isPhysical
+        ? outcome.somaticMapping
+        : (triggerState.emotionalNarrative ??
+            outcome.secondarySomaticMapping ??
+            (triggerState.emotionalStatus == TriggerStatus.soSo
+                ? 'Sintomas de ansiedade, sobrecarga mental ou agitação psicomotora relatados.'
+                : 'Monitoramento do bem-estar e equilíbrio emocional.'));
+    final emotionalIntensity = AxisIntensityResolver.resolveDisplayIntensity(
+      axis: CheckInAxis.emotional,
+      state: triggerState,
+      outcome: outcome,
+    );
+    final emotionalStatus = !isPhysical
+        ? triggerStatusFromIntensity(outcome.intensityScore)
+        : (triggerState.emotionalStatus ?? TriggerStatus.goodNormal);
+
+    final isPhysicalDistressed = physicalStatus != TriggerStatus.goodNormal;
+    final isEmotionalDistressed = emotionalStatus != TriggerStatus.goodNormal;
+
+    // Collect physical articles
+    List<RecommendedArticle> physicalArticles = [];
+    if (isPhysical && outcome.recommendedArticles.isNotEmpty) {
+      physicalArticles = outcome.recommendedArticles
+          .where((a) =>
+              a.category != 'depressiva_desanimo' &&
+              a.category != 'ansiosa_agitacao' &&
+              a.category != 'estresse_burnout' &&
+              a.category != 'sono' &&
+              a.category != 'respiracao')
+          .toList();
+    }
+    if (physicalArticles.isEmpty) {
+      physicalArticles = CuratedArticlesCatalog.getArticlesForSymptoms(
+        queryText: isPhysical ? outcome.aiMappedLayTerm : triggerState.physicalNarrative,
+        anatomicalSystem: isPhysical ? outcome.primaryCategory : 'membros_superiores',
+        isPhysicalDistressed: true,
+      );
+    }
+
+    // Collect emotional articles
+    List<RecommendedArticle> emotionalArticles = [];
+    if (!isPhysical && outcome.recommendedArticles.isNotEmpty) {
+      emotionalArticles = outcome.recommendedArticles
+          .where((a) =>
+              a.category == 'depressiva_desanimo' ||
+              a.category == 'ansiosa_agitacao' ||
+              a.category == 'estresse_burnout' ||
+              a.category == 'sono' ||
+              a.category == 'respiracao')
+          .toList();
+    }
+    if (emotionalArticles.isEmpty) {
+      final emoSummary = emotionalTitle.toLowerCase();
+      String emoDimension = 'ansiosa_agitacao';
+      if (emoSummary.contains('depress') || emoSummary.contains('desanimo')) {
+        emoDimension = 'depressiva_desanimo';
+      } else if (emoSummary.contains('estresse') || emoSummary.contains('burnout')) {
+        emoDimension = 'estresse_burnout';
+      }
+      emotionalArticles = CuratedArticlesCatalog.getArticlesForSymptoms(
+        queryText: triggerState.emotionalNarrative ?? emotionalTitle,
+        emotionalDimension: emoDimension,
+        isEmotionalDistressed: true,
+      );
+    }
+
+    final List<RecommendedArticle> articles = [];
+    if (isEmotionalDistressed && isPhysicalDistressed) {
+      // Both axes have symptoms: combine physical and emotional articles
+      for (final p in physicalArticles.take(2)) {
+        if (!articles.any((a) => a.id == p.id)) articles.add(p);
+      }
+      for (final e in emotionalArticles.take(2)) {
+        if (!articles.any((a) => a.id == e.id)) articles.add(e);
+      }
+    } else if (isEmotionalDistressed) {
+      articles.addAll(emotionalArticles.take(2));
+      for (final p in physicalArticles.take(1)) {
+        if (!articles.any((a) => a.id == p.id)) articles.add(p);
+      }
+    } else if (isPhysicalDistressed) {
+      if (outcome.recommendedArticles.isNotEmpty) {
+        articles.addAll(outcome.recommendedArticles);
+      } else {
+        articles.addAll(physicalArticles.take(2));
+      }
+      if (hasEmotionalOutcome) {
+        for (final e in emotionalArticles.take(1)) {
+          if (!articles.any((a) => a.id == e.id)) articles.add(e);
+        }
+      }
+    } else {
+      articles.addAll(outcome.recommendedArticles.isNotEmpty
+          ? outcome.recommendedArticles
+          : CuratedArticlesCatalog.wellnessArticles);
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,92 +328,59 @@ class TodayTriageResultTab extends ConsumerWidget {
           OrganicPrimacyBanner(notice: outcome.organicPrimacyNotice),
           const SizedBox(height: 16),
         ],
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: verticalColor.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: verticalColor.withValues(alpha: 0.3)),
+
+        // Exibe os eixos de triagem realizados
+        if (hasPhysicalOutcome && hasEmotionalOutcome) ...[
+          _buildOutcomeAxisCard(
+            axisLabel: l10n.outcomeAxisPhysicalNumbered,
+            categoryTitle: physicalTitle,
+            description: physicalDescription,
+            narrative: isPhysical ? triggerState.physicalNarrative : null,
+            icon: Icons.accessibility_new_rounded,
+            accentColor: AppColors.clinicalTeal,
+            status: physicalStatus,
+            intensity: physicalIntensity,
+            isDark: isDark,
           ),
-          child: Row(
-            children: [
-              Icon(
-                isPhysical ? Icons.healing_rounded : Icons.psychology_rounded,
-                color: verticalColor,
-                size: 28,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      outcome.categoryLabel,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: verticalColor,
-                      ),
-                    ),
-                    if (outcome.somaticMapping.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        outcome.somaticMapping,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          color: AppColors.textSecondaryLight,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (outcome.secondaryCategoryLabel != null) ...[
           const SizedBox(height: 12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.softIndigo.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.softIndigo.withValues(alpha: 0.2)),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.psychology_rounded, color: AppColors.softIndigo, size: 22),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Componente Associado: ${outcome.secondaryCategoryLabel}',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.softIndigo,
-                        ),
-                      ),
-                      if (outcome.secondarySomaticMapping != null &&
-                          outcome.secondarySomaticMapping!.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          outcome.secondarySomaticMapping!,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          _buildOutcomeAxisCard(
+            // Same axis label with or without an associated component; the
+            // component itself is the card's category title.
+            axisLabel: l10n.outcomeAxisEmotionalNumbered,
+            categoryTitle: outcome.secondaryCategoryLabel != null
+                ? outcome.secondaryCategoryLabel!
+                : emotionalTitle,
+            description: emotionalDescription,
+            narrative: !isPhysical ? triggerState.emotionalNarrative : null,
+            icon: Icons.psychology_rounded,
+            accentColor: AppColors.softIndigo,
+            status: emotionalStatus,
+            intensity: emotionalIntensity,
+            isDark: isDark,
+          ),
+        ] else if (isPhysical) ...[
+          _buildOutcomeAxisCard(
+            axisLabel: 'Avaliação Física',
+            categoryTitle: physicalTitle,
+            description: physicalDescription,
+            narrative: triggerState.physicalNarrative,
+            icon: Icons.accessibility_new_rounded,
+            accentColor: AppColors.clinicalTeal,
+            status: physicalStatus,
+            intensity: physicalIntensity,
+            isDark: isDark,
+          ),
+        ] else ...[
+          _buildOutcomeAxisCard(
+            axisLabel: 'Avaliação Psicoemocional',
+            categoryTitle: emotionalTitle,
+            description: emotionalDescription,
+            narrative: triggerState.emotionalNarrative,
+            icon: Icons.psychology_rounded,
+            accentColor: AppColors.softIndigo,
+            status: emotionalStatus,
+            intensity: emotionalIntensity,
+            isDark: isDark,
           ),
         ],
         const SizedBox(height: 16),
@@ -349,6 +438,130 @@ class TodayTriageResultTab extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
       ],
+    );
+  }
+
+  Widget _buildOutcomeAxisCard({
+    required String axisLabel,
+    required String categoryTitle,
+    required String description,
+    String? narrative,
+    required IconData icon,
+    required Color accentColor,
+    TriggerStatus? status,
+    int? intensity,
+    required bool isDark,
+  }) {
+    final tier = intensity != null
+        ? ClinicalIntensityTier.fromScore(intensity)
+        : (status?.tier ?? ClinicalIntensityTier.none);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: accentColor.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: accentColor.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: accentColor, size: 22),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      axisLabel,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: accentColor,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    Text(
+                      categoryTitle,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: tier.color,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  tier.label,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: tier.textColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (description.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.surfaceDark : Colors.white.withValues(alpha: 0.85),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: accentColor.withValues(alpha: 0.2)),
+              ),
+              child: Text(
+                description,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  height: 1.3,
+                ),
+              ),
+            ),
+          ],
+          if (narrative != null && narrative.trim().isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.surfaceDark : Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.outlineLight),
+              ),
+              child: Text(
+                '“${narrative.trim()}”',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -437,7 +650,8 @@ class TodayTriageResultTab extends ConsumerWidget {
                 axisLabel: '2. Eixo Avaliação Física',
                 status: triggerState.physicalStatus,
               ),
-              if (triggerState.naturalLanguageText.trim().isNotEmpty) ...[
+              if (triggerState.naturalLanguageText.trim().isNotEmpty &&
+                  int.tryParse(triggerState.naturalLanguageText.trim()) == null) ...[
                 const SizedBox(height: 12),
                 Container(
                   width: double.infinity,

@@ -1,149 +1,85 @@
 import 'dart:async';
+import 'dart:ui' show Locale;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
+
 import '../../features/hydration/domain/models/hydration_settings.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/locale_provider.dart';
+import 'app_notification_center.dart';
 
 typedef HydrationModalCallback = void Function();
 
 class HydrationNotificationService {
-  final FlutterLocalNotificationsPlugin _notificationsPlugin;
-  final StreamController<String> _notificationPayloadController =
-      StreamController<String>.broadcast();
-
-  static const String chimeChannelId = 'dualis_hydration_chime';
-  static const String chimeChannelName = 'Lembretes de Água (Aviso Suave)';
-
-  static const String alarmChannelId = 'dualis_hydration_alarm';
-  static const String alarmChannelName = 'Lembretes de Água (Alarme Sonoro)';
-
-  bool _isInitialized = false;
-
   HydrationNotificationService({
     FlutterLocalNotificationsPlugin? plugin,
-  }) : _notificationsPlugin = plugin ?? FlutterLocalNotificationsPlugin();
+    AppNotificationCenter? center,
+    Locale Function()? localeResolver,
+  })  : _center = center ??
+            AppNotificationCenter.of(
+                plugin ?? FlutterLocalNotificationsPlugin()),
+        _localeResolver = localeResolver;
 
-  Stream<String> get onNotificationOpened =>
-      _notificationPayloadController.stream;
+  final AppNotificationCenter _center;
+  final Locale Function()? _localeResolver;
 
-  Future<void> initialize() async {
-    if (_isInitialized) return;
+  static const String chimeChannelId = 'dualis_hydration_chime';
+  static const String alarmChannelId = 'dualis_hydration_alarm';
 
-    try {
-      tz.initializeTimeZones();
-      try {
-        final timezoneInfo = await FlutterTimezone.getLocalTimezone();
-        tz.setLocalLocation(tz.getLocation(timezoneInfo.identifier));
-      } catch (tzErr) {
-        debugPrint('Aviso ao carregar timezone via FlutterTimezone ($tzErr). Usando fallback America/Sao_Paulo');
-        try {
-          tz.setLocalLocation(tz.getLocation('America/Sao_Paulo'));
-        } catch (_) {}
-      }
-    } catch (e) {
-      debugPrint('Aviso ao inicializar timezones: $e');
-    }
+  /// Scheduled reminders use `reminderIdBase + hour` (hour 0..23).
+  static const int reminderIdBase = 1000;
 
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    const darwinSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+  /// "Test notification now" / immediate reminder.
+  static const int immediateReminderId = 9999;
 
-    const initSettings = InitializationSettings(
-      android: androidSettings,
-      iOS: darwinSettings,
-      macOS: darwinSettings,
-    );
+  /// Every scheduled-reminder ID this service may have created, whatever the
+  /// hours configured at the time.
+  static List<int> get scheduledReminderIds =>
+      [for (var hour = 0; hour < 24; hour++) reminderIdBase + hour];
 
-    try {
-      await _notificationsPlugin.initialize(
-        settings: initSettings,
-        onDidReceiveNotificationResponse: (response) {
-          final payload = response.payload;
-          if (payload != null && payload.isNotEmpty) {
-            _notificationPayloadController.add(payload);
-          }
-        },
+  /// Every notification ID owned by this service. Other features' IDs (e.g.
+  /// daily check-in 2000+) are never touched.
+  static List<int> get ownedNotificationIds =>
+      [...scheduledReminderIds, immediateReminderId];
+
+  FlutterLocalNotificationsPlugin get _plugin => _center.plugin;
+
+  /// Taps on water reminders (`open_water_modal`), including the tap that
+  /// launched the app.
+  Stream<String> get onNotificationOpened => _center.payloads(
+        where: (payload) => payload == NotificationPayloads.openWaterModal,
       );
-    } catch (e) {
-      debugPrint('Erro ao inicializar plugin de notificações: $e');
-    }
 
-    _isInitialized = true;
-  }
+  Future<void> initialize() => _center.initialize();
 
-  Future<bool> requestPermissions() async {
-    try {
-      final androidImpl = _notificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
-      if (androidImpl != null) {
-        final granted = await androidImpl.requestNotificationsPermission();
-        return granted ?? false;
-      }
-
-      final iosImpl = _notificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>();
-      if (iosImpl != null) {
-        final granted = await iosImpl.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-        return granted ?? false;
-      }
-    } catch (e) {
-      debugPrint('Erro ao solicitar permissões de notificação: $e');
-      return false;
-    }
-
-    return true;
-  }
+  Future<bool> requestPermissions() => _center.requestPermissions();
 
   /// Verifica se o dispositivo Android permite o agendamento de alarmes exatos
-  Future<bool> canScheduleExactAlarms() async {
-    try {
-      final androidImpl = _notificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
-      if (androidImpl != null) {
-        return (await androidImpl.canScheduleExactNotifications()) ?? false;
-      }
-    } catch (_) {
-      return false;
-    }
-    return false;
-  }
+  Future<bool> canScheduleExactAlarms() => _center.canScheduleExactAlarms();
 
-  /// Abre a tela do sistema para conceder permissão de alarmes exatos (Android 13+)
-  Future<void> requestExactAlarmsPermission() async {
-    try {
-      final androidImpl = _notificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
-      if (androidImpl != null) {
-        await androidImpl.requestExactAlarmsPermission();
-      }
-    } catch (e) {
-      debugPrint('Erro ao solicitar permissão de alarme exato: $e');
-    }
-  }
+  /// Abre a tela do sistema para conceder permissão de alarmes exatos (Android 12+)
+  Future<void> requestExactAlarmsPermission() =>
+      _center.requestExactAlarmsPermission();
 
-  NotificationDetails _getNotificationDetails(ReminderSoundStyle style) {
+  /// Requests exact-alarm access only when Android reports it missing.
+  Future<bool> ensureExactAlarmsPermission() =>
+      _center.ensureExactAlarmsPermission();
+
+  AppLocalizations _l10n() =>
+      resolveNotificationLocalizations(_localeResolver?.call());
+
+  NotificationDetails _getNotificationDetails(
+    ReminderSoundStyle style,
+    AppLocalizations l10n,
+  ) {
     if (style == ReminderSoundStyle.phoneAlarm) {
-      return const NotificationDetails(
+      return NotificationDetails(
         android: AndroidNotificationDetails(
           alarmChannelId,
-          alarmChannelName,
-          channelDescription:
-              'Alarme sonoro para lembrar de beber água a cada 2 horas',
+          l10n.notifWaterAlarmChannelName,
+          channelDescription: l10n.notifWaterAlarmChannelDescription,
           importance: Importance.max,
           priority: Priority.high,
           fullScreenIntent: true,
@@ -151,7 +87,7 @@ class HydrationNotificationService {
           enableVibration: true,
           playSound: true,
         ),
-        iOS: DarwinNotificationDetails(
+        iOS: const DarwinNotificationDetails(
           presentAlert: true,
           presentSound: true,
           presentBadge: true,
@@ -160,19 +96,18 @@ class HydrationNotificationService {
       );
     }
 
-    return const NotificationDetails(
+    return NotificationDetails(
       android: AndroidNotificationDetails(
         chimeChannelId,
-        chimeChannelName,
-        channelDescription:
-            'Aviso de chegada estilo mensagem para lembrete de hidratação',
+        l10n.notifWaterChimeChannelName,
+        channelDescription: l10n.notifWaterChimeChannelDescription,
         importance: Importance.high,
         priority: Priority.high,
         category: AndroidNotificationCategory.reminder,
         enableVibration: true,
         playSound: true,
       ),
-      iOS: DarwinNotificationDetails(
+      iOS: const DarwinNotificationDetails(
         presentAlert: true,
         presentSound: true,
         presentBadge: true,
@@ -180,16 +115,22 @@ class HydrationNotificationService {
     );
   }
 
+  String _body(AppLocalizations l10n, bool trackingEnabled) => trackingEnabled
+      ? l10n.notifWaterBodyTracking
+      : l10n.notifWaterBodyReminder;
+
   Future<void> scheduleHydrationReminders(HydrationSettings settings) async {
     await initialize();
-    await cancelAllReminders();
+    await _cancelScheduledReminders();
 
     if (!settings.reminderEnabled) return;
 
     // Garante que permissões de notificação sejam solicitadas ao agendar
     await requestPermissions();
 
-    final details = _getNotificationDetails(settings.reminderSoundStyle);
+    final l10n = _l10n();
+    final details = _getNotificationDetails(settings.reminderSoundStyle, l10n);
+    final body = _body(l10n, settings.trackingEnabled);
 
     // Verifica se alarmes exatos são permitidos pelo SO
     final exactAllowed = await canScheduleExactAlarms();
@@ -198,49 +139,35 @@ class HydrationNotificationService {
         : AndroidScheduleMode.inexactAllowWhileIdle;
 
     for (final hour in settings.scheduledHours) {
-      final notificationId = 1000 + hour;
-      final timeFormatted = '${hour.toString().padLeft(2, '0')}:00';
+      if (hour < 0 || hour > 23) continue;
+      final notificationId = reminderIdBase + hour;
+      final timeFormatted = formatReminderHour(hour);
 
       try {
-        final now = tz.TZDateTime.now(tz.local);
-        var scheduledDate = tz.TZDateTime(
-          tz.local,
-          now.year,
-          now.month,
-          now.day,
-          hour,
-          0,
-        );
-
-        if (scheduledDate.isBefore(now)) {
-          scheduledDate = scheduledDate.add(const Duration(days: 1));
-        }
+        final scheduledDate = AppNotificationCenter.nextInstanceOfHour(hour);
+        final title = l10n.notifWaterTitleAt(timeFormatted);
 
         try {
-          await _notificationsPlugin.zonedSchedule(
+          await _plugin.zonedSchedule(
             id: notificationId,
-            title: '💧 Hora de Beber Água ($timeFormatted)',
-            body: settings.trackingEnabled
-                ? 'Toque para registrar a quantidade de água consumida.'
-                : 'Mantenha seu corpo hidratado e saudável!',
+            title: title,
+            body: body,
             scheduledDate: scheduledDate,
             notificationDetails: details,
-            payload: 'open_water_modal',
+            payload: NotificationPayloads.openWaterModal,
             androidScheduleMode: scheduleMode,
             matchDateTimeComponents: DateTimeComponents.time,
           );
         } catch (e) {
           debugPrint('Aviso ao agendar com $scheduleMode: $e. Tentando modo inexato...');
           try {
-            await _notificationsPlugin.zonedSchedule(
+            await _plugin.zonedSchedule(
               id: notificationId,
-              title: '💧 Hora de Beber Água ($timeFormatted)',
-              body: settings.trackingEnabled
-                  ? 'Toque para registrar a quantidade de água consumida.'
-                  : 'Mantenha seu corpo hidratado e saudável!',
+              title: title,
+              body: body,
               scheduledDate: scheduledDate,
               notificationDetails: details,
-              payload: 'open_water_modal',
+              payload: NotificationPayloads.openWaterModal,
               androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
               matchDateTimeComponents: DateTimeComponents.time,
             );
@@ -260,36 +187,44 @@ class HydrationNotificationService {
     String? customBody,
   }) async {
     await initialize();
-    final details = _getNotificationDetails(style);
+    final l10n = _l10n();
+    final details = _getNotificationDetails(style, l10n);
 
-    await _notificationsPlugin.show(
-      id: 9999,
-      title: '💧 Hora de Beber Água',
-      body: customBody ??
-          (trackingEnabled
-              ? 'Toque para registrar a quantidade de água consumida.'
-              : 'Mantenha seu corpo hidratado e saudável!'),
+    await _plugin.show(
+      id: immediateReminderId,
+      title: l10n.notifWaterTitle,
+      body: customBody ?? _body(l10n, trackingEnabled),
       notificationDetails: details,
-      payload: 'open_water_modal',
+      payload: NotificationPayloads.openWaterModal,
     );
   }
 
-  Future<void> cancelAllReminders() async {
-    try {
-      await _notificationsPlugin.cancelAll();
-    } catch (e) {
-      debugPrint('Erro ao cancelar lembretes anteriores: $e');
+  Future<void> _cancelIds(Iterable<int> ids) async {
+    for (final id in ids) {
+      try {
+        await _plugin.cancel(id: id);
+      } catch (e) {
+        debugPrint('Erro ao cancelar lembrete de água $id: $e');
+      }
     }
   }
 
-  void dispose() {
-    _notificationPayloadController.close();
-  }
+  Future<void> _cancelScheduledReminders() => _cancelIds(scheduledReminderIds);
+
+  /// Cancels only this service's own notifications — never `cancelAll()`,
+  /// which would also wipe the daily check-in reminders.
+  Future<void> cancelAllReminders() => _cancelIds(ownedNotificationIds);
+
+  /// The tap dispatcher is shared (AppNotificationCenter); nothing to release.
+  void dispose() {}
 }
 
 final hydrationNotificationServiceProvider =
     Provider<HydrationNotificationService>((ref) {
-  final service = HydrationNotificationService();
-  ref.onDispose(() => service.dispose());
+  final service = HydrationNotificationService(
+    center: ref.watch(appNotificationCenterProvider),
+    localeResolver: () => ref.read(localeProvider),
+  );
+  ref.onDispose(service.dispose);
   return service;
 });

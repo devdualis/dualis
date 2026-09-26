@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/notifications/daily_checkin_notification_service.dart';
 import '../../../../core/security/secure_storage_service.dart';
+import '../../../../l10n/locale_provider.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../dashboard/data/triage_history_remote_data_source.dart';
 import '../../../dashboard/domain/models/triage_history_models.dart';
 import '../../../triage/data/symptom_classification_remote_data_source.dart';
@@ -34,8 +39,28 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
 
   @override
   TriggerCheckInState build() {
+    // Pending reminders carry the language they were scheduled in: re-arm
+    // them when the app language changes (only while someone is signed in).
+    ref.listen<Locale>(localeProvider, (previous, next) {
+      if (previous == next) return;
+      if (!ref.read(authControllerProvider).isAuthenticated) return;
+      _syncCheckInReminders();
+    });
     Future.microtask(() => loadTodayCheckIn());
     return const TriggerCheckInState();
+  }
+
+  /// Re-arms the check-in reminders for the current completion state. When
+  /// today is already done, today's remaining slots are skipped but the
+  /// following days keep their reminders — a bare cancel would silence every
+  /// future day until the app happened to be opened again.
+  void _syncCheckInReminders() {
+    try {
+      unawaited(ref
+          .read(dailyCheckinNotificationServiceProvider)
+          .scheduleDailyCheckInReminders(isCompletedToday: state.isCompletedToday)
+          .catchError((Object _) {}));
+    } catch (_) {}
   }
 
   String _getTodayDateString([DateTime? now]) {
@@ -260,7 +285,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
 
   void setEmotionalStatus(TriggerStatus status) {
     final modified = state.isCompletedToday && status != state.emotionalStatus;
-    final int? intensity = status.defaultIntensity;
+    final int intensity = status.defaultIntensity;
     state = state.copyWith(
       emotionalStatus: status,
       emotionalIntensity: intensity,
@@ -273,7 +298,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
 
   void setPhysicalStatus(TriggerStatus status) {
     final modified = state.isCompletedToday && status != state.physicalStatus;
-    final int? intensity = status.defaultIntensity;
+    final int intensity = status.defaultIntensity;
     state = state.copyWith(
       physicalStatus: status,
       physicalIntensity: intensity,
@@ -424,9 +449,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       textTouched: false,
     );
     _persistCurrentState();
-    try {
-      ref.read(dailyCheckinNotificationServiceProvider).cancelAllCheckInReminders();
-    } catch (_) {}
+    _syncCheckInReminders();
   }
 
   void completeStage({
@@ -461,9 +484,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       isModifiedAfterCompletion: false,
     );
     _persistCurrentState();
-    try {
-      ref.read(dailyCheckinNotificationServiceProvider).cancelAllCheckInReminders();
-    } catch (_) {}
+    _syncCheckInReminders();
   }
 
   void prepareForUpdate() {
@@ -486,9 +507,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       textTouched: false,
     );
     _persistCurrentState();
-    try {
-      ref.read(dailyCheckinNotificationServiceProvider).cancelAllCheckInReminders();
-    } catch (_) {}
+    _syncCheckInReminders();
 
     final isSymptomCheckIn = state.emotionalStatus != TriggerStatus.goodNormal ||
         state.physicalStatus != TriggerStatus.goodNormal ||

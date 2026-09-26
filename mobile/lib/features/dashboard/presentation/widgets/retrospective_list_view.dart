@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/clinical/clinical_intensity_tier.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/triage_history_models.dart';
@@ -19,9 +20,7 @@ class RetrospectiveListView extends StatelessWidget {
   });
 
   static Color getIntensityColor(int intensity) {
-    if (intensity <= 2) return const Color(0xFFFFA000);
-    if (intensity == 3) return const Color(0xFFF4511E);
-    return const Color(0xFFC62828);
+    return ClinicalIntensityTier.fromIntensity(intensity).color;
   }
 
   static String formatDisposition(String? disposition) {
@@ -47,10 +46,14 @@ class RetrospectiveListView extends StatelessWidget {
     'coluna_dorsal': 'Coluna Dorsal',
     'coluna_dor_dorsal': 'Coluna Dorsal',
     'coluna_dor_lombar': 'Coluna Lombar',
+    'membros_superiores': 'Membros Superiores',
     'membros_superiores_d': 'Membros Superiores (D)',
     'membros_superiores_e': 'Membros Superiores (E)',
+    'membros_inferiores': 'Membros Inferiores',
     'membros_inferiores_d': 'Membros Inferiores (D)',
     'membros_inferiores_e': 'Membros Inferiores (E)',
+    'muscular_geral_sistemico': 'Muscular Geral / Sistêmico',
+    'endocrino_metabolico': 'Endócrino / Metabólico',
     'neurologico': 'Neurológico',
     'geniturinario_pelvico': 'Geniturinário / Pélvico',
     'dermatologico': 'Dermatológico',

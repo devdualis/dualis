@@ -7,11 +7,11 @@ import 'package:go_router/go_router.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:dualis_mobile/features/home/presentation/widgets/admob_banner_container.dart';
-import 'package:dualis_mobile/features/home/presentation/widgets/wellness_confirmation_dialog.dart';
 import 'package:dualis_mobile/features/home/domain/trigger_checkin_state.dart';
 import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
 import 'package:dualis_mobile/features/dashboard/data/triage_history_remote_data_source.dart';
 import 'package:dualis_mobile/features/dashboard/domain/models/triage_history_models.dart';
+import 'package:dualis_mobile/features/home/presentation/widgets/dual_axis_trigger_card.dart';
 import 'package:dualis_mobile/features/triage/domain/triage_vertical.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
@@ -66,10 +66,10 @@ Widget createTriggerCheckInTestApp({
 }
 
 void main() {
-  group('Screen 3: Unified Dual-Axis Trigger Check-in (RF-001 / TRG-01) Widget Tests', () {
-    testWidgets('1. Displays dual-axis question and starts with CTA disabled',
+  group('Two-Stage Trigger Check-in Widget & Controller Tests', () {
+    testWidgets('1. Displays two stages (Psicoemocional and Avaliação Física) with direct triage start buttons',
         (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1200, 2400);
+      tester.view.physicalSize = const Size(1200, 3000);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
@@ -77,58 +77,19 @@ void main() {
       await tester.pumpWidget(createTriggerCheckInTestApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Como você está se sentindo hoje?'), findsOneWidget);
-      expect(find.text('1. Eixo Psico-Emocional'), findsOneWidget);
-      expect(find.text('2. Eixo Avaliação Física'), findsOneWidget);
+      expect(find.text('Check-in Diário em 2 Etapas'), findsOneWidget);
+      expect(find.text('Psicoemocional'), findsOneWidget);
+      expect(find.text('Avaliação Física'), findsOneWidget);
 
-      final ctaFinder = find.byKey(const Key('startTriageButton'));
-      expect(ctaFinder, findsOneWidget);
-      expect(find.text('Selecione os Dois Eixos'), findsOneWidget);
-
-      final button = tester.widget<FilledButton>(find.descendant(
-        of: ctaFinder,
-        matching: find.byType(FilledButton),
-      ));
-      expect(button.onPressed, isNull);
+      expect(find.byKey(const Key('start_psicoemocional_triage_button')), findsOneWidget);
+      expect(find.byKey(const Key('start_fisica_triage_button')), findsOneWidget);
+      expect(find.text('Iniciar Psicoemocional'), findsOneWidget);
+      expect(find.text('Iniciar Avaliação Física'), findsOneWidget);
     });
 
-    testWidgets('2. Case 1: Both [Bem / Normal] shows immediate Wellness Confirmation Dialog',
+    testWidgets('2. Tapping Iniciar Psicoemocional navigates to Triage Screen with psicoEmocional vertical',
         (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1200, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-
-      await tester.pumpWidget(createTriggerCheckInTestApp());
-      await tester.pumpAndSettle();
-
-      // Tap Bem/Normal on emotional axis
-      await tester.tap(find.byKey(const Key('emotional_goodNormal')));
-      await tester.pumpAndSettle();
-
-      // Tap Bem/Normal on physical axis
-      await tester.tap(find.byKey(const Key('physical_goodNormal')));
-      await tester.pumpAndSettle();
-
-      // CTA is now active
-      expect(find.text('Confirmar Check-in'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('startTriageButton')));
-      await tester.pumpAndSettle();
-
-      // Dialog opens
-      expect(find.byType(WellnessConfirmationDialog), findsOneWidget);
-      expect(find.text('Tudo Bem por Aqui!'), findsOneWidget);
-
-      // Dismiss dialog
-      await tester.tap(find.text('Concluir Check-in'));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(WellnessConfirmationDialog), findsNothing);
-    });
-
-    testWidgets('3. Case 2: Only Psico-Emocional distressed routes to emotional triage',
-        (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1200, 2400);
+      tester.view.physicalSize = const Size(1200, 3000);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
@@ -140,24 +101,16 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Emotional: Mais ou menos
-      await tester.tap(find.byKey(const Key('emotional_soSo')));
-      await tester.pumpAndSettle();
-
-      // Physical: Bem / Normal
-      await tester.tap(find.byKey(const Key('physical_goodNormal')));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(const Key('startTriageButton')));
+      await tester.tap(find.byKey(const Key('start_psicoemocional_triage_button')));
       await tester.pumpAndSettle();
 
       expect(find.text('Triage Screen: psicoEmocional'), findsOneWidget);
       expect(navigatedVertical, equals(TriageVertical.psicoEmocional));
     });
 
-    testWidgets('4. Case 3: Only Física distressed routes to physical triage',
+    testWidgets('3. Tapping Iniciar Avaliação Física navigates to Triage Screen with fisica vertical',
         (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1200, 2400);
+      tester.view.physicalSize = const Size(1200, 3000);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
@@ -169,75 +122,98 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Emotional: Bem / Normal
-      await tester.tap(find.byKey(const Key('emotional_goodNormal')));
-      await tester.pumpAndSettle();
-
-      // Physical: Mal / Ruim
-      await tester.tap(find.byKey(const Key('physical_badSick')));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(const Key('startTriageButton')));
+      await tester.tap(find.byKey(const Key('start_fisica_triage_button')));
       await tester.pumpAndSettle();
 
       expect(find.text('Triage Screen: fisica'), findsOneWidget);
       expect(navigatedVertical, equals(TriageVertical.fisica));
     });
 
-    testWidgets('5. Case 4: BOTH axes distressed enforces Organic Primacy (Physical first)',
+    testWidgets('4. Completing emotional stage displays completed summary badge and keeps physical stage available',
         (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1200, 2400);
+      tester.view.physicalSize = const Size(1200, 3000);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      TriageVertical? navigatedVertical;
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
 
-      await tester.pumpWidget(createTriggerCheckInTestApp(
-        onTriageNavigated: (v) => navigatedVertical = v,
-      ));
+      final notifier = container.read(triggerCheckInProvider.notifier);
+      notifier.completeStage(
+        vertical: TriageVertical.psicoEmocional,
+        summary: 'Bem / Ótimo',
+        narrative: 'Hoje foi um dia tranquilo e produtivo',
+      );
+
+      await tester.pumpWidget(createTriggerCheckInTestApp(container: container));
       await tester.pumpAndSettle();
 
-      // Emotional: Mal / Ruim
-      await tester.tap(find.byKey(const Key('emotional_badSick')));
-      await tester.pumpAndSettle();
+      // Emotional stage is marked completed
+      expect(find.byKey(const Key('psicoemocional_completed_card')), findsOneWidget);
+      expect(find.text('Bem / Ótimo'), findsWidgets);
+      expect(find.byKey(const Key('retake_psicoemocional_button')), findsOneWidget);
 
-      // Physical: Mais ou menos
-      await tester.tap(find.byKey(const Key('physical_soSo')));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(const Key('startTriageButton')));
-      await tester.pumpAndSettle();
-
-      // Must enforce Organic Primacy: Physical starts first!
-      expect(find.text('Triage Screen: fisica'), findsOneWidget);
-      expect(navigatedVertical, equals(TriageVertical.fisica));
+      // Physical stage is still pending
+      expect(find.text('Avaliação Física'), findsOneWidget);
+      expect(find.byKey(const Key('start_fisica_triage_button')), findsOneWidget);
     });
 
-    testWidgets('6. Natural language input and suggestion chips update text field',
+    testWidgets('5. Completing physical stage displays completed summary badge',
         (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1200, 2400);
+      tester.view.physicalSize = const Size(1200, 3000);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(createTriggerCheckInTestApp());
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(triggerCheckInProvider.notifier);
+      notifier.completeStage(
+        vertical: TriageVertical.fisica,
+        summary: 'Mais ou menos',
+        narrative: 'Leve desconforto lombar',
+      );
+
+      await tester.pumpWidget(createTriggerCheckInTestApp(container: container));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Dor de cabeça'));
+      // Physical stage is marked completed
+      expect(find.byKey(const Key('fisica_completed_card')), findsOneWidget);
+      expect(find.text('Mais ou menos'), findsWidgets);
+      expect(find.byKey(const Key('retake_fisica_button')), findsOneWidget);
+
+      // Emotional stage is still pending
+      expect(find.byKey(const Key('start_psicoemocional_triage_button')), findsOneWidget);
+    });
+
+    testWidgets('6. Stage with narrative displays quote block',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1200, 3000);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(triggerCheckInProvider.notifier);
+      notifier.completeStage(
+        vertical: TriageVertical.psicoEmocional,
+        summary: 'Bem / Ótimo',
+        narrative: 'Sensação de paz e clareza mental',
+      );
+
+      await tester.pumpWidget(createTriggerCheckInTestApp(container: container));
       await tester.pumpAndSettle();
 
-      expect(find.text('Dor de cabeça'), findsWidgets);
-
-      await tester.tap(find.text('Cansaço excessivo'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Dor de cabeça, Cansaço excessivo'), findsOneWidget);
+      expect(find.text('“Sensação de paz e clareza mental”'), findsOneWidget);
     });
 
     testWidgets('7. Renders privacy-safe local AdMob banner container (AD-01)',
         (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1200, 2400);
+      tester.view.physicalSize = const Size(1200, 3000);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
@@ -250,57 +226,61 @@ void main() {
       expect(find.text('AD'), findsOneWidget);
     });
 
-    testWidgets('8. Wellness confirmation remembers status, shows completed banner and updated button text',
+    testWidgets('8. Both stages completed shows dailyCheckInCompletedBanner',
         (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1200, 2400);
+      tester.view.physicalSize = const Size(1200, 3000);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(createTriggerCheckInTestApp());
-      await tester.pumpAndSettle();
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
 
-      await tester.tap(find.byKey(const Key('emotional_goodNormal')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('physical_goodNormal')));
-      await tester.pumpAndSettle();
+      final notifier = container.read(triggerCheckInProvider.notifier);
+      notifier.completeStage(
+        vertical: TriageVertical.psicoEmocional,
+        summary: 'Bem / Ótimo',
+      );
+      notifier.completeStage(
+        vertical: TriageVertical.fisica,
+        summary: 'Normal / Bom',
+      );
 
-      await tester.tap(find.byKey(const Key('startTriageButton')));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Concluir Check-in'));
+      await tester.pumpWidget(createTriggerCheckInTestApp(container: container));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('dailyCheckInCompletedBanner')), findsOneWidget);
-      expect(find.text('Check-in de Hoje Concluído'), findsOneWidget);
-      expect(find.byKey(const Key('startTriageButton')), findsOneWidget);
+      expect(find.text('Bem / Ótimo'), findsWidgets);
+      expect(find.text('Normal / Bom'), findsWidgets);
     });
 
-    testWidgets('9. Modifying option after completion changes button to Atualizar Check-in de Hoje',
+    testWidgets('9. Tapping Refazer resets that stage and navigates to triage',
         (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1200, 2400);
+      tester.view.physicalSize = const Size(1200, 3000);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(createTriggerCheckInTestApp());
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(triggerCheckInProvider.notifier);
+      notifier.completeStage(
+        vertical: TriageVertical.psicoEmocional,
+        summary: 'Bem / Ótimo',
+      );
+
+      await tester.pumpWidget(createTriggerCheckInTestApp(container: container));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('emotional_goodNormal')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('physical_goodNormal')));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(const Key('startTriageButton')));
+      expect(find.text('Bem / Ótimo'), findsWidgets);
+      final retakeBtn = find.byKey(const Key('retake_psicoemocional_button'));
+      await tester.ensureVisible(retakeBtn);
+      await tester.tap(retakeBtn);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Concluir Check-in'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(const Key('physical_soSo')));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Atualizar Check-in de Hoje'), findsOneWidget);
+      // Upon tapping retake, resetStage is called and it navigates to triage
+      expect(find.text('Triage Screen: psicoEmocional'), findsOneWidget);
     });
 
     testWidgets('10. Resets values to blank when calendar date advances past 24:00h',
@@ -314,7 +294,6 @@ void main() {
       notifier.markCompletedToday();
 
       expect(container.read(triggerCheckInProvider).isCompletedToday, isTrue);
-      expect(container.read(triggerCheckInProvider).isReadyToSubmit, isTrue);
 
       final nextDay = DateTime.now().add(const Duration(days: 1));
       notifier.checkAndResetIfNewDay(nextDay);
@@ -322,46 +301,8 @@ void main() {
       expect(container.read(triggerCheckInProvider).emotionalStatus, isNull);
       expect(container.read(triggerCheckInProvider).physicalStatus, isNull);
       expect(container.read(triggerCheckInProvider).isCompletedToday, isFalse);
-      expect(container.read(triggerCheckInProvider).isReadyToSubmit, isFalse);
-    });
-
-    testWidgets(
-        '12. Editing only the emotional axis after completion routes to emotional-only, '
-        'even when physical was already distressed', (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1200, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-
-      // Simulate an already-completed check-in from earlier today: physical
-      // axis is "medium" (soSo) and the check-in was finished/synced, so
-      // isCompletedToday is true and nothing is "touched" yet this session.
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      final notifier = container.read(triggerCheckInProvider.notifier);
-      notifier.setEmotionalStatus(TriggerStatus.goodNormal);
-      notifier.setPhysicalStatus(TriggerStatus.soSo);
-      notifier.markCompletedToday();
-
-      TriageVertical? navigatedVertical;
-
-      await tester.pumpWidget(createTriggerCheckInTestApp(
-        container: container,
-        onTriageNavigated: (v) => navigatedVertical = v,
-      ));
-      await tester.pumpAndSettle();
-
-      // Later, only the emotional axis is changed — physical stays "soSo"
-      // and untouched.
-      await tester.tap(find.byKey(const Key('emotional_badSick')));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(const Key('startTriageButton')));
-      await tester.pumpAndSettle();
-
-      // Must route to the emotional axis only, not the combined/dual flow.
-      expect(find.text('Triage Screen: psicoEmocional'), findsOneWidget);
-      expect(navigatedVertical, equals(TriageVertical.psicoEmocional));
+      expect(container.read(triggerCheckInProvider).isEmotionalCompleted, isFalse);
+      expect(container.read(triggerCheckInProvider).isPhysicalCompleted, isFalse);
     });
 
     test('11. Restores daily check-in status from remote history on rebuild/load', () async {
@@ -400,7 +341,7 @@ void main() {
       expect(state.completedAt, isNotNull);
     });
 
-    test('13. Remote history with older daily_checkin and newer triage prioritizes the triage (Bug Regression)', () async {
+    test('12. Remote history with older daily_checkin and newer triage prioritizes the triage (Bug Regression)', () async {
       final earlier = DateTime.now().subtract(const Duration(hours: 2));
       final later = DateTime.now();
 
@@ -449,11 +390,108 @@ void main() {
 
       final state = container.read(triggerCheckInProvider);
       expect(state.isCompletedToday, isTrue);
-      // It must be derived from the newer triage (somatica / intensity 3), NOT goodNormal from the old checkin!
       expect(state.emotionalStatus, TriggerStatus.soSo);
       expect(state.naturalLanguageText, 'aperto no peito e garganta');
     });
+
+    testWidgets('13. Bug Regression: Narrative box does not render when narrative is "5" or empty', (tester) async {
+      // 1. Verify TriggerCheckInState.fromJson sanitizes "5"
+      final jsonWithDirty5 = {
+        'isCompletedToday': true,
+        'isPhysicalCompleted': true,
+        'physicalStatus': 'soSo',
+        'physicalSummary': 'Avaliação Física Registrada',
+        'physicalNarrative': '5',
+        'naturalLanguageText': '5',
+      };
+      final sanitizedState = TriggerCheckInState.fromJson(jsonWithDirty5);
+      expect(sanitizedState.physicalNarrative, isNull);
+      expect(sanitizedState.naturalLanguageText, isEmpty);
+
+      // 2. Verify DualAxisTriggerCard does not render narrative container if physicalNarrative is '5'
+      final containerDirty = ProviderContainer(
+        overrides: [
+          triggerCheckInProvider.overrideWith(
+            () => _FakeTriggerCheckInNotifier(
+              const TriggerCheckInState(
+                isCompletedToday: true,
+                isPhysicalCompleted: true,
+                physicalStatus: TriggerStatus.soSo,
+                physicalSummary: 'Avaliação Física Registrada',
+                physicalNarrative: '5',
+              ),
+            ),
+          ),
+        ],
+      );
+      addTearDown(containerDirty.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: containerDirty,
+          child: const MaterialApp(
+            locale: Locale('pt', 'BR'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: DualAxisTriggerCard(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('“5”'), findsNothing);
+      expect(find.text('5'), findsNothing);
+
+      // 3. Verify that if valid narrative exists, it DOES render
+      final containerValid = ProviderContainer(
+        overrides: [
+          triggerCheckInProvider.overrideWith(
+            () => _FakeTriggerCheckInNotifier(
+              const TriggerCheckInState(
+                isCompletedToday: true,
+                isPhysicalCompleted: true,
+                physicalStatus: TriggerStatus.soSo,
+                physicalSummary: 'Avaliação Física Registrada',
+                physicalNarrative: 'Dor de cabeça ao acordar',
+              ),
+            ),
+          ),
+        ],
+      );
+      addTearDown(containerValid.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: containerValid,
+          child: const MaterialApp(
+            locale: Locale('pt', 'BR'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: DualAxisTriggerCard(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('“Dor de cabeça ao acordar”'), findsOneWidget);
+    });
   });
+}
+
+class _FakeTriggerCheckInNotifier extends TriggerCheckInNotifier {
+  final TriggerCheckInState _initial;
+  _FakeTriggerCheckInNotifier(this._initial);
+
+  @override
+  TriggerCheckInState build() => _initial;
 }
 
 class _FakeHistoryDataSource extends TriageHistoryRemoteDataSource {

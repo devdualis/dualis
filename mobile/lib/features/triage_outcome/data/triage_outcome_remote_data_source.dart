@@ -56,7 +56,7 @@ class TriageOutcomeRemoteDataSource {
   }) {
     final isZeroIndexed = answers.containsKey(0);
     final step1 = (isZeroIndexed ? answers[0] : answers[1]) ?? '';
-    final step3 = (isZeroIndexed ? answers[2] : answers[3]) ?? '2';
+    final step3 = answers[3] ?? (isZeroIndexed ? answers[2] : answers[3]) ?? '2';
 
     int score = 2;
     if (vertical == 'physical') {

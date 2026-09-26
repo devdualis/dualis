@@ -4,7 +4,7 @@ import 'package:dualis_mobile/features/home/presentation/widgets/dualis_bottom_n
 
 void main() {
   group('DualisBottomNavBar Widget Tests', () {
-    testWidgets('Renders all 3 navigation destinations correctly',
+    testWidgets('Renders all 4 navigation destinations correctly',
         (WidgetTester tester) async {
       int selectedIndex = 0;
 
@@ -24,10 +24,13 @@ void main() {
       expect(find.byKey(const Key('nav_destination_home')), findsOneWidget);
       expect(find.byKey(const Key('nav_destination_today_outcome')), findsOneWidget);
       expect(find.byKey(const Key('nav_destination_history')), findsOneWidget);
+      expect(find.byKey(const Key('nav_destination_hydration')), findsOneWidget);
 
-      expect(find.text('Início'), findsOneWidget);
-      expect(find.text('Resultado do Dia'), findsOneWidget);
-      expect(find.text('Histórico & Mapa'), findsOneWidget);
+      // Verify text labels are hidden for clean icon-only bottom bar
+      expect(find.text('Início'), findsNothing);
+      expect(find.text('Resultado do Dia'), findsNothing);
+      expect(find.text('Histórico & Mapa'), findsNothing);
+      expect(find.text('Água'), findsNothing);
     });
 
     testWidgets('Tapping destination triggers onTap with proper index',
@@ -56,6 +59,11 @@ void main() {
       await tester.tap(find.byKey(const Key('nav_destination_history')));
       await tester.pumpAndSettle();
       expect(tappedIndex, equals(2));
+
+      // Tap 'Água'
+      await tester.tap(find.byKey(const Key('nav_destination_hydration')));
+      await tester.pumpAndSettle();
+      expect(tappedIndex, equals(3));
 
       // Tap 'Início'
       await tester.tap(find.byKey(const Key('nav_destination_home')));

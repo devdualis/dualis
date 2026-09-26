@@ -18,11 +18,11 @@ void main() {
       expect(questions[1].options.length, equals(3));
       expect(questions[1].isPreview, isFalse);
 
-      expect(questions[2].options.length, equals(3));
-      expect(questions[2].options.every((o) => o.intensityValue != null), isTrue);
+      expect(questions[2].options.length, equals(4));
+      expect(questions[2].isPreview, isFalse);
 
-      expect(questions[3].options.length, equals(4));
-      expect(questions[3].isPreview, isFalse);
+      expect(questions[3].options.length, equals(3));
+      expect(questions[3].options.every((o) => o.intensityValue != null), isTrue);
 
       expect(questions[4].isPreview, isTrue);
       expect(questions[4].options, isEmpty);
@@ -41,9 +41,9 @@ void main() {
 
       expect(questions[1].options.length, equals(3));
 
-      expect(questions[2].isNumericScale, isTrue);
+      expect(questions[2].options.length, equals(3));
 
-      expect(questions[3].options.length, equals(3));
+      expect(questions[3].isNumericScale, isTrue);
 
       expect(questions[4].isPreview, isTrue);
       expect(questions[4].options, isEmpty);
@@ -83,33 +83,33 @@ void main() {
         );
 
         expect(questions.length, equals(5));
-        expect(questions[3].stepIndex, equals(3));
+        expect(questions[2].stepIndex, equals(2));
         expect(
-          questions[3].questionKey,
+          questions[2].questionKey,
           equals(entry.value),
           reason: 'Failed for system ${entry.key}',
         );
-        expect(questions[3].options.length, greaterThanOrEqualTo(3));
-        expect(questions[3].options.every((o) => o.key.isNotEmpty), isTrue);
-        expect(questions[3].options.every((o) => o.labelKey.isNotEmpty), isTrue);
+        expect(questions[2].options.length, greaterThanOrEqualTo(3));
+        expect(questions[2].options.every((o) => o.key.isNotEmpty), isTrue);
+        expect(questions[2].options.every((o) => o.labelKey.isNotEmpty), isTrue);
       }
     });
 
     test('forVertical supports clinical aliases/synonyms for physical systems', () {
       expect(
-        TriageQuestionBank.forVertical(TriageVertical.fisica, systemKey: 'gastrointestinal')[3].questionKey,
+        TriageQuestionBank.forVertical(TriageVertical.fisica, systemKey: 'gastrointestinal')[2].questionKey,
         equals('triageQ4Gastrointestinal'),
       );
       expect(
-        TriageQuestionBank.forVertical(TriageVertical.fisica, systemKey: 'respiratory')[3].questionKey,
+        TriageQuestionBank.forVertical(TriageVertical.fisica, systemKey: 'respiratory')[2].questionKey,
         equals('triageQ4Respiratorio'),
       );
       expect(
-        TriageQuestionBank.forVertical(TriageVertical.fisica, systemKey: 'head_neck')[3].questionKey,
+        TriageQuestionBank.forVertical(TriageVertical.fisica, systemKey: 'head_neck')[2].questionKey,
         equals('triageQ4CabecaPescoco'),
       );
       expect(
-        TriageQuestionBank.forVertical(TriageVertical.fisica, systemKey: 'dermatological')[3].questionKey,
+        TriageQuestionBank.forVertical(TriageVertical.fisica, systemKey: 'dermatological')[2].questionKey,
         equals('triageQ4Dermatological'),
       );
     });
@@ -132,49 +132,49 @@ void main() {
         );
 
         expect(questions.length, equals(5));
-        expect(questions[3].stepIndex, equals(3));
+        expect(questions[2].stepIndex, equals(2));
         expect(
-          questions[3].questionKey,
+          questions[2].questionKey,
           equals(entry.value),
           reason: 'Failed for emotional dimension ${entry.key}',
         );
-        expect(questions[3].options.length, greaterThanOrEqualTo(4));
-        expect(questions[3].options.every((o) => o.key.isNotEmpty), isTrue);
-        expect(questions[3].options.every((o) => o.labelKey.isNotEmpty), isTrue);
+        expect(questions[2].options.length, greaterThanOrEqualTo(4));
+        expect(questions[2].options.every((o) => o.key.isNotEmpty), isTrue);
+        expect(questions[2].options.every((o) => o.labelKey.isNotEmpty), isTrue);
       }
     });
 
     test('forVertical supports clinical aliases/synonyms for emotional dimensions', () {
       expect(
-        TriageQuestionBank.forVertical(TriageVertical.psicoEmocional, systemKey: 'ansiedade')[3].questionKey,
+        TriageQuestionBank.forVertical(TriageVertical.psicoEmocional, systemKey: 'ansiedade')[2].questionKey,
         equals('triageQ4Ansiedade'),
       );
       expect(
-        TriageQuestionBank.forVertical(TriageVertical.psicoEmocional, systemKey: 'anxious_agitation')[3].questionKey,
+        TriageQuestionBank.forVertical(TriageVertical.psicoEmocional, systemKey: 'anxious_agitation')[2].questionKey,
         equals('triageQ4Ansiedade'),
       );
       expect(
-        TriageQuestionBank.forVertical(TriageVertical.psicoEmocional, systemKey: 'tristeza_desanimo')[3].questionKey,
+        TriageQuestionBank.forVertical(TriageVertical.psicoEmocional, systemKey: 'tristeza_desanimo')[2].questionKey,
         equals('triageQ4Depressao'),
       );
       expect(
-        TriageQuestionBank.forVertical(TriageVertical.psicoEmocional, systemKey: 'burnout')[3].questionKey,
+        TriageQuestionBank.forVertical(TriageVertical.psicoEmocional, systemKey: 'burnout')[2].questionKey,
         equals('triageQ4EstresseBurnout'),
       );
       expect(
-        TriageQuestionBank.forVertical(TriageVertical.psicoEmocional, systemKey: 'psychosomatic')[3].questionKey,
+        TriageQuestionBank.forVertical(TriageVertical.psicoEmocional, systemKey: 'psychosomatic')[2].questionKey,
         equals('triageQ4Somatica'),
       );
       expect(
-        TriageQuestionBank.forVertical(TriageVertical.psicoEmocional, systemKey: 'sono_repouso')[3].questionKey,
+        TriageQuestionBank.forVertical(TriageVertical.psicoEmocional, systemKey: 'sono_repouso')[2].questionKey,
         equals('triageQ4Sono'),
       );
       expect(
-        TriageQuestionBank.forVertical(TriageVertical.psicoEmocional, systemKey: 'foco')[3].questionKey,
+        TriageQuestionBank.forVertical(TriageVertical.psicoEmocional, systemKey: 'foco')[2].questionKey,
         equals('triageQ4CognitivaFoco'),
       );
       expect(
-        TriageQuestionBank.forVertical(TriageVertical.psicoEmocional, systemKey: 'autoimagem')[3].questionKey,
+        TriageQuestionBank.forVertical(TriageVertical.psicoEmocional, systemKey: 'autoimagem')[2].questionKey,
         equals('triageQ4Autoestima'),
       );
     });

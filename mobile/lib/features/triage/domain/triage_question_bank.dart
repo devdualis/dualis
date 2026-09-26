@@ -60,6 +60,19 @@ class TriageQuestionBank {
     ),
     TriageQuestion(
       stepIndex: 2,
+      questionKey: 'triageQ4Emotional',
+      options: [
+        TriageOption(key: 'trabalho_estudos', labelKey: 'triageOptTrabalho'),
+        TriageOption(
+          key: 'familia_relacionamentos',
+          labelKey: 'triageOptFamilia',
+        ),
+        TriageOption(key: 'noite_ruim_sono', labelKey: 'triageOptNoiteRuim'),
+        TriageOption(key: 'nao_sei_dizer', labelKey: 'triageOptNaoSei'),
+      ],
+    ),
+    TriageQuestion(
+      stepIndex: 3,
       questionKey: 'triageQ3Emotional',
       options: [
         TriageOption(
@@ -77,19 +90,6 @@ class TriageQuestionBank {
           labelKey: 'triageOptMuitoForte',
           intensityValue: 4,
         ),
-      ],
-    ),
-    TriageQuestion(
-      stepIndex: 3,
-      questionKey: 'triageQ4Emotional',
-      options: [
-        TriageOption(key: 'trabalho_estudos', labelKey: 'triageOptTrabalho'),
-        TriageOption(
-          key: 'familia_relacionamentos',
-          labelKey: 'triageOptFamilia',
-        ),
-        TriageOption(key: 'noite_ruim_sono', labelKey: 'triageOptNoiteRuim'),
-        TriageOption(key: 'nao_sei_dizer', labelKey: 'triageOptNaoSei'),
       ],
     ),
     TriageQuestion(
@@ -181,12 +181,6 @@ class TriageQuestionBank {
     ),
     TriageQuestion(
       stepIndex: 2,
-      questionKey: 'triageQ3Physical',
-      options: [],
-      isNumericScale: true,
-    ),
-    TriageQuestion(
-      stepIndex: 3,
       questionKey: 'triageQ4Physical',
       options: [
         TriageOption(
@@ -201,6 +195,12 @@ class TriageQuestionBank {
       ],
     ),
     TriageQuestion(
+      stepIndex: 3,
+      questionKey: 'triageQ3Physical',
+      options: [],
+      isNumericScale: true,
+    ),
+    TriageQuestion(
       stepIndex: 4,
       questionKey: 'triagePreviewPhysical',
       options: [],
@@ -209,7 +209,7 @@ class TriageQuestionBank {
   ];
 
   static const TriageQuestion _fisicaStep3CabecaPescoco = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4CabecaPescoco',
     options: [
       TriageOption(
@@ -236,7 +236,7 @@ class TriageQuestionBank {
   );
 
   static const TriageQuestion _fisicaStep3CardiovascularTorax = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4CardiovascularTorax',
     options: [
       TriageOption(
@@ -259,7 +259,7 @@ class TriageQuestionBank {
   );
 
   static const TriageQuestion _fisicaStep3Respiratorio = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4Respiratorio',
     options: [
       TriageOption(
@@ -282,7 +282,7 @@ class TriageQuestionBank {
   );
 
   static const TriageQuestion _fisicaStep3Gastrointestinal = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4Gastrointestinal',
     options: [
       TriageOption(
@@ -305,7 +305,7 @@ class TriageQuestionBank {
   );
 
   static const TriageQuestion _fisicaStep3ColunaDorDorsal = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4ColunaDorDorsal',
     options: [
       TriageOption(
@@ -328,53 +328,117 @@ class TriageQuestionBank {
   );
 
   static const TriageQuestion _fisicaStep3MembrosSuperiores = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4MembrosSuperiores',
     options: [
       TriageOption(
-        key: 'sim_movimento_repetitivo',
-        labelKey: 'triageOptSimMovimentoRepetitivo',
+        key: 'ombro_direito',
+        labelKey: 'triageOptOmbroDireito',
       ),
       TriageOption(
-        key: 'sim_treino_sobrecarga',
-        labelKey: 'triageOptSimTreinoSobrecarga',
+        key: 'ombro_esquerdo',
+        labelKey: 'triageOptOmbroEsquerdo',
       ),
       TriageOption(
-        key: 'sim_trauma_pancada',
-        labelKey: 'triageOptSimTraumaPancada',
+        key: 'braco_direito',
+        labelKey: 'triageOptBracoDireito',
       ),
       TriageOption(
-        key: 'nao_comecou_do_nada',
-        labelKey: 'triageOptNaoComecouNada',
+        key: 'braco_esquerdo',
+        labelKey: 'triageOptBracoEsquerdo',
+      ),
+      TriageOption(
+        key: 'cotovelo_direito',
+        labelKey: 'triageOptCotoveloDireito',
+      ),
+      TriageOption(
+        key: 'cotovelo_esquerdo',
+        labelKey: 'triageOptCotoveloEsquerdo',
+      ),
+      TriageOption(
+        key: 'antebraco_direito',
+        labelKey: 'triageOptAntebracoDireito',
+      ),
+      TriageOption(
+        key: 'antebraco_esquerdo',
+        labelKey: 'triageOptAntebracoEsquerdo',
+      ),
+      TriageOption(
+        key: 'punho_direito',
+        labelKey: 'triageOptPunhoDireito',
+      ),
+      TriageOption(
+        key: 'punho_esquerdo',
+        labelKey: 'triageOptPunhoEsquerdo',
+      ),
+      TriageOption(
+        key: 'mao_dedos_direito',
+        labelKey: 'triageOptMaoDedosDireito',
+      ),
+      TriageOption(
+        key: 'mao_dedos_esquerdo',
+        labelKey: 'triageOptMaoDedosEsquerdo',
+      ),
+      TriageOption(
+        key: 'membros_superiores_bilateral',
+        labelKey: 'triageOptMembrosSuperioresBilateral',
       ),
     ],
   );
 
   static const TriageQuestion _fisicaStep3MembrosInferiores = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4MembrosInferiores',
     options: [
       TriageOption(
-        key: 'sim_caminhada_corrida',
-        labelKey: 'triageOptSimCaminhadaCorrida',
+        key: 'coxa_quadril_direito',
+        labelKey: 'triageOptCoxaQuadrilDireito',
       ),
       TriageOption(
-        key: 'sim_tempo_em_pe_sentado',
-        labelKey: 'triageOptSimTempoEmPeSentado',
+        key: 'coxa_quadril_esquerdo',
+        labelKey: 'triageOptCoxaQuadrilEsquerdo',
       ),
       TriageOption(
-        key: 'sim_torcao_tropeco',
-        labelKey: 'triageOptSimTorcaoTropeco',
+        key: 'joelho_direito',
+        labelKey: 'triageOptJoelhoDireito',
       ),
       TriageOption(
-        key: 'nao_comecou_do_nada',
-        labelKey: 'triageOptNaoComecouNada',
+        key: 'joelho_esquerdo',
+        labelKey: 'triageOptJoelhoEsquerdo',
+      ),
+      TriageOption(
+        key: 'canela_panturrilha_direito',
+        labelKey: 'triageOptCanelaPanturrilhaDireito',
+      ),
+      TriageOption(
+        key: 'canela_panturrilha_esquerdo',
+        labelKey: 'triageOptCanelaPanturrilhaEsquerdo',
+      ),
+      TriageOption(
+        key: 'tornozelo_direito',
+        labelKey: 'triageOptTornozeloDireito',
+      ),
+      TriageOption(
+        key: 'tornozelo_esquerdo',
+        labelKey: 'triageOptTornozeloEsquerdo',
+      ),
+      TriageOption(
+        key: 'pe_dedos_direito',
+        labelKey: 'triageOptPeDedosDireito',
+      ),
+      TriageOption(
+        key: 'pe_dedos_esquerdo',
+        labelKey: 'triageOptPeDedosEsquerdo',
+      ),
+      TriageOption(
+        key: 'membros_inferiores_bilateral',
+        labelKey: 'triageOptMembrosInferioresBilateral',
       ),
     ],
   );
 
   static const TriageQuestion _fisicaStep3Neurologico = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4Neurologico',
     options: [
       TriageOption(
@@ -401,7 +465,7 @@ class TriageQuestionBank {
   );
 
   static const TriageQuestion _fisicaStep3Geniturinario = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4Geniturinario',
     options: [
       TriageOption(
@@ -428,7 +492,7 @@ class TriageQuestionBank {
   );
 
   static const TriageQuestion _fisicaStep3Dermatologica = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4Dermatological',
     options: [
       TriageOption(
@@ -451,7 +515,7 @@ class TriageQuestionBank {
   );
 
   static const TriageQuestion _fisicaStep3MuscularGeral = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4MuscularGeral',
     options: [
       TriageOption(
@@ -478,7 +542,7 @@ class TriageQuestionBank {
   );
 
   static const TriageQuestion _fisicaStep3EndocrinoMetabolico = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4EndocrinoMetabolico',
     options: [
       TriageOption(
@@ -505,7 +569,7 @@ class TriageQuestionBank {
   );
 
   static const TriageQuestion _emocionalStep3Ansiedade = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4Ansiedade',
     options: [
       TriageOption(
@@ -532,7 +596,7 @@ class TriageQuestionBank {
   );
 
   static const TriageQuestion _emocionalStep3Depressao = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4Depressao',
     options: [
       TriageOption(
@@ -559,7 +623,7 @@ class TriageQuestionBank {
   );
 
   static const TriageQuestion _emocionalStep3EstresseBurnout = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4EstresseBurnout',
     options: [
       TriageOption(
@@ -586,7 +650,7 @@ class TriageQuestionBank {
   );
 
   static const TriageQuestion _emocionalStep3Somatica = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4Somatica',
     options: [
       TriageOption(
@@ -613,7 +677,7 @@ class TriageQuestionBank {
   );
 
   static const TriageQuestion _emocionalStep3Sono = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4Sono',
     options: [
       TriageOption(
@@ -640,7 +704,7 @@ class TriageQuestionBank {
   );
 
   static const TriageQuestion _emocionalStep3CognitivaFoco = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4CognitivaFoco',
     options: [
       TriageOption(
@@ -667,7 +731,7 @@ class TriageQuestionBank {
   );
 
   static const TriageQuestion _emocionalStep3Autoestima = TriageQuestion(
-    stepIndex: 3,
+    stepIndex: 2,
     questionKey: 'triageQ4Autoestima',
     options: [
       TriageOption(
@@ -744,7 +808,7 @@ class TriageQuestionBank {
         return _emocionalStep3Autoestima;
 
       default:
-        return psicoEmocional[3];
+        return psicoEmocional[2];
     }
   }
 
@@ -807,32 +871,33 @@ class TriageQuestionBank {
         return _fisicaStep3EndocrinoMetabolico;
 
       default:
-        return fisica[3];
+        return fisica[2];
     }
   }
 
   /// Returns the question set for [v]. For both verticals, [systemKey]
-  /// (the step-0 answer) swaps in a domain-appropriate step-3 question tailored
-  /// to each of the 7 emotional dimensions or 12 physical systems.
+  /// (the step-0 answer) swaps in a domain-appropriate step-2 question tailored
+  /// to each of the 7 emotional dimensions or 12 physical systems, followed by
+  /// intensity at step 3 and preview at step 4.
   static List<TriageQuestion> forVertical(TriageVertical v, {String? systemKey}) {
     if (v == TriageVertical.psicoEmocional) {
       if (systemKey == null || systemKey.isEmpty) return psicoEmocional;
-      final step3 = _emotionalStep3ForDimension(systemKey);
+      final step2 = _emotionalStep3ForDimension(systemKey);
       return [
         psicoEmocional[0],
         psicoEmocional[1],
-        psicoEmocional[2],
-        step3,
+        step2,
+        psicoEmocional[3],
         psicoEmocional[4],
       ];
     }
     if (systemKey == null || systemKey.isEmpty) return fisica;
-    final step3 = _physicalStep3ForSystem(systemKey);
+    final step2 = _physicalStep3ForSystem(systemKey);
     return [
       fisica[0],
       fisica[1],
-      fisica[2],
-      step3,
+      step2,
+      fisica[3],
       fisica[4],
     ];
   }

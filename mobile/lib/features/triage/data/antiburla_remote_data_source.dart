@@ -5,8 +5,9 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/security/secure_storage_service.dart';
 
 final antiburlaDataSourceProvider = Provider<AntiburlaRemoteDataSource>((ref) {
+  final apiClient = ref.watch(apiClientProvider);
   final secureStorage = ref.watch(secureStorageServiceProvider);
-  return AntiburlaRemoteDataSource(secureStorage: secureStorage);
+  return AntiburlaRemoteDataSource(apiClient: apiClient, secureStorage: secureStorage);
 });
 
 class AntiburlaCheckResult {

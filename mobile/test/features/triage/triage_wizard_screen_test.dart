@@ -148,7 +148,7 @@ void main() {
       expect(find.text('Ansiosa / Agitação'), findsOneWidget);
     });
 
-    testWidgets('7. Step 3 in Physical vertical renders TriageIntensitySelector',
+    testWidgets('7. Step 4 in Physical vertical renders TriageIntensitySelector',
         (tester) async {
       await tester.pumpWidget(createTriageTestWidget(
         vertical: TriageVertical.fisica,
@@ -165,13 +165,19 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Passo 3 de 5'), findsOneWidget);
+      // Step 2 is Trigger
+      await tester.tap(find.text('Pegou peso ou fez esforço lombar'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Passo 4 de 5'), findsOneWidget);
       expect(find.byType(TriageIntensitySelector), findsOneWidget);
       expect(find.text('1'), findsOneWidget);
       expect(find.text('5'), findsOneWidget);
     });
 
-    testWidgets('8. Reaching Step 5 displays TriagePreviewCard and "Confirmar e Finalizar" button',
+    testWidgets('8. Reaching Step 5 displays TriagePreviewCard, narrative input, and "Confirmar e Finalizar" button',
         (tester) async {
       await tester.pumpWidget(createTriageTestWidget(
         vertical: TriageVertical.psicoEmocional,
@@ -188,11 +194,6 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Leve e controlável'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
-      await tester.pumpAndSettle();
-
       final anxietyTriggerChip = find.text('Sobrecarga de tarefas, prazos ou expectativas');
       await tester.ensureVisible(anxietyTriggerChip);
       await tester.tap(anxietyTriggerChip);
@@ -200,12 +201,18 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();
 
+      await tester.tap(find.text('Leve e controlável'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
+      await tester.pumpAndSettle();
+
       expect(find.text('Passo 5 de 5'), findsOneWidget);
       expect(find.byType(TriagePreviewCard), findsOneWidget);
+      expect(find.byKey(const Key('triageOptionalNarrativeInput')), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Confirmar e Finalizar'), findsOneWidget);
     });
 
-    testWidgets('9. Step 4 in Physical vertical renders gastrointestinal trigger question when gastrointestinal is selected',
+    testWidgets('9. Step 3 in Physical vertical renders gastrointestinal trigger question when gastrointestinal is selected',
         (tester) async {
       await tester.pumpWidget(createTriageTestWidget(
         vertical: TriageVertical.fisica,
@@ -224,15 +231,8 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();
 
-      // Step 3 (Intensity)
+      // Step 3 of 5 (Trigger / Gatilho)
       expect(find.text('Passo 3 de 5'), findsOneWidget);
-      await tester.tap(find.text('2'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
-      await tester.pumpAndSettle();
-
-      // Step 4 (Trigger / Gatilho)
-      expect(find.text('Passo 4 de 5'), findsOneWidget);
       expect(
         find.text('Você ingeriu algum alimento diferente ou pesado, tomou remédios recentes ou ficou muito tempo em jejum?'),
         findsOneWidget,
@@ -247,7 +247,7 @@ void main() {
       expect(find.text('Sim, sofri uma queda'), findsNothing);
     });
 
-    testWidgets('10. Step 4 in Emotional vertical renders specialized sleep trigger question when Sono is selected',
+    testWidgets('10. Step 3 in Emotional vertical renders specialized sleep trigger question when Sono is selected',
         (tester) async {
       await tester.pumpWidget(createTriageTestWidget(
         vertical: TriageVertical.psicoEmocional,
@@ -266,15 +266,8 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();
 
-      // Step 3 (Intensity)
+      // Step 3 of 5 (Trigger / Gatilho for Sleep)
       expect(find.text('Passo 3 de 5'), findsOneWidget);
-      await tester.tap(find.text('Moderada'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
-      await tester.pumpAndSettle();
-
-      // Step 4 (Trigger / Gatilho for Sleep)
-      expect(find.text('Passo 4 de 5'), findsOneWidget);
       expect(
         find.text('Qual tem sido a principal dificuldade que atrapalha suas noites de sono?'),
         findsOneWidget,

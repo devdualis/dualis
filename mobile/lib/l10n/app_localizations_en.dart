@@ -1191,4 +1191,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navHistory => 'History & Map';
+
+  @override
+  String get navHydration => 'Water';
+
+  @override
+  String get notifWaterTitle => '💧 Time to Drink Water';
+
+  @override
+  String notifWaterTitleAt(String time) {
+    return '💧 Time to Drink Water ($time)';
+  }
+
+  @override
+  String get notifWaterBodyTracking => 'Tap to log how much water you drank.';
+
+  @override
+  String get notifWaterBodyReminder => 'Keep your body hydrated and healthy!';
+
+  @override
+  String get notifWaterChimeChannelName => 'Water Reminders (Soft Chime)';
+
+  @override
+  String get notifWaterChimeChannelDescription =>
+      'Message-style alert reminding you to stay hydrated';
+
+  @override
+  String get notifWaterAlarmChannelName => 'Water Reminders (Alarm Sound)';
+
+  @override
+  String get notifWaterAlarmChannelDescription =>
+      'Alarm sound reminding you to drink water every 2 hours';
+
+  @override
+  String notifCheckinTitleAt(String time) {
+    return '🩺 Dualis Daily Check-in ($time)';
+  }
+
+  @override
+  String get notifCheckinBody =>
+      'You haven\'t updated your health status today. Tap to do your check-in!';
+
+  @override
+  String get notifCheckinChannelName => 'Daily Check-in Reminders';
+
+  @override
+  String get notifCheckinChannelDescription =>
+      'Notifications every 2 hours reminding you to update your daily health check-in';
+
+  @override
+  String get outcomeAxisPhysicalNumbered => '1. Physical Assessment Axis';
+
+  @override
+  String get outcomeAxisEmotionalNumbered =>
+      '2. Psycho-emotional Assessment Axis';
 }

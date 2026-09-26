@@ -20,6 +20,7 @@ import '../../data/antiburla_remote_data_source.dart';
 import 'package:dualis_mobile/features/triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import 'package:dualis_mobile/features/triage_outcome/domain/triage_outcome_models.dart';
 import 'package:dualis_mobile/features/sync/data/triage_outbox_repository.dart';
+import 'package:dualis_mobile/features/home/domain/axis_intensity_resolver.dart';
 import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
 import '../../../../core/network/connectivity_service.dart';
 import '../../../../l10n/locale_provider.dart';
@@ -46,10 +47,16 @@ class TriageWizardScreen extends ConsumerStatefulWidget {
 class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
   Color _prevColor = AppColors.softIndigo;
   TriageOutcome? _physicalOutcome;
+  late final TextEditingController _narrativeController;
 
   @override
   void initState() {
     super.initState();
+    final initialNarrative = (widget.naturalLanguageText != null &&
+            int.tryParse(widget.naturalLanguageText!.trim()) == null)
+        ? widget.naturalLanguageText!
+        : '';
+    _narrativeController = TextEditingController(text: initialNarrative);
     _prevColor = widget.vertical == TriageVertical.psicoEmocional
         ? AppColors.softIndigo
         : AppColors.clinicalTeal;
@@ -62,6 +69,12 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
         notifier.presetCategoryAndSkip(categoryKey);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _narrativeController.dispose();
+    super.dispose();
   }
 
   Color _getActiveColor(TriageVertical vertical) {
@@ -298,10 +311,86 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
     Color activeColor,
   ) {
     if (question.isPreview) {
-      return TriagePreviewCard(
-        vertical: state.activeVertical,
-        answers: state.answers,
-        activeColor: activeColor,
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TriagePreviewCard(
+            vertical: state.activeVertical,
+            answers: state.answers,
+            activeColor: activeColor,
+          ),
+          const SizedBox(height: 16),
+          Card(
+            color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: activeColor.withValues(alpha: 0.25),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.edit_note_rounded, size: 20, color: activeColor),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Descrição opcional (em suas palavras)',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimaryLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    key: const Key('triageOptionalNarrativeInput'),
+                    controller: _narrativeController,
+                    maxLines: 3,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      color: isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimaryLight,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Descreva como você está se sentindo com base nos sintomas...',
+                      hintStyle: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : AppColors.textSecondaryLight,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.grey.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: activeColor,
+                          width: 1.5,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.all(12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       );
     }
 
@@ -369,6 +458,15 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
           final answers = Map<int, String>.from(state.answers);
           final verticalStr =
               state.activeVertical == TriageVertical.fisica ? 'physical' : 'emotional';
+          final narrativeInput = _narrativeController.text.trim();
+          final effectiveNarrative = (narrativeInput.isNotEmpty &&
+                  int.tryParse(narrativeInput) == null)
+              ? narrativeInput
+              : ((widget.naturalLanguageText != null &&
+                      widget.naturalLanguageText!.trim().isNotEmpty &&
+                      int.tryParse(widget.naturalLanguageText!.trim()) == null)
+                  ? widget.naturalLanguageText!.trim()
+                  : null);
 
           ref.read(triageWizardNotifierProvider.notifier).advance();
 
@@ -384,7 +482,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
               outcome = await dataSource.submitTriage(
                 vertical: verticalStr,
                 answers: answers,
-                narrative: widget.naturalLanguageText,
+                narrative: effectiveNarrative,
                 clientSessionId: clientSessionId,
                 language: langCode,
               );
@@ -397,7 +495,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
               outcome = dataSource.generateOfflineFallback(
                 verticalStr,
                 answers,
-                widget.naturalLanguageText,
+                effectiveNarrative,
                 language: langCode,
               );
             }
@@ -410,7 +508,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
             outcome = dataSource.generateOfflineFallback(
               verticalStr,
               answers,
-              widget.naturalLanguageText,
+              effectiveNarrative,
               language: langCode,
             );
           }
@@ -426,18 +524,62 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
           }
 
           var finalOutcome = outcome;
+          final currentTrigger = ref.read(triggerCheckInProvider);
+          final existingOutcome = ref.read(triageOutcomeProvider).outcome;
+
           if (widget.isDual && _physicalOutcome != null) {
             finalOutcome = _physicalOutcome!.copyWith(
               secondaryCategoryLabel: outcome.categoryLabel,
               secondarySomaticMapping: outcome.somaticMapping,
               secondaryIntensityScore: outcome.intensityScore,
             );
+          } else if (outcome.vertical == 'physical' &&
+              (currentTrigger.isEmotionalCompleted ||
+                  (existingOutcome != null && existingOutcome.vertical == 'emotional'))) {
+            final emoOutcome =
+                existingOutcome?.vertical == 'emotional' ? existingOutcome : null;
+            final emoLabel = currentTrigger.emotionalSummary ?? emoOutcome?.categoryLabel;
+            final emoMapping = currentTrigger.emotionalNarrative ??
+                emoOutcome?.somaticMapping ??
+                'Avaliação Psicoemocional Registrada';
+            final emoScore = AxisIntensityResolver.resolveDisplayIntensity(
+              axis: CheckInAxis.emotional,
+              state: currentTrigger,
+              outcome: existingOutcome,
+            );
+            finalOutcome = outcome.copyWith(
+              secondaryCategoryLabel: emoLabel,
+              secondarySomaticMapping: emoMapping,
+              secondaryIntensityScore: emoScore,
+            );
+          } else if (outcome.vertical == 'emotional' &&
+              (currentTrigger.isPhysicalCompleted ||
+                  (existingOutcome != null && existingOutcome.vertical == 'physical'))) {
+            final physOutcome =
+                existingOutcome?.vertical == 'physical' ? existingOutcome : null;
+            final physLabel = currentTrigger.physicalSummary ?? physOutcome?.categoryLabel;
+            final physMapping = currentTrigger.physicalNarrative ??
+                physOutcome?.somaticMapping ??
+                'Avaliação Física Registrada';
+            final physScore = AxisIntensityResolver.resolveDisplayIntensity(
+              axis: CheckInAxis.physical,
+              state: currentTrigger,
+              outcome: existingOutcome,
+            );
+            finalOutcome = outcome.copyWith(
+              secondaryCategoryLabel: physLabel,
+              secondarySomaticMapping: physMapping,
+              secondaryIntensityScore: physScore,
+            );
           }
           ref.read(triageOutcomeProvider.notifier).setOutcome(finalOutcome);
-          ref.read(triggerCheckInProvider.notifier).markCompletedWithOutcome(finalOutcome);
+          ref.read(triggerCheckInProvider.notifier).markCompletedWithOutcome(
+            finalOutcome,
+            narrative: effectiveNarrative,
+          );
 
           if (context.mounted) {
-            context.go(RoutePaths.triageOutcome, extra: finalOutcome);
+            context.go(RoutePaths.home);
           }
         },
         child: Text(
@@ -487,7 +629,11 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
           vertical: verticalStr,
           category: category,
           selectedPersistence: selectedPersistence,
-          narrative: widget.naturalLanguageText,
+          narrative: (widget.naturalLanguageText != null &&
+                  widget.naturalLanguageText!.trim().isNotEmpty &&
+                  int.tryParse(widget.naturalLanguageText!.trim()) == null)
+              ? widget.naturalLanguageText!.trim()
+              : null,
         );
 
         if (checkResult.triggered && context.mounted) {
