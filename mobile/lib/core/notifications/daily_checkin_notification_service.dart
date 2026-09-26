@@ -115,7 +115,6 @@ class DailyCheckinNotificationService {
   Future<void> _reschedule({required bool isCompletedToday}) async {
     await initialize();
     await cancelAllCheckInReminders();
-    await requestPermissions();
 
     final l10n = _l10n();
     final details = _getNotificationDetails(l10n);
