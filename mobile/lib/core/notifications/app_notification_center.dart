@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui' show Locale, PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -31,11 +33,65 @@ typedef LocalTimezoneResolver = Future<String> Function();
 ///  * dispatches tap payloads to filtered streams, buffering payloads that
 ///    arrive before anyone listens and replaying them to the first matching
 ///    subscriber.
+/// Remembers that the OS notification dialog was already shown.
+/// Device-level: must survive logout, which wipes secure storage.
+abstract class NotificationPermissionPromptStore {
+  Future<bool> wasRequested();
+  Future<void> markRequested();
+}
+
+class InMemoryNotificationPermissionPromptStore
+    implements NotificationPermissionPromptStore {
+  bool _requested = false;
+
+  @override
+  Future<bool> wasRequested() async => _requested;
+
+  @override
+  Future<void> markRequested() async {
+    _requested = true;
+  }
+}
+
+class FileNotificationPermissionPromptStore
+    implements NotificationPermissionPromptStore {
+  static const _fileName = 'notification_permission_requested';
+
+  @override
+  Future<bool> wasRequested() async {
+    try {
+      return (await _file()).exists();
+    } catch (e) {
+      debugPrint('Could not read notification permission flag: $e');
+      return false;
+    }
+  }
+
+  @override
+  Future<void> markRequested() async {
+    try {
+      final file = await _file();
+      await file.parent.create(recursive: true);
+      await file.writeAsString('1');
+    } catch (e) {
+      debugPrint('Could not store notification permission flag: $e');
+    }
+  }
+
+  Future<File> _file() async {
+    final dir = await getApplicationSupportDirectory();
+    return File('${dir.path}/$_fileName');
+  }
+}
+
 class AppNotificationCenter {
   AppNotificationCenter({
     required this.plugin,
     LocalTimezoneResolver? timezoneResolver,
-  }) : _timezoneResolver = timezoneResolver ?? _platformTimezone;
+    NotificationPermissionPromptStore? permissionPromptStore,
+  })  : _timezoneResolver = timezoneResolver ?? _platformTimezone,
+        _permissionPromptStore =
+            permissionPromptStore ?? FileNotificationPermissionPromptStore();
 
   static final Expando<AppNotificationCenter> _byPlugin =
       Expando<AppNotificationCenter>('AppNotificationCenter');
@@ -48,8 +104,10 @@ class AppNotificationCenter {
 
   final FlutterLocalNotificationsPlugin plugin;
   final LocalTimezoneResolver _timezoneResolver;
+  final NotificationPermissionPromptStore _permissionPromptStore;
 
   Future<void>? _initialization;
+  Future<void>? _firstLaunchPermission;
   final List<_PayloadSubscriber> _subscribers = <_PayloadSubscriber>[];
   final List<String> _pendingPayloads = <String>[];
 
@@ -58,6 +116,11 @@ class AppNotificationCenter {
 
   /// Idempotent: the plugin is initialized once, however many callers race.
   Future<void> initialize() => _initialization ??= _initialize();
+
+  /// Shows the OS notification dialog the first time the app is opened.
+  /// Later launches skip it, including after the user denies the prompt.
+  Future<void> requestPermissionsOnFirstLaunch() =>
+      _firstLaunchPermission ??= _requestPermissionsOnFirstLaunch();
 
   Future<void> _initialize() async {
     await _configureLocalTimezone();
@@ -187,26 +250,48 @@ class AppNotificationCenter {
       plugin.resolvePlatformSpecificImplementation<
           IOSFlutterLocalNotificationsPlugin>();
 
-  Future<bool> requestPermissions() async {
+  Future<bool> requestPermissions() async =>
+      (await _requestPermissionsDetailed()).granted;
+
+  /// [prompted] is true only when the OS dialog was actually invoked
+  /// (granted or denied). A missing plugin or a thrown call stays false so
+  /// the first-launch flag is not stored and the next open can retry.
+  Future<({bool granted, bool prompted})> _requestPermissionsDetailed() async {
     try {
       final android = _android;
       if (android != null) {
-        return (await android.requestNotificationsPermission()) ?? false;
+        final granted =
+            (await android.requestNotificationsPermission()) ?? false;
+        return (granted: granted, prompted: true);
       }
       final ios = _ios;
       if (ios != null) {
-        return (await ios.requestPermissions(
+        final granted = (await ios.requestPermissions(
               alert: true,
               badge: true,
               sound: true,
             )) ??
             false;
+        return (granted: granted, prompted: true);
       }
     } catch (e) {
       debugPrint('Notification permission request failed: $e');
-      return false;
+      return (granted: false, prompted: false);
     }
-    return true;
+    return (granted: true, prompted: false);
+  }
+
+  Future<void> _requestPermissionsOnFirstLaunch() async {
+    try {
+      await initialize();
+      if (await _permissionPromptStore.wasRequested()) return;
+      final result = await _requestPermissionsDetailed();
+      if (result.prompted) {
+        await _permissionPromptStore.markRequested();
+      }
+    } catch (e) {
+      debugPrint('First-launch notification permission request failed: $e');
+    }
   }
 
   /// Whether Android currently allows exact alarms (false elsewhere).

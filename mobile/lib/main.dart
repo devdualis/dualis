@@ -33,9 +33,11 @@ class _DualisAppState extends ConsumerState<DualisApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(authControllerProvider.notifier).restoreSession();
       // Single owner of the notification plugin: registers the one tap
-      // handler and captures the tap that launched the app (cold start),
-      // before any feature schedules reminders.
-      unawaited(ref.read(appNotificationCenterProvider).initialize());
+      // handler, captures a cold-start tap, then asks for notification
+      // permission the first time the app is opened.
+      unawaited(
+        ref.read(appNotificationCenterProvider).requestPermissionsOnFirstLaunch(),
+      );
     });
   }
 

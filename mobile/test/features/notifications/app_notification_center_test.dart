@@ -233,6 +233,91 @@ void main() {
       expect(settings.iOS!.requestAlertPermission, isFalse);
       expect(settings.android, isNotNull);
     });
+
+    test('first launch asks for notification permission once', () async {
+      final h = Harness();
+      final android = MockAndroidPlugin();
+      when(() => h.plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()).thenReturn(android);
+      when(() => android.requestNotificationsPermission())
+          .thenAnswer((_) async => true);
+
+      final store = InMemoryNotificationPermissionPromptStore();
+      final center = AppNotificationCenter(
+        plugin: h.plugin,
+        timezoneResolver: () async => _zone,
+        permissionPromptStore: store,
+      );
+
+      await center.requestPermissionsOnFirstLaunch();
+      await center.requestPermissionsOnFirstLaunch();
+      expect(await store.wasRequested(), isTrue);
+
+      final nextLaunch = AppNotificationCenter(
+        plugin: h.plugin,
+        timezoneResolver: () async => _zone,
+        permissionPromptStore: store,
+      );
+      await nextLaunch.requestPermissionsOnFirstLaunch();
+      verify(() => android.requestNotificationsPermission()).called(1);
+    });
+
+    test('a denied first-launch prompt is not asked again', () async {
+      final h = Harness();
+      final android = MockAndroidPlugin();
+      when(() => h.plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()).thenReturn(android);
+      when(() => android.requestNotificationsPermission())
+          .thenAnswer((_) async => false);
+
+      final store = InMemoryNotificationPermissionPromptStore();
+      final center = AppNotificationCenter(
+        plugin: h.plugin,
+        timezoneResolver: () async => _zone,
+        permissionPromptStore: store,
+      );
+
+      await center.requestPermissionsOnFirstLaunch();
+      expect(await store.wasRequested(), isTrue);
+
+      final nextLaunch = AppNotificationCenter(
+        plugin: h.plugin,
+        timezoneResolver: () async => _zone,
+        permissionPromptStore: store,
+      );
+      await nextLaunch.requestPermissionsOnFirstLaunch();
+      verify(() => android.requestNotificationsPermission()).called(1);
+    });
+
+    test('a failed permission request is retried on the next launch', () async {
+      final h = Harness();
+      final android = MockAndroidPlugin();
+      when(() => h.plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()).thenReturn(android);
+      when(() => android.requestNotificationsPermission())
+          .thenThrow(Exception('plugin unavailable'));
+
+      final store = InMemoryNotificationPermissionPromptStore();
+      final center = AppNotificationCenter(
+        plugin: h.plugin,
+        timezoneResolver: () async => _zone,
+        permissionPromptStore: store,
+      );
+
+      await center.requestPermissionsOnFirstLaunch();
+      expect(await store.wasRequested(), isFalse);
+
+      when(() => android.requestNotificationsPermission())
+          .thenAnswer((_) async => true);
+      final nextLaunch = AppNotificationCenter(
+        plugin: h.plugin,
+        timezoneResolver: () async => _zone,
+        permissionPromptStore: store,
+      );
+      await nextLaunch.requestPermissionsOnFirstLaunch();
+      verify(() => android.requestNotificationsPermission()).called(2);
+      expect(await store.wasRequested(), isTrue);
+    });
   });
 
   group('Finding 5: taps are never lost (cold start / early taps)', () {
