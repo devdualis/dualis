@@ -60,7 +60,8 @@ class FileNotificationPermissionPromptStore
   @override
   Future<bool> wasRequested() async {
     try {
-      return (await _file()).exists();
+      final file = await _file();
+      return await file.exists();
     } catch (e) {
       debugPrint('Could not read notification permission flag: $e');
       return false;
