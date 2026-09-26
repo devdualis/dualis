@@ -1,5 +1,3 @@
-import 'package:dualis_mobile/core/clinical/clinical_intensity_tier.dart';
-import 'package:dualis_mobile/core/constants/app_colors.dart';
 import 'package:dualis_mobile/features/home/domain/trigger_checkin_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

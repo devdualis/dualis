@@ -70,7 +70,6 @@ class CriticalRecurrenceCard extends StatelessWidget {
     'membros_inferiores': 'Membros Inferiores',
     'membros_inferiores_d': 'Membros Inferiores (D)',
     'membros_inferiores_e': 'Membros Inferiores (E)',
-    'muscular_geral_sistemico': 'Muscular Geral e Sistêmico',
     'endocrino_metabolico': 'Endócrino / Metabólico',
     'neurologico': 'Neurológico',
     'geniturinario_pelvico': 'Geniturinário / Pélvico',

@@ -82,7 +82,6 @@ enum ClinicalIntensityTier {
   String localizedLabel(BuildContext? context) {
     if (context == null) return label;
     final l10n = AppLocalizations.of(context);
-    if (l10n == null) return label;
     switch (this) {
       case ClinicalIntensityTier.none:
         return l10n.heatLegendNone;

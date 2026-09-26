@@ -70,7 +70,7 @@ Widget createHydrationQATestApp({
           isLoading: false,
           todayTotalMl: 0,
           settings: HydrationSettings(dailyTargetMl: 2000),
-          last7DaysTotals: const {},
+          last7DaysTotals: {},
           todayLogs: [],
         ),
       );
@@ -211,7 +211,7 @@ void main() {
           isLoading: false,
           todayTotalMl: 0,
           settings: HydrationSettings(dailyTargetMl: 2000),
-          last7DaysTotals: const {},
+          last7DaysTotals: {},
           todayLogs: [],
         ),
       );

@@ -285,7 +285,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
 
   void setEmotionalStatus(TriggerStatus status) {
     final modified = state.isCompletedToday && status != state.emotionalStatus;
-    final int? intensity = status.defaultIntensity;
+    final int intensity = status.defaultIntensity;
     state = state.copyWith(
       emotionalStatus: status,
       emotionalIntensity: intensity,
@@ -298,7 +298,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
 
   void setPhysicalStatus(TriggerStatus status) {
     final modified = state.isCompletedToday && status != state.physicalStatus;
-    final int? intensity = status.defaultIntensity;
+    final int intensity = status.defaultIntensity;
     state = state.copyWith(
       physicalStatus: status,
       physicalIntensity: intensity,
