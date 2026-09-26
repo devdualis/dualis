@@ -48,21 +48,16 @@ class AuthController extends Notifier<AuthState> {
   Future<void> restoreSession() async {
     try {
       final token = await _secureStorage.getAccessToken();
-      if (token == null || token.isEmpty) {
-        state = state.copyWith(isLoading: false);
-        return;
-      }
+      if (token == null || token.isEmpty) return;
 
       final profile = await _repository.getProfile(token: token);
       state = state.copyWith(
-        isLoading: false,
         isAuthenticated: true,
         user: profile,
         accessToken: token,
       );
     } catch (_) {
       await _secureStorage.clearAll();
-      state = state.copyWith(isLoading: false);
     }
   }
 
