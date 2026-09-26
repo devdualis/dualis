@@ -279,8 +279,12 @@ void main() {
       await tester.tap(retakeBtn);
       await tester.pumpAndSettle();
 
-      // Upon tapping retake, resetStage is called and it navigates to triage
+      // Upon tapping retake, prepareForUpdate is called and it navigates to triage
       expect(find.text('Triage Screen: psicoEmocional'), findsOneWidget);
+      // Verify that the previous stage state was NOT prematurely wiped out
+      final state = container.read(triggerCheckInProvider);
+      expect(state.isEmotionalCompleted, isTrue);
+      expect(state.emotionalSummary, 'Bem / Ótimo');
     });
 
     testWidgets('10. Resets values to blank when calendar date advances past 24:00h',
@@ -482,6 +486,50 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('“Dor de cabeça ao acordar”'), findsOneWidget);
+    });
+
+    testWidgets('14. Retaking psychoemotional stage preserves previous stage data when triage is not completed',
+        (WidgetTester tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(triggerCheckInProvider.notifier);
+      notifier.completeStage(
+        vertical: TriageVertical.psicoEmocional,
+        summary: 'Dimensão Somática (Psicossomática)',
+        intensity: 3,
+        status: TriggerStatus.soSo,
+      );
+      notifier.completeStage(
+        vertical: TriageVertical.fisica,
+        summary: 'Membros Inferiores (Pé / Dedos Direito)',
+        intensity: 3,
+        status: TriggerStatus.soSo,
+      );
+
+      await tester.pumpWidget(createTriggerCheckInTestApp(container: container));
+      await tester.pumpAndSettle();
+
+      // Both stages are completed initially
+      expect(find.byKey(const Key('psicoemocional_completed_card')), findsOneWidget);
+      expect(find.byKey(const Key('fisica_completed_card')), findsOneWidget);
+      expect(find.text('Dimensão Somática (Psicossomática)'), findsOneWidget);
+
+      // User taps "Atualizar" on Psicoemocional
+      final retakeBtn = find.byKey(const Key('retake_psicoemocional_button'));
+      await tester.ensureVisible(retakeBtn);
+      await tester.tap(retakeBtn);
+      await tester.pumpAndSettle();
+
+      // Navigated to triage wizard
+      expect(find.text('Triage Screen: psicoEmocional'), findsOneWidget);
+
+      // Verify the state did NOT wipe out emotional completion or summary
+      final state = container.read(triggerCheckInProvider);
+      expect(state.isEmotionalCompleted, isTrue);
+      expect(state.emotionalSummary, 'Dimensão Somática (Psicossomática)');
+      expect(state.emotionalStatus, TriggerStatus.soSo);
+      expect(state.emotionalIntensity, 3);
     });
   });
 }

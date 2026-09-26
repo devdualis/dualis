@@ -18,6 +18,7 @@ import '../../features/dashboard/presentation/screens/historical_dashboard_scree
 import '../../features/privacy/presentation/screens/privacy_center_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/hydration/presentation/screens/hydration_dashboard_screen.dart';
+import '../presentation/screens/splash_screen.dart';
 import 'route_paths.dart';
 
 class RouterNotifier extends ChangeNotifier {
@@ -36,28 +37,37 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     refreshListenable: notifier,
     redirect: (context, state) {
       final authState = ref.read(authControllerProvider);
-      if (authState.isLoading) return null;
+      final currentLoc = state.uri.toString();
+
+      // ── 1. Still restoring session → hold on splash ──────────────────────
+      if (authState.isLoading) {
+        return currentLoc == RoutePaths.splash ? null : RoutePaths.splash;
+      }
 
       final isLoggedIn = authState.isAuthenticated;
-      final currentLoc = state.uri.toString();
       final isAuthRoute = currentLoc == RoutePaths.onboarding ||
           currentLoc == RoutePaths.login ||
           currentLoc == RoutePaths.register ||
-          currentLoc == RoutePaths.verifyEmail;
+          currentLoc == RoutePaths.verifyEmail ||
+          currentLoc == RoutePaths.splash;
 
+      // ── 2. Session restored + logged in ──────────────────────────────────
       if (isLoggedIn && isAuthRoute) {
         return RoutePaths.home;
       }
+
+      // ── 3. Session restored + not logged in ──────────────────────────────
       if (!isLoggedIn && !isAuthRoute && currentLoc != RoutePaths.emergency) {
         return RoutePaths.onboarding;
       }
+
       return null;
     },
   );
 });
 
 GoRouter createRouter({
-  String initialLocation = RoutePaths.onboarding,
+  String initialLocation = RoutePaths.splash,
   Listenable? refreshListenable,
   GoRouterRedirect? redirect,
 }) {
@@ -66,6 +76,11 @@ GoRouter createRouter({
     refreshListenable: refreshListenable,
     redirect: redirect,
     routes: [
+      GoRoute(
+        path: RoutePaths.splash,
+        name: 'splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: RoutePaths.onboarding,
         name: 'onboarding',

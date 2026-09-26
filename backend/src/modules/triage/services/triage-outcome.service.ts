@@ -56,6 +56,16 @@ export class TriageOutcomeService {
   }
 
   private readonly physicalMappings: Record<string, CategoryMapping> = {
+    normal: {
+      code: 'normal',
+      label: 'Estado de Saúde Normal',
+      somaticNormalized: 'Sem alterações somáticas ou queixas físicas',
+    },
+    bem_normal: {
+      code: 'normal',
+      label: 'Estado de Saúde Normal',
+      somaticNormalized: 'Sem alterações somáticas ou queixas físicas',
+    },
     cabeca: {
       code: 'cabeca_pescoco',
       label: 'Cabeça e Pescoço',
@@ -331,6 +341,16 @@ export class TriageOutcomeService {
   };
 
   private readonly emotionalMappings: Record<string, CategoryMapping> = {
+    normal: {
+      code: 'normal',
+      label: 'Estado Emocional Normal / Bem',
+      somaticNormalized: 'Equilíbrio emocional / Sem queixas de sobrecarga',
+    },
+    bem_normal: {
+      code: 'normal',
+      label: 'Estado Emocional Normal / Bem',
+      somaticNormalized: 'Equilíbrio emocional / Sem queixas de sobrecarga',
+    },
     ansiedade: {
       code: 'ansiosa_agitacao',
       label: 'Dimensão Ansiosa / Agitação',
@@ -554,8 +574,25 @@ export class TriageOutcomeService {
       intensityRaw = ans2;
     }
 
+    const userLang = (dto.language || 'pt').toLowerCase();
+
     let intensityScore = 2;
-    if (vertical === 'physical') {
+    if (step1 === 'normal' || step1 === 'bem_normal') {
+      intensityScore = 0;
+      if (userLang === 'es') {
+        mapping = {
+          code: 'normal',
+          label: vertical === 'physical' ? 'Estado de Salud Normal' : 'Estado Emocional Normal / Bien',
+          somaticNormalized: vertical === 'physical' ? 'Sin quejas clínicas reportadas. Estado de salud preservado.' : 'Equilibrio emocional / Sin quejas de sobrecarga',
+        };
+      } else if (userLang === 'en') {
+        mapping = {
+          code: 'normal',
+          label: vertical === 'physical' ? 'Normal Health Status' : 'Normal / Good Emotional State',
+          somaticNormalized: vertical === 'physical' ? 'No clinical complaints reported. Preserved health status.' : 'Emotional balance / No overload complaints',
+        };
+      }
+    } else if (vertical === 'physical') {
       const numeric = parseInt(intensityRaw, 10);
       if (!isNaN(numeric) && numeric >= 1 && numeric <= 5) {
         intensityScore = numeric;
@@ -571,15 +608,13 @@ export class TriageOutcomeService {
       }
     }
 
-    const userLang = (dto.language || 'pt').toLowerCase();
-
     let aiMappedLayTerm: string | undefined;
     let aiClinicalConcept: string | undefined;
     let aiSource: TriageOutcomeResponseDto['aiSource'];
     let aiConfidence: number | undefined;
     let classification: TriageClassificationResult | undefined;
 
-    if (this.aiTriage && narrative && narrative.trim().length >= 2) {
+    if (this.aiTriage && narrative && narrative.trim().length >= 2 && step1 !== 'normal' && step1 !== 'bem_normal') {
       try {
         classification = await this.aiTriage.classify({ text: narrative, language: userLang as any });
         aiMappedLayTerm = classification.mappedLayTerm;
@@ -604,7 +639,7 @@ export class TriageOutcomeService {
     const isPsychosomaticDimension = step1 === 'somatico' || step1 === 'somatica';
     const narrativeIsPhysical = classification?.primaryVertical === 'physical';
 
-    if (vertical === 'emotional') {
+    if (vertical === 'emotional' && step1 !== 'normal' && step1 !== 'bem_normal') {
       if (narrativeIsPhysical || narrativeHasSomatic || isPsychosomaticDimension) {
         organicPrimacyApplied = true;
         organicPrimacyNotice =

@@ -12,7 +12,8 @@ void main() {
         expect(questions[i].stepIndex, equals(i));
       }
 
-      expect(questions[0].options.length, equals(7));
+      expect(questions[0].options.first.key, equals('normal'));
+      expect(questions[0].options.length, equals(8));
       expect(questions[0].isPreview, isFalse);
 
       expect(questions[1].options.length, equals(3));
@@ -36,7 +37,8 @@ void main() {
         expect(questions[i].stepIndex, equals(i));
       }
 
-      expect(questions[0].options.length, equals(12));
+      expect(questions[0].options.first.key, equals('normal'));
+      expect(questions[0].options.length, equals(13));
       expect(questions[0].options.every((o) => o.systemKey != null), isTrue);
 
       expect(questions[1].options.length, equals(3));

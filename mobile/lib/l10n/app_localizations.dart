@@ -496,6 +496,18 @@ abstract class AppLocalizations {
   /// **'Olhando para o seu lado emocional e mental, qual palavra descreve melhor o que você está sentindo agora?'**
   String get triageQ1Emotional;
 
+  /// Opção de triagem: Normal / Me sinto bem
+  ///
+  /// In pt, this message translates to:
+  /// **'Normal / Me sinto bem'**
+  String get triageOptNormal;
+
+  /// Botão de salvar triagem imediatamente como normal
+  ///
+  /// In pt, this message translates to:
+  /// **'Concluir como Normal / Bem'**
+  String get triageSaveNormal;
+
   /// Emotional option: Anxiety/Agitation
   ///
   /// In pt, this message translates to:

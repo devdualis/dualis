@@ -66,6 +66,8 @@
   "triagePreviewTitle": "Revisión de su Evaluación",
   "triagePreviewSubmit": "Confirmar y Finalizar",
   "triageQ1Emotional": "Mirando su lado emocional y mental, ¿qué palabra describe mejor lo que siente ahora?",
+  "triageOptNormal": "Normal / Me siento bien",
+  "triageSaveNormal": "Concluir como Normal / Bien",
   "triageOptAnsiedade": "Ansiedad / Agitación",
   "triageOptTristeza": "Tristeza / Desánimo",
   "triageOptEstresse": "Estrés / Irritabilidad",

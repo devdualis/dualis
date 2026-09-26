@@ -141,7 +141,12 @@ class TriageOutcomeScreen extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 16),
-              IntensityMeter(score: outcome.intensityScore),
+              IntensityMeter(
+                score: [
+                  outcome.intensityScore,
+                  outcome.secondaryIntensityScore ?? 0,
+                ].reduce((a, b) => a > b ? a : b),
+              ),
               const SizedBox(height: 16),
               if (outcome.organicPrimacyApplied) ...[
                 OrganicPrimacyBanner(notice: outcome.organicPrimacyNotice),

@@ -19,6 +19,9 @@ class TriagePreviewCard extends StatelessWidget {
   static String resolveAnswerLabel(BuildContext context, String key) {
     final l10n = AppLocalizations.of(context);
     switch (key) {
+      case 'normal':
+      case 'bem_normal':
+        return l10n.triageOptNormal;
       case 'ansiedade_agitacao':
         return l10n.triageOptAnsiedade;
       case 'ansiosa_agitacao':

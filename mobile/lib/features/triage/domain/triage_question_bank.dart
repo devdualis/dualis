@@ -10,6 +10,11 @@ class TriageQuestionBank {
       questionKey: 'triageQ1Emotional',
       options: [
         TriageOption(
+          key: 'normal',
+          labelKey: 'triageOptNormal',
+          systemKey: 'normal',
+        ),
+        TriageOption(
           key: 'ansiosa_agitacao',
           labelKey: 'triageOptAnsiosaAgitacao',
           systemKey: 'ansiosa_agitacao',
@@ -105,6 +110,11 @@ class TriageQuestionBank {
       stepIndex: 0,
       questionKey: 'triageQ1Physical',
       options: [
+        TriageOption(
+          key: 'normal',
+          labelKey: 'triageOptNormal',
+          systemKey: 'normal',
+        ),
         TriageOption(
           key: 'cabeca_pescoco',
           labelKey: 'triageOptCabecaPescoco',

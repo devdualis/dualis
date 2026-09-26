@@ -23,22 +23,20 @@ class DualAxisTriggerCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final isPhysicalFromOutcome = outcome != null && outcome.vertical == 'physical';
-    final isEmotionalFromOutcome = outcome != null && outcome.vertical == 'emotional';
+    final hasSecondaryEmotional = outcome != null &&
+        (outcome.vertical == 'physical' && outcome.secondaryCategoryLabel != null);
+    final isEmotionalFromOutcome = outcome != null &&
+        (outcome.vertical == 'emotional' || hasSecondaryEmotional);
+
+    final hasSecondaryPhysical = outcome != null &&
+        (outcome.vertical == 'emotional' &&
+            (outcome.organicPrimacyApplied || outcome.secondaryCategoryLabel != null));
+    final isPhysicalFromOutcome = outcome != null &&
+        (outcome.vertical == 'physical' || hasSecondaryPhysical);
 
     final isEmotionalCompleted = state.isEmotionalCompleted || isEmotionalFromOutcome;
     final isPhysicalCompleted = state.isPhysicalCompleted || isPhysicalFromOutcome;
     final isCompletedToday = state.isCompletedToday || outcome != null || (isEmotionalCompleted && isPhysicalCompleted);
-
-    final emotionalStatus = state.emotionalStatus ??
-        (isEmotionalFromOutcome
-            ? triggerStatusFromIntensity(outcome.intensityScore)
-            : null);
-
-    final physicalStatus = state.physicalStatus ??
-        (isPhysicalFromOutcome
-            ? triggerStatusFromIntensity(outcome.intensityScore)
-            : null);
 
     final emotionalIntensity = AxisIntensityResolver.resolveDisplayIntensity(
       axis: CheckInAxis.emotional,
@@ -52,11 +50,37 @@ class DualAxisTriggerCard extends ConsumerWidget {
       outcome: outcome,
     );
 
+    final emotionalStatus = state.emotionalStatus ??
+        (outcome != null
+            ? (outcome.vertical == 'emotional'
+                ? triggerStatusFromIntensity(outcome.intensityScore)
+                : (hasSecondaryEmotional
+                    ? triggerStatusFromIntensity(outcome.secondaryIntensityScore ?? emotionalIntensity)
+                    : null))
+            : null);
+
+    final physicalStatus = state.physicalStatus ??
+        (outcome != null
+            ? (outcome.vertical == 'physical'
+                ? triggerStatusFromIntensity(outcome.intensityScore)
+                : (hasSecondaryPhysical
+                    ? triggerStatusFromIntensity(outcome.secondaryIntensityScore ?? physicalIntensity)
+                    : null))
+            : null);
+
     final emotionalSummary = state.emotionalSummary ??
-        (isEmotionalFromOutcome ? outcome.categoryLabel : null);
+        (outcome != null
+            ? (outcome.vertical == 'emotional'
+                ? outcome.categoryLabel
+                : outcome.secondaryCategoryLabel)
+            : null);
 
     final physicalSummary = state.physicalSummary ??
-        (isPhysicalFromOutcome ? outcome.categoryLabel : null);
+        (outcome != null
+            ? (outcome.vertical == 'physical'
+                ? outcome.categoryLabel
+                : outcome.secondaryCategoryLabel)
+            : null);
 
     final completedTime = state.completedAt ?? outcome?.recordedAt;
 
@@ -188,7 +212,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 );
               },
               onRetake: () {
-                notifier.resetStage(isPhysical: false);
+                notifier.prepareForUpdate();
                 context.push(
                   RoutePaths.triage,
                   extra: TriageNavigationArgs(
@@ -227,7 +251,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 );
               },
               onRetake: () {
-                notifier.resetStage(isPhysical: true);
+                notifier.prepareForUpdate();
                 context.push(
                   RoutePaths.triage,
                   extra: TriageNavigationArgs(

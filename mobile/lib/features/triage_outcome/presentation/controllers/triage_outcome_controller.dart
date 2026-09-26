@@ -303,6 +303,9 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
 
 String mapCategoryLabel(String code) {
   switch (code) {
+    case 'normal':
+    case 'bem_normal':
+      return 'Bem / Normal';
     case 'cabeca_pescoco':
     case 'cabeca':
       return 'Cabeça e Pescoço';

@@ -229,6 +229,12 @@ class AppLocalizationsPt extends AppLocalizations {
       'Olhando para o seu lado emocional e mental, qual palavra descreve melhor o que você está sentindo agora?';
 
   @override
+  String get triageOptNormal => 'Normal / Me sinto bem';
+
+  @override
+  String get triageSaveNormal => 'Concluir como Normal / Bem';
+
+  @override
   String get triageOptAnsiedade => 'Ansiedade / Agitação';
 
   @override

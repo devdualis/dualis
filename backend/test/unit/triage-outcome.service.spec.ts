@@ -305,5 +305,19 @@ describe('TriageOutcomeService Unit Tests', () => {
       expect(outcome.careDisposition).toBe('emergencia');
       expect(outcome.intensityScore).toBe(2);
     });
+
+    it('13. normal triage selection yields auto_cuidado, intensityScore 0 and normal health status', async () => {
+      const outcome = await service.processOutcome('user-1', {
+        vertical: 'physical',
+        answers: { 0: 'normal' },
+      });
+
+      expect(outcome.intensityScore).toBe(0);
+      expect(outcome.careDisposition).toBe('auto_cuidado');
+      expect(outcome.primaryCategory).toBe('normal');
+      expect(outcome.categoryLabel).toBe('Estado de Saúde Normal');
+      expect(outcome.somaticMapping).toBe('Sem alterações somáticas ou queixas físicas');
+      expect(outcome.organicPrimacyApplied).toBe(false);
+    });
   });
 });

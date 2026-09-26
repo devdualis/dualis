@@ -67,7 +67,8 @@ void main() {
 
       expect(find.text('Iniciando Autoavaliação Psico-Emocional'), findsOneWidget);
       expect(find.text('Passo 1 de 5'), findsOneWidget);
-      expect(find.byType(TriageOptionChip), findsNWidgets(7));
+      expect(find.text('Normal / Me sinto bem'), findsOneWidget);
+      expect(find.byType(TriageOptionChip), findsNWidgets(8));
     });
 
     testWidgets('2. Renders "Iniciando Autoavaliação Física" banner on fisica vertical',
@@ -79,8 +80,9 @@ void main() {
 
       expect(find.text('Iniciando Autoavaliação Física'), findsOneWidget);
       expect(find.text('Passo 1 de 5'), findsOneWidget);
+      expect(find.text('Normal / Me sinto bem'), findsOneWidget);
       expect(find.text('Cabeça e Pescoço'), findsOneWidget);
-      expect(find.byType(TriageOptionChip), findsNWidgets(12));
+      expect(find.byType(TriageOptionChip), findsNWidgets(13));
     });
 
     testWidgets('3. "Próximo" button starts disabled when no option is selected',
@@ -155,7 +157,10 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Coluna e Dor Dorsal'));
+      final colunaChip = find.text('Coluna e Dor Dorsal');
+      await tester.ensureVisible(colunaChip);
+      await tester.pumpAndSettle();
+      await tester.tap(colunaChip);
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();
@@ -281,6 +286,24 @@ void main() {
       // Verify generic emotional options are NOT present
       expect(find.text('Trabalho / Estudos'), findsNothing);
       expect(find.text('Família / Relacionamentos'), findsNothing);
+    });
+
+    testWidgets('11. Selecting Normal as first option shows "Concluir como Normal / Bem" CTA',
+        (tester) async {
+      await tester.pumpWidget(createTriageTestWidget(
+        vertical: TriageVertical.psicoEmocional,
+      ));
+      await tester.pumpAndSettle();
+
+      final normalChip = find.text('Normal / Me sinto bem');
+      expect(normalChip, findsOneWidget);
+      await tester.tap(normalChip);
+      await tester.pumpAndSettle();
+
+      final completeButton = find.widgetWithText(FilledButton, 'Concluir como Normal / Bem');
+      expect(completeButton, findsOneWidget);
+      final filledBtn = tester.widget<FilledButton>(completeButton);
+      expect(filledBtn.onPressed, isNotNull);
     });
   });
 }

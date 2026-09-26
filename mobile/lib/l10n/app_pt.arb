@@ -272,6 +272,14 @@
   "@triageQ1Emotional": {
     "description": "Question 1 emotional"
   },
+  "triageOptNormal": "Normal / Me sinto bem",
+  "@triageOptNormal": {
+    "description": "Opção de triagem: Normal / Me sinto bem"
+  },
+  "triageSaveNormal": "Concluir como Normal / Bem",
+  "@triageSaveNormal": {
+    "description": "Botão de salvar triagem imediatamente como normal"
+  },
   "triageOptAnsiedade": "Ansiedade / Agitação",
   "@triageOptAnsiedade": {
     "description": "Emotional option: Anxiety/Agitation"

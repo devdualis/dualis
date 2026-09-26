@@ -228,6 +228,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Looking at your emotional and mental side, which word best describes how you feel right now?';
 
   @override
+  String get triageOptNormal => 'Normal / Feeling well';
+
+  @override
+  String get triageSaveNormal => 'Complete as Normal / Well';
+
+  @override
   String get triageOptAnsiedade => 'Anxiety / Agitation';
 
   @override
@@ -1096,7 +1102,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteHistoryItemSuccess => 'Record removed successfully.';
 
   @override
-  String get deleteHistoryItemError => 'Não foi possível remover o registro.';
+  String get deleteHistoryItemError => 'Could not remove the record.';
 
   @override
   String get deleteAction => 'Delete';

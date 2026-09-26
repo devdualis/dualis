@@ -17,8 +17,12 @@ class AuthState {
     this.refreshToken,
   });
 
+  /// The app starts with [isLoading] = true so the GoRouter redirect holds
+  /// navigation at the current location (returns null) while [restoreSession]
+  /// checks SecureStorage. Once [restoreSession] completes it sets
+  /// [isLoading] = false and [isAuthenticated] reflects the real state.
   const AuthState.initial()
-      : isLoading = false,
+      : isLoading = true,
         isAuthenticated = false,
         user = null,
         errorMessage = null,

@@ -66,6 +66,8 @@
   "triagePreviewTitle": "Review Your Assessment",
   "triagePreviewSubmit": "Confirm and Submit",
   "triageQ1Emotional": "Looking at your emotional and mental side, which word best describes how you feel right now?",
+  "triageOptNormal": "Normal / Feeling well",
+  "triageSaveNormal": "Complete as Normal / Well",
   "triageOptAnsiedade": "Anxiety / Agitation",
   "triageOptTristeza": "Sadness / Low Mood",
   "triageOptEstresse": "Stress / Irritability",

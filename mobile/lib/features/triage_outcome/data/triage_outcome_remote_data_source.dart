@@ -56,6 +56,36 @@ class TriageOutcomeRemoteDataSource {
   }) {
     final isZeroIndexed = answers.containsKey(0);
     final step1 = (isZeroIndexed ? answers[0] : answers[1]) ?? '';
+    final lowerStep1 = step1.toLowerCase();
+
+    if (lowerStep1 == 'normal' || lowerStep1 == 'bem_normal') {
+      final lang = (language ?? 'pt').toLowerCase();
+      final String normalCategoryLabel;
+      final String normalSomaticDesc;
+      if (lang == 'es') {
+        normalCategoryLabel = 'Estado de Salud Normal';
+        normalSomaticDesc = 'Sin quejas clínicas reportadas. Estado de salud y bienestar preservado.';
+      } else if (lang == 'en') {
+        normalCategoryLabel = 'Normal Health Status';
+        normalSomaticDesc = 'No clinical complaints reported. Preserved health and well-being status.';
+      } else {
+        normalCategoryLabel = 'Estado de Saúde Normal';
+        normalSomaticDesc = 'Sem queixas clínicas relatadas. Estado de saúde e bem-estar preservado.';
+      }
+      return TriageOutcome(
+        id: 'fallback-normal-${DateTime.now().millisecondsSinceEpoch}',
+        vertical: vertical,
+        intensityScore: 0,
+        careDisposition: CareDisposition.selfCare,
+        primaryCategory: 'normal',
+        categoryLabel: normalCategoryLabel,
+        somaticMapping: normalSomaticDesc,
+        organicPrimacyApplied: false,
+        recommendedArticles: const [],
+        recordedAt: DateTime.now(),
+      );
+    }
+
     final step3 = answers[3] ?? (isZeroIndexed ? answers[2] : answers[3]) ?? '2';
 
     int score = 2;
@@ -122,7 +152,6 @@ class TriageOutcomeRemoteDataSource {
     }
 
     List<RecommendedArticle> articles;
-    final lowerStep1 = step1.toLowerCase();
     final lowerNarrative = (narrative ?? '').toLowerCase();
     final matchTarget = '$lowerStep1 $lowerNarrative';
 
