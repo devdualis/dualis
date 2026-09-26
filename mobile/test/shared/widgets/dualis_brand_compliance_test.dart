@@ -196,6 +196,17 @@ void main() {
       expect(lightTheme.textTheme.headlineMedium?.color, AppColors.dualisNavy);
     });
 
+    test('AppTheme.darkTheme retains identical colors and light brightness to maintain consistent appearance across dark/light mode', () {
+      final lightTheme = AppTheme.lightTheme;
+      final darkTheme = AppTheme.darkTheme;
+
+      expect(darkTheme.brightness, equals(lightTheme.brightness));
+      expect(darkTheme.scaffoldBackgroundColor, equals(lightTheme.scaffoldBackgroundColor));
+      expect(darkTheme.colorScheme.primary, equals(lightTheme.colorScheme.primary));
+      expect(darkTheme.colorScheme.surface, equals(lightTheme.colorScheme.surface));
+      expect(darkTheme.textTheme.displayLarge?.color, equals(lightTheme.textTheme.displayLarge?.color));
+    });
+
     // Punto 8: Proibição de distorção
     testWidgets('Punto 8: Logo maintains contain BoxFit to prevent distortion', (tester) async {
       await tester.pumpWidget(

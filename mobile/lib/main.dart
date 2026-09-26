@@ -52,7 +52,7 @@ class _DualisAppState extends ConsumerState<DualisApp> {
       routerConfig: router,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light,
       locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
