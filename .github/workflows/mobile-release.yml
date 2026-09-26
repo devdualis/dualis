@@ -27,7 +27,7 @@ on:
         default: false
         type: boolean
       api_base_url:
-        description: 'Backend API Base URL (e.g., https://dualis-backend-xyz.a.run.app)'
+        description: 'Optional Backend API Base URL override (e.g., https://dualis-backend-xyz.a.run.app). Leave empty to use the repo API_BASE_URL variable/secret, or the production Cloud Run backend by default.'
         required: false
         default: ''
         type: string
@@ -50,6 +50,9 @@ jobs:
     # `secrets` is not available in step-level `if`, so expose presence flags via env
     env:
       HAS_ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+      # API_BASE_URL is resolved once for the whole job so the build and summary steps cannot drift.
+      # Precedence: dispatch input > repo variable > repo secret > production Cloud Run backend.
+      API_BASE_URL: ${{ inputs.api_base_url || vars.API_BASE_URL || secrets.API_BASE_URL || 'https://dualis-backend-476640769147.southamerica-east1.run.app' }}
 
     steps:
       - name: Checkout repository
@@ -111,7 +114,6 @@ jobs:
         env:
           BUILD_TYPE: ${{ inputs.build_type || 'release' }}
           SPLIT_ABI: ${{ inputs.split_per_abi || false }}
-          API_BASE_URL: ${{ inputs.api_base_url || vars.API_BASE_URL || secrets.API_BASE_URL }}
           DART_DEFINES_JSON: ${{ secrets.MOBILE_DART_DEFINES_JSON }}
         run: |
           BUILD_ARGS="apk --$BUILD_TYPE"
@@ -119,13 +121,9 @@ jobs:
             BUILD_ARGS="$BUILD_ARGS --split-per-abi"
           fi
 
-          # Inject API_BASE_URL if configured in inputs, vars, or secrets
-          if [ -n "$API_BASE_URL" ]; then
-            echo "Injecting API_BASE_URL: $API_BASE_URL"
-            BUILD_ARGS="$BUILD_ARGS --dart-define=API_BASE_URL=$API_BASE_URL"
-          else
-            echo "No custom API_BASE_URL provided; app will default to standard localhost / emulator endpoint."
-          fi
+          # API_BASE_URL is always injected; it is resolved once in the job-level env
+          echo "Injecting API_BASE_URL: $API_BASE_URL"
+          BUILD_ARGS="$BUILD_ARGS --dart-define=API_BASE_URL=$API_BASE_URL"
 
           # Optional: inject additional dart defines if MOBILE_DART_DEFINES_JSON secret is set
           if [ -n "$DART_DEFINES_JSON" ]; then
@@ -161,15 +159,9 @@ jobs:
       # Step Summary
       # ------------------------------------------------------------------------
       - name: APK Build Summary
-        env:
-          API_BASE_URL: ${{ inputs.api_base_url || vars.API_BASE_URL || secrets.API_BASE_URL }}
         run: |
           echo "### 📱 Android APK Build Complete" >> $GITHUB_STEP_SUMMARY
-          if [ -n "$API_BASE_URL" ]; then
-            echo "- **Configured API Base URL:** \`$API_BASE_URL\`" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- **Configured API Base URL:** \`Default (Local / Emulator)\`" >> $GITHUB_STEP_SUMMARY
-          fi
+          echo "- **Configured API Base URL:** \`$API_BASE_URL\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| File | Size |" >> $GITHUB_STEP_SUMMARY
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
