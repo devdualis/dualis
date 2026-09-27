@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_client.dart';
@@ -48,16 +49,46 @@ class AuthController extends Notifier<AuthState> {
   Future<void> restoreSession() async {
     try {
       final token = await _secureStorage.getAccessToken();
-      if (token == null || token.isEmpty) return;
+      final cachedProfile = await _secureStorage.getUserProfile();
 
-      final profile = await _repository.getProfile(token: token);
+      if (token == null || token.isEmpty) {
+        state = state.copyWith(isLoading: false, isAuthenticated: false);
+        return;
+      }
+
+      // Restore session immediately from secure device storage (WhatsApp-like persistence)
       state = state.copyWith(
         isAuthenticated: true,
-        user: profile,
+        user: cachedProfile,
         accessToken: token,
+        isLoading: false,
       );
+
+      // In the background, validate / refresh with the server
+      try {
+        final profile = await _repository.getProfile(token: token);
+        await _secureStorage.saveUserProfile(profile);
+        final currentToken = await _secureStorage.getAccessToken() ?? token;
+        state = state.copyWith(
+          isAuthenticated: true,
+          user: profile,
+          accessToken: currentToken,
+          isLoading: false,
+        );
+      } on DioException catch (dioErr) {
+        if (dioErr.response?.statusCode == 401) {
+          // Token expired and refresh failed
+          await logout();
+        } else {
+          // Offline, slow connection, or server restart: preserve session!
+        }
+      } catch (_) {}
     } catch (_) {
-      await _secureStorage.clearAll();
+      // Storage read error fallback: never wipe storage on transient error
+    } finally {
+      if (state.isLoading) {
+        state = state.copyWith(isLoading: false);
+      }
     }
   }
 
@@ -93,6 +124,7 @@ class AuthController extends Notifier<AuthState> {
           refreshToken: refreshToken,
           userId: user.id,
         );
+        await _secureStorage.saveUserProfile(user);
         state = state.copyWith(
           isLoading: false,
           isAuthenticated: true,
@@ -136,6 +168,7 @@ class AuthController extends Notifier<AuthState> {
           refreshToken: refreshToken,
           userId: user.id,
         );
+        await _secureStorage.saveUserProfile(user);
       }
 
       state = state.copyWith(
@@ -190,6 +223,7 @@ class AuthController extends Notifier<AuthState> {
           refreshToken: refreshToken,
           userId: user.id,
         );
+        await _secureStorage.saveUserProfile(user);
       }
 
       state = state.copyWith(
@@ -233,6 +267,7 @@ class AuthController extends Notifier<AuthState> {
         picture: picture,
         gender: gender,
       );
+      await _secureStorage.saveUserProfile(updated);
 
       state = state.copyWith(
         isLoading: false,

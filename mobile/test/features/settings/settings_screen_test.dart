@@ -17,6 +17,15 @@ class FakeSecureStorageService extends SecureStorageService {
 
   @override
   Future<void> clearAll() async {}
+
+  @override
+  Future<void> saveUserProfile(UserProfile user) async {}
+
+  @override
+  Future<UserProfile?> getUserProfile() async => null;
+
+  @override
+  Future<void> clearUserProfile() async {}
 }
 
 class FakeAuthRepository implements AuthRepository {

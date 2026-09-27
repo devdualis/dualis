@@ -570,6 +570,49 @@ class HydrationDashboardScreen extends ConsumerWidget {
                 }
               },
             ),
+            const Divider(height: 1, color: AppColors.outlineLight),
+            ListTile(
+              key: const Key('settings_test_background_notification_tile'),
+              leading: const Icon(Icons.alarm_on_outlined,
+                  color: AppColors.softIndigo),
+              title: Text(
+                'Testar com App Fechado (em 10s)',
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: AppColors.textPrimaryLight,
+                ),
+              ),
+              subtitle: Text(
+                'Agenda para 10s. Feche o app após tocar para testar.',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  color: AppColors.textSecondaryLight,
+                ),
+              ),
+              trailing: const Icon(Icons.timer_outlined,
+                  color: AppColors.softIndigo, size: 20),
+              onTap: () async {
+                final service = ref.read(hydrationNotificationServiceProvider);
+                await service.scheduleTestReminderInSeconds(
+                  seconds: 10,
+                  style: settings.reminderSoundStyle,
+                  trackingEnabled: settings.trackingEnabled,
+                  customBody:
+                      '💧 Dualis: Alerta de fundo! O app está funcionando com o aplicativo fechado.',
+                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'Alerta agendado para daqui a 10 segundos! Feche o aplicativo agora para testar.'),
+                      backgroundColor: AppColors.softIndigo,
+                      duration: Duration(seconds: 5),
+                    ),
+                  );
+                }
+              },
+            ),
           ],
         ),
       ),

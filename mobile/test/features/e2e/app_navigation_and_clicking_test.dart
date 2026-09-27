@@ -46,9 +46,20 @@ class MockSecureStorageService extends SecureStorageService {
     token = accessToken;
   }
 
+  UserProfile? userProfile;
+
+  @override
+  Future<void> saveUserProfile(UserProfile user) async {
+    userProfile = user;
+  }
+
+  @override
+  Future<UserProfile?> getUserProfile() async => userProfile;
+
   @override
   Future<void> clearAll() async {
     token = null;
+    userProfile = null;
   }
 }
 

@@ -14,6 +14,8 @@ import 'package:dualis_mobile/l10n/app_localizations.dart';
 import 'package:dualis_mobile/shared/widgets/dualis_primary_button.dart';
 
 class MockSecureStorageService extends SecureStorageService {
+  UserProfile? _profile;
+
   @override
   Future<String?> getAccessToken() async => null;
 
@@ -23,6 +25,14 @@ class MockSecureStorageService extends SecureStorageService {
     required String refreshToken,
     required String userId,
   }) async {}
+
+  @override
+  Future<void> saveUserProfile(UserProfile user) async {
+    _profile = user;
+  }
+
+  @override
+  Future<UserProfile?> getUserProfile() async => _profile;
 
   @override
   Future<void> clearAll() async {}

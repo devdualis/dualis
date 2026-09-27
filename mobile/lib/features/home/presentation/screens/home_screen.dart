@@ -71,6 +71,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(triggerCheckInProvider.notifier).checkAndResetIfNewDay();
       ref.read(triggerCheckInProvider.notifier).loadTodayCheckIn();
       ref.read(triageOutcomeProvider.notifier).loadTodayOutcome();
+      ref.read(hydrationControllerProvider.notifier).loadData();
     });
   }
 
@@ -86,6 +87,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.listen(authControllerProvider, (prev, next) {
       if ((prev == null || !prev.isAuthenticated) && next.isAuthenticated) {
         ref.read(triggerCheckInProvider.notifier).loadTodayCheckIn();
+        ref.read(hydrationControllerProvider.notifier).loadData();
       }
     });
 
@@ -94,6 +96,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final userName = (user?.name != null && user!.name.isNotEmpty) ? user.name : 'Paciente';
     final userEmail = (user?.email != null && user!.email.isNotEmpty) ? user.email : 'Sessão ativa';
     ref.watch(syncOutboxWorkerProvider);
+    ref.watch(hydrationControllerProvider);
 
     final triggerState = ref.watch(triggerCheckInProvider);
 

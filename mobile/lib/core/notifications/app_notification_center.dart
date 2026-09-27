@@ -112,8 +112,16 @@ class AppNotificationCenter {
   final List<_PayloadSubscriber> _subscribers = <_PayloadSubscriber>[];
   final List<String> _pendingPayloads = <String>[];
 
-  static Future<String> _platformTimezone() async =>
-      (await FlutterTimezone.getLocalTimezone()).identifier;
+  static Future<String> _platformTimezone() async {
+    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+      return 'UTC';
+    }
+    try {
+      return (await FlutterTimezone.getLocalTimezone()).identifier;
+    } catch (_) {
+      return 'UTC';
+    }
+  }
 
   /// Idempotent: the plugin is initialized once, however many callers race.
   Future<void> initialize() => _initialization ??= _initialize();

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../features/auth/domain/user_profile.dart';
 
 final secureStorageServiceProvider = Provider<SecureStorageService>((ref) {
   return SecureStorageService();
@@ -10,6 +11,7 @@ class SecureStorageService {
   static const String _keyAccessToken = 'dualis_access_token';
   static const String _keyRefreshToken = 'dualis_refresh_token';
   static const String _keyUserId = 'dualis_user_id';
+  static const String _keyUserProfile = 'dualis_user_profile';
   static const String _keyBiometricEnabled = 'dualis_biometric_enabled';
   static const String _prefixDailyCheckIn = 'dualis_daily_checkin_';
 
@@ -43,6 +45,35 @@ class SecureStorageService {
   Future<String?> getRefreshToken() => _storage.read(key: _keyRefreshToken);
 
   Future<String?> getUserId() => _storage.read(key: _keyUserId);
+
+  Future<void> saveUserProfile(UserProfile user) async {
+    try {
+      await _storage.write(
+        key: _keyUserProfile,
+        value: jsonEncode(user.toJson()),
+      );
+    } catch (_) {}
+  }
+
+  Future<UserProfile?> getUserProfile() async {
+    try {
+      final raw = await _storage.read(key: _keyUserProfile);
+      if (raw == null || raw.isEmpty) return null;
+      final decoded = jsonDecode(raw);
+      if (decoded is Map<String, dynamic>) {
+        return UserProfile.fromJson(decoded);
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> clearUserProfile() async {
+    try {
+      await _storage.delete(key: _keyUserProfile);
+    } catch (_) {}
+  }
 
   Future<bool> isBiometricEnabled() async {
     final val = await _storage.read(key: _keyBiometricEnabled);

@@ -4,6 +4,7 @@ import 'dart:ui' show Locale;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../features/hydration/domain/models/hydration_settings.dart';
 import '../../l10n/app_localizations.dart';
@@ -197,6 +198,51 @@ class HydrationNotificationService {
       notificationDetails: details,
       payload: NotificationPayloads.openWaterModal,
     );
+  }
+
+  /// Agenda uma notificação de teste para daqui a [seconds] segundos para
+  /// que o usuário possa fechar o aplicativo e validar o recebimento com o app fechado.
+  Future<void> scheduleTestReminderInSeconds({
+    int seconds = 10,
+    required ReminderSoundStyle style,
+    required bool trackingEnabled,
+    String? customBody,
+  }) async {
+    await initialize();
+    await requestPermissions();
+    final l10n = _l10n();
+    final details = _getNotificationDetails(style, l10n);
+    final scheduledDate =
+        tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds));
+
+    final exactAllowed = await canScheduleExactAlarms();
+    final scheduleMode = exactAllowed
+        ? AndroidScheduleMode.exactAllowWhileIdle
+        : AndroidScheduleMode.inexactAllowWhileIdle;
+
+    try {
+      await _plugin.zonedSchedule(
+        id: 1999,
+        title: l10n.notifWaterTitle,
+        body: customBody ??
+            '💧 Dualis: Alerta de teste em segundo plano! O app está ativo na memória.',
+        scheduledDate: scheduledDate,
+        notificationDetails: details,
+        payload: NotificationPayloads.openWaterModal,
+        androidScheduleMode: scheduleMode,
+      );
+    } catch (_) {
+      await _plugin.zonedSchedule(
+        id: 1999,
+        title: l10n.notifWaterTitle,
+        body: customBody ??
+            '💧 Dualis: Alerta de teste em segundo plano! O app está ativo na memória.',
+        scheduledDate: scheduledDate,
+        notificationDetails: details,
+        payload: NotificationPayloads.openWaterModal,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      );
+    }
   }
 
   Future<void> _cancelIds(Iterable<int> ids) async {

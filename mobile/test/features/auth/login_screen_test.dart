@@ -104,6 +104,8 @@ class MockAuthRepository implements AuthRepository {
 }
 
 class MockSecureStorage extends SecureStorageService {
+  UserProfile? _profile;
+
   @override
   Future<void> persistTokens({
     required String accessToken,
@@ -113,6 +115,14 @@ class MockSecureStorage extends SecureStorageService {
 
   @override
   Future<String?> getAccessToken() async => null;
+
+  @override
+  Future<void> saveUserProfile(UserProfile user) async {
+    _profile = user;
+  }
+
+  @override
+  Future<UserProfile?> getUserProfile() async => _profile;
 
   @override
   Future<void> clearAll() async {}

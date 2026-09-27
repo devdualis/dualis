@@ -2,6 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
+import 'package:dualis_mobile/features/auth/domain/user_profile.dart';
 
 class MockFlutterSecureStorage extends Mock implements FlutterSecureStorage {}
 
@@ -106,6 +107,44 @@ void main() {
             key: 'dualis_biometric_enabled',
             value: 'false',
           )).called(1);
+    });
+
+    test('saveUserProfile serializes and writes profile to secure storage',
+        () async {
+      when(() => mockStorage.write(
+            key: any(named: 'key'),
+            value: any(named: 'value'),
+          )).thenAnswer((_) async {});
+
+      const profile = UserProfile(
+        id: testUserId,
+        name: 'Ricardo Rincon',
+        email: 'ricardo@exemplo.com',
+        gender: Gender.masculino,
+        dateOfBirth: '1985-05-15',
+        isEmailVerified: true,
+      );
+
+      await secureStorageService.saveUserProfile(profile);
+
+      verify(() => mockStorage.write(
+            key: 'dualis_user_profile',
+            value: any(named: 'value'),
+          )).called(1);
+    });
+
+    test('getUserProfile parses and returns cached profile', () async {
+      const jsonStr =
+          '{"id":"$testUserId","name":"Ricardo Rincon","email":"ricardo@exemplo.com","gender":"masculino","dateOfBirth":"1985-05-15","isEmailVerified":true}';
+
+      when(() => mockStorage.read(key: 'dualis_user_profile'))
+          .thenAnswer((_) async => jsonStr);
+
+      final profile = await secureStorageService.getUserProfile();
+      expect(profile, isNotNull);
+      expect(profile!.id, equals(testUserId));
+      expect(profile.name, equals('Ricardo Rincon'));
+      expect(profile.email, equals('ricardo@exemplo.com'));
     });
 
     test('clearAll delegates to deleteAll on mockStorage', () async {

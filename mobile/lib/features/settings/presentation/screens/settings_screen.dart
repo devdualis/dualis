@@ -991,6 +991,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
                         onTap: () => context.push(RoutePaths.history),
                       ),
+                      const Divider(height: 1, color: AppColors.outlineLight),
+                      ListTile(
+                        key: const Key('settings_hydration_tile'),
+                        leading: const Icon(Icons.water_drop_outlined, color: AppColors.clinicalTeal),
+                        title: Text(
+                          'Lembretes e Hidratação',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Horários de notificações, alarmes e teste com app fechado',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
+                        onTap: () => context.push(RoutePaths.hydration),
+                      ),
                     ],
                   ),
                 ),

@@ -169,18 +169,77 @@ class DailyCheckinNotificationService {
     required bool repeatDaily,
   }) async {
     try {
+      final exactAllowed = await _center.canScheduleExactAlarms();
+      final scheduleMode = exactAllowed
+          ? AndroidScheduleMode.exactAllowWhileIdle
+          : AndroidScheduleMode.inexactAllowWhileIdle;
+
+      try {
+        await _plugin.zonedSchedule(
+          id: id,
+          title: title,
+          body: body,
+          scheduledDate: date,
+          notificationDetails: details,
+          payload: NotificationPayloads.openCheckIn,
+          androidScheduleMode: scheduleMode,
+          matchDateTimeComponents: repeatDaily ? DateTimeComponents.time : null,
+        );
+      } catch (e) {
+        debugPrint(
+            'Aviso ao agendar check-in $id com $scheduleMode: $e. Tentando modo inexato...');
+        await _plugin.zonedSchedule(
+          id: id,
+          title: title,
+          body: body,
+          scheduledDate: date,
+          notificationDetails: details,
+          payload: NotificationPayloads.openCheckIn,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          matchDateTimeComponents: repeatDaily ? DateTimeComponents.time : null,
+        );
+      }
+    } catch (scheduleErr) {
+      debugPrint('Aviso ao agendar check-in $id: $scheduleErr');
+    }
+  }
+
+  /// Agenda uma notificação de teste para daqui a [seconds] segundos para
+  /// que o usuário possa fechar o aplicativo e validar o recebimento com o app fechado.
+  Future<void> scheduleTestCheckinInSeconds({int seconds = 10}) async {
+    await initialize();
+    await requestPermissions();
+    final l10n = _l10n();
+    final details = _getNotificationDetails(l10n);
+    final title = 'Dualis: ${l10n.notifCheckinTitleAt("Agora")}';
+    final body = l10n.notifCheckinBody;
+    final scheduledDate = _now().add(Duration(seconds: seconds));
+
+    final exactAllowed = await _center.canScheduleExactAlarms();
+    final scheduleMode = exactAllowed
+        ? AndroidScheduleMode.exactAllowWhileIdle
+        : AndroidScheduleMode.inexactAllowWhileIdle;
+
+    try {
       await _plugin.zonedSchedule(
-        id: id,
+        id: 2999,
         title: title,
         body: body,
-        scheduledDate: date,
+        scheduledDate: scheduledDate,
+        notificationDetails: details,
+        payload: NotificationPayloads.openCheckIn,
+        androidScheduleMode: scheduleMode,
+      );
+    } catch (_) {
+      await _plugin.zonedSchedule(
+        id: 2999,
+        title: title,
+        body: body,
+        scheduledDate: scheduledDate,
         notificationDetails: details,
         payload: NotificationPayloads.openCheckIn,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        matchDateTimeComponents: repeatDaily ? DateTimeComponents.time : null,
       );
-    } catch (scheduleErr) {
-      debugPrint('Aviso ao agendar check-in $id: $scheduleErr');
     }
   }
 
