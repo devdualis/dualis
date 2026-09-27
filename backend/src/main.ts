@@ -16,6 +16,29 @@ async function bootstrap() {
     bodyLimit: 5242880, // 5MB payload limit for profile pictures
   });
 
+  // Fastify by default rejects empty bodies with Content-Type: application/json with HTTP 400.
+  // Many mobile clients (Dio) set default headers: {'Content-Type': 'application/json'}.
+  // Allow empty or whitespace-only bodies to gracefully parse as undefined for DELETE / GET.
+  fastifyAdapter.useBodyParser(
+    'application/json',
+    false,
+    {},
+    (req: any, body: any, done: any) => {
+      const str = body ? body.toString('utf8').trim() : '';
+      if (!str) {
+        done(null, undefined);
+        return;
+      }
+      try {
+        const json = JSON.parse(str);
+        done(null, json);
+      } catch (err: any) {
+        err.statusCode = 400;
+        done(err, undefined);
+      }
+    },
+  );
+
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     fastifyAdapter,

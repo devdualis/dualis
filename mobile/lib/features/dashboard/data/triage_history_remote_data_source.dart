@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/network/api_client.dart';
@@ -48,12 +49,16 @@ class TriageHistoryRemoteDataSource {
       final token = await _secureStorage.getAccessToken();
       final response = await _apiClient.delete(
         ApiEndpoints.triageHistoryItem(id),
-        options: token != null
-            ? Options(headers: {'Authorization': 'Bearer $token'})
-            : null,
+        options: Options(
+          headers: {
+            if (token != null) 'Authorization': 'Bearer $token',
+            'Content-Type': null,
+          },
+        ),
       );
       return response.statusCode == 200 || response.statusCode == 204;
-    } catch (_) {
+    } catch (e, stack) {
+      debugPrint('[TriageHistoryRemoteDataSource] Failed to delete history item $id: $e\n$stack');
       return false;
     }
   }

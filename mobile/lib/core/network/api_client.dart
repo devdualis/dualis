@@ -157,11 +157,21 @@ class ApiClient {
     Options? options,
     CancelToken? cancelToken,
   }) {
+    // If no data payload is sent with DELETE, omit Content-Type header to avoid empty-body HTTP 400
+    final effectiveOptions = options?.copyWith() ?? Options();
+    if (data == null) {
+      effectiveOptions.contentType = null;
+      final currentHeaders = Map<String, dynamic>.from(effectiveOptions.headers ?? {});
+      currentHeaders.remove('Content-Type');
+      currentHeaders.remove('content-type');
+      effectiveOptions.headers = currentHeaders;
+    }
+
     return dio.delete<T>(
       path,
       data: data,
       queryParameters: queryParameters,
-      options: options,
+      options: effectiveOptions,
       cancelToken: cancelToken,
     );
   }

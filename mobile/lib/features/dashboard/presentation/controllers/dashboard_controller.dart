@@ -67,7 +67,26 @@ class DashboardNotifier extends AsyncNotifier<DashboardState> {
     final dataSource = ref.read(triageHistoryDataSourceProvider);
     final success = await dataSource.deleteHistoryItem(id);
     if (success) {
-      await refreshHistory();
+      final current = state.asData?.value;
+      if (current != null) {
+        final updatedLogs = current.history.logs.where((e) => e.id != id).toList();
+        state = AsyncData(
+          current.copyWith(
+            history: current.history.copyWith(logs: updatedLogs),
+          ),
+        );
+      }
+      try {
+        final history = await dataSource.fetchHistory(days: 14);
+        final currentTab = state.asData?.value.selectedTab ?? DashboardTab.emotional;
+        state = AsyncData(
+          DashboardState(
+            selectedTab: currentTab,
+            history: history,
+            selectedRegionKey: state.asData?.value.selectedRegionKey,
+          ),
+        );
+      } catch (_) {}
       return true;
     }
     return false;

@@ -2,22 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/models/triage_history_models.dart';
+import 'delete_history_item_dialog.dart';
 import 'retrospective_list_view.dart';
 
 class TriageHistoryDetailModal extends StatelessWidget {
   final TriageHistoryEntry entry;
+  final Future<bool> Function(String id)? onDelete;
 
   const TriageHistoryDetailModal({
     super.key,
     required this.entry,
+    this.onDelete,
   });
 
-  static Future<void> show(BuildContext context, TriageHistoryEntry entry) {
+  static Future<void> show(
+    BuildContext context,
+    TriageHistoryEntry entry, {
+    Future<bool> Function(String id)? onDelete,
+  }) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => TriageHistoryDetailModal(entry: entry),
+      builder: (_) => TriageHistoryDetailModal(
+        entry: entry,
+        onDelete: onDelete,
+      ),
     );
   }
 
@@ -253,6 +263,23 @@ class TriageHistoryDetailModal extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (onDelete != null)
+                    IconButton(
+                      key: const Key('modal_delete_button'),
+                      icon: const Icon(Icons.delete_outline_rounded),
+                      color: AppColors.emergencyCrimson,
+                      tooltip: 'Descartar registro',
+                      onPressed: () async {
+                        final success = await DeleteHistoryItemDialog.show(
+                          context,
+                          entry: entry,
+                          onDelete: onDelete,
+                        );
+                        if (success == true && context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                    ),
                   IconButton(
                     key: const Key('modal_close_button'),
                     icon: const Icon(Icons.close_rounded),

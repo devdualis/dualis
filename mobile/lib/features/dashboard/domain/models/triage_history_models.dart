@@ -184,6 +184,20 @@ class TriageHistoryResponse {
     );
   }
 
+  TriageHistoryResponse copyWith({
+    List<TriageHistoryEntry>? logs,
+    Map<String, int>? physicalSummary,
+    List<EmotionalDayData>? emotionalSummary,
+    List<CriticalRecurrenceItem>? criticalRecurrences,
+  }) {
+    return TriageHistoryResponse(
+      logs: logs ?? this.logs,
+      physicalSummary: physicalSummary ?? this.physicalSummary,
+      emotionalSummary: emotionalSummary ?? this.emotionalSummary,
+      criticalRecurrences: criticalRecurrences ?? this.criticalRecurrences,
+    );
+  }
+
   factory TriageHistoryResponse.empty() {
     return const TriageHistoryResponse(
       logs: [],

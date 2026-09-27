@@ -3,6 +3,7 @@ import '../../../../core/clinical/clinical_intensity_tier.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/triage_history_models.dart';
+import 'delete_history_item_dialog.dart';
 import 'triage_history_detail_modal.dart';
 
 class RetrospectiveListView extends StatelessWidget {
@@ -101,64 +102,26 @@ class RetrospectiveListView extends StatelessWidget {
     return '$day/$month/$year $hour:$minute';
   }
 
-  Future<void> _confirmAndDelete(BuildContext context, String id) async {
+  Future<void> _confirmAndDelete(BuildContext context, TriageHistoryEntry entry) async {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            const Icon(
-              Icons.delete_outline_rounded,
-              color: AppColors.emergencyCrimson,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                l10n?.deleteHistoryItemTitle ?? 'Descartar registro do histórico',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          l10n?.deleteHistoryItemConfirm ??
-              'Tem certeza de que deseja descartar este registro de triagem do seu histórico? Esta ação é irreversível.',
-          style: const TextStyle(fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n?.cancel ?? 'Cancelar'),
-          ),
-          FilledButton(
-            key: const Key('confirm_delete_history_item_button'),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.emergencyCrimson,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n?.deleteAction ?? 'Descartar'),
-          ),
-        ],
-      ),
+    final success = await DeleteHistoryItemDialog.show(
+      context,
+      entry: entry,
+      onDelete: onDeleteEntry,
     );
 
-    if (confirmed == true && context.mounted && onDeleteEntry != null) {
-      final success = await onDeleteEntry!(id);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              success
-                  ? (l10n?.deleteHistoryItemSuccess ?? 'Registro removido com sucesso.')
-                  : (l10n?.deleteHistoryItemError ?? 'Não foi possível remover o registro.'),
-            ),
-            backgroundColor:
-                success ? AppColors.clinicalTeal : AppColors.emergencyCrimson,
+    if (success != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            success
+                ? (l10n?.deleteHistoryItemSuccess ?? 'Registro removido com sucesso.')
+                : (l10n?.deleteHistoryItemError ?? 'Não foi possível remover o registro.'),
           ),
-        );
-      }
+          backgroundColor:
+              success ? AppColors.clinicalTeal : AppColors.emergencyCrimson,
+        ),
+      );
     }
   }
 
@@ -232,7 +195,7 @@ class RetrospectiveListView extends StatelessWidget {
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
-            onTap: () => TriageHistoryDetailModal.show(context, entry),
+            onTap: () => TriageHistoryDetailModal.show(context, entry, onDelete: onDeleteEntry),
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Row(
@@ -364,7 +327,7 @@ class RetrospectiveListView extends StatelessWidget {
                           constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                           splashRadius: 18,
                           tooltip: l10n?.deleteHistoryItemTitle ?? 'Descartar registro',
-                          onPressed: () => _confirmAndDelete(context, entry.id),
+                          onPressed: () => _confirmAndDelete(context, entry),
                         ),
                       Icon(
                         Icons.chevron_right_rounded,

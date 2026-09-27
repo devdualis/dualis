@@ -119,8 +119,23 @@ describe('Triage History E2E Suite (DASH-01, DASH-02, DASH-03, DASH-04, SEC-01)'
       });
     }
 
+    const fastifyAdapter = new FastifyAdapter();
+    fastifyAdapter.useBodyParser('application/json', false, {}, (req: any, body: any, done: any) => {
+      const str = body ? body.toString('utf8').trim() : '';
+      if (!str) {
+        done(null, undefined);
+        return;
+      }
+      try {
+        done(null, JSON.parse(str));
+      } catch (err: any) {
+        err.statusCode = 400;
+        done(err, undefined);
+      }
+    });
+
     app = moduleRef.createNestApplication<NestFastifyApplication>(
-      new FastifyAdapter(),
+      fastifyAdapter,
     );
 
     app.enableVersioning({
@@ -213,6 +228,22 @@ describe('Triage History E2E Suite (DASH-01, DASH-02, DASH-03, DASH-04, SEC-01)'
       url: `/v1/triage/history/${testId}`,
       headers: {
         authorization: `Bearer ${validAccessToken}`,
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = JSON.parse(res.payload);
+    expect(body).toEqual({ success: true, id: testId });
+  });
+
+  it('7. DELETE /v1/triage/history/:id with content-type: application/json and empty body returns 200', async () => {
+    const testId = '22222222-2222-2222-2222-222222222222';
+    const res = await app.inject({
+      method: 'DELETE',
+      url: `/v1/triage/history/${testId}`,
+      headers: {
+        authorization: `Bearer ${validAccessToken}`,
+        'content-type': 'application/json',
       },
     });
 
