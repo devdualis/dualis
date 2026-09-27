@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/notifications/hydration_notification_service.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
 import '../../domain/models/hydration_settings.dart';
 import '../controllers/hydration_controller.dart';
@@ -350,7 +349,9 @@ class HydrationDashboardScreen extends ConsumerWidget {
               icon: const Icon(Icons.delete_outline, size: 20, color: Colors.grey),
               onPressed: () {
                 if (log.id != null) {
-                  ref.read(hydrationControllerProvider.notifier).deleteLog(log.id!);
+                  ref
+                      .read(hydrationControllerProvider.notifier)
+                      .deleteLog(log.id!, remoteId: log.remoteId);
                 }
               },
             ),
@@ -528,91 +529,6 @@ class HydrationDashboardScreen extends ConsumerWidget {
                 ),
               ),
             ],
-            const Divider(height: 1, color: AppColors.outlineLight),
-            ListTile(
-              key: const Key('settings_test_notification_tile'),
-              leading: const Icon(Icons.notifications_active_outlined,
-                  color: AppColors.clinicalTeal),
-              title: Text(
-                'Testar Notificação Agora',
-                style: GoogleFonts.plusJakartaSans(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: AppColors.textPrimaryLight,
-                ),
-              ),
-              subtitle: Text(
-                'Dispara um alerta imediato na barra de notificações',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  color: AppColors.textSecondaryLight,
-                ),
-              ),
-              trailing: const Icon(Icons.send_rounded,
-                  color: AppColors.clinicalTeal, size: 20),
-              onTap: () async {
-                final service = ref.read(hydrationNotificationServiceProvider);
-                await service.showImmediateReminder(
-                  style: settings.reminderSoundStyle,
-                  trackingEnabled: settings.trackingEnabled,
-                  customBody:
-                      '💧 Teste: Hora de Beber Água! Toque para interagir.',
-                );
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                          'Notificação de teste enviada! Verifique a barra de notificações.'),
-                      backgroundColor: AppColors.clinicalTeal,
-                      duration: Duration(seconds: 3),
-                    ),
-                  );
-                }
-              },
-            ),
-            const Divider(height: 1, color: AppColors.outlineLight),
-            ListTile(
-              key: const Key('settings_test_background_notification_tile'),
-              leading: const Icon(Icons.alarm_on_outlined,
-                  color: AppColors.softIndigo),
-              title: Text(
-                'Testar com App Fechado (em 10s)',
-                style: GoogleFonts.plusJakartaSans(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: AppColors.textPrimaryLight,
-                ),
-              ),
-              subtitle: Text(
-                'Agenda para 10s. Feche o app após tocar para testar.',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  color: AppColors.textSecondaryLight,
-                ),
-              ),
-              trailing: const Icon(Icons.timer_outlined,
-                  color: AppColors.softIndigo, size: 20),
-              onTap: () async {
-                final service = ref.read(hydrationNotificationServiceProvider);
-                await service.scheduleTestReminderInSeconds(
-                  seconds: 10,
-                  style: settings.reminderSoundStyle,
-                  trackingEnabled: settings.trackingEnabled,
-                  customBody:
-                      '💧 Dualis: Alerta de fundo! O app está funcionando com o aplicativo fechado.',
-                );
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                          'Alerta agendado para daqui a 10 segundos! Feche o aplicativo agora para testar.'),
-                      backgroundColor: AppColors.softIndigo,
-                      duration: Duration(seconds: 5),
-                    ),
-                  );
-                }
-              },
-            ),
           ],
         ),
       ),

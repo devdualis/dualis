@@ -155,9 +155,12 @@ class HydrationController extends Notifier<HydrationState> {
     }
   }
 
-  Future<void> deleteLog(int id) async {
+  Future<void> deleteLog(int id, {String? remoteId}) async {
     try {
       await _repository.deleteLog(id);
+      if (remoteId != null && remoteId.isNotEmpty) {
+        await _repository.deleteRemoteLog(remoteId);
+      }
       await loadData();
     } catch (e) {
       state = state.copyWith(

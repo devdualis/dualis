@@ -1,12 +1,14 @@
 class WaterIntakeEntry {
   final int? id;
+  final String? remoteId;
   final String userId;
   final int amountMl;
   final DateTime timestamp;
-  final String source; // 'reminder_alarm', 'manual', 'quick_action'
+  final String source; // 'reminder_alarm', 'manual', 'quick_chip', etc.
 
   const WaterIntakeEntry({
     this.id,
+    this.remoteId,
     required this.userId,
     required this.amountMl,
     required this.timestamp,
@@ -15,17 +17,19 @@ class WaterIntakeEntry {
 
   factory WaterIntakeEntry.fromJson(Map<String, dynamic> json) {
     return WaterIntakeEntry(
-      id: json['id'] as int?,
-      userId: json['userId'] as String,
-      amountMl: json['amountMl'] as int,
-      timestamp: DateTime.parse(json['timestamp'] as String),
-      source: json['source'] as String? ?? 'manual',
+      id: json['id'] is int ? json['id'] as int : null,
+      remoteId: json['remoteId'] as String? ?? (json['id'] is String ? json['id'] as String : null),
+      userId: (json['userId'] ?? json['user_id'] ?? '') as String,
+      amountMl: (json['amountMl'] ?? json['amount_ml'] ?? 0) as int,
+      timestamp: DateTime.parse((json['timestamp'] ?? json['recordedAt'] ?? json['recorded_at']) as String),
+      source: (json['source'] ?? 'manual') as String,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'remoteId': remoteId,
       'userId': userId,
       'amountMl': amountMl,
       'timestamp': timestamp.toIso8601String(),
@@ -35,6 +39,7 @@ class WaterIntakeEntry {
 
   WaterIntakeEntry copyWith({
     int? id,
+    String? remoteId,
     String? userId,
     int? amountMl,
     DateTime? timestamp,
@@ -42,6 +47,7 @@ class WaterIntakeEntry {
   }) {
     return WaterIntakeEntry(
       id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
       userId: userId ?? this.userId,
       amountMl: amountMl ?? this.amountMl,
       timestamp: timestamp ?? this.timestamp,

@@ -38,4 +38,9 @@ class ApiEndpoints {
   static const String classifySymptom = '/v1/ai/classify-symptom';
   static const String exportData = '/v1/auth/export-data';
   static const String deleteAccount = '/v1/auth/account';
+
+  static const String hydrationLog = '/v1/hydration/log';
+  static const String hydrationToday = '/v1/hydration/today';
+  static const String hydrationHistory = '/v1/hydration/history';
+  static String hydrationLogItem(String id) => '/v1/hydration/log/$id';
 }

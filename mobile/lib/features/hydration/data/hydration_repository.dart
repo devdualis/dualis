@@ -5,6 +5,7 @@ import '../../../../core/database/app_database.dart' hide WaterIntakeLog;
 import '../../../../core/security/secure_storage_service.dart';
 import '../domain/models/hydration_settings.dart';
 import '../domain/models/water_intake_log.dart';
+import 'hydration_remote_data_source.dart';
 
 abstract class HydrationRepository {
   Future<WaterIntakeEntry> logWaterIntake({
@@ -28,6 +29,8 @@ abstract class HydrationRepository {
 
   Future<void> deleteLog(int id);
 
+  Future<void> deleteRemoteLog(String remoteId) async {}
+
   Future<HydrationSettings> getSettings();
 
   Future<void> saveSettings(HydrationSettings settings);
@@ -36,14 +39,17 @@ abstract class HydrationRepository {
 class HydrationRepositoryImpl implements HydrationRepository {
   final AppDatabase _db;
   final SecureStorageService _storage;
+  final HydrationRemoteDataSource? _remoteDataSource;
 
   static const _settingsKey = 'dualis_hydration_settings';
 
   HydrationRepositoryImpl({
     required AppDatabase db,
     required SecureStorageService storage,
+    HydrationRemoteDataSource? remoteDataSource,
   })  : _db = db,
-        _storage = storage;
+        _storage = storage,
+        _remoteDataSource = remoteDataSource;
 
   @override
   Future<WaterIntakeEntry> logWaterIntake({
@@ -62,8 +68,21 @@ class HydrationRepositoryImpl implements HydrationRepository {
 
     final id = await _db.into(_db.waterIntakeLogs).insert(companion);
 
+    String? remoteId;
+    if (_remoteDataSource != null && userId.isNotEmpty && userId != 'guest_user') {
+      try {
+        final remoteEntry = await _remoteDataSource.logWater(
+          amountMl: amountMl,
+          source: source,
+          timestamp: entryTime,
+        );
+        remoteId = remoteEntry?.remoteId;
+      } catch (_) {}
+    }
+
     return WaterIntakeEntry(
       id: id,
+      remoteId: remoteId,
       userId: userId,
       amountMl: amountMl,
       timestamp: entryTime,
@@ -77,7 +96,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
     required DateTime day,
   }) async {
     final startOfDay = DateTime(day.year, day.month, day.day, 0, 0, 0);
-    final endOfDay = DateTime(day.year, day.month, day.day, 23, 59, 59);
+    final endOfDay = DateTime(day.year, day.month, day.day, 23, 59, 59, 999);
 
     final query = _db.select(_db.waterIntakeLogs)
       ..where((tbl) =>
@@ -91,7 +110,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
 
     final rows = await query.get();
 
-    return rows
+    final localLogs = rows
         .map((r) => WaterIntakeEntry(
               id: r.id,
               userId: r.userId,
@@ -100,6 +119,31 @@ class HydrationRepositoryImpl implements HydrationRepository {
               source: r.source,
             ))
         .toList();
+
+    // Sync with remote database when user is authenticated
+    if (_remoteDataSource != null && userId.isNotEmpty && userId != 'guest_user') {
+      try {
+        final remoteLogs = await _remoteDataSource.getTodayLogs(date: day);
+        if (remoteLogs != null && remoteLogs.isNotEmpty) {
+          if (localLogs.isEmpty) {
+            for (final r in remoteLogs) {
+              final companion = WaterIntakeLogsCompanion(
+                userId: Value(userId),
+                amountMl: Value(r.amountMl),
+                timestamp: Value(r.timestamp),
+                source: Value(r.source),
+              );
+              final insertedId = await _db.into(_db.waterIntakeLogs).insert(companion);
+              localLogs.add(r.copyWith(id: insertedId));
+            }
+          } else {
+            return remoteLogs;
+          }
+        }
+      } catch (_) {}
+    }
+
+    return localLogs;
   }
 
   @override
@@ -114,6 +158,21 @@ class HydrationRepositoryImpl implements HydrationRepository {
     DateTime? referenceDate,
   }) async {
     final refDate = referenceDate ?? DateTime.now();
+
+    // Try remote database first if authenticated
+    if (_remoteDataSource != null && userId.isNotEmpty && userId != 'guest_user') {
+      try {
+        final remoteTotals = await _remoteDataSource.getHistoryTotals(
+          days: 7,
+          referenceDate: refDate,
+        );
+        if (remoteTotals != null && remoteTotals.isNotEmpty) {
+          return remoteTotals;
+        }
+      } catch (_) {}
+    }
+
+    // Fallback to local Drift DB calculation
     final totals = <DateTime, int>{};
 
     for (int i = 6; i >= 0; i--) {
@@ -133,6 +192,15 @@ class HydrationRepositoryImpl implements HydrationRepository {
     await (_db.delete(_db.waterIntakeLogs)
           ..where((tbl) => tbl.id.equals(id)))
         .go();
+  }
+
+  @override
+  Future<void> deleteRemoteLog(String remoteId) async {
+    if (_remoteDataSource != null) {
+      try {
+        await _remoteDataSource.deleteLog(remoteId);
+      } catch (_) {}
+    }
   }
 
   @override
@@ -159,5 +227,10 @@ class HydrationRepositoryImpl implements HydrationRepository {
 final hydrationRepositoryProvider = Provider<HydrationRepository>((ref) {
   final db = ref.watch(appDatabaseProvider);
   final storage = ref.watch(secureStorageServiceProvider);
-  return HydrationRepositoryImpl(db: db, storage: storage);
+  final remoteDataSource = ref.watch(hydrationRemoteDataSourceProvider);
+  return HydrationRepositoryImpl(
+    db: db,
+    storage: storage,
+    remoteDataSource: remoteDataSource,
+  );
 });

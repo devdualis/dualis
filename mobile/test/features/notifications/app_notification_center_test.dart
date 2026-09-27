@@ -180,6 +180,8 @@ class _FakeHydrationRepository implements HydrationRepository {
   @override
   Future<void> deleteLog(int id) async {}
   @override
+  Future<void> deleteRemoteLog(String remoteId) async {}
+  @override
   Future<int> getTodayTotalMl({required String userId}) async => 0;
   @override
   Future<WaterIntakeEntry> logWaterIntake({
