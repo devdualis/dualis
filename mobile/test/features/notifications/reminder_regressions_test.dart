@@ -213,7 +213,7 @@ void main() {
       expect(harness.cancelAllCalls, 0);
       expect(harness.cancelledIds, isNotEmpty);
       expect(
-        harness.cancelledIds.every((id) => (id >= 1000 && id < 1024) || id == 9999),
+        harness.cancelledIds.every((id) => (id >= 1000 && id < 2000) || id == 9999),
         isTrue,
         reason: 'cancelled: ${harness.cancelledIds}',
       );

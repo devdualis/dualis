@@ -103,10 +103,16 @@ class HydrationController extends Notifier<HydrationState> {
         last7DaysTotals: last7Days,
       );
 
+      final isGoalReached =
+          todayTotal >= settings.dailyTargetMl && settings.dailyTargetMl > 0;
+
       // Reagendar notificações com as configurações atuais (nunca sem sessão:
       // o logout cancela os lembretes e eles não podem voltar sozinhos).
       if (settings.reminderEnabled && _isSignedIn) {
-        await _notificationService.scheduleHydrationReminders(settings);
+        await _notificationService.scheduleHydrationReminders(
+          settings,
+          isGoalReached: isGoalReached,
+        );
       }
     } catch (e) {
       state = state.copyWith(
@@ -124,6 +130,7 @@ class HydrationController extends Notifier<HydrationState> {
     if (amountMl <= 0) return false;
 
     try {
+      final wasGoalReached = state.isGoalReached;
       final newLog = await _repository.logWaterIntake(
         userId: _currentUserId,
         amountMl: amountMl,
@@ -145,6 +152,16 @@ class HydrationController extends Notifier<HydrationState> {
         todayTotalMl: updatedTotal,
         last7DaysTotals: updatedLast7,
       );
+
+      if (state.settings.reminderEnabled && _isSignedIn) {
+        final isGoalReached = state.isGoalReached;
+        if (!wasGoalReached && isGoalReached) {
+          await _notificationService.scheduleHydrationReminders(
+            state.settings,
+            isGoalReached: true,
+          );
+        }
+      }
 
       return true;
     } catch (e) {
@@ -175,7 +192,12 @@ class HydrationController extends Notifier<HydrationState> {
       state = state.copyWith(settings: newSettings);
 
       if (newSettings.reminderEnabled) {
-        await _notificationService.scheduleHydrationReminders(newSettings);
+        final isGoalReached = state.todayTotalMl >= newSettings.dailyTargetMl &&
+            newSettings.dailyTargetMl > 0;
+        await _notificationService.scheduleHydrationReminders(
+          newSettings,
+          isGoalReached: isGoalReached,
+        );
       } else {
         await _notificationService.cancelAllReminders();
       }
@@ -219,7 +241,10 @@ class HydrationController extends Notifier<HydrationState> {
       return;
     }
     try {
-      await _notificationService.scheduleHydrationReminders(state.settings);
+      await _notificationService.scheduleHydrationReminders(
+        state.settings,
+        isGoalReached: state.isGoalReached,
+      );
     } catch (_) {}
   }
 

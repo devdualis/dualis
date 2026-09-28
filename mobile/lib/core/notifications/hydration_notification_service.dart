@@ -18,13 +18,20 @@ class HydrationNotificationService {
     FlutterLocalNotificationsPlugin? plugin,
     AppNotificationCenter? center,
     Locale Function()? localeResolver,
+    tz.TZDateTime Function()? clock,
   })  : _center = center ??
             AppNotificationCenter.of(
                 plugin ?? FlutterLocalNotificationsPlugin()),
-        _localeResolver = localeResolver;
+        _localeResolver = localeResolver,
+        _clock = clock;
 
   final AppNotificationCenter _center;
   final Locale Function()? _localeResolver;
+  final tz.TZDateTime Function()? _clock;
+
+  /// Reschedules run one after another (last request wins): interleaved
+  /// cancel/schedule sequences could leave a stale trigger armed.
+  Future<void> _lastReschedule = Future<void>.value();
 
   static const String chimeChannelId = 'dualis_hydration_chime';
   static const String alarmChannelId = 'dualis_hydration_alarm';
@@ -35,15 +42,31 @@ class HydrationNotificationService {
   /// "Test notification now" / immediate reminder.
   static const int immediateReminderId = 9999;
 
+  /// In-seconds test reminder id.
+  static const int testReminderId = 1999;
+
+  /// When today's hydration target is reached, reminder slots still ahead today
+  /// are scheduled as one-shots on the next [completedLookaheadDays] days
+  /// so that no reminders fire for the rest of today, but upcoming days remain
+  /// scheduled even if the user does not open the app tomorrow.
+  static const int completedLookaheadDays = 3;
+
+  /// One-shot slot for `dayOffset` days ahead: `1000 + 100 * dayOffset + hour`.
+  static int oneShotId(int dayOffset, int hour) =>
+      reminderIdBase + 100 * dayOffset + hour;
+
   /// Every scheduled-reminder ID this service may have created, whatever the
-  /// hours configured at the time.
-  static List<int> get scheduledReminderIds =>
-      [for (var hour = 0; hour < 24; hour++) reminderIdBase + hour];
+  /// hours configured at the time, including one-shot lookahead slots.
+  static List<int> get scheduledReminderIds => [
+        for (var hour = 0; hour < 24; hour++) reminderIdBase + hour,
+        for (var day = 1; day <= completedLookaheadDays; day++)
+          for (var hour = 0; hour < 24; hour++) oneShotId(day, hour),
+      ];
 
   /// Every notification ID owned by this service. Other features' IDs (e.g.
   /// daily check-in 2000+) are never touched.
   static List<int> get ownedNotificationIds =>
-      [...scheduledReminderIds, immediateReminderId];
+      [...scheduledReminderIds, immediateReminderId, testReminderId];
 
   FlutterLocalNotificationsPlugin get _plugin => _center.plugin;
 
@@ -120,7 +143,23 @@ class HydrationNotificationService {
       ? l10n.notifWaterBodyTracking
       : l10n.notifWaterBodyReminder;
 
-  Future<void> scheduleHydrationReminders(HydrationSettings settings) async {
+  tz.TZDateTime _now() => _clock?.call() ?? tz.TZDateTime.now(tz.local);
+
+  Future<void> scheduleHydrationReminders(
+    HydrationSettings settings, {
+    bool isGoalReached = false,
+  }) {
+    final run = _lastReschedule.then(
+      (_) => _reschedule(settings: settings, isGoalReached: isGoalReached),
+    );
+    _lastReschedule = run.catchError((Object _) {});
+    return run;
+  }
+
+  Future<void> _reschedule({
+    required HydrationSettings settings,
+    required bool isGoalReached,
+  }) async {
     await initialize();
     await _cancelScheduledReminders();
 
@@ -132,6 +171,7 @@ class HydrationNotificationService {
     final l10n = _l10n();
     final details = _getNotificationDetails(settings.reminderSoundStyle, l10n);
     final body = _body(l10n, settings.trackingEnabled);
+    final now = _now();
 
     // Verifica se alarmes exatos são permitidos pelo SO
     final exactAllowed = await canScheduleExactAlarms();
@@ -141,44 +181,100 @@ class HydrationNotificationService {
 
     for (final hour in settings.scheduledHours) {
       if (hour < 0 || hour > 23) continue;
-      final notificationId = reminderIdBase + hour;
       final timeFormatted = formatReminderHour(hour);
+      final title = l10n.notifWaterTitleAt(timeFormatted);
 
       try {
-        final scheduledDate = AppNotificationCenter.nextInstanceOfHour(hour);
-        final title = l10n.notifWaterTitleAt(timeFormatted);
+        final todaySlot = tz.TZDateTime(
+          now.location,
+          now.year,
+          now.month,
+          now.day,
+          hour,
+        );
+        final stillAheadToday = todaySlot.isAfter(now);
 
-        try {
-          await _plugin.zonedSchedule(
-            id: notificationId,
+        // Se a meta foi atingida hoje:
+        // - Horários que ainda estão por vir hoje NÃO devem disparar hoje.
+        //   São agendados como one-shots para os próximos dias (1..completedLookaheadDays).
+        // - Horários que já passaram hoje continuam repetindo diariamente (próximo disparo amanhã).
+        //
+        // Se a meta NÃO foi atingida hoje (ou voltou a ser menor que a meta após deletar registros):
+        // - Todos os horários repetem diariamente (logo, os que ainda estão à frente hoje DISPARARÃO hoje).
+        if (!isGoalReached || !stillAheadToday) {
+          await _schedule(
+            id: reminderIdBase + hour,
             title: title,
             body: body,
-            scheduledDate: scheduledDate,
-            notificationDetails: details,
-            payload: NotificationPayloads.openWaterModal,
-            androidScheduleMode: scheduleMode,
-            matchDateTimeComponents: DateTimeComponents.time,
+            details: details,
+            date: AppNotificationCenter.nextInstanceOfHour(hour, now: now),
+            repeatDaily: true,
+            scheduleMode: scheduleMode,
           );
-        } catch (e) {
-          debugPrint('Aviso ao agendar com $scheduleMode: $e. Tentando modo inexato...');
-          try {
-            await _plugin.zonedSchedule(
-              id: notificationId,
-              title: title,
-              body: body,
-              scheduledDate: scheduledDate,
-              notificationDetails: details,
-              payload: NotificationPayloads.openWaterModal,
-              androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-              matchDateTimeComponents: DateTimeComponents.time,
-            );
-          } catch (e2) {
-            debugPrint('Erro fatal ao agendar lembrete das $timeFormatted: $e2');
-          }
+          continue;
+        }
+
+        // Meta atingida hoje e horário ainda à frente hoje:
+        // Agenda one-shots para os próximos dias sem disparar mais hoje.
+        for (var day = 1; day <= completedLookaheadDays; day++) {
+          await _schedule(
+            id: oneShotId(day, hour),
+            title: title,
+            body: body,
+            details: details,
+            date: AppNotificationCenter.nextInstanceOfHour(
+              hour,
+              now: now,
+              dayOffset: day,
+            ),
+            repeatDaily: false,
+            scheduleMode: scheduleMode,
+          );
         }
       } catch (e) {
-        debugPrint('Erro no cálculo de data do lembrete das $timeFormatted: $e');
+        debugPrint(
+            'Erro no cálculo de data do lembrete de água das $timeFormatted: $e');
       }
+    }
+  }
+
+  Future<void> _schedule({
+    required int id,
+    required String title,
+    required String body,
+    required NotificationDetails details,
+    required tz.TZDateTime date,
+    required bool repeatDaily,
+    required AndroidScheduleMode scheduleMode,
+  }) async {
+    try {
+      try {
+        await _plugin.zonedSchedule(
+          id: id,
+          title: title,
+          body: body,
+          scheduledDate: date,
+          notificationDetails: details,
+          payload: NotificationPayloads.openWaterModal,
+          androidScheduleMode: scheduleMode,
+          matchDateTimeComponents: repeatDaily ? DateTimeComponents.time : null,
+        );
+      } catch (e) {
+        debugPrint(
+            'Aviso ao agendar lembrete de água $id com $scheduleMode: $e. Tentando modo inexato...');
+        await _plugin.zonedSchedule(
+          id: id,
+          title: title,
+          body: body,
+          scheduledDate: date,
+          notificationDetails: details,
+          payload: NotificationPayloads.openWaterModal,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          matchDateTimeComponents: repeatDaily ? DateTimeComponents.time : null,
+        );
+      }
+    } catch (scheduleErr) {
+      debugPrint('Aviso ao agendar lembrete de água $id: $scheduleErr');
     }
   }
 
@@ -222,7 +318,7 @@ class HydrationNotificationService {
 
     try {
       await _plugin.zonedSchedule(
-        id: 1999,
+        id: testReminderId,
         title: l10n.notifWaterTitle,
         body: customBody ??
             '💧 Dualis: Alerta de teste em segundo plano! O app está ativo na memória.',
@@ -233,7 +329,7 @@ class HydrationNotificationService {
       );
     } catch (_) {
       await _plugin.zonedSchedule(
-        id: 1999,
+        id: testReminderId,
         title: l10n.notifWaterTitle,
         body: customBody ??
             '💧 Dualis: Alerta de teste em segundo plano! O app está ativo na memória.',
