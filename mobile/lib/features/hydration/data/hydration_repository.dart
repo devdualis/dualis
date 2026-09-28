@@ -59,14 +59,6 @@ class HydrationRepositoryImpl implements HydrationRepository {
     DateTime? timestamp,
   }) async {
     final entryTime = timestamp ?? DateTime.now();
-    final companion = WaterIntakeLogsCompanion(
-      userId: Value(userId),
-      amountMl: Value(amountMl),
-      timestamp: Value(entryTime),
-      source: Value(source),
-    );
-
-    final id = await _db.into(_db.waterIntakeLogs).insert(companion);
 
     String? remoteId;
     if (_remoteDataSource != null && userId.isNotEmpty && userId != 'guest_user') {
@@ -79,6 +71,16 @@ class HydrationRepositoryImpl implements HydrationRepository {
         remoteId = remoteEntry?.remoteId;
       } catch (_) {}
     }
+
+    final companion = WaterIntakeLogsCompanion(
+      userId: Value(userId),
+      remoteId: Value(remoteId),
+      amountMl: Value(amountMl),
+      timestamp: Value(entryTime),
+      source: Value(source),
+    );
+
+    final id = await _db.into(_db.waterIntakeLogs).insert(companion);
 
     return WaterIntakeEntry(
       id: id,
@@ -98,6 +100,62 @@ class HydrationRepositoryImpl implements HydrationRepository {
     final startOfDay = DateTime(day.year, day.month, day.day, 0, 0, 0);
     final endOfDay = DateTime(day.year, day.month, day.day, 23, 59, 59, 999);
 
+    // Sync with remote database when user is authenticated
+    if (_remoteDataSource != null && userId.isNotEmpty && userId != 'guest_user') {
+      try {
+        final remoteLogs = await _remoteDataSource.getTodayLogs(date: day);
+        if (remoteLogs != null) {
+          final existingRows = await (_db.select(_db.waterIntakeLogs)
+                ..where((tbl) =>
+                    tbl.userId.equals(userId) &
+                    tbl.timestamp.isBiggerOrEqualValue(startOfDay) &
+                    tbl.timestamp.isSmallerOrEqualValue(endOfDay)))
+              .get();
+
+          final remoteIdSet = remoteLogs
+              .map((r) => r.remoteId)
+              .whereType<String>()
+              .toSet();
+
+          // Purge local Drift records that were synced before but deleted on server
+          for (final row in existingRows) {
+            if (row.remoteId != null && !remoteIdSet.contains(row.remoteId)) {
+              await (_db.delete(_db.waterIntakeLogs)
+                    ..where((tbl) => tbl.id.equals(row.id)))
+                  .go();
+            }
+          }
+
+          // Insert or update entries from remoteLogs into Drift
+          final updatedExisting = await (_db.select(_db.waterIntakeLogs)
+                ..where((tbl) =>
+                    tbl.userId.equals(userId) &
+                    tbl.timestamp.isBiggerOrEqualValue(startOfDay) &
+                    tbl.timestamp.isSmallerOrEqualValue(endOfDay)))
+              .get();
+
+          final existingByRemoteId = {
+            for (final row in updatedExisting)
+              if (row.remoteId != null) row.remoteId!: row
+          };
+
+          for (final r in remoteLogs) {
+            if (r.remoteId != null && existingByRemoteId.containsKey(r.remoteId)) {
+              continue;
+            }
+            final companion = WaterIntakeLogsCompanion(
+              userId: Value(userId),
+              remoteId: Value(r.remoteId),
+              amountMl: Value(r.amountMl),
+              timestamp: Value(r.timestamp),
+              source: Value(r.source),
+            );
+            await _db.into(_db.waterIntakeLogs).insert(companion);
+          }
+        }
+      } catch (_) {}
+    }
+
     final query = _db.select(_db.waterIntakeLogs)
       ..where((tbl) =>
           tbl.userId.equals(userId) &
@@ -110,40 +168,16 @@ class HydrationRepositoryImpl implements HydrationRepository {
 
     final rows = await query.get();
 
-    final localLogs = rows
+    return rows
         .map((r) => WaterIntakeEntry(
               id: r.id,
+              remoteId: r.remoteId,
               userId: r.userId,
               amountMl: r.amountMl,
               timestamp: r.timestamp,
               source: r.source,
             ))
         .toList();
-
-    // Sync with remote database when user is authenticated
-    if (_remoteDataSource != null && userId.isNotEmpty && userId != 'guest_user') {
-      try {
-        final remoteLogs = await _remoteDataSource.getTodayLogs(date: day);
-        if (remoteLogs != null && remoteLogs.isNotEmpty) {
-          if (localLogs.isEmpty) {
-            for (final r in remoteLogs) {
-              final companion = WaterIntakeLogsCompanion(
-                userId: Value(userId),
-                amountMl: Value(r.amountMl),
-                timestamp: Value(r.timestamp),
-                source: Value(r.source),
-              );
-              final insertedId = await _db.into(_db.waterIntakeLogs).insert(companion);
-              localLogs.add(r.copyWith(id: insertedId));
-            }
-          } else {
-            return remoteLogs;
-          }
-        }
-      } catch (_) {}
-    }
-
-    return localLogs;
   }
 
   @override
@@ -187,8 +221,20 @@ class HydrationRepositoryImpl implements HydrationRepository {
     return totals;
   }
 
+
   @override
   Future<void> deleteLog(int id) async {
+    try {
+      final row = await (_db.select(_db.waterIntakeLogs)
+            ..where((tbl) => tbl.id.equals(id)))
+          .getSingleOrNull();
+      if (row?.remoteId != null && row!.remoteId!.isNotEmpty) {
+        if (_remoteDataSource != null) {
+          await _remoteDataSource.deleteLog(row.remoteId!);
+        }
+      }
+    } catch (_) {}
+
     await (_db.delete(_db.waterIntakeLogs)
           ..where((tbl) => tbl.id.equals(id)))
         .go();
@@ -196,6 +242,12 @@ class HydrationRepositoryImpl implements HydrationRepository {
 
   @override
   Future<void> deleteRemoteLog(String remoteId) async {
+    try {
+      await (_db.delete(_db.waterIntakeLogs)
+            ..where((tbl) => tbl.remoteId.equals(remoteId)))
+          .go();
+    } catch (_) {}
+
     if (_remoteDataSource != null) {
       try {
         await _remoteDataSource.deleteLog(remoteId);

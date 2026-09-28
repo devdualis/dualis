@@ -346,13 +346,12 @@ class HydrationDashboardScreen extends ConsumerWidget {
               ),
             ),
             trailing: IconButton(
+              key: Key('delete_water_log_${log.id ?? log.remoteId ?? log.timestamp.millisecondsSinceEpoch}'),
               icon: const Icon(Icons.delete_outline, size: 20, color: Colors.grey),
               onPressed: () {
-                if (log.id != null) {
-                  ref
-                      .read(hydrationControllerProvider.notifier)
-                      .deleteLog(log.id!, remoteId: log.remoteId);
-                }
+                ref
+                    .read(hydrationControllerProvider.notifier)
+                    .deleteLog(log);
               },
             ),
           ),

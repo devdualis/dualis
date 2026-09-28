@@ -1058,6 +1058,17 @@ class $WaterIntakeLogsTable extends WaterIntakeLogs
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _remoteIdMeta = const VerificationMeta(
+    'remoteId',
+  );
+  @override
+  late final GeneratedColumn<String> remoteId = GeneratedColumn<String>(
+    'remote_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
@@ -1103,6 +1114,7 @@ class $WaterIntakeLogsTable extends WaterIntakeLogs
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    remoteId,
     userId,
     amountMl,
     timestamp,
@@ -1122,6 +1134,12 @@ class $WaterIntakeLogsTable extends WaterIntakeLogs
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(
+        _remoteIdMeta,
+        remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta),
+      );
     }
     if (data.containsKey('user_id')) {
       context.handle(
@@ -1165,6 +1183,10 @@ class $WaterIntakeLogsTable extends WaterIntakeLogs
             DriftSqlType.int,
             data['${effectivePrefix}id'],
           )!,
+      remoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_id'],
+      ),
       userId:
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
@@ -1196,12 +1218,14 @@ class $WaterIntakeLogsTable extends WaterIntakeLogs
 
 class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
   final int id;
+  final String? remoteId;
   final String userId;
   final int amountMl;
   final DateTime timestamp;
   final String source;
   const WaterIntakeLog({
     required this.id,
+    this.remoteId,
     required this.userId,
     required this.amountMl,
     required this.timestamp,
@@ -1211,6 +1235,9 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || remoteId != null) {
+      map['remote_id'] = Variable<String>(remoteId);
+    }
     map['user_id'] = Variable<String>(userId);
     map['amount_ml'] = Variable<int>(amountMl);
     map['timestamp'] = Variable<DateTime>(timestamp);
@@ -1221,6 +1248,10 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
   WaterIntakeLogsCompanion toCompanion(bool nullToAbsent) {
     return WaterIntakeLogsCompanion(
       id: Value(id),
+      remoteId:
+          remoteId == null && nullToAbsent
+              ? const Value.absent()
+              : Value(remoteId),
       userId: Value(userId),
       amountMl: Value(amountMl),
       timestamp: Value(timestamp),
@@ -1235,6 +1266,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return WaterIntakeLog(
       id: serializer.fromJson<int>(json['id']),
+      remoteId: serializer.fromJson<String?>(json['remoteId']),
       userId: serializer.fromJson<String>(json['userId']),
       amountMl: serializer.fromJson<int>(json['amountMl']),
       timestamp: serializer.fromJson<DateTime>(json['timestamp']),
@@ -1246,6 +1278,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'remoteId': serializer.toJson<String?>(remoteId),
       'userId': serializer.toJson<String>(userId),
       'amountMl': serializer.toJson<int>(amountMl),
       'timestamp': serializer.toJson<DateTime>(timestamp),
@@ -1255,12 +1288,14 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
 
   WaterIntakeLog copyWith({
     int? id,
+    Value<String?> remoteId = const Value.absent(),
     String? userId,
     int? amountMl,
     DateTime? timestamp,
     String? source,
   }) => WaterIntakeLog(
     id: id ?? this.id,
+    remoteId: remoteId.present ? remoteId.value : this.remoteId,
     userId: userId ?? this.userId,
     amountMl: amountMl ?? this.amountMl,
     timestamp: timestamp ?? this.timestamp,
@@ -1269,6 +1304,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
   WaterIntakeLog copyWithCompanion(WaterIntakeLogsCompanion data) {
     return WaterIntakeLog(
       id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
       userId: data.userId.present ? data.userId.value : this.userId,
       amountMl: data.amountMl.present ? data.amountMl.value : this.amountMl,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
@@ -1280,6 +1316,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
   String toString() {
     return (StringBuffer('WaterIntakeLog(')
           ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
           ..write('userId: $userId, ')
           ..write('amountMl: $amountMl, ')
           ..write('timestamp: $timestamp, ')
@@ -1289,12 +1326,14 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
   }
 
   @override
-  int get hashCode => Object.hash(id, userId, amountMl, timestamp, source);
+  int get hashCode =>
+      Object.hash(id, remoteId, userId, amountMl, timestamp, source);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is WaterIntakeLog &&
           other.id == this.id &&
+          other.remoteId == this.remoteId &&
           other.userId == this.userId &&
           other.amountMl == this.amountMl &&
           other.timestamp == this.timestamp &&
@@ -1303,12 +1342,14 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
 
 class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
   final Value<int> id;
+  final Value<String?> remoteId;
   final Value<String> userId;
   final Value<int> amountMl;
   final Value<DateTime> timestamp;
   final Value<String> source;
   const WaterIntakeLogsCompanion({
     this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
     this.userId = const Value.absent(),
     this.amountMl = const Value.absent(),
     this.timestamp = const Value.absent(),
@@ -1316,6 +1357,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
   });
   WaterIntakeLogsCompanion.insert({
     this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
     required String userId,
     required int amountMl,
     this.timestamp = const Value.absent(),
@@ -1324,6 +1366,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
        amountMl = Value(amountMl);
   static Insertable<WaterIntakeLog> custom({
     Expression<int>? id,
+    Expression<String>? remoteId,
     Expression<String>? userId,
     Expression<int>? amountMl,
     Expression<DateTime>? timestamp,
@@ -1331,6 +1374,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
       if (userId != null) 'user_id': userId,
       if (amountMl != null) 'amount_ml': amountMl,
       if (timestamp != null) 'timestamp': timestamp,
@@ -1340,6 +1384,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
 
   WaterIntakeLogsCompanion copyWith({
     Value<int>? id,
+    Value<String?>? remoteId,
     Value<String>? userId,
     Value<int>? amountMl,
     Value<DateTime>? timestamp,
@@ -1347,6 +1392,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
   }) {
     return WaterIntakeLogsCompanion(
       id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
       userId: userId ?? this.userId,
       amountMl: amountMl ?? this.amountMl,
       timestamp: timestamp ?? this.timestamp,
@@ -1359,6 +1405,9 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<String>(remoteId.value);
     }
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
@@ -1379,6 +1428,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
   String toString() {
     return (StringBuffer('WaterIntakeLogsCompanion(')
           ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
           ..write('userId: $userId, ')
           ..write('amountMl: $amountMl, ')
           ..write('timestamp: $timestamp, ')
@@ -1968,6 +2018,7 @@ typedef $$LocalSymptomDraftsTableProcessedTableManager =
 typedef $$WaterIntakeLogsTableCreateCompanionBuilder =
     WaterIntakeLogsCompanion Function({
       Value<int> id,
+      Value<String?> remoteId,
       required String userId,
       required int amountMl,
       Value<DateTime> timestamp,
@@ -1976,6 +2027,7 @@ typedef $$WaterIntakeLogsTableCreateCompanionBuilder =
 typedef $$WaterIntakeLogsTableUpdateCompanionBuilder =
     WaterIntakeLogsCompanion Function({
       Value<int> id,
+      Value<String?> remoteId,
       Value<String> userId,
       Value<int> amountMl,
       Value<DateTime> timestamp,
@@ -1993,6 +2045,11 @@ class $$WaterIntakeLogsTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2031,6 +2088,11 @@ class $$WaterIntakeLogsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get userId => $composableBuilder(
     column: $table.userId,
     builder: (column) => ColumnOrderings(column),
@@ -2063,6 +2125,9 @@ class $$WaterIntakeLogsTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
 
   GeneratedColumn<String> get userId =>
       $composableBuilder(column: $table.userId, builder: (column) => column);
@@ -2122,12 +2187,14 @@ class $$WaterIntakeLogsTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
                 Value<String> userId = const Value.absent(),
                 Value<int> amountMl = const Value.absent(),
                 Value<DateTime> timestamp = const Value.absent(),
                 Value<String> source = const Value.absent(),
               }) => WaterIntakeLogsCompanion(
                 id: id,
+                remoteId: remoteId,
                 userId: userId,
                 amountMl: amountMl,
                 timestamp: timestamp,
@@ -2136,12 +2203,14 @@ class $$WaterIntakeLogsTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
                 required String userId,
                 required int amountMl,
                 Value<DateTime> timestamp = const Value.absent(),
                 Value<String> source = const Value.absent(),
               }) => WaterIntakeLogsCompanion.insert(
                 id: id,
+                remoteId: remoteId,
                 userId: userId,
                 amountMl: amountMl,
                 timestamp: timestamp,

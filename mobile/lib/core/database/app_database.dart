@@ -28,6 +28,7 @@ class LocalSymptomDrafts extends Table {
 
 class WaterIntakeLogs extends Table {
   IntColumn get id => integer().autoIncrement()();
+  TextColumn get remoteId => text().nullable()();
   TextColumn get userId => text()();
   IntColumn get amountMl => integer()();
   DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
@@ -39,7 +40,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -50,6 +51,9 @@ class AppDatabase extends _$AppDatabase {
       onUpgrade: (Migrator m, int from, int to) async {
         if (from < 2) {
           await m.createTable(waterIntakeLogs);
+        }
+        if (from < 3) {
+          await m.addColumn(waterIntakeLogs, waterIntakeLogs.remoteId);
         }
       },
     );

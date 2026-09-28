@@ -163,5 +163,66 @@ void main() {
 
       verify(() => remoteDataSource.deleteLog('rem-123')).called(1);
     });
+
+    test('deleting via deleteRemoteLog removes from local Drift database as well', () async {
+      const userId = 'user-123';
+      final now = DateTime.now();
+
+      when(() => remoteDataSource.logWater(
+            amountMl: any(named: 'amountMl'),
+            source: any(named: 'source'),
+            timestamp: any(named: 'timestamp'),
+          )).thenAnswer((_) async => WaterIntakeEntry(
+            remoteId: 'uuid-to-delete',
+            userId: userId,
+            amountMl: 300,
+            timestamp: now,
+          ));
+      when(() => remoteDataSource.deleteLog('uuid-to-delete')).thenAnswer((_) async => true);
+      when(() => remoteDataSource.getTodayLogs(date: any(named: 'date'))).thenAnswer((_) async => null);
+
+      final entry = await repository.logWaterIntake(
+        userId: userId,
+        amountMl: 300,
+        timestamp: now,
+      );
+      expect(entry.remoteId, equals('uuid-to-delete'));
+
+      // Delete by remoteId only
+      await repository.deleteRemoteLog('uuid-to-delete');
+
+      final logs = await repository.getLogsForDay(userId: userId, day: now);
+      expect(logs, isEmpty);
+      verify(() => remoteDataSource.deleteLog('uuid-to-delete')).called(1);
+    });
+
+    test('reconciles deletions when server returns empty remote logs list', () async {
+      const userId = 'user-123';
+      final now = DateTime.now();
+
+      when(() => remoteDataSource.logWater(
+            amountMl: any(named: 'amountMl'),
+            source: any(named: 'source'),
+            timestamp: any(named: 'timestamp'),
+          )).thenAnswer((_) async => WaterIntakeEntry(
+            remoteId: 'uuid-server-1',
+            userId: userId,
+            amountMl: 500,
+            timestamp: now,
+          ));
+
+      await repository.logWaterIntake(
+        userId: userId,
+        amountMl: 500,
+        timestamp: now,
+      );
+
+      // Now server says 0 logs (deleted elsewhere or through API)
+      when(() => remoteDataSource.getTodayLogs(date: any(named: 'date')))
+          .thenAnswer((_) async => <WaterIntakeEntry>[]);
+
+      final logsAfterServerEmpty = await repository.getLogsForDay(userId: userId, day: now);
+      expect(logsAfterServerEmpty, isEmpty);
+    });
   });
 }

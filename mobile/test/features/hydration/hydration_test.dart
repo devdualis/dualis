@@ -8,9 +8,12 @@ import 'package:dualis_mobile/features/hydration/presentation/widgets/water_cons
 import 'package:dualis_mobile/features/hydration/presentation/widgets/water_intake_modal.dart';
 import 'package:dualis_mobile/features/home/presentation/widgets/home_hydration_card.dart';
 import 'package:dualis_mobile/core/notifications/hydration_notification_service.dart';
+import 'package:dualis_mobile/features/hydration/presentation/screens/hydration_dashboard_screen.dart';
 
 class FakeHydrationController extends HydrationController {
   final HydrationState _initialState;
+  final List<dynamic> deletedEntries = [];
+
   FakeHydrationController(this._initialState);
 
   @override
@@ -41,6 +44,27 @@ class FakeHydrationController extends HydrationController {
       ],
     );
     return true;
+  }
+
+  @override
+  Future<void> deleteLog(dynamic idOrEntry, {String? remoteId}) async {
+    deletedEntries.add(idOrEntry);
+    final toRemove = state.todayLogs.where((l) {
+      if (idOrEntry is WaterIntakeEntry) {
+        return (idOrEntry.id != null && l.id == idOrEntry.id) ||
+            (idOrEntry.remoteId != null && l.remoteId == idOrEntry.remoteId) ||
+            l == idOrEntry;
+      } else if (idOrEntry is int) {
+        return l.id == idOrEntry;
+      } else if (idOrEntry is String) {
+        return l.remoteId == idOrEntry;
+      }
+      return false;
+    }).toList();
+
+    final remaining = state.todayLogs.where((l) => !toRemove.contains(l)).toList();
+    final newTotal = remaining.fold<int>(0, (sum, l) => sum + l.amountMl);
+    state = state.copyWith(todayLogs: remaining, todayTotalMl: newTotal);
   }
 }
 
@@ -366,6 +390,96 @@ void main() {
         service.scheduleHydrationReminders(settings),
         completes,
       );
+    });
+  });
+
+  group('HydrationDashboardScreen Delete Logs', () {
+    testWidgets('deletes remote-only log (id is null) when trash icon is tapped', (tester) async {
+      final remoteEntry = WaterIntakeEntry(
+        id: null,
+        remoteId: 'remote-uuid-abc-123',
+        userId: 'patient-1',
+        amountMl: 300,
+        timestamp: DateTime.now(),
+        source: 'quick_chip',
+      );
+
+      final fakeController = FakeHydrationController(
+        HydrationState(
+          isLoading: false,
+          todayTotalMl: 300,
+          settings: const HydrationSettings(dailyTargetMl: 2000),
+          last7DaysTotals: {},
+          todayLogs: [remoteEntry],
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            hydrationControllerProvider.overrideWith(() => fakeController),
+          ],
+          child: const MaterialApp(
+            home: HydrationDashboardScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('300 ml'), findsOneWidget);
+      expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+
+      // Tap the delete button
+      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.pumpAndSettle();
+
+      expect(fakeController.deletedEntries, contains(remoteEntry));
+      expect(find.text('Nenhum copo de água registrado hoje ainda.'), findsOneWidget);
+    });
+
+    testWidgets('deletes local log (id is not null) when trash icon is tapped', (tester) async {
+      final localEntry = WaterIntakeEntry(
+        id: 77,
+        remoteId: 'remote-uuid-xyz',
+        userId: 'patient-1',
+        amountMl: 250,
+        timestamp: DateTime.now(),
+        source: 'manual',
+      );
+
+      final fakeController = FakeHydrationController(
+        HydrationState(
+          isLoading: false,
+          todayTotalMl: 250,
+          settings: const HydrationSettings(dailyTargetMl: 2000),
+          last7DaysTotals: {},
+          todayLogs: [localEntry],
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            hydrationControllerProvider.overrideWith(() => fakeController),
+          ],
+          child: const MaterialApp(
+            home: HydrationDashboardScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('250 ml'), findsOneWidget);
+      expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+
+      // Tap the delete button
+      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.pumpAndSettle();
+
+      expect(fakeController.deletedEntries, contains(localEntry));
+      expect(find.text('Nenhum copo de água registrado hoje ainda.'), findsOneWidget);
     });
   });
 }

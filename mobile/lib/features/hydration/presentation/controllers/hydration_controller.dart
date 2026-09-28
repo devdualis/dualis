@@ -172,11 +172,25 @@ class HydrationController extends Notifier<HydrationState> {
     }
   }
 
-  Future<void> deleteLog(int id, {String? remoteId}) async {
+  Future<void> deleteLog(dynamic idOrEntry, {String? remoteId}) async {
     try {
-      await _repository.deleteLog(id);
-      if (remoteId != null && remoteId.isNotEmpty) {
-        await _repository.deleteRemoteLog(remoteId);
+      int? localId;
+      String? actualRemoteId = remoteId;
+
+      if (idOrEntry is WaterIntakeEntry) {
+        localId = idOrEntry.id;
+        actualRemoteId = idOrEntry.remoteId ?? actualRemoteId;
+      } else if (idOrEntry is int) {
+        localId = idOrEntry;
+      } else if (idOrEntry is String) {
+        actualRemoteId = idOrEntry;
+      }
+
+      if (localId != null) {
+        await _repository.deleteLog(localId);
+      }
+      if (actualRemoteId != null && actualRemoteId.isNotEmpty) {
+        await _repository.deleteRemoteLog(actualRemoteId);
       }
       await loadData();
     } catch (e) {
