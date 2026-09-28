@@ -3,13 +3,79 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:dualis_mobile/core/network/connectivity_service.dart';
+import 'package:dualis_mobile/core/notifications/daily_checkin_notification_service.dart';
+import 'package:dualis_mobile/core/router/route_paths.dart';
+import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/triage/data/antiburla_remote_data_source.dart';
 import 'package:dualis_mobile/features/triage/domain/triage_vertical.dart';
 import 'package:dualis_mobile/features/triage/presentation/screens/triage_wizard_screen.dart';
 import 'package:dualis_mobile/features/triage/presentation/widgets/triage_intensity_selector.dart';
 import 'package:dualis_mobile/features/triage/presentation/widgets/triage_option_chip.dart';
 import 'package:dualis_mobile/features/triage/presentation/widgets/triage_preview_card.dart';
+import 'package:dualis_mobile/features/triage_outcome/data/triage_outcome_remote_data_source.dart';
+import 'package:dualis_mobile/features/triage_outcome/domain/triage_outcome_models.dart';
+import 'package:dualis_mobile/features/triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
+import 'package:go_router/go_router.dart';
+
+class FakeConnectivityService extends Fake implements ConnectivityService {
+  @override
+  Future<bool> checkOnline() async => true;
+
+  @override
+  Stream<bool> get isOnlineStream => Stream.value(true);
+}
+
+class FakeDailyCheckinNotificationService extends Fake
+    implements DailyCheckinNotificationService {
+  @override
+  Future<void> scheduleDailyCheckInReminders({required bool isCompletedToday}) async {}
+
+  @override
+  Future<void> cancelAllCheckInReminders() async {}
+}
+
+class FakeSecureStorageService extends Fake implements SecureStorageService {
+  final Map<String, dynamic> _data = {};
+
+  @override
+  Future<String?> getAccessToken() async => 'mock-token';
+
+  @override
+  Future<String?> getUserId() async => 'user-1';
+
+  @override
+  Future<Map<String, dynamic>?> getDailyCheckIn(String userId) async =>
+      _data[userId] as Map<String, dynamic>?;
+
+  @override
+  Future<void> saveDailyCheckIn({
+    required String userId,
+    required Map<String, dynamic> data,
+  }) async {
+    _data[userId] = data;
+  }
+
+  @override
+  Future<void> clearDailyCheckIn(String userId) async {
+    _data.remove(userId);
+  }
+}
+
+class FakeTriageOutcomeRemoteDataSource extends TriageOutcomeRemoteDataSource {
+  @override
+  Future<TriageOutcome> submitTriage({
+    required String vertical,
+    required Map<int, String> answers,
+    String? narrative,
+    String? token,
+    String? clientSessionId,
+    String? language,
+  }) async {
+    return generateOfflineFallback(vertical, answers, narrative, language: language);
+  }
+}
 
 class FakeAntiburlaRemoteDataSource extends AntiburlaRemoteDataSource {
   final AntiburlaCheckResult result;
@@ -304,6 +370,126 @@ void main() {
       expect(completeButton, findsOneWidget);
       final filledBtn = tester.widget<FilledButton>(completeButton);
       expect(filledBtn.onPressed, isNotNull);
+    });
+
+    testWidgets('12. Psycho-emotional vertical: Selecting Normal and clicking complete does not advance to onset step 2',
+        (tester) async {
+      final fakeOutcomeDataSource = FakeTriageOutcomeRemoteDataSource();
+      final router = GoRouter(
+        initialLocation: RoutePaths.triage,
+        routes: [
+          GoRoute(
+            path: RoutePaths.home,
+            builder: (context, state) => const Scaffold(body: Text('Home Screen Destination')),
+          ),
+          GoRoute(
+            path: RoutePaths.triage,
+            builder: (context, state) => const TriageWizardScreen(vertical: TriageVertical.psicoEmocional),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            antiburlaDataSourceProvider.overrideWithValue(FakeAntiburlaRemoteDataSource()),
+            triageOutcomeDataSourceProvider.overrideWithValue(fakeOutcomeDataSource),
+            connectivityServiceProvider.overrideWithValue(FakeConnectivityService()),
+            dailyCheckinNotificationServiceProvider.overrideWithValue(FakeDailyCheckinNotificationService()),
+            secureStorageServiceProvider.overrideWithValue(FakeSecureStorageService()),
+          ],
+          child: MaterialApp.router(
+            routerConfig: router,
+            locale: const Locale('pt', 'BR'),
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [Locale('pt', 'BR')],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final normalChip = find.text('Normal / Me sinto bem');
+      expect(normalChip, findsOneWidget);
+      await tester.tap(normalChip);
+      await tester.pumpAndSettle();
+
+      final completeButton = find.widgetWithText(FilledButton, 'Concluir como Normal / Bem');
+      await tester.tap(completeButton);
+      await tester.pump(); // Advance one frame to check intermediate state
+
+      // CRITICAL: Ensure Step 2 / onset question is NOT rendered
+      expect(find.text('Passo 2 de 5'), findsNothing);
+      expect(find.text('Começou hoje'), findsNothing);
+
+      await tester.pumpAndSettle();
+
+      // Navigated directly to Home
+      expect(find.text('Home Screen Destination'), findsOneWidget);
+    });
+
+    testWidgets('13. Physical vertical: Selecting Normal and clicking complete does not show onset question',
+        (tester) async {
+      final fakeOutcomeDataSource = FakeTriageOutcomeRemoteDataSource();
+      final router = GoRouter(
+        initialLocation: RoutePaths.triage,
+        routes: [
+          GoRoute(
+            path: RoutePaths.home,
+            builder: (context, state) => const Scaffold(body: Text('Home Screen Destination')),
+          ),
+          GoRoute(
+            path: RoutePaths.triage,
+            builder: (context, state) => const TriageWizardScreen(vertical: TriageVertical.fisica),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            antiburlaDataSourceProvider.overrideWithValue(FakeAntiburlaRemoteDataSource()),
+            triageOutcomeDataSourceProvider.overrideWithValue(fakeOutcomeDataSource),
+            connectivityServiceProvider.overrideWithValue(FakeConnectivityService()),
+            dailyCheckinNotificationServiceProvider.overrideWithValue(FakeDailyCheckinNotificationService()),
+            secureStorageServiceProvider.overrideWithValue(FakeSecureStorageService()),
+          ],
+          child: MaterialApp.router(
+            routerConfig: router,
+            locale: const Locale('pt', 'BR'),
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [Locale('pt', 'BR')],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final normalChip = find.text('Normal / Me sinto bem');
+      expect(normalChip, findsOneWidget);
+      await tester.tap(normalChip);
+      await tester.pumpAndSettle();
+
+      final completeButton = find.widgetWithText(FilledButton, 'Concluir como Normal / Bem');
+      await tester.tap(completeButton);
+      await tester.pump();
+
+      // CRITICAL: Ensure Step 2 / onset question is NOT rendered
+      expect(find.text('Passo 2 de 5'), findsNothing);
+      expect(find.text('Começou agora'), findsNothing);
+
+      await tester.pumpAndSettle();
+
+      // Navigated directly to Home
+      expect(find.text('Home Screen Destination'), findsOneWidget);
     });
   });
 }

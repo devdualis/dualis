@@ -49,6 +49,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
   Color _prevColor = AppColors.softIndigo;
   TriageOutcome? _physicalOutcome;
   late final TextEditingController _narrativeController;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -448,150 +449,174 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
           widget.isDual && state.activeVertical == TriageVertical.fisica;
       return FilledButton(
         style: FilledButton.styleFrom(
-          backgroundColor: activeColor,
+          backgroundColor: !_isSubmitting ? activeColor : activeColor.withValues(alpha: 0.4),
           foregroundColor: Colors.white,
           minimumSize: const Size.fromHeight(52),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        onPressed: () async {
-          final answers = Map<int, String>.from(state.answers);
-          final verticalStr =
-              state.activeVertical == TriageVertical.fisica ? 'physical' : 'emotional';
-          final narrativeInput = _narrativeController.text.trim();
-          final effectiveNarrative = (narrativeInput.isNotEmpty &&
-                  int.tryParse(narrativeInput) == null)
-              ? narrativeInput
-              : ((widget.naturalLanguageText != null &&
-                      widget.naturalLanguageText!.trim().isNotEmpty &&
-                      int.tryParse(widget.naturalLanguageText!.trim()) == null)
-                  ? widget.naturalLanguageText!.trim()
-                  : null);
+        onPressed: _isSubmitting
+            ? null
+            : () async {
+                setState(() {
+                  _isSubmitting = true;
+                });
+                try {
+                  final answers = Map<int, String>.from(state.answers);
+                  final verticalStr =
+                      state.activeVertical == TriageVertical.fisica ? 'physical' : 'emotional';
+                  final narrativeInput = _narrativeController.text.trim();
+                  final effectiveNarrative = (narrativeInput.isNotEmpty &&
+                          int.tryParse(narrativeInput) == null)
+                      ? narrativeInput
+                      : ((widget.naturalLanguageText != null &&
+                              widget.naturalLanguageText!.trim().isNotEmpty &&
+                              int.tryParse(widget.naturalLanguageText!.trim()) == null)
+                          ? widget.naturalLanguageText!.trim()
+                          : null);
 
-          ref.read(triageWizardNotifierProvider.notifier).advance();
+                  ref.read(triageWizardNotifierProvider.notifier).advance();
 
-          final dataSource = ref.read(triageOutcomeDataSourceProvider);
-          final connectivity = ref.read(connectivityServiceProvider);
-          final isOnline = await connectivity.checkOnline();
-          final clientSessionId = const Uuid().v4();
+                  final dataSource = ref.read(triageOutcomeDataSourceProvider);
+                  final connectivity = ref.read(connectivityServiceProvider);
+                  final isOnline = await connectivity.checkOnline();
+                  final clientSessionId = const Uuid().v4();
 
-          final langCode = ref.read(localeProvider).languageCode;
-          TriageOutcome outcome;
-          if (isOnline) {
-            try {
-              outcome = await dataSource.submitTriage(
-                vertical: verticalStr,
-                answers: answers,
-                narrative: effectiveNarrative,
-                clientSessionId: clientSessionId,
-                language: langCode,
-              );
-            } catch (_) {
-              await ref.read(triageOutboxRepositoryProvider).enqueueTriageCheckIn(
-                vertical: verticalStr,
-                answers: answers,
-                clientSessionId: clientSessionId,
-              );
-              outcome = dataSource.generateOfflineFallback(
-                verticalStr,
-                answers,
-                effectiveNarrative,
-                language: langCode,
-              );
-            }
-          } else {
-            await ref.read(triageOutboxRepositoryProvider).enqueueTriageCheckIn(
-              vertical: verticalStr,
-              answers: answers,
-              clientSessionId: clientSessionId,
-            );
-            outcome = dataSource.generateOfflineFallback(
-              verticalStr,
-              answers,
-              effectiveNarrative,
-              language: langCode,
-            );
-          }
+                  final langCode = ref.read(localeProvider).languageCode;
+                  TriageOutcome outcome;
+                  if (isOnline) {
+                    try {
+                      outcome = await dataSource.submitTriage(
+                        vertical: verticalStr,
+                        answers: answers,
+                        narrative: effectiveNarrative,
+                        clientSessionId: clientSessionId,
+                        language: langCode,
+                      );
+                    } catch (_) {
+                      await ref.read(triageOutboxRepositoryProvider).enqueueTriageCheckIn(
+                        vertical: verticalStr,
+                        answers: answers,
+                        clientSessionId: clientSessionId,
+                      );
+                      outcome = dataSource.generateOfflineFallback(
+                        verticalStr,
+                        answers,
+                        effectiveNarrative,
+                        language: langCode,
+                      );
+                    }
+                  } else {
+                    await ref.read(triageOutboxRepositoryProvider).enqueueTriageCheckIn(
+                      vertical: verticalStr,
+                      answers: answers,
+                      clientSessionId: clientSessionId,
+                    );
+                    outcome = dataSource.generateOfflineFallback(
+                      verticalStr,
+                      answers,
+                      effectiveNarrative,
+                      language: langCode,
+                    );
+                  }
 
-          if (isTransitionToEmotional) {
-            setState(() {
-              _physicalOutcome = outcome;
-            });
-            ref
-                .read(triageWizardNotifierProvider.notifier)
-                .setVertical(TriageVertical.psicoEmocional);
-            return;
-          }
+                  if (isTransitionToEmotional) {
+                    setState(() {
+                      _physicalOutcome = outcome;
+                      _isSubmitting = false;
+                    });
+                    ref
+                        .read(triageWizardNotifierProvider.notifier)
+                        .setVertical(TriageVertical.psicoEmocional);
+                    return;
+                  }
 
-          var finalOutcome = outcome;
-          final currentTrigger = ref.read(triggerCheckInProvider);
-          final existingOutcome = ref.read(triageOutcomeProvider).outcome;
+                  var finalOutcome = outcome;
+                  final currentTrigger = ref.read(triggerCheckInProvider);
+                  final existingOutcome = ref.read(triageOutcomeProvider).outcome;
 
-          if (widget.isDual && _physicalOutcome != null) {
-            finalOutcome = _physicalOutcome!.copyWith(
-              secondaryCategoryLabel: outcome.categoryLabel,
-              secondarySomaticMapping: outcome.somaticMapping,
-              secondaryIntensityScore: outcome.intensityScore,
-            );
-          } else if (outcome.vertical == 'physical' &&
-              (currentTrigger.isEmotionalCompleted ||
-                  (existingOutcome != null && existingOutcome.vertical == 'emotional'))) {
-            final emoOutcome =
-                existingOutcome?.vertical == 'emotional' ? existingOutcome : null;
-            final emoLabel = currentTrigger.emotionalSummary ?? emoOutcome?.categoryLabel;
-            final emoMapping = currentTrigger.emotionalNarrative ??
-                emoOutcome?.somaticMapping ??
-                'Avaliação Psicoemocional Registrada';
-            final emoScore = AxisIntensityResolver.resolveDisplayIntensity(
-              axis: CheckInAxis.emotional,
-              state: currentTrigger,
-              outcome: existingOutcome,
-            );
-            finalOutcome = outcome.copyWith(
-              secondaryCategoryLabel: emoLabel,
-              secondarySomaticMapping: emoMapping,
-              secondaryIntensityScore: emoScore,
-            );
-          } else if (outcome.vertical == 'emotional' &&
-              (currentTrigger.isPhysicalCompleted ||
-                  (existingOutcome != null && existingOutcome.vertical == 'physical'))) {
-            final physOutcome =
-                existingOutcome?.vertical == 'physical' ? existingOutcome : null;
-            final physLabel = currentTrigger.physicalSummary ?? physOutcome?.categoryLabel;
-            final physMapping = currentTrigger.physicalNarrative ??
-                physOutcome?.somaticMapping ??
-                'Avaliação Física Registrada';
-            final physScore = AxisIntensityResolver.resolveDisplayIntensity(
-              axis: CheckInAxis.physical,
-              state: currentTrigger,
-              outcome: existingOutcome,
-            );
-            finalOutcome = outcome.copyWith(
-              secondaryCategoryLabel: physLabel,
-              secondarySomaticMapping: physMapping,
-              secondaryIntensityScore: physScore,
-            );
-          }
-          ref.read(triageOutcomeProvider.notifier).setOutcome(finalOutcome);
-          ref.read(triggerCheckInProvider.notifier).markCompletedWithOutcome(
-            finalOutcome,
-            narrative: effectiveNarrative,
-          );
+                  if (widget.isDual && _physicalOutcome != null) {
+                    finalOutcome = _physicalOutcome!.copyWith(
+                      secondaryCategoryLabel: outcome.categoryLabel,
+                      secondarySomaticMapping: outcome.somaticMapping,
+                      secondaryIntensityScore: outcome.intensityScore,
+                    );
+                  } else if (outcome.vertical == 'physical' &&
+                      (currentTrigger.isEmotionalCompleted ||
+                          (existingOutcome != null && existingOutcome.vertical == 'emotional'))) {
+                    final emoOutcome =
+                        existingOutcome?.vertical == 'emotional' ? existingOutcome : null;
+                    final emoLabel = currentTrigger.emotionalSummary ?? emoOutcome?.categoryLabel;
+                    final emoMapping = currentTrigger.emotionalNarrative ??
+                        emoOutcome?.somaticMapping ??
+                        'Avaliação Psicoemocional Registrada';
+                    final emoScore = AxisIntensityResolver.resolveDisplayIntensity(
+                      axis: CheckInAxis.emotional,
+                      state: currentTrigger,
+                      outcome: existingOutcome,
+                    );
+                    finalOutcome = outcome.copyWith(
+                      secondaryCategoryLabel: emoLabel,
+                      secondarySomaticMapping: emoMapping,
+                      secondaryIntensityScore: emoScore,
+                    );
+                  } else if (outcome.vertical == 'emotional' &&
+                      (currentTrigger.isPhysicalCompleted ||
+                          (existingOutcome != null && existingOutcome.vertical == 'physical'))) {
+                    final physOutcome =
+                        existingOutcome?.vertical == 'physical' ? existingOutcome : null;
+                    final physLabel = currentTrigger.physicalSummary ?? physOutcome?.categoryLabel;
+                    final physMapping = currentTrigger.physicalNarrative ??
+                        physOutcome?.somaticMapping ??
+                        'Avaliação Física Registrada';
+                    final physScore = AxisIntensityResolver.resolveDisplayIntensity(
+                      axis: CheckInAxis.physical,
+                      state: currentTrigger,
+                      outcome: existingOutcome,
+                    );
+                    finalOutcome = outcome.copyWith(
+                      secondaryCategoryLabel: physLabel,
+                      secondarySomaticMapping: physMapping,
+                      secondaryIntensityScore: physScore,
+                    );
+                  }
+                  ref.read(triageOutcomeProvider.notifier).setOutcome(finalOutcome);
+                  ref.read(triggerCheckInProvider.notifier).markCompletedWithOutcome(
+                    finalOutcome,
+                    narrative: effectiveNarrative,
+                  );
 
-          if (context.mounted) {
-            context.go(RoutePaths.home);
-          }
-        },
-        child: Text(
-          isTransitionToEmotional
-              ? 'Concluir Física e Iniciar Psico-Emocional'
-              : l10n.triagePreviewSubmit,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+                  if (context.mounted) {
+                    ref.read(triageWizardNotifierProvider.notifier).reset();
+                    context.go(RoutePaths.home);
+                  }
+                } finally {
+                  if (mounted) {
+                    setState(() {
+                      _isSubmitting = false;
+                    });
+                  }
+                }
+              },
+        child: _isSubmitting
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : Text(
+                isTransitionToEmotional
+                    ? 'Concluir Física e Iniciar Psico-Emocional'
+                    : l10n.triagePreviewSubmit,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
       );
     }
 
@@ -609,23 +634,34 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
       buttonLabel = l10n.triageNext;
     }
 
+    final isButtonEnabled = canAdvance && !_isSubmitting;
+
     return FilledButton(
       style: FilledButton.styleFrom(
-        backgroundColor: canAdvance ? activeColor : activeColor.withValues(alpha: 0.4),
+        backgroundColor: isButtonEnabled ? activeColor : activeColor.withValues(alpha: 0.4),
         foregroundColor: Colors.white,
         minimumSize: const Size.fromHeight(52),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
       ),
-      onPressed: canAdvance ? () => _handleNext(context, state) : null,
-      child: Text(
-        buttonLabel,
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+      onPressed: isButtonEnabled ? () => _handleNext(context, state) : null,
+      child: _isSubmitting
+          ? const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            )
+          : Text(
+              buttonLabel,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
     );
   }
 
@@ -633,31 +669,48 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
     BuildContext context,
     TriageWizardState state,
   ) async {
-    final answers = <int, String>{0: 'normal'};
-    final verticalStr =
-        state.activeVertical == TriageVertical.fisica ? 'physical' : 'emotional';
-    final isTransitionToEmotional =
-        widget.isDual && state.activeVertical == TriageVertical.fisica;
+    if (_isSubmitting) return;
+    setState(() {
+      _isSubmitting = true;
+    });
 
-    ref.read(triageWizardNotifierProvider.notifier).advance();
+    try {
+      final answers = <int, String>{0: 'normal'};
+      final verticalStr =
+          state.activeVertical == TriageVertical.fisica ? 'physical' : 'emotional';
+      final isTransitionToEmotional =
+          widget.isDual && state.activeVertical == TriageVertical.fisica;
 
-    final dataSource = ref.read(triageOutcomeDataSourceProvider);
-    final connectivity = ref.read(connectivityServiceProvider);
-    final isOnline = await connectivity.checkOnline();
-    final clientSessionId = const Uuid().v4();
+      final dataSource = ref.read(triageOutcomeDataSourceProvider);
+      final connectivity = ref.read(connectivityServiceProvider);
+      final isOnline = await connectivity.checkOnline();
+      final clientSessionId = const Uuid().v4();
 
-    final langCode = ref.read(localeProvider).languageCode;
-    TriageOutcome outcome;
-    if (isOnline) {
-      try {
-        outcome = await dataSource.submitTriage(
-          vertical: verticalStr,
-          answers: answers,
-          narrative: null,
-          clientSessionId: clientSessionId,
-          language: langCode,
-        );
-      } catch (_) {
+      final langCode = ref.read(localeProvider).languageCode;
+      TriageOutcome outcome;
+      if (isOnline) {
+        try {
+          outcome = await dataSource.submitTriage(
+            vertical: verticalStr,
+            answers: answers,
+            narrative: null,
+            clientSessionId: clientSessionId,
+            language: langCode,
+          );
+        } catch (_) {
+          await ref.read(triageOutboxRepositoryProvider).enqueueTriageCheckIn(
+            vertical: verticalStr,
+            answers: answers,
+            clientSessionId: clientSessionId,
+          );
+          outcome = dataSource.generateOfflineFallback(
+            verticalStr,
+            answers,
+            null,
+            language: langCode,
+          );
+        }
+      } else {
         await ref.read(triageOutboxRepositoryProvider).enqueueTriageCheckIn(
           vertical: verticalStr,
           answers: answers,
@@ -670,96 +723,94 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
           language: langCode,
         );
       }
-    } else {
-      await ref.read(triageOutboxRepositoryProvider).enqueueTriageCheckIn(
-        vertical: verticalStr,
-        answers: answers,
-        clientSessionId: clientSessionId,
-      );
-      outcome = dataSource.generateOfflineFallback(
-        verticalStr,
-        answers,
-        null,
-        language: langCode,
-      );
-    }
 
-    if (isTransitionToEmotional) {
+      if (isTransitionToEmotional) {
+        ref.read(triggerCheckInProvider.notifier).completeStage(
+          vertical: TriageVertical.fisica,
+          summary: 'Bem / Normal',
+          status: TriggerStatus.goodNormal,
+          intensity: 0,
+        );
+        if (mounted) {
+          setState(() {
+            _physicalOutcome = outcome;
+            _isSubmitting = false;
+          });
+        }
+        ref
+            .read(triageWizardNotifierProvider.notifier)
+            .setVertical(TriageVertical.psicoEmocional);
+        return;
+      }
+
+      var finalOutcome = outcome;
+      final currentTrigger = ref.read(triggerCheckInProvider);
+      final existingOutcome = ref.read(triageOutcomeProvider).outcome;
+
+      if (widget.isDual && _physicalOutcome != null) {
+        finalOutcome = _physicalOutcome!.copyWith(
+          secondaryCategoryLabel: outcome.categoryLabel,
+          secondarySomaticMapping: outcome.somaticMapping,
+          secondaryIntensityScore: outcome.intensityScore,
+        );
+      } else if (outcome.vertical == 'physical' &&
+          (currentTrigger.isEmotionalCompleted ||
+              (existingOutcome != null && existingOutcome.vertical == 'emotional'))) {
+        final emoOutcome =
+            existingOutcome?.vertical == 'emotional' ? existingOutcome : null;
+        final emoLabel = currentTrigger.emotionalSummary ?? emoOutcome?.categoryLabel;
+        final emoMapping = currentTrigger.emotionalNarrative ??
+            emoOutcome?.somaticMapping ??
+            'Avaliação Psicoemocional Registrada';
+        final emoScore = AxisIntensityResolver.resolveDisplayIntensity(
+          axis: CheckInAxis.emotional,
+          state: currentTrigger,
+          outcome: existingOutcome,
+        );
+        finalOutcome = outcome.copyWith(
+          secondaryCategoryLabel: emoLabel,
+          secondarySomaticMapping: emoMapping,
+          secondaryIntensityScore: emoScore,
+        );
+      } else if (outcome.vertical == 'emotional' &&
+          (currentTrigger.isPhysicalCompleted ||
+              (existingOutcome != null && existingOutcome.vertical == 'physical'))) {
+        final physOutcome =
+            existingOutcome?.vertical == 'physical' ? existingOutcome : null;
+        final physLabel = currentTrigger.physicalSummary ?? physOutcome?.categoryLabel;
+        final physMapping = currentTrigger.physicalNarrative ??
+            physOutcome?.somaticMapping ??
+            'Avaliação Física Registrada';
+        final physScore = AxisIntensityResolver.resolveDisplayIntensity(
+          axis: CheckInAxis.physical,
+          state: currentTrigger,
+          outcome: existingOutcome,
+        );
+        finalOutcome = outcome.copyWith(
+          secondaryCategoryLabel: physLabel,
+          secondarySomaticMapping: physMapping,
+          secondaryIntensityScore: physScore,
+        );
+      }
+
+      ref.read(triageOutcomeProvider.notifier).setOutcome(finalOutcome);
       ref.read(triggerCheckInProvider.notifier).completeStage(
-        vertical: TriageVertical.fisica,
+        vertical: state.activeVertical,
         summary: 'Bem / Normal',
         status: TriggerStatus.goodNormal,
         intensity: 0,
       );
-      setState(() {
-        _physicalOutcome = outcome;
-      });
-      ref
-          .read(triageWizardNotifierProvider.notifier)
-          .setVertical(TriageVertical.psicoEmocional);
-      return;
-    }
 
-    var finalOutcome = outcome;
-    final currentTrigger = ref.read(triggerCheckInProvider);
-    final existingOutcome = ref.read(triageOutcomeProvider).outcome;
-
-    if (widget.isDual && _physicalOutcome != null) {
-      finalOutcome = _physicalOutcome!.copyWith(
-        secondaryCategoryLabel: outcome.categoryLabel,
-        secondarySomaticMapping: outcome.somaticMapping,
-        secondaryIntensityScore: outcome.intensityScore,
-      );
-    } else if (outcome.vertical == 'physical' &&
-        (currentTrigger.isEmotionalCompleted ||
-            (existingOutcome != null && existingOutcome.vertical == 'emotional'))) {
-      final emoOutcome =
-          existingOutcome?.vertical == 'emotional' ? existingOutcome : null;
-      final emoLabel = currentTrigger.emotionalSummary ?? emoOutcome?.categoryLabel;
-      final emoMapping = currentTrigger.emotionalNarrative ??
-          emoOutcome?.somaticMapping ??
-          'Avaliação Psicoemocional Registrada';
-      final emoScore = AxisIntensityResolver.resolveDisplayIntensity(
-        axis: CheckInAxis.emotional,
-        state: currentTrigger,
-        outcome: existingOutcome,
-      );
-      finalOutcome = outcome.copyWith(
-        secondaryCategoryLabel: emoLabel,
-        secondarySomaticMapping: emoMapping,
-        secondaryIntensityScore: emoScore,
-      );
-    } else if (outcome.vertical == 'emotional' &&
-        (currentTrigger.isPhysicalCompleted ||
-            (existingOutcome != null && existingOutcome.vertical == 'physical'))) {
-      final physOutcome =
-          existingOutcome?.vertical == 'physical' ? existingOutcome : null;
-      final physLabel = currentTrigger.physicalSummary ?? physOutcome?.categoryLabel;
-      final physMapping = currentTrigger.physicalNarrative ??
-          physOutcome?.somaticMapping ??
-          'Avaliação Física Registrada';
-      final physScore = AxisIntensityResolver.resolveDisplayIntensity(
-        axis: CheckInAxis.physical,
-        state: currentTrigger,
-        outcome: existingOutcome,
-      );
-      finalOutcome = outcome.copyWith(
-        secondaryCategoryLabel: physLabel,
-        secondarySomaticMapping: physMapping,
-        secondaryIntensityScore: physScore,
-      );
-    }
-
-    ref.read(triageOutcomeProvider.notifier).setOutcome(finalOutcome);
-    ref.read(triggerCheckInProvider.notifier).completeStage(
-      vertical: state.activeVertical,
-      summary: 'Bem / Normal',
-      status: TriggerStatus.goodNormal,
-      intensity: 0,
-    );
-
-    if (context.mounted) {
-      context.go(RoutePaths.home);
+      if (context.mounted) {
+        ref.read(triageWizardNotifierProvider.notifier).reset();
+        context.go(RoutePaths.home);
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
