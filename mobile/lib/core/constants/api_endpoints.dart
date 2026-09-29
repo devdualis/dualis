@@ -1,11 +1,18 @@
-import 'dart:io' show Platform;
+import 'dart:io' show File, Platform;
 import 'package:flutter/foundation.dart';
 
 class ApiEndpoints {
   static String get _defaultBaseUrl {
     if (kIsWeb) return 'http://localhost:3000';
     try {
-      if (Platform.isAndroid) return 'http://10.0.2.2:3000';
+      if (Platform.isAndroid) {
+        // 10.0.2.2 is exclusively for the Android Studio Emulator (AVD/QEMU).
+        // Physical Android devices connected via ADB reverse proxy (adb reverse tcp:3000 tcp:3000)
+        // communicate with the host machine at 127.0.0.1.
+        final isEmulator = File('/dev/qemu_pipe').existsSync() ||
+            File('/dev/socket/qemud').existsSync();
+        return isEmulator ? 'http://10.0.2.2:3000' : 'http://127.0.0.1:3000';
+      }
     } catch (_) {}
     return 'http://localhost:3000';
   }

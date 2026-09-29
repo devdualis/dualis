@@ -37,6 +37,7 @@ void main() {
     when(() => mockSecureStorage.clearUserProfile()).thenAnswer((_) async {});
     when(() => mockSecureStorage.clearAll()).thenAnswer((_) async {});
     when(() => mockSecureStorage.saveUserProfile(any())).thenAnswer((_) async {});
+    when(() => mockSecureStorage.getRefreshToken()).thenAnswer((_) async => null);
 
     container = ProviderContainer(
       overrides: [
@@ -119,6 +120,35 @@ void main() {
       expect(state.isAuthenticated, isFalse);
       expect(state.user, isNull);
       verify(() => mockSecureStorage.clearAll()).called(1);
+    });
+
+    test(
+        'restoreSession preserves local session if 401 occurs but refresh token is still present',
+        () async {
+      when(() => mockSecureStorage.getAccessToken())
+          .thenAnswer((_) async => 'expired-token');
+      when(() => mockSecureStorage.getRefreshToken())
+          .thenAnswer((_) async => 'valid-refresh-token');
+      when(() => mockSecureStorage.getUserProfile())
+          .thenAnswer((_) async => testUser);
+      when(() => mockRepository.getProfile(token: 'expired-token')).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/auth/me'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/auth/me'),
+            statusCode: 401,
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+      );
+
+      final controller = container.read(authControllerProvider.notifier);
+      await controller.restoreSession();
+
+      final state = container.read(authControllerProvider);
+      expect(state.isAuthenticated, isTrue);
+      expect(state.user, equals(testUser));
+      verifyNever(() => mockSecureStorage.clearAll());
     });
 
     test('logout clears secure storage and resets auth state', () async {

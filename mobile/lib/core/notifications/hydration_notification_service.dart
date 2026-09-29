@@ -91,6 +91,9 @@ class HydrationNotificationService {
   Future<bool> ensureExactAlarmsPermission() =>
       _center.ensureExactAlarmsPermission();
 
+  Future<void> ensureBackgroundAlarmsReliability() =>
+      _center.ensureBackgroundAlarmsReliability();
+
   AppLocalizations _l10n() =>
       resolveNotificationLocalizations(_localeResolver?.call());
 

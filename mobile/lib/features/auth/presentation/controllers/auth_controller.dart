@@ -76,11 +76,13 @@ class AuthController extends Notifier<AuthState> {
           isLoading: false,
         );
       } on DioException catch (dioErr) {
-        if (dioErr.response?.statusCode == 401) {
-          // Token expired and refresh failed
+        final hasRefreshToken =
+            (await _secureStorage.getRefreshToken())?.isNotEmpty ?? false;
+        if (dioErr.response?.statusCode == 401 && !hasRefreshToken) {
+          // Both access token and refresh token are confirmed invalid
           await logout();
         } else {
-          // Offline, slow connection, or server restart: preserve session!
+          // Offline, network error during refresh, or temporary server glitch: preserve session!
         }
       } catch (_) {}
     } catch (_) {
