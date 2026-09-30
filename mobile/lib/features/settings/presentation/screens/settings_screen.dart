@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/notifications/app_notification_center.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../core/utils/error_message_resolver.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -39,7 +38,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _obscureConfirmPassword = true;
   bool _isSavingProfile = false;
   bool _isChangingPassword = false;
-  bool? _isIgnoringBattery;
 
   @override
   void initState() {
@@ -54,17 +52,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // _localImageBytes stays null on init — only populated after a new pick.
     if (user?.dateOfBirth != null && user!.dateOfBirth!.isNotEmpty) {
       _selectedDateOfBirth = DateTime.tryParse(user.dateOfBirth!);
-    }
-    _checkBatteryStatus();
-  }
-
-  Future<void> _checkBatteryStatus() async {
-    final center = ref.read(appNotificationCenterProvider);
-    final ignored = await center.isIgnoringBatteryOptimizations();
-    if (mounted) {
-      setState(() {
-        _isIgnoringBattery = ignored;
-      });
     }
   }
 
@@ -1024,63 +1011,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
                         onTap: () => context.push(RoutePaths.hydration),
-                      ),
-                      const Divider(height: 1, color: AppColors.outlineLight),
-                      ListTile(
-                        key: const Key('settings_battery_optimization_tile'),
-                        leading: const Icon(Icons.battery_charging_full_rounded, color: AppColors.clinicalTeal),
-                        title: Text(
-                          'Confiabilidade de Lembretes & Bateria',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                        subtitle: Text(
-                          'Evita que o sistema silencie lembretes e alarmes após 24 horas',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            color: AppColors.textSecondaryLight,
-                          ),
-                        ),
-                        trailing: _isIgnoringBattery == true
-                            ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'Ativo',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.clinicalTeal,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  const Icon(Icons.check_circle_rounded,
-                                      color: AppColors.clinicalTeal, size: 18),
-                                ],
-                              )
-                            : Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'Ajustar',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.softIndigo,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  const Icon(Icons.arrow_forward_ios_rounded,
-                                      color: AppColors.softIndigo, size: 14),
-                                ],
-                              ),
-                        onTap: () async {
-                          final center = ref.read(appNotificationCenterProvider);
-                          await center.requestIgnoreBatteryOptimizations();
-                          await _checkBatteryStatus();
-                        },
                       ),
                     ],
                   ),

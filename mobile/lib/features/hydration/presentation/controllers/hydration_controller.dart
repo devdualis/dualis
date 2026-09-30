@@ -246,7 +246,7 @@ class HydrationController extends Notifier<HydrationState> {
   /// alarm style) and only when missing — never on every reschedule.
   Future<void> _requestExactAlarmsIfMissing() async {
     try {
-      await _notificationService.ensureBackgroundAlarmsReliability();
+      await _notificationService.ensureExactAlarmsPermission();
     } catch (_) {}
   }
 

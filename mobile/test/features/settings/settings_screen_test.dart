@@ -297,22 +297,5 @@ void main() {
       expect(fakeRepo.lastCurrentPassword, 'OldPass123!');
       expect(fakeRepo.lastNewPassword, 'BrandNewPass123!');
     });
-
-    testWidgets('6. Renders battery optimization tile and allows tapping', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(createSettingsTestApp(repository: fakeRepo, user: testUser));
-      await tester.pumpAndSettle();
-
-      final batteryTile = find.byKey(const Key('settings_battery_optimization_tile'));
-      await tester.ensureVisible(batteryTile);
-      expect(batteryTile, findsOneWidget);
-      expect(find.text('Confiabilidade de Lembretes & Bateria'), findsOneWidget);
-
-      await tester.tap(batteryTile);
-      await tester.pumpAndSettle();
-    });
   });
 }

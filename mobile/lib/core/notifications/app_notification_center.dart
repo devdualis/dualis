@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:ui' show Locale, PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show MethodChannel;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -299,9 +298,6 @@ class AppNotificationCenter {
       if (result.prompted) {
         await _permissionPromptStore.markRequested();
       }
-      if (result.granted) {
-        await ensureBackgroundAlarmsReliability();
-      }
     } catch (e) {
       debugPrint('First-launch notification permission request failed: $e');
     }
@@ -337,61 +333,6 @@ class AppNotificationCenter {
     if (await canScheduleExactAlarms()) return true;
     await requestExactAlarmsPermission();
     return canScheduleExactAlarms();
-  }
-
-  static const MethodChannel _batteryChannel =
-      MethodChannel('dualis/battery_and_alarms');
-
-  /// Whether the app is exempt from Android battery optimizations (Doze mode),
-  /// preventing the OS from suppressing scheduled alarms after 24h of inactivity.
-  Future<bool> isIgnoringBatteryOptimizations() async {
-    if (kIsWeb ||
-        defaultTargetPlatform != TargetPlatform.android ||
-        Platform.environment.containsKey('FLUTTER_TEST')) {
-      return true;
-    }
-    try {
-      final res =
-          await _batteryChannel.invokeMethod<bool>('isIgnoringBatteryOptimizations');
-      return res ?? false;
-    } catch (e) {
-      debugPrint('Failed to query battery optimization status: $e');
-      return false;
-    }
-  }
-
-  /// Prompts the Android OS dialog to whitelist Dualis from battery optimization
-  /// so reminders keep firing indefinitely without being killed after 1 day.
-  Future<bool> requestIgnoreBatteryOptimizations() async {
-    if (kIsWeb ||
-        defaultTargetPlatform != TargetPlatform.android ||
-        Platform.environment.containsKey('FLUTTER_TEST')) {
-      return true;
-    }
-    try {
-      final res = await _batteryChannel
-          .invokeMethod<bool>('requestIgnoreBatteryOptimizations');
-      return res ?? false;
-    } catch (e) {
-      debugPrint('Failed to request battery optimization ignore: $e');
-      return false;
-    }
-  }
-
-  /// Ensures both exact alarm permission and battery optimization exemption
-  /// so that notifications and alarms survive past 24 hours (1 day).
-  Future<void> ensureBackgroundAlarmsReliability() async {
-    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return;
-    try {
-      await ensureExactAlarmsPermission();
-      if (!Platform.environment.containsKey('FLUTTER_TEST')) {
-        if (!await isIgnoringBatteryOptimizations()) {
-          await requestIgnoreBatteryOptimizations();
-        }
-      }
-    } catch (e) {
-      debugPrint('Failed to ensure background alarms reliability: $e');
-    }
   }
 
   /// Next wall-clock occurrence of [hour]:00 in the local timezone that is
