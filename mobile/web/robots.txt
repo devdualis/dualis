@@ -1,0 +1,21 @@
+# DualisCheckUp Robots Configuration
+# https://app.dualischeckup.com
+
+User-agent: *
+Allow: /
+Allow: /onboarding
+Allow: /login
+Allow: /register
+Allow: /terms-of-service
+Allow: /privacy-policy
+
+# Protect user confidential health records & active clinical triage paths
+Disallow: /triage/
+Disallow: /emergency/
+Disallow: /history/
+Disallow: /privacy-center/
+Disallow: /hydration/
+Disallow: /settings/
+Disallow: /api/
+
+Sitemap: https://app.dualischeckup.com/sitemap.xml

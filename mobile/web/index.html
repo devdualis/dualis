@@ -1,46 +1,115 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="DualisCheckUp Mobile Preventive Health Platform">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-  <!-- iOS meta tags & icons -->
+  <title>DualisCheckUp | Triagem Preventiva de Saúde Física e Emocional</title>
+  <meta name="description" content="Plataforma preventiva inteligente unindo triagem somática em 12 sistemas anatômicos e bem-estar psicoemocional com segurança clínica e conformidade LGPD.">
+  <meta name="keywords" content="saúde preventiva, triagem médica, bem-estar emocional, checkup digital, dualischeckup, telemedicina, LGPD saúde, Anvisa RDC 657/2022">
+  <meta name="author" content="Dualis Health Inc. & DualisCheckUp Saúde e Tecnologia Ltda.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://app.dualischeckup.com/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://app.dualischeckup.com/">
+  <meta property="og:site_name" content="DualisCheckUp">
+  <meta property="og:title" content="DualisCheckUp | Triagem Preventiva de Saúde Física e Emocional">
+  <meta property="og:description" content="Plataforma preventiva inteligente unindo triagem somática em 12 sistemas anatômicos e bem-estar psicoemocional com segurança clínica e conformidade LGPD.">
+  <meta property="og:image" content="https://app.dualischeckup.com/icons/Icon-512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:locale:alternate" content="es_ES">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="DualisCheckUp | Triagem Preventiva de Saúde Física e Emocional">
+  <meta name="twitter:description" content="Plataforma preventiva inteligente unindo triagem somática em 12 sistemas anatômicos e bem-estar psicoemocional com segurança clínica.">
+  <meta name="twitter:image" content="https://app.dualischeckup.com/icons/Icon-512.png">
+
+  <!-- Mobile & iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="DualisCheckUp">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-  <!-- Favicon -->
+  <!-- Theme and Favicon -->
+  <meta name="theme-color" content="#00A896">
+  <meta name="msapplication-TileColor" content="#00A896">
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>DualisCheckUp</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #081B2B;
+      color: #FFFFFF;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #app-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      text-align: center;
+      transition: opacity 0.4s ease-out;
+    }
+    .loading-pulse-ring {
+      width: 56px;
+      height: 56px;
+      border: 3px solid rgba(0, 168, 150, 0.2);
+      border-top-color: #00A896;
+      border-radius: 50%;
+      animation: spin 0.9s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
+    }
+    .brand-title {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: #FFFFFF;
+    }
+    .brand-subtitle {
+      font-size: 13px;
+      color: #90A4AE;
+      max-width: 280px;
+      line-height: 1.4;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
+  <div id="app-loading">
+    <div class="loading-pulse-ring" aria-label="Carregando DualisCheckUp"></div>
+    <div class="brand-title">DualisCheckUp</div>
+    <div class="brand-subtitle">Iniciando ambiente seguro de triagem e saúde preventiva...</div>
+  </div>
 
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      var loader = document.getElementById('app-loading');
+      if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(function() { loader.remove(); }, 400);
+      }
+    });
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

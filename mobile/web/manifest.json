@@ -1,35 +1,36 @@
 {
-    "name": "DualisCheckUp",
-    "short_name": "DualisCheckUp",
-    "start_url": ".",
-    "display": "standalone",
-    "background_color": "#FFFFFF",
-    "theme_color": "#0E3E6C",
-    "description": "DualisCheckUp Mobile Preventive Health Platform",
-    "orientation": "portrait-primary",
-    "prefer_related_applications": false,
-    "icons": [
-        {
-            "src": "icons/Icon-192.png",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
-            "src": "icons/Icon-512.png",
-            "sizes": "512x512",
-            "type": "image/png"
-        },
-        {
-            "src": "icons/Icon-maskable-192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "maskable"
-        },
-        {
-            "src": "icons/Icon-maskable-512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "maskable"
-        }
-    ]
+  "name": "DualisCheckUp | Triagem Preventiva de Saúde Física e Emocional",
+  "short_name": "DualisCheckUp",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#081B2B",
+  "theme_color": "#00A896",
+  "description": "Plataforma unificada de autoavaliação preventiva e triagem de saúde somática em 12 sistemas e bem-estar psicoemocional com segurança clínica e conformidade LGPD.",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "categories": ["health", "medical", "lifestyle"],
+  "icons": [
+    {
+      "src": "icons/Icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/Icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/Icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/Icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
 }

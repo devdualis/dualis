@@ -16,8 +16,11 @@ import '../../features/triage_outcome/domain/triage_outcome_models.dart';
 import '../../features/triage_outcome/presentation/screens/triage_outcome_screen.dart';
 import '../../features/dashboard/presentation/screens/historical_dashboard_screen.dart';
 import '../../features/privacy/presentation/screens/privacy_center_screen.dart';
+import '../../features/privacy/presentation/screens/terms_of_service_screen.dart';
+import '../../features/privacy/presentation/screens/privacy_policy_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/hydration/presentation/screens/hydration_dashboard_screen.dart';
+import '../presentation/screens/not_found_screen.dart';
 import 'route_paths.dart';
 
 class RouterNotifier extends ChangeNotifier {
@@ -45,10 +48,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           currentLoc == RoutePaths.register ||
           currentLoc == RoutePaths.verifyEmail;
 
+      final isPublicAccessibleRoute = isAuthRoute ||
+          currentLoc == RoutePaths.emergency ||
+          currentLoc == RoutePaths.termsOfService ||
+          currentLoc == RoutePaths.privacyPolicy ||
+          currentLoc == RoutePaths.notFound;
+
       if (isLoggedIn && isAuthRoute) {
         return RoutePaths.home;
       }
-      if (!isLoggedIn && !isAuthRoute && currentLoc != RoutePaths.emergency) {
+      if (!isLoggedIn && !isPublicAccessibleRoute) {
         return RoutePaths.onboarding;
       }
       return null;
@@ -65,6 +74,9 @@ GoRouter createRouter({
     initialLocation: initialLocation,
     refreshListenable: refreshListenable,
     redirect: redirect,
+    errorBuilder: (context, state) => NotFoundScreen(
+      uri: state.uri.toString(),
+    ),
     routes: [
       GoRoute(
         path: RoutePaths.onboarding,
@@ -165,6 +177,21 @@ GoRouter createRouter({
         path: RoutePaths.hydration,
         name: 'hydration',
         builder: (context, state) => const HydrationDashboardScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.termsOfService,
+        name: 'termsOfService',
+        builder: (context, state) => const TermsOfServiceScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.privacyPolicy,
+        name: 'privacyPolicy',
+        builder: (context, state) => const PrivacyPolicyScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.notFound,
+        name: 'notFound',
+        builder: (context, state) => const NotFoundScreen(),
       ),
     ],
   );

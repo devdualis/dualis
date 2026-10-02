@@ -357,6 +357,153 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                 ],
               ),
             ),
+            const SizedBox(height: 24),
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.softIndigo.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.gavel_rounded,
+                            color: AppColors.softIndigo,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Documentação Legal e Termos',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Acesse as diretrizes completas de governança de dados, conformidade regulatória (Anvisa/CFM) e o contrato do serviço.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            key: const Key('privacy_center_terms_button'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.softIndigo,
+                              side: const BorderSide(color: AppColors.softIndigo),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            icon: const Icon(Icons.description_outlined, size: 18),
+                            label: const Text('Termos de Uso'),
+                            onPressed: () => context.push(RoutePaths.termsOfService),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton.icon(
+                            key: const Key('privacy_center_policy_button'),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppColors.softIndigo,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            icon: const Icon(Icons.policy_outlined, size: 18),
+                            label: const Text('Política LGPD'),
+                            onPressed: () => context.push(RoutePaths.privacyPolicy),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.clinicalTealDark.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.shield_rounded,
+                            color: AppColors.clinicalTealDark,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Segurança e Resposta a Incidentes',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '• Criptografia: TLS 1.3 em trânsito e AES-256 em repouso.\n'
+                      '• Autenticação: Senhas protegidas com algoritmo Argon2id.\n'
+                      '• Isolamento Multitenant: Row-Level Security (RLS) no PostgreSQL.\n'
+                      '• Plano de Vazamento: Protocolo de notificação em até 72h à ANPD e aos titulares (LGPD Art. 48).\n'
+                      '• DPO / Contato: dpo@dualischeckup.com',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
           ],
         ),
       ),

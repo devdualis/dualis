@@ -1,7 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/router/route_paths.dart';
 
 class LgpdConsentCheckbox extends StatelessWidget {
   final bool value;
@@ -75,7 +77,8 @@ class LgpdConsentCheckbox extends StatelessWidget {
                   Text(
                     '• Anvisa RDC nº 657/2022: Regulamentação de Software como Dispositivo Médico (SaMD).\n'
                     '• CFM Resolução nº 2.314/2022: Normas de Telemedicina no Brasil.\n'
-                    '• Lei Federal nº 13.709/2018 (LGPD): Art. 11 - Tratamento de dados pessoais sensíveis de saúde.',
+                    '• Lei Federal nº 13.709/2018 (LGPD): Art. 11 - Tratamento de dados pessoais sensíveis de saúde.\n'
+                    '• Código de Defesa do Consumidor (CDC): Art. 49 - Direito de Arrependimento em 7 dias.',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       height: 1.5,
@@ -83,18 +86,31 @@ class LgpdConsentCheckbox extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.softIndigo,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.of(ctx).pop();
+                            context.push(RoutePaths.termsOfService);
+                          },
+                          child: const Text('Ver Termos de Uso'),
                         ),
                       ),
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      child: const Text('Compreendi e Fechar'),
-                    ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: FilledButton(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.softIndigo,
+                          ),
+                          onPressed: () {
+                            Navigator.of(ctx).pop();
+                            context.push(RoutePaths.privacyPolicy);
+                          },
+                          child: const Text('Ver Política Completa'),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -116,13 +132,25 @@ class LgpdConsentCheckbox extends StatelessWidget {
       activeColor: AppColors.softIndigo,
       title: Text.rich(
         TextSpan(
-          text: 'Li e concordo com a ',
+          text: 'Li e concordo com os ',
           style: GoogleFonts.plusJakartaSans(
             fontSize: 13,
             color: AppColors.textPrimaryLight,
             height: 1.4,
           ),
           children: [
+            TextSpan(
+              text: 'Termos de Uso',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                color: AppColors.softIndigo,
+                fontWeight: FontWeight.w600,
+                decoration: TextDecoration.underline,
+              ),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => context.push(RoutePaths.termsOfService),
+            ),
+            const TextSpan(text: ' e a '),
             TextSpan(
               text: 'Política de Privacidade',
               style: GoogleFonts.plusJakartaSans(
@@ -132,11 +160,21 @@ class LgpdConsentCheckbox extends StatelessWidget {
                 decoration: TextDecoration.underline,
               ),
               recognizer: TapGestureRecognizer()
-                ..onTap = () => _showDisclaimerBottomSheet(context),
+                ..onTap = () => context.push(RoutePaths.privacyPolicy),
             ),
             const TextSpan(
               text:
-                  ' e consinto expressamente com o tratamento de meus dados pessoais sensíveis de saúde para fins de triagem preventiva e acompanhamento longitudinal, nos termos do Art. 11 da LGPD.',
+                  ', e consinto expressamente com o tratamento de meus dados de saúde (LGPD Art. 11). ',
+            ),
+            TextSpan(
+              text: '(Saiba mais)',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                color: AppColors.clinicalTealDark,
+                fontWeight: FontWeight.w600,
+              ),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => _showDisclaimerBottomSheet(context),
             ),
           ],
         ),

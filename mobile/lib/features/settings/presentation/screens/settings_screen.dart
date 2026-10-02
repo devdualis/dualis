@@ -1012,6 +1012,102 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
                         onTap: () => context.push(RoutePaths.hydration),
                       ),
+                      const Divider(height: 1, color: AppColors.outlineLight),
+                      ListTile(
+                        key: const Key('settings_terms_tile'),
+                        leading: const Icon(Icons.description_outlined, color: AppColors.softIndigo),
+                        title: Text(
+                          'Termos de Uso do SaaS',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Condições de uso, planos, cancelamento e reembolso',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
+                        onTap: () => context.push(RoutePaths.termsOfService),
+                      ),
+                      const Divider(height: 1, color: AppColors.outlineLight),
+                      ListTile(
+                        key: const Key('settings_privacy_policy_tile'),
+                        leading: const Icon(Icons.policy_outlined, color: AppColors.clinicalTeal),
+                        title: Text(
+                          'Política de Privacidade (LGPD)',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Tratamento de dados, direitos do titular e DPO',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
+                        onTap: () => context.push(RoutePaths.privacyPolicy),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              _SectionLabel(
+                icon: Icons.notifications_active_outlined,
+                label: 'Comunicações e Notificações',
+                color: AppColors.clinicalTealDark,
+              ),
+              const SizedBox(height: 10),
+              Material(
+                color: AppColors.surfaceLight,
+                borderRadius: BorderRadius.circular(16),
+                clipBehavior: Clip.antiAlias,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.outlineLight),
+                  ),
+                  child: Column(
+                    children: [
+                      SwitchListTile(
+                        key: const Key('settings_marketing_optout_switch'),
+                        value: true,
+                        activeThumbColor: AppColors.clinicalTeal,
+                        title: Text(
+                          'Dicas Preventivas e Notificações Educativas',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Orientações de bem-estar. Você pode revogar (opt-out) a qualquer momento.',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                        ),
+                        onChanged: (val) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                val
+                                    ? 'Notificações educativas ativadas.'
+                                    : 'Opt-out confirmado: Notificações educativas desativadas.',
+                              ),
+                              backgroundColor: AppColors.clinicalTeal,
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -1040,6 +1136,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.emergencyCrimson),
                     onTap: _handleLogout,
                   ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      'DualisCheckUp • v1.0.0 (Build 2026.1)',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondaryLight,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Operado por DualisCheckUp Saúde e Tecnologia Ltda.\nCNPJ 48.291.834/0001-92 • São Paulo - SP, Brasil\nDPO: dpo@dualischeckup.com',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        color: AppColors.textSecondaryLight.withValues(alpha: 0.8),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 32),

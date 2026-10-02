@@ -4,10 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dualis_mobile/core/router/app_router.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
+import 'package:dualis_mobile/core/presentation/screens/not_found_screen.dart';
 import 'package:dualis_mobile/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:dualis_mobile/features/auth/presentation/screens/register_screen.dart';
 import 'package:dualis_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:dualis_mobile/features/home/presentation/screens/home_screen.dart';
+import 'package:dualis_mobile/features/privacy/presentation/screens/terms_of_service_screen.dart';
+import 'package:dualis_mobile/features/privacy/presentation/screens/privacy_policy_screen.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 import 'package:dualis_mobile/l10n/locale_provider.dart';
 import 'package:dualis_mobile/shared/widgets/dualis_primary_button.dart';
@@ -44,6 +47,9 @@ void main() {
       expect(RoutePaths.register, equals('/register'));
       expect(RoutePaths.login, equals('/login'));
       expect(RoutePaths.home, equals('/home'));
+      expect(RoutePaths.termsOfService, equals('/terms-of-service'));
+      expect(RoutePaths.privacyPolicy, equals('/privacy-policy'));
+      expect(RoutePaths.notFound, equals('/404'));
     });
   });
 
@@ -85,6 +91,41 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(HomeScreen), findsOneWidget);
+    });
+
+    testWidgets('navigates to Terms of Service screen (SaaS Legal Requirement)',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        createRouterTestApp(initialLocation: RoutePaths.termsOfService),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TermsOfServiceScreen), findsOneWidget);
+      expect(find.text('Termos de Uso do SaaS'), findsOneWidget);
+    });
+
+    testWidgets('navigates to Privacy Policy screen (LGPD SaaS Requirement)',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        createRouterTestApp(initialLocation: RoutePaths.privacyPolicy),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PrivacyPolicyScreen), findsOneWidget);
+      expect(find.text('Política de Privacidade (LGPD)'), findsOneWidget);
+    });
+
+    testWidgets('renders custom NotFoundScreen for nonexistent routes (Video 1 Anti-Vibe Coding)',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        createRouterTestApp(initialLocation: '/nonexistent-random-route'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NotFoundScreen), findsOneWidget);
+      expect(find.text('ERRO 404'), findsOneWidget);
+      expect(find.text('Página Não Encontrada'), findsOneWidget);
+      expect(find.byKey(const Key('not_found_home_button')), findsOneWidget);
     });
   });
 
