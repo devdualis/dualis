@@ -13,7 +13,7 @@
     "test:watch": "vitest test/unit",
     "test:coverage": "vitest run --coverage test/unit",
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
-    "test:rls": "vitest run test/security/cross-tenant-rls.spec.ts",
+    "test:rls": "vitest run --config ./vitest.config.security.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",

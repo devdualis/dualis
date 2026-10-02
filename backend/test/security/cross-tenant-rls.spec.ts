@@ -17,13 +17,34 @@ describe('Security Regression: PostgreSQL Cross-Tenant RLS Isolation (SEC-01)', 
   const userB_LogId = 'bbbbbbb2-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 
   beforeAll(async () => {
-    const connectionString =
-      process.env.TEST_DATABASE_URL ||
-      process.env.DATABASE_URL ||
-      'postgresql://postgres:postgres@localhost:5432/dualis_dev';
+    // CRITICAL SAFETY GUARDRAIL:
+    // NEVER fall back to DATABASE_URL. Must ONLY use TEST_DATABASE_URL pointing to local test DB.
+    const rawTestUrl = process.env.TEST_DATABASE_URL;
+
+    if (!rawTestUrl) {
+      console.warn(
+        '[cross-tenant-rls.spec.ts] SAFETY GUARD: TEST_DATABASE_URL not set. Skipping live database assertions to protect production/dev databases.',
+      );
+      isDbAvailable = false;
+      return;
+    }
+
+    // Strict validation: Ban remote / cloud / production hosts
+    const isCloudOrProd = /supabase\.co|supabase\.com|aws-|pooler|rds\.amazonaws\.com|compute\.amazonaws\.com|prod/i.test(
+      rawTestUrl,
+    );
+    const isLocal = /localhost|127\.0\.0\.1|test/i.test(rawTestUrl);
+
+    if (isCloudOrProd || !isLocal) {
+      console.error(
+        `[cross-tenant-rls.spec.ts] CRITICAL SAFETY TRIGGER: TEST_DATABASE_URL (${rawTestUrl}) points to a remote/cloud host. Aborting all test database operations to prevent data loss!`,
+      );
+      isDbAvailable = false;
+      return;
+    }
 
     pool = new Pool({
-      connectionString,
+      connectionString: rawTestUrl,
       max: 5,
       connectionTimeoutMillis: 3000,
     });
