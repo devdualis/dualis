@@ -7,3 +7,6 @@ export * from './email-verifications.schema';
 export * from './symptom-knowledge.schema';
 export * from './water-intake-logs.schema';
 
+export * from './profiles.schema';
+export * from './legal-guardianships.schema';
+export * from './shared-access-grants.schema';
