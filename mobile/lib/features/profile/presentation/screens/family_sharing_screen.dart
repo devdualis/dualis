@@ -151,12 +151,20 @@ class _FamilySharingBodyState extends ConsumerState<_FamilySharingBody>
         bottom: TabBar(
           controller: _tabs,
           tabs: [
+            // Two-line labels: the pt-BR copy does not fit one line on
+            // narrow phones.
             Tab(
-                key: const ValueKey('family-share-tab-outgoing'),
-                text: l10n.familySharingTabOutgoing),
+              key: const ValueKey('family-share-tab-outgoing'),
+              height: 56,
+              child: Text(l10n.familySharingTabOutgoing,
+                  textAlign: TextAlign.center, maxLines: 2),
+            ),
             Tab(
-                key: const ValueKey('family-share-tab-incoming'),
-                text: l10n.familySharingTabIncoming),
+              key: const ValueKey('family-share-tab-incoming'),
+              height: 56,
+              child: Text(l10n.familySharingTabIncoming,
+                  textAlign: TextAlign.center, maxLines: 2),
+            ),
           ],
         ),
       ),
@@ -344,6 +352,21 @@ class _GrantTile extends StatelessWidget {
                   onPressed: onRevoke,
                   icon: const Icon(Icons.block, size: 18),
                   label: Text(l10n.familySharingRevokeButton),
+                ),
+              ),
+            ],
+            // A pending invite can be cancelled before anyone uses the code.
+            if (grant.status == GrantStatus.pending && !_isExpired) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: OutlinedButton.icon(
+                  key: ValueKey('family-share-cancel-${grant.id}'),
+                  style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.emergencyCrimson),
+                  onPressed: onRevoke,
+                  icon: const Icon(Icons.close, size: 18),
+                  label: Text(l10n.familySharingCancelInvite),
                 ),
               ),
             ],

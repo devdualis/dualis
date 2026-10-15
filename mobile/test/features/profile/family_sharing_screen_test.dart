@@ -276,4 +276,29 @@ void main() {
     expect(find.byKey(const ValueKey('family-share-revoke-g1')), findsOneWidget);
     expect(find.byKey(const ValueKey('family-share-revoke-g2')), findsOneWidget);
   });
+
+  testWidgets('pending invite can be cancelled; expired one cannot',
+      (tester) async {
+    final controller = _FakeController(_state(outgoing: [
+      _grant('p1', GrantDirection.outgoing, 'Ana',
+          status: GrantStatus.pending, code: 'ABC234'),
+      _grant('p2', GrantDirection.outgoing, 'Pedro',
+          status: GrantStatus.pending,
+          code: 'XYZ789',
+          expiresAt: DateTime.now().subtract(const Duration(hours: 1))),
+    ]));
+    await tester.pumpWidget(_app(controller));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('family-share-cancel-p2')), findsNothing);
+    final cancel = find.byKey(const ValueKey('family-share-cancel-p1'));
+    expect(cancel, findsOneWidget);
+
+    await tester.tap(cancel);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('family-share-revoke-confirm')));
+    await tester.pumpAndSettle();
+
+    expect(controller.revokedIds, ['p1']);
+  });
 }

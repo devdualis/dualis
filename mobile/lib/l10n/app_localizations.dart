@@ -2533,13 +2533,13 @@ abstract class AppLocalizations {
   /// No description provided for @addDependentRelationshipCurator.
   ///
   /// In pt, this message translates to:
-  /// **'Curatela / Tutela legal de maior incapaz'**
+  /// **'Curador(a) de maior incapaz (Curatela)'**
   String get addDependentRelationshipCurator;
 
   /// No description provided for @addDependentRelationshipLegalGuardian.
   ///
   /// In pt, this message translates to:
-  /// **'Acompanhante / Cuidador legalmente constituído'**
+  /// **'Tutor(a) legal de menor (Tutela)'**
   String get addDependentRelationshipLegalGuardian;
 
   /// No description provided for @addDependentLgpdArt14Consent.
@@ -2697,6 +2697,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não foi possível concluir a ação. Tente novamente.'**
   String get profileSwitcherActionError;
+
+  /// Button to cancel a pending outgoing invite
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar Convite'**
+  String get familySharingCancelInvite;
 }
 
 class _AppLocalizationsDelegate

@@ -405,8 +405,8 @@
   "addDependentRelationshipLabel": "Grado de parentesco / representación",
   "addDependentRelationshipHint": "Selecciona el vínculo legal",
   "addDependentRelationshipParent": "Hijo(a) menor (patria potestad)",
-  "addDependentRelationshipCurator": "Curatela / tutela de mayor incapaz",
-  "addDependentRelationshipLegalGuardian": "Acompañante / cuidador legalmente constituido",
+  "addDependentRelationshipCurator": "Curador(a) de mayor incapaz (curatela)",
+  "addDependentRelationshipLegalGuardian": "Tutor(a) legal de menor (tutela)",
   "addDependentLgpdArt14Consent": "Declaro, bajo pena de ley, que soy padre, madre o representante legal de este dependiente y autorizo expresamente la recopilación y el tratamiento de sus datos de salud preventiva en la plataforma DualisCheckUp, en estricta conformidad con el Artículo 14 de la LGPD (Ley 13.709/2018).",
   "addDependentSubmit": "Registrar dependiente",
   "addDependentSuccess": "Dependiente registrado con éxito.",
@@ -432,5 +432,6 @@
   "profileSwitcherBadgePrimary": "Titular",
   "profileSwitcherNoDependents": "Ningún dependiente registrado.",
   "profileSwitcherNoShared": "Ningún perfil compartido contigo.",
-  "profileSwitcherActionError": "No se pudo completar la acción. Inténtalo de nuevo."
+  "profileSwitcherActionError": "No se pudo completar la acción. Inténtalo de nuevo.",
+  "familySharingCancelInvite": "Cancelar invitación"
 }

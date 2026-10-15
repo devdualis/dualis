@@ -1416,11 +1416,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addDependentRelationshipCurator =>
-      'Curatorship / guardianship of incapacitated adult';
+      'Court-appointed curator of an incapacitated adult';
 
   @override
   String get addDependentRelationshipLegalGuardian =>
-      'Legally appointed caregiver / companion';
+      'Legal guardian of a minor';
 
   @override
   String get addDependentLgpdArt14Consent =>
@@ -1504,4 +1504,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get profileSwitcherActionError =>
       'Could not complete the action. Please try again.';
+
+  @override
+  String get familySharingCancelInvite => 'Cancel Invite';
 }

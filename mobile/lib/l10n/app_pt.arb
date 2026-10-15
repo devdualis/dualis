@@ -1546,8 +1546,8 @@
   "addDependentRelationshipLabel": "Grau de Parentesco / Representação",
   "addDependentRelationshipHint": "Selecione o vínculo legal",
   "addDependentRelationshipParent": "Filho(a) menor de idade (Poder Familiar)",
-  "addDependentRelationshipCurator": "Curatela / Tutela legal de maior incapaz",
-  "addDependentRelationshipLegalGuardian": "Acompanhante / Cuidador legalmente constituído",
+  "addDependentRelationshipCurator": "Curador(a) de maior incapaz (Curatela)",
+  "addDependentRelationshipLegalGuardian": "Tutor(a) legal de menor (Tutela)",
   "addDependentLgpdArt14Consent": "Declaro, sob as penas da lei, que sou pai, mãe ou representante legal deste dependente e autorizo expressamente a coleta e tratamento dos seus dados de saúde preventiva na plataforma DualisCheckUp, em estrita conformidade com o Artigo 14 da LGPD (Lei 13.709/2018).",
   "addDependentSubmit": "Cadastrar Dependente",
   "addDependentSuccess": "Dependente cadastrado com sucesso.",
@@ -1644,5 +1644,9 @@
   "profileSwitcherActionError": "Não foi possível concluir a ação. Tente novamente.",
   "@profileSwitcherActionError": {
     "description": "Snackbar when renaming or deleting a profile fails"
+  },
+  "familySharingCancelInvite": "Cancelar Convite",
+  "@familySharingCancelInvite": {
+    "description": "Button to cancel a pending outgoing invite"
   }
 }

@@ -405,8 +405,8 @@
   "addDependentRelationshipLabel": "Relationship / legal representation",
   "addDependentRelationshipHint": "Select legal relationship",
   "addDependentRelationshipParent": "Minor child (parental authority)",
-  "addDependentRelationshipCurator": "Curatorship / guardianship of incapacitated adult",
-  "addDependentRelationshipLegalGuardian": "Legally appointed caregiver / companion",
+  "addDependentRelationshipCurator": "Court-appointed curator of an incapacitated adult",
+  "addDependentRelationshipLegalGuardian": "Legal guardian of a minor",
   "addDependentLgpdArt14Consent": "I declare, under penalty of law, that I am the parent or legal representative of this dependent and expressly authorize the collection and processing of their preventive health data on the DualisCheckUp platform, in strict compliance with Article 14 of the LGPD (Law 13.709/2018).",
   "addDependentSubmit": "Register Dependent",
   "addDependentSuccess": "Dependent registered successfully.",
@@ -432,5 +432,6 @@
   "profileSwitcherBadgePrimary": "Primary",
   "profileSwitcherNoDependents": "No dependents registered.",
   "profileSwitcherNoShared": "No profiles shared with you.",
-  "profileSwitcherActionError": "Could not complete the action. Please try again."
+  "profileSwitcherActionError": "Could not complete the action. Please try again.",
+  "familySharingCancelInvite": "Cancel Invite"
 }

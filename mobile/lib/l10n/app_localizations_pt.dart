@@ -1430,11 +1430,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get addDependentRelationshipCurator =>
-      'Curatela / Tutela legal de maior incapaz';
+      'Curador(a) de maior incapaz (Curatela)';
 
   @override
   String get addDependentRelationshipLegalGuardian =>
-      'Acompanhante / Cuidador legalmente constituído';
+      'Tutor(a) legal de menor (Tutela)';
 
   @override
   String get addDependentLgpdArt14Consent =>
@@ -1519,4 +1519,7 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get profileSwitcherActionError =>
       'Não foi possível concluir a ação. Tente novamente.';
+
+  @override
+  String get familySharingCancelInvite => 'Cancelar Convite';
 }
