@@ -433,5 +433,9 @@
   "profileSwitcherNoDependents": "No dependents registered.",
   "profileSwitcherNoShared": "No profiles shared with you.",
   "profileSwitcherActionError": "Could not complete the action. Please try again.",
-  "familySharingCancelInvite": "Cancel Invite"
+  "familySharingCancelInvite": "Cancel Invite",
+  "activeProfileBannerDataOf": "Showing {profileName}'s data",
+  "activeProfileBannerSwitchToMine": "My profile",
+  "activeProfileReadOnlyNote": "Read-only",
+  "activeProfileCardTitle": "{profileName}'s profile"
 }

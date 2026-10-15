@@ -37,6 +37,30 @@ export interface ExportedEmergencyEventDto {
   reportedAt: string;
 }
 
+export interface ExportedWaterIntakeLogDto {
+  id: string;
+  amountMl: number;
+  source: string;
+  recordedAt: string;
+}
+
+export interface ExportedDependentProfileDto {
+  id: string;
+  name: string;
+  profileType: string;
+  dateOfBirth: string | null;
+  gender: string | null;
+  createdAt: string;
+}
+
+/** Clinical data of one dependent profile owned by the exporting account. */
+export interface ExportedDependentDataDto {
+  profile: ExportedDependentProfileDto;
+  symptomLogs: ExportedSymptomLogDto[];
+  emergencyEvents: ExportedEmergencyEventDto[];
+  waterIntakeLogs: ExportedWaterIntakeLogDto[];
+}
+
 export interface UserDataExportResponseDto {
   metadata: {
     exportDate: string;
@@ -48,4 +72,6 @@ export interface UserDataExportResponseDto {
   consents: ExportedConsentDto[];
   symptomLogs: ExportedSymptomLogDto[];
   emergencyEvents: ExportedEmergencyEventDto[];
+  waterIntakeLogs: ExportedWaterIntakeLogDto[];
+  dependentProfiles: ExportedDependentDataDto[];
 }

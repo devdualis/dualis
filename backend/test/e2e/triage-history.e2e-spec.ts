@@ -7,6 +7,12 @@ import {
 import { VersioningType, ValidationPipe, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AppModule } from '../../src/app.module';
+import {
+  defaultPrimaryProfileId,
+  familyAccessFor,
+  stubProfileAccess,
+  TEST_PROFILES,
+} from './support/profile-access.stub';
 import { AuthService } from '../../src/modules/auth/auth.service';
 import { TriageHistoryService } from '../../src/modules/triage/services/triage-history.service';
 import {
@@ -16,10 +22,14 @@ import {
 
 @Injectable()
 class MockTriageHistoryService {
+  readonly calls: Array<{ method: string; userId: string; profileId: string }> = [];
+
   async getHistory(
     userId: string,
+    profileId: string,
     query?: GetTriageHistoryQueryDto,
   ): Promise<TriageHistoryResponseDto> {
+    this.calls.push({ method: 'getHistory', userId, profileId });
     return {
       logs: [
         {
@@ -80,8 +90,10 @@ class MockTriageHistoryService {
 
   async deleteHistoryItem(
     userId: string,
+    profileId: string,
     id: string,
   ): Promise<{ success: boolean; id: string }> {
+    this.calls.push({ method: 'deleteHistoryItem', userId, profileId });
     return { success: true, id };
   }
 }
@@ -90,6 +102,7 @@ describe('Triage History E2E Suite (DASH-01, DASH-02, DASH-03, DASH-04, SEC-01)'
   let app: NestFastifyApplication;
   let jwtService: JwtService;
   let validAccessToken: string;
+  let historyService: MockTriageHistoryService;
   const mockUserId = '99999999-9999-9999-9999-999999999999';
 
   beforeAll(async () => {
@@ -99,6 +112,9 @@ describe('Triage History E2E Suite (DASH-01, DASH-02, DASH-03, DASH-04, SEC-01)'
       .overrideProvider(TriageHistoryService)
       .useClass(MockTriageHistoryService)
       .compile();
+
+    stubProfileAccess(moduleRef, familyAccessFor(mockUserId));
+    historyService = moduleRef.get(TriageHistoryService) as unknown as MockTriageHistoryService;
 
     jwtService = moduleRef.get<JwtService>(JwtService);
     validAccessToken = jwtService.sign(
@@ -250,5 +266,91 @@ describe('Triage History E2E Suite (DASH-01, DASH-02, DASH-03, DASH-04, SEC-01)'
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.payload);
     expect(body).toEqual({ success: true, id: testId });
+  });
+
+  const lastCall = () => historyService.calls[historyService.calls.length - 1];
+
+  it('8. GET /v1/triage/history without X-Profile-Id reads the primary profile', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/v1/triage/history',
+      headers: { authorization: `Bearer ${validAccessToken}` },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(lastCall()).toEqual({
+      method: 'getHistory',
+      userId: mockUserId,
+      profileId: defaultPrimaryProfileId(mockUserId),
+    });
+  });
+
+  it('9. GET /v1/triage/history with a dependent X-Profile-Id reads that profile', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/v1/triage/history',
+      headers: {
+        authorization: `Bearer ${validAccessToken}`,
+        'x-profile-id': TEST_PROFILES.dependent,
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(lastCall().profileId).toBe(TEST_PROFILES.dependent);
+  });
+
+  it('10. VIEW_ONLY grant reads history (200) but cannot delete (403)', async () => {
+    const read = await app.inject({
+      method: 'GET',
+      url: '/v1/triage/history',
+      headers: {
+        authorization: `Bearer ${validAccessToken}`,
+        'x-profile-id': TEST_PROFILES.sharedViewOnly,
+      },
+    });
+    expect(read.statusCode).toBe(200);
+    expect(lastCall().profileId).toBe(TEST_PROFILES.sharedViewOnly);
+
+    const callsBefore = historyService.calls.length;
+    const remove = await app.inject({
+      method: 'DELETE',
+      url: '/v1/triage/history/11111111-1111-1111-1111-111111111111',
+      headers: {
+        authorization: `Bearer ${validAccessToken}`,
+        'x-profile-id': TEST_PROFILES.sharedViewOnly,
+      },
+    });
+    expect(remove.statusCode).toBe(403);
+    expect(historyService.calls.length).toBe(callsBefore);
+  });
+
+  it('11. CO_MANAGE grant can delete on the shared profile', async () => {
+    const res = await app.inject({
+      method: 'DELETE',
+      url: '/v1/triage/history/11111111-1111-1111-1111-111111111111',
+      headers: {
+        authorization: `Bearer ${validAccessToken}`,
+        'x-profile-id': TEST_PROFILES.sharedCoManage,
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(lastCall()).toMatchObject({
+      method: 'deleteHistoryItem',
+      profileId: TEST_PROFILES.sharedCoManage,
+    });
+  });
+
+  it('12. X-Profile-Id the caller cannot reach returns 403', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/v1/triage/history',
+      headers: {
+        authorization: `Bearer ${validAccessToken}`,
+        'x-profile-id': TEST_PROFILES.foreign,
+      },
+    });
+
+    expect(res.statusCode).toBe(403);
   });
 });

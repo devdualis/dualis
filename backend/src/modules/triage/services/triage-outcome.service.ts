@@ -523,10 +523,14 @@ export class TriageOutcomeService {
 
   async processOutcome(
     userId: string,
+    profileId: string,
     dto: SubmitTriageDto,
   ): Promise<TriageOutcomeResponseDto> {
     if (!userId) {
       throw new BadRequestException('ID do usuário ausente para processamento do desfecho.');
+    }
+    if (!profileId) {
+      throw new BadRequestException('ID do perfil ausente para processamento do desfecho.');
     }
 
     const { vertical, answers, narrative } = dto;
@@ -771,6 +775,7 @@ export class TriageOutcomeService {
         .insert(symptomLogs)
         .values({
           userId,
+          profileId,
           encryptedNarrative,
           intensity: intensityScore,
           anatomicalSystem: vertical === 'physical'
@@ -814,10 +819,14 @@ export class TriageOutcomeService {
 
   async recordDailyCheckIn(
     userId: string,
+    profileId: string,
     dto: SubmitDailyCheckInDto,
   ): Promise<DailyCheckInResponseDto> {
     if (!userId) {
       throw new BadRequestException('ID do usuário ausente para registro de check-in diário.');
+    }
+    if (!profileId) {
+      throw new BadRequestException('ID do perfil ausente para registro de check-in diário.');
     }
 
     let intensity = 1;
@@ -854,6 +863,7 @@ export class TriageOutcomeService {
         .insert(symptomLogs)
         .values({
           userId,
+          profileId,
           encryptedNarrative,
           intensity,
           anatomicalSystem: physicalCategory,

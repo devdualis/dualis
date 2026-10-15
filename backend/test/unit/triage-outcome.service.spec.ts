@@ -52,7 +52,7 @@ describe('TriageOutcomeService Unit Tests', () => {
   });
 
   it('1. correctly normalizes physical symptoms into 12 systems and calculates intensity', async () => {
-    const outcome = await service.processOutcome('user-1', {
+    const outcome = await service.processOutcome('user-1', 'prof-user-1', {
       vertical: 'physical',
       answers: {
         1: 'cabeca',
@@ -73,8 +73,39 @@ describe('TriageOutcomeService Unit Tests', () => {
     expect(outcome.recommendedArticles[0].category).toBe('cabeca_pescoco');
   });
 
+  it('files the record under the active profile with the caller as author', async () => {
+    const insertValues = vi.fn().mockReturnValue({
+      returning: vi.fn().mockResolvedValue([
+        { id: 'mock-symptom-id-123', intensity: 3, recordedAt: new Date('2026-09-14T10:00:00Z') },
+      ]),
+    });
+    mockDb.transaction.mockImplementation(async (callback: any) =>
+      callback({ execute: vi.fn().mockResolvedValue(true), insert: vi.fn().mockReturnValue({ values: insertValues }) }),
+    );
+
+    await service.processOutcome('user-1', 'prof-dependent-1', {
+      vertical: 'physical',
+      answers: { 1: 'cabeca', 2: 'comecou_hoje', 3: '2', 4: 'nenhum' },
+    });
+    await service.recordDailyCheckIn('user-1', 'prof-dependent-1', {
+      emotionalStatus: 'goodNormal',
+      physicalStatus: 'goodNormal',
+    } as any);
+
+    expect(insertValues).toHaveBeenCalledTimes(2);
+    for (const [values] of insertValues.mock.calls) {
+      expect(values).toMatchObject({ userId: 'user-1', profileId: 'prof-dependent-1' });
+    }
+  });
+
+  it('rejects an outcome without an active profile', async () => {
+    await expect(
+      service.processOutcome('user-1', '', { vertical: 'physical', answers: { 1: 'cabeca' } }),
+    ).rejects.toThrow('perfil');
+  });
+
   it('2. correctly normalizes psycho-emotional symptoms into 7 dimensions', async () => {
-    const outcome = await service.processOutcome('user-1', {
+    const outcome = await service.processOutcome('user-1', 'prof-user-1', {
       vertical: 'emotional',
       answers: {
         1: 'ansiedade',
@@ -92,7 +123,7 @@ describe('TriageOutcomeService Unit Tests', () => {
   });
 
   it('3. strictly enforces Organic Primacy when physical symptoms accompany emotional distress (SOM-02)', async () => {
-    const outcome = await service.processOutcome('user-1', {
+    const outcome = await service.processOutcome('user-1', 'prof-user-1', {
       vertical: 'emotional',
       answers: {
         1: 'ansiedade',
@@ -110,7 +141,7 @@ describe('TriageOutcomeService Unit Tests', () => {
   });
 
   it('4. triggers Organic Primacy when psychosomatic dimension is directly selected', async () => {
-    const outcome = await service.processOutcome('user-1', {
+    const outcome = await service.processOutcome('user-1', 'prof-user-1', {
       vertical: 'emotional',
       answers: {
         1: 'somatico',
@@ -125,7 +156,7 @@ describe('TriageOutcomeService Unit Tests', () => {
   });
 
   it('5. maps score 5 to emergencia disposition and encrypts narrative under RLS', async () => {
-    const outcome = await service.processOutcome('user-1', {
+    const outcome = await service.processOutcome('user-1', 'prof-user-1', {
       vertical: 'physical',
       answers: {
         1: 'costas',
@@ -142,7 +173,7 @@ describe('TriageOutcomeService Unit Tests', () => {
   });
 
   it('6. recommends articles for both physical and emotional axes when a daily check-in flags both', async () => {
-    const outcome = await service.recordDailyCheckIn('user-1', {
+    const outcome = await service.recordDailyCheckIn('user-1', 'prof-user-1', {
       physicalStatus: 'badSick',
       emotionalStatus: 'badSick',
       naturalLanguageText: 'Dor nas costas e muito estresse essa semana',
@@ -174,7 +205,7 @@ describe('TriageOutcomeService Unit Tests', () => {
     ];
 
     for (const [naturalLanguageText, expectedCategory] of cases) {
-      const outcome = await service.recordDailyCheckIn('user-1', {
+      const outcome = await service.recordDailyCheckIn('user-1', 'prof-user-1', {
         physicalStatus: 'badSick',
         emotionalStatus: 'goodNormal',
         naturalLanguageText,
@@ -201,7 +232,7 @@ describe('TriageOutcomeService Unit Tests', () => {
     ];
 
     for (const [naturalLanguageText, expectedCategory] of cases) {
-      const outcome = await service.recordDailyCheckIn('user-1', {
+      const outcome = await service.recordDailyCheckIn('user-1', 'prof-user-1', {
         physicalStatus: 'goodNormal',
         emotionalStatus: 'badSick',
         naturalLanguageText,
@@ -217,7 +248,7 @@ describe('TriageOutcomeService Unit Tests', () => {
   });
 
   it('9. bridges cross-vertical physical symptom in emotional triage with organic primacy and associated component', async () => {
-    const outcome = await service.processOutcome('user-1', {
+    const outcome = await service.processOutcome('user-1', 'prof-user-1', {
       vertical: 'emotional',
       answers: {
         1: 'ansiedade',
@@ -261,7 +292,7 @@ describe('TriageOutcomeService Unit Tests', () => {
         classification({ primaryVertical: 'emotional', systemOrDimension: 'estresse_burnout' }),
       );
 
-      const outcome = await service.processOutcome('user-1', {
+      const outcome = await service.processOutcome('user-1', 'prof-user-1', {
         vertical: 'physical',
         answers: { 1: 'cabeca', 2: 'comecou_hoje', 3: '2' },
         narrative: 'muito estresse no trabalho',
@@ -277,7 +308,7 @@ describe('TriageOutcomeService Unit Tests', () => {
         classification({ primaryVertical: 'physical', systemOrDimension: 'cabeca_pescoco' }),
       );
 
-      const outcome = await service.processOutcome('user-1', {
+      const outcome = await service.processOutcome('user-1', 'prof-user-1', {
         vertical: 'emotional',
         answers: { 1: 'ansiedade', 2: 'comecou_hoje', 3: 'leve_controlavel' },
         narrative: 'dor de cabeça',
@@ -296,7 +327,7 @@ describe('TriageOutcomeService Unit Tests', () => {
         }),
       );
 
-      const outcome = await service.processOutcome('user-1', {
+      const outcome = await service.processOutcome('user-1', 'prof-user-1', {
         vertical: 'physical',
         answers: { 1: 'peito', 2: 'comecou_hoje', 3: '2' },
         narrative: 'dor no peito forte',
@@ -307,7 +338,7 @@ describe('TriageOutcomeService Unit Tests', () => {
     });
 
     it('13. normal triage selection yields auto_cuidado, intensityScore 0 and normal health status', async () => {
-      const outcome = await service.processOutcome('user-1', {
+      const outcome = await service.processOutcome('user-1', 'prof-user-1', {
         vertical: 'physical',
         answers: { 0: 'normal' },
       });

@@ -22,18 +22,17 @@ describe('HydrationService Unit Tests', () => {
       createdAt: new Date('2026-09-27T10:00:00Z'),
     };
 
+    const insertValues = vi.fn().mockReturnValue({
+      returning: vi.fn().mockResolvedValue([mockCreated]),
+    });
     mockDatabaseService.withRls.mockImplementation(async (userId: string, callback: any) => {
       const tx = {
-        insert: vi.fn().mockReturnValue({
-          values: vi.fn().mockReturnValue({
-            returning: vi.fn().mockResolvedValue([mockCreated]),
-          }),
-        }),
+        insert: vi.fn().mockReturnValue({ values: insertValues }),
       };
       return callback(tx);
     });
 
-    const result = await service.logWater('usr-1', {
+    const result = await service.logWater('usr-1', 'prof-usr-1', {
       amountMl: 300,
       source: 'quick_chip',
       recordedAt: '2026-09-27T10:00:00Z',
@@ -43,6 +42,15 @@ describe('HydrationService Unit Tests', () => {
     expect(result.amountMl).toBe(300);
     expect(result.source).toBe('quick_chip');
     expect(mockDatabaseService.withRls).toHaveBeenCalledWith('usr-1', expect.any(Function));
+    // Author is the caller, subject is the active profile.
+    expect(insertValues).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'usr-1', profileId: 'prof-usr-1' }),
+    );
+  });
+
+  it('rejects calls without an active profile', async () => {
+    await expect(service.getTodayLogs('usr-1', '')).rejects.toThrow('Profile ID is required');
+    expect(mockDatabaseService.withRls).not.toHaveBeenCalled();
   });
 
   it('2. retrieves today logs and calculates todayTotalMl', async () => {
@@ -79,7 +87,7 @@ describe('HydrationService Unit Tests', () => {
       return callback(tx);
     });
 
-    const result = await service.getTodayLogs('usr-1');
+    const result = await service.getTodayLogs('usr-1', 'prof-usr-1');
 
     expect(result.todayTotalMl).toBe(750);
     expect(result.logs).toHaveLength(2);
@@ -121,7 +129,7 @@ describe('HydrationService Unit Tests', () => {
       return callback(tx);
     });
 
-    const result = await service.getHistory('usr-1', 7, '2026-09-27T12:00:00Z');
+    const result = await service.getHistory('usr-1', 'prof-usr-1', 7, '2026-09-27T12:00:00Z');
 
     expect(Object.keys(result.totals)).toHaveLength(7);
     expect(result.totals['2026-09-27']).toBe(300);
@@ -141,7 +149,7 @@ describe('HydrationService Unit Tests', () => {
       return callback(tx);
     });
 
-    const result = await service.deleteLog('usr-1', 'log-1');
+    const result = await service.deleteLog('usr-1', 'prof-usr-1', 'log-1');
 
     expect(result.success).toBe(true);
     expect(result.id).toBe('log-1');

@@ -212,9 +212,21 @@ export class ProfilesService {
         gender: user.gender,
         dateOfBirth: user.dateOfBirth,
       })
+      // Concurrent first requests (this list and ProfileContextGuard) may race to
+      // create the primary profile; uq_profiles_primary_per_owner keeps one.
+      .onConflictDoNothing()
       .returning();
+    if (created) return created;
 
-    return created;
+    const [existing] = await tx
+      .select()
+      .from(profiles)
+      .where(and(eq(profiles.accountOwnerId, userId), eq(profiles.profileType, 'primary')))
+      .limit(1);
+    if (!existing) {
+      throw new NotFoundException('Primary profile not found.');
+    }
+    return existing;
   }
 
   private async findProfile(tx: DrizzleTransaction, profileId: string): Promise<ProfileRow> {

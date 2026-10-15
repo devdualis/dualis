@@ -21,9 +21,31 @@ class TriageOutcomeRemoteDataSource {
     String? token,
     String? clientSessionId,
     String? language,
+  }) =>
+      submitTriageForProfile(
+        vertical: vertical,
+        answers: answers,
+        narrative: narrative,
+        token: token,
+        clientSessionId: clientSessionId,
+        language: language,
+      );
+
+  Future<TriageOutcome> submitTriageForProfile({
+    required String vertical,
+    required Map<int, String> answers,
+    String? narrative,
+    String? token,
+    String? clientSessionId,
+    String? language,
+    String? profileId,
   }) async {
     try {
       final authToken = token ?? await _secureStorage.getAccessToken();
+      final headers = <String, dynamic>{
+        if (authToken != null) 'Authorization': 'Bearer $authToken',
+        if (profileId != null && profileId.isNotEmpty) 'X-Profile-Id': profileId,
+      };
       final response = await _apiClient.post(
         ApiEndpoints.triageOutcome,
         data: {
@@ -34,9 +56,7 @@ class TriageOutcomeRemoteDataSource {
             'clientSessionId': clientSessionId,
           if (language != null && language.isNotEmpty) 'language': language,
         },
-        options: authToken != null
-            ? Options(headers: {'Authorization': 'Bearer $authToken'})
-            : null,
+        options: headers.isNotEmpty ? Options(headers: headers) : null,
       );
 
       if (response.data is Map<String, dynamic>) {

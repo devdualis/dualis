@@ -4,11 +4,12 @@ import { ProfilesController } from './profiles.controller';
 import { ProfilesService } from './profiles.service';
 import { FamilySharingController } from './family-sharing.controller';
 import { FamilySharingService } from './family-sharing.service';
+import { ProfileContextGuard } from './profile-context';
 
 @Module({
   imports: [DatabaseModule],
   controllers: [ProfilesController, FamilySharingController],
-  providers: [ProfilesService, FamilySharingService],
-  exports: [ProfilesService, FamilySharingService],
+  providers: [ProfilesService, FamilySharingService, ProfileContextGuard],
+  exports: [ProfilesService, FamilySharingService, ProfileContextGuard],
 })
 export class ProfilesModule {}

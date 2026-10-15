@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/config/feature_flags.dart';
 import '../../../../core/utils/error_message_resolver.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/anatomical_body_map.dart';
@@ -79,6 +80,7 @@ class HistoricalDashboardScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const ActiveProfileBanner(),
                   DashboardSegmentedTab(
                     selectedTab: tab,
                     onTabChanged: (newTab) {
@@ -195,9 +197,12 @@ class HistoricalDashboardScreen extends ConsumerWidget {
                           entries: state.history.logs,
                           verticalFilter:
                               isEmotional ? 'emotional' : 'physical',
-                          onDeleteEntry: (id) => ref
-                              .read(dashboardControllerProvider.notifier)
-                              .deleteHistoryEntry(id),
+                          // VIEW_ONLY profiles cannot delete (backend 403).
+                          onDeleteEntry: activeProfileIsViewOnly(ref)
+                              ? null
+                              : (id) => ref
+                                  .read(dashboardControllerProvider.notifier)
+                                  .deleteHistoryEntry(id),
                         ),
                         const SizedBox(height: 32),
                       ],

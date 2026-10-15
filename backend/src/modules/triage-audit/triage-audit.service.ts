@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { triageEmergencyEvents } from '../../database/schema/triage-emergency-events.schema';
@@ -15,9 +16,13 @@ export class TriageAuditService {
   async recordEmergencyEvent(
     dto: CreateEmergencyEventDto,
     userId?: string | null,
+    profileId?: string | null,
   ) {
+    // Anonymous events (no session) have no profile; authenticated ones are filed
+    // under the active profile resolved by ProfileContextGuard.
     const eventValues = {
       userId: userId ?? null,
+      profileId: userId ? (profileId ?? null) : null,
       triggerCategory: dto.triggerCategory,
       severityLevel: dto.severityLevel,
       sourceVertical: dto.sourceVertical,
@@ -36,15 +41,16 @@ export class TriageAuditService {
         return result;
       });
     } else {
-      const [result] = await this.databaseService.db
-        .insert(triageEmergencyEvents)
-        .values(eventValues)
-        .returning();
-      insertedRecord = result;
+      // No RETURNING here: Postgres checks RETURNING rows against the SELECT policy,
+      // which an anonymous session never passes. The id is generated here instead,
+      // so the emergency audit insert cannot fail on RLS.
+      const anonymousRecord = { ...eventValues, id: randomUUID(), createdAt: new Date() };
+      await this.databaseService.db.insert(triageEmergencyEvents).values(anonymousRecord);
+      insertedRecord = anonymousRecord;
     }
 
     this.logger.log(
-      `Recorded emergency event: category=${dto.triggerCategory}, severity=${dto.severityLevel}, vertical=${dto.sourceVertical}, userId=${userId ?? 'ANONYMOUS'}`,
+      `Recorded emergency event: category=${dto.triggerCategory}, severity=${dto.severityLevel}, vertical=${dto.sourceVertical}, userId=${userId ?? 'ANONYMOUS'}, profileId=${eventValues.profileId ?? 'NONE'}`,
     );
 
     return {
@@ -52,6 +58,7 @@ export class TriageAuditService {
       triggerCategory: insertedRecord.triggerCategory,
       severityLevel: insertedRecord.severityLevel,
       sourceVertical: insertedRecord.sourceVertical,
+      profileId: insertedRecord.profileId ?? null,
       actionTaken: insertedRecord.actionTaken,
       reportedAt: insertedRecord.reportedAt,
       createdAt: insertedRecord.createdAt,

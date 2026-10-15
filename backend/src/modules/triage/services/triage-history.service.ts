@@ -200,10 +200,14 @@ export class TriageHistoryService {
 
   async getHistory(
     userId: string,
+    profileId: string,
     query?: GetTriageHistoryQueryDto,
   ): Promise<TriageHistoryResponseDto> {
     if (!userId) {
       throw new BadRequestException('ID do usuário ausente para consulta de histórico.');
+    }
+    if (!profileId) {
+      throw new BadRequestException('ID do perfil ausente para consulta de histórico.');
     }
 
     const windowDays = Math.min(Math.max(query?.days || 14, 1), 30);
@@ -216,7 +220,7 @@ export class TriageHistoryService {
         .from(symptomLogs)
         .where(
           and(
-            eq(symptomLogs.userId, userId),
+            eq(symptomLogs.profileId, profileId),
             gte(symptomLogs.recordedAt, cutoffDate),
           ),
         )
@@ -343,10 +347,14 @@ export class TriageHistoryService {
 
   async deleteHistoryItem(
     userId: string,
+    profileId: string,
     id: string,
   ): Promise<{ success: boolean; id: string }> {
     if (!userId) {
       throw new BadRequestException('ID do usuário ausente para exclusão de registro.');
+    }
+    if (!profileId) {
+      throw new BadRequestException('ID do perfil ausente para exclusão de registro.');
     }
     if (!id) {
       throw new BadRequestException('ID do registro ausente.');
@@ -360,7 +368,7 @@ export class TriageHistoryService {
         .where(
           and(
             eq(symptomLogs.id, id),
-            eq(symptomLogs.userId, userId),
+            eq(symptomLogs.profileId, profileId),
           ),
         );
 
@@ -373,7 +381,7 @@ export class TriageHistoryService {
         .where(
           and(
             eq(symptomLogs.id, id),
-            eq(symptomLogs.userId, userId),
+            eq(symptomLogs.profileId, profileId),
           ),
         );
 

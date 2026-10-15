@@ -11,6 +11,7 @@ import '../../../../l10n/locale_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../dashboard/data/triage_history_remote_data_source.dart';
 import '../../../dashboard/domain/models/triage_history_models.dart';
+import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../../triage/data/symptom_classification_remote_data_source.dart';
 import '../../../triage/domain/triage_vertical.dart';
 import '../../../triage_outcome/domain/triage_outcome_models.dart';
@@ -37,16 +38,57 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
   SymptomClassificationRemoteDataSource get _classificationDataSource =>
       ref.read(symptomClassificationDataSourceProvider);
 
+  bool _isDisposed = false;
+  String? _lastProfileId;
+
+  String _scopedUserId(String userId) {
+    if (_isDisposed) return userId;
+    try {
+      final profileId = ref.read(activeProfileControllerProvider).activeProfile?.id;
+      return (profileId != null && profileId.isNotEmpty) ? '${userId}_$profileId' : userId;
+    } catch (_) {
+      return userId;
+    }
+  }
+
   @override
   TriggerCheckInState build() {
+    _isDisposed = false;
+    ref.onDispose(() {
+      _isDisposed = true;
+    });
+
+    final activeProfileId = ref.watch(
+      activeProfileControllerProvider.select((s) => s.activeProfile?.id),
+    );
+    if (_lastProfileId != activeProfileId) {
+      _lastProfileId = activeProfileId;
+      Future.microtask(() {
+        if (_isDisposed) return;
+        try {
+          if (ref.exists(triageOutcomeProvider)) {
+            ref.read(triageOutcomeProvider.notifier).reset();
+            ref.read(triageOutcomeProvider.notifier).loadTodayOutcome();
+          }
+        } catch (_) {}
+      });
+    }
+
     // Pending reminders carry the language they were scheduled in: re-arm
     // them when the app language changes (only while someone is signed in).
     ref.listen<Locale>(localeProvider, (previous, next) {
+      if (_isDisposed) return;
       if (previous == next) return;
-      if (!ref.read(authControllerProvider).isAuthenticated) return;
-      _syncCheckInReminders();
+      try {
+        if (!ref.read(authControllerProvider).isAuthenticated) return;
+        _syncCheckInReminders();
+      } catch (_) {}
     });
-    Future.microtask(() => loadTodayCheckIn());
+    Future.microtask(() {
+      if (!_isDisposed) {
+        loadTodayCheckIn();
+      }
+    });
     return const TriggerCheckInState();
   }
 
@@ -82,7 +124,8 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
 
   Future<void> _loadLocalTodayCheckIn([DateTime? now]) async {
     try {
-      final userId = await _storage.getUserId() ?? 'anonymous';
+      final baseUserId = await _storage.getUserId() ?? 'anonymous';
+      final userId = _scopedUserId(baseUserId);
       final saved = await _storage.getDailyCheckIn(userId);
       if (saved == null) {
         final today = _getTodayDateString(now);
@@ -262,18 +305,31 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
   }
 
   Future<void> loadTodayCheckIn([DateTime? now]) async {
+    if (_isDisposed) return;
+    // Abort only if the active profile changed mid-load; overlapping loads for
+    // the same profile are idempotent and must all finish.
+    final currentScope = _scopedUserId('');
     await _loadLocalTodayCheckIn(now);
+    if (_isDisposed || _scopedUserId('') != currentScope) {
+      return;
+    }
     await _syncTodayCheckInFromRemote(now);
+    if (_isDisposed || _scopedUserId('') != currentScope) {
+      return;
+    }
     try {
-      await ref
-          .read(dailyCheckinNotificationServiceProvider)
-          .scheduleDailyCheckInReminders(isCompletedToday: state.isCompletedToday);
+      if (!_isDisposed) {
+        await ref
+            .read(dailyCheckinNotificationServiceProvider)
+            .scheduleDailyCheckInReminders(isCompletedToday: state.isCompletedToday);
+      }
     } catch (_) {}
   }
 
   Future<void> _persistCurrentState() async {
     try {
-      final userId = await _storage.getUserId() ?? 'anonymous';
+      final baseUserId = await _storage.getUserId() ?? 'anonymous';
+      final userId = _scopedUserId(baseUserId);
       final today = _getTodayDateString();
       final toSave = state.copyWith(checkInDate: today);
       await _storage.saveDailyCheckIn(
@@ -629,7 +685,8 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
 
   Future<void> _clearStorage() async {
     try {
-      final userId = await _storage.getUserId() ?? 'anonymous';
+      final baseUserId = await _storage.getUserId() ?? 'anonymous';
+      final userId = _scopedUserId(baseUserId);
       await _storage.clearDailyCheckIn(userId);
     } catch (_) {}
   }

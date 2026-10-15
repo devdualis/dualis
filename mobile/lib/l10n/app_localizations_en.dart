@@ -1507,4 +1507,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familySharingCancelInvite => 'Cancel Invite';
+
+  @override
+  String activeProfileBannerDataOf(String profileName) {
+    return 'Showing $profileName\'s data';
+  }
+
+  @override
+  String get activeProfileBannerSwitchToMine => 'My profile';
+
+  @override
+  String get activeProfileReadOnlyNote => 'Read-only';
+
+  @override
+  String activeProfileCardTitle(String profileName) {
+    return '$profileName\'s profile';
+  }
 }

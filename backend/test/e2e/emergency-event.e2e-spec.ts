@@ -8,6 +8,12 @@ import { VersioningType, ValidationPipe, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import { AppModule } from '../../src/app.module';
+import {
+  defaultPrimaryProfileId,
+  familyAccessFor,
+  stubProfileAccess,
+  TEST_PROFILES,
+} from './support/profile-access.stub';
 import { TriageAuditService } from '../../src/modules/triage-audit/triage-audit.service';
 import { CreateEmergencyEventDto } from '../../src/modules/triage-audit/dto/create-emergency-event.dto';
 import { AuthService } from '../../src/modules/auth/auth.service';
@@ -23,11 +29,13 @@ class MockTriageAuditService {
     reportedAt: Date;
     createdAt: Date;
     userId: string | null;
+    profileId: string | null;
   }> = [];
 
   async recordEmergencyEvent(
     dto: CreateEmergencyEventDto,
     userId?: string | null,
+    profileId?: string | null,
   ) {
     const event = {
       id: crypto.randomUUID(),
@@ -38,6 +46,7 @@ class MockTriageAuditService {
       reportedAt: new Date(dto.clientTimestamp),
       createdAt: new Date(),
       userId: userId ?? null,
+      profileId: profileId ?? null,
     };
     this.recordedEvents.push(event);
     return event;
@@ -58,6 +67,8 @@ describe('Triage Emergency Audit E2E Suite (EMRG-01, EMRG-03, SEC-01)', () => {
       .overrideProvider(TriageAuditService)
       .useClass(MockTriageAuditService)
       .compile();
+
+    stubProfileAccess(moduleRef, familyAccessFor(mockUserId));
 
     mockTriageAuditService = moduleRef.get<MockTriageAuditService>(TriageAuditService);
 
@@ -236,5 +247,89 @@ describe('Triage Emergency Audit E2E Suite (EMRG-01, EMRG-03, SEC-01)', () => {
     );
     expect(recorded).toBeDefined();
     expect(recorded?.userId).toBe(mockUserId);
+  });
+
+  const emergencyPayload = (triggerCategory: string) => ({
+    triggerCategory,
+    severityLevel: 5,
+    sourceVertical: 'PHYSICAL',
+    clientTimestamp: new Date().toISOString(),
+    actionTaken: 'DIALED_192',
+  });
+  const recordedFor = (triggerCategory: string) =>
+    mockTriageAuditService.recordedEvents.find((e) => e.triggerCategory === triggerCategory);
+
+  it('anonymous emergency event has no user and no profile', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v1/triage/emergency-event',
+      payload: emergencyPayload('anonymousProfileCheck'),
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(recordedFor('anonymousProfileCheck')).toMatchObject({ userId: null, profileId: null });
+  });
+
+  it('authenticated emergency event without X-Profile-Id is filed on the primary profile', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v1/triage/emergency-event',
+      headers: { authorization: `Bearer ${validAccessToken}` },
+      payload: emergencyPayload('primaryProfileCheck'),
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(recordedFor('primaryProfileCheck')).toMatchObject({
+      userId: mockUserId,
+      profileId: defaultPrimaryProfileId(mockUserId),
+    });
+  });
+
+  it('emergency event with a dependent X-Profile-Id is filed on the dependent', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v1/triage/emergency-event',
+      headers: {
+        authorization: `Bearer ${validAccessToken}`,
+        'x-profile-id': TEST_PROFILES.dependent,
+      },
+      payload: emergencyPayload('dependentProfileCheck'),
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(recordedFor('dependentProfileCheck')?.profileId).toBe(TEST_PROFILES.dependent);
+  });
+
+  it('VIEW_ONLY grant can still record an emergency event (201): emergencies are never blocked', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v1/triage/emergency-event',
+      headers: {
+        authorization: `Bearer ${validAccessToken}`,
+        'x-profile-id': TEST_PROFILES.sharedViewOnly,
+      },
+      payload: emergencyPayload('viewOnlyProfileCheck'),
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(recordedFor('viewOnlyProfileCheck')).toMatchObject({
+      userId: mockUserId,
+      profileId: TEST_PROFILES.sharedViewOnly,
+    });
+  });
+
+  it('emergency event for a profile the caller cannot reach returns 403', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v1/triage/emergency-event',
+      headers: {
+        authorization: `Bearer ${validAccessToken}`,
+        'x-profile-id': TEST_PROFILES.foreign,
+      },
+      payload: emergencyPayload('foreignProfileCheck'),
+    });
+
+    expect(res.statusCode).toBe(403);
+    expect(recordedFor('foreignProfileCheck')).toBeUndefined();
   });
 });

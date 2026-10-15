@@ -38,7 +38,7 @@ describe('AntiburlaService Unit Tests (ANTI-01, ANTI-02, ANTI-03, UC-01)', () =>
       return callback(tx);
     });
 
-    const result = await service.checkHistoricalConsistency('usr-1', {
+    const result = await service.checkHistoricalConsistency('usr-1', 'prof-usr-1', {
       vertical: 'physical',
       category: 'coluna_dor_dorsal',
       selectedPersistence: 'comecou_hoje',
@@ -68,7 +68,7 @@ describe('AntiburlaService Unit Tests (ANTI-01, ANTI-02, ANTI-03, UC-01)', () =>
       return callback(tx);
     });
 
-    const result = await service.checkHistoricalConsistency('usr-1', {
+    const result = await service.checkHistoricalConsistency('usr-1', 'prof-usr-1', {
       vertical: 'physical',
       category: 'cabeca_pescoco',
       selectedPersistence: 'comecou_hoje',
@@ -78,7 +78,7 @@ describe('AntiburlaService Unit Tests (ANTI-01, ANTI-02, ANTI-03, UC-01)', () =>
   });
 
   it('3. does NOT trigger Antiburla if user selects persistence other than today', async () => {
-    const result = await service.checkHistoricalConsistency('usr-1', {
+    const result = await service.checkHistoricalConsistency('usr-1', 'prof-usr-1', {
       vertical: 'emotional',
       category: 'ansiosa_agitacao',
       selectedPersistence: 'ha_alguns_dias',
@@ -105,7 +105,7 @@ describe('AntiburlaService Unit Tests (ANTI-01, ANTI-02, ANTI-03, UC-01)', () =>
       return callback(tx);
     });
 
-    const result = await service.checkHistoricalConsistency('usr-female-1', {
+    const result = await service.checkHistoricalConsistency('usr-female-1', 'prof-usr-female-1', {
       vertical: 'physical',
       category: 'geniturinario',
       selectedPersistence: 'comecou_hoje',

@@ -8,6 +8,7 @@ import { VersioningType, ValidationPipe, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import { AppModule } from '../../src/app.module';
+import { familyAccessFor, stubProfileAccess } from './support/profile-access.stub';
 import { AuthService } from '../../src/modules/auth/auth.service';
 import { TriageOutcomeService } from '../../src/modules/triage/services/triage-outcome.service';
 import { SubmitTriageDto, TriageOutcomeResponseDto } from '../../src/modules/triage/dto/triage-outcome.dto';
@@ -16,7 +17,11 @@ import { SubmitTriageDto, TriageOutcomeResponseDto } from '../../src/modules/tri
 class IdempotentMockTriageOutcomeService {
   private readonly records = new Map<string, TriageOutcomeResponseDto>();
 
-  async processOutcome(userId: string, dto: SubmitTriageDto): Promise<TriageOutcomeResponseDto> {
+  async processOutcome(
+    userId: string,
+    _profileId: string,
+    dto: SubmitTriageDto,
+  ): Promise<TriageOutcomeResponseDto> {
     if (dto.clientSessionId && this.records.has(`${userId}:${dto.clientSessionId}`)) {
       return this.records.get(`${userId}:${dto.clientSessionId}`)!;
     }
@@ -55,6 +60,8 @@ describe('Outbox Idempotency E2E Suite (SYNC-01)', () => {
       .overrideProvider(TriageOutcomeService)
       .useClass(IdempotentMockTriageOutcomeService)
       .compile();
+
+    stubProfileAccess(moduleRef, familyAccessFor(mockUserId));
 
     jwtService = moduleRef.get<JwtService>(JwtService);
     validAccessToken = jwtService.sign(

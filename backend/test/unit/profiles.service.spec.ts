@@ -43,7 +43,7 @@ function createTx(results: { select?: unknown[][]; insert?: unknown[][]; update?
 
   const chain = (kind: keyof typeof queues) => {
     const c: any = {};
-    for (const m of ['from', 'where', 'innerJoin', 'leftJoin', 'limit', 'orderBy', 'returning']) {
+    for (const m of ['from', 'where', 'innerJoin', 'leftJoin', 'limit', 'orderBy', 'returning', 'onConflictDoNothing']) {
       c[m] = vi.fn(() => c);
     }
     c.values = vi.fn((v: unknown) => {
@@ -248,6 +248,25 @@ describe('ProfilesService Unit Tests', () => {
       });
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({ id: createdPrimary.id, ownership: 'own', accessLevel: 'OWNER' });
+    });
+
+    it('reuses the primary created by a concurrent request instead of failing', async () => {
+      const racedPrimary = profileRow({ id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee' });
+      const { tx } = createTx({
+        select: [
+          [],
+          [{ name: 'Ana Souza', gender: 'feminino', dateOfBirth: '1990-04-12' }],
+          [racedPrimary],
+          [],
+        ],
+        insert: [[]],
+      });
+      runWith(tx);
+
+      const result = await service.getProfilesForUser(USER_ID);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({ id: racedPrimary.id, ownership: 'own' });
     });
   });
 

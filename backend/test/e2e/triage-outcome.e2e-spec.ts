@@ -8,16 +8,34 @@ import { VersioningType, ValidationPipe, Injectable, BadRequestException } from 
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import { AppModule } from '../../src/app.module';
+import {
+  defaultPrimaryProfileId,
+  familyAccessFor,
+  stubProfileAccess,
+  TEST_PROFILES,
+} from './support/profile-access.stub';
 import { AuthService } from '../../src/modules/auth/auth.service';
 import { TriageOutcomeService } from '../../src/modules/triage/services/triage-outcome.service';
 import { SubmitTriageDto, TriageOutcomeResponseDto } from '../../src/modules/triage/dto/triage-outcome.dto';
 
 @Injectable()
 class MockTriageOutcomeService {
-  async processOutcome(userId: string, dto: SubmitTriageDto): Promise<TriageOutcomeResponseDto> {
+  readonly calls: Array<{ method: string; userId: string; profileId: string }> = [];
+
+  async recordDailyCheckIn(userId: string, profileId: string, _dto: unknown) {
+    this.calls.push({ method: 'recordDailyCheckIn', userId, profileId });
+    return { id: crypto.randomUUID(), recordedAt: new Date().toISOString() };
+  }
+
+  async processOutcome(
+    userId: string,
+    profileId: string,
+    dto: SubmitTriageDto,
+  ): Promise<TriageOutcomeResponseDto> {
     if (!userId) {
       throw new BadRequestException('ID do usuário ausente.');
     }
+    this.calls.push({ method: 'processOutcome', userId, profileId });
     const isOrganic = dto.vertical === 'emotional' && (dto.narrative?.includes('peito') || false);
     return {
       id: crypto.randomUUID(),
@@ -52,6 +70,7 @@ describe('Triage Outcome E2E Suite (SOM-01, SOM-02, OUT-01, REC-01)', () => {
   let app: NestFastifyApplication;
   let jwtService: JwtService;
   let validAccessToken: string;
+  let outcomeService: MockTriageOutcomeService;
   const mockUserId = '88888888-8888-8888-8888-888888888888';
 
   beforeAll(async () => {
@@ -61,6 +80,9 @@ describe('Triage Outcome E2E Suite (SOM-01, SOM-02, OUT-01, REC-01)', () => {
       .overrideProvider(TriageOutcomeService)
       .useClass(MockTriageOutcomeService)
       .compile();
+
+    stubProfileAccess(moduleRef, familyAccessFor(mockUserId));
+    outcomeService = moduleRef.get(TriageOutcomeService) as unknown as MockTriageOutcomeService;
 
     jwtService = moduleRef.get<JwtService>(JwtService);
     validAccessToken = jwtService.sign(
@@ -196,5 +218,75 @@ describe('Triage Outcome E2E Suite (SOM-01, SOM-02, OUT-01, REC-01)', () => {
     expect(body.organicPrimacyNotice).toBeDefined();
     expect(body.organicPrimacyNotice).toContain('Primazia Orgânica');
     expect(body.careDisposition).toBe('consulta_rotina');
+  });
+
+  const physicalPayload = {
+    vertical: 'physical',
+    answers: { 1: 'costas', 2: 'comecou_hoje', 3: '3', 4: 'exercicio_intenso' },
+  };
+  const checkInPayload = { emotionalStatus: 'soSo', physicalStatus: 'goodNormal' };
+  const lastCall = () => outcomeService.calls[outcomeService.calls.length - 1];
+  const post = (url: string, payload: object, profileId?: string) =>
+    app.inject({
+      method: 'POST',
+      url,
+      headers: {
+        authorization: `Bearer ${validAccessToken}`,
+        ...(profileId ? { 'x-profile-id': profileId } : {}),
+      },
+      payload,
+    });
+
+  it('5. POST /v1/triage/outcome without X-Profile-Id records on the primary profile', async () => {
+    const res = await post('/v1/triage/outcome', physicalPayload);
+
+    expect(res.statusCode).toBe(200);
+    expect(lastCall()).toEqual({
+      method: 'processOutcome',
+      userId: mockUserId,
+      profileId: defaultPrimaryProfileId(mockUserId),
+    });
+  });
+
+  it('6. Outcome and daily check-in with a dependent X-Profile-Id land on the dependent', async () => {
+    const outcome = await post('/v1/triage/outcome', physicalPayload, TEST_PROFILES.dependent);
+    expect(outcome.statusCode).toBe(200);
+    expect(lastCall()).toEqual({
+      method: 'processOutcome',
+      userId: mockUserId,
+      profileId: TEST_PROFILES.dependent,
+    });
+
+    const checkIn = await post('/v1/triage/daily-checkin', checkInPayload, TEST_PROFILES.dependent);
+    expect(checkIn.statusCode).toBe(200);
+    expect(lastCall()).toEqual({
+      method: 'recordDailyCheckIn',
+      userId: mockUserId,
+      profileId: TEST_PROFILES.dependent,
+    });
+  });
+
+  it('7. CO_MANAGE grant can submit a triage for the shared profile', async () => {
+    const res = await post('/v1/triage/outcome', physicalPayload, TEST_PROFILES.sharedCoManage);
+
+    expect(res.statusCode).toBe(200);
+    expect(lastCall().profileId).toBe(TEST_PROFILES.sharedCoManage);
+  });
+
+  it('8. VIEW_ONLY grant gets 403 on outcome and daily check-in, and nothing is recorded', async () => {
+    const callsBefore = outcomeService.calls.length;
+
+    const outcome = await post('/v1/triage/outcome', physicalPayload, TEST_PROFILES.sharedViewOnly);
+    expect(outcome.statusCode).toBe(403);
+
+    const checkIn = await post('/v1/triage/daily-checkin', checkInPayload, TEST_PROFILES.sharedViewOnly);
+    expect(checkIn.statusCode).toBe(403);
+
+    expect(outcomeService.calls.length).toBe(callsBefore);
+  });
+
+  it('9. X-Profile-Id the caller cannot reach returns 403', async () => {
+    const res = await post('/v1/triage/outcome', physicalPayload, TEST_PROFILES.foreign);
+    expect(res.statusCode).toBe(403);
   });
 });

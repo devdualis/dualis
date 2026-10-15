@@ -15,6 +15,7 @@ class TriageOutbox extends Table {
   TextColumn get lastError => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get syncedAt => dateTime().nullable()();
+  TextColumn get profileId => text().nullable()();
 }
 
 class LocalSymptomDrafts extends Table {
@@ -24,6 +25,7 @@ class LocalSymptomDrafts extends Table {
   TextColumn get stepAnswersJson => text()();
   TextColumn get narrative => text().nullable()();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get profileId => text().nullable()();
 }
 
 class WaterIntakeLogs extends Table {
@@ -33,6 +35,7 @@ class WaterIntakeLogs extends Table {
   IntColumn get amountMl => integer()();
   DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
   TextColumn get source => text().withDefault(const Constant('manual'))();
+  TextColumn get profileId => text().nullable()();
 }
 
 @DriftDatabase(tables: [TriageOutbox, LocalSymptomDrafts, WaterIntakeLogs])
@@ -40,7 +43,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -54,6 +57,11 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 3) {
           await m.addColumn(waterIntakeLogs, waterIntakeLogs.remoteId);
+        }
+        if (from < 4) {
+          await m.addColumn(triageOutbox, triageOutbox.profileId);
+          await m.addColumn(localSymptomDrafts, localSymptomDrafts.profileId);
+          await m.addColumn(waterIntakeLogs, waterIntakeLogs.profileId);
         }
       },
     );

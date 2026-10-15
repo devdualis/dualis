@@ -27,7 +27,10 @@ import '../../../../core/notifications/daily_checkin_notification_service.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../hydration/presentation/screens/hydration_dashboard_screen.dart';
 import '../../../hydration/presentation/widgets/water_intake_modal.dart';
+import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
+import '../../../profile/presentation/controllers/active_profile_controller.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -97,6 +100,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final user = authState.user;
     final userName = (user?.name != null && user!.name.isNotEmpty) ? user.name : 'Paciente';
     final userEmail = (user?.email != null && user!.email.isNotEmpty) ? user.email : 'Sessão ativa';
+    final activeProfileState = ref.watch(activeProfileControllerProvider);
+    final delegatedProfile = showsDelegatedActiveProfile(ref)
+        ? activeProfileState.activeProfile
+        : null;
+    final l10n = AppLocalizations.of(context);
+    final cardDisplayName = delegatedProfile?.name ?? userName;
+    final cardDisplaySubtitle = delegatedProfile != null
+        ? profileContextSubtitle(delegatedProfile, l10n)
+        : userEmail;
+    final cardAvatarInitial = cardDisplayName;
+    final viewOnlyActive = activeProfileIsViewOnly(ref);
     ref.watch(syncOutboxWorkerProvider);
     ref.watch(hydrationControllerProvider);
 
@@ -230,8 +244,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: _buildCurrentTab(
                 context,
                 user,
-                userName,
-                userEmail,
+                cardDisplayName,
+                cardDisplaySubtitle,
+                cardAvatarInitial,
+                viewOnlyActive,
                 triggerState,
               ),
             ),
@@ -251,13 +267,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildCurrentTab(
     BuildContext context,
     dynamic user,
-    String userName,
-    String userEmail,
+    String cardDisplayName,
+    String cardDisplaySubtitle,
+    String cardAvatarInitial,
+    bool viewOnlyActive,
     TriggerCheckInState triggerState,
   ) {
     switch (_currentTabIndex) {
       case 0:
-        return _buildHomeTab(context, user, userName, userEmail, triggerState);
+        return _buildHomeTab(
+          context,
+          user,
+          cardDisplayName,
+          cardDisplaySubtitle,
+          cardAvatarInitial,
+          viewOnlyActive,
+          triggerState,
+        );
       case 1:
         return TodayTriageResultTab(
           onGoToCheckIn: () {
@@ -270,21 +296,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       case 3:
         return const HydrationDashboardScreen(isEmbedded: true);
       default:
-        return _buildHomeTab(context, user, userName, userEmail, triggerState);
+        return _buildHomeTab(
+          context,
+          user,
+          cardDisplayName,
+          cardDisplaySubtitle,
+          cardAvatarInitial,
+          viewOnlyActive,
+          triggerState,
+        );
     }
   }
 
   Widget _buildHomeTab(
     BuildContext context,
     dynamic user,
-    String userName,
-    String userEmail,
+    String cardDisplayName,
+    String cardDisplaySubtitle,
+    String cardAvatarInitial,
+    bool viewOnlyActive,
     TriggerCheckInState triggerState,
   ) {
     final outcomeState = ref.watch(triageOutcomeProvider);
     final outcome = outcomeState.outcome;
+    final useDelegatedAvatar = showsDelegatedActiveProfile(ref);
 
-    return SingleChildScrollView(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const ActiveProfileBanner(),
+        Expanded(
+          child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,8 +358,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       Row(
                         children: [
                           UserAvatar(
-                            picture: user?.picture,
-                            fallbackInitial: userName,
+                            picture: useDelegatedAvatar ? null : user?.picture,
+                            fallbackInitial: cardAvatarInitial,
                             radius: 26,
                           ),
                           const SizedBox(width: 14),
@@ -326,7 +368,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Olá, $userName',
+                                  useDelegatedAvatar
+                                      ? AppLocalizations.of(context)
+                                          .activeProfileCardTitle(
+                                              cardDisplayName)
+                                      : 'Olá, $cardDisplayName',
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
@@ -337,7 +383,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  userEmail,
+                                  cardDisplaySubtitle,
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 13,
                                     color: Colors.white.withValues(alpha: 0.85),
@@ -391,10 +437,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   onViewFullResult: () {
                     setState(() => _currentTabIndex = 1);
                   },
-                  onRetake: () {
-                    ref.read(triggerCheckInProvider.notifier).prepareForUpdate();
-                    setState(() => _currentTabIndex = 1);
-                  },
+                  onRetake: viewOnlyActive
+                      ? null
+                      : () {
+                          ref.read(triggerCheckInProvider.notifier).prepareForUpdate();
+                          setState(() => _currentTabIndex = 1);
+                        },
                 ),
                 const SizedBox(height: 20),
               ],
@@ -405,7 +453,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 16),
             ],
           ),
-        );
+        ),
+        ),
+      ],
+    );
   }
 }
 

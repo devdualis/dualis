@@ -1,6 +1,7 @@
 import { pgTable, uuid, text, integer, timestamp, pgPolicy, boolean, index, uniqueIndex } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { users } from './users.schema';
+import { profiles } from './profiles.schema';
 
 export const symptomLogs = pgTable(
   'symptom_logs',
@@ -8,7 +9,10 @@ export const symptomLogs = pgTable(
     id: uuid('id').primaryKey().defaultRandom(),
     userId: uuid('user_id')
       .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
+      .references(() => users.id, { onDelete: 'cascade' }), // author (always the caller)
+    profileId: uuid('profile_id')
+      .notNull()
+      .references(() => profiles.id, { onDelete: 'cascade' }), // subject (whose health data)
     encryptedNarrative: text('encrypted_narrative'), // AES-256-GCM ciphertext
     intensity: integer('intensity').notNull(),
     anatomicalSystem: text('anatomical_system'),
@@ -24,10 +28,23 @@ export const symptomLogs = pgTable(
   (table) => [
     index('idx_symptom_logs_user_recorded').on(table.userId, table.recordedAt.desc()),
     uniqueIndex('idx_symptom_logs_user_client_session').on(table.userId, table.clientSessionId),
-    pgPolicy('symptom_logs_patient_isolation', {
-      for: 'all',
-      using: sql`user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`,
-      withCheck: sql`user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`,
+    index('idx_symptom_logs_profile_recorded').on(table.profileId, table.recordedAt.desc()),
+    pgPolicy('symptom_logs_profile_select', {
+      for: 'select',
+      using: sql`app_can_read_profile(profile_id)`,
+    }),
+    pgPolicy('symptom_logs_profile_insert', {
+      for: 'insert',
+      withCheck: sql`app_can_write_profile(profile_id) AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`,
+    }),
+    pgPolicy('symptom_logs_profile_update', {
+      for: 'update',
+      using: sql`app_can_write_profile(profile_id)`,
+      withCheck: sql`app_can_write_profile(profile_id)`,
+    }),
+    pgPolicy('symptom_logs_profile_delete', {
+      for: 'delete',
+      using: sql`app_can_write_profile(profile_id)`,
     }),
   ],
 );

@@ -66,12 +66,22 @@ class SyncOutboxWorker extends Notifier<SyncState> {
           final Map<String, dynamic> rawAnswers = jsonDecode(item.stepAnswersJson);
           final answers = rawAnswers.map((k, v) => MapEntry(int.parse(k), v.toString()));
 
-          await _dataSource.submitTriage(
-            vertical: item.vertical,
-            answers: answers,
-            narrative: item.narrative,
-            clientSessionId: item.clientSessionId,
-          );
+          if (item.profileId != null && item.profileId!.isNotEmpty) {
+            await _dataSource.submitTriageForProfile(
+              vertical: item.vertical,
+              answers: answers,
+              narrative: item.narrative,
+              clientSessionId: item.clientSessionId,
+              profileId: item.profileId,
+            );
+          } else {
+            await _dataSource.submitTriage(
+              vertical: item.vertical,
+              answers: answers,
+              narrative: item.narrative,
+              clientSessionId: item.clientSessionId,
+            );
+          }
 
           await _repository.markOutboxItemSynced(item.id);
           successfullySynced++;

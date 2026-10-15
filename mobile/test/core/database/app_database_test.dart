@@ -1,4 +1,5 @@
 import 'package:drift/native.dart';
+import 'package:drift/drift.dart' hide isNotNull;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dualis_mobile/core/database/app_database.dart';
 import 'package:dualis_mobile/features/sync/data/triage_outbox_repository.dart';
@@ -105,6 +106,44 @@ void main() {
       var afterSync = await repository.getPendingOutboxItems();
       expect(afterSync.length, equals(1));
       expect(afterSync.first.id, equals(item2.id));
+    });
+
+    test('enqueues triage check-in with profileId', () async {
+      final item = await repository.enqueueTriageCheckIn(
+        vertical: 'physical',
+        answers: {0: 'cabeca'},
+        profileId: 'profile-child-1',
+      );
+
+      expect(item.profileId, equals('profile-child-1'));
+      final fetched = await (db.select(db.triageOutbox)
+            ..where((tbl) => tbl.id.equals(item.id)))
+          .getSingle();
+      expect(fetched.profileId, equals('profile-child-1'));
+    });
+
+    test('persists profileId on waterIntakeLogs and localSymptomDrafts', () async {
+      await db.into(db.waterIntakeLogs).insert(
+            WaterIntakeLogsCompanion.insert(
+              userId: 'user-1',
+              amountMl: 250,
+              profileId: const Value('profile-abc'),
+            ),
+          );
+
+      final waterLog = await db.select(db.waterIntakeLogs).getSingle();
+      expect(waterLog.profileId, equals('profile-abc'));
+
+      await db.into(db.localSymptomDrafts).insert(
+            LocalSymptomDraftsCompanion.insert(
+              vertical: 'physical',
+              stepAnswersJson: '{}',
+              profileId: const Value('profile-abc'),
+            ),
+          );
+
+      final draft = await db.select(db.localSymptomDrafts).getSingle();
+      expect(draft.profileId, equals('profile-abc'));
     });
   });
 }

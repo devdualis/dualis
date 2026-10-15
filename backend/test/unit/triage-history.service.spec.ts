@@ -27,7 +27,7 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
       return callback(tx);
     });
 
-    const result = await service.getHistory('usr-1', { days: 14 });
+    const result = await service.getHistory('usr-1', 'prof-usr-1', { days: 14 });
 
     expect(result.logs).toHaveLength(0);
     expect(result.physicalSummary.cabeca_pescoco).toBe(0);
@@ -90,7 +90,7 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
       return callback(tx);
     });
 
-    const result = await service.getHistory('usr-1', { days: 14 });
+    const result = await service.getHistory('usr-1', 'prof-usr-1', { days: 14 });
 
     expect(result.logs).toHaveLength(3);
     expect(result.physicalSummary.cabeca_pescoco).toBe(4);
@@ -142,7 +142,7 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
       return callback(tx);
     });
 
-    const result = await service.getHistory('usr-1', { days: 14 });
+    const result = await service.getHistory('usr-1', 'prof-usr-1', { days: 14 });
 
     expect(result.physicalSummary.membros_superiores).toBe(3);
     expect(result.physicalSummary.membros_superiores_d).toBe(3);
@@ -195,7 +195,7 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
       return callback(tx);
     });
 
-    const result = await service.getHistory('usr-1', { days: 14 });
+    const result = await service.getHistory('usr-1', 'prof-usr-1', { days: 14 });
 
     expect(result.criticalRecurrences.length).toBeGreaterThan(0);
     const recurrence = result.criticalRecurrences[0];
@@ -231,7 +231,7 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
       return callback(tx);
     });
 
-    const result = await service.deleteHistoryItem('usr-1', 'log-delete-1');
+    const result = await service.deleteHistoryItem('usr-1', 'prof-usr-1', 'log-delete-1');
 
     expect(result).toEqual({ success: true, id: 'log-delete-1' });
     expect(deleteMock).toHaveBeenCalled();
@@ -251,7 +251,7 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
       return callback(tx);
     });
 
-    await expect(service.deleteHistoryItem('usr-1', 'non-existent-log')).rejects.toThrow(
+    await expect(service.deleteHistoryItem('usr-1', 'prof-usr-1', 'non-existent-log')).rejects.toThrow(
       'Registro de histórico não encontrado.',
     );
   });

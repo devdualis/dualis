@@ -7,16 +7,26 @@ import {
 import { VersioningType, ValidationPipe, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AppModule } from '../../src/app.module';
+import {
+  defaultPrimaryProfileId,
+  familyAccessFor,
+  stubProfileAccess,
+  TEST_PROFILES,
+} from './support/profile-access.stub';
 import { AuthService } from '../../src/modules/auth/auth.service';
 import { AntiburlaService } from '../../src/modules/triage/services/antiburla.service';
 import { CheckAntiburlaDto, AntiburlaCheckResponseDto } from '../../src/modules/triage/dto/antiburla.dto';
 
 @Injectable()
 class MockAntiburlaService {
+  readonly profileIds: string[] = [];
+
   async checkHistoricalConsistency(
     userId: string,
+    profileId: string,
     dto: CheckAntiburlaDto,
   ): Promise<AntiburlaCheckResponseDto> {
+    this.profileIds.push(profileId);
     const isToday = dto.selectedPersistence.includes('hoje') || dto.selectedPersistence.includes('agora');
     const isDiscordant = dto.userGender === 'feminino' && (dto.narrative?.includes('testículo') || false);
 
@@ -51,6 +61,7 @@ describe('Antiburla Historical Verification E2E Suite (ANTI-01, ANTI-02, ANTI-03
   let app: NestFastifyApplication;
   let jwtService: JwtService;
   let validAccessToken: string;
+  let antiburlaService: MockAntiburlaService;
   const mockUserId = '77777777-7777-7777-7777-777777777777';
 
   beforeAll(async () => {
@@ -60,6 +71,9 @@ describe('Antiburla Historical Verification E2E Suite (ANTI-01, ANTI-02, ANTI-03
       .overrideProvider(AntiburlaService)
       .useClass(MockAntiburlaService)
       .compile();
+
+    stubProfileAccess(moduleRef, familyAccessFor(mockUserId));
+    antiburlaService = moduleRef.get(AntiburlaService) as unknown as MockAntiburlaService;
 
     jwtService = moduleRef.get<JwtService>(JwtService);
     validAccessToken = jwtService.sign(
@@ -181,5 +195,38 @@ describe('Antiburla Historical Verification E2E Suite (ANTI-01, ANTI-02, ANTI-03
     expect(body.biologicalDiscordance).toBe(true);
     expect(body.biologicalNotice).toBeDefined();
     expect(body.biologicalNotice).toContain('discordância anatômica');
+  });
+
+  const check = (profileId?: string) =>
+    app.inject({
+      method: 'POST',
+      url: '/v1/triage/antiburla-check',
+      headers: {
+        authorization: `Bearer ${validAccessToken}`,
+        ...(profileId ? { 'x-profile-id': profileId } : {}),
+      },
+      payload: { vertical: 'physical', category: 'coluna', selectedPersistence: 'comecou_hoje' },
+    });
+  const lastProfileId = () => antiburlaService.profileIds[antiburlaService.profileIds.length - 1];
+
+  it('5. Without X-Profile-Id the 14-day window is checked on the primary profile', async () => {
+    const res = await check();
+    expect(res.statusCode).toBe(200);
+    expect(lastProfileId()).toBe(defaultPrimaryProfileId(mockUserId));
+  });
+
+  it('6. With a dependent X-Profile-Id the window is checked on the dependent', async () => {
+    const res = await check(TEST_PROFILES.dependent);
+    expect(res.statusCode).toBe(200);
+    expect(lastProfileId()).toBe(TEST_PROFILES.dependent);
+  });
+
+  it('7. Antiburla check is a read: VIEW_ONLY gets 200, unreachable profile gets 403', async () => {
+    const viewOnly = await check(TEST_PROFILES.sharedViewOnly);
+    expect(viewOnly.statusCode).toBe(200);
+    expect(lastProfileId()).toBe(TEST_PROFILES.sharedViewOnly);
+
+    const foreign = await check(TEST_PROFILES.foreign);
+    expect(foreign.statusCode).toBe(403);
   });
 });

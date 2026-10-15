@@ -14,10 +14,14 @@ export class AntiburlaService {
 
   async checkHistoricalConsistency(
     userId: string,
+    profileId: string,
     dto: CheckAntiburlaDto,
   ): Promise<AntiburlaCheckResponseDto> {
     if (!userId) {
       throw new BadRequestException('ID do usuário ausente para verificação histórica.');
+    }
+    if (!profileId) {
+      throw new BadRequestException('ID do perfil ausente para verificação histórica.');
     }
 
     const { vertical, category, selectedPersistence, userGender, narrative } = dto;
@@ -64,7 +68,7 @@ export class AntiburlaService {
     // 14-day rolling cutoff date
     const cutoffDate = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
 
-    // Query past 14 days under RLS
+    // Query the active profile's past 14 days under RLS
     const pastLogs = await this.db.transaction(async (tx) => {
       await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`);
       return tx
@@ -72,7 +76,7 @@ export class AntiburlaService {
         .from(symptomLogs)
         .where(
           and(
-            eq(symptomLogs.userId, userId),
+            eq(symptomLogs.profileId, profileId),
             gte(symptomLogs.recordedAt, cutoffDate),
             or(
               eq(symptomLogs.anatomicalSystem, category),

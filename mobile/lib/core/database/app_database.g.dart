@@ -122,6 +122,17 @@ class $TriageOutboxTable extends TriageOutbox
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _profileIdMeta = const VerificationMeta(
+    'profileId',
+  );
+  @override
+  late final GeneratedColumn<String> profileId = GeneratedColumn<String>(
+    'profile_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -134,6 +145,7 @@ class $TriageOutboxTable extends TriageOutbox
     lastError,
     createdAt,
     syncedAt,
+    profileId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -216,6 +228,12 @@ class $TriageOutboxTable extends TriageOutbox
         syncedAt.isAcceptableOrUnknown(data['synced_at']!, _syncedAtMeta),
       );
     }
+    if (data.containsKey('profile_id')) {
+      context.handle(
+        _profileIdMeta,
+        profileId.isAcceptableOrUnknown(data['profile_id']!, _profileIdMeta),
+      );
+    }
     return context;
   }
 
@@ -272,6 +290,10 @@ class $TriageOutboxTable extends TriageOutbox
         DriftSqlType.dateTime,
         data['${effectivePrefix}synced_at'],
       ),
+      profileId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}profile_id'],
+      ),
     );
   }
 
@@ -293,6 +315,7 @@ class TriageOutboxData extends DataClass
   final String? lastError;
   final DateTime createdAt;
   final DateTime? syncedAt;
+  final String? profileId;
   const TriageOutboxData({
     required this.id,
     required this.clientSessionId,
@@ -304,6 +327,7 @@ class TriageOutboxData extends DataClass
     this.lastError,
     required this.createdAt,
     this.syncedAt,
+    this.profileId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -323,6 +347,9 @@ class TriageOutboxData extends DataClass
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || syncedAt != null) {
       map['synced_at'] = Variable<DateTime>(syncedAt);
+    }
+    if (!nullToAbsent || profileId != null) {
+      map['profile_id'] = Variable<String>(profileId);
     }
     return map;
   }
@@ -348,6 +375,10 @@ class TriageOutboxData extends DataClass
           syncedAt == null && nullToAbsent
               ? const Value.absent()
               : Value(syncedAt),
+      profileId:
+          profileId == null && nullToAbsent
+              ? const Value.absent()
+              : Value(profileId),
     );
   }
 
@@ -367,6 +398,7 @@ class TriageOutboxData extends DataClass
       lastError: serializer.fromJson<String?>(json['lastError']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
+      profileId: serializer.fromJson<String?>(json['profileId']),
     );
   }
   @override
@@ -383,6 +415,7 @@ class TriageOutboxData extends DataClass
       'lastError': serializer.toJson<String?>(lastError),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'syncedAt': serializer.toJson<DateTime?>(syncedAt),
+      'profileId': serializer.toJson<String?>(profileId),
     };
   }
 
@@ -397,6 +430,7 @@ class TriageOutboxData extends DataClass
     Value<String?> lastError = const Value.absent(),
     DateTime? createdAt,
     Value<DateTime?> syncedAt = const Value.absent(),
+    Value<String?> profileId = const Value.absent(),
   }) => TriageOutboxData(
     id: id ?? this.id,
     clientSessionId: clientSessionId ?? this.clientSessionId,
@@ -408,6 +442,7 @@ class TriageOutboxData extends DataClass
     lastError: lastError.present ? lastError.value : this.lastError,
     createdAt: createdAt ?? this.createdAt,
     syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
+    profileId: profileId.present ? profileId.value : this.profileId,
   );
   TriageOutboxData copyWithCompanion(TriageOutboxCompanion data) {
     return TriageOutboxData(
@@ -427,6 +462,7 @@ class TriageOutboxData extends DataClass
       lastError: data.lastError.present ? data.lastError.value : this.lastError,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
+      profileId: data.profileId.present ? data.profileId.value : this.profileId,
     );
   }
 
@@ -442,7 +478,8 @@ class TriageOutboxData extends DataClass
           ..write('attempts: $attempts, ')
           ..write('lastError: $lastError, ')
           ..write('createdAt: $createdAt, ')
-          ..write('syncedAt: $syncedAt')
+          ..write('syncedAt: $syncedAt, ')
+          ..write('profileId: $profileId')
           ..write(')'))
         .toString();
   }
@@ -459,6 +496,7 @@ class TriageOutboxData extends DataClass
     lastError,
     createdAt,
     syncedAt,
+    profileId,
   );
   @override
   bool operator ==(Object other) =>
@@ -473,7 +511,8 @@ class TriageOutboxData extends DataClass
           other.attempts == this.attempts &&
           other.lastError == this.lastError &&
           other.createdAt == this.createdAt &&
-          other.syncedAt == this.syncedAt);
+          other.syncedAt == this.syncedAt &&
+          other.profileId == this.profileId);
 }
 
 class TriageOutboxCompanion extends UpdateCompanion<TriageOutboxData> {
@@ -487,6 +526,7 @@ class TriageOutboxCompanion extends UpdateCompanion<TriageOutboxData> {
   final Value<String?> lastError;
   final Value<DateTime> createdAt;
   final Value<DateTime?> syncedAt;
+  final Value<String?> profileId;
   const TriageOutboxCompanion({
     this.id = const Value.absent(),
     this.clientSessionId = const Value.absent(),
@@ -498,6 +538,7 @@ class TriageOutboxCompanion extends UpdateCompanion<TriageOutboxData> {
     this.lastError = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.syncedAt = const Value.absent(),
+    this.profileId = const Value.absent(),
   });
   TriageOutboxCompanion.insert({
     this.id = const Value.absent(),
@@ -510,6 +551,7 @@ class TriageOutboxCompanion extends UpdateCompanion<TriageOutboxData> {
     this.lastError = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.syncedAt = const Value.absent(),
+    this.profileId = const Value.absent(),
   }) : clientSessionId = Value(clientSessionId),
        vertical = Value(vertical),
        stepAnswersJson = Value(stepAnswersJson);
@@ -524,6 +566,7 @@ class TriageOutboxCompanion extends UpdateCompanion<TriageOutboxData> {
     Expression<String>? lastError,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? syncedAt,
+    Expression<String>? profileId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -536,6 +579,7 @@ class TriageOutboxCompanion extends UpdateCompanion<TriageOutboxData> {
       if (lastError != null) 'last_error': lastError,
       if (createdAt != null) 'created_at': createdAt,
       if (syncedAt != null) 'synced_at': syncedAt,
+      if (profileId != null) 'profile_id': profileId,
     });
   }
 
@@ -550,6 +594,7 @@ class TriageOutboxCompanion extends UpdateCompanion<TriageOutboxData> {
     Value<String?>? lastError,
     Value<DateTime>? createdAt,
     Value<DateTime?>? syncedAt,
+    Value<String?>? profileId,
   }) {
     return TriageOutboxCompanion(
       id: id ?? this.id,
@@ -562,6 +607,7 @@ class TriageOutboxCompanion extends UpdateCompanion<TriageOutboxData> {
       lastError: lastError ?? this.lastError,
       createdAt: createdAt ?? this.createdAt,
       syncedAt: syncedAt ?? this.syncedAt,
+      profileId: profileId ?? this.profileId,
     );
   }
 
@@ -598,6 +644,9 @@ class TriageOutboxCompanion extends UpdateCompanion<TriageOutboxData> {
     if (syncedAt.present) {
       map['synced_at'] = Variable<DateTime>(syncedAt.value);
     }
+    if (profileId.present) {
+      map['profile_id'] = Variable<String>(profileId.value);
+    }
     return map;
   }
 
@@ -613,7 +662,8 @@ class TriageOutboxCompanion extends UpdateCompanion<TriageOutboxData> {
           ..write('attempts: $attempts, ')
           ..write('lastError: $lastError, ')
           ..write('createdAt: $createdAt, ')
-          ..write('syncedAt: $syncedAt')
+          ..write('syncedAt: $syncedAt, ')
+          ..write('profileId: $profileId')
           ..write(')'))
         .toString();
   }
@@ -695,6 +745,17 @@ class $LocalSymptomDraftsTable extends LocalSymptomDrafts
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _profileIdMeta = const VerificationMeta(
+    'profileId',
+  );
+  @override
+  late final GeneratedColumn<String> profileId = GeneratedColumn<String>(
+    'profile_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -703,6 +764,7 @@ class $LocalSymptomDraftsTable extends LocalSymptomDrafts
     stepAnswersJson,
     narrative,
     updatedAt,
+    profileId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -759,6 +821,12 @@ class $LocalSymptomDraftsTable extends LocalSymptomDrafts
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
+    if (data.containsKey('profile_id')) {
+      context.handle(
+        _profileIdMeta,
+        profileId.isAcceptableOrUnknown(data['profile_id']!, _profileIdMeta),
+      );
+    }
     return context;
   }
 
@@ -797,6 +865,10 @@ class $LocalSymptomDraftsTable extends LocalSymptomDrafts
             DriftSqlType.dateTime,
             data['${effectivePrefix}updated_at'],
           )!,
+      profileId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}profile_id'],
+      ),
     );
   }
 
@@ -814,6 +886,7 @@ class LocalSymptomDraft extends DataClass
   final String stepAnswersJson;
   final String? narrative;
   final DateTime updatedAt;
+  final String? profileId;
   const LocalSymptomDraft({
     required this.id,
     required this.vertical,
@@ -821,6 +894,7 @@ class LocalSymptomDraft extends DataClass
     required this.stepAnswersJson,
     this.narrative,
     required this.updatedAt,
+    this.profileId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -833,6 +907,9 @@ class LocalSymptomDraft extends DataClass
       map['narrative'] = Variable<String>(narrative);
     }
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || profileId != null) {
+      map['profile_id'] = Variable<String>(profileId);
+    }
     return map;
   }
 
@@ -847,6 +924,10 @@ class LocalSymptomDraft extends DataClass
               ? const Value.absent()
               : Value(narrative),
       updatedAt: Value(updatedAt),
+      profileId:
+          profileId == null && nullToAbsent
+              ? const Value.absent()
+              : Value(profileId),
     );
   }
 
@@ -862,6 +943,7 @@ class LocalSymptomDraft extends DataClass
       stepAnswersJson: serializer.fromJson<String>(json['stepAnswersJson']),
       narrative: serializer.fromJson<String?>(json['narrative']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      profileId: serializer.fromJson<String?>(json['profileId']),
     );
   }
   @override
@@ -874,6 +956,7 @@ class LocalSymptomDraft extends DataClass
       'stepAnswersJson': serializer.toJson<String>(stepAnswersJson),
       'narrative': serializer.toJson<String?>(narrative),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'profileId': serializer.toJson<String?>(profileId),
     };
   }
 
@@ -884,6 +967,7 @@ class LocalSymptomDraft extends DataClass
     String? stepAnswersJson,
     Value<String?> narrative = const Value.absent(),
     DateTime? updatedAt,
+    Value<String?> profileId = const Value.absent(),
   }) => LocalSymptomDraft(
     id: id ?? this.id,
     vertical: vertical ?? this.vertical,
@@ -891,6 +975,7 @@ class LocalSymptomDraft extends DataClass
     stepAnswersJson: stepAnswersJson ?? this.stepAnswersJson,
     narrative: narrative.present ? narrative.value : this.narrative,
     updatedAt: updatedAt ?? this.updatedAt,
+    profileId: profileId.present ? profileId.value : this.profileId,
   );
   LocalSymptomDraft copyWithCompanion(LocalSymptomDraftsCompanion data) {
     return LocalSymptomDraft(
@@ -904,6 +989,7 @@ class LocalSymptomDraft extends DataClass
               : this.stepAnswersJson,
       narrative: data.narrative.present ? data.narrative.value : this.narrative,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      profileId: data.profileId.present ? data.profileId.value : this.profileId,
     );
   }
 
@@ -915,7 +1001,8 @@ class LocalSymptomDraft extends DataClass
           ..write('currentStep: $currentStep, ')
           ..write('stepAnswersJson: $stepAnswersJson, ')
           ..write('narrative: $narrative, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('profileId: $profileId')
           ..write(')'))
         .toString();
   }
@@ -928,6 +1015,7 @@ class LocalSymptomDraft extends DataClass
     stepAnswersJson,
     narrative,
     updatedAt,
+    profileId,
   );
   @override
   bool operator ==(Object other) =>
@@ -938,7 +1026,8 @@ class LocalSymptomDraft extends DataClass
           other.currentStep == this.currentStep &&
           other.stepAnswersJson == this.stepAnswersJson &&
           other.narrative == this.narrative &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.profileId == this.profileId);
 }
 
 class LocalSymptomDraftsCompanion extends UpdateCompanion<LocalSymptomDraft> {
@@ -948,6 +1037,7 @@ class LocalSymptomDraftsCompanion extends UpdateCompanion<LocalSymptomDraft> {
   final Value<String> stepAnswersJson;
   final Value<String?> narrative;
   final Value<DateTime> updatedAt;
+  final Value<String?> profileId;
   const LocalSymptomDraftsCompanion({
     this.id = const Value.absent(),
     this.vertical = const Value.absent(),
@@ -955,6 +1045,7 @@ class LocalSymptomDraftsCompanion extends UpdateCompanion<LocalSymptomDraft> {
     this.stepAnswersJson = const Value.absent(),
     this.narrative = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.profileId = const Value.absent(),
   });
   LocalSymptomDraftsCompanion.insert({
     this.id = const Value.absent(),
@@ -963,6 +1054,7 @@ class LocalSymptomDraftsCompanion extends UpdateCompanion<LocalSymptomDraft> {
     required String stepAnswersJson,
     this.narrative = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.profileId = const Value.absent(),
   }) : vertical = Value(vertical),
        stepAnswersJson = Value(stepAnswersJson);
   static Insertable<LocalSymptomDraft> custom({
@@ -972,6 +1064,7 @@ class LocalSymptomDraftsCompanion extends UpdateCompanion<LocalSymptomDraft> {
     Expression<String>? stepAnswersJson,
     Expression<String>? narrative,
     Expression<DateTime>? updatedAt,
+    Expression<String>? profileId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -980,6 +1073,7 @@ class LocalSymptomDraftsCompanion extends UpdateCompanion<LocalSymptomDraft> {
       if (stepAnswersJson != null) 'step_answers_json': stepAnswersJson,
       if (narrative != null) 'narrative': narrative,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (profileId != null) 'profile_id': profileId,
     });
   }
 
@@ -990,6 +1084,7 @@ class LocalSymptomDraftsCompanion extends UpdateCompanion<LocalSymptomDraft> {
     Value<String>? stepAnswersJson,
     Value<String?>? narrative,
     Value<DateTime>? updatedAt,
+    Value<String?>? profileId,
   }) {
     return LocalSymptomDraftsCompanion(
       id: id ?? this.id,
@@ -998,6 +1093,7 @@ class LocalSymptomDraftsCompanion extends UpdateCompanion<LocalSymptomDraft> {
       stepAnswersJson: stepAnswersJson ?? this.stepAnswersJson,
       narrative: narrative ?? this.narrative,
       updatedAt: updatedAt ?? this.updatedAt,
+      profileId: profileId ?? this.profileId,
     );
   }
 
@@ -1022,6 +1118,9 @@ class LocalSymptomDraftsCompanion extends UpdateCompanion<LocalSymptomDraft> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (profileId.present) {
+      map['profile_id'] = Variable<String>(profileId.value);
+    }
     return map;
   }
 
@@ -1033,7 +1132,8 @@ class LocalSymptomDraftsCompanion extends UpdateCompanion<LocalSymptomDraft> {
           ..write('currentStep: $currentStep, ')
           ..write('stepAnswersJson: $stepAnswersJson, ')
           ..write('narrative: $narrative, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('profileId: $profileId')
           ..write(')'))
         .toString();
   }
@@ -1111,6 +1211,17 @@ class $WaterIntakeLogsTable extends WaterIntakeLogs
     requiredDuringInsert: false,
     defaultValue: const Constant('manual'),
   );
+  static const VerificationMeta _profileIdMeta = const VerificationMeta(
+    'profileId',
+  );
+  @override
+  late final GeneratedColumn<String> profileId = GeneratedColumn<String>(
+    'profile_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1119,6 +1230,7 @@ class $WaterIntakeLogsTable extends WaterIntakeLogs
     amountMl,
     timestamp,
     source,
+    profileId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1169,6 +1281,12 @@ class $WaterIntakeLogsTable extends WaterIntakeLogs
         source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
       );
     }
+    if (data.containsKey('profile_id')) {
+      context.handle(
+        _profileIdMeta,
+        profileId.isAcceptableOrUnknown(data['profile_id']!, _profileIdMeta),
+      );
+    }
     return context;
   }
 
@@ -1207,6 +1325,10 @@ class $WaterIntakeLogsTable extends WaterIntakeLogs
             DriftSqlType.string,
             data['${effectivePrefix}source'],
           )!,
+      profileId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}profile_id'],
+      ),
     );
   }
 
@@ -1223,6 +1345,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
   final int amountMl;
   final DateTime timestamp;
   final String source;
+  final String? profileId;
   const WaterIntakeLog({
     required this.id,
     this.remoteId,
@@ -1230,6 +1353,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
     required this.amountMl,
     required this.timestamp,
     required this.source,
+    this.profileId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1242,6 +1366,9 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
     map['amount_ml'] = Variable<int>(amountMl);
     map['timestamp'] = Variable<DateTime>(timestamp);
     map['source'] = Variable<String>(source);
+    if (!nullToAbsent || profileId != null) {
+      map['profile_id'] = Variable<String>(profileId);
+    }
     return map;
   }
 
@@ -1256,6 +1383,10 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
       amountMl: Value(amountMl),
       timestamp: Value(timestamp),
       source: Value(source),
+      profileId:
+          profileId == null && nullToAbsent
+              ? const Value.absent()
+              : Value(profileId),
     );
   }
 
@@ -1271,6 +1402,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
       amountMl: serializer.fromJson<int>(json['amountMl']),
       timestamp: serializer.fromJson<DateTime>(json['timestamp']),
       source: serializer.fromJson<String>(json['source']),
+      profileId: serializer.fromJson<String?>(json['profileId']),
     );
   }
   @override
@@ -1283,6 +1415,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
       'amountMl': serializer.toJson<int>(amountMl),
       'timestamp': serializer.toJson<DateTime>(timestamp),
       'source': serializer.toJson<String>(source),
+      'profileId': serializer.toJson<String?>(profileId),
     };
   }
 
@@ -1293,6 +1426,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
     int? amountMl,
     DateTime? timestamp,
     String? source,
+    Value<String?> profileId = const Value.absent(),
   }) => WaterIntakeLog(
     id: id ?? this.id,
     remoteId: remoteId.present ? remoteId.value : this.remoteId,
@@ -1300,6 +1434,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
     amountMl: amountMl ?? this.amountMl,
     timestamp: timestamp ?? this.timestamp,
     source: source ?? this.source,
+    profileId: profileId.present ? profileId.value : this.profileId,
   );
   WaterIntakeLog copyWithCompanion(WaterIntakeLogsCompanion data) {
     return WaterIntakeLog(
@@ -1309,6 +1444,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
       amountMl: data.amountMl.present ? data.amountMl.value : this.amountMl,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
       source: data.source.present ? data.source.value : this.source,
+      profileId: data.profileId.present ? data.profileId.value : this.profileId,
     );
   }
 
@@ -1320,14 +1456,15 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
           ..write('userId: $userId, ')
           ..write('amountMl: $amountMl, ')
           ..write('timestamp: $timestamp, ')
-          ..write('source: $source')
+          ..write('source: $source, ')
+          ..write('profileId: $profileId')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(id, remoteId, userId, amountMl, timestamp, source);
+      Object.hash(id, remoteId, userId, amountMl, timestamp, source, profileId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1337,7 +1474,8 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
           other.userId == this.userId &&
           other.amountMl == this.amountMl &&
           other.timestamp == this.timestamp &&
-          other.source == this.source);
+          other.source == this.source &&
+          other.profileId == this.profileId);
 }
 
 class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
@@ -1347,6 +1485,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
   final Value<int> amountMl;
   final Value<DateTime> timestamp;
   final Value<String> source;
+  final Value<String?> profileId;
   const WaterIntakeLogsCompanion({
     this.id = const Value.absent(),
     this.remoteId = const Value.absent(),
@@ -1354,6 +1493,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
     this.amountMl = const Value.absent(),
     this.timestamp = const Value.absent(),
     this.source = const Value.absent(),
+    this.profileId = const Value.absent(),
   });
   WaterIntakeLogsCompanion.insert({
     this.id = const Value.absent(),
@@ -1362,6 +1502,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
     required int amountMl,
     this.timestamp = const Value.absent(),
     this.source = const Value.absent(),
+    this.profileId = const Value.absent(),
   }) : userId = Value(userId),
        amountMl = Value(amountMl);
   static Insertable<WaterIntakeLog> custom({
@@ -1371,6 +1512,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
     Expression<int>? amountMl,
     Expression<DateTime>? timestamp,
     Expression<String>? source,
+    Expression<String>? profileId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1379,6 +1521,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
       if (amountMl != null) 'amount_ml': amountMl,
       if (timestamp != null) 'timestamp': timestamp,
       if (source != null) 'source': source,
+      if (profileId != null) 'profile_id': profileId,
     });
   }
 
@@ -1389,6 +1532,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
     Value<int>? amountMl,
     Value<DateTime>? timestamp,
     Value<String>? source,
+    Value<String?>? profileId,
   }) {
     return WaterIntakeLogsCompanion(
       id: id ?? this.id,
@@ -1397,6 +1541,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
       amountMl: amountMl ?? this.amountMl,
       timestamp: timestamp ?? this.timestamp,
       source: source ?? this.source,
+      profileId: profileId ?? this.profileId,
     );
   }
 
@@ -1421,6 +1566,9 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
     if (source.present) {
       map['source'] = Variable<String>(source.value);
     }
+    if (profileId.present) {
+      map['profile_id'] = Variable<String>(profileId.value);
+    }
     return map;
   }
 
@@ -1432,7 +1580,8 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
           ..write('userId: $userId, ')
           ..write('amountMl: $amountMl, ')
           ..write('timestamp: $timestamp, ')
-          ..write('source: $source')
+          ..write('source: $source, ')
+          ..write('profileId: $profileId')
           ..write(')'))
         .toString();
   }
@@ -1470,6 +1619,7 @@ typedef $$TriageOutboxTableCreateCompanionBuilder =
       Value<String?> lastError,
       Value<DateTime> createdAt,
       Value<DateTime?> syncedAt,
+      Value<String?> profileId,
     });
 typedef $$TriageOutboxTableUpdateCompanionBuilder =
     TriageOutboxCompanion Function({
@@ -1483,6 +1633,7 @@ typedef $$TriageOutboxTableUpdateCompanionBuilder =
       Value<String?> lastError,
       Value<DateTime> createdAt,
       Value<DateTime?> syncedAt,
+      Value<String?> profileId,
     });
 
 class $$TriageOutboxTableFilterComposer
@@ -1541,6 +1692,11 @@ class $$TriageOutboxTableFilterComposer
 
   ColumnFilters<DateTime> get syncedAt => $composableBuilder(
     column: $table.syncedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profileId => $composableBuilder(
+    column: $table.profileId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1603,6 +1759,11 @@ class $$TriageOutboxTableOrderingComposer
     column: $table.syncedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get profileId => $composableBuilder(
+    column: $table.profileId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TriageOutboxTableAnnotationComposer
@@ -1647,6 +1808,9 @@ class $$TriageOutboxTableAnnotationComposer
 
   GeneratedColumn<DateTime> get syncedAt =>
       $composableBuilder(column: $table.syncedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get profileId =>
+      $composableBuilder(column: $table.profileId, builder: (column) => column);
 }
 
 class $$TriageOutboxTableTableManager
@@ -1691,6 +1855,7 @@ class $$TriageOutboxTableTableManager
                 Value<String?> lastError = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
+                Value<String?> profileId = const Value.absent(),
               }) => TriageOutboxCompanion(
                 id: id,
                 clientSessionId: clientSessionId,
@@ -1702,6 +1867,7 @@ class $$TriageOutboxTableTableManager
                 lastError: lastError,
                 createdAt: createdAt,
                 syncedAt: syncedAt,
+                profileId: profileId,
               ),
           createCompanionCallback:
               ({
@@ -1715,6 +1881,7 @@ class $$TriageOutboxTableTableManager
                 Value<String?> lastError = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
+                Value<String?> profileId = const Value.absent(),
               }) => TriageOutboxCompanion.insert(
                 id: id,
                 clientSessionId: clientSessionId,
@@ -1726,6 +1893,7 @@ class $$TriageOutboxTableTableManager
                 lastError: lastError,
                 createdAt: createdAt,
                 syncedAt: syncedAt,
+                profileId: profileId,
               ),
           withReferenceMapper:
               (p0) =>
@@ -1773,6 +1941,7 @@ typedef $$LocalSymptomDraftsTableCreateCompanionBuilder =
       required String stepAnswersJson,
       Value<String?> narrative,
       Value<DateTime> updatedAt,
+      Value<String?> profileId,
     });
 typedef $$LocalSymptomDraftsTableUpdateCompanionBuilder =
     LocalSymptomDraftsCompanion Function({
@@ -1782,6 +1951,7 @@ typedef $$LocalSymptomDraftsTableUpdateCompanionBuilder =
       Value<String> stepAnswersJson,
       Value<String?> narrative,
       Value<DateTime> updatedAt,
+      Value<String?> profileId,
     });
 
 class $$LocalSymptomDraftsTableFilterComposer
@@ -1820,6 +1990,11 @@ class $$LocalSymptomDraftsTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profileId => $composableBuilder(
+    column: $table.profileId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1862,6 +2037,11 @@ class $$LocalSymptomDraftsTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get profileId => $composableBuilder(
+    column: $table.profileId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$LocalSymptomDraftsTableAnnotationComposer
@@ -1894,6 +2074,9 @@ class $$LocalSymptomDraftsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get profileId =>
+      $composableBuilder(column: $table.profileId, builder: (column) => column);
 }
 
 class $$LocalSymptomDraftsTableTableManager
@@ -1948,6 +2131,7 @@ class $$LocalSymptomDraftsTableTableManager
                 Value<String> stepAnswersJson = const Value.absent(),
                 Value<String?> narrative = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> profileId = const Value.absent(),
               }) => LocalSymptomDraftsCompanion(
                 id: id,
                 vertical: vertical,
@@ -1955,6 +2139,7 @@ class $$LocalSymptomDraftsTableTableManager
                 stepAnswersJson: stepAnswersJson,
                 narrative: narrative,
                 updatedAt: updatedAt,
+                profileId: profileId,
               ),
           createCompanionCallback:
               ({
@@ -1964,6 +2149,7 @@ class $$LocalSymptomDraftsTableTableManager
                 required String stepAnswersJson,
                 Value<String?> narrative = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> profileId = const Value.absent(),
               }) => LocalSymptomDraftsCompanion.insert(
                 id: id,
                 vertical: vertical,
@@ -1971,6 +2157,7 @@ class $$LocalSymptomDraftsTableTableManager
                 stepAnswersJson: stepAnswersJson,
                 narrative: narrative,
                 updatedAt: updatedAt,
+                profileId: profileId,
               ),
           withReferenceMapper:
               (p0) =>
@@ -2023,6 +2210,7 @@ typedef $$WaterIntakeLogsTableCreateCompanionBuilder =
       required int amountMl,
       Value<DateTime> timestamp,
       Value<String> source,
+      Value<String?> profileId,
     });
 typedef $$WaterIntakeLogsTableUpdateCompanionBuilder =
     WaterIntakeLogsCompanion Function({
@@ -2032,6 +2220,7 @@ typedef $$WaterIntakeLogsTableUpdateCompanionBuilder =
       Value<int> amountMl,
       Value<DateTime> timestamp,
       Value<String> source,
+      Value<String?> profileId,
     });
 
 class $$WaterIntakeLogsTableFilterComposer
@@ -2070,6 +2259,11 @@ class $$WaterIntakeLogsTableFilterComposer
 
   ColumnFilters<String> get source => $composableBuilder(
     column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profileId => $composableBuilder(
+    column: $table.profileId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2112,6 +2306,11 @@ class $$WaterIntakeLogsTableOrderingComposer
     column: $table.source,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get profileId => $composableBuilder(
+    column: $table.profileId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$WaterIntakeLogsTableAnnotationComposer
@@ -2140,6 +2339,9 @@ class $$WaterIntakeLogsTableAnnotationComposer
 
   GeneratedColumn<String> get source =>
       $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get profileId =>
+      $composableBuilder(column: $table.profileId, builder: (column) => column);
 }
 
 class $$WaterIntakeLogsTableTableManager
@@ -2192,6 +2394,7 @@ class $$WaterIntakeLogsTableTableManager
                 Value<int> amountMl = const Value.absent(),
                 Value<DateTime> timestamp = const Value.absent(),
                 Value<String> source = const Value.absent(),
+                Value<String?> profileId = const Value.absent(),
               }) => WaterIntakeLogsCompanion(
                 id: id,
                 remoteId: remoteId,
@@ -2199,6 +2402,7 @@ class $$WaterIntakeLogsTableTableManager
                 amountMl: amountMl,
                 timestamp: timestamp,
                 source: source,
+                profileId: profileId,
               ),
           createCompanionCallback:
               ({
@@ -2208,6 +2412,7 @@ class $$WaterIntakeLogsTableTableManager
                 required int amountMl,
                 Value<DateTime> timestamp = const Value.absent(),
                 Value<String> source = const Value.absent(),
+                Value<String?> profileId = const Value.absent(),
               }) => WaterIntakeLogsCompanion.insert(
                 id: id,
                 remoteId: remoteId,
@@ -2215,6 +2420,7 @@ class $$WaterIntakeLogsTableTableManager
                 amountMl: amountMl,
                 timestamp: timestamp,
                 source: source,
+                profileId: profileId,
               ),
           withReferenceMapper:
               (p0) =>

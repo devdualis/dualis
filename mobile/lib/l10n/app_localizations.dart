@@ -2703,6 +2703,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Cancelar Convite'**
   String get familySharingCancelInvite;
+
+  /// Banner when viewing clinical data for a non-primary active profile
+  ///
+  /// In pt, this message translates to:
+  /// **'Exibindo dados de {profileName}'**
+  String activeProfileBannerDataOf(String profileName);
+
+  /// Tap action on active profile banner to return to the signed-in user's primary profile
+  ///
+  /// In pt, this message translates to:
+  /// **'Meu perfil'**
+  String get activeProfileBannerSwitchToMine;
+
+  /// Shown when the active shared profile grants VIEW_ONLY access
+  ///
+  /// In pt, this message translates to:
+  /// **'Somente leitura'**
+  String get activeProfileReadOnlyNote;
+
+  /// Home card title when a dependent or shared profile is active
+  ///
+  /// In pt, this message translates to:
+  /// **'Perfil de {profileName}'**
+  String activeProfileCardTitle(String profileName);
 }
 
 class _AppLocalizationsDelegate

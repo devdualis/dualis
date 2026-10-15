@@ -1522,4 +1522,20 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get familySharingCancelInvite => 'Cancelar Convite';
+
+  @override
+  String activeProfileBannerDataOf(String profileName) {
+    return 'Exibindo dados de $profileName';
+  }
+
+  @override
+  String get activeProfileBannerSwitchToMine => 'Meu perfil';
+
+  @override
+  String get activeProfileReadOnlyNote => 'Somente leitura';
+
+  @override
+  String activeProfileCardTitle(String profileName) {
+    return 'Perfil de $profileName';
+  }
 }

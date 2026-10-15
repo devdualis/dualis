@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
+import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../triage/domain/triage_vertical.dart';
 import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import '../../domain/axis_intensity_resolver.dart';
@@ -83,6 +84,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
             : null);
 
     final completedTime = state.completedAt ?? outcome?.recordedAt;
+    final viewOnly = activeProfileIsViewOnly(ref);
 
     return Card(
       elevation: 0,
@@ -185,6 +187,8 @@ class DualAxisTriggerCard extends ConsumerWidget {
             const Divider(height: 1),
             const SizedBox(height: 16),
 
+            if (viewOnly) const ActiveProfileReadOnlyNote(),
+
             // Etapa 1: Psicoemocional
             _buildStageCard(
               context: context,
@@ -222,6 +226,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 );
               },
               isDark: isDark,
+              viewOnly: viewOnly,
             ),
 
             const SizedBox(height: 16),
@@ -261,6 +266,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 );
               },
               isDark: isDark,
+              viewOnly: viewOnly,
             ),
           ],
         ),
@@ -285,6 +291,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
     required VoidCallback onStart,
     required VoidCallback onRetake,
     required bool isDark,
+    required bool viewOnly,
   }) {
     if (isCompleted) {
       final tier = intensity != null
@@ -410,20 +417,80 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                key: Key(retakeKey),
-                onPressed: onRetake,
-                icon: const Icon(Icons.refresh_rounded, size: 16),
-                label: const Text('Atualizar'),
-                style: TextButton.styleFrom(
-                  foregroundColor: accentColor,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  visualDensity: VisualDensity.compact,
+            if (!viewOnly) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  key: Key(retakeKey),
+                  onPressed: onRetake,
+                  icon: const Icon(Icons.refresh_rounded, size: 16),
+                  label: const Text('Atualizar'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: accentColor,
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    visualDensity: VisualDensity.compact,
+                  ),
                 ),
               ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    if (viewOnly) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: accentColor, size: 22),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimaryLight,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),

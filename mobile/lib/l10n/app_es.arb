@@ -433,5 +433,9 @@
   "profileSwitcherNoDependents": "Ningún dependiente registrado.",
   "profileSwitcherNoShared": "Ningún perfil compartido contigo.",
   "profileSwitcherActionError": "No se pudo completar la acción. Inténtalo de nuevo.",
-  "familySharingCancelInvite": "Cancelar invitación"
+  "familySharingCancelInvite": "Cancelar invitación",
+  "activeProfileBannerDataOf": "Mostrando datos de {profileName}",
+  "activeProfileBannerSwitchToMine": "Mi perfil",
+  "activeProfileReadOnlyNote": "Solo lectura",
+  "activeProfileCardTitle": "Perfil de {profileName}"
 }

@@ -1648,5 +1648,31 @@
   "familySharingCancelInvite": "Cancelar Convite",
   "@familySharingCancelInvite": {
     "description": "Button to cancel a pending outgoing invite"
+  },
+  "activeProfileBannerDataOf": "Exibindo dados de {profileName}",
+  "@activeProfileBannerDataOf": {
+    "description": "Banner when viewing clinical data for a non-primary active profile",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "activeProfileBannerSwitchToMine": "Meu perfil",
+  "@activeProfileBannerSwitchToMine": {
+    "description": "Tap action on active profile banner to return to the signed-in user's primary profile"
+  },
+  "activeProfileReadOnlyNote": "Somente leitura",
+  "@activeProfileReadOnlyNote": {
+    "description": "Shown when the active shared profile grants VIEW_ONLY access"
+  },
+  "activeProfileCardTitle": "Perfil de {profileName}",
+  "@activeProfileCardTitle": {
+    "description": "Home card title when a dependent or shared profile is active",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
   }
 }
