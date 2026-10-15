@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
@@ -26,6 +27,7 @@ import '../../../../core/notifications/daily_checkin_notification_service.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../hydration/presentation/screens/hydration_dashboard_screen.dart';
 import '../../../hydration/presentation/widgets/water_intake_modal.dart';
+import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -117,6 +119,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         },
       );
       appBarActions = [
+        if (ref.watch(premiumProfilesEnabledProvider)) ...[
+          const ProfileAppBarPill(),
+          const SizedBox(width: 8),
+        ],
         _AppBarIconButton(
           key: const Key('home_settings_button'),
           icon: Icons.settings_outlined,
@@ -136,6 +142,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       );
       appBarActions = [
+        if (ref.watch(premiumProfilesEnabledProvider)) ...[
+          const ProfileAppBarPill(),
+          const SizedBox(width: 8),
+        ],
         _AppBarIconButton(
           key: const Key('home_settings_button'),
           icon: Icons.settings_outlined,
@@ -155,6 +165,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       );
       appBarActions = [
+        if (ref.watch(premiumProfilesEnabledProvider)) ...[
+          const ProfileAppBarPill(),
+          const SizedBox(width: 4),
+        ],
         _AppBarIconButton(
           key: const Key('home_refresh_history_button'),
           icon: Icons.refresh_rounded,
@@ -182,6 +196,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       );
       appBarActions = [
+        if (ref.watch(premiumProfilesEnabledProvider)) ...[
+          const ProfileAppBarPill(),
+          const SizedBox(width: 8),
+        ],
         _AppBarIconButton(
           key: const Key('home_settings_button'),
           icon: Icons.settings_outlined,

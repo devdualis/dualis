@@ -2241,6 +2241,462 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'2. Eixo Avaliação Psico-emocional'**
   String get outcomeAxisEmotionalNumbered;
+
+  /// No description provided for @familySharingTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhamento Familiar'**
+  String get familySharingTitle;
+
+  /// No description provided for @familySharingTabOutgoing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quem acessa meus dados'**
+  String get familySharingTabOutgoing;
+
+  /// No description provided for @familySharingTabIncoming.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados compartilhados comigo'**
+  String get familySharingTabIncoming;
+
+  /// No description provided for @familySharingUnavailableTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recurso ainda não disponível'**
+  String get familySharingUnavailableTitle;
+
+  /// No description provided for @familySharingUnavailableBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'O compartilhamento familiar chegará em uma próxima versão do DualisCheckUp.'**
+  String get familySharingUnavailableBody;
+
+  /// No description provided for @familySharingInviteButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convidar Familiar ou Acompanhante'**
+  String get familySharingInviteButton;
+
+  /// No description provided for @familySharingEnterCodeButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Possui um código de convite? Inserir e Aceitar'**
+  String get familySharingEnterCodeButton;
+
+  /// No description provided for @familySharingEmptyOutgoing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ninguém tem acesso aos seus dados no momento.'**
+  String get familySharingEmptyOutgoing;
+
+  /// No description provided for @familySharingEmptyIncoming.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum familiar compartilhou dados com você ainda.'**
+  String get familySharingEmptyIncoming;
+
+  /// No description provided for @familySharingScopeViewOnly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Somente Leitura'**
+  String get familySharingScopeViewOnly;
+
+  /// No description provided for @familySharingScopeCoManage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Co-gestão'**
+  String get familySharingScopeCoManage;
+
+  /// No description provided for @familySharingScopeViewOnlyOption.
+  ///
+  /// In pt, this message translates to:
+  /// **'Somente Leitura (Recomendado)'**
+  String get familySharingScopeViewOnlyOption;
+
+  /// No description provided for @familySharingScopeCoManageOption.
+  ///
+  /// In pt, this message translates to:
+  /// **'Co-gestão (Pode registrar triagens)'**
+  String get familySharingScopeCoManageOption;
+
+  /// No description provided for @familySharingActiveSince.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ativo desde {date}'**
+  String familySharingActiveSince(String date);
+
+  /// No description provided for @familySharingActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acesso ativo'**
+  String get familySharingActive;
+
+  /// No description provided for @familySharingPendingUntil.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código {code} · aguardando aceite até {date}'**
+  String familySharingPendingUntil(String code, String date);
+
+  /// No description provided for @familySharingExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convite expirado'**
+  String get familySharingExpired;
+
+  /// No description provided for @familySharingRevokeButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Revogar Acesso'**
+  String get familySharingRevokeButton;
+
+  /// No description provided for @familySharingRevokeConfirmTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Revogar acesso?'**
+  String get familySharingRevokeConfirmTitle;
+
+  /// No description provided for @familySharingRevokeConfirmBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza? O acesso será interrompido imediatamente.'**
+  String get familySharingRevokeConfirmBody;
+
+  /// No description provided for @familySharingCancel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar'**
+  String get familySharingCancel;
+
+  /// No description provided for @familySharingRevoked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acesso revogado.'**
+  String get familySharingRevoked;
+
+  /// No description provided for @familySharingRevokeError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível revogar o acesso. Tente novamente.'**
+  String get familySharingRevokeError;
+
+  /// No description provided for @familySharingInviteTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convidar Familiar ou Acompanhante'**
+  String get familySharingInviteTitle;
+
+  /// No description provided for @familySharingInviteProfileLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Perfil a compartilhar'**
+  String get familySharingInviteProfileLabel;
+
+  /// No description provided for @familySharingInviteScopeLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Permissão'**
+  String get familySharingInviteScopeLabel;
+
+  /// No description provided for @familySharingInviteGenerate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerar Código'**
+  String get familySharingInviteGenerate;
+
+  /// No description provided for @familySharingInviteError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível gerar o convite. Tente novamente.'**
+  String get familySharingInviteError;
+
+  /// No description provided for @familySharingInviteCodeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Envie este código para o familiar. Ele expira em 72 horas.'**
+  String get familySharingInviteCodeHint;
+
+  /// No description provided for @familySharingInviteDeadline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Válido até {date}'**
+  String familySharingInviteDeadline(String date);
+
+  /// No description provided for @familySharingCopyCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar Código'**
+  String get familySharingCopyCode;
+
+  /// No description provided for @familySharingCodeCopied.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código copiado.'**
+  String get familySharingCodeCopied;
+
+  /// No description provided for @familySharingDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Concluir'**
+  String get familySharingDone;
+
+  /// No description provided for @familySharingAcceptTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Inserir código de convite'**
+  String get familySharingAcceptTitle;
+
+  /// No description provided for @familySharingAcceptFieldLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de 6 caracteres'**
+  String get familySharingAcceptFieldLabel;
+
+  /// No description provided for @familySharingAcceptSubmit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aceitar Convite'**
+  String get familySharingAcceptSubmit;
+
+  /// No description provided for @familySharingAcceptError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código inválido ou expirado.'**
+  String get familySharingAcceptError;
+
+  /// No description provided for @familySharingAccepted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convite aceito. O perfil já aparece na sua lista.'**
+  String get familySharingAccepted;
+
+  /// Title of the legal dependent registration bottom sheet
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastrar Dependente Legal'**
+  String get addDependentTitle;
+
+  /// No description provided for @addDependentNameLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome Completo do Dependente'**
+  String get addDependentNameLabel;
+
+  /// No description provided for @addDependentDobLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Data de Nascimento'**
+  String get addDependentDobLabel;
+
+  /// No description provided for @addDependentDobHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque para selecionar'**
+  String get addDependentDobHint;
+
+  /// No description provided for @addDependentDobPickerHelp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione a data de nascimento'**
+  String get addDependentDobPickerHelp;
+
+  /// No description provided for @addDependentDobInvalid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe uma data de nascimento válida.'**
+  String get addDependentDobInvalid;
+
+  /// No description provided for @addDependentDobFuture.
+  ///
+  /// In pt, this message translates to:
+  /// **'A data de nascimento não pode estar no futuro.'**
+  String get addDependentDobFuture;
+
+  /// No description provided for @addDependentRelationshipLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Grau de Parentesco / Representação'**
+  String get addDependentRelationshipLabel;
+
+  /// No description provided for @addDependentRelationshipHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione o vínculo legal'**
+  String get addDependentRelationshipHint;
+
+  /// No description provided for @addDependentRelationshipParent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Filho(a) menor de idade (Poder Familiar)'**
+  String get addDependentRelationshipParent;
+
+  /// No description provided for @addDependentRelationshipCurator.
+  ///
+  /// In pt, this message translates to:
+  /// **'Curatela / Tutela legal de maior incapaz'**
+  String get addDependentRelationshipCurator;
+
+  /// No description provided for @addDependentRelationshipLegalGuardian.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acompanhante / Cuidador legalmente constituído'**
+  String get addDependentRelationshipLegalGuardian;
+
+  /// No description provided for @addDependentLgpdArt14Consent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Declaro, sob as penas da lei, que sou pai, mãe ou representante legal deste dependente e autorizo expressamente a coleta e tratamento dos seus dados de saúde preventiva na plataforma DualisCheckUp, em estrita conformidade com o Artigo 14 da LGPD (Lei 13.709/2018).'**
+  String get addDependentLgpdArt14Consent;
+
+  /// No description provided for @addDependentSubmit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastrar Dependente'**
+  String get addDependentSubmit;
+
+  /// No description provided for @addDependentSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dependente cadastrado com sucesso.'**
+  String get addDependentSuccess;
+
+  /// No description provided for @addDependentGenericError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível cadastrar o dependente. Tente novamente.'**
+  String get addDependentGenericError;
+
+  /// Header title of the profile selection bottom sheet
+  ///
+  /// In pt, this message translates to:
+  /// **'Perfis de Saúde'**
+  String get profileSwitcherSheetTitle;
+
+  /// Section title for the primary user profile
+  ///
+  /// In pt, this message translates to:
+  /// **'Meu Perfil'**
+  String get profileSwitcherMyProfile;
+
+  /// Section title for registered legal dependents
+  ///
+  /// In pt, this message translates to:
+  /// **'Meus Dependentes (Permissão Legal)'**
+  String get profileSwitcherDependents;
+
+  /// Section title for shared family profiles
+  ///
+  /// In pt, this message translates to:
+  /// **'Perfis Compartilhados (Opcional)'**
+  String get profileSwitcherShared;
+
+  /// Button to open legal dependent registration
+  ///
+  /// In pt, this message translates to:
+  /// **'+ Adicionar Dependente (Legal)'**
+  String get profileSwitcherAddDependent;
+
+  /// Button to open family sharing management screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerenciar Compartilhamento Familiar'**
+  String get profileSwitcherManageSharing;
+
+  /// Title of profile rename dialog
+  ///
+  /// In pt, this message translates to:
+  /// **'Renomear Perfil'**
+  String get profileSwitcherRenameTitle;
+
+  /// Label for rename input field
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome do perfil'**
+  String get profileSwitcherRenameLabel;
+
+  /// Confirm button for profile rename
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar'**
+  String get profileSwitcherRenameSave;
+
+  /// Cancel button for profile rename
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar'**
+  String get profileSwitcherRenameCancel;
+
+  /// Title of profile delete confirmation dialog
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir Perfil?'**
+  String get profileSwitcherDeleteTitle;
+
+  /// Confirmation message when deleting a profile
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza que deseja excluir o perfil \"{name}\"? Esta ação não pode ser desfeita.'**
+  String profileSwitcherDeleteConfirm(String name);
+
+  /// Confirm button to delete profile
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir'**
+  String get profileSwitcherDeleteAction;
+
+  /// Close button tooltip
+  ///
+  /// In pt, this message translates to:
+  /// **'Fechar'**
+  String get profileSwitcherClose;
+
+  /// Badge for dependent minor
+  ///
+  /// In pt, this message translates to:
+  /// **'Menor de idade'**
+  String get profileSwitcherBadgeMinor;
+
+  /// Badge for dependent adult
+  ///
+  /// In pt, this message translates to:
+  /// **'Maior sob tutela'**
+  String get profileSwitcherBadgeAdult;
+
+  /// Badge for view-only shared access
+  ///
+  /// In pt, this message translates to:
+  /// **'Somente leitura'**
+  String get profileSwitcherBadgeViewOnly;
+
+  /// Badge for co-manage shared access
+  ///
+  /// In pt, this message translates to:
+  /// **'Co-gestão'**
+  String get profileSwitcherBadgeCoManage;
+
+  /// Badge for primary profile
+  ///
+  /// In pt, this message translates to:
+  /// **'Titular'**
+  String get profileSwitcherBadgePrimary;
+
+  /// Empty state for dependents section
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum dependente cadastrado.'**
+  String get profileSwitcherNoDependents;
+
+  /// Empty state for shared section
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum perfil compartilhado com você.'**
+  String get profileSwitcherNoShared;
+
+  /// Snackbar when renaming or deleting a profile fails
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível concluir a ação. Tente novamente.'**
+  String get profileSwitcherActionError;
 }
 
 class _AppLocalizationsDelegate

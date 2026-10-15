@@ -1262,4 +1262,260 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get outcomeAxisEmotionalNumbered =>
       '2. Eje de Evaluación Psicoemocional';
+
+  @override
+  String get familySharingTitle => 'Compartir en familia';
+
+  @override
+  String get familySharingTabOutgoing => 'Quién ve mis datos';
+
+  @override
+  String get familySharingTabIncoming => 'Compartidos conmigo';
+
+  @override
+  String get familySharingUnavailableTitle => 'Función aún no disponible';
+
+  @override
+  String get familySharingUnavailableBody =>
+      'Compartir en familia llegará en una próxima versión de DualisCheckUp.';
+
+  @override
+  String get familySharingInviteButton => 'Invitar a un familiar o acompañante';
+
+  @override
+  String get familySharingEnterCodeButton =>
+      '¿Tienes un código de invitación? Ingresar y aceptar';
+
+  @override
+  String get familySharingEmptyOutgoing =>
+      'Nadie tiene acceso a tus datos en este momento.';
+
+  @override
+  String get familySharingEmptyIncoming =>
+      'Ningún familiar ha compartido datos contigo todavía.';
+
+  @override
+  String get familySharingScopeViewOnly => 'Solo lectura';
+
+  @override
+  String get familySharingScopeCoManage => 'Cogestión';
+
+  @override
+  String get familySharingScopeViewOnlyOption => 'Solo lectura (recomendado)';
+
+  @override
+  String get familySharingScopeCoManageOption =>
+      'Cogestión (puede registrar triajes)';
+
+  @override
+  String familySharingActiveSince(String date) {
+    return 'Activo desde $date';
+  }
+
+  @override
+  String get familySharingActive => 'Acceso activo';
+
+  @override
+  String familySharingPendingUntil(String code, String date) {
+    return 'Código $code · pendiente de aceptación hasta $date';
+  }
+
+  @override
+  String get familySharingExpired => 'Invitación vencida';
+
+  @override
+  String get familySharingRevokeButton => 'Revocar acceso';
+
+  @override
+  String get familySharingRevokeConfirmTitle => '¿Revocar acceso?';
+
+  @override
+  String get familySharingRevokeConfirmBody =>
+      '¿Estás seguro? El acceso se interrumpirá de inmediato.';
+
+  @override
+  String get familySharingCancel => 'Cancelar';
+
+  @override
+  String get familySharingRevoked => 'Acceso revocado.';
+
+  @override
+  String get familySharingRevokeError =>
+      'No se pudo revocar el acceso. Inténtalo de nuevo.';
+
+  @override
+  String get familySharingInviteTitle => 'Invitar a un familiar o acompañante';
+
+  @override
+  String get familySharingInviteProfileLabel => 'Perfil a compartir';
+
+  @override
+  String get familySharingInviteScopeLabel => 'Permiso';
+
+  @override
+  String get familySharingInviteGenerate => 'Generar código';
+
+  @override
+  String get familySharingInviteError =>
+      'No se pudo crear la invitación. Inténtalo de nuevo.';
+
+  @override
+  String get familySharingInviteCodeHint =>
+      'Envía este código a tu familiar. Vence en 72 horas.';
+
+  @override
+  String familySharingInviteDeadline(String date) {
+    return 'Válido hasta $date';
+  }
+
+  @override
+  String get familySharingCopyCode => 'Copiar código';
+
+  @override
+  String get familySharingCodeCopied => 'Código copiado.';
+
+  @override
+  String get familySharingDone => 'Listo';
+
+  @override
+  String get familySharingAcceptTitle => 'Ingresar código de invitación';
+
+  @override
+  String get familySharingAcceptFieldLabel => 'Código de 6 caracteres';
+
+  @override
+  String get familySharingAcceptSubmit => 'Aceptar invitación';
+
+  @override
+  String get familySharingAcceptError => 'Código inválido o vencido.';
+
+  @override
+  String get familySharingAccepted =>
+      'Invitación aceptada. El perfil ya aparece en tu lista.';
+
+  @override
+  String get addDependentTitle => 'Registrar dependiente legal';
+
+  @override
+  String get addDependentNameLabel => 'Nombre completo del dependiente';
+
+  @override
+  String get addDependentDobLabel => 'Fecha de nacimiento';
+
+  @override
+  String get addDependentDobHint => 'Toca para seleccionar';
+
+  @override
+  String get addDependentDobPickerHelp => 'Selecciona la fecha de nacimiento';
+
+  @override
+  String get addDependentDobInvalid =>
+      'Ingresa una fecha de nacimiento válida.';
+
+  @override
+  String get addDependentDobFuture =>
+      'La fecha de nacimiento no puede ser futura.';
+
+  @override
+  String get addDependentRelationshipLabel =>
+      'Grado de parentesco / representación';
+
+  @override
+  String get addDependentRelationshipHint => 'Selecciona el vínculo legal';
+
+  @override
+  String get addDependentRelationshipParent =>
+      'Hijo(a) menor (patria potestad)';
+
+  @override
+  String get addDependentRelationshipCurator =>
+      'Curatela / tutela de mayor incapaz';
+
+  @override
+  String get addDependentRelationshipLegalGuardian =>
+      'Acompañante / cuidador legalmente constituido';
+
+  @override
+  String get addDependentLgpdArt14Consent =>
+      'Declaro, bajo pena de ley, que soy padre, madre o representante legal de este dependiente y autorizo expresamente la recopilación y el tratamiento de sus datos de salud preventiva en la plataforma DualisCheckUp, en estricta conformidad con el Artículo 14 de la LGPD (Ley 13.709/2018).';
+
+  @override
+  String get addDependentSubmit => 'Registrar dependiente';
+
+  @override
+  String get addDependentSuccess => 'Dependiente registrado con éxito.';
+
+  @override
+  String get addDependentGenericError =>
+      'No se pudo registrar el dependiente. Inténtalo de nuevo.';
+
+  @override
+  String get profileSwitcherSheetTitle => 'Perfiles de Salud';
+
+  @override
+  String get profileSwitcherMyProfile => 'Mi Perfil';
+
+  @override
+  String get profileSwitcherDependents => 'Mis Dependientes (Tutela Legal)';
+
+  @override
+  String get profileSwitcherShared => 'Perfiles Compartidos (Opcional)';
+
+  @override
+  String get profileSwitcherAddDependent => '+ Añadir Dependiente Legal';
+
+  @override
+  String get profileSwitcherManageSharing =>
+      'Administrar Compartición Familiar';
+
+  @override
+  String get profileSwitcherRenameTitle => 'Renombrar Perfil';
+
+  @override
+  String get profileSwitcherRenameLabel => 'Nombre del perfil';
+
+  @override
+  String get profileSwitcherRenameSave => 'Guardar';
+
+  @override
+  String get profileSwitcherRenameCancel => 'Cancelar';
+
+  @override
+  String get profileSwitcherDeleteTitle => '¿Eliminar Perfil?';
+
+  @override
+  String profileSwitcherDeleteConfirm(String name) {
+    return '¿Está seguro de eliminar el perfil \"$name\"? Esta acción no se puede deshacer.';
+  }
+
+  @override
+  String get profileSwitcherDeleteAction => 'Eliminar';
+
+  @override
+  String get profileSwitcherClose => 'Cerrar';
+
+  @override
+  String get profileSwitcherBadgeMinor => 'Menor de edad';
+
+  @override
+  String get profileSwitcherBadgeAdult => 'Adulto dependiente';
+
+  @override
+  String get profileSwitcherBadgeViewOnly => 'Solo lectura';
+
+  @override
+  String get profileSwitcherBadgeCoManage => 'Co-gestión';
+
+  @override
+  String get profileSwitcherBadgePrimary => 'Titular';
+
+  @override
+  String get profileSwitcherNoDependents => 'Ningún dependiente registrado.';
+
+  @override
+  String get profileSwitcherNoShared => 'Ningún perfil compartido contigo.';
+
+  @override
+  String get profileSwitcherActionError =>
+      'No se pudo completar la acción. Inténtalo de nuevo.';
 }

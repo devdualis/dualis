@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/config/feature_flags.dart';
 import '../../../../core/utils/error_message_resolver.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/anatomical_body_map.dart';
 import '../widgets/critical_recurrence_card.dart';
@@ -224,6 +226,10 @@ class HistoricalDashboardScreen extends ConsumerWidget {
         backgroundColor: Colors.white,
         foregroundColor: const Color(0xFF1E293B),
         actions: [
+          if (ref.watch(premiumProfilesEnabledProvider)) ...[
+            const ProfileAppBarPill(),
+            const SizedBox(width: 4),
+          ],
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             onPressed: () =>

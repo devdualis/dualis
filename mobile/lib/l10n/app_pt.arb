@@ -1470,6 +1470,179 @@
   "outcomeAxisEmotionalNumbered": "2. Eixo Avaliação Psico-emocional",
   "@outcomeAxisEmotionalNumbered": {
     "description": "Today's result, dual view: label of the second (psycho-emotional / associated component) axis card"
+  },
+  "familySharingTitle": "Compartilhamento Familiar",
+  "familySharingTabOutgoing": "Quem acessa meus dados",
+  "familySharingTabIncoming": "Dados compartilhados comigo",
+  "familySharingUnavailableTitle": "Recurso ainda não disponível",
+  "familySharingUnavailableBody": "O compartilhamento familiar chegará em uma próxima versão do DualisCheckUp.",
+  "familySharingInviteButton": "Convidar Familiar ou Acompanhante",
+  "familySharingEnterCodeButton": "Possui um código de convite? Inserir e Aceitar",
+  "familySharingEmptyOutgoing": "Ninguém tem acesso aos seus dados no momento.",
+  "familySharingEmptyIncoming": "Nenhum familiar compartilhou dados com você ainda.",
+  "familySharingScopeViewOnly": "Somente Leitura",
+  "familySharingScopeCoManage": "Co-gestão",
+  "familySharingScopeViewOnlyOption": "Somente Leitura (Recomendado)",
+  "familySharingScopeCoManageOption": "Co-gestão (Pode registrar triagens)",
+  "familySharingActiveSince": "Ativo desde {date}",
+  "@familySharingActiveSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "familySharingActive": "Acesso ativo",
+  "familySharingPendingUntil": "Código {code} · aguardando aceite até {date}",
+  "@familySharingPendingUntil": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "familySharingExpired": "Convite expirado",
+  "familySharingRevokeButton": "Revogar Acesso",
+  "familySharingRevokeConfirmTitle": "Revogar acesso?",
+  "familySharingRevokeConfirmBody": "Tem certeza? O acesso será interrompido imediatamente.",
+  "familySharingCancel": "Cancelar",
+  "familySharingRevoked": "Acesso revogado.",
+  "familySharingRevokeError": "Não foi possível revogar o acesso. Tente novamente.",
+  "familySharingInviteTitle": "Convidar Familiar ou Acompanhante",
+  "familySharingInviteProfileLabel": "Perfil a compartilhar",
+  "familySharingInviteScopeLabel": "Permissão",
+  "familySharingInviteGenerate": "Gerar Código",
+  "familySharingInviteError": "Não foi possível gerar o convite. Tente novamente.",
+  "familySharingInviteCodeHint": "Envie este código para o familiar. Ele expira em 72 horas.",
+  "familySharingInviteDeadline": "Válido até {date}",
+  "@familySharingInviteDeadline": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "familySharingCopyCode": "Copiar Código",
+  "familySharingCodeCopied": "Código copiado.",
+  "familySharingDone": "Concluir",
+  "familySharingAcceptTitle": "Inserir código de convite",
+  "familySharingAcceptFieldLabel": "Código de 6 caracteres",
+  "familySharingAcceptSubmit": "Aceitar Convite",
+  "familySharingAcceptError": "Código inválido ou expirado.",
+  "familySharingAccepted": "Convite aceito. O perfil já aparece na sua lista.",
+  "addDependentTitle": "Cadastrar Dependente Legal",
+  "@addDependentTitle": {
+    "description": "Title of the legal dependent registration bottom sheet"
+  },
+  "addDependentNameLabel": "Nome Completo do Dependente",
+  "addDependentDobLabel": "Data de Nascimento",
+  "addDependentDobHint": "Toque para selecionar",
+  "addDependentDobPickerHelp": "Selecione a data de nascimento",
+  "addDependentDobInvalid": "Informe uma data de nascimento válida.",
+  "addDependentDobFuture": "A data de nascimento não pode estar no futuro.",
+  "addDependentRelationshipLabel": "Grau de Parentesco / Representação",
+  "addDependentRelationshipHint": "Selecione o vínculo legal",
+  "addDependentRelationshipParent": "Filho(a) menor de idade (Poder Familiar)",
+  "addDependentRelationshipCurator": "Curatela / Tutela legal de maior incapaz",
+  "addDependentRelationshipLegalGuardian": "Acompanhante / Cuidador legalmente constituído",
+  "addDependentLgpdArt14Consent": "Declaro, sob as penas da lei, que sou pai, mãe ou representante legal deste dependente e autorizo expressamente a coleta e tratamento dos seus dados de saúde preventiva na plataforma DualisCheckUp, em estrita conformidade com o Artigo 14 da LGPD (Lei 13.709/2018).",
+  "addDependentSubmit": "Cadastrar Dependente",
+  "addDependentSuccess": "Dependente cadastrado com sucesso.",
+  "addDependentGenericError": "Não foi possível cadastrar o dependente. Tente novamente.",
+  "profileSwitcherSheetTitle": "Perfis de Saúde",
+  "@profileSwitcherSheetTitle": {
+    "description": "Header title of the profile selection bottom sheet"
+  },
+  "profileSwitcherMyProfile": "Meu Perfil",
+  "@profileSwitcherMyProfile": {
+    "description": "Section title for the primary user profile"
+  },
+  "profileSwitcherDependents": "Meus Dependentes (Permissão Legal)",
+  "@profileSwitcherDependents": {
+    "description": "Section title for registered legal dependents"
+  },
+  "profileSwitcherShared": "Perfis Compartilhados (Opcional)",
+  "@profileSwitcherShared": {
+    "description": "Section title for shared family profiles"
+  },
+  "profileSwitcherAddDependent": "+ Adicionar Dependente (Legal)",
+  "@profileSwitcherAddDependent": {
+    "description": "Button to open legal dependent registration"
+  },
+  "profileSwitcherManageSharing": "Gerenciar Compartilhamento Familiar",
+  "@profileSwitcherManageSharing": {
+    "description": "Button to open family sharing management screen"
+  },
+  "profileSwitcherRenameTitle": "Renomear Perfil",
+  "@profileSwitcherRenameTitle": {
+    "description": "Title of profile rename dialog"
+  },
+  "profileSwitcherRenameLabel": "Nome do perfil",
+  "@profileSwitcherRenameLabel": {
+    "description": "Label for rename input field"
+  },
+  "profileSwitcherRenameSave": "Salvar",
+  "@profileSwitcherRenameSave": {
+    "description": "Confirm button for profile rename"
+  },
+  "profileSwitcherRenameCancel": "Cancelar",
+  "@profileSwitcherRenameCancel": {
+    "description": "Cancel button for profile rename"
+  },
+  "profileSwitcherDeleteTitle": "Excluir Perfil?",
+  "@profileSwitcherDeleteTitle": {
+    "description": "Title of profile delete confirmation dialog"
+  },
+  "profileSwitcherDeleteConfirm": "Tem certeza que deseja excluir o perfil \"{name}\"? Esta ação não pode ser desfeita.",
+  "@profileSwitcherDeleteConfirm": {
+    "description": "Confirmation message when deleting a profile",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "profileSwitcherDeleteAction": "Excluir",
+  "@profileSwitcherDeleteAction": {
+    "description": "Confirm button to delete profile"
+  },
+  "profileSwitcherClose": "Fechar",
+  "@profileSwitcherClose": {
+    "description": "Close button tooltip"
+  },
+  "profileSwitcherBadgeMinor": "Menor de idade",
+  "@profileSwitcherBadgeMinor": {
+    "description": "Badge for dependent minor"
+  },
+  "profileSwitcherBadgeAdult": "Maior sob tutela",
+  "@profileSwitcherBadgeAdult": {
+    "description": "Badge for dependent adult"
+  },
+  "profileSwitcherBadgeViewOnly": "Somente leitura",
+  "@profileSwitcherBadgeViewOnly": {
+    "description": "Badge for view-only shared access"
+  },
+  "profileSwitcherBadgeCoManage": "Co-gestão",
+  "@profileSwitcherBadgeCoManage": {
+    "description": "Badge for co-manage shared access"
+  },
+  "profileSwitcherBadgePrimary": "Titular",
+  "@profileSwitcherBadgePrimary": {
+    "description": "Badge for primary profile"
+  },
+  "profileSwitcherNoDependents": "Nenhum dependente cadastrado.",
+  "@profileSwitcherNoDependents": {
+    "description": "Empty state for dependents section"
+  },
+  "profileSwitcherNoShared": "Nenhum perfil compartilhado com você.",
+  "@profileSwitcherNoShared": {
+    "description": "Empty state for shared section"
+  },
+  "profileSwitcherActionError": "Não foi possível concluir a ação. Tente novamente.",
+  "@profileSwitcherActionError": {
+    "description": "Snackbar when renaming or deleting a profile fails"
   }
 }
-
