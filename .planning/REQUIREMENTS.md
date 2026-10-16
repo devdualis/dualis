@@ -106,37 +106,15 @@ Requirements for initial release (Free Tier Vertical MVP). Structured around the
 
 ---
 
-## v2 Requirements (Versão Premium & Advanced)
+## v2 Requirements (Deferred Premium Tier Features)
 
-A comercialização da versão 2.0 será dividida em dois tiers comerciais principais, além da modalidade familiar:
-- **Tier Premium**: Inclui todas as funcionalidades essenciais clínicas, histórico permanente, leitor de exames, leitor de receitas e gestão de permissões (tudo, exceto Leitor de Bula e Interação por Voz).
-- **Tier Advanced**: Acesso completo a 100% dos recursos do ecossistema DualisCheckUp (incluindo Leitor de Bula com resumo e Interação por Voz pós-login).
-- **Modalidade Pacote Família**: Precificação unificada para grupos familiares com gestão integrada de permissões legais e dependentes dentro do mesmo pacote.
+The following features from SRS Sections 2, 3.3, 5.2 and UC-02 are explicitly categorized as **Premium Paga** and are deferred to v2:
 
-### Funcionalidades Essenciais (Core Premium)
-
-- [ ] **PREM-01 / RF-010 (SRS ID 09)**: **Prontuário Estruturado - CID** — Registro permanente e longitudinal de patologias diagnosticadas mapeadas aos padrões internacionais CID-10 e CID-11 na aba *Minhas Condições & Diagnósticos*.
-- [ ] **PREM-02 / RF-011 (SRS ID 10)**: **Histórico Médico Completo & Gestão de Fármacos** — Aba *Tratamentos & Medicamentos Contínuos* com alertas de horário de doses, controle de estoque de remédios e histórico cirúrgico/procedimentos.
-- [ ] **PREM-06 / PERM-01**: **Cadastro de Permissão Legal (Representação Legal & Dependência)** — Suporte a múltiplos perfis dependentes sob tutela ou responsabilidade legal (menores de idade, maiores enfermos/dependentes ou com acompanhantes obrigatórios por Lei). Em conformidade estrita com LGPD Art. 14 (consentimento de pais/responsáveis legais e isolamento de dados via PostgreSQL RLS).
-- [ ] **PREM-07 / PERM-02**: **Cadastro de Permissão Opcional (Compartilhamento Consentido)** — Vinculação consensual entre contas (casal, irmãos, cuidadores informais ou outros familiares), com níveis de acesso granulares (leitura/edição) e revogação imediata a qualquer momento.
-- [ ] **PREM-08 / VACC-01**: **Controle de Vacinação** — Caderneta digital de vacinação abrangendo vacinas obrigatórias (calendário nacional PNI/SUS) e não obrigatórias/particulares, com registro de doses aplicadas, datas, lotes e alertas de reforço preventivo.
-- [ ] **PREM-09 / ALRG-01**: **Indicação e Alerta de Alergias Medicamentosas** — Cadastro explícito de alergias a medicamentos (fármacos, princípios ativos e classes terapêuticas), com badge visual de alerta destacado no perfil e verificação preventiva contra prescrições e bulas.
-- [ ] **PREM-05 / CLIN-01**: **One-Click "Doctor's Brief" SBAR Clinical PDF Export** — Exportação instantânea em PDF formatado no padrão médico SBAR (*Situation, Background, Assessment, Recommendation*) com resumo da queixa principal, evolução de 14 dias, correlação somato-emocional e biomarcadores para apresentação ao médico.
-
-### Melhorias Não Essenciais / Ingestão Avançada & IA
-
-- [ ] **PREM-10 / PRIC-01**: **Precificação Pacote Família** — Estrutura de assinatura e checkout recorrente para grupos familiares com permissão legal e múltiplos dependentes integrados no mesmo plano.
-- [ ] **PREM-11 / BULA-01**: **Leitor de Bula com Resumo Inteligente (Exclusivo Tier Advanced)** — Processamento via OCR e IA generativa de bulas/prospectos farmacêuticos, estruturando um resumo padronizado contendo:
-  1. *Para que serve*: Indicação principal explicada em linguagem clara e acessível.
-  2. *Posologia e modo de uso*: Dosagens recomendadas e horários habituais.
-  3. *Contraindicações críticas & advertências*: Quando NÃO tomar e riscos graves.
-  4. *Efeitos colaterais e reações adversas*: Sintomas comuns e sinais de alerta para procurar atendimento médico.
-  5. *Orientações em caso de esquecimento de dose*.
-- [ ] **PREM-12 / RX-01**: **Leitor de Receita Médica (OCR + IA Nativo)** — Digitalização de receitas médicas (manuscritas ou digitadas) reaproveitando nativamente a infraestrutura desacoplada de OCR + IA já existente para exames laboratoriais, extraindo nomes de medicamentos, dosagens e frequência diretamente para o Histórico Médico (RF-011).
-- [ ] **PREM-03 / RF-012 & UC-02 (SRS ID 11)**: **Leitor de Exames Inteligente (OCR + IA)** — Upload de PDF/foto de laudos de exames laboratoriais com pipeline desacoplado OCR + IA para extração de marcadores (PSA Total, hemograma, glicemia, etc.), valores e datas na aba *Biomarcadores & Exames Estruturados*.
-- [ ] **PREM-13 / AUTH-03**: **Opções Avançadas de Log In Biométrico** — Configurações expandidas de autenticação biométrica nativa (FaceID / TouchID / Biometrics): opções de ativação/desativação, tempo de timeout customizável e reautenticação biométrica obrigatória para acessar prontuário, exames ou exportação de dados.
-- [ ] **PREM-14 / VOICE-01**: **Interação por Voz pós-login (Exclusivo Tier Advanced)** — Interface conversacional assistida por voz (Speech-to-Text / Voice AI) após o login para registro ágil de sintomas, check-in diário hands-free e navegação guiada por comandos vocais.
-- [ ] **PREM-04 / RF-013 (SRS ID 12)**: **Gestão de Tiers de Assinatura Recorrente** — Monetização e gestão de acesso via checkout seguro PCI-DSS com suporte aos tiers Free, Premium, Advanced e Pacote Família.
+- **PREM-01 / RF-010 (SRS ID 09)**: Prontuário Estruturado - CID (registro permanente de patologias CID-10/11 na aba *Minhas Condições & Diagnósticos*).
+- **PREM-02 / RF-011 (SRS ID 10)**: Histórico Médico Completo (aba *Tratamentos & Medicamentos Contínuos* com alertas de horário, controle de estoque e histórico cirúrgico).
+- **PREM-03 / RF-012 & UC-02 (SRS ID 11)**: Leitor de Exames Inteligente (upload de PDF/foto com pipeline desacoplado OCR + IA para extração de marcadores como PSA Total, valores e datas na aba *Biomarcadores & Exames Estruturados*).
+- **PREM-04 / RF-013 (SRS ID 12)**: Gestão de Tiers de Assinatura Recorrente (monetização por volume de dados/armazenamento).
+- **PREM-05 / CLIN-01**: One-Click "Doctor's Brief" SBAR Clinical PDF Export.
 
 ---
 

@@ -13,10 +13,7 @@ Unified, safe, and clinically consistent daily health triage bridging somatic/ph
 - **Customer**: Individuals seeking proactive personal health tracking, chronic symptom management, and holistic physical & emotional well-being.
 - **Revenue model**: 
   - **Free Tier (v1 Target)**: Daily dual-axis triage, 5-step decision wizard, 14-day Antiburla consistency verification, somatic translation, independent historical dashboards (2D body heat map + emotional trend graph + Cards de Recorrência Crítica + Lista Retrospectiva), monetized via privacy-focused native AdMob banners targeted strictly by age and approximate location for local businesses (pharmacies, supermarkets, department stores).
-  - **Versão 2.0 (Premium & Advanced Tiers)**:
-    - **Tier Premium**: Prontuário CID (RF-010), Histórico Médico Completo (RF-011), Leitor de Exames Inteligente (RF-012), Leitor de Receita Médica (RX-01), Controle de Vacinação (VACC-01), Alertas de Alergias Medicamentosas (ALRG-01), Permissão Legal e Opcional (PERM-01/02), Opções Avançadas de Biometria (AUTH-03), Doctor's Brief SBAR (CLIN-01).
-    - **Tier Advanced**: 100% dos recursos do Tier Premium + Leitor de Bula com Resumo Inteligente (BULA-01) + Interação por Voz pós-login (VOICE-01).
-    - **Pacote Família**: Precificação consolidada com permissão legal e múltiplos dependentes.
+  - **Premium Tier (Deferred to v2)**: Prontuário Estruturado CID (RF-010), Histórico Médico Completo com alarmes de remédios (RF-011), Leitor de Exames Inteligente via OCR + IA (RF-012 / UC-02), e Assinatura recorrente por volume de dados (RF-013).
 - **Success metric**: Daily active check-in consistency, sub-2-second AI triage classification latency, and 100% emergency trigger fidelity.
 - **Strategy notes**: User-centric health data sovereignty, LGPD-compliant storage, and preventive health guidance.
 
@@ -44,30 +41,12 @@ Unified, safe, and clinically consistent daily health triage bridging somatic/ph
 - [ ] **RNF-003 (Cross-Platform Mobile Architecture)**: Flutter client for iOS and Android with Riverpod state management and Material 3 design system.
 - [ ] **RNF-004 (Trilingual Localization)**: Comprehensive multilingual support across Spanish (`es`), Brazilian Portuguese (`pt-BR`), and English (`en`) for UI strings, medical disclaimers, triage decision trees, and AI classification prompts.
 
-### Out of Scope / Deferred to v2 (Versão Premium & Advanced)
+### Out of Scope / Deferred to v2 (Premium Features)
 
-**Estrutura de Tiers v2**:
-- **Premium**: Tudo exceto Leitor de Bula e Interação por Voz.
-- **Advanced**: Tudo (incluindo Leitor de Bula com resumo e Interação por Voz).
-- **Pacote Família**: Precificação com permissão legal e dependentes incluídos.
-
-**Funcionalidades Essenciais v2**:
 - **RF-010 / PREM-01 (Prontuário Estruturado - CID)**: Permanent registry of diagnosed pathologies mapped to international ICD-10/11 standards in *Minhas Condições & Diagnósticos*.
 - **RF-011 / PREM-02 (Histórico Médico Completo)**: Modules for continuous medication management with dosage alarms, inventory alerts, surgical history, and doctor appointment logs.
-- **PERM-01 / PREM-06 (Cadastro de Permissão Legal)**: Multi-profile dependent and guardianship management for minors, sick/dependent adults, or legally mandated escorts under LGPD Art. 14.
-- **PERM-02 / PREM-07 (Cadastro de Permissão Opcional)**: Consensual health profile sharing between couples, siblings, or informal caregivers with granular access control.
-- **VACC-01 / PREM-08 (Controle de Vacinação)**: Digital vaccination card tracking mandatory (PNI/SUS) and elective/private vaccines, doses, lot numbers, and booster reminders.
-- **ALRG-01 / PREM-09 (Indicação e Alerta de Alergias)**: Registry of active drug allergies with cross-referencing against prescriptions and medications.
-- **CLIN-01 / PREM-05 (Doctor's Brief SBAR Export)**: One-click structured clinical PDF export for medical consultations.
-
-**Melhorias e Recursos Avançados v2**:
-- **PRIC-01 / PREM-10 (Precificação Pacote Família)**: Multi-profile family tier pricing with integrated legal permission.
-- **BULA-01 / PREM-11 (Leitor de Bula com Resumo - Advanced Only)**: Generative AI pill/package insert summarizer (indications, dosages, critical contraindications, adverse reactions, and missed dose steps).
-- **RX-01 / PREM-12 (Leitor de Receita Médica)**: Native OCR + LLM prescription parser feeding directly into the medication schedule.
-- **RF-012 / UC-02 / PREM-03 (Leitor de Exames Inteligente)**: Upload of lab test PDFs/photos with automated extraction of biomarker names, values, reference intervals, and exam dates.
-- **AUTH-03 / PREM-13 (Opções Avançadas de Log In Biométrico)**: Expanded biometric settings (timeout controls, step-up biometric prompt for sensitive clinical data).
-- **VOICE-01 / PREM-14 (Interação por Voz pós-login - Advanced Only)**: Hands-free voice-assisted check-in, symptom recording, and vocal navigation.
-- **RF-013 / PREM-04 (Gestão de Tiers de Assinatura)**: Multi-tier subscription billing (Free, Premium, Advanced, Família).
+- **RF-012 / UC-02 / PREM-03 (Leitor de Exames Inteligente - OCR + IA)**: Upload of lab test PDFs/photos with automated extraction of biomarker names (e.g. PSA Total), values, reference intervals, and exam dates into structured charts.
+- **RF-013 / PREM-04 (Gestão de Tiers de Assinatura)**: Recurring subscription plans based on cloud database storage volume tiers.
 - **Direct Telemedicine / Physician Prescriptions**: DualisCheckUp provides preventive triage, monitoring, and educational health guidance; it is not a telemedicine provider or e-pharmacy.
 - **Full Hospital EHR Integration (FHIR/HL7) in V1**: Initial focus is on patient-controlled medical records and self-evaluations.
 - **Autonomous Medical Diagnosis**: The platform classifies risk and categorizes symptoms; it does not replace licensed medical consultations.
