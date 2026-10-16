@@ -37,7 +37,7 @@ class MockTriageHistoryService {
           intensity: 4,
           anatomicalSystem: 'coluna_dorsal',
           emotionalDimension: null,
-          disposition: 'consulta_rotina',
+          vertical: 'physical',
           stepAnswers: { causes: 'esforço pesado' },
           recordedAt: new Date().toISOString(),
         },
@@ -70,21 +70,7 @@ class MockTriageHistoryService {
           },
         },
       ],
-      criticalRecurrences: [
-        {
-          id: 'recurrence-estresse',
-          vertical: 'emotional',
-          category: 'estresse_burnout',
-          categoryLabel: 'Estresse / Burnout',
-          title: 'Foco de Atenção: Estresse / Burnout',
-          description: 'Identificamos que a sua dimensão Estresse / Burnout esteve em nível 4 em 6 dos últimos 10 dias.',
-          intensity: 4,
-          frequencyCount: 6,
-          windowDays: 10,
-          recommendedArticleTitle: 'Manejo do Burnout',
-          recommendedArticleUrl: 'https://drauziovarella.uol.com.br/psiquiatria/sindrome-de-burnout-esgotamento-profissional/',
-        },
-      ],
+      journalPatterns: [{ category: 'estresse_burnout', vertical: 'emotional', count: 6, windowDays: 10 }],
     };
   }
 
@@ -200,8 +186,11 @@ describe('Triage History E2E Suite (DASH-01, DASH-02, DASH-03, DASH-04, SEC-01)'
     expect(body.logs).toHaveLength(1);
     expect(body.physicalSummary.coluna_dorsal).toBe(4);
     expect(body.emotionalSummary).toHaveLength(1);
-    expect(body.criticalRecurrences).toHaveLength(1);
-    expect(body.criticalRecurrences[0].category).toBe('estresse_burnout');
+    expect(body.journalPatterns).toEqual([
+      { category: 'estresse_burnout', vertical: 'emotional', count: 6, windowDays: 10 },
+    ]);
+    expect(body).not.toHaveProperty('criticalRecurrences');
+    expect(body.logs[0]).not.toHaveProperty('disposition');
   });
 
   it('3. GET /v1/triage/history with invalid days parameter returns 400 Bad Request', async () => {

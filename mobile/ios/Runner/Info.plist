@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSFaceIDUsageDescription</key>
-	<string>O DualisCheckUp utiliza biometria para proteger o acesso aos seus dados médicos confidenciais e registros de triagem.</string>
+	<string>O Dualis usa Face ID para proteger o acesso aos seus registros de bem-estar.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Usamos a câmera para sua foto de perfil.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -33,8 +33,6 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
@@ -75,7 +73,7 @@
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Privacy-safe native Ad container for local commerce partners (RF-009 / AD-01).
 /// Enforces strict LGPD compliance: targeted solely by approximate location/age;
@@ -33,15 +34,19 @@ class AdMobBannerContainer extends StatelessWidget {
                 color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
               ),
               const SizedBox(width: 6),
-              Text(
-                'Parceiro Local • Zero rastreamento clínico',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(context).adBannerHeader,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: 6),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
@@ -90,7 +95,7 @@ class AdMobBannerContainer extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Itens de primeiros socorros e higiene pessoal com até 20% off.',
+                      AppLocalizations.of(context).adBannerSampleBody,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,

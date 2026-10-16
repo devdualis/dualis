@@ -153,7 +153,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
+              // Intended-use statement (wellness app, not a medical device)
+              Text(
+                l10n.onboardingIntendedUseNote,
+                key: const Key('onboarding_intended_use_note'),
+                textAlign: TextAlign.center,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  height: 1.4,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 16),
             ],
           ),
         ),

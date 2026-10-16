@@ -26,12 +26,15 @@ import 'package:dualis_mobile/features/home/presentation/controllers/trigger_che
 import '../../../../core/network/connectivity_service.dart';
 import '../../../../l10n/locale_provider.dart';
 import 'package:uuid/uuid.dart';
+import '../../../emergency/domain/red_flag_evaluator.dart';
+import '../../../emergency/presentation/widgets/safety_notice_banner.dart';
 
 class TriageWizardScreen extends ConsumerStatefulWidget {
   final TriageVertical vertical;
   final bool isDual;
   final String? naturalLanguageText;
   final String? preselectedCategoryKey;
+  final bool mentionsSelfHarm;
 
   const TriageWizardScreen({
     super.key,
@@ -39,6 +42,7 @@ class TriageWizardScreen extends ConsumerStatefulWidget {
     this.isDual = false,
     this.naturalLanguageText,
     this.preselectedCategoryKey,
+    this.mentionsSelfHarm = false,
   });
 
   @override
@@ -69,6 +73,13 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
       final categoryKey = widget.preselectedCategoryKey;
       if (categoryKey != null && categoryKey.isNotEmpty) {
         notifier.presetCategoryAndSkip(categoryKey);
+      }
+      // Safety net: text typed on Home (local patterns) or flagged by the AI.
+      if (!mounted) return;
+      if (widget.mentionsSelfHarm) {
+        SafetyNotice.show(context, SafetyNoticeKind.selfHarm);
+      } else if (initialNarrative.trim().isNotEmpty) {
+        notifier.checkFreeText(context, initialNarrative);
       }
     });
   }
@@ -342,7 +353,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
                       Icon(Icons.edit_note_rounded, size: 20, color: activeColor),
                       const SizedBox(width: 8),
                       Text(
-                        'Descrição opcional (em suas palavras)',
+                        AppLocalizations.of(context).wizardNarrativeLabel,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -365,7 +376,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
                           : AppColors.textPrimaryLight,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'Descreva como você está se sentindo com base nos sintomas...',
+                      hintText: AppLocalizations.of(context).wizardNarrativeHint,
                       hintStyle: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         color: isDark
@@ -476,6 +487,16 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
                           ? widget.naturalLanguageText!.trim()
                           : null);
 
+                  // Safety net for the text written in the wizard itself. The
+                  // notice lives on the root messenger, so it stays visible
+                  // after navigating home.
+                  if (narrativeInput.isNotEmpty &&
+                      narrativeInput != (widget.naturalLanguageText ?? '').trim()) {
+                    ref
+                        .read(triageWizardNotifierProvider.notifier)
+                        .checkFreeText(context, narrativeInput);
+                  }
+
                   ref.read(triageWizardNotifierProvider.notifier).advance();
 
                   final dataSource = ref.read(triageOutcomeDataSourceProvider);
@@ -550,7 +571,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
                     final emoLabel = currentTrigger.emotionalSummary ?? emoOutcome?.categoryLabel;
                     final emoMapping = currentTrigger.emotionalNarrative ??
                         emoOutcome?.somaticMapping ??
-                        'Avaliação Psicoemocional Registrada';
+                        'Registro emocional salvo';
                     final emoScore = AxisIntensityResolver.resolveDisplayIntensity(
                       axis: CheckInAxis.emotional,
                       state: currentTrigger,
@@ -569,7 +590,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
                     final physLabel = currentTrigger.physicalSummary ?? physOutcome?.categoryLabel;
                     final physMapping = currentTrigger.physicalNarrative ??
                         physOutcome?.somaticMapping ??
-                        'Avaliação Física Registrada';
+                        'Registro físico salvo';
                     final physScore = AxisIntensityResolver.resolveDisplayIntensity(
                       axis: CheckInAxis.physical,
                       state: currentTrigger,
@@ -761,7 +782,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
         final emoLabel = currentTrigger.emotionalSummary ?? emoOutcome?.categoryLabel;
         final emoMapping = currentTrigger.emotionalNarrative ??
             emoOutcome?.somaticMapping ??
-            'Avaliação Psicoemocional Registrada';
+            'Registro emocional salvo';
         final emoScore = AxisIntensityResolver.resolveDisplayIntensity(
           axis: CheckInAxis.emotional,
           state: currentTrigger,
@@ -780,7 +801,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
         final physLabel = currentTrigger.physicalSummary ?? physOutcome?.categoryLabel;
         final physMapping = currentTrigger.physicalNarrative ??
             physOutcome?.somaticMapping ??
-            'Avaliação Física Registrada';
+            'Registro físico salvo';
         final physScore = AxisIntensityResolver.resolveDisplayIntensity(
           axis: CheckInAxis.physical,
           state: currentTrigger,

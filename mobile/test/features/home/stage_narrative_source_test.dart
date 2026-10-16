@@ -42,11 +42,9 @@ TriageOutcome _physicalOutcome({String id = 'phys', String? aiMappedLayTerm}) {
     id: id,
     vertical: 'physical',
     intensityScore: 2,
-    careDisposition: CareDisposition.selfCare,
     primaryCategory: 'neurologico',
-    categoryLabel: 'Sistema Neurológico',
-    somaticMapping: 'Tontura / Instabilidade postural e equilíbrio',
-    organicPrimacyApplied: false,
+    categoryLabel: 'Tontura e equilíbrio',
+    somaticMapping: 'Tontura ao levantar',
     recommendedArticles: const [],
     recordedAt: DateTime.now(),
     aiMappedLayTerm: aiMappedLayTerm,
@@ -58,7 +56,7 @@ TriageHistoryResponse _history(List<TriageHistoryEntry> logs) {
     logs: logs,
     physicalSummary: const {},
     emotionalSummary: const [],
-    criticalRecurrences: const [],
+    journalPatterns: const [],
   );
 }
 
@@ -146,11 +144,10 @@ void main() {
       final now = DateTime.now();
       final emotional = TriageHistoryEntry(
         id: 'emo',
+        vertical: 'emotional',
         intensity: 3,
         anatomicalSystem: 'neurologico',
         emotionalDimension: 'estresse_burnout',
-        organicPrimacyApplied: true,
-        disposition: 'consulta_rotina',
         narrative: 'dor de cabeça',
         recordedAt: now.subtract(const Duration(minutes: 20)),
       );
@@ -158,7 +155,6 @@ void main() {
         id: 'phys',
         intensity: 2,
         anatomicalSystem: 'neurologico',
-        disposition: 'auto_cuidado',
         recordedAt: now.subtract(const Duration(minutes: 5)),
       );
 
@@ -183,11 +179,10 @@ void main() {
       final now = DateTime.now();
       final emotional = TriageHistoryEntry(
         id: 'emo',
+        vertical: 'emotional',
         intensity: 3,
         anatomicalSystem: 'neurologico',
         emotionalDimension: 'estresse_burnout',
-        organicPrimacyApplied: true,
-        disposition: 'consulta_rotina',
         narrative: 'dor de cabeça',
         recordedAt: now.subtract(const Duration(minutes: 5)),
       );

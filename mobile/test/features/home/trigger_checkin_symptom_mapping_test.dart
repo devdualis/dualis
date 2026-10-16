@@ -33,11 +33,9 @@ void main() {
         id: 'dual-triage-1',
         vertical: 'physical',
         intensityScore: 1, // Leve / Mínimo
-        careDisposition: CareDisposition.selfCare,
         primaryCategory: 'cabeca_pescoco',
         categoryLabel: 'Cabeça e Pescoço',
         somaticMapping: 'Cefaleia / Desconforto crânio-cervical',
-        organicPrimacyApplied: true,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
         secondaryCategoryLabel: 'Dimensão Sono / Ritmo Circadiano',
@@ -65,11 +63,9 @@ void main() {
         id: 'physical-triage-1',
         vertical: 'physical',
         intensityScore: 1,
-        careDisposition: CareDisposition.selfCare,
         primaryCategory: 'cabeca_pescoco',
         categoryLabel: 'Cabeça e Pescoço',
         somaticMapping: 'Cefaleia / Desconforto crânio-cervical',
-        organicPrimacyApplied: false,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
         secondaryCategoryLabel: null,
@@ -91,11 +87,9 @@ void main() {
         id: 'severe-triage-1',
         vertical: 'physical',
         intensityScore: 4,
-        careDisposition: CareDisposition.urgentCare,
         primaryCategory: 'cardiovascular_torax',
         categoryLabel: 'Cardiovascular e Tórax',
         somaticMapping: 'Sensação de aperto torácico funcional / Palpitações',
-        organicPrimacyApplied: false,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
       );
@@ -117,14 +111,13 @@ void main() {
             intensity: 1, // Mild headache and sleep disruption
             anatomicalSystem: 'cabeca_pescoco',
             emotionalDimension: 'sono',
-            disposition: 'auto_cuidado',
             narrative: 'Dor de cabeça',
             recordedAt: now,
           ),
         ],
         physicalSummary: {},
         emotionalSummary: [],
-        criticalRecurrences: [],
+        journalPatterns: [],
       );
 
       final container = ProviderContainer(
@@ -154,11 +147,9 @@ void main() {
         id: 'widget-test-outcome',
         vertical: 'physical',
         intensityScore: 1,
-        careDisposition: CareDisposition.selfCare,
         primaryCategory: 'cabeca_pescoco',
         categoryLabel: 'Cabeça e Pescoço',
         somaticMapping: 'Cefaleia / Desconforto crânio-cervical',
-        organicPrimacyApplied: true,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
         secondaryCategoryLabel: 'Dimensão Sono / Ritmo Circadiano',
@@ -210,11 +201,9 @@ void main() {
         id: 'physical-only-headache',
         vertical: 'physical',
         intensityScore: 2, // Dor de cabeça leve/moderada -> soSo
-        careDisposition: CareDisposition.routineConsultation,
         primaryCategory: 'cabeca_pescoco',
         categoryLabel: 'Cabeça e Pescoço',
         somaticMapping: 'Cefaleia',
-        organicPrimacyApplied: false,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
         secondaryCategoryLabel: null,
@@ -240,11 +229,9 @@ void main() {
         id: 'emotional-only-anxiety',
         vertical: 'emotional',
         intensityScore: 4, // Severe anxiety -> badSick
-        careDisposition: CareDisposition.urgentCare,
         primaryCategory: 'ansiosa_agitacao',
         categoryLabel: 'Ansiedade e Agitação',
         somaticMapping: 'Angústia e inquietação psíquica',
-        organicPrimacyApplied: false,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
         secondaryCategoryLabel: null,
@@ -268,7 +255,6 @@ void main() {
         id: 'log-1-emotional',
         intensity: 3,
         emotionalDimension: 'sono_vigilia',
-        disposition: 'consulta_rotina',
         recordedAt: now.subtract(const Duration(hours: 3)),
       );
       // Log 2: latest physical triage today (intensity 2 -> soSo)
@@ -276,7 +262,6 @@ void main() {
         id: 'log-2-physical',
         intensity: 2,
         anatomicalSystem: 'cabeca_pescoco',
-        disposition: 'auto_cuidado',
         recordedAt: now.subtract(const Duration(minutes: 30)),
       );
 
@@ -284,7 +269,7 @@ void main() {
         logs: [log2, log1],
         physicalSummary: const {},
         emotionalSummary: const [],
-        criticalRecurrences: const [],
+        journalPatterns: const [],
       );
 
       final container = ProviderContainer(

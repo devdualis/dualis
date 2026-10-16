@@ -113,14 +113,8 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     return '$y-$m-$day';
   }
 
-  TriggerStatus? _parseTriggerStatus(dynamic value) {
-    if (value == null) return null;
-    final str = value.toString();
-    for (final s in TriggerStatus.values) {
-      if (s.name == str) return s;
-    }
-    return null;
-  }
+  TriggerStatus? _parseTriggerStatus(dynamic value) =>
+      triggerStatusFromStepAnswer(value);
 
   Future<void> _loadLocalTodayCheckIn([DateTime? now]) async {
     try {
@@ -227,15 +221,23 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
 
         if (rec != null &&
             (chk == null || !rec.recordedAt.isBefore(chk.recordedAt))) {
+          final declaredOnRec = declaredStatusOnLog(rec, axis);
           final code = AxisIntensityResolver.categoryCodeFor(rec, axis);
+          final status = declaredOnRec ??
+              (rec.intensity > 0
+                  ? triggerStatusFromIntensity(rec.intensity)
+                  : (chkStatus ?? TriggerStatus.goodNormal));
+          final intensity = rec.intensity > 0
+              ? rec.intensity
+              : (declaredOnRec ?? chkStatus)?.defaultIntensity;
           return (
-            status: triggerStatusFromIntensity(rec.intensity),
-            intensity: rec.intensity,
+            status: status,
+            intensity: intensity,
             completed: true,
             summary: currentSummary ??
                 (code != null
                     ? mapCategoryLabel(code)
-                    : (isEmotional ? 'Psicoemocional' : 'Avaliação Física')),
+                    : (isEmotional ? 'Psicoemocional' : 'Registro físico')),
             // A description belongs to the triage it was typed in: only the
             // axis's own record supplies it, and the record wins over local
             // state so an older triage's text never lingers.
@@ -408,6 +410,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
         naturalLanguageText: state.naturalLanguageText,
         preselectedCategoryKey: classification.wizardCategoryKey,
         isOffTopic: classification.isOffTopic,
+        mentionsSelfHarm: classification.mentionsSelfHarm,
       );
     } catch (_) {
       return null;
@@ -422,6 +425,11 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     TriageOutcome outcome, {
     Object? narrative = _keepNarrative,
   }) {
+    // Quick daily check-ins persist intensity 0; axis state lives in stepAnswers.
+    if (outcome.intensityScore <= 0) {
+      return;
+    }
+
     final today = _getTodayDateString(outcome.recordedAt);
     final isPhysical = outcome.vertical == 'physical';
 
@@ -459,7 +467,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
         physicalIntensity = state.physicalIntensity;
         physicalStatus = state.physicalStatus ??
             triggerStatusFromIntensity(state.physicalIntensity);
-      } else if (outcome.organicPrimacyApplied || outcome.secondaryCategoryLabel != null) {
+      } else if (outcome.secondaryCategoryLabel != null) {
         final secScore = outcome.secondaryIntensityScore ?? outcome.intensityScore;
         physicalIntensity = secScore;
         physicalStatus = triggerStatusFromIntensity(secScore);
@@ -469,7 +477,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       }
     }
 
-    final summary = outcome.categoryLabel.isNotEmpty ? outcome.categoryLabel : (isPhysical ? 'Avaliação Física' : 'Psicoemocional');
+    final summary = outcome.categoryLabel.isNotEmpty ? outcome.categoryLabel : (isPhysical ? 'Registro físico' : 'Psicoemocional');
     // The AI's mapped lay term is never used here: it is not the user's text.
     final isSubmission = !identical(narrative, _keepNarrative);
     final typed = isSubmission ? (narrative as String?)?.trim() : null;
@@ -578,14 +586,9 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
                   state.physicalStatus == TriggerStatus.soSo)
               ? 3
               : 1);
-      final disposition = intensity == 4
-          ? 'pronto_atendimento'
-          : (intensity == 3 ? 'consulta_rotina' : 'auto_cuidado');
-
       ref.read(triageOutcomeProvider.notifier).setOutcomeFromCheckIn(
             id: 'checkin-${DateTime.now().millisecondsSinceEpoch}',
             intensity: intensity,
-            disposition: disposition,
             emotionalStatus: state.emotionalStatus?.name ?? 'goodNormal',
             physicalStatus: state.physicalStatus?.name ?? 'goodNormal',
             naturalLanguageText: state.naturalLanguageText,
@@ -615,7 +618,6 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
         final data = response.data as Map<String, dynamic>;
         final id = data['id'] as String? ?? 'checkin-${DateTime.now().millisecondsSinceEpoch}';
         final intensity = (data['intensity'] as num?)?.toInt() ?? 1;
-        final disposition = data['disposition'] as String? ?? 'auto_cuidado';
         List<RecommendedArticle>? articles;
         if (data['recommendedArticles'] is List) {
           articles = (data['recommendedArticles'] as List)
@@ -632,7 +634,6 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
           ref.read(triageOutcomeProvider.notifier).setOutcomeFromCheckIn(
                 id: id,
                 intensity: intensity,
-                disposition: disposition,
                 emotionalStatus: state.emotionalStatus?.name ?? 'goodNormal',
                 physicalStatus: state.physicalStatus?.name ?? 'goodNormal',
                 naturalLanguageText: state.naturalLanguageText,

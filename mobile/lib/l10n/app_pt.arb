@@ -16,39 +16,39 @@
   "@screen2PrimaryCta": {
     "description": "Primary action button on Screen 2"
   },
-  "valueCard1Title": "Triagem Preventiva Unificada",
+  "valueCard1Title": "Diário de Bem-Estar Integrado",
   "@valueCard1Title": {
     "description": "Title of the first onboarding carousel card"
   },
-  "valueCard1Body": "Conecte sua saúde física e estado psico-emocional em um único fluxo diário inteligente, garantindo cuidado holístico e sem ruídos.",
+  "valueCard1Body": "Registre como você está no corpo e nas emoções em um único check-in diário de 1 minuto.",
   "@valueCard1Body": {
     "description": "Body copy of the first onboarding carousel card"
   },
-  "valueCard2Title": "Registros Médicos Blindados",
+  "valueCard2Title": "Seus Dados Protegidos",
   "@valueCard2Title": {
     "description": "Title of the second onboarding carousel card"
   },
-  "valueCard2Body": "Seu histórico clínico protegido por criptografia AES-256 e custodiado sob os mais rigorosos padrões da LGPD. Você é o único dono dos seus dados.",
+  "valueCard2Body": "Seus registros de bem-estar ficam criptografados e sob seu controle, conforme a LGPD.",
   "@valueCard2Body": {
     "description": "Body copy of the second onboarding carousel card"
   },
-  "valueCard3Title": "Orientações Preventivas Precisas",
+  "valueCard3Title": "Conteúdos para Hábitos Saudáveis",
   "@valueCard3Title": {
     "description": "Title of the third onboarding carousel card"
   },
-  "valueCard3Body": "Recomendações e artigos de especialistas médicos renomados sem diagnósticos falsos ou alarmismos desnecessários.",
+  "valueCard3Body": "Leituras curtas e gerais sobre sono, estresse, postura, hidratação e mais.",
   "@valueCard3Body": {
     "description": "Body copy of the third onboarding carousel card"
   },
-  "lgpdConsentCheckbox": "Li e concordo com a Política de Privacidade e consinto expressamente com o tratamento de meus dados pessoais sensíveis de saúde para fins de triagem preventiva e acompanhamento longitudinal, nos termos do Art. 11 da LGPD.",
+  "lgpdConsentCheckbox": "Li e concordo com a Política de Privacidade e consinto, de forma específica e destacada, com o tratamento dos meus dados pessoais sensíveis de saúde para registrar e visualizar meu diário de bem-estar, nos termos do Art. 11, I da LGPD.",
   "@lgpdConsentCheckbox": {
-    "description": "LGPD Article 11 mandatory consent checkbox text"
+    "description": "LGPD Art. 11, I consent sentence (full text, C-05)"
   },
   "privacyVeilTitle": "Dados de Saúde Protegidos",
   "@privacyVeilTitle": {
     "description": "Title displayed when privacy veil obscures health data"
   },
-  "privacyVeilBody": "Autentique-se com biometria ou senha para acessar seu prontuário.",
+  "privacyVeilBody": "Autentique-se com biometria ou senha para acessar seus registros.",
   "@privacyVeilBody": {
     "description": "Body copy displayed on the privacy veil"
   },
@@ -112,105 +112,21 @@
   "@english": {
     "description": "English language name"
   },
-  "emergencyTitle": "Alerta de Risco Imediato",
+  "emergencyTitle": "Precisa de ajuda agora?",
   "@emergencyTitle": {
     "description": "Title of the emergency risk alert screen"
   },
-  "emergencySubtitle": "Sintomas de gravidade identificados. Procure atendimento médico urgente.",
+  "emergencySubtitle": "Se você ou alguém perto de você estiver em perigo, ligue para a emergência. Não espere.",
   "@emergencySubtitle": {
     "description": "Subtitle describing immediate risk and advising urgent care"
   },
-  "emergencyBadgeChestPain": "Dor Torácica Crítica",
-  "@emergencyBadgeChestPain": {
-    "description": "Emergency badge for critical chest pain"
-  },
-  "emergencyBadgeRespiratory": "Dificuldade Respiratória Aguda",
-  "@emergencyBadgeRespiratory": {
-    "description": "Emergency badge for acute respiratory distress"
-  },
-  "emergencyBadgeStroke": "Suspeita de Déficit Neurológico (AVC)",
-  "@emergencyBadgeStroke": {
-    "description": "Emergency badge for suspected stroke"
-  },
-  "emergencyBadgeHeadache": "Cefaleia Súbita e Explosiva",
-  "@emergencyBadgeHeadache": {
-    "description": "Emergency badge for sudden explosive thunderclap headache"
-  },
-  "emergencyBadgeEmotional": "Apoio Emocional Imediato / Risco à Vida",
-  "@emergencyBadgeEmotional": {
-    "description": "Emergency badge for acute emotional crisis / life safety"
-  },
-  "emergencyBadgeGeneral": "Sintoma Crítico (Nível 4–5)",
-  "@emergencyBadgeGeneral": {
-    "description": "Emergency badge for general critical intensity symptoms"
-  },
-  "emergencyInstructionPhysical1": "Interrompa qualquer esforço físico e permaneça em repouso.",
-  "@emergencyInstructionPhysical1": {
-    "description": "First physical emergency action step"
-  },
-  "emergencyInstructionPhysical2": "Não dirija até o hospital. Acione o 192 ou peça ajuda a terceiros.",
-  "@emergencyInstructionPhysical2": {
-    "description": "Second physical emergency action step"
-  },
-  "emergencyInstructionPhysical3": "Afrouxe roupas apertadas e tente manter a calma enquanto o socorro chega.",
-  "@emergencyInstructionPhysical3": {
-    "description": "Third physical emergency action step"
-  },
-  "emergencyInstructionEmotional1": "Você não está sozinho(a). Ajuda qualificada e sigilosa está disponível agora.",
-  "@emergencyInstructionEmotional1": {
-    "description": "First emotional emergency action step"
-  },
-  "emergencyInstructionEmotional2": "O CVV oferece apoio emocional gratuito 24 horas por dia pelo telefone 188.",
-  "@emergencyInstructionEmotional2": {
-    "description": "Second emotional emergency action step"
-  },
-  "emergencyInstructionEmotional3": "Se sentir que está em perigo imediato, acione o 192 ou procure a emergência.",
-  "@emergencyInstructionEmotional3": {
-    "description": "Third emotional emergency action step"
-  },
-  "emergencyCallSamu": "Ligar SAMU (192)",
-  "@emergencyCallSamu": {
-    "description": "Button label to dial SAMU emergency services (192)"
-  },
-  "emergencyCallBombeiros": "Ligar Bombeiros (193)",
-  "@emergencyCallBombeiros": {
-    "description": "Button label to dial Bombeiros fire/rescue (193)"
-  },
-  "emergencyCallCvv": "Ligar CVV - Apoio Emocional (188)",
-  "@emergencyCallCvv": {
-    "description": "Button label to dial CVV crisis emotional hotline (188)"
-  },
-  "emergencyCallPolicia": "Ligar Polícia (190)",
-  "@emergencyCallPolicia": {
-    "description": "Button label to dial Police emergency line (190)"
-  },
-  "emergencyFindHospital": "Buscar Pronto-Socorro Mais Próximo",
+  "emergencyFindHospital": "Buscar pronto-socorro mais próximo",
   "@emergencyFindHospital": {
     "description": "Button label to open maps looking for nearest emergency room"
   },
   "emergencyDispatcherHint": "Ao ligar, informe seu endereço com clareza e mantenha a calma.",
   "@emergencyDispatcherHint": {
     "description": "Hint text advising patient to provide address clearly to emergency dispatchers"
-  },
-  "emergencyExitButton": "Voltar ao Início (Não recomendado)",
-  "@emergencyExitButton": {
-    "description": "Text button to initiate exiting the emergency screen"
-  },
-  "emergencyExitConfirmTitle": "Atenção Médica Urgente",
-  "@emergencyExitConfirmTitle": {
-    "description": "Title of the exit confirmation dialog"
-  },
-  "emergencyExitConfirmBody": "Seus sintomas indicam uma situação de risco à vida. Recomendamos fortemente que você contate um serviço médico antes de sair. Deseja realmente voltar ao início?",
-  "@emergencyExitConfirmBody": {
-    "description": "Body message of the exit confirmation dialog warning of life-safety risks"
-  },
-  "emergencyExitConfirmStay": "Permanecer na Emergência",
-  "@emergencyExitConfirmStay": {
-    "description": "Primary action button to stay on the emergency screen"
-  },
-  "emergencyExitConfirmLeave": "Entendi os Riscos / Sair",
-  "@emergencyExitConfirmLeave": {
-    "description": "Destructive secondary action button confirming exit despite life-safety warnings"
   },
   "emergencyFallbackTitle": "Dispositivo sem Discador",
   "@emergencyFallbackTitle": {
@@ -228,11 +144,11 @@
   "@emergencyCopiedToast": {
     "description": "Toast or snackbar message indicating emergency number was copied"
   },
-  "triageBannerEmotional": "Iniciando Autoavaliação Psico-Emocional",
+  "triageBannerEmotional": "Registro emocional de hoje",
   "@triageBannerEmotional": {
     "description": "Banner text for emotional triage vertical"
   },
-  "triageBannerPhysical": "Iniciando Autoavaliação Física",
+  "triageBannerPhysical": "Registro físico de hoje",
   "@triageBannerPhysical": {
     "description": "Banner text for physical triage vertical"
   },
@@ -260,7 +176,7 @@
   "@triageConfirm": {
     "description": "Confirm button label"
   },
-  "triagePreviewTitle": "Revisão da sua Avaliação",
+  "triagePreviewTitle": "Revise seu registro",
   "@triagePreviewTitle": {
     "description": "Title of the preview step card"
   },
@@ -296,27 +212,27 @@
   "@triageOptCansaco": {
     "description": "Emotional option: Mental Fatigue"
   },
-  "triageOptAnsiosaAgitacao": "Ansiosa / Agitação",
+  "triageOptAnsiosaAgitacao": "Inquieto(a) / Agitado(a)",
   "@triageOptAnsiosaAgitacao": {
     "description": "Emotional dimension 1: Ansiosa / Agitação"
   },
-  "triageOptDepressivaDesanimo": "Depressiva / Desânimo",
+  "triageOptDepressivaDesanimo": "Pra baixo / Desanimado(a)",
   "@triageOptDepressivaDesanimo": {
     "description": "Emotional dimension 2: Depressiva / Desânimo"
   },
-  "triageOptEstresseBurnout": "Estresse / Burnout",
+  "triageOptEstresseBurnout": "Estressado(a) / Esgotado(a)",
   "@triageOptEstresseBurnout": {
     "description": "Emotional dimension 3: Estresse / Burnout"
   },
-  "triageOptSomatica": "Somática (Psicossomática)",
+  "triageOptSomatica": "Tensão no corpo",
   "@triageOptSomatica": {
     "description": "Emotional dimension 4: Somática (Psicossomática)"
   },
-  "triageOptSono": "Sono (Insônia / Hipersônia)",
+  "triageOptSono": "Sono ruim ou sono demais",
   "@triageOptSono": {
     "description": "Emotional dimension 5: Sono (Insônia/Hipersônia)"
   },
-  "triageOptCognitivaFoco": "Cognitiva / Foco",
+  "triageOptCognitivaFoco": "Dificuldade de foco",
   "@triageOptCognitivaFoco": {
     "description": "Emotional dimension 6: Cognitiva / Foco"
   },
@@ -520,7 +436,7 @@
   "@triageOptSimDesvalorizacaoPropria": {
     "description": "Emotional trigger: Difficulty acknowledging own achievements"
   },
-  "triagePreviewEmotional": "Revisão da sua Autoavaliação Psico-Emocional",
+  "triagePreviewEmotional": "Revise seu registro",
   "@triagePreviewEmotional": {
     "description": "Emotional preview step description"
   },
@@ -544,55 +460,55 @@
   "@triageOptAbdomen": {
     "description": "Physical location: Abdomen/Stomach"
   },
-  "triageOptCabecaPescoco": "Cabeça e Pescoço",
+  "triageOptCabecaPescoco": "Cabeça e pescoço",
   "@triageOptCabecaPescoco": {
     "description": "Physical system 1: Cabeça e Pescoço"
   },
-  "triageOptCardiovascularTorax": "Cardiovascular / Tórax",
+  "triageOptCardiovascularTorax": "Peito",
   "@triageOptCardiovascularTorax": {
     "description": "Physical system 2: Cardiovascular / Tórax"
   },
-  "triageOptRespiratorio": "Sistema Respiratório",
+  "triageOptRespiratorio": "Respiração",
   "@triageOptRespiratorio": {
     "description": "Physical system 3: Sistema Respiratório"
   },
-  "triageOptGastrointestinalAbdomen": "Gastrointestinal / Abdômen",
+  "triageOptGastrointestinalAbdomen": "Barriga",
   "@triageOptGastrointestinalAbdomen": {
     "description": "Physical system 4: Gastrointestinal / Abdômen"
   },
-  "triageOptColunaDorDorsal": "Coluna e Dor Dorsal",
+  "triageOptColunaDorDorsal": "Costas",
   "@triageOptColunaDorDorsal": {
     "description": "Physical system 5: Coluna e Dor Dorsal"
   },
-  "triageOptMembrosSuperiores": "Membros Superiores D/E",
+  "triageOptMembrosSuperiores": "Braços",
   "@triageOptMembrosSuperiores": {
     "description": "Physical system 6: Membros Superiores D/E"
   },
-  "triageOptMembrosInferiores": "Membros Inferiores D/E",
+  "triageOptMembrosInferiores": "Pernas",
   "@triageOptMembrosInferiores": {
     "description": "Physical system 7: Membros Inferiores D/E"
   },
-  "triageOptNeurologico": "Sistema Neurológico",
+  "triageOptNeurologico": "Tontura / formigamento",
   "@triageOptNeurologico": {
     "description": "Physical system 8: Sistema Neurológico"
   },
-  "triageOptGeniturinarioPelvico": "Geniturinário / Pélvico",
+  "triageOptGeniturinarioPelvico": "Região íntima / urinária",
   "@triageOptGeniturinarioPelvico": {
     "description": "Physical system 9: Geniturinário / Pélvico"
   },
-  "triageOptDermatologico": "Sistema Dermatológico",
+  "triageOptDermatologico": "Pele",
   "@triageOptDermatologico": {
     "description": "Physical system 10: Sistema Dermatológico"
   },
-  "triageOptMuscularGeralSistemico": "Muscular / Geral Sistêmico",
+  "triageOptMuscularGeralSistemico": "Corpo todo / cansaço",
   "@triageOptMuscularGeralSistemico": {
     "description": "Physical system 11: Muscular / Geral Sistêmico"
   },
-  "triageOptEndocrinoMetabolico": "Endócrino / Metabólico",
+  "triageOptEndocrinoMetabolico": "Sede, fome ou energia",
   "@triageOptEndocrinoMetabolico": {
     "description": "Physical system 12: Endócrino / Metabólico"
   },
-  "triageQ2Physical": "Há quanto tempo essa dor ou anomalia persiste?",
+  "triageQ2Physical": "Há quanto tempo você sente esse desconforto?",
   "@triageQ2Physical": {
     "description": "Question 2 physical"
   },
@@ -604,7 +520,7 @@
   "@triageOptHaAlgunsDias": {
     "description": "Physical persistence: A few days ago"
   },
-  "triageOptCronica": "É crônica",
+  "triageOptCronica": "Já faz bastante tempo",
   "@triageOptCronica": {
     "description": "Physical persistence: Chronic"
   },
@@ -848,7 +764,7 @@
   "@triageOptSimEstresseSobrecarga": {
     "description": "Trigger: Acute stress or routine disruption"
   },
-  "triagePreviewPhysical": "Revisão da sua Avaliação Física",
+  "triagePreviewPhysical": "Revise seu registro",
   "@triagePreviewPhysical": {
     "description": "Physical preview step description"
   },
@@ -869,71 +785,27 @@
   "@triageIntensityMax": {
     "description": "Intensity scale maximum label"
   },
-  "outcomeScreenTitle": "Resultado da Triagem",
+  "outcomeScreenTitle": "Resumo do seu registro",
   "@outcomeScreenTitle": {
-    "description": "Title of Screen 6 Triage Outcome"
+    "description": "Outcome screen title (wellness)"
   },
-  "outcomeScreenSubtitle": "Avaliação preventiva baseada nas suas respostas",
+  "outcomeScreenSubtitle": "Um retrato do que você registrou hoje",
   "@outcomeScreenSubtitle": {
     "description": "Subtitle of Screen 6 Triage Outcome"
   },
-  "outcomeIntensityTitle": "Intensidade Calculada",
+  "outcomeIntensityTitle": "Intensidade que você informou",
   "@outcomeIntensityTitle": {
     "description": "Intensity title"
   },
-  "outcomeIntensityDescription": "Pontuação calculada na escala clínica de 1 a 5",
+  "outcomeIntensityDescription": "Sua própria nota de 1 a 5 para como se sentiu",
   "@outcomeIntensityDescription": {
     "description": "Intensity score description"
   },
-  "outcomeDispositionTitle": "Recomendação de Cuidado",
-  "@outcomeDispositionTitle": {
-    "description": "Disposition title"
-  },
-  "outcomeDispositionSelfCare": "Auto-cuidado Monitorado",
-  "@outcomeDispositionSelfCare": {
-    "description": "Self-care disposition"
-  },
-  "outcomeDispositionSelfCareDesc": "Repouso, hidratação adequada e acompanhamento dos sintomas nas próximas 24 horas.",
-  "@outcomeDispositionSelfCareDesc": {
-    "description": "Self-care description"
-  },
-  "outcomeDispositionRoutine": "Consulta de Rotina",
-  "@outcomeDispositionRoutine": {
-    "description": "Routine disposition"
-  },
-  "outcomeDispositionRoutineDesc": "Agende uma consulta preventiva nos próximos dias com um profissional de saúde.",
-  "@outcomeDispositionRoutineDesc": {
-    "description": "Routine description"
-  },
-  "outcomeDispositionUrgent": "Pronto Atendimento",
-  "@outcomeDispositionUrgent": {
-    "description": "Urgent disposition"
-  },
-  "outcomeDispositionUrgentDesc": "Busque avaliação médica presencial em uma unidade de saúde em até 24 horas.",
-  "@outcomeDispositionUrgentDesc": {
-    "description": "Urgent description"
-  },
-  "outcomeDispositionEmergency": "Atendimento de Emergência",
-  "@outcomeDispositionEmergency": {
-    "description": "Emergency disposition"
-  },
-  "outcomeDispositionEmergencyDesc": "Seus sintomas exigem atenção imediata. Procure um serviço de emergência ou ligue 192.",
-  "@outcomeDispositionEmergencyDesc": {
-    "description": "Emergency description"
-  },
-  "outcomeOrganicPrimacyTitle": "Atenção: Primazia Orgânica",
-  "@outcomeOrganicPrimacyTitle": {
-    "description": "Organic primacy title"
-  },
-  "outcomeOrganicPrimacyDesc": "Sintomas físicos concomitantes ao desconforto emocional requerem avaliação médica física prioritária antes de serem atribuídos unicamente ao estresse psicológico.",
-  "@outcomeOrganicPrimacyDesc": {
-    "description": "Organic primacy description"
-  },
-  "outcomeArticlesTitle": "Artigos Médicos Recomendados",
+  "outcomeArticlesTitle": "Leituras sobre bem-estar",
   "@outcomeArticlesTitle": {
     "description": "Articles section title"
   },
-  "outcomeArticlesSubtitle": "Conteúdos preventivos elaborados por especialistas renomados",
+  "outcomeArticlesSubtitle": "Conteúdos educativos gerais. Não são orientação para o seu caso.",
   "@outcomeArticlesSubtitle": {
     "description": "Articles section subtitle"
   },
@@ -950,7 +822,7 @@
   "@outcomeDoneButton": {
     "description": "Button to finish triage and return home"
   },
-  "antiburlaTitle": "Verificação Histórica",
+  "antiburlaTitle": "Isso já apareceu antes?",
   "@antiburlaTitle": {
     "description": "Screen 5 Antiburla Bottom Sheet title"
   },
@@ -967,7 +839,7 @@
   "@antiburlaOptionRecurring": {
     "description": "Button label when symptom is recurring from previous episode"
   },
-  "antiburlaOptionRecurringDesc": "Ajustaremos o início para 'Há alguns dias' para manter seu histórico clínico consistente.",
+  "antiburlaOptionRecurringDesc": "Vamos registrar como algo que voltou, para seu diário ficar organizado.",
   "@antiburlaOptionRecurringDesc": {
     "description": "Explanation for recurring symptom choice"
   },
@@ -978,14 +850,6 @@
   "antiburlaOptionNewDesc": "Manteremos registrado como um evento agudo que começou hoje.",
   "@antiburlaOptionNewDesc": {
     "description": "Explanation for new symptom choice"
-  },
-  "antiburlaBiologicalDiscordanceTitle": "Aviso Anatômico Preventivo",
-  "@antiburlaBiologicalDiscordanceTitle": {
-    "description": "Title for biological discordance alert"
-  },
-  "antiburlaBiologicalDiscordanceDesc": "Notamos uma divergência entre a anatomia informada e os parâmetros do seu perfil. Deseja revisar antes de prosseguir?",
-  "@antiburlaBiologicalDiscordanceDesc": {
-    "description": "Description for biological discordance alert"
   },
   "offTopicNarrativeTitle": "Isso parece um sintoma?",
   "@offTopicNarrativeTitle": {
@@ -1020,7 +884,7 @@
   "@offlineSyncSuccessText": {
     "description": "Toast message when outbox sync completes"
   },
-  "offlineModeNotice": "Você está offline. Seu histórico e avaliação continuam funcionando normalmente.",
+  "offlineModeNotice": "Você está offline. Seus registros continuam funcionando normalmente.",
   "@offlineModeNotice": {
     "description": "Explanatory text for offline functionality"
   },
@@ -1044,7 +908,7 @@
   "@bodyMapHint": {
     "description": "Hint to interact with the body map"
   },
-  "heatLegendNone": "Sem dor",
+  "heatLegendNone": "Sem registro",
   "@heatLegendNone": {
     "description": "Legend label for no pain"
   },
@@ -1080,7 +944,7 @@
   "@emptyHistorySubtitle": {
     "description": "Empty state subtitle"
   },
-  "readRecommendedArticle": "Ler Artigo Recomendado",
+  "readRecommendedArticle": "Ler artigo",
   "@readRecommendedArticle": {
     "description": "Button to read recommended article on recurrence card"
   },
@@ -1092,7 +956,7 @@
   "@exportDataTitle": {
     "description": "Title for data export section"
   },
-  "exportDataDesc": "Baixe uma cópia completa dos seus dados pessoais e histórico clínico em formato JSON conforme o Art. 18, V da LGPD.",
+  "exportDataDesc": "Baixe uma cópia completa dos seus dados pessoais e registros de bem-estar em formato JSON conforme o Art. 18, V da LGPD.",
   "@exportDataDesc": {
     "description": "Description for data export section"
   },
@@ -1277,7 +1141,7 @@
   "@settingsDataHistoryTile": {
     "description": "Tile to navigate to historical dashboard"
   },
-  "settingsDataHistorySubtitle": "Visualize seu histórico de triagens",
+  "settingsDataHistorySubtitle": "Visualize seu histórico de registros",
   "@settingsDataHistorySubtitle": {
     "description": "Subtitle for history tile"
   },
@@ -1285,7 +1149,7 @@
   "@deleteHistoryItemTitle": {
     "description": "Title of the delete history item confirmation dialog"
   },
-  "deleteHistoryItemConfirm": "Tem certeza de que deseja descartar este registro de triagem do seu histórico? Esta ação é irreversível.",
+  "deleteHistoryItemConfirm": "Tem certeza de que deseja descartar este registro do seu histórico? Esta ação é irreversível.",
   "@deleteHistoryItemConfirm": {
     "description": "Confirmation message when discarding a history entry"
   },
@@ -1369,11 +1233,11 @@
   "@selectDateOfBirthHint": {
     "description": "Hint for date of birth selection"
   },
-  "errorLoadHistory": "Não foi possível carregar o histórico de triagens no momento.",
+  "errorLoadHistory": "Não foi possível carregar o histórico de registros no momento.",
   "@errorLoadHistory": {
     "description": "Error loading triage history"
   },
-  "errorArticleLinkUnavailable": "Link do artigo preventivo não disponível.",
+  "errorArticleLinkUnavailable": "Link do artigo não disponível.",
   "@errorArticleLinkUnavailable": {
     "description": "Article link unavailable"
   },
@@ -1393,7 +1257,7 @@
   "@navHome": {
     "description": "Bottom navigation Home label"
   },
-  "navTodayOutcome": "Resultado do Dia",
+  "navTodayOutcome": "Meu Dia",
   "@navTodayOutcome": {
     "description": "Bottom navigation Today Outcome label"
   },
@@ -1442,7 +1306,7 @@
   "@notifWaterAlarmChannelDescription": {
     "description": "Android notification channel description, alarm-style water reminders"
   },
-  "notifCheckinTitleAt": "🩺 Check-in Diário Dualis ({time})",
+  "notifCheckinTitleAt": "🌿 Check-in Diário Dualis ({time})",
   "@notifCheckinTitleAt": {
     "description": "Scheduled daily check-in reminder notification title",
     "placeholders": {
@@ -1451,7 +1315,7 @@
       }
     }
   },
-  "notifCheckinBody": "Você ainda não atualizou seu estado de saúde hoje. Toque para realizar seu check-in!",
+  "notifCheckinBody": "Você ainda não fez seu registro de hoje. Toque para fazer seu check-in!",
   "@notifCheckinBody": {
     "description": "Daily check-in reminder notification body"
   },
@@ -1459,7 +1323,7 @@
   "@notifCheckinChannelName": {
     "description": "Android notification channel name, daily check-in reminders"
   },
-  "notifCheckinChannelDescription": "Notificações a cada 2 horas para lembrar de atualizar seu check-in diário de saúde",
+  "notifCheckinChannelDescription": "Notificações a cada 2 horas para lembrar do seu check-in diário de bem-estar",
   "@notifCheckinChannelDescription": {
     "description": "Android notification channel description, daily check-in reminders"
   },
@@ -1483,7 +1347,7 @@
   "familySharingScopeViewOnly": "Somente Leitura",
   "familySharingScopeCoManage": "Co-gestão",
   "familySharingScopeViewOnlyOption": "Somente Leitura (Recomendado)",
-  "familySharingScopeCoManageOption": "Co-gestão (Pode registrar triagens)",
+  "familySharingScopeCoManageOption": "Co-gestão (Pode adicionar registros)",
   "familySharingActiveSince": "Ativo desde {date}",
   "@familySharingActiveSince": {
     "placeholders": {
@@ -1548,11 +1412,11 @@
   "addDependentRelationshipParent": "Filho(a) menor de idade (Poder Familiar)",
   "addDependentRelationshipCurator": "Curador(a) de maior incapaz (Curatela)",
   "addDependentRelationshipLegalGuardian": "Tutor(a) legal de menor (Tutela)",
-  "addDependentLgpdArt14Consent": "Declaro, sob as penas da lei, que sou pai, mãe ou representante legal deste dependente e autorizo expressamente a coleta e tratamento dos seus dados de saúde preventiva na plataforma DualisCheckUp, em estrita conformidade com o Artigo 14 da LGPD (Lei 13.709/2018).",
+  "addDependentLgpdArt14Consent": "Declaro, sob as penas da lei, que sou pai, mãe ou representante legal deste dependente e autorizo expressamente a coleta e tratamento dos seus dados de bem-estar na plataforma DualisCheckUp, em estrita conformidade com o Artigo 14 da LGPD (Lei 13.709/2018).",
   "addDependentSubmit": "Cadastrar Dependente",
   "addDependentSuccess": "Dependente cadastrado com sucesso.",
   "addDependentGenericError": "Não foi possível cadastrar o dependente. Tente novamente.",
-  "profileSwitcherSheetTitle": "Perfis de Saúde",
+  "profileSwitcherSheetTitle": "Perfis",
   "@profileSwitcherSheetTitle": {
     "description": "Header title of the profile selection bottom sheet"
   },
@@ -1674,5 +1538,425 @@
         "type": "String"
       }
     }
-  }
+  },
+  "emergencyMapsQuery": "pronto-socorro",
+  "@emergencyMapsQuery": {
+    "description": "Search text sent to the maps app to find the nearest emergency room."
+  },
+  "safetyClose": "Fechar",
+  "safetyCallLine": "Ligar {name} ({number})",
+  "@safetyCallLine": {
+    "description": "Call button on the help resources screen.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyKindEmergency": "Emergência",
+  "safetyKindAmbulance": "Ambulância",
+  "safetyKindFire": "Bombeiros",
+  "safetyKindPolice": "Polícia",
+  "safetyKindEmotionalSupport": "Apoio emocional",
+  "safetyKindHealthLine": "Linha de saúde",
+  "safetyFree24h": "24h, gratuito",
+  "safetyWarningSignsTitle": "Ligue {number} imediatamente se você ou alguém tiver:",
+  "@safetyWarningSignsTitle": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyWarningSign1": "dor ou pressão forte no peito",
+  "safetyWarningSign2": "falta de ar intensa",
+  "safetyWarningSign3": "rosto torto, fraqueza num lado do corpo ou fala enrolada",
+  "safetyWarningSign4": "a pior dor de cabeça da vida, de início súbito",
+  "safetyWarningSign5": "desmaio ou convulsão",
+  "safetyWarningSign6": "sangramento que não para",
+  "safetyWarningSignsSource": "Fonte: Ministério da Saúde / SAMU",
+  "safetyCrisisWithLine": "Se você está pensando em se machucar ou em tirar a própria vida, ligue {crisis} ou {emergency}.",
+  "@safetyCrisisWithLine": {
+    "placeholders": {
+      "crisis": {
+        "type": "String"
+      },
+      "emergency": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyCrisisNoLine": "Se você está pensando em se machucar ou em tirar a própria vida, ligue {emergency} ou procure a linha de apoio emocional do seu país.",
+  "@safetyCrisisNoLine": {
+    "placeholders": {
+      "emergency": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyLocalNumberHint": "Se o {number} não funcionar onde você está, ligue para o número local de emergência.",
+  "@safetyLocalNumberHint": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyNoticeGeneral": "Se isso for uma emergência, não use o app: ligue {number} agora.",
+  "@safetyNoticeGeneral": {
+    "description": "Same non-blocking notice for everyone. Never name a condition.",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyNoticeOpenResources": "Ver contatos de ajuda",
+  "urgentHelpButton": "Ajuda urgente",
+  "@urgentHelpButton": {
+    "description": "Global button that opens the help resources screen."
+  },
+  "lgpdConsentPrefix": "Li e concordo com os ",
+  "lgpdConsentTermsLink": "Termos de Uso",
+  "lgpdConsentAnd": " e a ",
+  "lgpdConsentPrivacyLink": "Política de Privacidade",
+  "lgpdConsentSuffix": ", e consinto, de forma específica e destacada, com o tratamento dos meus dados pessoais sensíveis de saúde para registrar e visualizar meu diário de bem-estar, nos termos do Art. 11, I da LGPD. ",
+  "lgpdConsentLearnMore": "(Saiba mais)",
+  "lgpdConsentSheetTitle": "Política de Privacidade e Termo de Consentimento (LGPD Art. 11, I)",
+  "lgpdConsentSheetBody": "O DualisCheckUp é um aplicativo de bem-estar e autoconhecimento. Ele ajuda você a registrar diariamente como se sente física e emocionalmente, acompanhar hábitos como hidratação e sono, visualizar seus próprios registros ao longo do tempo e acessar conteúdos educativos gerais sobre hábitos saudáveis. O DualisCheckUp não é um dispositivo médico: não avalia, não classifica nem interpreta sintomas, não indica nível de urgência, não faz diagnóstico, não recomenda tratamento e não substitui um profissional de saúde. Em caso de emergência, ligue 192 (SAMU). Se você estiver em sofrimento emocional, ligue 188 (CVV).",
+  "@lgpdConsentSheetBody": {
+    "description": "Canonical intended-use statement (plan §1.1)"
+  },
+  "lgpdConsentSheetBasesTitle": "Bases normativas:",
+  "lgpdConsentSheetBases": "• Lei nº 13.709/2018 (LGPD): Art. 7 e Art. 11 (tratamento de dados pessoais e de dados sensíveis de saúde), Art. 14 (dados de crianças e adolescentes) e Art. 18 (direitos do titular).\n• Código de Defesa do Consumidor (CDC): Art. 49 - Direito de Arrependimento em 7 dias.",
+  "lgpdConsentViewTerms": "Ver Termos de Uso",
+  "lgpdConsentViewPolicy": "Ver Política Completa",
+  "termsAppBarTitle": "Termos de Uso do SaaS",
+  "termsHeaderTitle": "Termos e Condições de Uso",
+  "termsVersionLine": "Versão 2026.2 • Atualizado em 16/10/2026",
+  "termsIntro": "Contrato de prestação de serviços de software em nuvem (SaaS) celebrado entre o Usuário e a DualisCheckUp Saúde e Tecnologia Ltda., inscrita no CNPJ sob o nº 48.291.834/0001-92, com sede em São Paulo/SP, Brasil.",
+  "termsSection1Title": "1. Aceitação e Capacidade Civil",
+  "termsSection1Body": "Ao cadastrar-se ou utilizar o DualisCheckUp, você declara possuir capacidade civil plena (maior de 18 anos ou emancipado) e manifesta concordância integral com estes Termos de Uso e com nossa Política de Privacidade.",
+  "termsSection2Title": "2. Natureza do Serviço",
+  "termsSection2Body": "O DualisCheckUp é um aplicativo de bem-estar e autoconhecimento. Ele ajuda você a registrar diariamente como se sente física e emocionalmente, acompanhar hábitos como hidratação e sono, visualizar seus próprios registros ao longo do tempo e acessar conteúdos educativos gerais sobre hábitos saudáveis. O DualisCheckUp não é um dispositivo médico: não avalia, não classifica nem interpreta sintomas, não indica nível de urgência, não faz diagnóstico, não recomenda tratamento e não substitui um profissional de saúde. Em caso de emergência, ligue 192 (SAMU). Se você estiver em sofrimento emocional, ligue 188 (CVV).",
+  "@termsSection2Body": {
+    "description": "Canonical intended-use statement (plan §1.1)"
+  },
+  "termsSection2Bullet1": "Não avalia sintomas, não indica urgência, não diagnostica e não recomenda tratamento.",
+  "termsSection2Bullet2": "As intensidades e demais informações exibidas são as que você mesmo registrou.",
+  "termsSection2Bullet3": "Em emergência, ligue 192 (SAMU) ou 188 (CVV).",
+  "termsSection3Title": "3. Planos SaaS, Cobrança e Reembolso",
+  "termsSection3Body": "Recursos adicionais podem ser oferecidos em planos com renovação automática periódica, processados por intermediadores de pagamento terceiros:",
+  "termsSection3Bullet1": "Cancelamento Facilitado: Você pode cancelar sua assinatura a qualquer momento no app com um toque, sem fidelidade ou taxas de cancelamento.",
+  "termsSection3Bullet2": "Direito de Arrependimento (CDC Art. 49): Garantia de reembolso integral em até 7 (sete) dias corridos a partir da contratação inicial.",
+  "termsSection3Bullet3": "Acesso Contínuo: O cancelamento interrompe faturas subsequentes e preserva seu acesso até o término do ciclo mensal contratado.",
+  "termsSection4Title": "4. Propriedade Intelectual",
+  "termsSection4Body": "Todos os direitos de propriedade intelectual sobre software, conteúdos, marcas e interfaces pertencem com exclusividade à DualisCheckUp Saúde e Tecnologia Ltda. É estritamente vedada a reprodução, engenharia reversa ou mineração de dados.",
+  "termsSection5Title": "5. Suspensão por Violação de Segurança",
+  "termsSection5Body": "Contas que executarem tentativas de invasão, ataques de força bruta, testes de penetração não autorizados ou submissão de dados fraudulentos serão imediatamente bloqueadas, com encaminhamento às autoridades competentes.",
+  "termsSection6Title": "6. Foro e Contato Jurídico",
+  "termsSection6Body": "Estes termos são regidos pelas leis brasileiras. Fica eleito o Foro da Comarca de São Paulo/SP como único competente para dirimir litígios decorrentes deste contrato.\n\nPara dúvidas ou notificações legais: legal@dualischeckup.com.",
+  "privacyPolicyAppBarTitle": "Política de Privacidade (LGPD)",
+  "privacyPolicyHeaderTitle": "Política de Privacidade & Proteção de Dados",
+  "privacyPolicyHeaderSubtitle": "Conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018)",
+  "privacyPolicyIntro": "A sua privacidade e a confidencialidade dos seus dados de saúde são a nossa prioridade absoluta. Esta política descreve como tratamos, protegemos e permitimos que você controle integralmente suas informações.",
+  "privacyPolicyDpoLine": "Encarregado de Dados (DPO): dpo@dualischeckup.com",
+  "privacyPolicySection1Title": "1. Dados Pessoais e Sensíveis Coletados",
+  "privacyPolicySection1Body": "Nos termos do Artigo 11 da LGPD, o tratamento de dados pessoais sensíveis de saúde é realizado com o seu consentimento específico e destacado (Art. 11, I):",
+  "privacyPolicySection1Bullet1": "Dados de Identificação: Nome completo, endereço de e-mail e data de nascimento.",
+  "privacyPolicySection1Bullet2": "Dados de Perfil: Sexo biológico e consumo de água, usados para ajustar suas metas de hidratação.",
+  "privacyPolicySection1Bullet3": "Diário de Bem-Estar: Anotações sobre como você se sente física e emocionalmente e a intensidade informada por você.",
+  "privacyPolicySection1Bullet4": "Dados de Acesso Técnico: Endereço IP mascarado, registros criptográficos de sessão e tokens de autenticação transitórios.",
+  "privacyPolicySection2Title": "2. Finalidades e Proibição de Venda de Dados",
+  "privacyPolicySection2Body": "Seus dados de saúde são tratados somente para:",
+  "privacyPolicySection2Bullet1": "Registro e visualização do seu diário de bem-estar.",
+  "privacyPolicySection2Bullet2": "Organização automática das suas anotações por área do corpo ou emoção (com auxílio de IA, sem avaliação de saúde).",
+  "privacyPolicySection2Bullet3": "Consistência do histórico.",
+  "privacyPolicySection2Bullet4": "Compromisso Ético: É expressamente PROIBIDA a venda, comercialização ou cessão onerosa dos seus dados para corretoras de seguros, anunciantes ou terceiros.",
+  "privacyPolicySection3Title": "3. Operadores e Transferência Internacional",
+  "privacyPolicySection3Body": "Para prestar o serviço, compartilhamos dados apenas com:",
+  "privacyPolicySection3Bullet1": "Google LLC (API Gemini): O texto das suas anotações é enviado à API Gemini do Google para organizá-las automaticamente. A IA não avalia a sua saúde.",
+  "privacyPolicySection3Bullet2": "Transferência Internacional: Esse processamento pode ocorrer em servidores localizados fora do Brasil (LGPD Art. 33).",
+  "privacyPolicySection3Bullet3": "Infraestrutura em Nuvem: Provedores de hospedagem e banco de dados, sujeitos a obrigações de confidencialidade e segurança.",
+  "privacyPolicySection4Title": "4. Pagamentos",
+  "privacyPolicySection4Body": "Quando houver planos pagos, os dados de cartão ficam isolados dos nossos servidores:",
+  "privacyPolicySection4Bullet1": "Processamento por Terceiros: Os pagamentos são intermediados por gateways de pagamento especializados.",
+  "privacyPolicySection4Bullet2": "Zero Armazenamento: Os servidores da DualisCheckUp NÃO recebem, não processam e não salvam números de cartão de crédito ou códigos CVV.",
+  "privacyPolicySection5Title": "5. Seus Direitos como Titular (Art. 18 da LGPD)",
+  "privacyPolicySection5Body": "Você pode exercer seus direitos legais diretamente pelo aplicativo de forma instantânea:",
+  "privacyPolicySection5Bullet1": "Exportação de Dados: Baixe todos os seus registros em formato estruturado (JSON) com um clique na Central de Privacidade.",
+  "privacyPolicySection5Bullet2": "Exclusão Definitiva: Solicite a exclusão irrevogável da sua conta e de todos os dados associados.",
+  "privacyPolicySection5Bullet3": "Revogação do Consentimento: Encerre o uso e retire a autorização a qualquer momento.",
+  "privacyPolicySection6Title": "6. Segurança da Informação & Resposta a Incidentes",
+  "privacyPolicySection6Body": "Medidas técnicas de ponta a ponta protegem seus registros:",
+  "privacyPolicySection6Bullet1": "Isolamento RLS: Cada consulta ao banco PostgreSQL é blindada pela política de Row-Level Security com chave de usuário isolada.",
+  "privacyPolicySection6Bullet2": "Criptografia Forte: Conexões TLS 1.3 obrigatórias e senhas protegidas pelo algoritmo Argon2id.",
+  "privacyPolicySection6Bullet3": "Plano de Notificação em até 72h: Protocolo de comunicação imediata à Autoridade Nacional de Proteção de Dados (ANPD) e aos usuários em qualquer evento relevante de segurança (LGPD Art. 48).",
+  "privacyPolicySection7Title": "7. Notificações, Comunicações e Opt-Out",
+  "privacyPolicySection7Body": "Respeitamos a sua tranquilidade e atenção:",
+  "privacyPolicySection7Bullet1": "Você tem liberdade total para desativar lembretes de hidratação ou notificações de dicas de bem-estar na aba de Configurações a qualquer momento.",
+  "privacyPolicySection7Bullet2": "Avisos de segurança e recuperação de conta são de natureza estritamente transacional e protegidos.",
+  "privacyPolicyCtaQuestion": "Deseja exportar seus dados ou gerenciar sua conta agora?",
+  "privacyPolicyCtaButton": "Ir para a Central de Privacidade",
+  "onboardingIntendedUseNote": "O DualisCheckUp é um aplicativo de bem-estar e autoconhecimento. Não é um dispositivo médico e não substitui um profissional de saúde.",
+  "privacyVeilBiometricReason": "Autentique-se para acessar seus registros.",
+  "privacyVeilUnlock": "Desbloquear",
+  "privacyVeilUnlockManually": "Desbloquear manualmente",
+  "wizardNarrativeLabel": "Descrição opcional (em suas palavras)",
+  "wizardNarrativeHint": "Se quiser, escreva com suas palavras como você está.",
+  "deleteHistoryItemIntensity": "Intensidade informada: {value}/5",
+  "@deleteHistoryItemIntensity": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "bodyMapRegionHeadNeck": "Cabeça e pescoço",
+  "bodyMapRegionHeadNeckHint": "Dor de cabeça, dor ou rigidez no pescoço",
+  "bodyMapRegionDizziness": "Tontura / formigamento",
+  "bodyMapRegionDizzinessHint": "Tontura, sensação de desequilíbrio, formigamento",
+  "bodyMapRegionBack": "Costas",
+  "bodyMapRegionBackHint": "Dor nas costas, na coluna ou na lombar",
+  "bodyMapRegionBreathing": "Respiração",
+  "bodyMapRegionBreathingHint": "Falta de ar, tosse",
+  "bodyMapRegionChest": "Peito",
+  "bodyMapRegionChestHint": "Aperto ou desconforto no peito, coração acelerado",
+  "bodyMapRegionBelly": "Barriga",
+  "bodyMapRegionBellyHint": "Desconforto na barriga, cólica, azia",
+  "bodyMapRegionPelvic": "Região íntima / urinária",
+  "bodyMapRegionPelvicHint": "Desconforto na região pélvica ou ao urinar",
+  "bodyMapRegionRightArm": "Braço direito",
+  "bodyMapRegionRightArmHint": "Braço, ombro, cotovelo ou punho direito",
+  "bodyMapRegionLeftArm": "Braço esquerdo",
+  "bodyMapRegionLeftArmHint": "Braço, ombro, cotovelo ou punho esquerdo",
+  "bodyMapRegionRightLeg": "Perna direita",
+  "bodyMapRegionRightLegHint": "Quadril, coxa, joelho ou tornozelo direito",
+  "bodyMapRegionLeftLeg": "Perna esquerda",
+  "bodyMapRegionLeftLegHint": "Quadril, coxa, joelho ou tornozelo esquerdo",
+  "bodyMapRegionSkin": "Pele",
+  "bodyMapRegionSkinHint": "Coceira, manchas",
+  "bodyMapRegionWholeBody": "Corpo todo / cansaço",
+  "bodyMapRegionWholeBodyHint": "Dor no corpo todo, cansaço",
+  "bodyMapRegionEnergy": "Sede, fome ou energia",
+  "bodyMapRegionEnergyHint": "Mudanças de energia, sede ou fome",
+  "bodyMapGroupHead": "Cabeça",
+  "bodyMapGroupTrunk": "Tronco",
+  "bodyMapGroupLimbs": "Braços e pernas",
+  "bodyMapGroupWholeBody": "Corpo todo e pele",
+  "bodyMapViewMap": "Mapa do corpo",
+  "bodyMapViewAll": "Todas as áreas",
+  "bodyMapShortSkin": "Pele",
+  "bodyMapShortWholeBody": "Corpo todo",
+  "bodyMapShortEnergy": "Energia",
+  "bodyMapMaxIntensity": "Maior intensidade informada nos últimos 14 dias: {value}/5",
+  "@bodyMapMaxIntensity": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "bodyMapNoEntriesThisSide": "Sem registros deste lado nos últimos 14 dias.\n({otherArea}: intensidade informada {value}/5)",
+  "@bodyMapNoEntriesThisSide": {
+    "placeholders": {
+      "otherArea": {
+        "type": "String"
+      },
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "bodyMapViewOtherSide": "Ver {area}",
+  "@bodyMapViewOtherSide": {
+    "placeholders": {
+      "area": {
+        "type": "String"
+      }
+    }
+  },
+  "bodyMapNoEntries14Days": "Nenhum registro nos últimos 14 dias",
+  "settingsChangePhotoSubtitle": "Escolha como deseja selecionar sua foto de perfil.",
+  "settingsPhotoCamera": "Câmera",
+  "settingsPhotoCameraSubtitle": "Tirar uma nova foto",
+  "settingsPhotoGallery": "Galeria",
+  "settingsPhotoGallerySubtitle": "Escolher da biblioteca de fotos",
+  "settingsPhotoPresets": "Avatares",
+  "settingsPhotoPresetsSubtitle": "Escolher um ícone ilustrado de autocuidado",
+  "settingsLogoutConfirmBody": "Deseja realmente encerrar sua sessão? Seus dados permanecem seguros e criptografados.",
+  "settingsLogoutConfirmAction": "Sair",
+  "settingsNameHint": "Seu nome completo",
+  "settingsRemindersTile": "Lembretes e Hidratação",
+  "settingsRemindersSubtitle": "Horários de notificações, alarmes e teste com app fechado",
+  "settingsTermsTile": "Termos de Uso",
+  "settingsTermsSubtitle": "Condições de uso, planos, cancelamento e reembolso",
+  "settingsPrivacyPolicyTile": "Política de Privacidade (LGPD)",
+  "settingsPrivacyPolicySubtitle": "Tratamento de dados, direitos do titular e DPO",
+  "settingsCommunicationsSection": "Comunicações e Notificações",
+  "settingsEducationalTipsTile": "Dicas de Bem-Estar e Notificações Educativas",
+  "settingsEducationalTipsSubtitle": "Dicas gerais de bem-estar. Você pode desativar (opt-out) a qualquer momento.",
+  "settingsEducationalTipsOn": "Notificações educativas ativadas.",
+  "settingsEducationalTipsOff": "Opt-out confirmado: Notificações educativas desativadas.",
+  "settingsOperatorInfo": "Operado por DualisCheckUp Saúde e Tecnologia Ltda.\nCNPJ 48.291.834/0001-92 • São Paulo - SP, Brasil\nDPO: dpo@dualischeckup.com",
+  "avatarSelectorSubtitle": "Selecione um ícone de autocuidado para personalizar seu perfil.",
+  "avatarConfirm": "Confirmar Avatar",
+  "avatarPresetSelfCare": "Autocuidado",
+  "avatarPresetBalance": "Equilíbrio",
+  "avatarPresetProtection": "Proteção",
+  "avatarPresetVitality": "Vitalidade",
+  "avatarPresetWellbeing": "Bem-estar",
+  "avatarPresetEnergy": "Energia",
+  "avatarPresetFocus": "Foco Mental",
+  "avatarPresetRadiant": "Radiante",
+  "loginTitle": "Entrar no DualisCheckUp",
+  "loginSubtitle": "Acesse seu diário de bem-estar com segurança.",
+  "authEmailHint": "seu.email@exemplo.com",
+  "loginPasswordRequired": "Senha é obrigatória.",
+  "loginNoAccountPrompt": "Ainda não possui conta? ",
+  "registerTitle": "Criar sua conta",
+  "registerSubtitle": "Informe alguns dados para personalizar sua experiência.",
+  "registerNameHint": "Ex: Carlos Silva",
+  "registerDobHint": "DD/MM/AAAA",
+  "registerDobHelper": "Ex: 15/08/1990 ou selecione pelo calendário.",
+  "registerDobPickerHelp": "Selecione a data de nascimento",
+  "registerDobPickerConfirm": "Confirmar",
+  "registerPasswordHint": "Mínimo 8 caracteres",
+  "registerPasswordHelper": "Use 8+ caracteres com maiúscula, número e símbolo.",
+  "registerHydrationTitle": "Lembretes e Controle de Hidratação",
+  "registerHydrationSubtitle": "Configure seus hábitos de hidratação",
+  "registerWaterReminderTitle": "Alerta para tomar água a cada 2h",
+  "registerWaterReminderSubtitle": "Horários pares: 8h, 10h, 12h, 14h, 16h, 18h e 20h",
+  "registerReminderStyleLabel": "Tipo de lembrete / som:",
+  "registerReminderStyleChime": "Aviso (Mensagem)",
+  "registerReminderStyleAlarm": "Alarme Telefônico",
+  "registerWaterTrackingTitle": "Controle de quantidade consumida",
+  "registerWaterTrackingOnDesc": "Ao tocar no alarme, o app abre para registrar a quantidade de água",
+  "registerWaterTrackingOffDesc": "Apenas soa o lembrete no horário, sem abrir preenchimento",
+  "registerHaveAccountPrompt": "Já possui uma conta? ",
+  "homeGreeting": "Olá, {name}",
+  "@homeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeGreetingNoName": "Olá!",
+  "homeSessionActive": "Sessão ativa",
+  "homeDataProtectedBadge": "Seus registros estão protegidos",
+  "homeTodayEntryDone": "Registro de hoje concluído",
+  "notFoundErrorCode": "ERRO 404",
+  "notFoundTitle": "Página Não Encontrada",
+  "notFoundBody": "A página que você tentou acessar não existe.",
+  "notFoundBackToDashboard": "Voltar para o Painel",
+  "notFoundGoHome": "Ir para o Início",
+  "notFoundGoBack": "Voltar à tela anterior",
+  "wellnessConfirmTitle": "Tudo Bem por Aqui!",
+  "wellnessConfirmBody": "Que excelente notícia! Você indicou estar se sentindo bem tanto física quanto emocionalmente hoje.\n\nSeu check-in diário foi concluído com sucesso e seus dados estão protegidos. Continue cultivando bons hábitos de autocuidado!",
+  "wellnessConfirmButton": "Concluir Check-in",
+  "adBannerHeader": "Parceiro local • Anúncio não usa seus dados de saúde",
+  "adBannerSampleBody": "Itens de primeiros socorros e higiene pessoal com até 20% off.",
+  "outcomeStaticGuidance": "Este app não avalia sua saúde. Se algum desconforto persistir, piorar ou te preocupar, procure um profissional de saúde. Em emergência, ligue 192.",
+  "outcomeDualAxisNote": "Você registrou sensações no corpo e nas emoções hoje. Se algum desconforto físico persistir ou piorar, converse com um profissional de saúde.",
+  "outcomeAiInsightTitle": "Como organizamos sua anotação",
+  "outcomeAiInsightLayTerm": "Termo que você usou: {term}",
+  "@outcomeAiInsightLayTerm": {
+    "placeholders": {
+      "term": {
+        "type": "String"
+      }
+    }
+  },
+  "outcomeAiInsightArea": "Área ou emoção: {area}",
+  "@outcomeAiInsightArea": {
+    "placeholders": {
+      "area": {
+        "type": "String"
+      }
+    }
+  },
+  "outcomeWellnessReadingsTitle": "Leituras sobre bem-estar",
+  "outcomeWellnessReadingsDisclaimer": "Conteúdos educativos gerais. Não são orientação para o seu caso.",
+  "outcomeWellnessReadingsRelatedTitle": "Leituras relacionadas ao tema que você registrou",
+  "outcomeWellnessReadingsCount": "{count} leituras",
+  "@outcomeWellnessReadingsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "outcomeArticlesEmpty": "Nenhuma leitura disponível no momento.",
+  "journalPatternTitle": "Padrões nos seus registros",
+  "journalPatternDescription": "Você registrou {category} com intensidade alta {count} vezes nos últimos {windowDays} dias. Se isso está atrapalhando seu dia a dia, pode ser útil conversar com um profissional de saúde.",
+  "@journalPatternDescription": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "windowDays": {
+        "type": "int"
+      }
+    }
+  },
+  "historyIntensityInformed": "Intensidade informada: {n}/5",
+  "@historyIntensityInformed": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "todayOutcomeCompletedBadge": "Registro concluído",
+  "todayOutcomeUpdateButton": "Atualizar registro de hoje",
+  "todayOutcomeDetailedCheckinButton": "Fazer registro detalhado",
+  "appUpdateTitle": "Atualize o aplicativo",
+  "appUpdateMessage": "Esta versão não é mais suportada. Instale a versão {minVersion} ou mais recente na loja de aplicativos.",
+  "@appUpdateMessage": {
+    "placeholders": {
+      "minVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "appUpdateButton": "Abrir loja de aplicativos",
+  "outcomeSummaryIntensity": "Intensidade informada: {value}/5",
+  "@outcomeSummaryIntensity": {
+    "description": "Chip on the Home summary card of today's entry. Self-reported intensity.",
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "outcomeSummaryRecordedAt": "Registrado às {time}",
+  "@outcomeSummaryRecordedAt": {
+    "description": "Time today's entry was saved (HH:mm).",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "outcomeTodayYouLogged": "Você registrou: {option}",
+  "@outcomeTodayYouLogged": {
+    "description": "Repeats the option the person chose, without reinterpreting it (audit C-32).",
+    "placeholders": {
+      "option": {
+        "type": "String"
+      }
+    }
+  },
+  "outcomeTodayStatusGood": "Bem",
+  "outcomeTodayStatusSoSo": "Mais ou menos",
+  "outcomeTodayStatusBad": "Mal",
+  "outcomeHistoryDetailTitle": "Detalhes do registro",
+  "outcomeHistoryNoNarrative": "Você não adicionou uma descrição neste registro."
 }

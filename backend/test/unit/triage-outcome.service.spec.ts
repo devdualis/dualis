@@ -1,16 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TriageOutcomeService } from '../../src/modules/triage/services/triage-outcome.service';
 import { ArticlesCatalogService } from '../../src/modules/triage/services/articles-catalog.service';
-import { AiTriageService } from '../../src/modules/ai/services/ai-triage.service';
+import { AiTaggingService } from '../../src/modules/ai/services/ai-tagging.service';
 import { IdiomDictionaryService } from '../../src/modules/ai/services/idiom-dictionary.service';
-import type { TriageClassificationResult } from '../../src/modules/ai/dto/classify-symptom.dto';
+import type { EntryTagResult } from '../../src/modules/ai/dto/classify-symptom.dto';
 
 describe('TriageOutcomeService Unit Tests', () => {
   let service: TriageOutcomeService;
   let mockDb: any;
   let mockEncryptionService: any;
   let articlesCatalog: ArticlesCatalogService;
-  let aiTriage: AiTriageService;
+  let aiTagging: AiTaggingService;
 
   beforeEach(() => {
     mockDb = {
@@ -40,18 +40,18 @@ describe('TriageOutcomeService Unit Tests', () => {
     };
 
     articlesCatalog = new ArticlesCatalogService();
-    aiTriage = new AiTriageService(undefined, new IdiomDictionaryService());
+    aiTagging = new AiTaggingService(undefined, new IdiomDictionaryService());
 
     service = new TriageOutcomeService(
       mockDb,
       mockEncryptionService,
       articlesCatalog,
       articlesCatalog,
-      aiTriage,
+      aiTagging,
     );
   });
 
-  it('1. correctly normalizes physical symptoms into 12 systems and calculates intensity', async () => {
+  it('1. files a physical entry under its area with the intensity the person reported', async () => {
     const outcome = await service.processOutcome('user-1', 'prof-user-1', {
       vertical: 'physical',
       answers: {
@@ -65,10 +65,8 @@ describe('TriageOutcomeService Unit Tests', () => {
 
     expect(outcome.vertical).toBe('physical');
     expect(outcome.primaryCategory).toBe('cabeca_pescoco');
-    expect(outcome.categoryLabel).toBe('Cabeça e Pescoço');
+    expect(outcome.categoryLabel).toBe('Cabeça e pescoço');
     expect(outcome.intensityScore).toBe(4);
-    expect(outcome.careDisposition).toBe('pronto_atendimento');
-    expect(outcome.organicPrimacyApplied).toBe(false);
     expect(outcome.recommendedArticles.length).toBeGreaterThan(0);
     expect(outcome.recommendedArticles[0].category).toBe('cabeca_pescoco');
   });
@@ -104,7 +102,7 @@ describe('TriageOutcomeService Unit Tests', () => {
     ).rejects.toThrow('perfil');
   });
 
-  it('2. correctly normalizes psycho-emotional symptoms into 7 dimensions', async () => {
+  it('2. files an emotional entry under its mood category', async () => {
     const outcome = await service.processOutcome('user-1', 'prof-user-1', {
       vertical: 'emotional',
       answers: {
@@ -118,11 +116,10 @@ describe('TriageOutcomeService Unit Tests', () => {
     expect(outcome.vertical).toBe('emotional');
     expect(outcome.primaryCategory).toBe('ansiosa_agitacao');
     expect(outcome.intensityScore).toBe(2);
-    expect(outcome.careDisposition).toBe('auto_cuidado');
     expect(outcome.recommendedArticles.some((a) => a.category === 'ansiosa_agitacao')).toBe(true);
   });
 
-  it('3. strictly enforces Organic Primacy when physical symptoms accompany emotional distress (SOM-02)', async () => {
+  it('3. no organic-primacy reasoning: an emotional entry mentioning the body gets no differential note (B-09)', async () => {
     const outcome = await service.processOutcome('user-1', 'prof-user-1', {
       vertical: 'emotional',
       answers: {
@@ -133,14 +130,12 @@ describe('TriageOutcomeService Unit Tests', () => {
       narrative: 'Sinto muita ansiedade e dor muscular nas costas',
     });
 
-    expect(outcome.organicPrimacyApplied).toBe(true);
-    expect(outcome.organicPrimacyNotice).toBeDefined();
-    expect(outcome.organicPrimacyNotice).toContain('Primazia Orgânica');
-    // Care disposition must not be downgraded to auto_cuidado when organic primacy is active
-    expect(outcome.careDisposition).toBe('consulta_rotina');
+    const body = JSON.stringify(outcome);
+    expect(body).not.toMatch(/organicPrimacy|Primazia|orgânica|somatiza|descartar/i);
+    expect(outcome.intensityScore).toBe(2);
   });
 
-  it('4. triggers Organic Primacy when psychosomatic dimension is directly selected', async () => {
+  it('4. the "emotions felt in the body" mood is just a category, with plain-language label', async () => {
     const outcome = await service.processOutcome('user-1', 'prof-user-1', {
       vertical: 'emotional',
       answers: {
@@ -150,12 +145,12 @@ describe('TriageOutcomeService Unit Tests', () => {
       },
     });
 
-    expect(outcome.organicPrimacyApplied).toBe(true);
     expect(outcome.primaryCategory).toBe('somatica');
+    expect(outcome.categoryLabel).toBe('Emoções sentidas no corpo');
     expect(outcome.recommendedArticles.some((a) => a.category === 'somatica')).toBe(true);
   });
 
-  it('5. maps score 5 to emergencia disposition and encrypts narrative under RLS', async () => {
+  it('5. keeps a reported 5 as-is, produces no care recommendation and encrypts the narrative', async () => {
     const outcome = await service.processOutcome('user-1', 'prof-user-1', {
       vertical: 'physical',
       answers: {
@@ -167,7 +162,7 @@ describe('TriageOutcomeService Unit Tests', () => {
     });
 
     expect(outcome.intensityScore).toBe(5);
-    expect(outcome.careDisposition).toBe('emergencia');
+    expect(outcome).not.toHaveProperty('careDisposition');
     expect(mockEncryptionService.encrypt).toHaveBeenCalledWith('Dor lombar aguda incapacitante');
     expect(mockDb.transaction).toHaveBeenCalled();
   });
@@ -247,7 +242,7 @@ describe('TriageOutcomeService Unit Tests', () => {
     }
   });
 
-  it('9. bridges cross-vertical physical symptom in emotional triage with organic primacy and associated component', async () => {
+  it('9. tags a body mention in an emotional entry and shows the same static note to everyone', async () => {
     const outcome = await service.processOutcome('user-1', 'prof-user-1', {
       vertical: 'emotional',
       answers: {
@@ -260,27 +255,23 @@ describe('TriageOutcomeService Unit Tests', () => {
 
     expect(outcome.vertical).toBe('emotional');
     expect(outcome.primaryCategory).toBe('ansiosa_agitacao');
-    expect(outcome.categoryLabel).toBe('Dimensão Ansiosa / Agitação');
-    expect(outcome.organicPrimacyApplied).toBe(true);
-    expect(outcome.organicPrimacyNotice).toContain('Primazia Orgânica');
-    expect(outcome.secondaryCategoryLabel).toBe('Cabeça e Pescoço');
-    expect(outcome.secondarySomaticMapping).toBe('Cefaleia / Desconforto crânio-cervical');
+    expect(outcome.categoryLabel).toBe('Ansiedade e agitação');
+    expect(outcome.secondaryCategoryLabel).toBe('Cabeça e pescoço');
+    expect(outcome.secondarySomaticMapping).toBe('Você registrou: Cabeça e pescoço.');
     expect(outcome.isCrossVerticalSomatic).toBe(true);
-    expect(outcome.crossVerticalContextNote).toBeDefined();
-    expect(outcome.crossVerticalContextNote).toContain('Manifestação física concorrente');
-    expect(outcome.aiClinicalConcept).toBe('cefaleia tensional / migrânea');
+    expect(outcome.crossVerticalContextNote).toBe(
+      'Você registrou sensações no corpo e nas emoções hoje. Se algum desconforto físico persistir ou piorar, converse com um profissional de saúde.',
+    );
     expect(outcome.aiMappedLayTerm).toBe('dor de cabeça');
-    expect(outcome.careDisposition).toBe('consulta_rotina');
   });
 
   describe('D-01: user-reported intensity is the only intensity source', () => {
-    const classification = (overrides: Partial<TriageClassificationResult>): TriageClassificationResult => ({
-      primaryVertical: 'emotional',
-      systemOrDimension: 'estresse_burnout',
-      urgencyScore: 4,
-      mappedLayTerm: 'estresse',
-      clinicalConcept: 'sobrecarga emocional',
-      isEmergencyCandidate: false,
+    const tags = (overrides: Partial<EntryTagResult>): EntryTagResult => ({
+      isOffTopic: false,
+      vertical: 'emotional',
+      bodyAreaOrMood: 'stress_burnout',
+      layTerm: 'estresse',
+      mentionsSelfHarm: false,
       confidence: 0.9,
       source: 'gemini',
       latencyMs: 120,
@@ -288,8 +279,8 @@ describe('TriageOutcomeService Unit Tests', () => {
     });
 
     it('10. physical vertical: cross-vertical secondaryIntensityScore equals the user intensity, not the AI score', async () => {
-      vi.spyOn(aiTriage, 'classify').mockResolvedValue(
-        classification({ primaryVertical: 'emotional', systemOrDimension: 'estresse_burnout' }),
+      vi.spyOn(aiTagging, 'tagWithMetadata').mockResolvedValue(
+        tags({ vertical: 'emotional', bodyAreaOrMood: 'stress_burnout' }),
       );
 
       const outcome = await service.processOutcome('user-1', 'prof-user-1', {
@@ -304,8 +295,8 @@ describe('TriageOutcomeService Unit Tests', () => {
     });
 
     it('11. emotional vertical: cross-vertical secondaryIntensityScore equals the user intensity, not the AI score', async () => {
-      vi.spyOn(aiTriage, 'classify').mockResolvedValue(
-        classification({ primaryVertical: 'physical', systemOrDimension: 'cabeca_pescoco' }),
+      vi.spyOn(aiTagging, 'tagWithMetadata').mockResolvedValue(
+        tags({ vertical: 'physical', bodyAreaOrMood: 'head_neck' }),
       );
 
       const outcome = await service.processOutcome('user-1', 'prof-user-1', {
@@ -318,13 +309,9 @@ describe('TriageOutcomeService Unit Tests', () => {
       expect(outcome.secondaryIntensityScore).toBe(2);
     });
 
-    it('12. emergency gate is unchanged and does not inflate intensity', async () => {
-      vi.spyOn(aiTriage, 'classify').mockResolvedValue(
-        classification({
-          primaryVertical: 'physical',
-          systemOrDimension: 'cardiovascular',
-          isEmergencyCandidate: true,
-        }),
+    it('12. a self-harm mention in the narrative changes nothing in the summary: no urgency output', async () => {
+      vi.spyOn(aiTagging, 'tagWithMetadata').mockResolvedValue(
+        tags({ vertical: 'physical', bodyAreaOrMood: 'cardiovascular_chest', mentionsSelfHarm: true }),
       );
 
       const outcome = await service.processOutcome('user-1', 'prof-user-1', {
@@ -333,22 +320,112 @@ describe('TriageOutcomeService Unit Tests', () => {
         narrative: 'dor no peito forte',
       });
 
-      expect(outcome.careDisposition).toBe('emergencia');
       expect(outcome.intensityScore).toBe(2);
+      expect(outcome).not.toHaveProperty('careDisposition');
+      expect(outcome).not.toHaveProperty('isEmergencyCandidate');
     });
 
-    it('13. normal triage selection yields auto_cuidado, intensityScore 0 and normal health status', async () => {
+    it('13. "feeling well" selection yields intensity 0 and a plain summary', async () => {
       const outcome = await service.processOutcome('user-1', 'prof-user-1', {
         vertical: 'physical',
         answers: { 0: 'normal' },
       });
 
       expect(outcome.intensityScore).toBe(0);
-      expect(outcome.careDisposition).toBe('auto_cuidado');
       expect(outcome.primaryCategory).toBe('normal');
-      expect(outcome.categoryLabel).toBe('Estado de Saúde Normal');
-      expect(outcome.somaticMapping).toBe('Sem alterações somáticas ou queixas físicas');
-      expect(outcome.organicPrimacyApplied).toBe(false);
+      expect(outcome.categoryLabel).toBe('Sem desconforto registrado');
+      expect(outcome.somaticMapping).toBe('Você registrou que está se sentindo bem.');
+    });
+
+    it('14. labels follow the requested language', async () => {
+      const outcome = await service.processOutcome('user-1', 'prof-user-1', {
+        vertical: 'physical',
+        answers: { 1: 'membros_superiores', 2: 'comecou_hoje', 3: 'ombro_direito', 4: '3' },
+        language: 'en',
+      });
+
+      expect(outcome.categoryLabel).toBe('Arms and hands (right shoulder)');
+      expect(outcome.somaticMapping).toBe('You logged: Arms and hands (right shoulder).');
+    });
+  });
+
+  describe('B-01/B-02: nothing assessed is written', () => {
+    it('15b. stores the submitted vertical as _entryVertical in the encrypted answers', async () => {
+      const insertValues = vi.fn().mockReturnValue({
+        returning: vi.fn().mockResolvedValue([{ id: 'id-1', intensity: 2, recordedAt: new Date() }]),
+      });
+      mockDb.transaction.mockImplementation(async (callback: any) =>
+        callback({ execute: vi.fn().mockResolvedValue(true), insert: vi.fn().mockReturnValue({ values: insertValues }) }),
+      );
+
+      await service.processOutcome('user-1', 'prof-user-1', {
+        vertical: 'emotional',
+        answers: { 1: 'ansiedade', 2: 'comecou_hoje', 3: 'moderada' },
+      });
+      await service.recordDailyCheckIn('user-1', 'prof-user-1', {
+        emotionalStatus: 'goodNormal',
+        physicalStatus: 'soSo',
+      });
+      await service.recordDailyCheckIn('user-1', 'prof-user-1', {
+        emotionalStatus: 'soSo',
+        physicalStatus: 'soSo',
+      });
+
+      const stored = insertValues.mock.calls.map(([values]) =>
+        JSON.parse(values.stepAnswers.replace('encrypted:', '')),
+      );
+      expect(stored[0]).toMatchObject({ 1: 'ansiedade', _entryVertical: 'emotional' });
+      expect(stored[1]).toMatchObject({ _entryVertical: 'physical' });
+      expect(stored[2]).not.toHaveProperty('_entryVertical');
+    });
+
+    it('15. the entry insert never writes disposition or organic_primacy_applied', async () => {
+      const insertValues = vi.fn().mockReturnValue({
+        returning: vi.fn().mockResolvedValue([{ id: 'id-1', intensity: 4, recordedAt: new Date() }]),
+      });
+      mockDb.transaction.mockImplementation(async (callback: any) =>
+        callback({ execute: vi.fn().mockResolvedValue(true), insert: vi.fn().mockReturnValue({ values: insertValues }) }),
+      );
+
+      await service.processOutcome('user-1', 'prof-user-1', {
+        vertical: 'physical',
+        answers: { 1: 'cabeca', 2: 'comecou_hoje', 3: '5' },
+        narrative: 'dor de cabeça',
+      });
+      await service.recordDailyCheckIn('user-1', 'prof-user-1', {
+        emotionalStatus: 'badSick',
+        physicalStatus: 'badSick',
+      });
+
+      for (const [values] of insertValues.mock.calls) {
+        expect(values).not.toHaveProperty('disposition');
+        expect(values).not.toHaveProperty('organicPrimacyApplied');
+      }
+    });
+
+    it('16. quick check-in stores only the declared state, with no inferred intensity or disposition', async () => {
+      const insertValues = vi.fn().mockReturnValue({
+        returning: vi.fn().mockResolvedValue([{ id: 'id-2', intensity: 0, recordedAt: new Date() }]),
+      });
+      mockDb.transaction.mockImplementation(async (callback: any) =>
+        callback({ execute: vi.fn().mockResolvedValue(true), insert: vi.fn().mockReturnValue({ values: insertValues }) }),
+      );
+
+      const result = await service.recordDailyCheckIn('user-1', 'prof-user-1', {
+        emotionalStatus: 'badSick',
+        physicalStatus: 'soSo',
+      });
+
+      const [values] = insertValues.mock.calls[0];
+      expect(values.intensity).toBe(0);
+      expect(JSON.parse(values.stepAnswers.replace('encrypted:', ''))).toMatchObject({
+        type: 'daily_checkin',
+        emotionalStatus: 'badSick',
+        physicalStatus: 'soSo',
+      });
+      expect(result).not.toHaveProperty('disposition');
+      expect(result).not.toHaveProperty('intensity');
+      expect(result).toMatchObject({ emotionalStatus: 'badSick', physicalStatus: 'soSo' });
     });
   });
 });

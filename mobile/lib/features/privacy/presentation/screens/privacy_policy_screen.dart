@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
@@ -10,6 +11,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
@@ -17,7 +19,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
         elevation: 0,
         scrolledUnderElevation: 1,
         title: Text(
-          'Política de Privacidade (LGPD)',
+          l10n.privacyPolicyAppBarTitle,
           style: GoogleFonts.plusJakartaSans(
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -60,7 +62,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Política de Privacidade & Proteção de Dados',
+                      l10n.privacyPolicyHeaderTitle,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -69,7 +71,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018)',
+                      l10n.privacyPolicyHeaderSubtitle,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         color: AppColors.clinicalTealDark,
@@ -78,7 +80,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                     ),
                     const Divider(height: 24),
                     Text(
-                      'A sua privacidade e a confidencialidade dos seus dados clínicos são a nossa prioridade absoluta. Esta política descreve como tratamos, protegemos e permitimos que você controle integralmente suas informações de saúde.',
+                      l10n.privacyPolicyIntro,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         color: AppColors.textSecondaryLight,
@@ -98,7 +100,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'Encarregado de Dados (DPO): dpo@dualischeckup.com',
+                              l10n.privacyPolicyDpoLine,
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -116,89 +118,98 @@ class PrivacyPolicyScreen extends StatelessWidget {
 
               // Section 1
               _PrivacySectionCard(
-                title: '1. Dados Pessoais e Sensíveis Coletados',
+                title: l10n.privacyPolicySection1Title,
                 icon: Icons.folder_shared_outlined,
                 color: AppColors.clinicalTeal,
-                content:
-                  'Nos termos do Artigo 11 da LGPD, o tratamento de dados pessoais sensíveis de saúde é realizado com o seu consentimento livre, informado e inequívoco:',
-                bullets: const [
-                  'Dados de Identificação: Nome completo, endereço de e-mail e data de nascimento.',
-                  'Dados Biométricos & Fisiológicos: Sexo biológico e consumo de água para calibragem de metas preventivas.',
-                  'Histórico Clínico Subjetivo: Queixas e intensidade de sintomas físicos em 12 sistemas corporais e estado emocional em 7 dimensões.',
-                  'Dados de Acesso Técnico: Endereço IP mascarado, registros criptográficos de sessão e tokens de autenticação transitórios.',
+                content: l10n.privacyPolicySection1Body,
+                bullets: [
+                  l10n.privacyPolicySection1Bullet1,
+                  l10n.privacyPolicySection1Bullet2,
+                  l10n.privacyPolicySection1Bullet3,
+                  l10n.privacyPolicySection1Bullet4,
                 ],
               ),
               const SizedBox(height: 16),
 
-              // Section 2
+              // Section 2: purposes (L-04)
               _PrivacySectionCard(
-                title: '2. Finalidade e Proibição de Venda de Dados',
+                title: l10n.privacyPolicySection2Title,
                 icon: Icons.health_and_safety_outlined,
                 color: AppColors.softIndigo,
-                content:
-                  'Todos os dados clínicos coletados têm finalidade preventiva e de autogestão de saúde:',
-                bullets: const [
-                  'Compromisso Ético: É expressamente PROIBIDA a venda, comercialização ou cessão onerosa dos seus dados para corretoras de seguros, anunciantes ou terceiros.',
-                  'Estratificação Preventiva: Análise de sintomas e orientações de autocuidado sem emissão de prescrições.',
-                  'Garantia Antiburla: Manutenção de cadeia de integridade criptográfica temporal (14 dias) para prevenção de adulterações históricas.',
+                content: l10n.privacyPolicySection2Body,
+                bullets: [
+                  l10n.privacyPolicySection2Bullet1,
+                  l10n.privacyPolicySection2Bullet2,
+                  l10n.privacyPolicySection2Bullet3,
+                  l10n.privacyPolicySection2Bullet4,
                 ],
               ),
               const SizedBox(height: 16),
 
-              // Section 3
+              // Section 3: processors and international transfer (LGPD Art. 33)
               _PrivacySectionCard(
-                title: '3. Pagamentos e Proteção PCI-DSS',
-                icon: Icons.lock_clock_outlined,
+                title: l10n.privacyPolicySection3Title,
+                icon: Icons.public_outlined,
                 color: AppColors.clinicalTealDark,
-                content:
-                  'A infraestrutura de pagamentos adota isolamento de dados de cartões:',
-                bullets: const [
-                  'Processamento Tokenizado: Os pagamentos são intermediados por gateways com certificação PCI-DSS Nível 1.',
-                  'Zero Armazenamento: Os servidores da DualisCheckUp NÃO recebem, não processam e não salvam números de cartão de crédito ou códigos CVV.',
+                content: l10n.privacyPolicySection3Body,
+                bullets: [
+                  l10n.privacyPolicySection3Bullet1,
+                  l10n.privacyPolicySection3Bullet2,
+                  l10n.privacyPolicySection3Bullet3,
                 ],
               ),
               const SizedBox(height: 16),
 
               // Section 4
               _PrivacySectionCard(
-                title: '4. Seus Direitos como Titular (Art. 18 da LGPD)',
-                icon: Icons.shield_moon_outlined,
-                color: AppColors.clinicalTeal,
-                content:
-                  'Você pode exercer seus direitos legais diretamente pelo aplicativo de forma instantânea:',
-                bullets: const [
-                  'Exportação de Dados: Baixe todo o seu prontuário em formato estruturado (JSON) com um clique na Central de Privacidade.',
-                  'Exclusão Definitiva: Solicite a exclusão irrevogável da sua conta e de todos os dados clínicos associados.',
-                  'Revogação do Consentimento: Encerre o uso e retire a autorização a qualquer momento.',
+                title: l10n.privacyPolicySection4Title,
+                icon: Icons.lock_clock_outlined,
+                color: AppColors.clinicalTealDark,
+                content: l10n.privacyPolicySection4Body,
+                bullets: [
+                  l10n.privacyPolicySection4Bullet1,
+                  l10n.privacyPolicySection4Bullet2,
                 ],
               ),
               const SizedBox(height: 16),
 
               // Section 5
               _PrivacySectionCard(
-                title: '5. Segurança da Informação & Resposta a Incidentes',
-                icon: Icons.security_rounded,
-                color: AppColors.softIndigo,
-                content:
-                  'Medidas técnicas de ponta a ponta protegem seus registros:',
-                bullets: const [
-                  'Isolamento RLS: Cada consulta ao banco PostgreSQL é blindada pela política de Row-Level Security com chave de usuário isolada.',
-                  'Criptografia Forte: Conexões TLS 1.3 obrigatórias e senhas protegidas pelo algoritmo Argon2id.',
-                  'Plano de Notificação em até 72h: Protocolo de comunicação imediata à Autoridade Nacional de Proteção de Dados (ANPD) e aos usuários em qualquer evento relevante de segurança (LGPD Art. 48).',
+                title: l10n.privacyPolicySection5Title,
+                icon: Icons.shield_moon_outlined,
+                color: AppColors.clinicalTeal,
+                content: l10n.privacyPolicySection5Body,
+                bullets: [
+                  l10n.privacyPolicySection5Bullet1,
+                  l10n.privacyPolicySection5Bullet2,
+                  l10n.privacyPolicySection5Bullet3,
                 ],
               ),
               const SizedBox(height: 16),
 
               // Section 6
               _PrivacySectionCard(
-                title: '6. Notificações, Comunicações e Opt-Out',
+                title: l10n.privacyPolicySection6Title,
+                icon: Icons.security_rounded,
+                color: AppColors.softIndigo,
+                content: l10n.privacyPolicySection6Body,
+                bullets: [
+                  l10n.privacyPolicySection6Bullet1,
+                  l10n.privacyPolicySection6Bullet2,
+                  l10n.privacyPolicySection6Bullet3,
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Section 7
+              _PrivacySectionCard(
+                title: l10n.privacyPolicySection7Title,
                 icon: Icons.notifications_none_rounded,
                 color: AppColors.textPrimaryLight,
-                content:
-                  'Respeitamos a sua tranquilidade e atenção:',
-                bullets: const [
-                  'Você tem liberdade total para desativar lembretes de hidratação ou notificações de dicas de bem-estar na aba de Configurações a qualquer momento.',
-                  'Avisos de segurança e recuperação de conta são de natureza estritamente transacional e protegidos.',
+                content: l10n.privacyPolicySection7Body,
+                bullets: [
+                  l10n.privacyPolicySection7Bullet1,
+                  l10n.privacyPolicySection7Bullet2,
                 ],
               ),
               const SizedBox(height: 24),
@@ -215,7 +226,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      'Deseja exportar seus dados ou gerenciar sua conta agora?',
+                      l10n.privacyPolicyCtaQuestion,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
@@ -234,7 +245,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                       ),
                       onPressed: () => context.push(RoutePaths.privacyCenter),
                       icon: const Icon(Icons.settings_suggest_rounded, size: 18),
-                      label: const Text('Ir para a Central de Privacidade'),
+                      label: Text(l10n.privacyPolicyCtaButton),
                     ),
                   ],
                 ),

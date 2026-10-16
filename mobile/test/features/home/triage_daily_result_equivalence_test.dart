@@ -8,6 +8,9 @@ import 'package:dualis_mobile/features/home/presentation/widgets/today_triage_re
 import 'package:dualis_mobile/features/triage_outcome/domain/triage_outcome_models.dart';
 import 'package:dualis_mobile/features/triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import 'package:dualis_mobile/features/triage_outcome/presentation/screens/triage_outcome_screen.dart';
+import 'package:dualis_mobile/features/triage_outcome/presentation/widgets/article_card.dart';
+import 'package:dualis_mobile/features/triage_outcome/presentation/widgets/dual_axis_static_note.dart';
+import 'package:dualis_mobile/features/triage_outcome/presentation/widgets/wellness_guidance_block.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 Widget createDualEquivalenceWrapper({
@@ -63,17 +66,15 @@ TriageOutcome createBaseMockOutcome({
   String id = 'out-base',
   String vertical = 'physical',
   int intensityScore = 2,
-  CareDisposition careDisposition = CareDisposition.selfCare,
   String primaryCategory = 'cabeca_pescoco',
-  String categoryLabel = 'Cabeça e Pescoço',
-  String somaticMapping = 'Cefaleia / Desconforto crânio-cervical',
-  bool organicPrimacyApplied = false,
-  String? organicPrimacyNotice,
+  String categoryLabel = 'Cabeça e pescoço',
+  String somaticMapping = 'Dor de cabeça e tensão no pescoço',
+  bool loggedBothAxesToday = false,
   String? secondaryCategoryLabel,
   String? secondarySomaticMapping,
   int? secondaryIntensityScore,
   String? aiMappedLayTerm,
-  String? aiClinicalConcept,
+  String? aiBodyAreaOrMood,
   String? aiSource,
   bool isCrossVerticalSomatic = false,
   String? crossVerticalContextNote,
@@ -84,17 +85,15 @@ TriageOutcome createBaseMockOutcome({
     id: id,
     vertical: vertical,
     intensityScore: intensityScore,
-    careDisposition: careDisposition,
     primaryCategory: primaryCategory,
     categoryLabel: categoryLabel,
     somaticMapping: somaticMapping,
-    organicPrimacyApplied: organicPrimacyApplied,
-    organicPrimacyNotice: organicPrimacyNotice,
+    loggedBothAxesToday: loggedBothAxesToday,
     secondaryCategoryLabel: secondaryCategoryLabel,
     secondarySomaticMapping: secondarySomaticMapping,
     secondaryIntensityScore: secondaryIntensityScore,
     aiMappedLayTerm: aiMappedLayTerm,
-    aiClinicalConcept: aiClinicalConcept,
+    aiBodyAreaOrMood: aiBodyAreaOrMood,
     aiSource: aiSource,
     isCrossVerticalSomatic: isCrossVerticalSomatic,
     crossVerticalContextNote: crossVerticalContextNote,
@@ -104,8 +103,8 @@ TriageOutcome createBaseMockOutcome({
             id: 'art-1',
             title: 'Prevenção de Cefaleias Tensionais',
             category: 'cabeca_pescoco',
-            author: 'Dr. Silva',
-            authorRole: 'Neurologista',
+            author: 'Sociedade Brasileira de Cefaleia',
+            authorRole: 'Fonte',
             readTimeMinutes: 4,
             summary: 'Orientações para alívio de cefaleias',
             url: 'https://sbcefaleia.com.br/noticias.php?id=350',
@@ -115,19 +114,35 @@ TriageOutcome createBaseMockOutcome({
   );
 }
 
+final AppLocalizations _pt = lookupAppLocalizations(const Locale('pt'));
+
+/// Care recommendations that existed before the wellness repositioning. None
+/// of them may appear anywhere now.
+const List<String> _removedDispositionLabels = [
+  'Auto-cuidado Monitorado',
+  'Consulta de Rotina',
+  'Pronto Atendimento (24h)',
+  'Atendimento de Emergência',
+];
+
+void _expectStaticGuidanceOnly(WidgetTester tester) {
+  expect(find.byType(WellnessGuidanceBlock), findsOneWidget);
+  expect(find.text(_pt.outcomeStaticGuidance), findsOneWidget);
+  for (final label in _removedDispositionLabels) {
+    expect(find.text(label), findsNothing, reason: '"$label" is a care recommendation');
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('Triage Outcome vs Daily Result Equivalence Battery (35 Tests)', () {
+  group('Triage Outcome vs Daily Result Equivalence Battery (36 Tests)', () {
     // -------------------------------------------------------------
-    // BLOCK 1: INTENSITY SCORE PARITY (Tests 1 to 5)
+    // BLOCK 1: SELF-REPORTED INTENSITY PARITY (Tests 1 to 5)
     // -------------------------------------------------------------
-    testWidgets('1. Level 1 intensity score is identical in both screens',
+    testWidgets('1. Self-reported intensity 1 is shown identically in both screens',
         (WidgetTester tester) async {
-      final outcome = createBaseMockOutcome(
-        intensityScore: 1,
-        careDisposition: CareDisposition.selfCare,
-      );
+      final outcome = createBaseMockOutcome(intensityScore: 1);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TodayTriageResultTab(onGoToCheckIn: () {}),
@@ -135,7 +150,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
       expect(find.text('1 / 5'), findsOneWidget);
-      expect(find.text('Leve / Mínimo'), findsOneWidget);
+      expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
@@ -143,15 +158,12 @@ void main() {
       ));
       await tester.pumpAndSettle();
       expect(find.text('1 / 5'), findsOneWidget);
-      expect(find.text('Leve / Mínimo'), findsOneWidget);
+      expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
     });
 
-    testWidgets('2. Level 2 intensity score is identical in both screens',
+    testWidgets('2. Self-reported intensity 2 is shown identically in both screens',
         (WidgetTester tester) async {
-      final outcome = createBaseMockOutcome(
-        intensityScore: 2,
-        careDisposition: CareDisposition.selfCare,
-      );
+      final outcome = createBaseMockOutcome(intensityScore: 2);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TodayTriageResultTab(onGoToCheckIn: () {}),
@@ -159,7 +171,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
       expect(find.text('2 / 5'), findsOneWidget);
-      expect(find.text('Moderado Baixo'), findsOneWidget);
+      expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
@@ -167,15 +179,12 @@ void main() {
       ));
       await tester.pumpAndSettle();
       expect(find.text('2 / 5'), findsOneWidget);
-      expect(find.text('Moderado Baixo'), findsOneWidget);
+      expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
     });
 
-    testWidgets('3. Level 3 intensity score is identical in both screens',
+    testWidgets('3. Self-reported intensity 3 is shown identically in both screens',
         (WidgetTester tester) async {
-      final outcome = createBaseMockOutcome(
-        intensityScore: 3,
-        careDisposition: CareDisposition.routineConsultation,
-      );
+      final outcome = createBaseMockOutcome(intensityScore: 3);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TodayTriageResultTab(onGoToCheckIn: () {}),
@@ -183,7 +192,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
       expect(find.text('3 / 5'), findsOneWidget);
-      expect(find.text('Moderado / Atenção'), findsOneWidget);
+      expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
@@ -191,15 +200,12 @@ void main() {
       ));
       await tester.pumpAndSettle();
       expect(find.text('3 / 5'), findsOneWidget);
-      expect(find.text('Moderado / Atenção'), findsOneWidget);
+      expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
     });
 
-    testWidgets('4. Level 4 intensity score is identical in both screens',
+    testWidgets('4. Self-reported intensity 4 is shown identically in both screens',
         (WidgetTester tester) async {
-      final outcome = createBaseMockOutcome(
-        intensityScore: 4,
-        careDisposition: CareDisposition.urgentCare,
-      );
+      final outcome = createBaseMockOutcome(intensityScore: 4);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TodayTriageResultTab(onGoToCheckIn: () {}),
@@ -207,7 +213,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
       expect(find.text('4 / 5'), findsOneWidget);
-      expect(find.text('Significativo / Agudo'), findsOneWidget);
+      expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
@@ -215,15 +221,12 @@ void main() {
       ));
       await tester.pumpAndSettle();
       expect(find.text('4 / 5'), findsOneWidget);
-      expect(find.text('Significativo / Agudo'), findsOneWidget);
+      expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
     });
 
-    testWidgets('5. Level 5 intensity score is identical in both screens',
+    testWidgets('5. Self-reported intensity 5 is shown identically in both screens',
         (WidgetTester tester) async {
-      final outcome = createBaseMockOutcome(
-        intensityScore: 5,
-        careDisposition: CareDisposition.emergency,
-      );
+      final outcome = createBaseMockOutcome(intensityScore: 5);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TodayTriageResultTab(onGoToCheckIn: () {}),
@@ -231,7 +234,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
       expect(find.text('5 / 5'), findsOneWidget);
-      expect(find.text('Crítico / Alerta'), findsOneWidget);
+      expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
@@ -239,98 +242,88 @@ void main() {
       ));
       await tester.pumpAndSettle();
       expect(find.text('5 / 5'), findsOneWidget);
-      expect(find.text('Crítico / Alerta'), findsOneWidget);
+      expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
     });
 
     // -------------------------------------------------------------
-    // BLOCK 2: CARE DISPOSITION PARITY (Tests 6 to 9)
+    // BLOCK 2: STATIC GUIDANCE, SAME FOR EVERYONE (Tests 6 to 9)
+    // The care recommendation (self-care / routine / urgent / emergency) was
+    // removed on purpose: every intensity shows the same static block.
     // -------------------------------------------------------------
-    testWidgets('6. Self-care disposition is identical in both screens',
+    testWidgets('6. Intensity 1: same static guidance block and no care recommendation on both screens',
         (WidgetTester tester) async {
-      final outcome = createBaseMockOutcome(
-        careDisposition: CareDisposition.selfCare,
-        intensityScore: 1,
-      );
+      final outcome = createBaseMockOutcome(intensityScore: 1);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TodayTriageResultTab(onGoToCheckIn: () {}),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Auto-cuidado Monitorado'), findsOneWidget);
+      _expectStaticGuidanceOnly(tester);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Auto-cuidado Monitorado'), findsOneWidget);
+      _expectStaticGuidanceOnly(tester);
     });
 
-    testWidgets('7. Routine consultation disposition is identical in both screens',
+    testWidgets('7. Intensity 3: same static guidance block and no care recommendation on both screens',
         (WidgetTester tester) async {
-      final outcome = createBaseMockOutcome(
-        careDisposition: CareDisposition.routineConsultation,
-        intensityScore: 3,
-      );
+      final outcome = createBaseMockOutcome(intensityScore: 3);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TodayTriageResultTab(onGoToCheckIn: () {}),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Consulta de Rotina'), findsOneWidget);
+      _expectStaticGuidanceOnly(tester);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Consulta de Rotina'), findsOneWidget);
+      _expectStaticGuidanceOnly(tester);
     });
 
-    testWidgets('8. Urgent care disposition is identical in both screens',
+    testWidgets('8. Intensity 4: same static guidance block and no care recommendation on both screens',
         (WidgetTester tester) async {
-      final outcome = createBaseMockOutcome(
-        careDisposition: CareDisposition.urgentCare,
-        intensityScore: 4,
-      );
+      final outcome = createBaseMockOutcome(intensityScore: 4);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TodayTriageResultTab(onGoToCheckIn: () {}),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Pronto Atendimento (24h)'), findsOneWidget);
+      _expectStaticGuidanceOnly(tester);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Pronto Atendimento (24h)'), findsOneWidget);
+      _expectStaticGuidanceOnly(tester);
     });
 
-    testWidgets('9. Emergency disposition is identical in both screens',
+    testWidgets('9. Intensity 5: same static guidance block and no care recommendation on both screens',
         (WidgetTester tester) async {
-      final outcome = createBaseMockOutcome(
-        careDisposition: CareDisposition.emergency,
-        intensityScore: 5,
-      );
+      final outcome = createBaseMockOutcome(intensityScore: 5);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TodayTriageResultTab(onGoToCheckIn: () {}),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Atendimento de Emergência'), findsOneWidget);
+      _expectStaticGuidanceOnly(tester);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Atendimento de Emergência'), findsOneWidget);
+      _expectStaticGuidanceOnly(tester);
     });
 
     // -------------------------------------------------------------
@@ -340,8 +333,8 @@ void main() {
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
         primaryCategory: 'cabeca_pescoco',
-        categoryLabel: 'Cabeça e Pescoço',
-        somaticMapping: 'Cefaleia / Desconforto crânio-cervical',
+        categoryLabel: 'Cabeça e pescoço',
+        somaticMapping: 'Dor de cabeça e tensão no pescoço',
       );
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
@@ -349,24 +342,24 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Cabeça e Pescoço'), findsOneWidget);
-      expect(find.text('Cefaleia / Desconforto crânio-cervical'), findsOneWidget);
+      expect(find.text('Cabeça e pescoço'), findsOneWidget);
+      expect(find.text('Dor de cabeça e tensão no pescoço'), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Cabeça e Pescoço'), findsOneWidget);
-      expect(find.text('Cefaleia / Desconforto crânio-cervical'), findsOneWidget);
+      expect(find.text('Cabeça e pescoço'), findsOneWidget);
+      expect(find.text('Dor de cabeça e tensão no pescoço'), findsOneWidget);
     });
 
-    testWidgets('11. Cardiovascular e Tórax category and somatic description match',
+    testWidgets('11. Peito category and somatic description match',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
         primaryCategory: 'cardiovascular_torax',
-        categoryLabel: 'Cardiovascular e Tórax',
-        somaticMapping: 'Sensação de aperto torácico funcional / Palpitações',
+        categoryLabel: 'Peito',
+        somaticMapping: 'Aperto no peito e coração acelerado',
       );
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
@@ -374,24 +367,24 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Cardiovascular e Tórax'), findsOneWidget);
-      expect(find.text('Sensação de aperto torácico funcional / Palpitações'), findsOneWidget);
+      expect(find.text('Peito'), findsOneWidget);
+      expect(find.text('Aperto no peito e coração acelerado'), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Cardiovascular e Tórax'), findsOneWidget);
-      expect(find.text('Sensação de aperto torácico funcional / Palpitações'), findsOneWidget);
+      expect(find.text('Peito'), findsOneWidget);
+      expect(find.text('Aperto no peito e coração acelerado'), findsOneWidget);
     });
 
-    testWidgets('12. Coluna e Dor Lombar category and somatic description match',
+    testWidgets('12. Costas category and somatic description match',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
         primaryCategory: 'coluna_dor_lombar',
-        categoryLabel: 'Coluna e Dor Lombar',
-        somaticMapping: 'Desconforto na coluna / Lombalgia tensional',
+        categoryLabel: 'Costas',
+        somaticMapping: 'Dor nas costas ao sentar',
       );
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
@@ -399,24 +392,24 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Coluna e Dor Lombar'), findsOneWidget);
-      expect(find.text('Desconforto na coluna / Lombalgia tensional'), findsOneWidget);
+      expect(find.text('Costas'), findsOneWidget);
+      expect(find.text('Dor nas costas ao sentar'), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Coluna e Dor Lombar'), findsOneWidget);
-      expect(find.text('Desconforto na coluna / Lombalgia tensional'), findsOneWidget);
+      expect(find.text('Costas'), findsOneWidget);
+      expect(find.text('Dor nas costas ao sentar'), findsOneWidget);
     });
 
-    testWidgets('13. Dermatológico category and somatic description match',
+    testWidgets('13. Pele category and somatic description match',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
         primaryCategory: 'dermatologico',
-        categoryLabel: 'Dermatológico / Pele',
-        somaticMapping: 'Prurido cutâneo / Desconforto na pele',
+        categoryLabel: 'Pele',
+        somaticMapping: 'Coceira e incômodo na pele',
       );
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
@@ -424,24 +417,24 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Dermatológico / Pele'), findsOneWidget);
-      expect(find.text('Prurido cutâneo / Desconforto na pele'), findsOneWidget);
+      expect(find.text('Pele'), findsOneWidget);
+      expect(find.text('Coceira e incômodo na pele'), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Dermatológico / Pele'), findsOneWidget);
-      expect(find.text('Prurido cutâneo / Desconforto na pele'), findsOneWidget);
+      expect(find.text('Pele'), findsOneWidget);
+      expect(find.text('Coceira e incômodo na pele'), findsOneWidget);
     });
 
-    testWidgets('14. Membros Superiores category and somatic description match',
+    testWidgets('14. Braços e mãos category and somatic description match',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
         primaryCategory: 'membros_superiores',
-        categoryLabel: 'Membros Superiores e Articulações',
-        somaticMapping: 'Desconforto musculoesquelético nos braços e ombros',
+        categoryLabel: 'Braços e mãos',
+        somaticMapping: 'Dor nos braços e ombros',
       );
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
@@ -449,28 +442,28 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Membros Superiores e Articulações'), findsOneWidget);
-      expect(find.text('Desconforto musculoesquelético nos braços e ombros'), findsOneWidget);
+      expect(find.text('Braços e mãos'), findsOneWidget);
+      expect(find.text('Dor nos braços e ombros'), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Membros Superiores e Articulações'), findsOneWidget);
-      expect(find.text('Desconforto musculoesquelético nos braços e ombros'), findsOneWidget);
+      expect(find.text('Braços e mãos'), findsOneWidget);
+      expect(find.text('Dor nos braços e ombros'), findsOneWidget);
     });
 
     // -------------------------------------------------------------
     // BLOCK 4: PSYCHO-EMOTIONAL DIMENSIONS (Tests 15 to 18)
     // -------------------------------------------------------------
-    testWidgets('15. Dimensão Ansiosa / Agitação matches in both screens',
+    testWidgets('15. Ansiedade e agitação matches in both screens',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
         vertical: 'emotional',
         primaryCategory: 'ansiosa_agitacao',
-        categoryLabel: 'Dimensão Ansiosa / Agitação',
-        somaticMapping: 'Tensão psicomotora / Ansiedade antecipatória',
+        categoryLabel: 'Ansiedade e agitação',
+        somaticMapping: 'Inquietação e preocupação',
       );
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
@@ -478,25 +471,25 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Dimensão Ansiosa / Agitação'), findsOneWidget);
-      expect(find.text('Tensão psicomotora / Ansiedade antecipatória'), findsOneWidget);
+      expect(find.text('Ansiedade e agitação'), findsOneWidget);
+      expect(find.text('Inquietação e preocupação'), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Dimensão Ansiosa / Agitação'), findsOneWidget);
-      expect(find.text('Tensão psicomotora / Ansiedade antecipatória'), findsOneWidget);
+      expect(find.text('Ansiedade e agitação'), findsOneWidget);
+      expect(find.text('Inquietação e preocupação'), findsOneWidget);
     });
 
-    testWidgets('16. Dimensão Depressiva / Desânimo matches in both screens',
+    testWidgets('16. Pra baixo matches in both screens',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
         vertical: 'emotional',
         primaryCategory: 'depressiva_desanimo',
-        categoryLabel: 'Dimensão Depressiva / Desânimo',
-        somaticMapping: 'Desânimo / Fadiga emocional transitória',
+        categoryLabel: 'Pra baixo',
+        somaticMapping: 'Desânimo e pouca energia',
       );
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
@@ -504,25 +497,25 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Dimensão Depressiva / Desânimo'), findsOneWidget);
-      expect(find.text('Desânimo / Fadiga emocional transitória'), findsOneWidget);
+      expect(find.text('Pra baixo'), findsOneWidget);
+      expect(find.text('Desânimo e pouca energia'), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Dimensão Depressiva / Desânimo'), findsOneWidget);
-      expect(find.text('Desânimo / Fadiga emocional transitória'), findsOneWidget);
+      expect(find.text('Pra baixo'), findsOneWidget);
+      expect(find.text('Desânimo e pouca energia'), findsOneWidget);
     });
 
-    testWidgets('17. Estresse e Burnout matches in both screens',
+    testWidgets('17. Estressado(a) ou esgotado(a) matches in both screens',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
         vertical: 'emotional',
         primaryCategory: 'estresse_burnout',
-        categoryLabel: 'Estresse e Burnout',
-        somaticMapping: 'Exaustão emocional / Sobrecarga de estresse',
+        categoryLabel: 'Estressado(a) ou esgotado(a)',
+        somaticMapping: 'Cansaço e sobrecarga',
       );
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
@@ -530,25 +523,25 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Estresse e Burnout'), findsOneWidget);
-      expect(find.text('Exaustão emocional / Sobrecarga de estresse'), findsOneWidget);
+      expect(find.text('Estressado(a) ou esgotado(a)'), findsOneWidget);
+      expect(find.text('Cansaço e sobrecarga'), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Estresse e Burnout'), findsOneWidget);
-      expect(find.text('Exaustão emocional / Sobrecarga de estresse'), findsOneWidget);
+      expect(find.text('Estressado(a) ou esgotado(a)'), findsOneWidget);
+      expect(find.text('Cansaço e sobrecarga'), findsOneWidget);
     });
 
-    testWidgets('18. Cognição e Foco matches in both screens',
+    testWidgets('18. Cansaço mental e foco matches in both screens',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
         vertical: 'emotional',
         primaryCategory: 'cognitiva_foco',
-        categoryLabel: 'Cognição e Foco',
-        somaticMapping: 'Fadiga mental / Névoa cognitiva e dispersão',
+        categoryLabel: 'Cansaço mental e foco',
+        somaticMapping: 'Dificuldade de concentração',
       );
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
@@ -556,14 +549,14 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Cognição e Foco'), findsOneWidget);
+      expect(find.text('Cansaço mental e foco'), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Cognição e Foco'), findsOneWidget);
+      expect(find.text('Cansaço mental e foco'), findsOneWidget);
     });
 
     // -------------------------------------------------------------
@@ -573,9 +566,9 @@ void main() {
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
         primaryCategory: 'cabeca_pescoco',
-        categoryLabel: 'Cabeça e Pescoço',
-        secondaryCategoryLabel: 'Estresse e Burnout',
-        secondarySomaticMapping: 'Sobrecarga de estresse associada',
+        categoryLabel: 'Cabeça e pescoço',
+        secondaryCategoryLabel: 'Estressado(a) ou esgotado(a)',
+        secondarySomaticMapping: 'Cansaço e sobrecarga no dia',
       );
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
@@ -584,23 +577,23 @@ void main() {
       ));
       await tester.pumpAndSettle();
       expect(find.text('2. Eixo Avaliação Psico-emocional'), findsOneWidget);
-      expect(find.text('Estresse e Burnout'), findsOneWidget);
+      expect(find.text('Estressado(a) ou esgotado(a)'), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Estresse e Burnout'), findsOneWidget);
+      expect(find.text('Estressado(a) ou esgotado(a)'), findsOneWidget);
     });
 
     testWidgets('20. Secondary somatic mapping matches in both screens',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
         primaryCategory: 'cabeca_pescoco',
-        categoryLabel: 'Cabeça e Pescoço',
-        secondaryCategoryLabel: 'Dimensão Ansiosa / Agitação',
-        secondarySomaticMapping: 'Tensão psicomotora / Ansiedade antecipatória',
+        categoryLabel: 'Cabeça e pescoço',
+        secondaryCategoryLabel: 'Ansiedade e agitação',
+        secondarySomaticMapping: 'Inquietação e preocupação',
       );
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
@@ -608,14 +601,14 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Tensão psicomotora / Ansiedade antecipatória'), findsOneWidget);
+      expect(find.text('Inquietação e preocupação'), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Tensão psicomotora / Ansiedade antecipatória'), findsOneWidget);
+      expect(find.text('Inquietação e preocupação'), findsOneWidget);
     });
 
     testWidgets('21. Dual triage without secondary component renders cleanly on both',
@@ -641,44 +634,38 @@ void main() {
     });
 
     // -------------------------------------------------------------
-    // BLOCK 6: ORGANIC PRIMACY NOTICE & BANNER (Tests 22 to 24)
+    // BLOCK 6: DUAL-AXIS STATIC NOTE (Tests 22 to 24)
+    // Replaces the removed "organic primacy" reasoning with a static note.
     // -------------------------------------------------------------
-    testWidgets('22. Organic Primacy banner is displayed on both screens when applied',
+    testWidgets('22. Static dual-axis note is shown on both screens when both axes were logged',
         (WidgetTester tester) async {
-      const noticeText =
-          'Atenção Clínica (Primazia Orgânica): Sintomas físicos concorrentes exigem avaliação médica presencial.';
-      final outcome = createBaseMockOutcome(
-        organicPrimacyApplied: true,
-        organicPrimacyNotice: noticeText,
-      );
+      final outcome = createBaseMockOutcome(loggedBothAxesToday: true);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TodayTriageResultTab(onGoToCheckIn: () {}),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text(noticeText), findsOneWidget);
+      expect(find.byType(DualAxisStaticNote), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text(noticeText), findsOneWidget);
+      expect(find.byType(DualAxisStaticNote), findsOneWidget);
     });
 
-    testWidgets('23. Organic Primacy banner is absent on both when not applied',
+    testWidgets('23. Dual-axis note is absent on both when only one axis was logged',
         (WidgetTester tester) async {
-      final outcome = createBaseMockOutcome(
-        organicPrimacyApplied: false,
-        organicPrimacyNotice: null,
-      );
+      final outcome = createBaseMockOutcome(loggedBothAxesToday: false);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TodayTriageResultTab(onGoToCheckIn: () {}),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
+      expect(find.byType(DualAxisStaticNote), findsNothing);
       expect(find.textContaining('Primazia Orgânica'), findsNothing);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
@@ -686,40 +673,39 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
+      expect(find.byType(DualAxisStaticNote), findsNothing);
       expect(find.textContaining('Primazia Orgânica'), findsNothing);
     });
 
-    testWidgets('24. Organic primacy notice text matches character-for-character',
+    testWidgets('24. Dual-axis note text is the same static copy on both screens',
         (WidgetTester tester) async {
-      const exactNotice = 'Nota clínica de teste para validação de primazia orgânica.';
-      final outcome = createBaseMockOutcome(
-        organicPrimacyApplied: true,
-        organicPrimacyNotice: exactNotice,
-      );
+      final outcome = createBaseMockOutcome(loggedBothAxesToday: true);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TodayTriageResultTab(onGoToCheckIn: () {}),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text(exactNotice), findsOneWidget);
+      expect(find.text(_pt.outcomeDualAxisNote), findsOneWidget);
+      expect(find.textContaining(RegExp('orgânica|somatiza', caseSensitive: false)), findsNothing);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text(exactNotice), findsOneWidget);
+      expect(find.text(_pt.outcomeDualAxisNote), findsOneWidget);
+      expect(find.textContaining(RegExp('orgânica|somatiza', caseSensitive: false)), findsNothing);
     });
 
     // -------------------------------------------------------------
-    // BLOCK 7: AI CLINICAL INSIGHT CARD (Tests 25 to 27)
+    // BLOCK 7: "HOW WE ORGANISED YOUR NOTE" CARD (Tests 25 to 27)
     // -------------------------------------------------------------
-    testWidgets('25. AiInsightCard clinical concept renders on both screens',
+    testWidgets('25. AI card shows the lay term the person used on both screens',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
-        aiClinicalConcept: 'Cefaleia Tensional Episódica',
         aiMappedLayTerm: 'dor de cabeça latejante',
+        aiBodyAreaOrMood: 'Cabeça',
         aiSource: 'gemini',
       );
 
@@ -728,21 +714,21 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Cefaleia Tensional Episódica'), findsOneWidget);
+      expect(find.text(_pt.outcomeAiInsightLayTerm('dor de cabeça latejante')), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Cefaleia Tensional Episódica'), findsOneWidget);
+      expect(find.text(_pt.outcomeAiInsightLayTerm('dor de cabeça latejante')), findsOneWidget);
     });
 
-    testWidgets('26. AiInsightCard lay term and source render on both screens',
+    testWidgets('26. AI card title and area render on both screens, never clinical wording',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
-        aiClinicalConcept: 'Lombalgia Mecânica',
         aiMappedLayTerm: 'dor nas costas ao sentar',
+        aiBodyAreaOrMood: 'Costas',
         aiSource: 'gemini',
       );
 
@@ -751,34 +737,36 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Lombalgia Mecânica'), findsOneWidget);
-      expect(find.text('Informação Clínica Complementar'), findsOneWidget);
-
-      await tester.pumpWidget(createDualEquivalenceWrapper(
-        child: TriageOutcomeScreen(outcome: outcome),
-        outcome: outcome,
-      ));
-      await tester.pumpAndSettle();
-      expect(find.text('Lombalgia Mecânica'), findsOneWidget);
-      expect(find.text('Informação Clínica Complementar'), findsOneWidget);
-    });
-
-    testWidgets('27. AiInsightCard is omitted on both screens when clinicalConcept is null',
-        (WidgetTester tester) async {
-      final outcome = createBaseMockOutcome(
-        aiClinicalConcept: null,
-        aiMappedLayTerm: null,
-      );
-
-      await tester.pumpWidget(createDualEquivalenceWrapper(
-        child: TodayTriageResultTab(onGoToCheckIn: () {}),
-        outcome: outcome,
-      ));
-      await tester.pumpAndSettle();
+      expect(find.text(_pt.outcomeAiInsightTitle), findsOneWidget);
+      expect(find.text(_pt.outcomeAiInsightArea('Costas')), findsOneWidget);
       expect(find.text('Informação Clínica Complementar'), findsNothing);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
+        outcome: outcome,
+      ));
+      await tester.pumpAndSettle();
+      expect(find.text(_pt.outcomeAiInsightTitle), findsOneWidget);
+      expect(find.text(_pt.outcomeAiInsightArea('Costas')), findsOneWidget);
+      expect(find.text('Informação Clínica Complementar'), findsNothing);
+    });
+
+    testWidgets('27. AI card is omitted on the outcome screen when there are no AI tags',
+        (WidgetTester tester) async {
+      final outcome = createBaseMockOutcome(
+        aiMappedLayTerm: null,
+        aiBodyAreaOrMood: null,
+      );
+
+      await tester.pumpWidget(createDualEquivalenceWrapper(
+        child: TriageOutcomeScreen(outcome: outcome),
+        outcome: outcome,
+      ));
+      await tester.pumpAndSettle();
+      expect(find.text(_pt.outcomeAiInsightTitle), findsNothing);
+
+      await tester.pumpWidget(createDualEquivalenceWrapper(
+        child: TodayTriageResultTab(onGoToCheckIn: () {}),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
@@ -795,8 +783,8 @@ void main() {
           id: 'art-coluna',
           title: 'Guia de Saúde da Coluna Lombar',
           category: 'coluna',
-          author: 'Dra. Santos',
-          authorRole: 'Ortopedista',
+          author: 'Ministério da Saúde',
+          authorRole: 'Fonte',
           readTimeMinutes: 5,
           summary: 'Cuidados para a coluna lombar',
           url: 'https://exemplo.com/coluna',
@@ -828,8 +816,8 @@ void main() {
           id: 'art-ansiedade',
           title: 'Artigo Um: Respiração Consciente',
           category: 'ansiedade',
-          author: 'Dra. Costa',
-          authorRole: 'Psicóloga',
+          author: 'Ministério da Saúde',
+          authorRole: 'Fonte',
           readTimeMinutes: 3,
           summary: 'Técnicas de respiração',
           url: 'https://exemplo.com/1',
@@ -838,8 +826,8 @@ void main() {
           id: 'art-sono',
           title: 'Artigo Dois: Higiene do Sono',
           category: 'sono',
-          author: 'Dr. Lima',
-          authorRole: 'Médico do Sono',
+          author: 'Associação Brasileira do Sono',
+          authorRole: 'Fonte',
           readTimeMinutes: 4,
           summary: 'Orientações para sono reparador',
           url: 'https://exemplo.com/2',
@@ -866,11 +854,11 @@ void main() {
       expect(find.text('Artigo Dois: Higiene do Sono'), findsOneWidget);
     });
 
-    testWidgets('30. Fallback curated catalog produces matching articles on both',
+    testWidgets('30. Empty article list: Today tab falls back to the general catalog, outcome screen shows the empty state',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
         primaryCategory: 'cabeca_pescoco',
-        recommendedArticles: const [], // empty list forces fallback catalog
+        recommendedArticles: const [], // empty list
       );
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
@@ -878,14 +866,16 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.textContaining('Cefaleia'), findsWidgets);
+      expect(find.text(_pt.outcomeWellnessReadingsTitle), findsOneWidget);
+      expect(find.byType(ArticleCard), findsWidgets);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.textContaining('Cefaleia'), findsWidgets);
+      expect(find.text(_pt.outcomeWellnessReadingsTitle), findsOneWidget);
+      expect(find.text(_pt.outcomeArticlesEmpty), findsOneWidget);
     });
 
     // -------------------------------------------------------------
@@ -898,9 +888,8 @@ void main() {
 
       final mockOutcome = createBaseMockOutcome(
         intensityScore: 4,
-        careDisposition: CareDisposition.urgentCare,
         primaryCategory: 'cardiovascular_torax',
-        categoryLabel: 'Cardiovascular e Tórax',
+        categoryLabel: 'Peito',
         aiMappedLayTerm: 'aperto no peito',
       );
 
@@ -923,23 +912,21 @@ void main() {
       final initialOutcome = createBaseMockOutcome(
         id: 'triage-1',
         intensityScore: 2,
-        careDisposition: CareDisposition.selfCare,
-        categoryLabel: 'Cabeça e Pescoço',
+        categoryLabel: 'Cabeça e pescoço',
       );
 
       container.read(triageOutcomeProvider.notifier).setOutcome(initialOutcome);
       container.read(triggerCheckInProvider.notifier).markCompletedWithOutcome(initialOutcome);
 
       expect(container.read(triageOutcomeProvider).outcome?.intensityScore, 2);
-      expect(container.read(triageOutcomeProvider).outcome?.categoryLabel, 'Cabeça e Pescoço');
+      expect(container.read(triageOutcomeProvider).outcome?.categoryLabel, 'Cabeça e pescoço');
 
       // User updates triage to severe cardiovascular
       final updatedOutcome = createBaseMockOutcome(
         id: 'triage-2',
         intensityScore: 4,
-        careDisposition: CareDisposition.urgentCare,
         primaryCategory: 'cardiovascular_torax',
-        categoryLabel: 'Cardiovascular e Tórax',
+        categoryLabel: 'Peito',
       );
 
       container.read(triageOutcomeProvider.notifier).setOutcome(updatedOutcome);
@@ -948,8 +935,7 @@ void main() {
       final activeOutcome = container.read(triageOutcomeProvider).outcome;
       expect(activeOutcome?.id, 'triage-2');
       expect(activeOutcome?.intensityScore, 4);
-      expect(activeOutcome?.categoryLabel, 'Cardiovascular e Tórax');
-      expect(activeOutcome?.careDisposition, CareDisposition.urgentCare);
+      expect(activeOutcome?.categoryLabel, 'Peito');
 
       // Calling markCompletedToday does not overwrite activeOutcome with generic check-in
       container.read(triggerCheckInProvider.notifier).markCompletedToday();
@@ -965,26 +951,26 @@ void main() {
       final physicalOutcome = createBaseMockOutcome(
         vertical: 'physical',
         primaryCategory: 'dermatologico',
-        categoryLabel: 'Dermatológico / Pele',
+        categoryLabel: 'Pele',
       );
       container.read(triageOutcomeProvider.notifier).setOutcome(physicalOutcome);
       container.read(triggerCheckInProvider.notifier).markCompletedWithOutcome(physicalOutcome);
 
-      expect(container.read(triageOutcomeProvider).outcome?.categoryLabel, 'Dermatológico / Pele');
+      expect(container.read(triageOutcomeProvider).outcome?.categoryLabel, 'Pele');
 
       final emotionalOutcome = createBaseMockOutcome(
         vertical: 'emotional',
         primaryCategory: 'estresse_burnout',
-        categoryLabel: 'Estresse e Burnout',
+        categoryLabel: 'Estressado(a) ou esgotado(a)',
       );
       container.read(triageOutcomeProvider.notifier).setOutcome(emotionalOutcome);
       container.read(triggerCheckInProvider.notifier).markCompletedWithOutcome(emotionalOutcome);
 
-      expect(container.read(triageOutcomeProvider).outcome?.categoryLabel, 'Estresse e Burnout');
+      expect(container.read(triageOutcomeProvider).outcome?.categoryLabel, 'Estressado(a) ou esgotado(a)');
       expect(container.read(triggerCheckInProvider).isCompletedToday, isTrue);
     });
 
-    testWidgets('34. prepareForUpdate is triggered when tapping Atualizar Triagem de Hoje',
+    testWidgets('34. prepareForUpdate is triggered when tapping Atualizar registro de hoje',
         (WidgetTester tester) async {
       bool calledGoToCheckIn = false;
       final outcome = createBaseMockOutcome(intensityScore: 3);
@@ -1034,39 +1020,38 @@ void main() {
         id: 'round-trip-test',
         vertical: 'physical',
         intensityScore: 3,
-        careDisposition: CareDisposition.routineConsultation,
         primaryCategory: 'respiratorio',
-        categoryLabel: 'Sistema Respiratório',
-        somaticMapping: 'Desconforto respiratório funcional',
-        organicPrimacyApplied: true,
-        organicPrimacyNotice: 'Nota de primazia para round-trip',
-        secondaryCategoryLabel: 'Estresse e Burnout',
-        secondarySomaticMapping: 'Sobrecarga de estresse',
+        categoryLabel: 'Respiração',
+        somaticMapping: 'Falta de ar ao subir escadas',
+        loggedBothAxesToday: true,
+        secondaryCategoryLabel: 'Estressado(a) ou esgotado(a)',
+        secondarySomaticMapping: 'Cansaço e sobrecarga',
         secondaryIntensityScore: 3,
-        aiClinicalConcept: 'Broncoespasmo Funcional Leve',
         aiMappedLayTerm: 'falta de ar ao cansar',
+        aiBodyAreaOrMood: 'Respiração',
         aiSource: 'gemini',
         isCrossVerticalSomatic: true,
         crossVerticalContextNote: 'Nota de contexto cruzado',
       );
 
       final json = original.toJson();
+      for (final removed in ['careDisposition', 'organicPrimacyApplied', 'organicPrimacyNotice', 'aiClinicalConcept', 'urgencyScore', 'isEmergencyCandidate']) {
+        expect(json.containsKey(removed), isFalse, reason: '$removed was removed from the contract');
+      }
       final restored = TriageOutcome.fromJson(json);
 
       expect(restored.id, original.id);
       expect(restored.vertical, original.vertical);
       expect(restored.intensityScore, original.intensityScore);
-      expect(restored.careDisposition, original.careDisposition);
       expect(restored.primaryCategory, original.primaryCategory);
       expect(restored.categoryLabel, original.categoryLabel);
       expect(restored.somaticMapping, original.somaticMapping);
-      expect(restored.organicPrimacyApplied, original.organicPrimacyApplied);
-      expect(restored.organicPrimacyNotice, original.organicPrimacyNotice);
+      expect(restored.loggedBothAxesToday, original.loggedBothAxesToday);
       expect(restored.secondaryCategoryLabel, original.secondaryCategoryLabel);
       expect(restored.secondarySomaticMapping, original.secondarySomaticMapping);
       expect(restored.secondaryIntensityScore, original.secondaryIntensityScore);
-      expect(restored.aiClinicalConcept, original.aiClinicalConcept);
       expect(restored.aiMappedLayTerm, original.aiMappedLayTerm);
+      expect(restored.aiBodyAreaOrMood, original.aiBodyAreaOrMood);
       expect(restored.aiSource, original.aiSource);
       expect(restored.isCrossVerticalSomatic, original.isCrossVerticalSomatic);
       expect(restored.crossVerticalContextNote, original.crossVerticalContextNote);
@@ -1074,20 +1059,18 @@ void main() {
       expect(restored.recordedAt.toIso8601String(), original.recordedAt.toIso8601String());
     });
 
-    testWidgets(
-        '36. AiInsightCard renders Manifestação Somática Concomitante and crossVerticalContextNote when isCrossVerticalSomatic is true on both screens',
+    testWidgets('36. Legacy cross-vertical somatic note is never rendered on either screen',
         (WidgetTester tester) async {
+      const legacyNote = 'A cefaleia foi identificada como manifestação somática concomitante à tensão psicomotora.';
       final outcome = createBaseMockOutcome(
         vertical: 'emotional',
-        primaryCategory: 'ansiedade_agitacao',
-        categoryLabel: 'Dimensão Ansiosa / Agitação',
-        somaticMapping: 'Ansiedade antecipatória / Tensão psicomotora',
-        aiClinicalConcept: 'cefaleia tensional / migrânea',
+        primaryCategory: 'ansiosa_agitacao',
+        categoryLabel: 'Ansiedade e agitação',
+        somaticMapping: 'Inquietação e preocupação',
         aiMappedLayTerm: 'dor de cabeça',
         aiSource: 'gemini',
         isCrossVerticalSomatic: true,
-        crossVerticalContextNote:
-            'A cefaleia foi identificada como manifestação somática concomitante à tensão psicomotora.',
+        crossVerticalContextNote: legacyNote,
       );
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
@@ -1095,26 +1078,16 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Manifestação Somática Concomitante'), findsOneWidget);
-      expect(
-        find.text(
-            'A cefaleia foi identificada como manifestação somática concomitante à tensão psicomotora.'),
-        findsOneWidget,
-      );
-      expect(find.text('Sintoma físico relatado no check-in'), findsOneWidget);
+      expect(find.text('Manifestação Somática Concomitante'), findsNothing);
+      expect(find.text(legacyNote), findsNothing);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Manifestação Somática Concomitante'), findsOneWidget);
-      expect(
-        find.text(
-            'A cefaleia foi identificada como manifestação somática concomitante à tensão psicomotora.'),
-        findsOneWidget,
-      );
-      expect(find.text('Sintoma físico relatado no check-in'), findsOneWidget);
+      expect(find.text('Manifestação Somática Concomitante'), findsNothing);
+      expect(find.text(legacyNote), findsNothing);
     });
   });
 }

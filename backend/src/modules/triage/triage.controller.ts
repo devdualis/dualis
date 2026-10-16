@@ -36,7 +36,8 @@ import { TriageOutcomeService } from './services/triage-outcome.service';
 import { AntiburlaService } from './services/antiburla.service';
 import { TriageHistoryService } from './services/triage-history.service';
 
-@Controller({ path: 'triage', version: '1' })
+// `journal` is the current prefix; `triage` stays as an alias for published app versions.
+@Controller({ path: ['journal', 'triage'], version: '1' })
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
 export class TriageController {
   constructor(
@@ -90,7 +91,7 @@ export class TriageController {
     return this.triageOutcomeService.recordDailyCheckIn(userId, profile.profileId, dto);
   }
 
-  @Post('antiburla-check')
+  @Post(['recurrence-check', 'antiburla-check'])
   @HttpCode(HttpStatus.OK)
   @ProfileAccess('read')
   @UseGuards(JwtAuthGuard, ProfileContextGuard)

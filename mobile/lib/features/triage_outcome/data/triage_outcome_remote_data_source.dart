@@ -74,38 +74,31 @@ class TriageOutcomeRemoteDataSource {
     String? narrative, {
     String? language,
   }) {
+    final lang = (language ?? 'pt').toLowerCase();
     final isZeroIndexed = answers.containsKey(0);
     final step1 = (isZeroIndexed ? answers[0] : answers[1]) ?? '';
     final lowerStep1 = step1.toLowerCase();
 
     if (lowerStep1 == 'normal' || lowerStep1 == 'bem_normal') {
-      final lang = (language ?? 'pt').toLowerCase();
-      final String normalCategoryLabel;
-      final String normalSomaticDesc;
-      if (lang == 'es') {
-        normalCategoryLabel = 'Estado de Salud Normal';
-        normalSomaticDesc = 'Sin quejas clínicas reportadas. Estado de salud y bienestar preservado.';
-      } else if (lang == 'en') {
-        normalCategoryLabel = 'Normal Health Status';
-        normalSomaticDesc = 'No clinical complaints reported. Preserved health and well-being status.';
-      } else {
-        normalCategoryLabel = 'Estado de Saúde Normal';
-        normalSomaticDesc = 'Sem queixas clínicas relatadas. Estado de saúde e bem-estar preservado.';
-      }
       return TriageOutcome(
         id: 'fallback-normal-${DateTime.now().millisecondsSinceEpoch}',
         vertical: vertical,
         intensityScore: 0,
-        careDisposition: CareDisposition.selfCare,
         primaryCategory: 'normal',
-        categoryLabel: normalCategoryLabel,
-        somaticMapping: normalSomaticDesc,
-        organicPrimacyApplied: false,
+        categoryLabel: _t(lang, pt: 'Tudo bem hoje', en: 'Feeling well today', es: 'Todo bien hoy'),
+        somaticMapping: _t(
+          lang,
+          pt: 'Você indicou que está bem hoje.',
+          en: 'You said you are feeling well today.',
+          es: 'Indicaste que hoy te sientes bien.',
+        ),
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
       );
     }
 
+    // Intensity is exactly what the person reported in step 3; it is never
+    // interpreted or escalated here.
     final step3 = answers[3] ?? (isZeroIndexed ? answers[2] : answers[3]) ?? '2';
 
     int score = 2;
@@ -122,272 +115,201 @@ class TriageOutcomeRemoteDataSource {
       }
     }
 
-    final somaticKeywords = [
-      'peito',
-      'coraç',
-      'ar',
-      'respir',
-      'garganta',
-      'estômago',
-      'nó',
-      'aperto',
-      'cabeça',
-      'cabeca',
-      'costas',
-      'dor',
-    ];
-    final isSomatic = vertical == 'emotional' &&
-        (step1 == 'somatico' ||
-            (narrative != null &&
-                somaticKeywords.any((kw) => narrative.toLowerCase().contains(kw))));
+    final savedOffline = _t(
+      lang,
+      pt: 'Registro salvo no aparelho; será sincronizado.',
+      en: 'Entry saved on this device; it will sync later.',
+      es: 'Registro guardado en el dispositivo; se sincronizará.',
+    );
 
-    CareDisposition disposition;
-    if (score <= 2) {
-      disposition = CareDisposition.selfCare;
-    } else if (score == 3) {
-      disposition = CareDisposition.routineConsultation;
-    } else if (score == 4) {
-      disposition = CareDisposition.urgentCare;
-    } else {
-      disposition = CareDisposition.emergency;
-    }
-
-    if (isSomatic && disposition == CareDisposition.selfCare) {
-      disposition = CareDisposition.routineConsultation;
-    }
-
-    final lang = (language ?? 'pt').toLowerCase();
-    String categoryLabel;
-    String somaticDesc;
-
-    if (lang == 'es') {
-      categoryLabel = vertical == 'physical' ? 'Evaluación Física' : 'Autoevaluación Psicoemocional';
-      somaticDesc = 'Evaluación clínica preliminar en modo fuera de línea';
-    } else if (lang == 'en') {
-      categoryLabel = vertical == 'physical' ? 'Physical Assessment' : 'Psycho-Emotional Assessment';
-      somaticDesc = 'Preliminary clinical assessment in offline mode';
-    } else {
-      categoryLabel = vertical == 'physical' ? 'Avaliação Física' : 'Autoavaliação Psico-Emocional';
-      somaticDesc = 'Avaliação clínica preliminar em modo desconectado';
-    }
-
+    String categoryLabel = vertical == 'physical'
+        ? _t(lang, pt: 'Registro físico', en: 'Physical entry', es: 'Registro físico')
+        : _t(lang, pt: 'Registro emocional', en: 'Emotional entry', es: 'Registro emocional');
     List<RecommendedArticle> articles;
+
     final lowerNarrative = (narrative ?? '').toLowerCase();
     final matchTarget = '$lowerStep1 $lowerNarrative';
+    final mentionsBack = matchTarget.contains('costas') || matchTarget.contains('coluna') || matchTarget.contains('lombar') || matchTarget.contains('espalda') || matchTarget.contains('back');
+    final mentionsHead = matchTarget.contains('cabeca') || matchTarget.contains('cabeça') || matchTarget.contains('cabeza') || matchTarget.contains('head') || matchTarget.contains('migraine') || matchTarget.contains('enxaqueca') || matchTarget.contains('cefaleia');
 
-    if (matchTarget.contains('costas') || matchTarget.contains('coluna') || matchTarget.contains('lombar') || matchTarget.contains('espalda') || matchTarget.contains('back')) {
-      if (lang == 'es') {
-        categoryLabel = 'Columna y Dolor Dorsal';
-        somaticDesc = 'Dolor lumbar / Tensión paravertebral postural';
-        articles = const [
-          RecommendedArticle(
-            id: 'art-coluna-01-es',
-            title: 'Dolor Lumbar y Ergonomía Postural',
+    if (mentionsBack) {
+      categoryLabel = _t(lang, pt: 'Costas', en: 'Back', es: 'Espalda');
+      articles = [
+        _t(
+          lang,
+          pt: const RecommendedArticle(
+            id: 'art-coluna-01',
+            title: 'Ergonomia no Trabalho e Cuidados com a Coluna',
             category: 'coluna_dor_dorsal',
-            author: 'Dr. Marcelo Mendes',
-            authorRole: 'Ortopedista y Traumatólogo',
+            author: 'Sociedade Brasileira de Ortopedia e Traumatologia',
+            authorRole: 'Fonte',
             readTimeMinutes: 5,
-            summary: 'Higiene postural, pausas activas y desmitificación del reposo prolongado en cama.',
-            url: 'https://medlineplus.gov/spanish/backpain.html',
+            summary: 'Posturas no dia a dia, pausas ativas a cada 50 minutos e alongamentos simples para as costas.',
+            url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
           ),
-        ];
-      } else if (lang == 'en') {
-        categoryLabel = 'Spine & Back Pain';
-        somaticDesc = 'Low back pain / Postural paravertebral strain';
-        articles = const [
-          RecommendedArticle(
+          en: const RecommendedArticle(
             id: 'art-coluna-01-en',
             title: 'Back Pain and Lumbar Strain: Posture and Ergonomics',
             category: 'coluna_dor_dorsal',
-            author: 'Dr. Marcelo Mendes',
-            authorRole: 'Orthopedic Spine Surgeon',
+            author: 'MedlinePlus (U.S. National Library of Medicine)',
+            authorRole: 'Source',
             readTimeMinutes: 5,
-            summary: 'Postural ergonomics, active breaks for desk workers, and avoiding prolonged bed rest.',
+            summary: 'Posture at your desk, active breaks during the day and gentle movement for your back.',
             url: 'https://medlineplus.gov/backpain.html',
           ),
-        ];
-      } else {
-        categoryLabel = 'Coluna e Dor Dorsal';
-        somaticDesc = 'Dor lombar / Tensão paravertebral postural (modo desconectado)';
-        articles = const [
-          RecommendedArticle(
-            id: 'art-coluna-01',
-            title: 'Ergonomia no Trabalho e Prevenção de Dores Lombares e Cervicais',
+          es: const RecommendedArticle(
+            id: 'art-coluna-01-es',
+            title: 'Dolor Lumbar y Ergonomía Postural',
             category: 'coluna_dor_dorsal',
-            author: 'Dr. Marcelo Mendes',
-            authorRole: 'Ortopedista e Traumatologista (HCFMUSP / CRM-SP 128.450)',
+            author: 'MedlinePlus (Biblioteca Nacional de Medicina de EE. UU.)',
+            authorRole: 'Fuente',
             readTimeMinutes: 5,
-            summary: 'Posturas preventivas, pausas ativas a cada 50 minutos e exercícios de descompressão da coluna lombar.',
-            url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
+            summary: 'Postura en el trabajo, pausas activas durante el día y movimiento suave para la espalda.',
+            url: 'https://medlineplus.gov/spanish/backpain.html',
           ),
-        ];
-      }
-    } else if (matchTarget.contains('cabeca') || matchTarget.contains('cabeza') || matchTarget.contains('head') || matchTarget.contains('migraine') || matchTarget.contains('enxaqueca') || matchTarget.contains('cefaleia')) {
-      if (lang == 'es') {
-        categoryLabel = 'Cabeza y Cuello';
-        somaticDesc = 'Cefalea / Tensión craneocervical';
-        articles = const [
-          RecommendedArticle(
-            id: 'art-cabeca-01-es',
-            title: 'Dolor de Cabeza y Migraña: Cuidados Iniciales',
-            category: 'cabeca_pescoco',
-            author: 'Dr. Fernando Siqueira',
-            authorRole: 'Neurólogo Clínico',
-            readTimeMinutes: 4,
-            summary: 'Identificación de cefalea tensional y migraña pulsátil con pautas de descanso.',
-            url: 'https://medlineplus.gov/spanish/headache.html',
-          ),
-        ];
-      } else if (lang == 'en') {
-        categoryLabel = 'Head & Neck';
-        somaticDesc = 'Headache / Cranio-cervical discomfort';
-        articles = const [
-          RecommendedArticle(
-            id: 'art-cabeca-01-en',
-            title: 'Headaches and Migraines: Initial Care Guide',
-            category: 'cabeca_pescoco',
-            author: 'Dr. Fernando Siqueira',
-            authorRole: 'Consultant Clinical Neurologist',
-            readTimeMinutes: 4,
-            summary: 'Distinguishing tension headaches from pulsating migraines with hydration and rest.',
-            url: 'https://medlineplus.gov/headache.html',
-          ),
-        ];
-      } else {
-        categoryLabel = 'Cabeça e Pescoço';
-        somaticDesc = 'Cefaleia / Desconforto crânio-cervical (modo desconectado)';
-        articles = const [
-          RecommendedArticle(
+        ),
+      ];
+    } else if (mentionsHead) {
+      categoryLabel = _t(lang, pt: 'Cabeça e pescoço', en: 'Head and neck', es: 'Cabeza y cuello');
+      articles = [
+        _t(
+          lang,
+          pt: const RecommendedArticle(
             id: 'art-cabeca-01',
-            title: 'Cefaleia Tensional vs. Enxaqueca: Como Identificar os Primeiros Sinais',
+            title: 'Dor de Cabeça no Dia a Dia: Informações Gerais',
             category: 'cabeca_pescoco',
-            author: 'Dr. Thiago Albuquerque',
-            authorRole: 'Neurologista Clínico (UNIFESP / CRM-SP 156.702)',
+            author: 'Sociedade Brasileira de Cefaleia',
+            authorRole: 'Fonte',
             readTimeMinutes: 4,
-            summary: 'Diferenciação prática entre dores de cabeça causadas por tensão muscular e crises de enxaqueca pulsátil.',
+            summary: 'Hábitos de descanso, hidratação e postura que costumam ajudar em dias de dor de cabeça.',
             url: 'https://sbcefaleia.com.br/noticias.php?id=350',
           ),
-        ];
-      }
-    } else if (matchTarget.contains('peito') || matchTarget.contains('pecho') || matchTarget.contains('chest') || matchTarget.contains('coracao') || matchTarget.contains('heart') || matchTarget.contains('palpitac')) {
-      if (lang == 'es') {
-        categoryLabel = 'Cardiovascular y Tórax';
-        somaticDesc = 'Palpitaciones / Tensión torácica funcional';
-        articles = const [
-          RecommendedArticle(
-            id: 'art-cardio-01-es',
-            title: 'Palpitaciones y Taquicardia: Comprendiendo los Latidos Rápidos',
-            category: 'cardiovascular_torax',
-            author: 'Dra. Beatriz Silva',
-            authorRole: 'Cardióloga Clínica',
+          en: const RecommendedArticle(
+            id: 'art-cabeca-01-en',
+            title: 'Headaches: General Self-Care Guide',
+            category: 'cabeca_pescoco',
+            author: 'MedlinePlus (U.S. National Library of Medicine)',
+            authorRole: 'Source',
             readTimeMinutes: 4,
-            summary: 'Pautas sobre palpitaciones por estrés y cuándo acudir a valoración cardiológica.',
-            url: 'https://medlineplus.gov/spanish/heartpalpitations.html',
+            summary: 'Rest, hydration and posture habits that often help on headache days.',
+            url: 'https://medlineplus.gov/headache.html',
           ),
-        ];
-      } else if (lang == 'en') {
-        categoryLabel = 'Cardiovascular & Thorax';
-        somaticDesc = 'Palpitations / Functional chest tightness';
-        articles = const [
-          RecommendedArticle(
+          es: const RecommendedArticle(
+            id: 'art-cabeca-01-es',
+            title: 'Dolor de Cabeza: Guía General de Autocuidado',
+            category: 'cabeca_pescoco',
+            author: 'MedlinePlus (Biblioteca Nacional de Medicina de EE. UU.)',
+            authorRole: 'Fuente',
+            readTimeMinutes: 4,
+            summary: 'Hábitos de descanso, hidratación y postura que suelen ayudar en días con dolor de cabeza.',
+            url: 'https://medlineplus.gov/spanish/headache.html',
+          ),
+        ),
+      ];
+    } else if (matchTarget.contains('peito') || matchTarget.contains('pecho') || matchTarget.contains('chest') || matchTarget.contains('coracao') || matchTarget.contains('heart') || matchTarget.contains('palpitac')) {
+      categoryLabel = _t(lang, pt: 'Peito', en: 'Chest', es: 'Pecho');
+      articles = [
+        _t(
+          lang,
+          pt: const RecommendedArticle(
+            id: 'art-cardio-01',
+            title: 'Coração Acelerado: Informações Gerais sobre Palpitações',
+            category: 'cardiovascular_torax',
+            author: 'Portal Drauzio Varella',
+            authorRole: 'Fonte',
+            readTimeMinutes: 4,
+            summary: 'Conteúdo educativo sobre a sensação de coração acelerado e fatores comuns do dia a dia, como estresse e cafeína.',
+            url: 'https://drauziovarella.uol.com.br/entrevistas-2/arritmia-cardiaca-entrevista/',
+          ),
+          en: const RecommendedArticle(
             id: 'art-cardio-01-en',
             title: 'Heart Racing and Palpitations: Understanding Rapid Heartbeats',
             category: 'cardiovascular_torax',
-            author: 'Dr. Beatriz Silva',
-            authorRole: 'Consultant Cardiologist',
+            author: 'MedlinePlus (U.S. National Library of Medicine)',
+            authorRole: 'Source',
             readTimeMinutes: 4,
-            summary: 'Clinical guide on stress palpitations versus arrhythmias needing prompt assessment.',
+            summary: 'Educational content about a racing heart and everyday factors such as stress and caffeine.',
             url: 'https://medlineplus.gov/heartpalpitations.html',
           ),
-        ];
-      } else {
-        categoryLabel = 'Cardiovascular e Tórax';
-        somaticDesc = 'Sensação de palpitação / Tensão torácica (modo desconectado)';
-        articles = const [
-          RecommendedArticle(
-            id: 'art-cardio-01',
-            title: 'Compreendendo as Palpitações e Quando Procurar um Cardiologista',
+          es: const RecommendedArticle(
+            id: 'art-cardio-01-es',
+            title: 'Palpitaciones: Comprendiendo los Latidos Rápidos',
             category: 'cardiovascular_torax',
-            author: 'Dra. Beatriz Silva',
-            authorRole: 'Cardiologista (InCor / CRM-SP 142.890)',
+            author: 'MedlinePlus (Biblioteca Nacional de Medicina de EE. UU.)',
+            authorRole: 'Fuente',
             readTimeMinutes: 4,
-            summary: 'Guia clínico sobre diferenciação de palpitações benignas por estresse e arritmias que requerem eletrocardiograma imediato.',
-            url: 'https://drauziovarella.uol.com.br/entrevistas-2/arritmia-cardiaca-entrevista/',
+            summary: 'Contenido educativo sobre la sensación de corazón acelerado y factores cotidianos como el estrés y la cafeína.',
+            url: 'https://medlineplus.gov/spanish/heartpalpitations.html',
           ),
-        ];
-      }
+        ),
+      ];
     } else if (matchTarget.contains('estomago') || matchTarget.contains('abdomen') || matchTarget.contains('digest')) {
-      categoryLabel = 'Gastrointestinal e Abdômen';
-      somaticDesc = 'Desconforto digestivo funcional (modo desconectado)';
+      categoryLabel = _t(lang, pt: 'Barriga e digestão', en: 'Stomach and digestion', es: 'Abdomen y digestión');
       articles = const [
         RecommendedArticle(
           id: 'art-gastro-01',
-          title: 'O Eixo Intestino-Cérebro: Como o Estresse Afeta Sua Digestão',
+          title: 'Estresse e Digestão: Como um Afeta o Outro',
           category: 'gastrointestinal_abdomen',
-          author: 'Dra. Fernanda Toledo',
-          authorRole: 'Gastroenterologista (FBG / CRM-SP 139.112)',
+          author: 'Portal Drauzio Varella',
+          authorRole: 'Fonte',
           readTimeMinutes: 5,
-          summary: 'Mecanismos neuroquímicos da dispepsia funcional, gastrite nervosa e estratégias de modulação alimentar.',
+          summary: 'Conteúdo educativo sobre a relação entre estresse e desconforto digestivo, com dicas de alimentação.',
           url: 'https://drauziovarella.uol.com.br/gastroenterologia/refluxo-saiba-o-que-e-os-sintomas-e-as-formas-de-tratamento/',
         ),
       ];
     } else if (matchTarget.contains('ansiedade') || matchTarget.contains('agitacao') || matchTarget.contains('nervos')) {
-      categoryLabel = 'Dimensão Ansiosa / Agitação';
-      somaticDesc = 'Ansiedade antecipatória / Tensão psicomotora (modo desconectado)';
+      categoryLabel = _t(lang, pt: 'Nervosismo e agitação', en: 'Nervous and restless', es: 'Nervios e inquietud');
       articles = const [
         RecommendedArticle(
           id: 'art-ansiedade-01',
-          title: 'Manejo da Ansiedade Aguda com Respiração Diafragmática',
+          title: 'Respiração Diafragmática para Momentos de Nervosismo',
           category: 'ansiosa_agitacao',
-          author: 'Dra. Camila Prado',
-          authorRole: 'Psiquiatra Clínica (ABP / CRM-SP 165.340)',
+          author: 'Portal Drauzio Varella',
+          authorRole: 'Fonte',
           readTimeMinutes: 4,
-          summary: 'Exercício guiado 4-7-8 para desaceleração do sistema simpático e restabelecimento do equilíbrio vagal em minutos.',
+          summary: 'Exercício guiado de respiração 4-7-8 para desacelerar e relaxar.',
           url: 'https://drauziovarella.uol.com.br/saude-mental/transtornos-de-ansiedade-nao-sao-todos-iguais-entenda-as-caracteristicas-de-cada-tipo/',
         ),
       ];
     } else if (matchTarget.contains('tristeza') || matchTarget.contains('desanimo') || matchTarget.contains('depress')) {
-      categoryLabel = 'Dimensão Depressiva / Desânimo';
-      somaticDesc = 'Sensação de desânimo / Queda de energia psicomotora (modo desconectado)';
+      categoryLabel = _t(lang, pt: 'Pra baixo', en: 'Feeling low', es: 'Decaído(a)');
       articles = const [
         RecommendedArticle(
           id: 'art-desanimo-01',
           title: 'Ativação Comportamental: Passos para Romper o Ciclo do Desânimo',
           category: 'depressiva_desanimo',
-          author: 'Dr. Rafael Nogueira',
-          authorRole: 'Psiquiatra e Psicoterapeuta (CRM-SP 148.910)',
+          author: 'Organização Pan-Americana da Saúde (OPAS)',
+          authorRole: 'Fonte',
           readTimeMinutes: 5,
-          summary: 'Estratégias práticas para reengajar em pequenas atividades diárias e restaurar gradualmente a motivação.',
+          summary: 'Estratégias práticas para retomar pequenas atividades diárias e recuperar aos poucos a motivação.',
           url: 'https://www.paho.org/pt/topicos/depressao',
         ),
       ];
     } else if (matchTarget.contains('burnout') || matchTarget.contains('estresse') || matchTarget.contains('sobrecarga')) {
-      categoryLabel = 'Dimensão Estresse / Sobrecarga';
-      somaticDesc = 'Sobrecarga psíquica e mental (modo desconectado)';
+      categoryLabel = _t(lang, pt: 'Esgotado(a)', en: 'Worn out', es: 'Agotado(a)');
       articles = const [
         RecommendedArticle(
           id: 'art-burnout-01',
-          title: 'Prevenção da Exaustão Mental e Sobrecarga Emocional',
+          title: 'Cansaço Mental e Sobrecarga: Cuidando da Rotina',
           category: 'estresse_burnout',
-          author: 'Dr. Lucas Rossi',
-          authorRole: 'Psicólogo Clínico (CRP-06/123456)',
+          author: 'Ministério da Saúde',
+          authorRole: 'Fonte',
           readTimeMinutes: 5,
-          summary: 'Sinais precoces de esgotamento pelo trabalho e métodos de reestruturação de rotina para restauração cognitiva.',
+          summary: 'Sinais comuns de cansaço pelo trabalho e ideias para reorganizar a rotina com pausas.',
           url: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout',
         ),
       ];
     } else if (matchTarget.contains('sono') || matchTarget.contains('insonia')) {
-      categoryLabel = 'Dimensão do Sono';
-      somaticDesc = 'Irregularidade do ciclo sono-vigília (modo desconectado)';
+      categoryLabel = _t(lang, pt: 'Sono ruim', en: 'Poor sleep', es: 'Mal sueño');
       articles = const [
         RecommendedArticle(
           id: 'art-sono-01',
-          title: 'Higiene do Sono: 7 Hábitos Essenciais para uma Noite Reparadora',
+          title: 'Higiene do Sono: Hábitos para uma Noite Mais Tranquila',
           category: 'sono',
-          author: 'Dra. Helena Vasconcelos',
-          authorRole: 'Especialista em Medicina do Sono (ABMS / CRM-SP 153.220)',
+          author: 'Portal Drauzio Varella',
+          authorRole: 'Fonte',
           readTimeMinutes: 4,
-          summary: 'Protocolo de descompressão antes de deitar, controle da exposição à luz azul e ambiente ideal para repouso.',
+          summary: 'Rotina para desacelerar antes de deitar, cuidado com a luz das telas e um ambiente confortável para dormir.',
           url: 'https://drauziovarella.uol.com.br/neurologia/higiene-do-sono-conheca-11-dicas-para-dormir-melhor/',
         ),
       ];
@@ -395,12 +317,12 @@ class TriageOutcomeRemoteDataSource {
       articles = const [
         RecommendedArticle(
           id: 'art-offline-01',
-          title: 'Guia de Auto-Cuidado Preventivo e Bem-Estar Diário',
+          title: 'Guia de Autocuidado e Bem-Estar Diário',
           category: 'geral',
-          author: 'Dr. André Cavalcanti',
-          authorRole: 'Clínico Geral (SBCM / CRM-SP 134.800)',
+          author: 'Organização Pan-Americana da Saúde (OPAS)',
+          authorRole: 'Fonte',
           readTimeMinutes: 3,
-          summary: 'Práticas fundamentais de repouso preventivo e monitoramento postural e fisiológico.',
+          summary: 'Hábitos simples de hidratação, sono e pausas ao longo do dia.',
           url: 'https://www.paho.org/pt/topicos/curso-vida-saudavel',
         ),
       ];
@@ -408,58 +330,53 @@ class TriageOutcomeRemoteDataSource {
 
     String? secondaryCategoryLabel;
     String? secondarySomaticMapping;
-    String? aiClinicalConcept;
     String? aiMappedLayTerm;
     bool isCrossVerticalSomatic = false;
     String? crossVerticalContextNote;
 
-    if (vertical == 'emotional') {
-      if (matchTarget.contains('cabeca') ||
-          matchTarget.contains('cabeza') ||
-          matchTarget.contains('head') ||
-          matchTarget.contains('migraine') ||
-          matchTarget.contains('enxaqueca') ||
-          matchTarget.contains('cefaleia')) {
-        secondaryCategoryLabel = 'Cabeça e Pescoço';
-        secondarySomaticMapping = 'Cefaleia / Desconforto crânio-cervical';
-        aiClinicalConcept = 'cefaleia tensional / migrânea';
-        aiMappedLayTerm = 'dor de cabeça';
-        isCrossVerticalSomatic = true;
-        crossVerticalContextNote =
-            'Manifestação física concorrente identificada no relato. Em quadros de ansiedade e tensão psicomotora, cefaleias e dores musculares são frequentes como somatização, mas exigem avaliação clínica para descartar causas orgânicas primárias.';
-      } else if (matchTarget.contains('costas') ||
-          matchTarget.contains('coluna') ||
-          matchTarget.contains('lombar')) {
-        secondaryCategoryLabel = 'Coluna e Dor Dorsal';
-        secondarySomaticMapping = 'Dor lombar / Tensão paravertebral postural';
-        aiClinicalConcept = 'lombalgia mecânica / postural';
-        aiMappedLayTerm = 'dor nas costas';
-        isCrossVerticalSomatic = true;
-        crossVerticalContextNote =
-            'Manifestação física concorrente identificada no relato. Exige avaliação clínica para descartar causas orgânicas primárias.';
+    // Descriptive only: notes that the emotional entry also mentions a body
+    // area. No assessment or recommendation is derived from it.
+    final mentionsBackPt = matchTarget.contains('costas') || matchTarget.contains('coluna') || matchTarget.contains('lombar');
+    if (vertical == 'emotional' && (mentionsHead || mentionsBackPt)) {
+      isCrossVerticalSomatic = true;
+      crossVerticalContextNote = _t(
+        lang,
+        pt: 'Você também mencionou algo físico neste registro.',
+        en: 'You also mentioned something physical in this entry.',
+        es: 'También mencionaste algo físico en este registro.',
+      );
+      final String layTerm;
+      if (mentionsHead) {
+        secondaryCategoryLabel = _t(lang, pt: 'Cabeça e pescoço', en: 'Head and neck', es: 'Cabeza y cuello');
+        layTerm = _t(lang, pt: 'Dor de cabeça', en: 'Headache', es: 'Dolor de cabeza');
+      } else {
+        secondaryCategoryLabel = _t(lang, pt: 'Costas', en: 'Back', es: 'Espalda');
+        layTerm = _t(lang, pt: 'Dor nas costas', en: 'Back pain', es: 'Dolor de espalda');
       }
+      secondarySomaticMapping = layTerm;
+      aiMappedLayTerm = layTerm.toLowerCase();
     }
 
     return TriageOutcome(
       id: 'offline-${DateTime.now().millisecondsSinceEpoch}',
       vertical: vertical,
       intensityScore: score,
-      careDisposition: disposition,
       primaryCategory: step1,
       categoryLabel: categoryLabel,
-      somaticMapping: somaticDesc,
-      organicPrimacyApplied: isSomatic,
-      organicPrimacyNotice: isSomatic
-          ? 'Atenção Clínica (Primazia Orgânica): Sintomas físicos concorrentes exigem avaliação médica presencial prioritária.'
-          : null,
+      somaticMapping: savedOffline,
       recommendedArticles: articles,
       recordedAt: DateTime.now(),
       secondaryCategoryLabel: secondaryCategoryLabel,
       secondarySomaticMapping: secondarySomaticMapping,
-      aiClinicalConcept: aiClinicalConcept,
       aiMappedLayTerm: aiMappedLayTerm,
       isCrossVerticalSomatic: isCrossVerticalSomatic,
       crossVerticalContextNote: crossVerticalContextNote,
     );
+  }
+
+  static T _t<T>(String lang, {required T pt, required T en, required T es}) {
+    if (lang == 'es') return es;
+    if (lang == 'en') return en;
+    return pt;
   }
 }

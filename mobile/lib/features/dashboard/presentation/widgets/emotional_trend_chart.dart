@@ -18,8 +18,8 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
   static const Map<String, ({String label, Color color})> dimensionMeta = {
     'ansiosa_agitacao': (label: 'Ansiedade', color: Color(0xFF7E57C2)),
     'depressiva_desanimo': (label: 'Desânimo', color: Color(0xFF5C6BC0)),
-    'estresse_burnout': (label: 'Estresse / Burnout', color: Color(0xFFFF7043)),
-    'somatica': (label: 'Somática', color: Color(0xFF26A69A)),
+    'estresse_burnout': (label: 'Estresse', color: Color(0xFFFF7043)),
+    'somatica': (label: 'Tensão no corpo', color: Color(0xFF26A69A)),
     'sono': (label: 'Sono', color: Color(0xFF3949AB)),
     'cognitiva_foco': (label: 'Foco / Atenção', color: Color(0xFF00ACC1)),
     'autoestima': (label: 'Autoestima', color: Color(0xFFEC407A)),

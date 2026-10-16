@@ -162,7 +162,7 @@ class MockTriageHistoryDataSource implements TriageHistoryRemoteDataSource {
       logs: [],
       physicalSummary: {},
       emotionalSummary: [],
-      criticalRecurrences: [],
+      journalPatterns: [],
     );
   }
 
@@ -277,7 +277,7 @@ void main() {
       // =========================================================================
       // 1. ONBOARDING SCREEN
       // =========================================================================
-      expect(find.text('Triagem Preventiva Unificada'), findsOneWidget);
+      expect(find.text('Diário de Bem-Estar Integrado'), findsOneWidget);
       expect(find.text('Criar Conta'), findsOneWidget);
       expect(find.text('Entrar'), findsOneWidget);
 

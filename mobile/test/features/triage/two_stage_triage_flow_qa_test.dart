@@ -126,12 +126,12 @@ void main() {
 
       expect(find.text('Check-in Diário em 2 Etapas'), findsOneWidget);
       expect(find.text('Psicoemocional'), findsOneWidget);
-      expect(find.text('Avaliação Física'), findsOneWidget);
+      expect(find.text('Físico'), findsOneWidget);
 
       expect(find.byKey(const Key('start_psicoemocional_triage_button')), findsOneWidget);
       expect(find.byKey(const Key('start_fisica_triage_button')), findsOneWidget);
       expect(find.text('Iniciar Psicoemocional'), findsOneWidget);
-      expect(find.text('Iniciar Avaliação Física'), findsOneWidget);
+      expect(find.text('Iniciar Físico'), findsOneWidget);
     });
 
     testWidgets('QA 3.2: Complete Psicoemocional with optional narrative returns to Home and updates its card',
@@ -173,7 +173,7 @@ void main() {
 
       // Avaliação Física remains pending and untouched
       expect(find.byKey(const Key('start_fisica_triage_button')), findsOneWidget);
-      expect(find.text('Iniciar Avaliação Física'), findsOneWidget);
+      expect(find.text('Iniciar Físico'), findsOneWidget);
     });
 
     testWidgets('QA 3.3: Complete both stages updates both cards and shows dailyCheckInCompletedBanner',

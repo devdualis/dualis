@@ -6,7 +6,8 @@ import { EncryptionModule } from './common/encryption/encryption.module';
 import { AiCoreModule } from './common/ai/ai-core.module';
 import { LegalModule } from './modules/legal/legal.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { TriageAuditModule } from './modules/triage-audit/triage-audit.module';
+import { SafetyModule } from './modules/safety/safety.module';
+import { AppConfigModule } from './modules/app-config/app-config.module';
 import { AiModule } from './modules/ai/ai.module';
 import { TriageModule } from './modules/triage/triage.module';
 import { HydrationModule } from './modules/hydration/hydration.module';
@@ -56,7 +57,8 @@ import { ProfilesModule } from './modules/profiles/profiles.module';
     AiCoreModule,
     LegalModule,
     AuthModule,
-    TriageAuditModule,
+    SafetyModule,
+    AppConfigModule,
     AiModule,
     TriageModule,
     HydrationModule,

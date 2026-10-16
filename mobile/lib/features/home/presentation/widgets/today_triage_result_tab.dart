@@ -9,10 +9,10 @@ import '../../../triage_outcome/domain/curated_articles_catalog.dart';
 import '../../../triage_outcome/domain/triage_outcome_models.dart';
 import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import '../../../triage_outcome/presentation/widgets/article_card.dart';
-import '../../../triage_outcome/presentation/widgets/disposition_card.dart';
 import '../../../triage_outcome/presentation/widgets/intensity_meter.dart';
-import '../../../triage_outcome/presentation/widgets/organic_primacy_banner.dart';
 import '../../../triage_outcome/presentation/widgets/ai_insight_card.dart';
+import '../../../triage_outcome/presentation/widgets/wellness_guidance_block.dart';
+import '../../../triage_outcome/presentation/widgets/dual_axis_static_note.dart';
 import '../../domain/axis_intensity_resolver.dart';
 import '../../domain/trigger_checkin_state.dart';
 import '../controllers/trigger_checkin_controller.dart';
@@ -44,6 +44,7 @@ class TodayTriageResultTab extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildDayHeader(
+            context,
             dateFormatted,
             isCompletedToday,
             outcome != null,
@@ -65,11 +66,13 @@ class TodayTriageResultTab extends ConsumerWidget {
   }
 
   Widget _buildDayHeader(
+    BuildContext context,
     String dateText,
     bool isCompleted,
     bool hasOutcome, {
     required bool isTrueWellness,
   }) {
+    final l10n = AppLocalizations.of(context);
     Color badgeBgColor;
     Color badgeBorderColor;
     Color badgeTextColor;
@@ -81,7 +84,7 @@ class TodayTriageResultTab extends ConsumerWidget {
       badgeBgColor = AppColors.clinicalTeal.withValues(alpha: 0.12);
       badgeBorderColor = AppColors.clinicalTeal.withValues(alpha: 0.3);
       badgeTextColor = AppColors.clinicalTealDark;
-      badgeText = 'Triagem Concluída';
+      badgeText = l10n.todayOutcomeCompletedBadge;
       headerIcon = Icons.verified_rounded;
       headerIconColor = AppColors.clinicalTeal;
     } else if (isCompleted) {
@@ -208,13 +211,15 @@ class TodayTriageResultTab extends ConsumerWidget {
             ? outcome.categoryLabel
             : (triggerState.physicalSummary ??
                 outcome.secondaryCategoryLabel ??
-                'Avaliação Física');
+                'Registro físico');
     final physicalDescription =
         isPhysical
             ? outcome.somaticMapping
             : (triggerState.physicalNarrative ??
                 outcome.secondarySomaticMapping ??
-                'Desconforto musculoesquelético ou somático registrado.');
+                l10n.outcomeTodayYouLogged(
+                  _statusLabel(l10n, triggerState.physicalStatus),
+                ));
     final physicalIntensity = AxisIntensityResolver.resolveDisplayIntensity(
       axis: CheckInAxis.physical,
       state: triggerState,
@@ -230,15 +235,15 @@ class TodayTriageResultTab extends ConsumerWidget {
             ? outcome.categoryLabel
             : (triggerState.emotionalSummary ??
                 outcome.secondaryCategoryLabel ??
-                'Avaliação Psicoemocional');
+                'Registro emocional');
     final emotionalDescription =
         !isPhysical
             ? outcome.somaticMapping
             : (triggerState.emotionalNarrative ??
                 outcome.secondarySomaticMapping ??
-                (triggerState.emotionalStatus == TriggerStatus.soSo
-                    ? 'Sintomas de ansiedade, sobrecarga mental ou agitação psicomotora relatados.'
-                    : 'Monitoramento do bem-estar e equilíbrio emocional.'));
+                l10n.outcomeTodayYouLogged(
+                  _statusLabel(l10n, triggerState.emotionalStatus),
+                ));
     final emotionalIntensity = AxisIntensityResolver.resolveDisplayIntensity(
       axis: CheckInAxis.emotional,
       state: triggerState,
@@ -346,8 +351,8 @@ class TodayTriageResultTab extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (outcome.organicPrimacyApplied) ...[
-          OrganicPrimacyBanner(notice: outcome.organicPrimacyNotice),
+        if (outcome.loggedBothAxesToday) ...[
+          const DualAxisStaticNote(),
           const SizedBox(height: 16),
         ],
 
@@ -383,7 +388,7 @@ class TodayTriageResultTab extends ConsumerWidget {
           ),
         ] else if (isPhysical) ...[
           _buildOutcomeAxisCard(
-            axisLabel: 'Avaliação Física',
+            axisLabel: 'Registro físico',
             categoryTitle: physicalTitle,
             description: physicalDescription,
             narrative: triggerState.physicalNarrative,
@@ -395,7 +400,7 @@ class TodayTriageResultTab extends ConsumerWidget {
           ),
         ] else ...[
           _buildOutcomeAxisCard(
-            axisLabel: 'Avaliação Psicoemocional',
+            axisLabel: 'Registro emocional',
             categoryTitle: emotionalTitle,
             description: emotionalDescription,
             narrative: triggerState.emotionalNarrative,
@@ -409,24 +414,18 @@ class TodayTriageResultTab extends ConsumerWidget {
         const SizedBox(height: 16),
         IntensityMeter(score: outcome.intensityScore),
         const SizedBox(height: 16),
-        if (outcome.aiClinicalConcept != null &&
-            outcome.aiClinicalConcept!.isNotEmpty) ...[
-          AiInsightCard(
-            mappedLayTerm: outcome.aiMappedLayTerm,
-            clinicalConcept: outcome.aiClinicalConcept!,
-            source: outcome.aiSource,
-            isCrossVerticalSomatic: outcome.isCrossVerticalSomatic,
-            contextNote: outcome.crossVerticalContextNote,
-          ),
-          const SizedBox(height: 16),
-        ],
-        DispositionCard(disposition: outcome.careDisposition),
+        AiInsightCard(
+          mappedLayTerm: outcome.aiMappedLayTerm,
+          bodyAreaOrMood: outcome.aiBodyAreaOrMood ?? outcome.categoryLabel,
+        ),
+        const SizedBox(height: 16),
+        const WellnessGuidanceBlock(),
         const SizedBox(height: 24),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Artigos Sugeridos para Você',
+              l10n.outcomeWellnessReadingsTitle,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -434,7 +433,7 @@ class TodayTriageResultTab extends ConsumerWidget {
               ),
             ),
             Text(
-              '${articles.length} recomendações',
+              l10n.outcomeWellnessReadingsCount(articles.length),
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 color: AppColors.textSecondaryLight,
@@ -459,12 +458,24 @@ class TodayTriageResultTab extends ConsumerWidget {
                 onGoToCheckIn();
               },
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Atualizar Triagem de Hoje'),
+              label: Text(l10n.todayOutcomeUpdateButton),
             ),
           ),
         const SizedBox(height: 16),
       ],
     );
+  }
+
+  String _statusLabel(AppLocalizations l10n, TriggerStatus? status) {
+    switch (status) {
+      case TriggerStatus.badSick:
+        return l10n.outcomeTodayStatusBad;
+      case TriggerStatus.soSo:
+        return l10n.outcomeTodayStatusSoSo;
+      case TriggerStatus.goodNormal:
+      case null:
+        return l10n.outcomeTodayStatusGood;
+    }
   }
 
   Widget _buildOutcomeAxisCard({
@@ -480,8 +491,8 @@ class TodayTriageResultTab extends ConsumerWidget {
   }) {
     final tier =
         intensity != null
-            ? ClinicalIntensityTier.fromScore(intensity)
-            : (status?.tier ?? ClinicalIntensityTier.none);
+            ? SelfReportedIntensityBand.fromScore(intensity)
+            : (status?.tier ?? SelfReportedIntensityBand.none);
 
     return Container(
       width: double.infinity,
@@ -619,12 +630,7 @@ class TodayTriageResultTab extends ConsumerWidget {
         triggerState.physicalStatus == TriggerStatus.soSo;
 
     final calculatedScore = hasBadSick ? 4 : (hasSoSo ? 3 : 1);
-    final calculatedDisposition =
-        hasBadSick
-            ? CareDisposition.urgentCare
-            : (hasSoSo
-                ? CareDisposition.routineConsultation
-                : CareDisposition.selfCare);
+    final l10n = AppLocalizations.of(context);
 
     final articles = CuratedArticlesCatalog.getArticlesForSymptoms(
       queryText: triggerState.naturalLanguageText,
@@ -742,7 +748,7 @@ class TodayTriageResultTab extends ConsumerWidget {
         const SizedBox(height: 16),
         IntensityMeter(score: calculatedScore),
         const SizedBox(height: 16),
-        DispositionCard(disposition: calculatedDisposition),
+        const WellnessGuidanceBlock(),
         const SizedBox(height: 20),
         ElevatedButton.icon(
           key: const Key('today_start_full_triage_button'),
@@ -757,7 +763,7 @@ class TodayTriageResultTab extends ConsumerWidget {
           ),
           icon: const Icon(Icons.arrow_forward_rounded, size: 20),
           label: Text(
-            'Completar Triagem Clínica Detalhada',
+            l10n.todayOutcomeDetailedCheckinButton,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 14,
               fontWeight: FontWeight.w700,
@@ -770,7 +776,7 @@ class TodayTriageResultTab extends ConsumerWidget {
           children: [
             Expanded(
               child: Text(
-                'Artigos Sugeridos para Seus Sintomas',
+                l10n.outcomeWellnessReadingsRelatedTitle,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -780,7 +786,7 @@ class TodayTriageResultTab extends ConsumerWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              '${articles.length} recomendações',
+              l10n.outcomeWellnessReadingsCount(articles.length),
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 color: AppColors.textSecondaryLight,
@@ -790,7 +796,7 @@ class TodayTriageResultTab extends ConsumerWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'Recomendações clínicas selecionadas de acordo com os sintomas relatados hoje.',
+          l10n.outcomeWellnessReadingsDisclaimer,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 13,
             color: AppColors.textSecondaryLight,
@@ -880,6 +886,7 @@ class TodayTriageResultTab extends ConsumerWidget {
     TriggerCheckInState triggerState,
   ) {
     final articles = CuratedArticlesCatalog.wellnessArticles;
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -931,7 +938,7 @@ class TodayTriageResultTab extends ConsumerWidget {
         ),
         const SizedBox(height: 24),
         Text(
-          'Artigos Preventivos do Dia',
+          l10n.outcomeArticlesTitle,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -940,7 +947,7 @@ class TodayTriageResultTab extends ConsumerWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'Leituras rápidas recomendadas pela equipe clínica para manter seu equilíbrio diário.',
+          l10n.outcomeArticlesSubtitle,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 13,
             color: AppColors.textSecondaryLight,
@@ -994,7 +1001,7 @@ class TodayTriageResultTab extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Nenhuma avaliação realizada hoje',
+            'Nenhum registro hoje',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 17,
               fontWeight: FontWeight.bold,
@@ -1004,7 +1011,7 @@ class TodayTriageResultTab extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Faça seu check-in diário de 1 minuto na aba Início para registrar seus sintomas, acompanhar sua saúde e receber artigos personalizados.',
+            'Faça seu check-in diário de 1 minuto na aba Início para registrar como você está e acompanhar seus registros.',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
               color: AppColors.textSecondaryLight,
@@ -1039,7 +1046,7 @@ class TodayTriageResultTab extends ConsumerWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              'Artigos Sugeridos para Você',
+              AppLocalizations.of(context).outcomeArticlesTitle,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,

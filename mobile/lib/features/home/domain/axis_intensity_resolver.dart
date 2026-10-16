@@ -24,6 +24,41 @@ TriggerStatus triggerStatusFromIntensity(int? score) {
   return TriggerStatus.soSo;
 }
 
+/// Parses declared quick check-in state from history `stepAnswers`.
+TriggerStatus? triggerStatusFromStepAnswer(dynamic value) {
+  if (value == null) return null;
+  final str = value.toString().trim();
+  if (str.isEmpty) return null;
+
+  for (final s in TriggerStatus.values) {
+    if (s.name == str) return s;
+  }
+
+  final normalized = str.toLowerCase().replaceAll('_', ' ');
+  switch (normalized) {
+    case 'bem':
+    case 'goodnormal':
+    case 'good normal':
+      return TriggerStatus.goodNormal;
+    case 'mais ou menos':
+    case 'soso':
+    case 'so so':
+      return TriggerStatus.soSo;
+    case 'mal':
+    case 'badsick':
+    case 'bad sick':
+      return TriggerStatus.badSick;
+    default:
+      return null;
+  }
+}
+
+TriggerStatus? declaredStatusOnLog(TriageHistoryEntry log, CheckInAxis axis) {
+  if (!AxisIntensityResolver.isDailyCheckIn(log)) return null;
+  final key = axis == CheckInAxis.emotional ? 'emotionalStatus' : 'physicalStatus';
+  return triggerStatusFromStepAnswer(log.stepAnswers?[key]);
+}
+
 /// Single source of truth for per-axis intensity: the most recent real history
 /// record for that axis today. Derived values (the outcome's secondary score,
 /// status defaults) are fallbacks only when no record exists for the axis.
@@ -35,14 +70,18 @@ abstract final class AxisIntensityResolver {
 
   /// The axis the record was submitted under.
   ///
-  /// Backend persistence rule (TriageOutcomeService.processOutcome): the
-  /// primary-axis column gets the mapped category code, and the other column
-  /// is filled only for a cross-vertical narrative. An emotional-vertical
-  /// record with a physical cross-vertical tag always has
-  /// `organicPrimacyApplied = true`, while the physical vertical never sets it.
-  /// That is why `organicPrimacyApplied` disambiguates dual-tagged records.
+  /// The backend returns the submitted `vertical` for each entry. A
+  /// dual-tagged record (both columns set) without it is a legacy row: the
+  /// old `organicPrimacyApplied` flag marked emotional entries, otherwise
+  /// physical.
   static CheckInAxis? primaryAxisOf(TriageHistoryEntry log) {
     if (isDailyCheckIn(log)) return null;
+    switch (log.vertical) {
+      case 'physical':
+        return CheckInAxis.physical;
+      case 'emotional':
+        return CheckInAxis.emotional;
+    }
     if (log.anatomicalSystem == _emotionalGeneralCode) return CheckInAxis.emotional;
     final hasPhysical = log.anatomicalSystem != null;
     final hasEmotional = log.emotionalDimension != null;
@@ -54,8 +93,7 @@ abstract final class AxisIntensityResolver {
     return null;
   }
 
-  /// Mirrors Histórico axis membership. `organicPrimacyApplied` alone does not
-  /// tag a record as physical.
+  /// Mirrors Histórico axis membership.
   static bool isTaggedWith(TriageHistoryEntry log, CheckInAxis axis) {
     switch (axis) {
       case CheckInAxis.physical:

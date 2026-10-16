@@ -7,8 +7,6 @@ import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/email_verification_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
-import '../../features/emergency/domain/emergency_context.dart';
-import '../../features/emergency/domain/emergency_trigger_category.dart';
 import '../../features/emergency/presentation/screens/emergency_screen.dart';
 import '../../features/triage/domain/triage_vertical.dart';
 import '../../features/triage/presentation/screens/triage_wizard_screen.dart';
@@ -110,16 +108,7 @@ GoRouter createRouter({
       GoRoute(
         path: RoutePaths.emergency,
         name: 'emergency',
-        builder: (context, state) {
-          final emergencyContext = state.extra as EmergencyContext? ??
-              EmergencyContext(
-                category: EmergencyTriggerCategory.generalCriticalIntensity,
-                severityLevel: 5,
-                isEmotional: false,
-                detectedAt: DateTime.now(),
-              );
-          return EmergencyScreen(emergencyContext: emergencyContext);
-        },
+        builder: (context, state) => const EmergencyScreen(),
       ),
       GoRoute(
         path: RoutePaths.triage,
@@ -132,6 +121,7 @@ GoRouter createRouter({
               isDual: args.isDual,
               naturalLanguageText: args.naturalLanguageText,
               preselectedCategoryKey: args.preselectedCategoryKey,
+              mentionsSelfHarm: args.mentionsSelfHarm,
             );
           }
           final vertical =
@@ -147,12 +137,10 @@ GoRouter createRouter({
               TriageOutcome(
                 id: 'default-outcome',
                 vertical: 'physical',
-                intensityScore: 2,
-                careDisposition: CareDisposition.selfCare,
+                intensityScore: 0,
                 primaryCategory: 'geral',
-                categoryLabel: 'Avaliação Física Geral',
-                somaticMapping: 'Sintomas autolimitados',
-                organicPrimacyApplied: false,
+                categoryLabel: '',
+                somaticMapping: '',
                 recommendedArticles: const [],
                 recordedAt: DateTime.now(),
               );

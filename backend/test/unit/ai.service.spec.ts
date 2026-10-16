@@ -2,119 +2,86 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ConfigService } from '@nestjs/config';
 import { GeminiService } from '../../src/common/ai/gemini.service';
 import { IdiomDictionaryService } from '../../src/modules/ai/services/idiom-dictionary.service';
-import { AiTriageService } from '../../src/modules/ai/services/ai-triage.service';
+import { AiTaggingService } from '../../src/modules/ai/services/ai-tagging.service';
 
-describe('AI Classification Engine (TRG-02 / I18N-02 / RNF-002)', () => {
+describe('AI journal tagging engine (I18N-02 / RNF-002)', () => {
   let idiomService: IdiomDictionaryService;
-  let aiTriageService: AiTriageService;
+  let aiTaggingService: AiTaggingService;
 
   beforeEach(() => {
     idiomService = new IdiomDictionaryService();
     const configService = {
       get: (key: string) => (key === 'GEMINI_API_KEY' ? 'mock-gemini-key' : null),
     } as unknown as ConfigService;
-    aiTriageService = new AiTriageService(new GeminiService(configService), idiomService);
+    aiTaggingService = new AiTaggingService(new GeminiService(configService), idiomService);
   });
 
   describe('IdiomDictionaryService', () => {
-    it('1. Correctly classifies physical emergency red-flags (e.g. chest pain)', () => {
-      const match = idiomService.match('Estou com uma dor no peito muito forte');
-      expect(match).not.toBeNull();
-      expect(match?.primaryVertical).toBe('physical');
-      expect(match?.systemOrDimension).toBe('cardiovascular_chest');
-      expect(match?.urgencyScore).toBe(5);
-      expect(match?.isEmergencyCandidate).toBe(true);
+    const cases: Array<[string, string, string, string]> = [
+      ['Estou com uma dor no peito muito forte', 'physical', 'cardiovascular_chest', 'dor / aperto no peito'],
+      ['Minha cabeça está explodindo, parece um trovão', 'physical', 'head_neck', 'dor de cabeça muito forte e repentina'],
+      ['Estou com muita falta de ar e me sinto sufocando', 'physical', 'respiratory', 'falta de ar'],
+      ['Acho que estou tendo uma crise de pânico agora', 'emotional', 'anxious_agitation', 'crise de pânico'],
+      ['Acordei hoje com dor de cabeça', 'physical', 'head_neck', 'dor de cabeça'],
+      ['Tengo dolor en el pecho', 'physical', 'cardiovascular_chest', 'dor / aperto no peito'],
+      ['I am having severe chest pain', 'physical', 'cardiovascular_chest', 'dor / aperto no peito'],
+    ];
+
+    it.each(cases)('1. tags "%s" with area/mood and lay term only', (text, vertical, area, layTerm) => {
+      const match = idiomService.match(text);
+      expect(match).toMatchObject({ isOffTopic: false, vertical, bodyAreaOrMood: area, layTerm, mentionsSelfHarm: false });
       expect(match?.latencyMs).toBeLessThan(10);
     });
 
-    it('2. Correctly classifies thunderclap headache emergency', () => {
-      const match = idiomService.match('Minha cabeça está explodindo, parece um trovão');
-      expect(match).not.toBeNull();
-      expect(match?.primaryVertical).toBe('physical');
-      expect(match?.systemOrDimension).toBe('head_neck');
-      expect(match?.urgencyScore).toBe(5);
-      expect(match?.isEmergencyCandidate).toBe(true);
-    });
-
-    it('3. Correctly classifies acute respiratory emergency', () => {
-      const match = idiomService.match('Estou com muita falta de ar e me sinto sufocando');
-      expect(match).not.toBeNull();
-      expect(match?.primaryVertical).toBe('physical');
-      expect(match?.systemOrDimension).toBe('respiratory');
-      expect(match?.urgencyScore).toBe(5);
-      expect(match?.isEmergencyCandidate).toBe(true);
-    });
-
-    it('4. Correctly classifies emotional suicidal crisis emergency', () => {
+    it('2. flags self-harm mentions as a content-safety signal', () => {
       const match = idiomService.match('Estou com vontade de sumir, não aguento mais viver');
-      expect(match).not.toBeNull();
-      expect(match?.primaryVertical).toBe('emotional');
-      expect(match?.systemOrDimension).toBe('depressive_hopelessness');
-      expect(match?.urgencyScore).toBe(5);
-      expect(match?.isEmergencyCandidate).toBe(true);
+      expect(match).toMatchObject({ vertical: 'emotional', bodyAreaOrMood: 'depressive_hopelessness', mentionsSelfHarm: true });
     });
 
-    it('5. Correctly classifies panic attack paroxysm', () => {
-      const match = idiomService.match('Acho que estou tendo uma crise de pânico agora');
-      expect(match).not.toBeNull();
-      expect(match?.primaryVertical).toBe('emotional');
-      expect(match?.systemOrDimension).toBe('anxious_agitation');
-      expect(match?.urgencyScore).toBe(4);
-      expect(match?.isEmergencyCandidate).toBe(true);
+    it('3. detects self-harm even when another idiom matched first', () => {
+      expect(idiomService.match('dor no peito e quero morrer')?.mentionsSelfHarm).toBe(true);
     });
 
-    it('6. Correctly maps non-emergency somatic complaint (dor de cabeça leve)', () => {
-      const match = idiomService.match('Acordei hoje com dor de cabeça');
-      expect(match).not.toBeNull();
-      expect(match?.primaryVertical).toBe('physical');
-      expect(match?.systemOrDimension).toBe('head_neck');
-      expect(match?.isEmergencyCandidate).toBe(false);
-    });
-
-    it('7. Correctly maps Spanish and English colloquial inputs', () => {
-      const esMatch = idiomService.match('Tengo dolor en el pecho');
-      expect(esMatch?.primaryVertical).toBe('physical');
-      expect(esMatch?.systemOrDimension).toBe('cardiovascular_chest');
-      expect(esMatch?.isEmergencyCandidate).toBe(true);
-
-      const enMatch = idiomService.match('I am having severe chest pain');
-      expect(enMatch?.primaryVertical).toBe('physical');
-      expect(enMatch?.systemOrDimension).toBe('cardiovascular_chest');
-      expect(enMatch?.isEmergencyCandidate).toBe(true);
+    it('4. never names a condition in lay terms', () => {
+      for (const [text] of cases) {
+        expect(idiomService.match(text)?.layTerm).not.toMatch(/suspeita|AVC|síndrome|coronari|hemorragia|insufici|déficit|transtorno/i);
+      }
     });
   });
 
-  describe('AiTriageService & SLA Benchmark', () => {
-    it('8. Serves query with sub-2s latency SLA (RNF-002)', async () => {
-      const result = await aiTriageService.classify({
+  describe('AiTaggingService & SLA Benchmark', () => {
+    it('5. serves a tag with sub-2s latency SLA (RNF-002)', async () => {
+      const result = await aiTaggingService.tagWithMetadata({
         text: 'Estou com muita dor de cabeça e enxaqueca',
       });
 
-      expect(result).toBeDefined();
-      expect(result.primaryVertical).toBe('physical');
-      expect(result.systemOrDimension).toBe('head_neck');
+      expect(result.vertical).toBe('physical');
+      expect(result.bodyAreaOrMood).toBe('head_neck');
       expect(result.latencyMs).toBeLessThan(2000);
     });
 
-    it('9. Caches repeated queries and returns from memory cache', async () => {
+    it('6. caches repeated queries and returns from memory cache', async () => {
       const query = { text: 'Estresse e cansaço mental do trabalho' };
-      const first = await aiTriageService.classify(query);
+      const first = await aiTaggingService.tagWithMetadata(query);
       expect(first.source).toBe('dictionary_fallback');
 
-      const second = await aiTriageService.classify(query);
+      const second = await aiTaggingService.tagWithMetadata(query);
       expect(second.source).toBe('idiom_cache');
       expect(second.latencyMs).toBeLessThan(5);
     });
 
-    it('10. Handles unfamiliar input via fallback with zero crash', async () => {
-      const result = await aiTriageService.classify({
+    it('7. leaves unfamiliar input untagged instead of guessing, with zero crash', async () => {
+      const result = await aiTaggingService.tagEntry({
         text: 'xyz123 algo completamente atípico e sem padrão conhecido',
       });
 
-      expect(result).toBeDefined();
-      expect(result.urgencyScore).toBe(2);
-      expect(result.isEmergencyCandidate).toBe(false);
-      expect(result.latencyMs).toBeLessThan(2000);
+      expect(result).toEqual({
+        isOffTopic: false,
+        vertical: null,
+        bodyAreaOrMood: null,
+        layTerm: null,
+        mentionsSelfHarm: false,
+      });
     });
   });
 });

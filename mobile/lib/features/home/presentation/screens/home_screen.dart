@@ -98,13 +98,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final authState = ref.watch(authControllerProvider);
     final user = authState.user;
-    final userName = (user?.name != null && user!.name.isNotEmpty) ? user.name : 'Paciente';
-    final userEmail = (user?.email != null && user!.email.isNotEmpty) ? user.email : 'Sessão ativa';
+    final l10n = AppLocalizations.of(context);
+    final userName = (user?.name != null && user!.name.isNotEmpty) ? user.name : '';
+    final userEmail = (user?.email != null && user!.email.isNotEmpty)
+        ? user.email
+        : l10n.homeSessionActive;
     final activeProfileState = ref.watch(activeProfileControllerProvider);
     final delegatedProfile = showsDelegatedActiveProfile(ref)
         ? activeProfileState.activeProfile
         : null;
-    final l10n = AppLocalizations.of(context);
     final cardDisplayName = delegatedProfile?.name ?? userName;
     final cardDisplaySubtitle = delegatedProfile != null
         ? profileContextSubtitle(delegatedProfile, l10n)
@@ -148,7 +150,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ];
     } else if (_currentTabIndex == 1) {
       appBarTitle = Text(
-        'Resultado do Dia',
+        AppLocalizations.of(context).navTodayOutcome,
         style: GoogleFonts.plusJakartaSans(
           fontSize: 18,
           fontWeight: FontWeight.bold,
@@ -372,7 +374,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       ? AppLocalizations.of(context)
                                           .activeProfileCardTitle(
                                               cardDisplayName)
-                                      : 'Olá, $cardDisplayName',
+                                      : (cardDisplayName.isEmpty
+                                          ? AppLocalizations.of(context)
+                                              .homeGreetingNoName
+                                          : AppLocalizations.of(context)
+                                              .homeGreeting(cardDisplayName)),
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
@@ -414,7 +420,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Prontuário Ativo & Protegido (LGPD Art. 11)',
+                              AppLocalizations.of(context).homeDataProtectedBadge,
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,

@@ -36,26 +36,20 @@ class MockTriageOutcomeService {
       throw new BadRequestException('ID do usuário ausente.');
     }
     this.calls.push({ method: 'processOutcome', userId, profileId });
-    const isOrganic = dto.vertical === 'emotional' && (dto.narrative?.includes('peito') || false);
     return {
       id: crypto.randomUUID(),
       vertical: dto.vertical,
       intensityScore: dto.vertical === 'physical' ? 3 : 2,
-      careDisposition: 'consulta_rotina',
       primaryCategory: dto.vertical === 'physical' ? 'coluna_dor_dorsal' : 'ansiosa_agitacao',
       categoryLabel: dto.vertical === 'physical' ? 'Coluna e Dor Dorsal' : 'Dimensão Ansiosa / Agitação',
       somaticMapping: 'Mapeamento somático normalizado',
-      organicPrimacyApplied: isOrganic,
-      organicPrimacyNotice: isOrganic
-        ? 'Atenção Clínica (Primazia Orgânica): Sintomas físicos concorrentes exigem que causas orgânicas sejam avaliadas.'
-        : undefined,
       recommendedArticles: [
         {
           id: 'art-coluna-01',
           title: 'Ergonomia no Trabalho',
           category: 'coluna_dor_dorsal',
-          author: 'Dr. Marcelo Mendes',
-          authorRole: 'Ortopedista',
+          author: 'Ministério da Saúde',
+          authorRole: 'Fonte',
           readTimeMinutes: 5,
           summary: 'Guia postural',
           url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
@@ -159,7 +153,22 @@ describe('Triage Outcome E2E Suite (SOM-01, SOM-02, OUT-01, REC-01)', () => {
     expect(res.statusCode).toBe(400);
   });
 
-  it('3. POST /v1/triage/outcome processes physical triage and returns disposition and specialist articles', async () => {
+  // Contract 1: no assessment output, only what the person reported plus general content.
+  const REMOVED_ASSESSMENT_FIELDS = [
+    'careDisposition',
+    'organicPrimacyApplied',
+    'organicPrimacyNotice',
+    'urgencyScore',
+    'clinicalConcept',
+    'aiClinicalConcept',
+    'isEmergencyCandidate',
+    'isCritical',
+  ];
+  const expectNoAssessment = (body: Record<string, unknown>) => {
+    for (const field of REMOVED_ASSESSMENT_FIELDS) expect(body, field).not.toHaveProperty(field);
+  };
+
+  it('3. POST /v1/triage/outcome records a physical entry and returns general articles with a real source', async () => {
     const res = await app.inject({
       method: 'POST',
       url: '/v1/triage/outcome',
@@ -185,17 +194,16 @@ describe('Triage Outcome E2E Suite (SOM-01, SOM-02, OUT-01, REC-01)', () => {
     expect(body.primaryCategory).toBe('coluna_dor_dorsal');
     expect(body.categoryLabel).toBe('Coluna e Dor Dorsal');
     expect(body.intensityScore).toBe(3);
-    expect(body.careDisposition).toBe('consulta_rotina');
-    expect(body.organicPrimacyApplied).toBe(false);
+    expectNoAssessment(body);
     expect(Array.isArray(body.recommendedArticles)).toBe(true);
     expect(body.recommendedArticles.length).toBeGreaterThan(0);
-    expect(body.recommendedArticles[0].author).toContain('Dr. Marcelo Mendes');
+    expect(body.recommendedArticles[0]).toMatchObject({ author: 'Ministério da Saúde', authorRole: 'Fonte' });
   });
 
-  it('4. POST /v1/triage/outcome triggers Organic Primacy on emotional triage with physical symptoms', async () => {
+  it('4. POST /v1/journal/outcome records an emotional entry with no assessment fields', async () => {
     const res = await app.inject({
       method: 'POST',
-      url: '/v1/triage/outcome',
+      url: '/v1/journal/outcome',
       headers: {
         authorization: `Bearer ${validAccessToken}`,
       },
@@ -214,10 +222,7 @@ describe('Triage Outcome E2E Suite (SOM-01, SOM-02, OUT-01, REC-01)', () => {
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.payload);
     expect(body.vertical).toBe('emotional');
-    expect(body.organicPrimacyApplied).toBe(true);
-    expect(body.organicPrimacyNotice).toBeDefined();
-    expect(body.organicPrimacyNotice).toContain('Primazia Orgânica');
-    expect(body.careDisposition).toBe('consulta_rotina');
+    expectNoAssessment(body);
   });
 
   const physicalPayload = {

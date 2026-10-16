@@ -141,6 +141,7 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       anatomicalSystem: 'respiratorio',
       emotionalDimension: null,
       disposition: 'consulta_eletiva',
+      organicPrimacyApplied: true,
       encryptedNarrative: 'narrativa_cifrada',
       stepAnswers: JSON.stringify({ question1: 'tosse leve' }),
       recordedAt: new Date('2026-01-05T14:00:00Z'),
@@ -154,13 +155,13 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
         [symptomRow('log-1', primaryProfileId)],
         [
           {
-            id: 'emerg-1',
+            id: 'safety-1',
+            userId: mockUserId,
             profileId: primaryProfileId,
-            triggerCategory: 'dor_toracica_critica',
-            severityLevel: 5,
-            sourceVertical: 'fisico',
-            actionTaken: 'chamou_samu',
-            reportedAt: new Date('2026-01-08T09:30:00Z'),
+            action: 'call_started',
+            channel: 'tel:192',
+            clientTimestamp: new Date('2026-01-08T09:30:00Z'),
+            createdAt: new Date('2026-01-08T09:30:01Z'),
           },
         ],
         [],
@@ -176,8 +177,19 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       expect(result.symptomLogs).toHaveLength(1);
       expect(result.symptomLogs[0].decryptedNarrative).toBe('decrypted:narrativa_cifrada');
       expect(result.symptomLogs[0].stepAnswers).toEqual({ question1: 'tosse leve' });
-      expect(result.emergencyEvents).toHaveLength(1);
-      expect(result.emergencyEvents[0].triggerCategory).toBe('dor_toracica_critica');
+      // Former assessment fields are exported only inside the labelled legacy block.
+      expect(result.symptomLogs[0].legacy).toEqual({ disposition: 'consulta_eletiva', organicPrimacyApplied: true });
+      expect(result.symptomLogs[0]).not.toHaveProperty('disposition');
+      expect(result.metadata.legacyFieldsNote).toContain('legacy');
+      expect(result.safetyResourceEvents).toEqual([
+        {
+          id: 'safety-1',
+          action: 'call_started',
+          channel: 'tel:192',
+          clientTimestamp: '2026-01-08T09:30:00.000Z',
+          createdAt: '2026-01-08T09:30:01.000Z',
+        },
+      ]);
       expect(result.waterIntakeLogs).toEqual([]);
       expect(mockEncryptionService.decrypt).toHaveBeenCalledWith('narrativa_cifrada');
     });
@@ -216,7 +228,7 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
         createdAt: '2026-02-01T10:00:00.000Z',
       });
       expect(lucas.symptomLogs.map((l) => l.id)).toEqual(['log-lucas']);
-      expect(lucas.emergencyEvents).toEqual([]);
+      expect(lucas.safetyResourceEvents).toEqual([]);
       expect(lucas.waterIntakeLogs).toEqual([
         { id: 'water-lucas', amountMl: 200, source: 'manual', recordedAt: '2026-02-02T08:00:00.000Z' },
       ]);
@@ -229,7 +241,7 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
 
       expect(mockTxSelect).toHaveBeenCalledTimes(3);
       expect(result.symptomLogs).toEqual([]);
-      expect(result.emergencyEvents).toEqual([]);
+      expect(result.safetyResourceEvents).toEqual([]);
       expect(result.waterIntakeLogs).toEqual([]);
       expect(result.dependentProfiles).toEqual([]);
     });

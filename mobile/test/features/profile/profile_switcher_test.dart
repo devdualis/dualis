@@ -234,7 +234,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Sheet is open: header and profiles are visible
-      expect(find.text('Perfis de Saúde'), findsOneWidget);
+      expect(find.text('Perfis'), findsOneWidget);
       expect(find.text('Enzo Silva'), findsOneWidget);
 
       // Tap dependent profile to select
@@ -243,7 +243,7 @@ void main() {
 
       // Sheet is closed, controller updated, pill displays Enzo Silva
       expect(fake.selectedId, equals('dep-1'));
-      expect(find.text('Perfis de Saúde'), findsNothing);
+      expect(find.text('Perfis'), findsNothing);
       expect(find.text('Enzo Silva'), findsOneWidget);
       expect(find.byIcon(Icons.family_restroom), findsOneWidget);
     });

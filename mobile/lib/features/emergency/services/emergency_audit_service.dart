@@ -1,62 +1,56 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/constants/api_endpoints.dart';
 import '../../../core/network/api_client.dart';
-import '../domain/emergency_context.dart';
 
-/// Asynchronous client service responsible for transmitting emergency risk events
-/// to the backend for regulatory compliance and clinical auditability (LGPD Art. 11).
+/// Minimal safety audit endpoint (optional auth, never fails server-side).
+const String safetyEventPath = '/v1/journal/safety-event';
+
+/// What the user did with the help resources. Nothing about their entries.
+enum SafetyEventAction {
+  openedResources('opened_resources'),
+  callStarted('call_started');
+
+  final String wireValue;
+  const SafetyEventAction(this.wireValue);
+}
+
+/// Records "help resources opened" / "call started" events (LGPD data
+/// minimisation: no symptoms, levels or categories).
 ///
-/// Dispatches telemetry via unawaited fire-and-forget requests so client-side life safety
-/// flows are never blocked or throttled by network conditions.
+/// Fire-and-forget: never blocks or throws into the UI, works offline and
+/// without a session.
 class EmergencyAuditService {
   final ApiClient _apiClient;
 
   EmergencyAuditService({ApiClient? apiClient})
       : _apiClient = apiClient ?? ApiClient();
 
-  /// Transmits the emergency event payload in a non-blocking, fire-and-forget pattern.
-  void reportEventFireAndForget(
-    EmergencyContext context, {
-    String? actionTaken,
-  }) {
-    unawaited(
-      reportEvent(context, actionTaken: actionTaken).then((_) {}).catchError((err) {
-        debugPrint('EmergencyAuditService telemetry failed non-critically: $err');
-      }),
-    );
+  void reportFireAndForget(SafetyEventAction action, {String? channel}) {
+    unawaited(report(action, channel: channel).catchError((Object err) {
+      debugPrint('Safety event not sent: $err');
+      return false;
+    }));
   }
 
-  /// Sends the structured emergency event payload to the backend audit endpoint.
-  Future<bool> reportEvent(
-    EmergencyContext context, {
-    String? actionTaken,
-  }) async {
+  Future<bool> report(SafetyEventAction action, {String? channel}) async {
     try {
-      final payload = {
-        'triggerCategory': context.category.name,
-        'severityLevel': context.severityLevel,
-        'sourceVertical': context.isEmotional ? 'EMOTIONAL' : 'PHYSICAL',
-        'clientTimestamp': context.detectedAt.toIso8601String(),
-        if (actionTaken != null) 'actionTaken': actionTaken,
-      };
-
       final response = await _apiClient.post(
-        ApiEndpoints.emergencyEvent,
-        data: payload,
+        safetyEventPath,
+        data: {
+          'action': action.wireValue,
+          if (channel != null) 'channel': channel,
+          'clientTimestamp': DateTime.now().toUtc().toIso8601String(),
+        },
       );
-
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
-      debugPrint('Emergency audit reporting encountered exception: $e');
+      debugPrint('Safety event not sent: $e');
       return false;
     }
   }
 }
 
-/// Riverpod provider for [EmergencyAuditService].
 final emergencyAuditServiceProvider = Provider<EmergencyAuditService>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
-  return EmergencyAuditService(apiClient: apiClient);
+  return EmergencyAuditService(apiClient: ref.watch(apiClientProvider));
 });

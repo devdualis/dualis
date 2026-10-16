@@ -4,10 +4,15 @@ import { and, desc, gte, or, eq, sql } from 'drizzle-orm';
 import { DRIZZLE_DB } from '../../../database/database.service';
 import * as schema from '../../../database/schema';
 import { symptomLogs } from '../../../database/schema';
-import { AntiburlaCheckResponseDto, CheckAntiburlaDto } from '../dto/antiburla.dto';
+import { CheckRecurrenceDto, RecurrenceCheckResponseDto } from '../dto/antiburla.dto';
 
+/**
+ * Journal consistency ("Isso já apareceu antes?"): finds the same category in the
+ * profile's last 14 days so a "started today" entry can be logged as something that
+ * came back. Formerly AntiburlaService; the old name stays exported as an alias.
+ */
 @Injectable()
-export class AntiburlaService {
+export class RecurrenceCheckService {
   constructor(
     @Inject(DRIZZLE_DB) private readonly db: NodePgDatabase<typeof schema>,
   ) {}
@@ -15,8 +20,8 @@ export class AntiburlaService {
   async checkHistoricalConsistency(
     userId: string,
     profileId: string,
-    dto: CheckAntiburlaDto,
-  ): Promise<AntiburlaCheckResponseDto> {
+    dto: CheckRecurrenceDto,
+  ): Promise<RecurrenceCheckResponseDto> {
     if (!userId) {
       throw new BadRequestException('ID do usuário ausente para verificação histórica.');
     }
@@ -24,32 +29,9 @@ export class AntiburlaService {
       throw new BadRequestException('ID do perfil ausente para verificação histórica.');
     }
 
-    const { vertical, category, selectedPersistence, userGender, narrative } = dto;
+    const { vertical, category, selectedPersistence } = dto;
 
-    // 1. Biological Boundary Check (ANTI-03)
-    let biologicalDiscordance = false;
-    let biologicalNotice: string | undefined;
-
-    const lowerNarrative = (narrative || '').toLowerCase();
-    const lowerCategory = (category || '').toLowerCase();
-
-    if (userGender === 'feminino') {
-      const maleTerms = ['testículo', 'testiculo', 'próstata', 'prostata', 'escrotal'];
-      if (maleTerms.some((term) => lowerNarrative.includes(term) || lowerCategory.includes(term))) {
-        biologicalDiscordance = true;
-        biologicalNotice =
-          'Observamos uma possível discordância anatômica com o seu perfil biológico. Redirecionando a avaliação para a região pélvica/abdominal.';
-      }
-    } else if (userGender === 'masculino') {
-      const femaleTerms = ['útero', 'utero', 'ovário', 'ovario', 'vagina', 'menstrua'];
-      if (femaleTerms.some((term) => lowerNarrative.includes(term) || lowerCategory.includes(term))) {
-        biologicalDiscordance = true;
-        biologicalNotice =
-          'Observamos uma possível discordância anatômica com o seu perfil biológico. Redirecionando a avaliação para a região pélvica/inguinal.';
-      }
-    }
-
-    // 2. Antiburla 14-Day Consistency Check (ANTI-01, ANTI-02)
+    // 14-day consistency check (ANTI-01, ANTI-02)
     // Only triggers if user states symptom started today / just now
     const isTodayPersistence =
       selectedPersistence === 'comecou_hoje' ||
@@ -58,11 +40,7 @@ export class AntiburlaService {
       selectedPersistence.includes('agora');
 
     if (!isTodayPersistence) {
-      return {
-        triggered: false,
-        biologicalDiscordance,
-        biologicalNotice,
-      };
+      return { triggered: false };
     }
 
     // 14-day rolling cutoff date
@@ -89,11 +67,7 @@ export class AntiburlaService {
     });
 
     if (pastLogs.length === 0) {
-      return {
-        triggered: false,
-        biologicalDiscordance,
-        biologicalNotice,
-      };
+      return { triggered: false };
     }
 
     const previousLog = pastLogs[0];
@@ -112,8 +86,9 @@ export class AntiburlaService {
       previousRecordedAt: previousLog.recordedAt.toISOString(),
       previousCategoryLabel: previousLog.anatomicalSystem || previousLog.emotionalDimension || category,
       empatheticPrompt,
-      biologicalDiscordance,
-      biologicalNotice,
     };
   }
 }
+
+/** @deprecated Old name; use RecurrenceCheckService. */
+export { RecurrenceCheckService as AntiburlaService };

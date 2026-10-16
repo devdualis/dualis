@@ -7,7 +7,7 @@ import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/anatomical_body_map.dart';
-import '../widgets/critical_recurrence_card.dart';
+import '../widgets/journal_pattern_card.dart';
 import '../widgets/dashboard_segmented_tab.dart';
 import '../widgets/emotional_trend_chart.dart';
 import '../widgets/retrospective_list_view.dart';
@@ -28,7 +28,7 @@ class HistoricalDashboardScreen extends ConsumerWidget {
           final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
           final errorText = l10n != null
               ? ErrorMessageResolver.resolve(err, l10n)
-              : (l10n?.errorLoadHistory ?? 'Não foi possível carregar o histórico de triagens.');
+              : (l10n?.errorLoadHistory ?? 'Não foi possível carregar o histórico de registros.');
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -168,7 +168,7 @@ class HistoricalDashboardScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 8),
                           ...recurrences.map(
-                            (r) => CriticalRecurrenceCard(item: r),
+                            (r) => JournalPatternCard(item: r),
                           ),
                         ],
                         const SizedBox(height: 20),

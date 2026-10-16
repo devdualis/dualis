@@ -16,7 +16,7 @@ import {
   users,
   userDisclaimerConsents,
   symptomLogs,
-  triageEmergencyEvents,
+  safetyResourceEvents,
   waterIntakeLogs,
   profiles,
   emailVerifications,
@@ -35,6 +35,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { StorageService } from '../../common/storage/storage.service';
 import { JwtPayload } from './strategies/jwt.strategy';
+import { LEGAL_DOCUMENTS_VERSION } from '../legal/legal.service';
 
 @Injectable()
 export class AuthService {
@@ -95,7 +96,7 @@ export class AuthService {
 
       await tx.insert(userDisclaimerConsents).values({
         userId: newUserId,
-        disclaimerVersion: dto.disclaimerVersion || '2026.1',
+        disclaimerVersion: dto.disclaimerVersion || LEGAL_DOCUMENTS_VERSION,
         ipAddressHash,
         userAgent: userAgent || 'Unknown',
       });
@@ -368,11 +369,11 @@ export class AuthService {
             .where(inArray(symptomLogs.profileId, ownedProfileIds))
         : [];
 
-      const emergencyRecords = ownedProfileIds.length
+      const safetyRecords = ownedProfileIds.length
         ? await tx
             .select()
-            .from(triageEmergencyEvents)
-            .where(inArray(triageEmergencyEvents.profileId, ownedProfileIds))
+            .from(safetyResourceEvents)
+            .where(inArray(safetyResourceEvents.profileId, ownedProfileIds))
         : [];
 
       const waterRecords = ownedProfileIds.length
@@ -386,15 +387,14 @@ export class AuthService {
         symptomLogs: symptomRecords
           .filter((s) => s.profileId === profileId)
           .map((s) => this.toExportedSymptomLog(s)),
-        emergencyEvents: emergencyRecords
+        safetyResourceEvents: safetyRecords
           .filter((e) => e.profileId === profileId)
           .map((e) => ({
             id: e.id,
-            triggerCategory: e.triggerCategory,
-            severityLevel: e.severityLevel,
-            sourceVertical: e.sourceVertical,
-            actionTaken: e.actionTaken,
-            reportedAt: e.reportedAt.toISOString(),
+            action: e.action,
+            channel: e.channel,
+            clientTimestamp: e.clientTimestamp.toISOString(),
+            createdAt: e.createdAt.toISOString(),
           })),
         waterIntakeLogs: waterRecords
           .filter((w) => w.profileId === profileId)
@@ -414,9 +414,11 @@ export class AuthService {
       return {
         metadata: {
           exportDate: new Date().toISOString(),
-          formatVersion: '1.1',
+          formatVersion: '1.2',
           legalBasis: 'LGPD Art. 18, V (Portabilidade de Dados)',
           dataController: 'DualisCheckUp Saúde Digital Ltda.',
+          legacyFieldsNote:
+            'Os campos em "legacy" vêm de uma versão anterior do app e não são mais gravados. Estão incluídos apenas para que você tenha acesso ao seu histórico completo.',
         },
         profile: {
           id: userRecord.id,
@@ -481,7 +483,10 @@ export class AuthService {
       intensity: s.intensity,
       anatomicalSystem: s.anatomicalSystem,
       emotionalDimension: s.emotionalDimension,
-      disposition: s.disposition,
+      legacy: {
+        disposition: s.disposition,
+        organicPrimacyApplied: s.organicPrimacyApplied,
+      },
       decryptedNarrative,
       stepAnswers: parsedAnswers,
       recordedAt: s.recordedAt.toISOString(),

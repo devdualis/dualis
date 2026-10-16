@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:dualis_mobile/features/dashboard/domain/models/triage_history_models.dart';
 import 'package:dualis_mobile/features/dashboard/presentation/widgets/anatomical_body_map.dart';
 import 'package:dualis_mobile/features/dashboard/presentation/widgets/retrospective_list_view.dart';
+import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 void main() {
   group('AnatomicalBodyMap & RetrospectiveListView Widget Tests (DASH-02, DASH-04)', () {
@@ -15,6 +16,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: AnatomicalBodyMap(physicalSummary: summary),
           ),
@@ -22,7 +26,7 @@ void main() {
       );
 
       expect(find.byType(CustomPaint), findsWidgets);
-      expect(find.text('Sem dor'), findsOneWidget);
+      expect(find.text('Sem registro'), findsOneWidget);
       expect(find.text('Leve (1-2)'), findsOneWidget);
       expect(find.text('Moderada (3)'), findsOneWidget);
       expect(find.text('Intensa (4-5)'), findsOneWidget);
@@ -37,6 +41,9 @@ void main() {
       String? tappedKey;
       await tester.pumpWidget(
         MaterialApp(
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: AnatomicalBodyMap(
               physicalSummary: summary,
@@ -64,6 +71,9 @@ void main() {
       String? tappedKey;
       await tester.pumpWidget(
         MaterialApp(
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: AnatomicalBodyMap(
               physicalSummary: summary,
@@ -81,8 +91,8 @@ void main() {
 
       expect(find.byKey(const Key('body_map_detail_card')), findsOneWidget);
       expect(tappedKey, equals('coluna_dorsal'));
-      expect(find.text('Coluna e Dor Dorsal'), findsOneWidget);
-      expect(find.textContaining('Nível 3'), findsOneWidget);
+      expect(find.text('Costas'), findsOneWidget);
+      expect(find.textContaining('Maior intensidade informada nos últimos 14 dias: 3/5'), findsOneWidget);
     });
 
     testWidgets('2c. Supports general membros_superiores key in physicalSummary as fallback', (tester) async {
@@ -93,6 +103,9 @@ void main() {
       String? tappedKey;
       await tester.pumpWidget(
         MaterialApp(
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: AnatomicalBodyMap(
               physicalSummary: summary,
@@ -111,8 +124,8 @@ void main() {
 
       expect(find.byKey(const Key('body_map_detail_card')), findsOneWidget);
       expect(tappedKey, equals('membros_superiores_d'));
-      expect(find.text('Membros Superiores (D)'), findsOneWidget);
-      expect(find.textContaining('Nível 3'), findsOneWidget);
+      expect(find.text('Braço direito'), findsOneWidget);
+      expect(find.textContaining('Maior intensidade informada nos últimos 14 dias: 3/5'), findsOneWidget);
     });
 
     testWidgets('2d. Tapping left arm (E) when right arm (D) has level 3 displays cross-limb notice and switch action', (tester) async {
@@ -124,6 +137,9 @@ void main() {
       String? tappedKey;
       await tester.pumpWidget(
         MaterialApp(
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: AnatomicalBodyMap(
               physicalSummary: summary,
@@ -142,15 +158,15 @@ void main() {
 
       expect(find.byKey(const Key('body_map_detail_card')), findsOneWidget);
       expect(tappedKey, equals('membros_superiores_e'));
-      expect(find.text('Membros Superiores (E)'), findsOneWidget);
-      expect(find.textContaining('Membro Superior Direito possui registro Nível 3'), findsOneWidget);
+      expect(find.text('Braço esquerdo'), findsOneWidget);
+      expect(find.textContaining('(Braço direito: intensidade informada 3/5)'), findsOneWidget);
 
       // Tap on switch action to select right arm
-      await tester.tap(find.text('Ver Membro Direito (D)'));
+      await tester.tap(find.text('Ver Braço direito'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Membros Superiores (D)'), findsOneWidget);
-      expect(find.textContaining('Nível 3'), findsOneWidget);
+      expect(find.text('Braço direito'), findsOneWidget);
+      expect(find.textContaining('Maior intensidade informada nos últimos 14 dias: 3/5'), findsOneWidget);
       expect(find.text('3/5'), findsOneWidget);
     });
 
@@ -164,6 +180,9 @@ void main() {
       String? tappedKey;
       await tester.pumpWidget(
         MaterialApp(
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: SingleChildScrollView(
               child: AnatomicalBodyMap(
@@ -175,14 +194,14 @@ void main() {
         ),
       );
 
-      expect(find.text('Endócrino'), findsOneWidget);
-      await tester.tap(find.text('Endócrino'));
+      expect(find.text('Energia'), findsOneWidget);
+      await tester.tap(find.text('Energia'));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('body_map_detail_card')), findsOneWidget);
       expect(tappedKey, equals('endocrino_metabolico'));
-      expect(find.text('Endócrino / Metabólico'), findsOneWidget);
-      expect(find.textContaining('Nível 2'), findsOneWidget);
+      expect(find.text('Sede, fome ou energia'), findsOneWidget);
+      expect(find.textContaining('Maior intensidade informada nos últimos 14 dias: 2/5'), findsOneWidget);
       expect(find.descendant(of: find.byKey(const Key('body_map_detail_card')), matching: find.text('2/5')), findsOneWidget);
     });
 
@@ -196,6 +215,9 @@ void main() {
       String? tappedKey;
       await tester.pumpWidget(
         MaterialApp(
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: SingleChildScrollView(
               child: AnatomicalBodyMap(
@@ -208,23 +230,23 @@ void main() {
       );
 
       // Switch to Todos os 12 Sistemas view
-      await tester.tap(find.text('Todos os 12 Sistemas'));
+      await tester.tap(find.text('Todas as áreas'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Cabeça & Nervos'), findsOneWidget);
-      expect(find.text('Tórax & Tronco'), findsOneWidget);
-      expect(find.text('Membros'), findsOneWidget);
-      expect(find.text('Sistêmico & Pele'), findsOneWidget);
-      expect(find.text('Respiratório (Pulmões)'), findsOneWidget);
-      expect(find.text('Neurológico (Cranial)'), findsOneWidget);
+      expect(find.text('Cabeça'), findsOneWidget);
+      expect(find.text('Tronco'), findsOneWidget);
+      expect(find.text('Braços e pernas'), findsOneWidget);
+      expect(find.text('Corpo todo e pele'), findsOneWidget);
+      expect(find.text('Respiração'), findsOneWidget);
+      expect(find.text('Tontura / formigamento'), findsOneWidget);
 
       // Tap on Respiratório
-      await tester.tap(find.text('Respiratório (Pulmões)'));
+      await tester.tap(find.text('Respiração'));
       await tester.pumpAndSettle();
 
       expect(tappedKey, equals('respiratorio'));
       expect(find.byKey(const Key('body_map_detail_card')), findsOneWidget);
-      expect(find.textContaining('Nível 2'), findsOneWidget);
+      expect(find.textContaining('Maior intensidade informada nos últimos 14 dias: 2/5'), findsOneWidget);
     });
 
     testWidgets('3. RetrospectiveListView renders entries with formatted date and category', (tester) async {
@@ -234,7 +256,6 @@ void main() {
           intensity: 4,
           anatomicalSystem: 'coluna_dorsal',
           emotionalDimension: null,
-          disposition: 'consulta_rotina',
           stepAnswers: {'causes': 'postura incorreta no trabalho'},
           recordedAt: DateTime.parse('2026-09-14T10:30:00.000Z'),
         ),
@@ -242,6 +263,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: SingleChildScrollView(
               child: RetrospectiveListView(
@@ -253,15 +277,20 @@ void main() {
         ),
       );
 
-      expect(find.text('Nível 4'), findsOneWidget);
-      expect(find.text('COLUNA DORSAL'), findsOneWidget);
-      expect(find.text('Consulta de Rotina'), findsOneWidget);
+      expect(find.text('Intensidade informada: 4/5'), findsOneWidget);
+      expect(find.text('COSTAS'), findsOneWidget);
       expect(find.textContaining('postura incorreta'), findsOneWidget);
+      // No levels and no care recommendation in the journal history.
+      expect(find.text('Nível 4'), findsNothing);
+      expect(find.text('Consulta de Rotina'), findsNothing);
     });
 
     testWidgets('4. RetrospectiveListView displays empty state when no records exist', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
+          locale: Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: RetrospectiveListView(
               entries: [],
@@ -283,7 +312,6 @@ void main() {
           intensity: 3,
           anatomicalSystem: 'coluna_dorsal',
           emotionalDimension: null,
-          disposition: 'consulta_rotina',
           stepAnswers: {'causes': 'dor nas costas'},
           recordedAt: DateTime.parse('2026-09-14T10:30:00.000Z'),
         ),
@@ -291,6 +319,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: SingleChildScrollView(
               child: RetrospectiveListView(

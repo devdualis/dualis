@@ -30,8 +30,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
         (outcome.vertical == 'emotional' || hasSecondaryEmotional);
 
     final hasSecondaryPhysical = outcome != null &&
-        (outcome.vertical == 'emotional' &&
-            (outcome.organicPrimacyApplied || outcome.secondaryCategoryLabel != null));
+        (outcome.vertical == 'emotional' && outcome.secondaryCategoryLabel != null);
     final isPhysicalFromOutcome = outcome != null &&
         (outcome.vertical == 'physical' || hasSecondaryPhysical);
 
@@ -231,10 +230,10 @@ class DualAxisTriggerCard extends ConsumerWidget {
 
             const SizedBox(height: 16),
 
-            // Etapa 2: Avaliação Física
+            // Etapa 2: Físico
             _buildStageCard(
               context: context,
-              title: 'Avaliação Física',
+              title: 'Físico',
               subtitle: 'Dores corporais, desconforto somático ou fadiga',
               icon: Icons.accessibility_new_rounded,
               accentColor: AppColors.dualisSymbolBlue,

@@ -127,43 +127,43 @@ abstract class AppLocalizations {
   /// Title of the first onboarding carousel card
   ///
   /// In pt, this message translates to:
-  /// **'Triagem Preventiva Unificada'**
+  /// **'Diário de Bem-Estar Integrado'**
   String get valueCard1Title;
 
   /// Body copy of the first onboarding carousel card
   ///
   /// In pt, this message translates to:
-  /// **'Conecte sua saúde física e estado psico-emocional em um único fluxo diário inteligente, garantindo cuidado holístico e sem ruídos.'**
+  /// **'Registre como você está no corpo e nas emoções em um único check-in diário de 1 minuto.'**
   String get valueCard1Body;
 
   /// Title of the second onboarding carousel card
   ///
   /// In pt, this message translates to:
-  /// **'Registros Médicos Blindados'**
+  /// **'Seus Dados Protegidos'**
   String get valueCard2Title;
 
   /// Body copy of the second onboarding carousel card
   ///
   /// In pt, this message translates to:
-  /// **'Seu histórico clínico protegido por criptografia AES-256 e custodiado sob os mais rigorosos padrões da LGPD. Você é o único dono dos seus dados.'**
+  /// **'Seus registros de bem-estar ficam criptografados e sob seu controle, conforme a LGPD.'**
   String get valueCard2Body;
 
   /// Title of the third onboarding carousel card
   ///
   /// In pt, this message translates to:
-  /// **'Orientações Preventivas Precisas'**
+  /// **'Conteúdos para Hábitos Saudáveis'**
   String get valueCard3Title;
 
   /// Body copy of the third onboarding carousel card
   ///
   /// In pt, this message translates to:
-  /// **'Recomendações e artigos de especialistas médicos renomados sem diagnósticos falsos ou alarmismos desnecessários.'**
+  /// **'Leituras curtas e gerais sobre sono, estresse, postura, hidratação e mais.'**
   String get valueCard3Body;
 
-  /// LGPD Article 11 mandatory consent checkbox text
+  /// LGPD Art. 11, I consent sentence (full text, C-05)
   ///
   /// In pt, this message translates to:
-  /// **'Li e concordo com a Política de Privacidade e consinto expressamente com o tratamento de meus dados pessoais sensíveis de saúde para fins de triagem preventiva e acompanhamento longitudinal, nos termos do Art. 11 da LGPD.'**
+  /// **'Li e concordo com a Política de Privacidade e consinto, de forma específica e destacada, com o tratamento dos meus dados pessoais sensíveis de saúde para registrar e visualizar meu diário de bem-estar, nos termos do Art. 11, I da LGPD.'**
   String get lgpdConsentCheckbox;
 
   /// Title displayed when privacy veil obscures health data
@@ -175,7 +175,7 @@ abstract class AppLocalizations {
   /// Body copy displayed on the privacy veil
   ///
   /// In pt, this message translates to:
-  /// **'Autentique-se com biometria ou senha para acessar seu prontuário.'**
+  /// **'Autentique-se com biometria ou senha para acessar seus registros.'**
   String get privacyVeilBody;
 
   /// Validation error for full name input
@@ -271,115 +271,19 @@ abstract class AppLocalizations {
   /// Title of the emergency risk alert screen
   ///
   /// In pt, this message translates to:
-  /// **'Alerta de Risco Imediato'**
+  /// **'Precisa de ajuda agora?'**
   String get emergencyTitle;
 
   /// Subtitle describing immediate risk and advising urgent care
   ///
   /// In pt, this message translates to:
-  /// **'Sintomas de gravidade identificados. Procure atendimento médico urgente.'**
+  /// **'Se você ou alguém perto de você estiver em perigo, ligue para a emergência. Não espere.'**
   String get emergencySubtitle;
-
-  /// Emergency badge for critical chest pain
-  ///
-  /// In pt, this message translates to:
-  /// **'Dor Torácica Crítica'**
-  String get emergencyBadgeChestPain;
-
-  /// Emergency badge for acute respiratory distress
-  ///
-  /// In pt, this message translates to:
-  /// **'Dificuldade Respiratória Aguda'**
-  String get emergencyBadgeRespiratory;
-
-  /// Emergency badge for suspected stroke
-  ///
-  /// In pt, this message translates to:
-  /// **'Suspeita de Déficit Neurológico (AVC)'**
-  String get emergencyBadgeStroke;
-
-  /// Emergency badge for sudden explosive thunderclap headache
-  ///
-  /// In pt, this message translates to:
-  /// **'Cefaleia Súbita e Explosiva'**
-  String get emergencyBadgeHeadache;
-
-  /// Emergency badge for acute emotional crisis / life safety
-  ///
-  /// In pt, this message translates to:
-  /// **'Apoio Emocional Imediato / Risco à Vida'**
-  String get emergencyBadgeEmotional;
-
-  /// Emergency badge for general critical intensity symptoms
-  ///
-  /// In pt, this message translates to:
-  /// **'Sintoma Crítico (Nível 4–5)'**
-  String get emergencyBadgeGeneral;
-
-  /// First physical emergency action step
-  ///
-  /// In pt, this message translates to:
-  /// **'Interrompa qualquer esforço físico e permaneça em repouso.'**
-  String get emergencyInstructionPhysical1;
-
-  /// Second physical emergency action step
-  ///
-  /// In pt, this message translates to:
-  /// **'Não dirija até o hospital. Acione o 192 ou peça ajuda a terceiros.'**
-  String get emergencyInstructionPhysical2;
-
-  /// Third physical emergency action step
-  ///
-  /// In pt, this message translates to:
-  /// **'Afrouxe roupas apertadas e tente manter a calma enquanto o socorro chega.'**
-  String get emergencyInstructionPhysical3;
-
-  /// First emotional emergency action step
-  ///
-  /// In pt, this message translates to:
-  /// **'Você não está sozinho(a). Ajuda qualificada e sigilosa está disponível agora.'**
-  String get emergencyInstructionEmotional1;
-
-  /// Second emotional emergency action step
-  ///
-  /// In pt, this message translates to:
-  /// **'O CVV oferece apoio emocional gratuito 24 horas por dia pelo telefone 188.'**
-  String get emergencyInstructionEmotional2;
-
-  /// Third emotional emergency action step
-  ///
-  /// In pt, this message translates to:
-  /// **'Se sentir que está em perigo imediato, acione o 192 ou procure a emergência.'**
-  String get emergencyInstructionEmotional3;
-
-  /// Button label to dial SAMU emergency services (192)
-  ///
-  /// In pt, this message translates to:
-  /// **'Ligar SAMU (192)'**
-  String get emergencyCallSamu;
-
-  /// Button label to dial Bombeiros fire/rescue (193)
-  ///
-  /// In pt, this message translates to:
-  /// **'Ligar Bombeiros (193)'**
-  String get emergencyCallBombeiros;
-
-  /// Button label to dial CVV crisis emotional hotline (188)
-  ///
-  /// In pt, this message translates to:
-  /// **'Ligar CVV - Apoio Emocional (188)'**
-  String get emergencyCallCvv;
-
-  /// Button label to dial Police emergency line (190)
-  ///
-  /// In pt, this message translates to:
-  /// **'Ligar Polícia (190)'**
-  String get emergencyCallPolicia;
 
   /// Button label to open maps looking for nearest emergency room
   ///
   /// In pt, this message translates to:
-  /// **'Buscar Pronto-Socorro Mais Próximo'**
+  /// **'Buscar pronto-socorro mais próximo'**
   String get emergencyFindHospital;
 
   /// Hint text advising patient to provide address clearly to emergency dispatchers
@@ -387,36 +291,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ao ligar, informe seu endereço com clareza e mantenha a calma.'**
   String get emergencyDispatcherHint;
-
-  /// Text button to initiate exiting the emergency screen
-  ///
-  /// In pt, this message translates to:
-  /// **'Voltar ao Início (Não recomendado)'**
-  String get emergencyExitButton;
-
-  /// Title of the exit confirmation dialog
-  ///
-  /// In pt, this message translates to:
-  /// **'Atenção Médica Urgente'**
-  String get emergencyExitConfirmTitle;
-
-  /// Body message of the exit confirmation dialog warning of life-safety risks
-  ///
-  /// In pt, this message translates to:
-  /// **'Seus sintomas indicam uma situação de risco à vida. Recomendamos fortemente que você contate um serviço médico antes de sair. Deseja realmente voltar ao início?'**
-  String get emergencyExitConfirmBody;
-
-  /// Primary action button to stay on the emergency screen
-  ///
-  /// In pt, this message translates to:
-  /// **'Permanecer na Emergência'**
-  String get emergencyExitConfirmStay;
-
-  /// Destructive secondary action button confirming exit despite life-safety warnings
-  ///
-  /// In pt, this message translates to:
-  /// **'Entendi os Riscos / Sair'**
-  String get emergencyExitConfirmLeave;
 
   /// Title of the telephony fallback dialog for tablets/devices without phone dialers
   ///
@@ -445,13 +319,13 @@ abstract class AppLocalizations {
   /// Banner text for emotional triage vertical
   ///
   /// In pt, this message translates to:
-  /// **'Iniciando Autoavaliação Psico-Emocional'**
+  /// **'Registro emocional de hoje'**
   String get triageBannerEmotional;
 
   /// Banner text for physical triage vertical
   ///
   /// In pt, this message translates to:
-  /// **'Iniciando Autoavaliação Física'**
+  /// **'Registro físico de hoje'**
   String get triageBannerPhysical;
 
   /// Step progress indicator
@@ -481,7 +355,7 @@ abstract class AppLocalizations {
   /// Title of the preview step card
   ///
   /// In pt, this message translates to:
-  /// **'Revisão da sua Avaliação'**
+  /// **'Revise seu registro'**
   String get triagePreviewTitle;
 
   /// Final submission CTA button
@@ -535,37 +409,37 @@ abstract class AppLocalizations {
   /// Emotional dimension 1: Ansiosa / Agitação
   ///
   /// In pt, this message translates to:
-  /// **'Ansiosa / Agitação'**
+  /// **'Inquieto(a) / Agitado(a)'**
   String get triageOptAnsiosaAgitacao;
 
   /// Emotional dimension 2: Depressiva / Desânimo
   ///
   /// In pt, this message translates to:
-  /// **'Depressiva / Desânimo'**
+  /// **'Pra baixo / Desanimado(a)'**
   String get triageOptDepressivaDesanimo;
 
   /// Emotional dimension 3: Estresse / Burnout
   ///
   /// In pt, this message translates to:
-  /// **'Estresse / Burnout'**
+  /// **'Estressado(a) / Esgotado(a)'**
   String get triageOptEstresseBurnout;
 
   /// Emotional dimension 4: Somática (Psicossomática)
   ///
   /// In pt, this message translates to:
-  /// **'Somática (Psicossomática)'**
+  /// **'Tensão no corpo'**
   String get triageOptSomatica;
 
   /// Emotional dimension 5: Sono (Insônia/Hipersônia)
   ///
   /// In pt, this message translates to:
-  /// **'Sono (Insônia / Hipersônia)'**
+  /// **'Sono ruim ou sono demais'**
   String get triageOptSono;
 
   /// Emotional dimension 6: Cognitiva / Foco
   ///
   /// In pt, this message translates to:
-  /// **'Cognitiva / Foco'**
+  /// **'Dificuldade de foco'**
   String get triageOptCognitivaFoco;
 
   /// Emotional dimension 7: Autoestima / Autoimagem
@@ -871,7 +745,7 @@ abstract class AppLocalizations {
   /// Emotional preview step description
   ///
   /// In pt, this message translates to:
-  /// **'Revisão da sua Autoavaliação Psico-Emocional'**
+  /// **'Revise seu registro'**
   String get triagePreviewEmotional;
 
   /// Question 1 physical
@@ -907,79 +781,79 @@ abstract class AppLocalizations {
   /// Physical system 1: Cabeça e Pescoço
   ///
   /// In pt, this message translates to:
-  /// **'Cabeça e Pescoço'**
+  /// **'Cabeça e pescoço'**
   String get triageOptCabecaPescoco;
 
   /// Physical system 2: Cardiovascular / Tórax
   ///
   /// In pt, this message translates to:
-  /// **'Cardiovascular / Tórax'**
+  /// **'Peito'**
   String get triageOptCardiovascularTorax;
 
   /// Physical system 3: Sistema Respiratório
   ///
   /// In pt, this message translates to:
-  /// **'Sistema Respiratório'**
+  /// **'Respiração'**
   String get triageOptRespiratorio;
 
   /// Physical system 4: Gastrointestinal / Abdômen
   ///
   /// In pt, this message translates to:
-  /// **'Gastrointestinal / Abdômen'**
+  /// **'Barriga'**
   String get triageOptGastrointestinalAbdomen;
 
   /// Physical system 5: Coluna e Dor Dorsal
   ///
   /// In pt, this message translates to:
-  /// **'Coluna e Dor Dorsal'**
+  /// **'Costas'**
   String get triageOptColunaDorDorsal;
 
   /// Physical system 6: Membros Superiores D/E
   ///
   /// In pt, this message translates to:
-  /// **'Membros Superiores D/E'**
+  /// **'Braços'**
   String get triageOptMembrosSuperiores;
 
   /// Physical system 7: Membros Inferiores D/E
   ///
   /// In pt, this message translates to:
-  /// **'Membros Inferiores D/E'**
+  /// **'Pernas'**
   String get triageOptMembrosInferiores;
 
   /// Physical system 8: Sistema Neurológico
   ///
   /// In pt, this message translates to:
-  /// **'Sistema Neurológico'**
+  /// **'Tontura / formigamento'**
   String get triageOptNeurologico;
 
   /// Physical system 9: Geniturinário / Pélvico
   ///
   /// In pt, this message translates to:
-  /// **'Geniturinário / Pélvico'**
+  /// **'Região íntima / urinária'**
   String get triageOptGeniturinarioPelvico;
 
   /// Physical system 10: Sistema Dermatológico
   ///
   /// In pt, this message translates to:
-  /// **'Sistema Dermatológico'**
+  /// **'Pele'**
   String get triageOptDermatologico;
 
   /// Physical system 11: Muscular / Geral Sistêmico
   ///
   /// In pt, this message translates to:
-  /// **'Muscular / Geral Sistêmico'**
+  /// **'Corpo todo / cansaço'**
   String get triageOptMuscularGeralSistemico;
 
   /// Physical system 12: Endócrino / Metabólico
   ///
   /// In pt, this message translates to:
-  /// **'Endócrino / Metabólico'**
+  /// **'Sede, fome ou energia'**
   String get triageOptEndocrinoMetabolico;
 
   /// Question 2 physical
   ///
   /// In pt, this message translates to:
-  /// **'Há quanto tempo essa dor ou anomalia persiste?'**
+  /// **'Há quanto tempo você sente esse desconforto?'**
   String get triageQ2Physical;
 
   /// Physical persistence: Started now
@@ -997,7 +871,7 @@ abstract class AppLocalizations {
   /// Physical persistence: Chronic
   ///
   /// In pt, this message translates to:
-  /// **'É crônica'**
+  /// **'Já faz bastante tempo'**
   String get triageOptCronica;
 
   /// Question 3 physical
@@ -1363,7 +1237,7 @@ abstract class AppLocalizations {
   /// Physical preview step description
   ///
   /// In pt, this message translates to:
-  /// **'Revisão da sua Avaliação Física'**
+  /// **'Revise seu registro'**
   String get triagePreviewPhysical;
 
   /// Intensity label
@@ -1384,106 +1258,40 @@ abstract class AppLocalizations {
   /// **'Insuportável'**
   String get triageIntensityMax;
 
-  /// Title of Screen 6 Triage Outcome
+  /// Outcome screen title (wellness)
   ///
   /// In pt, this message translates to:
-  /// **'Resultado da Triagem'**
+  /// **'Resumo do seu registro'**
   String get outcomeScreenTitle;
 
   /// Subtitle of Screen 6 Triage Outcome
   ///
   /// In pt, this message translates to:
-  /// **'Avaliação preventiva baseada nas suas respostas'**
+  /// **'Um retrato do que você registrou hoje'**
   String get outcomeScreenSubtitle;
 
   /// Intensity title
   ///
   /// In pt, this message translates to:
-  /// **'Intensidade Calculada'**
+  /// **'Intensidade que você informou'**
   String get outcomeIntensityTitle;
 
   /// Intensity score description
   ///
   /// In pt, this message translates to:
-  /// **'Pontuação calculada na escala clínica de 1 a 5'**
+  /// **'Sua própria nota de 1 a 5 para como se sentiu'**
   String get outcomeIntensityDescription;
-
-  /// Disposition title
-  ///
-  /// In pt, this message translates to:
-  /// **'Recomendação de Cuidado'**
-  String get outcomeDispositionTitle;
-
-  /// Self-care disposition
-  ///
-  /// In pt, this message translates to:
-  /// **'Auto-cuidado Monitorado'**
-  String get outcomeDispositionSelfCare;
-
-  /// Self-care description
-  ///
-  /// In pt, this message translates to:
-  /// **'Repouso, hidratação adequada e acompanhamento dos sintomas nas próximas 24 horas.'**
-  String get outcomeDispositionSelfCareDesc;
-
-  /// Routine disposition
-  ///
-  /// In pt, this message translates to:
-  /// **'Consulta de Rotina'**
-  String get outcomeDispositionRoutine;
-
-  /// Routine description
-  ///
-  /// In pt, this message translates to:
-  /// **'Agende uma consulta preventiva nos próximos dias com um profissional de saúde.'**
-  String get outcomeDispositionRoutineDesc;
-
-  /// Urgent disposition
-  ///
-  /// In pt, this message translates to:
-  /// **'Pronto Atendimento'**
-  String get outcomeDispositionUrgent;
-
-  /// Urgent description
-  ///
-  /// In pt, this message translates to:
-  /// **'Busque avaliação médica presencial em uma unidade de saúde em até 24 horas.'**
-  String get outcomeDispositionUrgentDesc;
-
-  /// Emergency disposition
-  ///
-  /// In pt, this message translates to:
-  /// **'Atendimento de Emergência'**
-  String get outcomeDispositionEmergency;
-
-  /// Emergency description
-  ///
-  /// In pt, this message translates to:
-  /// **'Seus sintomas exigem atenção imediata. Procure um serviço de emergência ou ligue 192.'**
-  String get outcomeDispositionEmergencyDesc;
-
-  /// Organic primacy title
-  ///
-  /// In pt, this message translates to:
-  /// **'Atenção: Primazia Orgânica'**
-  String get outcomeOrganicPrimacyTitle;
-
-  /// Organic primacy description
-  ///
-  /// In pt, this message translates to:
-  /// **'Sintomas físicos concomitantes ao desconforto emocional requerem avaliação médica física prioritária antes de serem atribuídos unicamente ao estresse psicológico.'**
-  String get outcomeOrganicPrimacyDesc;
 
   /// Articles section title
   ///
   /// In pt, this message translates to:
-  /// **'Artigos Médicos Recomendados'**
+  /// **'Leituras sobre bem-estar'**
   String get outcomeArticlesTitle;
 
   /// Articles section subtitle
   ///
   /// In pt, this message translates to:
-  /// **'Conteúdos preventivos elaborados por especialistas renomados'**
+  /// **'Conteúdos educativos gerais. Não são orientação para o seu caso.'**
   String get outcomeArticlesSubtitle;
 
   /// Article read time in minutes
@@ -1501,7 +1309,7 @@ abstract class AppLocalizations {
   /// Screen 5 Antiburla Bottom Sheet title
   ///
   /// In pt, this message translates to:
-  /// **'Verificação Histórica'**
+  /// **'Isso já apareceu antes?'**
   String get antiburlaTitle;
 
   /// Empathetic question prompt for Antiburla historical check
@@ -1519,7 +1327,7 @@ abstract class AppLocalizations {
   /// Explanation for recurring symptom choice
   ///
   /// In pt, this message translates to:
-  /// **'Ajustaremos o início para \'Há alguns dias\' para manter seu histórico clínico consistente.'**
+  /// **'Vamos registrar como algo que voltou, para seu diário ficar organizado.'**
   String get antiburlaOptionRecurringDesc;
 
   /// Button label when symptom is an isolated new occurrence
@@ -1533,18 +1341,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Manteremos registrado como um evento agudo que começou hoje.'**
   String get antiburlaOptionNewDesc;
-
-  /// Title for biological discordance alert
-  ///
-  /// In pt, this message translates to:
-  /// **'Aviso Anatômico Preventivo'**
-  String get antiburlaBiologicalDiscordanceTitle;
-
-  /// Description for biological discordance alert
-  ///
-  /// In pt, this message translates to:
-  /// **'Notamos uma divergência entre a anatomia informada e os parâmetros do seu perfil. Deseja revisar antes de prosseguir?'**
-  String get antiburlaBiologicalDiscordanceDesc;
 
   /// Title for the off-topic narrative confirmation bottom sheet
   ///
@@ -1591,7 +1387,7 @@ abstract class AppLocalizations {
   /// Explanatory text for offline functionality
   ///
   /// In pt, this message translates to:
-  /// **'Você está offline. Seu histórico e avaliação continuam funcionando normalmente.'**
+  /// **'Você está offline. Seus registros continuam funcionando normalmente.'**
   String get offlineModeNotice;
 
   /// Title of the historical dashboard screen
@@ -1627,7 +1423,7 @@ abstract class AppLocalizations {
   /// Legend label for no pain
   ///
   /// In pt, this message translates to:
-  /// **'Sem dor'**
+  /// **'Sem registro'**
   String get heatLegendNone;
 
   /// Legend label for mild pain
@@ -1681,7 +1477,7 @@ abstract class AppLocalizations {
   /// Button to read recommended article on recurrence card
   ///
   /// In pt, this message translates to:
-  /// **'Ler Artigo Recomendado'**
+  /// **'Ler artigo'**
   String get readRecommendedArticle;
 
   /// Title for Privacy Center screen
@@ -1699,7 +1495,7 @@ abstract class AppLocalizations {
   /// Description for data export section
   ///
   /// In pt, this message translates to:
-  /// **'Baixe uma cópia completa dos seus dados pessoais e histórico clínico em formato JSON conforme o Art. 18, V da LGPD.'**
+  /// **'Baixe uma cópia completa dos seus dados pessoais e registros de bem-estar em formato JSON conforme o Art. 18, V da LGPD.'**
   String get exportDataDesc;
 
   /// Button to export user data
@@ -1969,7 +1765,7 @@ abstract class AppLocalizations {
   /// Subtitle for history tile
   ///
   /// In pt, this message translates to:
-  /// **'Visualize seu histórico de triagens'**
+  /// **'Visualize seu histórico de registros'**
   String get settingsDataHistorySubtitle;
 
   /// Title of the delete history item confirmation dialog
@@ -1981,7 +1777,7 @@ abstract class AppLocalizations {
   /// Confirmation message when discarding a history entry
   ///
   /// In pt, this message translates to:
-  /// **'Tem certeza de que deseja descartar este registro de triagem do seu histórico? Esta ação é irreversível.'**
+  /// **'Tem certeza de que deseja descartar este registro do seu histórico? Esta ação é irreversível.'**
   String get deleteHistoryItemConfirm;
 
   /// Success snackbar message when record is deleted
@@ -2107,13 +1903,13 @@ abstract class AppLocalizations {
   /// Error loading triage history
   ///
   /// In pt, this message translates to:
-  /// **'Não foi possível carregar o histórico de triagens no momento.'**
+  /// **'Não foi possível carregar o histórico de registros no momento.'**
   String get errorLoadHistory;
 
   /// Article link unavailable
   ///
   /// In pt, this message translates to:
-  /// **'Link do artigo preventivo não disponível.'**
+  /// **'Link do artigo não disponível.'**
   String get errorArticleLinkUnavailable;
 
   /// Unable to open link error
@@ -2143,7 +1939,7 @@ abstract class AppLocalizations {
   /// Bottom navigation Today Outcome label
   ///
   /// In pt, this message translates to:
-  /// **'Resultado do Dia'**
+  /// **'Meu Dia'**
   String get navTodayOutcome;
 
   /// Bottom navigation History label
@@ -2209,13 +2005,13 @@ abstract class AppLocalizations {
   /// Scheduled daily check-in reminder notification title
   ///
   /// In pt, this message translates to:
-  /// **'🩺 Check-in Diário Dualis ({time})'**
+  /// **'🌿 Check-in Diário Dualis ({time})'**
   String notifCheckinTitleAt(String time);
 
   /// Daily check-in reminder notification body
   ///
   /// In pt, this message translates to:
-  /// **'Você ainda não atualizou seu estado de saúde hoje. Toque para realizar seu check-in!'**
+  /// **'Você ainda não fez seu registro de hoje. Toque para fazer seu check-in!'**
   String get notifCheckinBody;
 
   /// Android notification channel name, daily check-in reminders
@@ -2227,7 +2023,7 @@ abstract class AppLocalizations {
   /// Android notification channel description, daily check-in reminders
   ///
   /// In pt, this message translates to:
-  /// **'Notificações a cada 2 horas para lembrar de atualizar seu check-in diário de saúde'**
+  /// **'Notificações a cada 2 horas para lembrar do seu check-in diário de bem-estar'**
   String get notifCheckinChannelDescription;
 
   /// Today's result, dual view: label of the first (physical) axis card
@@ -2317,7 +2113,7 @@ abstract class AppLocalizations {
   /// No description provided for @familySharingScopeCoManageOption.
   ///
   /// In pt, this message translates to:
-  /// **'Co-gestão (Pode registrar triagens)'**
+  /// **'Co-gestão (Pode adicionar registros)'**
   String get familySharingScopeCoManageOption;
 
   /// No description provided for @familySharingActiveSince.
@@ -2545,7 +2341,7 @@ abstract class AppLocalizations {
   /// No description provided for @addDependentLgpdArt14Consent.
   ///
   /// In pt, this message translates to:
-  /// **'Declaro, sob as penas da lei, que sou pai, mãe ou representante legal deste dependente e autorizo expressamente a coleta e tratamento dos seus dados de saúde preventiva na plataforma DualisCheckUp, em estrita conformidade com o Artigo 14 da LGPD (Lei 13.709/2018).'**
+  /// **'Declaro, sob as penas da lei, que sou pai, mãe ou representante legal deste dependente e autorizo expressamente a coleta e tratamento dos seus dados de bem-estar na plataforma DualisCheckUp, em estrita conformidade com o Artigo 14 da LGPD (Lei 13.709/2018).'**
   String get addDependentLgpdArt14Consent;
 
   /// No description provided for @addDependentSubmit.
@@ -2569,7 +2365,7 @@ abstract class AppLocalizations {
   /// Header title of the profile selection bottom sheet
   ///
   /// In pt, this message translates to:
-  /// **'Perfis de Saúde'**
+  /// **'Perfis'**
   String get profileSwitcherSheetTitle;
 
   /// Section title for the primary user profile
@@ -2727,6 +2523,1494 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Perfil de {profileName}'**
   String activeProfileCardTitle(String profileName);
+
+  /// Search text sent to the maps app to find the nearest emergency room.
+  ///
+  /// In pt, this message translates to:
+  /// **'pronto-socorro'**
+  String get emergencyMapsQuery;
+
+  /// No description provided for @safetyClose.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fechar'**
+  String get safetyClose;
+
+  /// Call button on the help resources screen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligar {name} ({number})'**
+  String safetyCallLine(String name, String number);
+
+  /// No description provided for @safetyKindEmergency.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emergência'**
+  String get safetyKindEmergency;
+
+  /// No description provided for @safetyKindAmbulance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ambulância'**
+  String get safetyKindAmbulance;
+
+  /// No description provided for @safetyKindFire.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bombeiros'**
+  String get safetyKindFire;
+
+  /// No description provided for @safetyKindPolice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Polícia'**
+  String get safetyKindPolice;
+
+  /// No description provided for @safetyKindEmotionalSupport.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apoio emocional'**
+  String get safetyKindEmotionalSupport;
+
+  /// No description provided for @safetyKindHealthLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Linha de saúde'**
+  String get safetyKindHealthLine;
+
+  /// No description provided for @safetyFree24h.
+  ///
+  /// In pt, this message translates to:
+  /// **'24h, gratuito'**
+  String get safetyFree24h;
+
+  /// No description provided for @safetyWarningSignsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligue {number} imediatamente se você ou alguém tiver:'**
+  String safetyWarningSignsTitle(String number);
+
+  /// No description provided for @safetyWarningSign1.
+  ///
+  /// In pt, this message translates to:
+  /// **'dor ou pressão forte no peito'**
+  String get safetyWarningSign1;
+
+  /// No description provided for @safetyWarningSign2.
+  ///
+  /// In pt, this message translates to:
+  /// **'falta de ar intensa'**
+  String get safetyWarningSign2;
+
+  /// No description provided for @safetyWarningSign3.
+  ///
+  /// In pt, this message translates to:
+  /// **'rosto torto, fraqueza num lado do corpo ou fala enrolada'**
+  String get safetyWarningSign3;
+
+  /// No description provided for @safetyWarningSign4.
+  ///
+  /// In pt, this message translates to:
+  /// **'a pior dor de cabeça da vida, de início súbito'**
+  String get safetyWarningSign4;
+
+  /// No description provided for @safetyWarningSign5.
+  ///
+  /// In pt, this message translates to:
+  /// **'desmaio ou convulsão'**
+  String get safetyWarningSign5;
+
+  /// No description provided for @safetyWarningSign6.
+  ///
+  /// In pt, this message translates to:
+  /// **'sangramento que não para'**
+  String get safetyWarningSign6;
+
+  /// No description provided for @safetyWarningSignsSource.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fonte: Ministério da Saúde / SAMU'**
+  String get safetyWarningSignsSource;
+
+  /// No description provided for @safetyCrisisWithLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se você está pensando em se machucar ou em tirar a própria vida, ligue {crisis} ou {emergency}.'**
+  String safetyCrisisWithLine(String crisis, String emergency);
+
+  /// No description provided for @safetyCrisisNoLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se você está pensando em se machucar ou em tirar a própria vida, ligue {emergency} ou procure a linha de apoio emocional do seu país.'**
+  String safetyCrisisNoLine(String emergency);
+
+  /// No description provided for @safetyLocalNumberHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se o {number} não funcionar onde você está, ligue para o número local de emergência.'**
+  String safetyLocalNumberHint(String number);
+
+  /// Same non-blocking notice for everyone. Never name a condition.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se isso for uma emergência, não use o app: ligue {number} agora.'**
+  String safetyNoticeGeneral(String number);
+
+  /// No description provided for @safetyNoticeOpenResources.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver contatos de ajuda'**
+  String get safetyNoticeOpenResources;
+
+  /// Global button that opens the help resources screen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ajuda urgente'**
+  String get urgentHelpButton;
+
+  /// No description provided for @lgpdConsentPrefix.
+  ///
+  /// In pt, this message translates to:
+  /// **'Li e concordo com os '**
+  String get lgpdConsentPrefix;
+
+  /// No description provided for @lgpdConsentTermsLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Termos de Uso'**
+  String get lgpdConsentTermsLink;
+
+  /// No description provided for @lgpdConsentAnd.
+  ///
+  /// In pt, this message translates to:
+  /// **' e a '**
+  String get lgpdConsentAnd;
+
+  /// No description provided for @lgpdConsentPrivacyLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Política de Privacidade'**
+  String get lgpdConsentPrivacyLink;
+
+  /// No description provided for @lgpdConsentSuffix.
+  ///
+  /// In pt, this message translates to:
+  /// **', e consinto, de forma específica e destacada, com o tratamento dos meus dados pessoais sensíveis de saúde para registrar e visualizar meu diário de bem-estar, nos termos do Art. 11, I da LGPD. '**
+  String get lgpdConsentSuffix;
+
+  /// No description provided for @lgpdConsentLearnMore.
+  ///
+  /// In pt, this message translates to:
+  /// **'(Saiba mais)'**
+  String get lgpdConsentLearnMore;
+
+  /// No description provided for @lgpdConsentSheetTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Política de Privacidade e Termo de Consentimento (LGPD Art. 11, I)'**
+  String get lgpdConsentSheetTitle;
+
+  /// Canonical intended-use statement (plan §1.1)
+  ///
+  /// In pt, this message translates to:
+  /// **'O DualisCheckUp é um aplicativo de bem-estar e autoconhecimento. Ele ajuda você a registrar diariamente como se sente física e emocionalmente, acompanhar hábitos como hidratação e sono, visualizar seus próprios registros ao longo do tempo e acessar conteúdos educativos gerais sobre hábitos saudáveis. O DualisCheckUp não é um dispositivo médico: não avalia, não classifica nem interpreta sintomas, não indica nível de urgência, não faz diagnóstico, não recomenda tratamento e não substitui um profissional de saúde. Em caso de emergência, ligue 192 (SAMU). Se você estiver em sofrimento emocional, ligue 188 (CVV).'**
+  String get lgpdConsentSheetBody;
+
+  /// No description provided for @lgpdConsentSheetBasesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bases normativas:'**
+  String get lgpdConsentSheetBasesTitle;
+
+  /// No description provided for @lgpdConsentSheetBases.
+  ///
+  /// In pt, this message translates to:
+  /// **'• Lei nº 13.709/2018 (LGPD): Art. 7 e Art. 11 (tratamento de dados pessoais e de dados sensíveis de saúde), Art. 14 (dados de crianças e adolescentes) e Art. 18 (direitos do titular).\n• Código de Defesa do Consumidor (CDC): Art. 49 - Direito de Arrependimento em 7 dias.'**
+  String get lgpdConsentSheetBases;
+
+  /// No description provided for @lgpdConsentViewTerms.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver Termos de Uso'**
+  String get lgpdConsentViewTerms;
+
+  /// No description provided for @lgpdConsentViewPolicy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver Política Completa'**
+  String get lgpdConsentViewPolicy;
+
+  /// No description provided for @termsAppBarTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Termos de Uso do SaaS'**
+  String get termsAppBarTitle;
+
+  /// No description provided for @termsHeaderTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Termos e Condições de Uso'**
+  String get termsHeaderTitle;
+
+  /// No description provided for @termsVersionLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Versão 2026.2 • Atualizado em 16/10/2026'**
+  String get termsVersionLine;
+
+  /// No description provided for @termsIntro.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contrato de prestação de serviços de software em nuvem (SaaS) celebrado entre o Usuário e a DualisCheckUp Saúde e Tecnologia Ltda., inscrita no CNPJ sob o nº 48.291.834/0001-92, com sede em São Paulo/SP, Brasil.'**
+  String get termsIntro;
+
+  /// No description provided for @termsSection1Title.
+  ///
+  /// In pt, this message translates to:
+  /// **'1. Aceitação e Capacidade Civil'**
+  String get termsSection1Title;
+
+  /// No description provided for @termsSection1Body.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ao cadastrar-se ou utilizar o DualisCheckUp, você declara possuir capacidade civil plena (maior de 18 anos ou emancipado) e manifesta concordância integral com estes Termos de Uso e com nossa Política de Privacidade.'**
+  String get termsSection1Body;
+
+  /// No description provided for @termsSection2Title.
+  ///
+  /// In pt, this message translates to:
+  /// **'2. Natureza do Serviço'**
+  String get termsSection2Title;
+
+  /// Canonical intended-use statement (plan §1.1)
+  ///
+  /// In pt, this message translates to:
+  /// **'O DualisCheckUp é um aplicativo de bem-estar e autoconhecimento. Ele ajuda você a registrar diariamente como se sente física e emocionalmente, acompanhar hábitos como hidratação e sono, visualizar seus próprios registros ao longo do tempo e acessar conteúdos educativos gerais sobre hábitos saudáveis. O DualisCheckUp não é um dispositivo médico: não avalia, não classifica nem interpreta sintomas, não indica nível de urgência, não faz diagnóstico, não recomenda tratamento e não substitui um profissional de saúde. Em caso de emergência, ligue 192 (SAMU). Se você estiver em sofrimento emocional, ligue 188 (CVV).'**
+  String get termsSection2Body;
+
+  /// No description provided for @termsSection2Bullet1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não avalia sintomas, não indica urgência, não diagnostica e não recomenda tratamento.'**
+  String get termsSection2Bullet1;
+
+  /// No description provided for @termsSection2Bullet2.
+  ///
+  /// In pt, this message translates to:
+  /// **'As intensidades e demais informações exibidas são as que você mesmo registrou.'**
+  String get termsSection2Bullet2;
+
+  /// No description provided for @termsSection2Bullet3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em emergência, ligue 192 (SAMU) ou 188 (CVV).'**
+  String get termsSection2Bullet3;
+
+  /// No description provided for @termsSection3Title.
+  ///
+  /// In pt, this message translates to:
+  /// **'3. Planos SaaS, Cobrança e Reembolso'**
+  String get termsSection3Title;
+
+  /// No description provided for @termsSection3Body.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recursos adicionais podem ser oferecidos em planos com renovação automática periódica, processados por intermediadores de pagamento terceiros:'**
+  String get termsSection3Body;
+
+  /// No description provided for @termsSection3Bullet1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelamento Facilitado: Você pode cancelar sua assinatura a qualquer momento no app com um toque, sem fidelidade ou taxas de cancelamento.'**
+  String get termsSection3Bullet1;
+
+  /// No description provided for @termsSection3Bullet2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Direito de Arrependimento (CDC Art. 49): Garantia de reembolso integral em até 7 (sete) dias corridos a partir da contratação inicial.'**
+  String get termsSection3Bullet2;
+
+  /// No description provided for @termsSection3Bullet3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acesso Contínuo: O cancelamento interrompe faturas subsequentes e preserva seu acesso até o término do ciclo mensal contratado.'**
+  String get termsSection3Bullet3;
+
+  /// No description provided for @termsSection4Title.
+  ///
+  /// In pt, this message translates to:
+  /// **'4. Propriedade Intelectual'**
+  String get termsSection4Title;
+
+  /// No description provided for @termsSection4Body.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos os direitos de propriedade intelectual sobre software, conteúdos, marcas e interfaces pertencem com exclusividade à DualisCheckUp Saúde e Tecnologia Ltda. É estritamente vedada a reprodução, engenharia reversa ou mineração de dados.'**
+  String get termsSection4Body;
+
+  /// No description provided for @termsSection5Title.
+  ///
+  /// In pt, this message translates to:
+  /// **'5. Suspensão por Violação de Segurança'**
+  String get termsSection5Title;
+
+  /// No description provided for @termsSection5Body.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contas que executarem tentativas de invasão, ataques de força bruta, testes de penetração não autorizados ou submissão de dados fraudulentos serão imediatamente bloqueadas, com encaminhamento às autoridades competentes.'**
+  String get termsSection5Body;
+
+  /// No description provided for @termsSection6Title.
+  ///
+  /// In pt, this message translates to:
+  /// **'6. Foro e Contato Jurídico'**
+  String get termsSection6Title;
+
+  /// No description provided for @termsSection6Body.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estes termos são regidos pelas leis brasileiras. Fica eleito o Foro da Comarca de São Paulo/SP como único competente para dirimir litígios decorrentes deste contrato.\n\nPara dúvidas ou notificações legais: legal@dualischeckup.com.'**
+  String get termsSection6Body;
+
+  /// No description provided for @privacyPolicyAppBarTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Política de Privacidade (LGPD)'**
+  String get privacyPolicyAppBarTitle;
+
+  /// No description provided for @privacyPolicyHeaderTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Política de Privacidade & Proteção de Dados'**
+  String get privacyPolicyHeaderTitle;
+
+  /// No description provided for @privacyPolicyHeaderSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018)'**
+  String get privacyPolicyHeaderSubtitle;
+
+  /// No description provided for @privacyPolicyIntro.
+  ///
+  /// In pt, this message translates to:
+  /// **'A sua privacidade e a confidencialidade dos seus dados de saúde são a nossa prioridade absoluta. Esta política descreve como tratamos, protegemos e permitimos que você controle integralmente suas informações.'**
+  String get privacyPolicyIntro;
+
+  /// No description provided for @privacyPolicyDpoLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Encarregado de Dados (DPO): dpo@dualischeckup.com'**
+  String get privacyPolicyDpoLine;
+
+  /// No description provided for @privacyPolicySection1Title.
+  ///
+  /// In pt, this message translates to:
+  /// **'1. Dados Pessoais e Sensíveis Coletados'**
+  String get privacyPolicySection1Title;
+
+  /// No description provided for @privacyPolicySection1Body.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nos termos do Artigo 11 da LGPD, o tratamento de dados pessoais sensíveis de saúde é realizado com o seu consentimento específico e destacado (Art. 11, I):'**
+  String get privacyPolicySection1Body;
+
+  /// No description provided for @privacyPolicySection1Bullet1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados de Identificação: Nome completo, endereço de e-mail e data de nascimento.'**
+  String get privacyPolicySection1Bullet1;
+
+  /// No description provided for @privacyPolicySection1Bullet2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados de Perfil: Sexo biológico e consumo de água, usados para ajustar suas metas de hidratação.'**
+  String get privacyPolicySection1Bullet2;
+
+  /// No description provided for @privacyPolicySection1Bullet3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Diário de Bem-Estar: Anotações sobre como você se sente física e emocionalmente e a intensidade informada por você.'**
+  String get privacyPolicySection1Bullet3;
+
+  /// No description provided for @privacyPolicySection1Bullet4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados de Acesso Técnico: Endereço IP mascarado, registros criptográficos de sessão e tokens de autenticação transitórios.'**
+  String get privacyPolicySection1Bullet4;
+
+  /// No description provided for @privacyPolicySection2Title.
+  ///
+  /// In pt, this message translates to:
+  /// **'2. Finalidades e Proibição de Venda de Dados'**
+  String get privacyPolicySection2Title;
+
+  /// No description provided for @privacyPolicySection2Body.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seus dados de saúde são tratados somente para:'**
+  String get privacyPolicySection2Body;
+
+  /// No description provided for @privacyPolicySection2Bullet1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registro e visualização do seu diário de bem-estar.'**
+  String get privacyPolicySection2Bullet1;
+
+  /// No description provided for @privacyPolicySection2Bullet2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Organização automática das suas anotações por área do corpo ou emoção (com auxílio de IA, sem avaliação de saúde).'**
+  String get privacyPolicySection2Bullet2;
+
+  /// No description provided for @privacyPolicySection2Bullet3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Consistência do histórico.'**
+  String get privacyPolicySection2Bullet3;
+
+  /// No description provided for @privacyPolicySection2Bullet4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compromisso Ético: É expressamente PROIBIDA a venda, comercialização ou cessão onerosa dos seus dados para corretoras de seguros, anunciantes ou terceiros.'**
+  String get privacyPolicySection2Bullet4;
+
+  /// No description provided for @privacyPolicySection3Title.
+  ///
+  /// In pt, this message translates to:
+  /// **'3. Operadores e Transferência Internacional'**
+  String get privacyPolicySection3Title;
+
+  /// No description provided for @privacyPolicySection3Body.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para prestar o serviço, compartilhamos dados apenas com:'**
+  String get privacyPolicySection3Body;
+
+  /// No description provided for @privacyPolicySection3Bullet1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Google LLC (API Gemini): O texto das suas anotações é enviado à API Gemini do Google para organizá-las automaticamente. A IA não avalia a sua saúde.'**
+  String get privacyPolicySection3Bullet1;
+
+  /// No description provided for @privacyPolicySection3Bullet2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Transferência Internacional: Esse processamento pode ocorrer em servidores localizados fora do Brasil (LGPD Art. 33).'**
+  String get privacyPolicySection3Bullet2;
+
+  /// No description provided for @privacyPolicySection3Bullet3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Infraestrutura em Nuvem: Provedores de hospedagem e banco de dados, sujeitos a obrigações de confidencialidade e segurança.'**
+  String get privacyPolicySection3Bullet3;
+
+  /// No description provided for @privacyPolicySection4Title.
+  ///
+  /// In pt, this message translates to:
+  /// **'4. Pagamentos'**
+  String get privacyPolicySection4Title;
+
+  /// No description provided for @privacyPolicySection4Body.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quando houver planos pagos, os dados de cartão ficam isolados dos nossos servidores:'**
+  String get privacyPolicySection4Body;
+
+  /// No description provided for @privacyPolicySection4Bullet1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Processamento por Terceiros: Os pagamentos são intermediados por gateways de pagamento especializados.'**
+  String get privacyPolicySection4Bullet1;
+
+  /// No description provided for @privacyPolicySection4Bullet2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Zero Armazenamento: Os servidores da DualisCheckUp NÃO recebem, não processam e não salvam números de cartão de crédito ou códigos CVV.'**
+  String get privacyPolicySection4Bullet2;
+
+  /// No description provided for @privacyPolicySection5Title.
+  ///
+  /// In pt, this message translates to:
+  /// **'5. Seus Direitos como Titular (Art. 18 da LGPD)'**
+  String get privacyPolicySection5Title;
+
+  /// No description provided for @privacyPolicySection5Body.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você pode exercer seus direitos legais diretamente pelo aplicativo de forma instantânea:'**
+  String get privacyPolicySection5Body;
+
+  /// No description provided for @privacyPolicySection5Bullet1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exportação de Dados: Baixe todos os seus registros em formato estruturado (JSON) com um clique na Central de Privacidade.'**
+  String get privacyPolicySection5Bullet1;
+
+  /// No description provided for @privacyPolicySection5Bullet2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exclusão Definitiva: Solicite a exclusão irrevogável da sua conta e de todos os dados associados.'**
+  String get privacyPolicySection5Bullet2;
+
+  /// No description provided for @privacyPolicySection5Bullet3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Revogação do Consentimento: Encerre o uso e retire a autorização a qualquer momento.'**
+  String get privacyPolicySection5Bullet3;
+
+  /// No description provided for @privacyPolicySection6Title.
+  ///
+  /// In pt, this message translates to:
+  /// **'6. Segurança da Informação & Resposta a Incidentes'**
+  String get privacyPolicySection6Title;
+
+  /// No description provided for @privacyPolicySection6Body.
+  ///
+  /// In pt, this message translates to:
+  /// **'Medidas técnicas de ponta a ponta protegem seus registros:'**
+  String get privacyPolicySection6Body;
+
+  /// No description provided for @privacyPolicySection6Bullet1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Isolamento RLS: Cada consulta ao banco PostgreSQL é blindada pela política de Row-Level Security com chave de usuário isolada.'**
+  String get privacyPolicySection6Bullet1;
+
+  /// No description provided for @privacyPolicySection6Bullet2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criptografia Forte: Conexões TLS 1.3 obrigatórias e senhas protegidas pelo algoritmo Argon2id.'**
+  String get privacyPolicySection6Bullet2;
+
+  /// No description provided for @privacyPolicySection6Bullet3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Plano de Notificação em até 72h: Protocolo de comunicação imediata à Autoridade Nacional de Proteção de Dados (ANPD) e aos usuários em qualquer evento relevante de segurança (LGPD Art. 48).'**
+  String get privacyPolicySection6Bullet3;
+
+  /// No description provided for @privacyPolicySection7Title.
+  ///
+  /// In pt, this message translates to:
+  /// **'7. Notificações, Comunicações e Opt-Out'**
+  String get privacyPolicySection7Title;
+
+  /// No description provided for @privacyPolicySection7Body.
+  ///
+  /// In pt, this message translates to:
+  /// **'Respeitamos a sua tranquilidade e atenção:'**
+  String get privacyPolicySection7Body;
+
+  /// No description provided for @privacyPolicySection7Bullet1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você tem liberdade total para desativar lembretes de hidratação ou notificações de dicas de bem-estar na aba de Configurações a qualquer momento.'**
+  String get privacyPolicySection7Bullet1;
+
+  /// No description provided for @privacyPolicySection7Bullet2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avisos de segurança e recuperação de conta são de natureza estritamente transacional e protegidos.'**
+  String get privacyPolicySection7Bullet2;
+
+  /// No description provided for @privacyPolicyCtaQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deseja exportar seus dados ou gerenciar sua conta agora?'**
+  String get privacyPolicyCtaQuestion;
+
+  /// No description provided for @privacyPolicyCtaButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ir para a Central de Privacidade'**
+  String get privacyPolicyCtaButton;
+
+  /// No description provided for @onboardingIntendedUseNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'O DualisCheckUp é um aplicativo de bem-estar e autoconhecimento. Não é um dispositivo médico e não substitui um profissional de saúde.'**
+  String get onboardingIntendedUseNote;
+
+  /// No description provided for @privacyVeilBiometricReason.
+  ///
+  /// In pt, this message translates to:
+  /// **'Autentique-se para acessar seus registros.'**
+  String get privacyVeilBiometricReason;
+
+  /// No description provided for @privacyVeilUnlock.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desbloquear'**
+  String get privacyVeilUnlock;
+
+  /// No description provided for @privacyVeilUnlockManually.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desbloquear manualmente'**
+  String get privacyVeilUnlockManually;
+
+  /// No description provided for @wizardNarrativeLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Descrição opcional (em suas palavras)'**
+  String get wizardNarrativeLabel;
+
+  /// No description provided for @wizardNarrativeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se quiser, escreva com suas palavras como você está.'**
+  String get wizardNarrativeHint;
+
+  /// No description provided for @deleteHistoryItemIntensity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Intensidade informada: {value}/5'**
+  String deleteHistoryItemIntensity(int value);
+
+  /// No description provided for @bodyMapRegionHeadNeck.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cabeça e pescoço'**
+  String get bodyMapRegionHeadNeck;
+
+  /// No description provided for @bodyMapRegionHeadNeckHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dor de cabeça, dor ou rigidez no pescoço'**
+  String get bodyMapRegionHeadNeckHint;
+
+  /// No description provided for @bodyMapRegionDizziness.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tontura / formigamento'**
+  String get bodyMapRegionDizziness;
+
+  /// No description provided for @bodyMapRegionDizzinessHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tontura, sensação de desequilíbrio, formigamento'**
+  String get bodyMapRegionDizzinessHint;
+
+  /// No description provided for @bodyMapRegionBack.
+  ///
+  /// In pt, this message translates to:
+  /// **'Costas'**
+  String get bodyMapRegionBack;
+
+  /// No description provided for @bodyMapRegionBackHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dor nas costas, na coluna ou na lombar'**
+  String get bodyMapRegionBackHint;
+
+  /// No description provided for @bodyMapRegionBreathing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Respiração'**
+  String get bodyMapRegionBreathing;
+
+  /// No description provided for @bodyMapRegionBreathingHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta de ar, tosse'**
+  String get bodyMapRegionBreathingHint;
+
+  /// No description provided for @bodyMapRegionChest.
+  ///
+  /// In pt, this message translates to:
+  /// **'Peito'**
+  String get bodyMapRegionChest;
+
+  /// No description provided for @bodyMapRegionChestHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aperto ou desconforto no peito, coração acelerado'**
+  String get bodyMapRegionChestHint;
+
+  /// No description provided for @bodyMapRegionBelly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Barriga'**
+  String get bodyMapRegionBelly;
+
+  /// No description provided for @bodyMapRegionBellyHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desconforto na barriga, cólica, azia'**
+  String get bodyMapRegionBellyHint;
+
+  /// No description provided for @bodyMapRegionPelvic.
+  ///
+  /// In pt, this message translates to:
+  /// **'Região íntima / urinária'**
+  String get bodyMapRegionPelvic;
+
+  /// No description provided for @bodyMapRegionPelvicHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desconforto na região pélvica ou ao urinar'**
+  String get bodyMapRegionPelvicHint;
+
+  /// No description provided for @bodyMapRegionRightArm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Braço direito'**
+  String get bodyMapRegionRightArm;
+
+  /// No description provided for @bodyMapRegionRightArmHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Braço, ombro, cotovelo ou punho direito'**
+  String get bodyMapRegionRightArmHint;
+
+  /// No description provided for @bodyMapRegionLeftArm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Braço esquerdo'**
+  String get bodyMapRegionLeftArm;
+
+  /// No description provided for @bodyMapRegionLeftArmHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Braço, ombro, cotovelo ou punho esquerdo'**
+  String get bodyMapRegionLeftArmHint;
+
+  /// No description provided for @bodyMapRegionRightLeg.
+  ///
+  /// In pt, this message translates to:
+  /// **'Perna direita'**
+  String get bodyMapRegionRightLeg;
+
+  /// No description provided for @bodyMapRegionRightLegHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quadril, coxa, joelho ou tornozelo direito'**
+  String get bodyMapRegionRightLegHint;
+
+  /// No description provided for @bodyMapRegionLeftLeg.
+  ///
+  /// In pt, this message translates to:
+  /// **'Perna esquerda'**
+  String get bodyMapRegionLeftLeg;
+
+  /// No description provided for @bodyMapRegionLeftLegHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quadril, coxa, joelho ou tornozelo esquerdo'**
+  String get bodyMapRegionLeftLegHint;
+
+  /// No description provided for @bodyMapRegionSkin.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pele'**
+  String get bodyMapRegionSkin;
+
+  /// No description provided for @bodyMapRegionSkinHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Coceira, manchas'**
+  String get bodyMapRegionSkinHint;
+
+  /// No description provided for @bodyMapRegionWholeBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Corpo todo / cansaço'**
+  String get bodyMapRegionWholeBody;
+
+  /// No description provided for @bodyMapRegionWholeBodyHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dor no corpo todo, cansaço'**
+  String get bodyMapRegionWholeBodyHint;
+
+  /// No description provided for @bodyMapRegionEnergy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sede, fome ou energia'**
+  String get bodyMapRegionEnergy;
+
+  /// No description provided for @bodyMapRegionEnergyHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mudanças de energia, sede ou fome'**
+  String get bodyMapRegionEnergyHint;
+
+  /// No description provided for @bodyMapGroupHead.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cabeça'**
+  String get bodyMapGroupHead;
+
+  /// No description provided for @bodyMapGroupTrunk.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tronco'**
+  String get bodyMapGroupTrunk;
+
+  /// No description provided for @bodyMapGroupLimbs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Braços e pernas'**
+  String get bodyMapGroupLimbs;
+
+  /// No description provided for @bodyMapGroupWholeBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Corpo todo e pele'**
+  String get bodyMapGroupWholeBody;
+
+  /// No description provided for @bodyMapViewMap.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mapa do corpo'**
+  String get bodyMapViewMap;
+
+  /// No description provided for @bodyMapViewAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todas as áreas'**
+  String get bodyMapViewAll;
+
+  /// No description provided for @bodyMapShortSkin.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pele'**
+  String get bodyMapShortSkin;
+
+  /// No description provided for @bodyMapShortWholeBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Corpo todo'**
+  String get bodyMapShortWholeBody;
+
+  /// No description provided for @bodyMapShortEnergy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Energia'**
+  String get bodyMapShortEnergy;
+
+  /// No description provided for @bodyMapMaxIntensity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Maior intensidade informada nos últimos 14 dias: {value}/5'**
+  String bodyMapMaxIntensity(int value);
+
+  /// No description provided for @bodyMapNoEntriesThisSide.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem registros deste lado nos últimos 14 dias.\n({otherArea}: intensidade informada {value}/5)'**
+  String bodyMapNoEntriesThisSide(String otherArea, int value);
+
+  /// No description provided for @bodyMapViewOtherSide.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver {area}'**
+  String bodyMapViewOtherSide(String area);
+
+  /// No description provided for @bodyMapNoEntries14Days.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum registro nos últimos 14 dias'**
+  String get bodyMapNoEntries14Days;
+
+  /// No description provided for @settingsChangePhotoSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha como deseja selecionar sua foto de perfil.'**
+  String get settingsChangePhotoSubtitle;
+
+  /// No description provided for @settingsPhotoCamera.
+  ///
+  /// In pt, this message translates to:
+  /// **'Câmera'**
+  String get settingsPhotoCamera;
+
+  /// No description provided for @settingsPhotoCameraSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar uma nova foto'**
+  String get settingsPhotoCameraSubtitle;
+
+  /// No description provided for @settingsPhotoGallery.
+  ///
+  /// In pt, this message translates to:
+  /// **'Galeria'**
+  String get settingsPhotoGallery;
+
+  /// No description provided for @settingsPhotoGallerySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher da biblioteca de fotos'**
+  String get settingsPhotoGallerySubtitle;
+
+  /// No description provided for @settingsPhotoPresets.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avatares'**
+  String get settingsPhotoPresets;
+
+  /// No description provided for @settingsPhotoPresetsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher um ícone ilustrado de autocuidado'**
+  String get settingsPhotoPresetsSubtitle;
+
+  /// No description provided for @settingsLogoutConfirmBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deseja realmente encerrar sua sessão? Seus dados permanecem seguros e criptografados.'**
+  String get settingsLogoutConfirmBody;
+
+  /// No description provided for @settingsLogoutConfirmAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sair'**
+  String get settingsLogoutConfirmAction;
+
+  /// No description provided for @settingsNameHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu nome completo'**
+  String get settingsNameHint;
+
+  /// No description provided for @settingsRemindersTile.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembretes e Hidratação'**
+  String get settingsRemindersTile;
+
+  /// No description provided for @settingsRemindersSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Horários de notificações, alarmes e teste com app fechado'**
+  String get settingsRemindersSubtitle;
+
+  /// No description provided for @settingsTermsTile.
+  ///
+  /// In pt, this message translates to:
+  /// **'Termos de Uso'**
+  String get settingsTermsTile;
+
+  /// No description provided for @settingsTermsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Condições de uso, planos, cancelamento e reembolso'**
+  String get settingsTermsSubtitle;
+
+  /// No description provided for @settingsPrivacyPolicyTile.
+  ///
+  /// In pt, this message translates to:
+  /// **'Política de Privacidade (LGPD)'**
+  String get settingsPrivacyPolicyTile;
+
+  /// No description provided for @settingsPrivacyPolicySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tratamento de dados, direitos do titular e DPO'**
+  String get settingsPrivacyPolicySubtitle;
+
+  /// No description provided for @settingsCommunicationsSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comunicações e Notificações'**
+  String get settingsCommunicationsSection;
+
+  /// No description provided for @settingsEducationalTipsTile.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dicas de Bem-Estar e Notificações Educativas'**
+  String get settingsEducationalTipsTile;
+
+  /// No description provided for @settingsEducationalTipsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dicas gerais de bem-estar. Você pode desativar (opt-out) a qualquer momento.'**
+  String get settingsEducationalTipsSubtitle;
+
+  /// No description provided for @settingsEducationalTipsOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notificações educativas ativadas.'**
+  String get settingsEducationalTipsOn;
+
+  /// No description provided for @settingsEducationalTipsOff.
+  ///
+  /// In pt, this message translates to:
+  /// **'Opt-out confirmado: Notificações educativas desativadas.'**
+  String get settingsEducationalTipsOff;
+
+  /// No description provided for @settingsOperatorInfo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Operado por DualisCheckUp Saúde e Tecnologia Ltda.\nCNPJ 48.291.834/0001-92 • São Paulo - SP, Brasil\nDPO: dpo@dualischeckup.com'**
+  String get settingsOperatorInfo;
+
+  /// No description provided for @avatarSelectorSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione um ícone de autocuidado para personalizar seu perfil.'**
+  String get avatarSelectorSubtitle;
+
+  /// No description provided for @avatarConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar Avatar'**
+  String get avatarConfirm;
+
+  /// No description provided for @avatarPresetSelfCare.
+  ///
+  /// In pt, this message translates to:
+  /// **'Autocuidado'**
+  String get avatarPresetSelfCare;
+
+  /// No description provided for @avatarPresetBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Equilíbrio'**
+  String get avatarPresetBalance;
+
+  /// No description provided for @avatarPresetProtection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Proteção'**
+  String get avatarPresetProtection;
+
+  /// No description provided for @avatarPresetVitality.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vitalidade'**
+  String get avatarPresetVitality;
+
+  /// No description provided for @avatarPresetWellbeing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bem-estar'**
+  String get avatarPresetWellbeing;
+
+  /// No description provided for @avatarPresetEnergy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Energia'**
+  String get avatarPresetEnergy;
+
+  /// No description provided for @avatarPresetFocus.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foco Mental'**
+  String get avatarPresetFocus;
+
+  /// No description provided for @avatarPresetRadiant.
+  ///
+  /// In pt, this message translates to:
+  /// **'Radiante'**
+  String get avatarPresetRadiant;
+
+  /// No description provided for @loginTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar no DualisCheckUp'**
+  String get loginTitle;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acesse seu diário de bem-estar com segurança.'**
+  String get loginSubtitle;
+
+  /// No description provided for @authEmailHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'seu.email@exemplo.com'**
+  String get authEmailHint;
+
+  /// No description provided for @loginPasswordRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Senha é obrigatória.'**
+  String get loginPasswordRequired;
+
+  /// No description provided for @loginNoAccountPrompt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ainda não possui conta? '**
+  String get loginNoAccountPrompt;
+
+  /// No description provided for @registerTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar sua conta'**
+  String get registerTitle;
+
+  /// No description provided for @registerSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe alguns dados para personalizar sua experiência.'**
+  String get registerSubtitle;
+
+  /// No description provided for @registerNameHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex: Carlos Silva'**
+  String get registerNameHint;
+
+  /// No description provided for @registerDobHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'DD/MM/AAAA'**
+  String get registerDobHint;
+
+  /// No description provided for @registerDobHelper.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex: 15/08/1990 ou selecione pelo calendário.'**
+  String get registerDobHelper;
+
+  /// No description provided for @registerDobPickerHelp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione a data de nascimento'**
+  String get registerDobPickerHelp;
+
+  /// No description provided for @registerDobPickerConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar'**
+  String get registerDobPickerConfirm;
+
+  /// No description provided for @registerPasswordHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mínimo 8 caracteres'**
+  String get registerPasswordHint;
+
+  /// No description provided for @registerPasswordHelper.
+  ///
+  /// In pt, this message translates to:
+  /// **'Use 8+ caracteres com maiúscula, número e símbolo.'**
+  String get registerPasswordHelper;
+
+  /// No description provided for @registerHydrationTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembretes e Controle de Hidratação'**
+  String get registerHydrationTitle;
+
+  /// No description provided for @registerHydrationSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Configure seus hábitos de hidratação'**
+  String get registerHydrationSubtitle;
+
+  /// No description provided for @registerWaterReminderTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alerta para tomar água a cada 2h'**
+  String get registerWaterReminderTitle;
+
+  /// No description provided for @registerWaterReminderSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Horários pares: 8h, 10h, 12h, 14h, 16h, 18h e 20h'**
+  String get registerWaterReminderSubtitle;
+
+  /// No description provided for @registerReminderStyleLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tipo de lembrete / som:'**
+  String get registerReminderStyleLabel;
+
+  /// No description provided for @registerReminderStyleChime.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aviso (Mensagem)'**
+  String get registerReminderStyleChime;
+
+  /// No description provided for @registerReminderStyleAlarm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alarme Telefônico'**
+  String get registerReminderStyleAlarm;
+
+  /// No description provided for @registerWaterTrackingTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Controle de quantidade consumida'**
+  String get registerWaterTrackingTitle;
+
+  /// No description provided for @registerWaterTrackingOnDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ao tocar no alarme, o app abre para registrar a quantidade de água'**
+  String get registerWaterTrackingOnDesc;
+
+  /// No description provided for @registerWaterTrackingOffDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apenas soa o lembrete no horário, sem abrir preenchimento'**
+  String get registerWaterTrackingOffDesc;
+
+  /// No description provided for @registerHaveAccountPrompt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já possui uma conta? '**
+  String get registerHaveAccountPrompt;
+
+  /// No description provided for @homeGreeting.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá, {name}'**
+  String homeGreeting(String name);
+
+  /// No description provided for @homeGreetingNoName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá!'**
+  String get homeGreetingNoName;
+
+  /// No description provided for @homeSessionActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sessão ativa'**
+  String get homeSessionActive;
+
+  /// No description provided for @homeDataProtectedBadge.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seus registros estão protegidos'**
+  String get homeDataProtectedBadge;
+
+  /// No description provided for @homeTodayEntryDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registro de hoje concluído'**
+  String get homeTodayEntryDone;
+
+  /// No description provided for @notFoundErrorCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'ERRO 404'**
+  String get notFoundErrorCode;
+
+  /// No description provided for @notFoundTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Página Não Encontrada'**
+  String get notFoundTitle;
+
+  /// No description provided for @notFoundBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'A página que você tentou acessar não existe.'**
+  String get notFoundBody;
+
+  /// No description provided for @notFoundBackToDashboard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Voltar para o Painel'**
+  String get notFoundBackToDashboard;
+
+  /// No description provided for @notFoundGoHome.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ir para o Início'**
+  String get notFoundGoHome;
+
+  /// No description provided for @notFoundGoBack.
+  ///
+  /// In pt, this message translates to:
+  /// **'Voltar à tela anterior'**
+  String get notFoundGoBack;
+
+  /// No description provided for @wellnessConfirmTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tudo Bem por Aqui!'**
+  String get wellnessConfirmTitle;
+
+  /// No description provided for @wellnessConfirmBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Que excelente notícia! Você indicou estar se sentindo bem tanto física quanto emocionalmente hoje.\n\nSeu check-in diário foi concluído com sucesso e seus dados estão protegidos. Continue cultivando bons hábitos de autocuidado!'**
+  String get wellnessConfirmBody;
+
+  /// No description provided for @wellnessConfirmButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Concluir Check-in'**
+  String get wellnessConfirmButton;
+
+  /// No description provided for @adBannerHeader.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parceiro local • Anúncio não usa seus dados de saúde'**
+  String get adBannerHeader;
+
+  /// No description provided for @adBannerSampleBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Itens de primeiros socorros e higiene pessoal com até 20% off.'**
+  String get adBannerSampleBody;
+
+  /// No description provided for @outcomeStaticGuidance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este app não avalia sua saúde. Se algum desconforto persistir, piorar ou te preocupar, procure um profissional de saúde. Em emergência, ligue 192.'**
+  String get outcomeStaticGuidance;
+
+  /// No description provided for @outcomeDualAxisNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você registrou sensações no corpo e nas emoções hoje. Se algum desconforto físico persistir ou piorar, converse com um profissional de saúde.'**
+  String get outcomeDualAxisNote;
+
+  /// No description provided for @outcomeAiInsightTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como organizamos sua anotação'**
+  String get outcomeAiInsightTitle;
+
+  /// No description provided for @outcomeAiInsightLayTerm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Termo que você usou: {term}'**
+  String outcomeAiInsightLayTerm(String term);
+
+  /// No description provided for @outcomeAiInsightArea.
+  ///
+  /// In pt, this message translates to:
+  /// **'Área ou emoção: {area}'**
+  String outcomeAiInsightArea(String area);
+
+  /// No description provided for @outcomeWellnessReadingsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Leituras sobre bem-estar'**
+  String get outcomeWellnessReadingsTitle;
+
+  /// No description provided for @outcomeWellnessReadingsDisclaimer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conteúdos educativos gerais. Não são orientação para o seu caso.'**
+  String get outcomeWellnessReadingsDisclaimer;
+
+  /// No description provided for @outcomeWellnessReadingsRelatedTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Leituras relacionadas ao tema que você registrou'**
+  String get outcomeWellnessReadingsRelatedTitle;
+
+  /// No description provided for @outcomeWellnessReadingsCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} leituras'**
+  String outcomeWellnessReadingsCount(int count);
+
+  /// No description provided for @outcomeArticlesEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma leitura disponível no momento.'**
+  String get outcomeArticlesEmpty;
+
+  /// No description provided for @journalPatternTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Padrões nos seus registros'**
+  String get journalPatternTitle;
+
+  /// No description provided for @journalPatternDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você registrou {category} com intensidade alta {count} vezes nos últimos {windowDays} dias. Se isso está atrapalhando seu dia a dia, pode ser útil conversar com um profissional de saúde.'**
+  String journalPatternDescription(String category, int count, int windowDays);
+
+  /// No description provided for @historyIntensityInformed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Intensidade informada: {n}/5'**
+  String historyIntensityInformed(int n);
+
+  /// No description provided for @todayOutcomeCompletedBadge.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registro concluído'**
+  String get todayOutcomeCompletedBadge;
+
+  /// No description provided for @todayOutcomeUpdateButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atualizar registro de hoje'**
+  String get todayOutcomeUpdateButton;
+
+  /// No description provided for @todayOutcomeDetailedCheckinButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fazer registro detalhado'**
+  String get todayOutcomeDetailedCheckinButton;
+
+  /// No description provided for @appUpdateTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atualize o aplicativo'**
+  String get appUpdateTitle;
+
+  /// No description provided for @appUpdateMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta versão não é mais suportada. Instale a versão {minVersion} ou mais recente na loja de aplicativos.'**
+  String appUpdateMessage(String minVersion);
+
+  /// No description provided for @appUpdateButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir loja de aplicativos'**
+  String get appUpdateButton;
+
+  /// Chip on the Home summary card of today's entry. Self-reported intensity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Intensidade informada: {value}/5'**
+  String outcomeSummaryIntensity(int value);
+
+  /// Time today's entry was saved (HH:mm).
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrado às {time}'**
+  String outcomeSummaryRecordedAt(String time);
+
+  /// Repeats the option the person chose, without reinterpreting it (audit C-32).
+  ///
+  /// In pt, this message translates to:
+  /// **'Você registrou: {option}'**
+  String outcomeTodayYouLogged(String option);
+
+  /// No description provided for @outcomeTodayStatusGood.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bem'**
+  String get outcomeTodayStatusGood;
+
+  /// No description provided for @outcomeTodayStatusSoSo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais ou menos'**
+  String get outcomeTodayStatusSoSo;
+
+  /// No description provided for @outcomeTodayStatusBad.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mal'**
+  String get outcomeTodayStatusBad;
+
+  /// No description provided for @outcomeHistoryDetailTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Detalhes do registro'**
+  String get outcomeHistoryDetailTitle;
+
+  /// No description provided for @outcomeHistoryNoNarrative.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você não adicionou uma descrição neste registro.'**
+  String get outcomeHistoryNoNarrative;
 }
 
 class _AppLocalizationsDelegate

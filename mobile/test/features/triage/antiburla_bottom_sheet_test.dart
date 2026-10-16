@@ -48,7 +48,7 @@ void main() {
       await tester.tap(find.text('Open Sheet'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Verificação Histórica'), findsOneWidget);
+      expect(find.text('Isso já apareceu antes?'), findsOneWidget);
       expect(
         find.text(
             'Você registrou um sintoma similar há 4 dias. É a mesma sensação que voltou ou algo totalmente novo?'),
@@ -126,36 +126,5 @@ void main() {
       expect(find.byType(AntiburlaVerificationBottomSheet), findsNothing);
     });
 
-    testWidgets('displays biological discordance notice when detected', (tester) async {
-      const result = AntiburlaCheckResult(
-        triggered: true,
-        daysAgo: 3,
-        biologicalDiscordance: true,
-        biologicalNotice:
-            'Aviso: Região anatômica masculina selecionada para perfil feminino.',
-      );
-
-      await tester.pumpWidget(_buildTestApp(
-        child: Builder(
-          builder: (context) {
-            return ElevatedButton(
-              onPressed: () {
-                AntiburlaVerificationBottomSheet.show(context, result: result);
-              },
-              child: const Text('Open Sheet'),
-            );
-          },
-        ),
-      ));
-
-      await tester.tap(find.text('Open Sheet'));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text(
-            'Aviso: Região anatômica masculina selecionada para perfil feminino.'),
-        findsOneWidget,
-      );
-    });
   });
 }

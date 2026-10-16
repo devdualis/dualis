@@ -55,11 +55,9 @@ void main() {
         id: 'out-1',
         vertical: 'physical',
         intensityScore: 3,
-        careDisposition: CareDisposition.routineConsultation,
         primaryCategory: 'cabeca',
         categoryLabel: 'Cabeça',
         somaticMapping: 'Cefaleia',
-        organicPrimacyApplied: false,
         recommendedArticles: [],
         recordedAt: DateTime.now(),
       );
@@ -149,11 +147,9 @@ void main() {
         id: 'out-profile-1',
         vertical: 'physical',
         intensityScore: 3,
-        careDisposition: CareDisposition.routineConsultation,
         primaryCategory: 'cabeca',
         categoryLabel: 'Cabeça',
         somaticMapping: 'Cefaleia',
-        organicPrimacyApplied: false,
         recommendedArticles: [],
         recordedAt: DateTime.now(),
       );

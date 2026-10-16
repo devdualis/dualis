@@ -66,11 +66,11 @@ void main() {
         isCompletedToday: true,
         isEmotionalCompleted: true,
         emotionalStatus: TriggerStatus.soSo,
-        emotionalSummary: 'Dimensão Ansiosa / Agitação',
+        emotionalSummary: 'Ansiedade e agitação',
         emotionalNarrative: 'Muita correria no trabalho hoje',
         isPhysicalCompleted: true,
         physicalStatus: TriggerStatus.soSo,
-        physicalSummary: 'Membros Superiores - Mão e Dedos Direito',
+        physicalSummary: 'Mão e dedos (direita)',
         physicalNarrative: 'Dor ao digitar no teclado',
       );
 
@@ -84,14 +84,14 @@ void main() {
 
       // Check titles
       expect(find.text('Psicoemocional'), findsOneWidget);
-      expect(find.text('Avaliação Física'), findsOneWidget);
+      expect(find.text('Físico'), findsOneWidget);
 
       // Check badges
       expect(find.text('Moderada (3)'), findsNWidgets(2));
 
       // Check that full summaries are rendered
-      expect(find.text('Dimensão Ansiosa / Agitação'), findsOneWidget);
-      expect(find.text('Membros Superiores - Mão e Dedos Direito'), findsOneWidget);
+      expect(find.text('Ansiedade e agitação'), findsOneWidget);
+      expect(find.text('Mão e dedos (direita)'), findsOneWidget);
 
       // Check narratives
       expect(find.text('“Muita correria no trabalho hoje”'), findsOneWidget);
@@ -114,18 +114,16 @@ void main() {
         id: 'qa-phys-1',
         vertical: 'physical',
         intensityScore: 3,
-        careDisposition: CareDisposition.routineConsultation,
         primaryCategory: 'membros_superiores',
-        categoryLabel: 'Membros Superiores - Mão e Dedos Direito',
+        categoryLabel: 'Mão e dedos (direita)',
         somaticMapping: 'Dor ao digitar no teclado e desconforto articular no punho',
-        organicPrimacyApplied: false,
         recommendedArticles: const [
           RecommendedArticle(
             id: 'art-membros-sup-01',
             title: 'Sobrecarga Musculoesquelética em Braços e Ombros',
             category: 'membros_superiores',
-            author: 'Dr. André Villas',
-            authorRole: 'Ortopedista e Fisiatra',
+            author: 'Portal Drauzio Varella',
+            authorRole: 'Fonte',
             readTimeMinutes: 4,
             summary: 'Identificação de tensões mecânicas e orientações posturais.',
             url: 'https://drauziovarella.uol.com.br/podcasts/tendinite/',
@@ -138,11 +136,11 @@ void main() {
         isCompletedToday: true,
         isEmotionalCompleted: true,
         emotionalStatus: TriggerStatus.soSo,
-        emotionalSummary: 'Dimensão Ansiosa / Agitação',
+        emotionalSummary: 'Ansiedade e agitação',
         emotionalNarrative: 'Ansiedade moderada e agitação',
         isPhysicalCompleted: true,
         physicalStatus: TriggerStatus.soSo,
-        physicalSummary: 'Membros Superiores - Mão e Dedos Direito',
+        physicalSummary: 'Mão e dedos (direita)',
         physicalNarrative: 'Dor ao digitar no teclado',
       );
 
@@ -157,18 +155,19 @@ void main() {
 
       // 1. Both axes must be rendered
       expect(find.text('1. Eixo Avaliação Física'), findsOneWidget);
-      expect(find.text('Membros Superiores - Mão e Dedos Direito'), findsOneWidget);
+      expect(find.text('Mão e dedos (direita)'), findsOneWidget);
       expect(find.text('2. Eixo Avaliação Psico-emocional'), findsOneWidget);
-      expect(find.text('Dimensão Ansiosa / Agitação'), findsOneWidget);
+      expect(find.text('Ansiedade e agitação'), findsOneWidget);
 
       // 2. Both status badges must appear with unified ClinicalIntensityTier
       expect(find.text('Moderada (3)'), findsNWidgets(2));
 
       // 3. Articles section must contain both Physical and Emotional articles
-      expect(find.text('Artigos Sugeridos para Você'), findsOneWidget);
+      expect(find.text('Leituras sobre bem-estar'), findsOneWidget);
 
       // Verify physical article
       expect(find.text('Sobrecarga Musculoesquelética em Braços e Ombros'), findsOneWidget);
+      expect(find.text('Portal Drauzio Varella • Fonte'), findsWidgets);
       expect(find.text('Saúde Física'), findsWidgets);
 
       // Verify emotional article (anxiety management or breathing technique)
@@ -182,13 +181,11 @@ void main() {
         id: 'qa-neurological-1',
         vertical: 'physical',
         intensityScore: 2,
-        careDisposition: CareDisposition.selfCare,
         primaryCategory: 'neurologico',
-        categoryLabel: 'Sistema Neurológico',
-        somaticMapping: 'Tontura / Instabilidade postural e equilíbrio',
-        secondaryCategoryLabel: 'Estresse e Burnout',
+        categoryLabel: 'Tontura e equilíbrio',
+        somaticMapping: 'Tontura ao levantar',
+        secondaryCategoryLabel: 'Estressado(a) ou esgotado(a)',
         secondaryIntensityScore: 4,
-        organicPrimacyApplied: false,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
       );
@@ -221,9 +218,9 @@ void main() {
       expect(find.text('Intensa (4-5)'), findsOneWidget);
 
       // Verify categories
-      expect(find.text('Sistema Neurológico'), findsOneWidget);
+      expect(find.text('Tontura e equilíbrio'), findsOneWidget);
       expect(find.text('2. Eixo Avaliação Psico-emocional'), findsOneWidget);
-      expect(find.text('Estresse e Burnout'), findsOneWidget);
+      expect(find.text('Estressado(a) ou esgotado(a)'), findsOneWidget);
       expect(find.textContaining('Componente Associado'), findsNothing);
     });
 
@@ -238,13 +235,11 @@ void main() {
           id: 'qa-l10n-${locale.languageCode}',
           vertical: 'physical',
           intensityScore: 2,
-          careDisposition: CareDisposition.selfCare,
           primaryCategory: 'neurologico',
-          categoryLabel: 'Sistema Neurológico',
-          somaticMapping: 'Tontura / Instabilidade postural e equilíbrio',
-          secondaryCategoryLabel: 'Estresse e Burnout',
+          categoryLabel: 'Tontura e equilíbrio',
+          somaticMapping: 'Tontura ao levantar',
+          secondaryCategoryLabel: 'Estressado(a) ou esgotado(a)',
           secondaryIntensityScore: 4,
-          organicPrimacyApplied: false,
           recommendedArticles: const [],
           recordedAt: DateTime.now(),
         );
@@ -269,7 +264,7 @@ void main() {
 
         expect(find.text(physicalLabel), findsOneWidget);
         expect(find.text(emotionalLabel), findsOneWidget);
-        expect(find.text('Estresse e Burnout'), findsOneWidget);
+        expect(find.text('Estressado(a) ou esgotado(a)'), findsOneWidget);
         expect(find.textContaining('Componente Associado'), findsNothing);
       });
     }

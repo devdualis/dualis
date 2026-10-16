@@ -4,7 +4,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE_DB } from '../../../database/database.service';
 import * as schema from '../../../database/schema';
 import { ArticleEmbeddingService } from '../../triage/services/article-embedding.service';
-import { TriageClassificationResult } from '../dto/classify-symptom.dto';
+import { EntryTagResult } from '../dto/classify-symptom.dto';
 import { SYMPTOM_KNOWLEDGE_SEED } from '../data/symptom-knowledge.seed';
 
 const MATCH_SIMILARITY_THRESHOLD = 0.75;
@@ -28,23 +28,15 @@ export class SymptomVectorService implements OnModuleInit {
 
   async ensureSeedSymptoms(): Promise<void> {
     for (const seed of SYMPTOM_KNOWLEDGE_SEED) {
-      const existing = await this.db.execute(
-        sql`SELECT id FROM symptom_knowledge WHERE input_text = ${seed.inputText} LIMIT 1`,
-      );
-      const rows = (existing as any).rows || existing;
-      if (Array.isArray(rows) && rows.length > 0) {
+      if (await this.hasEntry(seed.inputText, seed.systemOrDimension)) {
         continue;
       }
-
       const embeddingVector = await this.embeddingService.embed(seed.inputText);
-      await this.db.insert(schema.symptomKnowledge).values({
+      await this.insertEntry({
         inputText: seed.inputText,
         vertical: seed.vertical,
         systemOrDimension: seed.systemOrDimension,
-        urgencyScore: seed.urgencyScore,
         mappedLayTerm: seed.mappedLayTerm,
-        clinicalConcept: seed.clinicalConcept,
-        isEmergencyCandidate: seed.isEmergencyCandidate,
         confidence: 0.95,
         source: 'dictionary_fallback',
         embedding: embeddingVector,
@@ -52,7 +44,7 @@ export class SymptomVectorService implements OnModuleInit {
     }
   }
 
-  async matchSymptom(text: string): Promise<TriageClassificationResult | null> {
+  async matchSymptom(text: string): Promise<EntryTagResult | null> {
     const cleanText = text.trim();
     if (cleanText.length === 0) return null;
 
@@ -64,10 +56,7 @@ export class SymptomVectorService implements OnModuleInit {
         SELECT
           vertical,
           system_or_dimension AS "systemOrDimension",
-          urgency_score AS "urgencyScore",
           mapped_lay_term AS "mappedLayTerm",
-          clinical_concept AS "clinicalConcept",
-          is_emergency_candidate AS "isEmergencyCandidate",
           1 - (embedding <=> ${vectorString}::vector) AS similarity
         FROM symptom_knowledge
         ORDER BY embedding <=> ${vectorString}::vector ASC
@@ -86,12 +75,12 @@ export class SymptomVectorService implements OnModuleInit {
       }
 
       return {
-        primaryVertical: top.vertical === 'emotional' ? 'emotional' : 'physical',
-        systemOrDimension: top.systemOrDimension,
-        urgencyScore: Number(top.urgencyScore),
-        mappedLayTerm: top.mappedLayTerm,
-        clinicalConcept: top.clinicalConcept,
-        isEmergencyCandidate: Boolean(top.isEmergencyCandidate),
+        isOffTopic: false,
+        vertical: top.vertical === 'emotional' ? 'emotional' : 'physical',
+        bodyAreaOrMood: top.systemOrDimension,
+        layTerm: top.mappedLayTerm,
+        // Set by the caller from the user's own text; a neighbour entry says nothing about it.
+        mentionsSelfHarm: false,
         confidence: Number(similarity.toFixed(2)),
         source: 'vector_match',
         latencyMs: 0,
@@ -102,23 +91,60 @@ export class SymptomVectorService implements OnModuleInit {
     }
   }
 
-  async upsertFromClassification(text: string, result: TriageClassificationResult): Promise<void> {
+  /**
+   * Learns a tag produced by Gemini. symptom_knowledge is shared by every user, so the
+   * raw entry text is never stored: only the normalised lay term (input_text = layTerm)
+   * and its area/mood key (LGPD Art. 6 III, data minimisation).
+   */
+  async upsertFromTag(tag: EntryTagResult): Promise<void> {
+    const layTerm = tag.layTerm?.trim();
+    if (!layTerm || !tag.vertical || !tag.bodyAreaOrMood || tag.isOffTopic || tag.mentionsSelfHarm) {
+      return;
+    }
     try {
-      const embeddingVector = await this.embeddingService.embed(text.trim());
-      await this.db.insert(schema.symptomKnowledge).values({
-        inputText: text.trim(),
-        vertical: result.primaryVertical,
-        systemOrDimension: result.systemOrDimension,
-        urgencyScore: result.urgencyScore,
-        mappedLayTerm: result.mappedLayTerm,
-        clinicalConcept: result.clinicalConcept,
-        isEmergencyCandidate: result.isEmergencyCandidate,
-        confidence: result.confidence,
+      if (await this.hasEntry(layTerm, tag.bodyAreaOrMood)) {
+        return;
+      }
+      const embeddingVector = await this.embeddingService.embed(layTerm);
+      await this.insertEntry({
+        inputText: layTerm,
+        vertical: tag.vertical,
+        systemOrDimension: tag.bodyAreaOrMood,
+        mappedLayTerm: layTerm,
+        confidence: tag.confidence,
         source: 'gemini',
         embedding: embeddingVector,
       });
     } catch (err) {
-      this.logger.warn(`Failed to persist learned symptom classification: ${(err as Error).message}`);
+      this.logger.warn(`Failed to persist learned entry tag: ${(err as Error).message}`);
     }
+  }
+
+  private async hasEntry(inputText: string, systemOrDimension: string): Promise<boolean> {
+    const existing = await this.db.execute(
+      sql`SELECT id FROM symptom_knowledge WHERE input_text = ${inputText} AND system_or_dimension = ${systemOrDimension} LIMIT 1`,
+    );
+    const rows = (existing as any).rows || existing;
+    return Array.isArray(rows) && rows.length > 0;
+  }
+
+  // Explicit column list: only the tagging columns exist after migration 0015.
+  private async insertEntry(entry: {
+    inputText: string;
+    vertical: string;
+    systemOrDimension: string;
+    mappedLayTerm: string;
+    confidence: number;
+    source: string;
+    embedding: number[];
+  }): Promise<void> {
+    const vectorString = `[${entry.embedding.join(',')}]`;
+    await this.db.execute(sql`
+      INSERT INTO symptom_knowledge
+        (input_text, vertical, system_or_dimension, mapped_lay_term, confidence, source, embedding)
+      VALUES
+        (${entry.inputText}, ${entry.vertical}, ${entry.systemOrDimension}, ${entry.mappedLayTerm},
+         ${entry.confidence}, ${entry.source}, ${vectorString}::vector)
+    `);
   }
 }

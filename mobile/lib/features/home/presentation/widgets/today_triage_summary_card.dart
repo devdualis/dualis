@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../triage_outcome/domain/triage_outcome_models.dart';
 
 class TodayTriageSummaryCard extends StatelessWidget {
@@ -16,39 +17,14 @@ class TodayTriageSummaryCard extends StatelessWidget {
     this.onRetake,
   });
 
-  Color _getDispositionColor(CareDisposition disposition) {
-    switch (disposition) {
-      case CareDisposition.emergency:
-        return const Color(0xFFD32F2F); // Red
-      case CareDisposition.urgentCare:
-        return const Color(0xFFE65100); // Deep Orange
-      case CareDisposition.routineConsultation:
-        return const Color(0xFF3F51B5); // Soft Indigo
-      case CareDisposition.selfCare:
-        return const Color(0xFF00796B); // Clinical Teal
-    }
-  }
-
-  String _getDispositionLabel(CareDisposition disposition) {
-    switch (disposition) {
-      case CareDisposition.emergency:
-        return 'Atendimento de Emergência';
-      case CareDisposition.urgentCare:
-        return 'Pronto Atendimento (24h)';
-      case CareDisposition.routineConsultation:
-        return 'Consulta de Rotina';
-      case CareDisposition.selfCare:
-        return 'Auto-cuidado Monitorado';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final dispositionColor = _getDispositionColor(outcome.careDisposition);
-    final dispositionLabel = _getDispositionLabel(outcome.careDisposition);
+    final l10n = AppLocalizations.of(context);
+    // Same neutral accent for every entry: the app does not grade the record.
+    const accentColor = AppColors.clinicalTeal;
 
     final recordedHour = outcome.recordedAt.hour.toString().padLeft(2, '0');
     final recordedMin = outcome.recordedAt.minute.toString().padLeft(2, '0');
@@ -60,7 +36,7 @@ class TodayTriageSummaryCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: dispositionColor.withValues(alpha: 0.35),
+          color: accentColor.withValues(alpha: 0.35),
           width: 1.5,
         ),
       ),
@@ -76,14 +52,12 @@ class TodayTriageSummaryCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: dispositionColor.withValues(alpha: 0.12),
+                  color: accentColor.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  outcome.intensityScore >= 4
-                      ? Icons.warning_amber_rounded
-                      : Icons.verified_rounded,
-                  color: dispositionColor,
+                child: const Icon(
+                  Icons.verified_rounded,
+                  color: accentColor,
                   size: 20,
                 ),
               ),
@@ -93,7 +67,7 @@ class TodayTriageSummaryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Triagem de Hoje Concluída',
+                      l10n.homeTodayEntryDone,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -103,7 +77,7 @@ class TodayTriageSummaryCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Realizada às $recordedHour:$recordedMin',
+                      l10n.outcomeSummaryRecordedAt('$recordedHour:$recordedMin'),
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         color: isDark
@@ -117,18 +91,18 @@ class TodayTriageSummaryCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: dispositionColor.withValues(alpha: 0.12),
+                  color: accentColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: dispositionColor.withValues(alpha: 0.4),
+                    color: accentColor.withValues(alpha: 0.4),
                   ),
                 ),
                 child: Text(
-                  dispositionLabel,
+                  l10n.outcomeSummaryIntensity(outcome.intensityScore),
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11.5,
                     fontWeight: FontWeight.w700,
-                    color: dispositionColor,
+                    color: accentColor,
                   ),
                 ),
               ),

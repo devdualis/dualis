@@ -30,11 +30,9 @@ class IdempotentMockTriageOutcomeService {
       id: crypto.randomUUID(),
       vertical: dto.vertical,
       intensityScore: 3,
-      careDisposition: 'consulta_rotina',
       primaryCategory: 'coluna_dor_dorsal',
       categoryLabel: 'Coluna e Dor Dorsal',
       somaticMapping: 'Dor lombar postural',
-      organicPrimacyApplied: false,
       recommendedArticles: [],
       recordedAt: new Date().toISOString(),
     };

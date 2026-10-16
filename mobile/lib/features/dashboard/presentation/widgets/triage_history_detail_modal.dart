@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/triage_history_models.dart';
 import 'delete_history_item_dialog.dart';
 import 'retrospective_list_view.dart';
@@ -40,67 +41,6 @@ class TriageHistoryDetailModal extends StatelessWidget {
     return '$day/$month/$year às $hour:$minute';
   }
 
-  static String getIntensityDescription(int intensity) {
-    switch (intensity) {
-      case 1:
-        return 'Nível 1 - Mínimo';
-      case 2:
-        return 'Nível 2 - Leve';
-      case 3:
-        return 'Nível 3 - Moderado';
-      case 4:
-        return 'Nível 4 - Severo / Urgente';
-      case 5:
-        return 'Nível 5 - Crítico / Emergência';
-      default:
-        return 'Nível $intensity';
-    }
-  }
-
-  static String getDispositionDescription(String? disposition) {
-    switch (disposition) {
-      case 'auto_cuidado':
-        return 'Autocuidado orientado com repouso, hidratação e observação de novos sintomas.';
-      case 'consulta_rotina':
-        return 'Consulta médica ambulatorial recomendada nos próximos dias para avaliação com especialista.';
-      case 'pronto_atendimento':
-        return 'Avaliação presencial em pronto atendimento recomendada para investigação clínica prioritária.';
-      case 'emergencia':
-        return 'Atendimento médico imediato de emergência hospitalar recomendado.';
-      default:
-        return 'Acompanhamento clínico e observação da evolução dos sintomas.';
-    }
-  }
-
-  static IconData getDispositionIcon(String? disposition) {
-    switch (disposition) {
-      case 'auto_cuidado':
-        return Icons.spa_rounded;
-      case 'consulta_rotina':
-        return Icons.event_available_rounded;
-      case 'pronto_atendimento':
-        return Icons.medical_services_rounded;
-      case 'emergencia':
-        return Icons.emergency_rounded;
-      default:
-        return Icons.fact_check_rounded;
-    }
-  }
-
-  static Color getDispositionColor(String? disposition) {
-    switch (disposition) {
-      case 'auto_cuidado':
-        return AppColors.clinicalTeal;
-      case 'consulta_rotina':
-        return const Color(0xFF0288D1);
-      case 'pronto_atendimento':
-        return const Color(0xFFF57C00);
-      case 'emergencia':
-        return AppColors.emergencyCrimson;
-      default:
-        return Colors.grey.shade700;
-    }
-  }
 
   static String _formatAnswerValue(String key) {
     final map = {
@@ -162,10 +102,13 @@ class TriageHistoryDetailModal extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final isPhysical = entry.anatomicalSystem != null;
+    // The submitted vertical wins: an emotional entry can carry a physical cross-tag.
+    final isPhysical = entry.vertical != null
+        ? entry.vertical == 'physical'
+        : entry.anatomicalSystem != null;
     final verticalThemeColor = isPhysical ? AppColors.clinicalTeal : AppColors.softIndigo;
+    final l10n = AppLocalizations.of(context);
     final intensityColor = RetrospectiveListView.getIntensityColor(entry.intensity);
-    final dispositionColor = getDispositionColor(entry.disposition);
 
     final rawNarrative = entry.narrative ??
         entry.stepAnswers?['naturalLanguageText'] as String? ??
@@ -234,7 +177,7 @@ class TriageHistoryDetailModal extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Detalhes da Triagem',
+                          l10n.outcomeHistoryDetailTitle,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -299,41 +242,6 @@ class TriageHistoryDetailModal extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Organic Primacy Alert Banner
-                    if (entry.organicPrimacyApplied) ...[
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.emergencySurfaceRed,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.emergencyCrimson.withValues(alpha: 0.3)),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.warning_amber_rounded,
-                              color: AppColors.emergencyCrimson,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'Atenção Clínica (Primazia Orgânica): Sintomas físicos concorrentes foram identificados e receberam prioridade de avaliação médica.',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.emergencyTextDark,
-                                  height: 1.35,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                    ],
-
                     // Category & Vertical Card
                     Container(
                       padding: const EdgeInsets.all(14),
@@ -381,7 +289,7 @@ class TriageHistoryDetailModal extends StatelessWidget {
                     ),
                     const SizedBox(height: 14),
 
-                    // Level / Severity Card
+                    // Self-reported intensity
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
@@ -397,7 +305,7 @@ class TriageHistoryDetailModal extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  'Nível de Intensidade',
+                                  l10n.outcomeIntensityTitle,
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
@@ -415,7 +323,7 @@ class TriageHistoryDetailModal extends StatelessWidget {
                                   border: Border.all(color: intensityColor.withValues(alpha: 0.4)),
                                 ),
                                 child: Text(
-                                  getIntensityDescription(entry.intensity),
+                                  l10n.historyIntensityInformed(entry.intensity),
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
@@ -444,69 +352,6 @@ class TriageHistoryDetailModal extends StatelessWidget {
                                 ),
                               );
                             }),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Care Disposition Card
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: dispositionColor.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: dispositionColor.withValues(alpha: 0.3)),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                getDispositionIcon(entry.disposition),
-                                color: dispositionColor,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Encaminhamento Sugerido',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey.shade700,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                key: const Key('modal_disposition_badge'),
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: dispositionColor.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: dispositionColor.withValues(alpha: 0.4)),
-                                ),
-                                child: Text(
-                                  RetrospectiveListView.formatDisposition(entry.disposition),
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: dispositionColor,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            getDispositionDescription(entry.disposition),
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13,
-                              color: isDark ? AppColors.textSecondaryDark : AppColors.textPrimaryLight,
-                              height: 1.35,
-                            ),
                           ),
                         ],
                       ),
@@ -553,7 +398,7 @@ class TriageHistoryDetailModal extends StatelessWidget {
                           ] else ...[
                             _buildAnswerRow(
                               icon: Icons.place_outlined,
-                              label: isPhysical ? 'Sistema / Região' : 'Dimensão Afetada',
+                              label: isPhysical ? 'Área do corpo' : 'Como você se sentiu',
                               value: RetrospectiveListView.formatCategory(entry),
                             ),
                             if (entry.stepAnswers != null) ...[
@@ -617,7 +462,7 @@ class TriageHistoryDetailModal extends StatelessWidget {
                               ],
                             )
                           : Text(
-                              'Nenhuma descrição adicional relatada pelo paciente nesta triagem.',
+                              l10n.outcomeHistoryNoNarrative,
                               key: const Key('modal_narrative_text'),
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13,

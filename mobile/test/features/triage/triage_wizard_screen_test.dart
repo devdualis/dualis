@@ -7,6 +7,7 @@ import 'package:dualis_mobile/core/network/connectivity_service.dart';
 import 'package:dualis_mobile/core/notifications/daily_checkin_notification_service.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
+import 'package:dualis_mobile/features/emergency/presentation/widgets/safety_notice_banner.dart';
 import 'package:dualis_mobile/features/triage/data/antiburla_remote_data_source.dart';
 import 'package:dualis_mobile/features/triage/domain/triage_vertical.dart';
 import 'package:dualis_mobile/features/triage/presentation/screens/triage_wizard_screen.dart';
@@ -99,6 +100,8 @@ class FakeAntiburlaRemoteDataSource extends AntiburlaRemoteDataSource {
 Widget createTriageTestWidget({
   TriageVertical vertical = TriageVertical.psicoEmocional,
   AntiburlaRemoteDataSource? antiburlaDataSource,
+  String? naturalLanguageText,
+  bool mentionsSelfHarm = false,
 }) {
   return ProviderScope(
     overrides: [
@@ -117,37 +120,41 @@ Widget createTriageTestWidget({
       supportedLocales: const [
         Locale('pt', 'BR'),
       ],
-      home: TriageWizardScreen(vertical: vertical),
+      home: TriageWizardScreen(
+        vertical: vertical,
+        naturalLanguageText: naturalLanguageText,
+        mentionsSelfHarm: mentionsSelfHarm,
+      ),
     ),
   );
 }
 
 void main() {
   group('TriageWizardScreen Widget Tests', () {
-    testWidgets('1. Renders "Iniciando Autoavaliação Psico-Emocional" banner on psicoEmocional vertical',
+    testWidgets('1. Renders "Registro emocional de hoje" banner on psicoEmocional vertical',
         (tester) async {
       await tester.pumpWidget(createTriageTestWidget(
         vertical: TriageVertical.psicoEmocional,
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('Iniciando Autoavaliação Psico-Emocional'), findsOneWidget);
+      expect(find.text('Registro emocional de hoje'), findsOneWidget);
       expect(find.text('Passo 1 de 5'), findsOneWidget);
       expect(find.text('Normal / Me sinto bem'), findsOneWidget);
       expect(find.byType(TriageOptionChip), findsNWidgets(8));
     });
 
-    testWidgets('2. Renders "Iniciando Autoavaliação Física" banner on fisica vertical',
+    testWidgets('2. Renders "Registro físico de hoje" banner on fisica vertical',
         (tester) async {
       await tester.pumpWidget(createTriageTestWidget(
         vertical: TriageVertical.fisica,
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('Iniciando Autoavaliação Física'), findsOneWidget);
+      expect(find.text('Registro físico de hoje'), findsOneWidget);
       expect(find.text('Passo 1 de 5'), findsOneWidget);
       expect(find.text('Normal / Me sinto bem'), findsOneWidget);
-      expect(find.text('Cabeça e Pescoço'), findsOneWidget);
+      expect(find.text('Cabeça e pescoço'), findsOneWidget);
       expect(find.byType(TriageOptionChip), findsNWidgets(13));
     });
 
@@ -172,7 +179,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Ansiosa / Agitação'));
+      await tester.tap(find.text('Inquieto(a) / Agitado(a)'));
       await tester.pumpAndSettle();
 
       final nextButton = find.widgetWithText(FilledButton, 'Próximo');
@@ -186,7 +193,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Ansiosa / Agitação'));
+      await tester.tap(find.text('Inquieto(a) / Agitado(a)'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
@@ -202,7 +209,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Ansiosa / Agitação'));
+      await tester.tap(find.text('Inquieto(a) / Agitado(a)'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
@@ -213,7 +220,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Passo 1 de 5'), findsOneWidget);
-      expect(find.text('Ansiosa / Agitação'), findsOneWidget);
+      expect(find.text('Inquieto(a) / Agitado(a)'), findsOneWidget);
     });
 
     testWidgets('7. Step 4 in Physical vertical renders TriageIntensitySelector',
@@ -223,7 +230,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      final colunaChip = find.text('Coluna e Dor Dorsal');
+      final colunaChip = find.text('Costas');
       await tester.ensureVisible(colunaChip);
       await tester.pumpAndSettle();
       await tester.tap(colunaChip);
@@ -255,7 +262,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Ansiosa / Agitação'));
+      await tester.tap(find.text('Inquieto(a) / Agitado(a)'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Próximo'));
       await tester.pumpAndSettle();
@@ -290,7 +297,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      final gastroChip = find.text('Gastrointestinal / Abdômen');
+      final gastroChip = find.text('Barriga');
       await tester.ensureVisible(gastroChip);
       await tester.tap(gastroChip);
       await tester.pumpAndSettle();
@@ -325,7 +332,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      final sonoChip = find.text('Sono (Insônia / Hipersônia)');
+      final sonoChip = find.text('Sono ruim ou sono demais');
       await tester.ensureVisible(sonoChip);
       await tester.tap(sonoChip);
       await tester.pumpAndSettle();
@@ -490,6 +497,91 @@ void main() {
 
       // Navigated directly to Home
       expect(find.text('Home Screen Destination'), findsOneWidget);
+    });
+  });
+
+  group('TriageWizardScreen safety notice wiring', () {
+    const bannerKey = Key('safety_notice_banner');
+
+    String bannerText(WidgetTester tester) =>
+        tester.widget<Text>(find.byKey(const Key('safety_notice_text'))).data!;
+
+    testWidgets('self-harm phrase in the text typed on Home shows the crisis banner',
+        (tester) async {
+      addTearDown(SafetyNotice.hide);
+      await tester.pumpWidget(createTriageTestWidget(
+        naturalLanguageText: 'hoje eu quero morrer',
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(bannerKey), findsOneWidget);
+      expect(find.byKey(const Key('safety_notice_open_resources')), findsOneWidget);
+      // Non-blocking: the wizard stays usable under the banner.
+      expect(find.text('Passo 1 de 5'), findsOneWidget);
+      expect(find.byType(TriageOptionChip), findsWidgets);
+    });
+
+    testWidgets('mentionsSelfHarm from the AI shows the same crisis banner, even for neutral text',
+        (tester) async {
+      addTearDown(SafetyNotice.hide);
+      await tester.pumpWidget(createTriageTestWidget(
+        naturalLanguageText: 'hoje eu quero morrer',
+      ));
+      await tester.pumpAndSettle();
+      final fromPhrase = bannerText(tester);
+      SafetyNotice.hide();
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpWidget(createTriageTestWidget(
+        naturalLanguageText: 'dormi pouco esta semana',
+        mentionsSelfHarm: true,
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(bannerKey), findsOneWidget);
+      expect(bannerText(tester), fromPhrase, reason: 'same card for everyone');
+    });
+
+    testWidgets('warning-sign text shows the generic notice, different from the crisis text',
+        (tester) async {
+      addTearDown(SafetyNotice.hide);
+      await tester.pumpWidget(createTriageTestWidget(
+        vertical: TriageVertical.fisica,
+        naturalLanguageText: 'quero morrer',
+      ));
+      await tester.pumpAndSettle();
+      final crisisText = bannerText(tester);
+      SafetyNotice.hide();
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpWidget(createTriageTestWidget(
+        vertical: TriageVertical.fisica,
+        naturalLanguageText: 'dor forte no peito',
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(bannerKey), findsOneWidget);
+      expect(bannerText(tester), isNot(crisisText));
+    });
+
+    testWidgets('neutral text shows no banner', (tester) async {
+      addTearDown(SafetyNotice.hide);
+      await tester.pumpWidget(createTriageTestWidget(
+        naturalLanguageText: 'dormi pouco esta semana',
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(bannerKey), findsNothing);
+    });
+
+    testWidgets('no text shows no banner', (tester) async {
+      addTearDown(SafetyNotice.hide);
+      await tester.pumpWidget(createTriageTestWidget());
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(bannerKey), findsNothing);
     });
   });
 }

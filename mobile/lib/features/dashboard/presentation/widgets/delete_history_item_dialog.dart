@@ -132,7 +132,7 @@ class _DeleteHistoryItemDialogState extends State<DeleteHistoryItemDialog> {
             // Explanation Message
             Text(
               l10n?.deleteHistoryItemConfirm ??
-                  'Tem certeza de que deseja descartar este registro de triagem do seu histórico? Esta ação é irreversível.',
+                  'Tem certeza de que deseja descartar este registro do seu histórico? Esta ação é irreversível.',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13.5,
                 color: subtitleColor,
@@ -210,7 +210,8 @@ class _DeleteHistoryItemDialogState extends State<DeleteHistoryItemDialog> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          'Nível ${widget.entry.intensity}',
+                          l10n?.deleteHistoryItemIntensity(widget.entry.intensity) ??
+                              'Intensidade informada: ${widget.entry.intensity}/5',
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w700,

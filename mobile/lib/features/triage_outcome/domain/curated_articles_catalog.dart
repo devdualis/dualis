@@ -5,11 +5,11 @@ class CuratedArticlesCatalog {
     id: 'art-wellness-1',
     title: 'Higiene do Sono e Repouso Restaurador',
     category: 'sono',
-    author: 'Dr. Lucas Mendes',
-    authorRole: 'Neurologista e Especialista em Sono',
+    author: 'Portal Drauzio Varella',
+    authorRole: 'Fonte',
     readTimeMinutes: 4,
     summary:
-        'Entenda como ciclos regulares de sono consolidam a imunidade celular e estabilizam os neurotransmissores do humor.',
+        'Hábitos simples para manter horários regulares de sono e favorecer noites mais tranquilas.',
     url: 'https://drauziovarella.uol.com.br/neurologia/higiene-do-sono-conheca-11-dicas-para-dormir-melhor/',
   );
 
@@ -17,11 +17,11 @@ class CuratedArticlesCatalog {
     id: 'art-wellness-2',
     title: 'Equilíbrio Hidroeletrolítico e Foco Diário',
     category: 'nutricao',
-    author: 'Dra. Camila Rocha',
-    authorRole: 'Nutricionista Clínica',
+    author: 'Organização Pan-Americana da Saúde (OPAS)',
+    authorRole: 'Fonte',
     readTimeMinutes: 3,
     summary:
-        'A hidratação adequada ao longo do dia previne cefaleias tensionais transitórias e otimiza a performance cognitiva.',
+        'Beber água ao longo do dia faz parte dos hábitos que ajudam a manter disposição e concentração.',
     url: 'https://www.paho.org/pt/topicos/curso-vida-saudavel',
   );
 
@@ -29,11 +29,11 @@ class CuratedArticlesCatalog {
     id: 'art-wellness-3',
     title: 'Técnica de Respiração Diafragmática 4-7-8',
     category: 'respiracao',
-    author: 'Dra. Beatriz Santos',
-    authorRole: 'Psicóloga Especialista em Regulação Emocional',
+    author: 'Portal Drauzio Varella',
+    authorRole: 'Fonte',
     readTimeMinutes: 5,
     summary:
-        'Três minutos de respiração compassada ativam o tônus vagal e previnem picos de cortisol mesmo em dias exigentes.',
+        'Alguns minutos de respiração compassada podem ajudar a desacelerar e relaxar em dias exigentes.',
     url: 'https://drauziovarella.uol.com.br/saude-mental/transtornos-de-ansiedade-nao-sao-todos-iguais-entenda-as-caracteristicas-de-cada-tipo/',
   );
 
@@ -41,11 +41,11 @@ class CuratedArticlesCatalog {
     id: 'art-dermato-01',
     title: 'Prurido Cutâneo, Alergias e Cuidados com a Pele',
     category: 'dermatologico',
-    author: 'Dra. Juliana Barbosa',
-    authorRole: 'Dermatologista Clínica (SBD)',
+    author: 'Sociedade Brasileira de Dermatologia',
+    authorRole: 'Fonte',
     readTimeMinutes: 4,
     summary:
-        'Manejo de irritações dérmicas, cuidados com a barreira cutânea e sinais de alerta para reações alérgicas agudas.',
+        'Cuidados gerais com a pele, hidratação da barreira cutânea e sinais de atenção.',
     url: 'https://www.sbd.org.br/doencas/urticaria/',
   );
 
@@ -53,11 +53,11 @@ class CuratedArticlesCatalog {
     id: 'art-membros-sup-01',
     title: 'Sobrecarga Musculoesquelética em Braços e Ombros',
     category: 'membros_superiores',
-    author: 'Dr. André Villas',
-    authorRole: 'Ortopedista e Fisiatra (SBOT)',
+    author: 'Portal Drauzio Varella',
+    authorRole: 'Fonte',
     readTimeMinutes: 4,
     summary:
-        'Identificação de tensões mecânicas, tendinopatias e orientações posturais para alívio de desconfortos nos braços.',
+        'Informações gerais sobre sobrecarga nos braços e ombros e orientações posturais para o dia a dia.',
     url: 'https://drauziovarella.uol.com.br/podcasts/tendinite/',
   );
 
@@ -65,11 +65,11 @@ class CuratedArticlesCatalog {
     id: 'art-humor-01',
     title: 'Manejo do Desânimo Persistente e Baixa Energia',
     category: 'depressiva_desanimo',
-    author: 'Dr. Marcelo Fagundes',
-    authorRole: 'Psiquiatra (ABP / CRM-SP)',
+    author: 'Organização Pan-Americana da Saúde (OPAS)',
+    authorRole: 'Fonte',
     readTimeMinutes: 5,
     summary:
-        'Estratégias baseadas em evidências para regulação do humor, rotinas de ativação comportamental e quando buscar suporte.',
+        'Pequenas rotinas para lidar com dias de desânimo e informações sobre quando buscar apoio.',
     url: 'https://www.paho.org/pt/topicos/depressao',
   );
 
@@ -77,11 +77,11 @@ class CuratedArticlesCatalog {
     id: 'art-ansiedade-01',
     title: 'Manejo da Ansiedade Aguda e Agitação Psicomotora',
     category: 'ansiosa_agitacao',
-    author: 'Dra. Camila Prado',
-    authorRole: 'Psiquiatra Clínica (ABP)',
+    author: 'Portal Drauzio Varella',
+    authorRole: 'Fonte',
     readTimeMinutes: 4,
     summary:
-        'Exercício guiado de regulação autonômica em episódios de angústia, nervosismo e pensamentos acelerados.',
+        'Exercício guiado de respiração para momentos de nervosismo e pensamentos acelerados.',
     url: 'https://drauziovarella.uol.com.br/saude-mental/transtornos-de-ansiedade-nao-sao-todos-iguais-entenda-as-caracteristicas-de-cada-tipo/',
   );
 
@@ -89,8 +89,8 @@ class CuratedArticlesCatalog {
     id: 'art-cefaleia-01',
     title: 'Cefaleia Tensional e Alívio Crânio-Cervical',
     category: 'cabeca_pescoco',
-    author: 'Dr. Fernando Siqueira',
-    authorRole: 'Neurologista Clínico',
+    author: 'Sociedade Brasileira de Cefaleia',
+    authorRole: 'Fonte',
     readTimeMinutes: 4,
     summary:
         'Gatilhos posturais e de estresse para dores de cabeça tensionais e técnicas ergonômicas de descompressão.',
@@ -101,8 +101,8 @@ class CuratedArticlesCatalog {
     id: 'art-coluna-01',
     title: 'Cuidados Posturais e Descompressão Lombar',
     category: 'coluna_dor_lombar',
-    author: 'Dra. Renata Toledo',
-    authorRole: 'Fisioterapeuta Especialista em Coluna',
+    author: 'Sociedade Brasileira de Ortopedia e Traumatologia',
+    authorRole: 'Fonte',
     readTimeMinutes: 4,
     summary:
         'Exercícios de mobilidade diária para alívio de dor lombar e prevenção de contraturas musculares.',
@@ -113,11 +113,11 @@ class CuratedArticlesCatalog {
     id: 'art-burnout-01',
     title: 'Esgotamento e Estresse Crônico (Burnout)',
     category: 'estresse_burnout',
-    author: 'Dra. Lívia Meireles',
-    authorRole: 'Psicóloga Especialista em Saúde Ocupacional',
+    author: 'Portal Drauzio Varella',
+    authorRole: 'Fonte',
     readTimeMinutes: 5,
     summary:
-        'Reconhecimento precoce de sinais de exaustão emocional, distanciamento afetivo e limites saudáveis de produtividade.',
+        'Informações gerais sobre cansaço emocional no trabalho e limites saudáveis na rotina.',
     url: 'https://drauziovarella.uol.com.br/psiquiatria/sindrome-de-burnout-esgotamento-profissional/',
   );
 

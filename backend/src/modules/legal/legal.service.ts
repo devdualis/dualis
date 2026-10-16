@@ -14,9 +14,28 @@ import {
 
 export type SupportedLanguage = 'pt-BR' | 'es' | 'en';
 
+/**
+ * Current version of the legal documents (terms, privacy policy, disclaimer).
+ * 2026.2 = wellness repositioning: the app is no longer described as a triage
+ * tool. Bumping it forces every user to accept the new texts again.
+ * Env overrides (TERMS_VERSION, PRIVACY_VERSION, DISCLAIMER_VERSION) still win.
+ */
+export const LEGAL_DOCUMENTS_VERSION = '2026.2';
+
+const LEGAL_DOCUMENTS_EFFECTIVE_DATE = '2026-10-16';
+const LEGAL_DOCUMENTS_LAST_UPDATED = '2026-10-16';
+
+/** Canonical intended-use statement (plan §1.1). Must stay identical everywhere. */
+export const INTENDED_USE_STATEMENT: Record<SupportedLanguage, string> = {
+  'pt-BR':
+    'O DualisCheckUp é um aplicativo de bem-estar e autoconhecimento. Ele ajuda você a registrar diariamente como se sente física e emocionalmente, acompanhar hábitos como hidratação e sono, visualizar seus próprios registros ao longo do tempo e acessar conteúdos educativos gerais sobre hábitos saudáveis. O DualisCheckUp não é um dispositivo médico: não avalia, não classifica nem interpreta sintomas, não indica nível de urgência, não faz diagnóstico, não recomenda tratamento e não substitui um profissional de saúde. Em caso de emergência, ligue 192 (SAMU). Se você estiver em sofrimento emocional, ligue 188 (CVV).',
+  en: 'DualisCheckUp is a wellness and self-awareness app. It helps you keep a daily journal of how you feel physically and emotionally, track habits such as hydration and sleep, view your own entries over time, and access general educational content about healthy habits. DualisCheckUp is not a medical device: it does not assess, classify or interpret symptoms, does not indicate urgency levels, does not diagnose, does not recommend treatment and does not replace a healthcare professional. In an emergency, call your local emergency number. If you are in emotional distress, contact your local crisis line.',
+  es: 'DualisCheckUp es una aplicación de bienestar y autoconocimiento. Te ayuda a registrar a diario cómo te sientes física y emocionalmente, seguir hábitos como la hidratación y el sueño, ver tus propios registros a lo largo del tiempo y acceder a contenidos educativos generales sobre hábitos saludables. DualisCheckUp no es un dispositivo médico: no evalúa, no clasifica ni interpreta síntomas, no indica niveles de urgencia, no realiza diagnósticos, no recomienda tratamientos y no sustituye a un profesional de la salud. En caso de emergencia, llama al número de emergencias local. Si estás pasando por un momento de angustia emocional, contacta con la línea de crisis de tu país.',
+};
+
 @Injectable()
 export class LegalService {
-  private readonly defaultVersion = '2026.1';
+  private readonly defaultVersion = LEGAL_DOCUMENTS_VERSION;
 
   constructor(@Inject(ConfigService) private readonly configService: ConfigService) {}
 
@@ -41,8 +60,8 @@ export class LegalService {
     const lang = this.resolveLanguage(requestedLang, acceptLanguageHeader);
     const version = this.configService.get<string>('TERMS_VERSION') || this.defaultVersion;
     const entity = this.getLegalEntityDetails();
-    const effectiveDate = '2026-01-01';
-    const lastUpdated = '2026-10-01';
+    const effectiveDate = LEGAL_DOCUMENTS_EFFECTIVE_DATE;
+    const lastUpdated = LEGAL_DOCUMENTS_LAST_UPDATED;
 
     if (lang === 'es') {
       return {
@@ -53,7 +72,7 @@ export class LegalService {
         legalEntity: entity,
         title: 'Términos y Condiciones de Uso del SaaS DualisCheckUp',
         summary:
-          'Contrato de prestación de servicios de software para monitoreo preventivo de salud y triaje clínico inteligente.',
+          'Contrato de prestación de servicios de software para el registro personal de bienestar y autoconocimiento.',
         sections: [
           {
             sectionId: '1-acceptance',
@@ -63,20 +82,19 @@ export class LegalService {
           },
           {
             sectionId: '2-nature-of-service',
-            title: '2. Naturaleza del Servicio y Descargo de Responsabilidad Médica',
-            content:
-              'DualisCheckUp es un Software como Servicio (SaaS) destinado exclusivamente al automonitoreo preventivo y triaje de bienestar somático y psicoemocional.',
+            title: '2. Naturaleza del Servicio',
+            content: INTENDED_USE_STATEMENT.es,
             bullets: [
-              'No es un dispositivo de diagnóstico médico autónomo (Anvisa RDC nº 657/2022).',
-              'No prescribe medicamentos ni tratamientos clínicos (Res. CFM nº 2.314/2022).',
-              'En situaciones de emergencia médica o riesgo vital, debe llamar inmediatamente al 192 (SAMU), 193 o a los servicios de urgencias locales.',
+              'No evalúa síntomas, no indica urgencia, no diagnostica y no recomienda tratamientos.',
+              'Las intensidades y la información que se muestran son las que usted mismo registró.',
+              'En una emergencia en Brasil, llame al 192 (SAMU) o al 188 (CVV); en otros países, al número de emergencias local.',
             ],
           },
           {
             sectionId: '3-subscriptions-billing-refunds',
             title: '3. Suscripciones, Facturación, Cancelaciones y Reembolsos',
             content:
-              'El acceso a funcionalidades avanzadas se realiza mediante suscripciones periódicas procesadas por pasarelas externas certificadas (PCI-DSS Nivel 1).',
+              'El acceso a funcionalidades adicionales puede ofrecerse mediante suscripciones periódicas, procesadas por intermediarios de pago externos.',
             bullets: [
               'Puede cancelar su suscripción en cualquier momento desde la configuración de su cuenta sin penalizaciones.',
               'De conformidad con las normas de protección al consumidor, los usuarios tienen derecho a retracto y reembolso total dentro de los 7 (siete) días posteriores a la primera contratación.',
@@ -87,7 +105,7 @@ export class LegalService {
             sectionId: '4-intellectual-property',
             title: '4. Propiedad Intelectual',
             content:
-              'Todos los modelos de clasificación clínica, algoritmos heurísticos, código fuente, interfaces y marcas registradas son propiedad exclusiva de DualisCheckUp Saúde e Tecnologia Ltda. Queda prohibida la ingeniería inversa, extracción de datos o uso no autorizado.',
+              'El software, los contenidos, las marcas y las interfaces de la plataforma son propiedad exclusiva de DualisCheckUp Saúde e Tecnologia Ltda. Queda prohibida la ingeniería inversa, extracción de datos o uso no autorizado.',
           },
           {
             sectionId: '5-suspension-termination',
@@ -114,7 +132,7 @@ export class LegalService {
         legalEntity: entity,
         title: 'DualisCheckUp SaaS Terms of Service',
         summary:
-          'Software-as-a-Service customer contract for preventive health self-monitoring and intelligent clinical triage.',
+          'Software-as-a-Service customer contract for a personal wellness and self-awareness journal.',
         sections: [
           {
             sectionId: '1-acceptance',
@@ -124,21 +142,25 @@ export class LegalService {
           },
           {
             sectionId: '2-nature-of-service',
-            title: '2. Nature of the Service & Medical Disclaimer',
-            content:
-              'DualisCheckUp provides preventive health wellness tracking and risk stratification tools. It is not an autonomous diagnostic medical device under Anvisa RDC 657/2022 or international SaMD regulations. Always seek direct medical care for acute emergencies.',
+            title: '2. Nature of the Service',
+            content: INTENDED_USE_STATEMENT.en,
+            bullets: [
+              'It does not assess symptoms, indicate urgency, diagnose or recommend treatment.',
+              'Intensities and other information shown are the ones you entered yourself.',
+              'In an emergency in Brazil, call 192 (SAMU) or 188 (CVV); elsewhere, call your local emergency number.',
+            ],
           },
           {
             sectionId: '3-subscriptions-billing-refunds',
             title: '3. Subscriptions, Billing, Cancellations & Refunds',
             content:
-              'Subscriptions are billed on a recurring basis via certified PCI-DSS Level 1 payment processors. Users can cancel at any time with no lock-in fees. A 7-day unconditional refund window applies to all initial subscription charges.',
+              'Additional features may be offered through recurring subscriptions processed by third-party payment providers. Users can cancel at any time with no lock-in fees. A 7-day unconditional refund window applies to all initial subscription charges.',
           },
           {
             sectionId: '4-intellectual-property',
             title: '4. Intellectual Property Rights',
             content:
-              'All clinical models, software architecture, UI components, and proprietary trademarks are owned exclusively by DualisCheckUp. Reverse engineering, data scraping, or unauthorized exploitation is strictly prohibited.',
+              'The software, content, trademarks and interfaces of the platform are owned exclusively by DualisCheckUp. Reverse engineering, data scraping, or unauthorized exploitation is strictly prohibited.',
           },
           {
             sectionId: '5-suspension-termination',
@@ -165,7 +187,7 @@ export class LegalService {
       legalEntity: entity,
       title: 'Termos e Condições de Uso do SaaS DualisCheckUp',
       summary:
-        'Contrato de prestação de serviços de software em nuvem para automonitoramento preventivo de saúde e triagem clínica inteligente.',
+        'Contrato de prestação de serviços de software em nuvem para registro pessoal de bem-estar e autoconhecimento.',
       sections: [
         {
           sectionId: '1-aceitacao',
@@ -174,21 +196,20 @@ export class LegalService {
             'Ao criar uma conta ou utilizar o aplicativo DualisCheckUp, o Usuário declara ter capacidade civil plena (maior de 18 anos) e concorda expressamente com as disposições deste Contrato de Prestação de Serviços de Software.',
         },
         {
-          sectionId: '2-natureza-e-isencao-medica',
-          title: '2. Natureza da Plataforma e Limitação de Responsabilidade Clínica',
-          content:
-            'O DualisCheckUp atua como ferramenta auxiliar de bem-estar e estratificação de risco preventivo nos termos da RDC Anvisa nº 657/2022.',
+          sectionId: '2-natureza-do-servico',
+          title: '2. Natureza do Serviço',
+          content: INTENDED_USE_STATEMENT['pt-BR'],
           bullets: [
-            'O serviço NÃO substitui a avaliação presencial de um médico com CRM ativo.',
-            'O software NÃO realiza diagnósticos nosológicos definitivos e NÃO prescreve fármacos.',
-            'Em sintomas agudos de intensidade crítica (Nível 4 ou 5), o aplicativo aciona a tela de emergência com discagem direta ao SAMU (192).',
+            'Não avalia sintomas, não indica urgência, não diagnostica e não recomenda tratamento.',
+            'As intensidades e demais informações exibidas são as que você mesmo registrou.',
+            'Em emergência, ligue 192 (SAMU) ou 188 (CVV).',
           ],
         },
         {
           sectionId: '3-pagamentos-cancelamento-reembolso',
           title: '3. Planos, Cobrança, Cancelamento e Política de Reembolso',
           content:
-            'O acesso a recursos avançados de histórico longitudinal é disponibilizado mediante planos de assinatura intermediados por processadores de pagamento seguros homologados PCI-DSS.',
+            'O acesso a recursos adicionais pode ser disponibilizado mediante planos de assinatura, processados por intermediadores de pagamento terceiros.',
           bullets: [
             'O Usuário pode cancelar sua assinatura a qualquer momento através do aplicativo, sem multas rescisórias.',
             'Direito de Arrependimento: Em conformidade com o Art. 49 do Código de Defesa do Consumidor (CDC), o Usuário pode solicitar reembolso integral no prazo de até 7 (sete) dias após a primeira contratação.',
@@ -199,7 +220,7 @@ export class LegalService {
           sectionId: '4-propriedade-intelectual',
           title: '4. Propriedade Intelectual e Licença de Uso',
           content:
-            'A DualisCheckUp Saúde e Tecnologia Ltda. é titular exclusiva de todos os direitos autorais, patentes, segredos comerciais, marcas e algoritmos de triagem da plataforma. É vedada a engenharia reversa, cópia ou comercialização não autorizada.',
+            'A DualisCheckUp Saúde e Tecnologia Ltda. é titular exclusiva dos direitos sobre software, conteúdos, marcas e interfaces da plataforma. É vedada a engenharia reversa, cópia ou comercialização não autorizada.',
         },
         {
           sectionId: '5-suspensao-e-rescisao',
@@ -224,8 +245,8 @@ export class LegalService {
     const lang = this.resolveLanguage(requestedLang, acceptLanguageHeader);
     const version = this.configService.get<string>('PRIVACY_VERSION') || this.defaultVersion;
     const entity = this.getLegalEntityDetails();
-    const effectiveDate = '2026-01-01';
-    const lastUpdated = '2026-10-01';
+    const effectiveDate = LEGAL_DOCUMENTS_EFFECTIVE_DATE;
+    const lastUpdated = LEGAL_DOCUMENTS_LAST_UPDATED;
 
     const rights = [
       'Confirmação da existência de tratamento e acesso aos dados.',
@@ -247,8 +268,8 @@ export class LegalService {
           'Normas de recolección, tratamiento, almacenamiento seguro y eliminación de datos personales y sensibles de salud.',
         lgpdCompliance: {
           legalBases: [
-            'Consentimiento explícito del titular (LGPD Art. 11, I / GDPR Art. 9)',
-            'Tutela de la salud y prevención (LGPD Art. 7, VIII)',
+            'Consentimiento específico y destacado del titular para datos sensibles de salud (LGPD Art. 11, I / GDPR Art. 9(2)(a))',
+            'Ejecución del contrato de prestación del servicio, para los datos de registro (LGPD Art. 7, V)',
             'Cumplimiento de obligación legal y regulatoria (LGPD Art. 7, II)',
           ],
           sensitiveDataArticle: 'LGPD Art. 11 (Datos Personales Sensibles de Salud)',
@@ -260,10 +281,10 @@ export class LegalService {
             sectionId: '1-data-collected',
             title: '1. Datos que Recolectamos',
             content:
-              'Recolectamos únicamente la información necesaria para el funcionamiento preventivo de la aplicación:',
+              'Recolectamos únicamente la información necesaria para el funcionamiento de la aplicación:',
             bullets: [
               'Datos de registro: Nombre, correo electrónico, fecha de nacimiento, sexo biológico.',
-              'Datos sensibles de salud: Registros de síntomas físicos y psicoemocionales, consumo de agua, métricas de bienestar.',
+              'Datos sensibles de salud: Anotaciones diarias sobre cómo se siente física y emocionalmente, la intensidad que usted informa, consumo de agua y otros hábitos.',
               'Datos técnicos de seguridad: Dirección IP anonimizada, registros de auditoría de acceso, versión del dispositivo.',
             ],
           },
@@ -271,23 +292,39 @@ export class LegalService {
             sectionId: '2-purposes',
             title: '2. Finalidad del Tratamiento',
             content:
-              'Toda la información es tratada para proporcionar la estratificación de riesgo, alertas de hidratación y seguimiento longitudinal. Nunca vendemos datos de salud a terceros o aseguradoras.',
+              'Los datos sensibles de salud se tratan exclusivamente para las siguientes finalidades. Nunca vendemos datos de salud a terceros, anunciantes o aseguradoras.',
+            bullets: [
+              'Registro y visualización de su diario de bienestar.',
+              'Organización automática de sus anotaciones por área del cuerpo o emoción (con ayuda de IA, sin evaluación de salud).',
+              'Consistencia del historial.',
+            ],
           },
           {
-            sectionId: '3-third-parties',
-            title: '3. Compartición con Terceros y Pasarelas de Pago',
+            sectionId: '3-processors-international-transfer',
+            title: '3. Encargados del Tratamiento y Transferencia Internacional',
             content:
-              'Los pagos son procesados de forma segura mediante procesadores certificados (PCI-DSS) como Stripe. DualisCheckUp jamás almacena números de tarjeta de crédito en sus servidores.',
+              'Para prestar el servicio compartimos datos únicamente con los siguientes encargados del tratamiento:',
+            bullets: [
+              'Google LLC (API Gemini): el texto de sus anotaciones se envía a la API Gemini de Google para organizarlas automáticamente. La IA no evalúa su salud.',
+              'Transferencia internacional: este procesamiento puede realizarse en servidores ubicados fuera de Brasil (LGPD Art. 33).',
+              'Proveedores de infraestructura en la nube (alojamiento y base de datos), sujetos a obligaciones de confidencialidad y seguridad.',
+            ],
           },
           {
-            sectionId: '4-retention-and-deletion',
-            title: '4. Período de Retención y Derecho de Eliminación',
+            sectionId: '4-payments',
+            title: '4. Pagos',
+            content:
+              'Cuando existan planes de pago, los pagos serán procesados por intermediarios de pago externos. DualisCheckUp jamás almacena números de tarjeta de crédito en sus servidores.',
+          },
+          {
+            sectionId: '5-retention-and-deletion',
+            title: '5. Período de Retención y Derecho de Eliminación',
             content:
               'Sus datos se conservan mientras su cuenta permanezca activa. El usuario puede solicitar la eliminación total y permanente en cualquier momento desde la Central de Privacidad.',
           },
           {
-            sectionId: '5-communications',
-            title: '5. Comunicaciones y Desuscripción (Opt-Out)',
+            sectionId: '6-communications',
+            title: '6. Comunicaciones y Desuscripción (Opt-Out)',
             content:
               'Solo enviamos notificaciones operativas obligatorias. Las comunicaciones informativas o de bienestar cuentan con un botón de desuscripción y un selector de preferencias en la app.',
           },
@@ -307,8 +344,8 @@ export class LegalService {
           'Governance policy for collecting, processing, securing, and deleting personal and sensitive health data.',
         lgpdCompliance: {
           legalBases: [
-            'Explicit consent of the data subject (LGPD Art. 11 / GDPR Art. 9)',
-            'Health protection and wellness tracking (LGPD Art. 7, VIII)',
+            'Specific and prominent consent of the data subject for sensitive health data (LGPD Art. 11, I / GDPR Art. 9(2)(a))',
+            'Performance of the service contract, for account data (LGPD Art. 7, V)',
             'Compliance with legal and regulatory obligations (LGPD Art. 7, II)',
           ],
           sensitiveDataArticle: 'LGPD Art. 11 (Sensitive Health Data)',
@@ -319,11 +356,10 @@ export class LegalService {
           {
             sectionId: '1-data-collected',
             title: '1. Information We Collect',
-            content:
-              'We collect only what is necessary to personalize your preventive health triage experience:',
+            content: 'We collect only what is necessary to run your wellness journal:',
             bullets: [
               'Account info: Name, email address, date of birth, biological sex.',
-              'Sensitive health data: Symptom check-ins, emotional markers, water intake records.',
+              'Sensitive health data: Daily notes on how you feel physically and emotionally, the intensity you report, water intake and other habits.',
               'Security logs: Anonymized IP addresses, session telemetry, audit hashes.',
             ],
           },
@@ -331,23 +367,38 @@ export class LegalService {
             sectionId: '2-purposes',
             title: '2. Purpose of Data Processing',
             content:
-              'Data is used solely for symptom triage, hydration alerts, and longitudinal self-care tracking. We strictly forbid the commercial sale or sharing of health data with advertising networks or insurance brokers.',
+              'Sensitive health data is processed solely for the purposes below. We strictly forbid the sale or sharing of health data with advertising networks or insurance brokers.',
+            bullets: [
+              'Recording and viewing your wellness journal.',
+              'Automatically organizing your notes by body area or mood (AI-assisted, with no health assessment).',
+              'Keeping your history consistent.',
+            ],
           },
           {
-            sectionId: '3-payment-security',
-            title: '3. Payments & Zero Cardholder Storage',
+            sectionId: '3-processors-international-transfer',
+            title: '3. Processors & International Transfer',
+            content: 'We share data only with the following processors, to run the service:',
+            bullets: [
+              'Google LLC (Gemini API): the text of your notes is sent to Google\'s Gemini API to organize them automatically. The AI does not assess your health.',
+              'International transfer: this processing may take place on servers located outside Brazil (LGPD Art. 33).',
+              'Cloud infrastructure providers (hosting and database), bound by confidentiality and security obligations.',
+            ],
+          },
+          {
+            sectionId: '4-payments',
+            title: '4. Payments & Zero Cardholder Storage',
             content:
-              'All subscription payments are tokenized through PCI-DSS Level 1 compliant gateways (e.g. Stripe). DualisCheckUp servers never receive, store, or process raw credit card numbers.',
+              'When paid plans are available, payments are handled by third-party payment providers. DualisCheckUp servers never receive, store, or process raw credit card numbers.',
           },
           {
-            sectionId: '4-rights-and-deletion',
-            title: '4. Data Subject Rights & Deletion',
+            sectionId: '5-rights-and-deletion',
+            title: '5. Data Subject Rights & Deletion',
             content:
-              'Users hold the complete right to export their clinical history as JSON or trigger permanent irreversible deletion directly within the Privacy Center.',
+              'Users hold the complete right to export their journal entries as JSON or trigger permanent irreversible deletion directly within the Privacy Center.',
           },
           {
-            sectionId: '5-communications-optout',
-            title: '5. Communications & Instant Opt-Out',
+            sectionId: '6-communications-optout',
+            title: '6. Communications & Instant Opt-Out',
             content:
               'Educational tips and notification preferences can be toggled on or off at any moment with a single tap in the application settings.',
           },
@@ -367,8 +418,8 @@ export class LegalService {
         'Diretrizes de coleta, tratamento, segurança criptográfica e exclusão de dados pessoais sensíveis de saúde da plataforma DualisCheckUp.',
       lgpdCompliance: {
         legalBases: [
-          'Consentimento expresso e inequívoco do Titular (LGPD Art. 11, I)',
-          'Tutela da saúde em procedimento realizado por serviços de saúde e bem-estar (LGPD Art. 7º, VIII e Art. 11, II, "f")',
+          'Consentimento específico e destacado do Titular para dados pessoais sensíveis de saúde (LGPD Art. 11, I)',
+          'Execução do contrato de prestação do serviço, para os dados cadastrais (LGPD Art. 7º, V)',
           'Cumprimento de obrigação legal ou regulatória (LGPD Art. 7º, II)',
         ],
         sensitiveDataArticle: 'Artigo 11 da Lei Federal nº 13.709/2018 (Dados Sensíveis de Saúde)',
@@ -380,40 +431,56 @@ export class LegalService {
           sectionId: '1-dados-coletados',
           title: '1. Quais Dados Coletamos',
           content:
-            'Coletamos estritamente os dados necessários para a personalização clínica e segurança do Usuário:',
+            'Coletamos estritamente os dados necessários para o funcionamento do seu diário de bem-estar e para a segurança do Usuário:',
           bullets: [
             'Dados Cadastrais: Nome completo, endereço de e-mail autenticado, data de nascimento e sexo biológico.',
-            'Dados Sensíveis de Saúde: Histórico de sintomas físicos (12 sistemas) e psicoemocionais (7 dimensões), registros de hidratação e desfechos de triagem.',
-            'Dados de Acesso e Metadados: Endereço IP mascarado, registros cronológicos de login, hashes imutáveis antiburla.',
+            'Dados Sensíveis de Saúde: Anotações diárias sobre como você se sente física e emocionalmente, intensidade informada por você, registros de hidratação e de outros hábitos.',
+            'Dados de Acesso e Metadados: Endereço IP mascarado, registros cronológicos de login, hashes de integridade do histórico.',
           ],
         },
         {
           sectionId: '2-finalidade-tratamento',
           title: '2. Finalidade e Não Comercialização',
           content:
-            'Os dados sensíveis de saúde são utilizados com a finalidade exclusiva de processar a estratificação preventiva e alimentar o prontuário pessoal do Usuário. É expressamente PROIBIDA a venda, comercialização ou compartilhamento de dados médicos com seguradoras, anunciantes ou terceiros não autorizados.',
-        },
-        {
-          sectionId: '3-pagamentos-e-pci',
-          title: '3. Arquitetura de Pagamentos e Proteção PCI-DSS',
-          content:
-            'As transações financeiras para planos pagos são processadas diretamente por intermediadores de pagamento homologados PCI-DSS Nivel 1 (ex: Stripe / Asaas). Os servidores da DualisCheckUp NUNCA tocam, visualizam ou armazenam números de cartão de crédito ou códigos de segurança (CVV).',
-        },
-        {
-          sectionId: '4-direitos-titular-lgpd',
-          title: '4. Direitos do Titular e Exclusão Imediata (Art. 18 da LGPD)',
-          content:
-            'O Usuário possui controle autônomo sobre seus dados diretamente na Central de Privacidade do aplicativo:',
+            'Os dados sensíveis de saúde são tratados exclusivamente para as finalidades abaixo. É expressamente PROIBIDA a venda, comercialização ou compartilhamento de dados de saúde com seguradoras, anunciantes ou terceiros não autorizados.',
           bullets: [
-            'Exportação Completa: Download de todos os registros clínicos em formato padronizado JSON.',
+            'Registro e visualização do seu diário de bem-estar.',
+            'Organização automática das suas anotações por área do corpo ou emoção (com auxílio de IA, sem avaliação de saúde).',
+            'Consistência do histórico.',
+          ],
+        },
+        {
+          sectionId: '3-operadores-transferencia-internacional',
+          title: '3. Operadores e Transferência Internacional',
+          content:
+            'Compartilhamos dados apenas com os operadores abaixo, para a prestação do serviço:',
+          bullets: [
+            'Google LLC (API Gemini): o texto das suas anotações é enviado à API Gemini do Google para organizá-las automaticamente. A IA não avalia a sua saúde.',
+            'Transferência internacional: esse processamento pode ocorrer em servidores localizados fora do Brasil (LGPD Art. 33).',
+            'Provedores de infraestrutura em nuvem (hospedagem e banco de dados), sujeitos a obrigações de confidencialidade e segurança.',
+          ],
+        },
+        {
+          sectionId: '4-pagamentos',
+          title: '4. Pagamentos',
+          content:
+            'Quando houver planos pagos, as transações serão processadas por intermediadores de pagamento terceiros. Os servidores da DualisCheckUp NUNCA tocam, visualizam ou armazenam números de cartão de crédito ou códigos de segurança (CVV).',
+        },
+        {
+          sectionId: '5-direitos-titular-lgpd',
+          title: '5. Direitos do Titular e Exclusão Imediata (Art. 18 da LGPD)',
+          content:
+            'O Usuário possui controle direto sobre seus dados diretamente na Central de Privacidade do aplicativo:',
+          bullets: [
+            'Exportação Completa: Download de todos os seus registros em formato padronizado JSON.',
             'Exclusão Permanente: Opção de apagar a conta e todos os dados associados mediante confirmação com senha, resultando na eliminação criptográfica irreversível dos bancos de dados.',
           ],
         },
         {
-          sectionId: '5-comunicacoes-e-opt-out',
-          title: '5. Comunicações, Notificações e Mecanismo de Opt-Out',
+          sectionId: '6-comunicacoes-e-opt-out',
+          title: '6. Comunicações, Notificações e Mecanismo de Opt-Out',
           content:
-            'As mensagens de rotina (lembretes de água e dicas preventivas) exigem consentimento prévio e podem ser ativadas ou desativadas a qualquer instante na tela de Configurações, garantindo liberdade total de descontinuidade de mensagens informativas.',
+            'As mensagens de rotina (lembretes de água e dicas de bem-estar) exigem consentimento prévio e podem ser ativadas ou desativadas a qualquer instante na tela de Configurações, garantindo liberdade total de descontinuidade de mensagens informativas.',
         },
       ],
     };
@@ -504,18 +571,18 @@ export class LegalService {
   private getPortugueseDisclaimer(version: string): MedicalDisclaimerResponseDto {
     const citations: RegulatoryCitationDto[] = [
       {
-        regulatoryBody: 'Anvisa',
-        normativeAct: 'RDC nº 657/2022',
+        regulatoryBody: 'Autoridade Nacional de Proteção de Dados (ANPD)',
+        normativeAct: 'Lei nº 13.709/2018 (LGPD)',
         summary:
-          'Regulamenta Software como Dispositivo Médico (SaMD); a plataforma atua estritamente em monitoramento preventivo e estratificação de risco sem exercer diagnóstico autônomo.',
-        url: 'https://www.in.gov.br/web/dou/-/resolucao-de-diretoria-colegiada-rdc-n-657-de-24-de-marco-de-2022-389603457',
+          'Rege o tratamento dos seus dados pessoais, inclusive os dados sensíveis de saúde registrados no diário (Art. 7, 11, 14 e 18).',
+        url: 'https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm',
       },
       {
-        regulatoryBody: 'Conselho Federal de Medicina (CFM)',
-        normativeAct: 'Resolução CFM nº 2.314/2022',
+        regulatoryBody: 'Secretaria Nacional do Consumidor (Senacon)',
+        normativeAct: 'Lei nº 8.078/1990 (Código de Defesa do Consumidor)',
         summary:
-          'Define e disciplina a telemedicina no Brasil; ratifica a necessidade de supervisão médica direta em decisões diagnósticas e terapêuticas.',
-        url: 'https://sistemas.cfm.org.br/normas/visualizar/resolucoes/BR/2022/2314',
+          'Garante os direitos do consumidor na contratação do serviço, incluindo o direito de arrependimento em 7 dias (Art. 49).',
+        url: 'https://www.planalto.gov.br/ccivil_03/leis/l8078compilado.htm',
       },
     ];
 
@@ -523,12 +590,12 @@ export class LegalService {
       {
         name: 'SAMU',
         phone: '192',
-        description: 'Serviço de Atendimento Móvel de Urgência para emergências clínicas graves.',
+        description: 'Serviço de Atendimento Móvel de Urgência.',
       },
       {
         name: 'Bombeiros',
         phone: '193',
-        description: 'Corpo de Bombeiros para resgates, traumas e acidentes.',
+        description: 'Corpo de Bombeiros para resgates e acidentes.',
       },
       {
         name: 'CVV',
@@ -540,10 +607,9 @@ export class LegalService {
     return {
       version,
       language: 'pt-BR',
-      disclaimerText:
-        'O DualisCheckUp é uma plataforma móvel de auto-monitoramento preventivo e triagem de bem-estar físico e psico-emocional baseada em protocolos clínicos reconhecidos. O aplicativo NÃO realiza diagnósticos médicos, NÃO prescreve medicamentos ou tratamentos e NÃO substitui a consulta clínica presencial ou o aconselhamento de um médico devidamente registrado no Conselho Regional de Medicina (CRM). Todas as informações e estratificações de risco fornecidas possuem finalidade estritamente informativa e preventiva.',
+      disclaimerText: INTENDED_USE_STATEMENT['pt-BR'],
       shortDisclaimer:
-        'O DualisCheckUp oferece triagem preventiva e não substitui a avaliação de um profissional médico.',
+        'O DualisCheckUp é um app de bem-estar, não é um dispositivo médico e não substitui um profissional de saúde.',
       citations,
       emergencyContacts,
     };
@@ -552,46 +618,45 @@ export class LegalService {
   private getSpanishDisclaimer(version: string): MedicalDisclaimerResponseDto {
     const citations: RegulatoryCitationDto[] = [
       {
-        regulatoryBody: 'Anvisa / Normas Sanitarias Regionales',
-        normativeAct: 'RDC nº 657/2022',
+        regulatoryBody: 'Autoridad Nacional de Protección de Datos (ANPD)',
+        normativeAct: 'Ley nº 13.709/2018 (LGPD)',
         summary:
-          'Regulación de Software como Dispositivo Médico (SaMD); la plataforma actúa exclusivamente en monitoreo preventivo y estratificación de riesgo sin emitir diagnósticos autónomos.',
-        url: 'https://www.in.gov.br/web/dou/-/resolucao-de-diretoria-colegiada-rdc-n-657-de-24-de-marco-de-2022-389603457',
+          'Regula el tratamiento de sus datos personales, incluidos los datos sensibles de salud registrados en el diario (Art. 7, 11, 14 y 18).',
+        url: 'https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm',
       },
       {
-        regulatoryBody: 'Consejo Federal de Medicina (CFM)',
-        normativeAct: 'Resolución CFM nº 2.314/2022',
+        regulatoryBody: 'Secretaría Nacional del Consumidor (Senacon)',
+        normativeAct: 'Ley nº 8.078/1990 (Código de Defensa del Consumidor)',
         summary:
-          'Regula la telemedicina y exige supervisión médica presencial para decisiones de diagnóstico y prescripción.',
-        url: 'https://sistemas.cfm.org.br/normas/visualizar/resolucoes/BR/2022/2314',
+          'Garantiza los derechos del consumidor al contratar el servicio, incluido el derecho de retracto en 7 días (Art. 49).',
+        url: 'https://www.planalto.gov.br/ccivil_03/leis/l8078compilado.htm',
       },
     ];
 
     const emergencyContacts: EmergencyContactDto[] = [
       {
-        name: 'SAMU / Urgencias Médicas',
+        name: 'SAMU / Emergencias',
         phone: '192',
-        description: 'Servicio de Atención Médica de Urgencias para situaciones clínicas agudas (en otros países llame al 911).',
+        description: 'Servicio de atención móvil de urgencias en Brasil (en otros países, llame al número de emergencias local).',
       },
       {
         name: 'Bomberos / Rescate',
         phone: '193',
-        description: 'Cuerpo de bomberos y unidades de rescate y trauma.',
+        description: 'Cuerpo de bomberos y unidades de rescate.',
       },
       {
         name: 'CVV / Asistencia en Crisis',
         phone: '188',
-        description: 'Línea de contención emocional y prevención del suicidio confidencial y gratuita.',
+        description: 'Línea de apoyo emocional y prevención del suicidio, confidencial y gratuita.',
       },
     ];
 
     return {
       version,
       language: 'es',
-      disclaimerText:
-        'DualisCheckUp es una plataforma móvil de automonitoreo preventivo y triaje de bienestar físico y psicoemocional basada en protocolos clínicos reconocidos. La aplicación NO realiza diagnósticos médicos, NO prescribe medicamentos ni tratamientos y NO reemplaza la consulta clínica presencial ni el asesoramiento de un profesional médico matriculado. Toda la información y estratificaciones de riesgo tienen fines estrictamente informativos y preventivos.',
+      disclaimerText: INTENDED_USE_STATEMENT.es,
       shortDisclaimer:
-        'DualisCheckUp ofrece triaje preventivo y no reemplaza la evaluación médica profesional.',
+        'DualisCheckUp es una app de bienestar, no es un dispositivo médico y no reemplaza a un profesional de la salud.',
       citations,
       emergencyContacts,
     };
@@ -600,18 +665,18 @@ export class LegalService {
   private getEnglishDisclaimer(version: string): MedicalDisclaimerResponseDto {
     const citations: RegulatoryCitationDto[] = [
       {
-        regulatoryBody: 'Anvisa / International SaMD Standards',
-        normativeAct: 'RDC 657/2022',
+        regulatoryBody: 'Brazilian National Data Protection Authority (ANPD)',
+        normativeAct: 'Law 13,709/2018 (LGPD)',
         summary:
-          'Regulates Software as a Medical Device (SaMD); this platform operates strictly as an auxiliary preventive wellness and risk stratification tool without claiming autonomous diagnostic authority.',
-        url: 'https://www.in.gov.br/en/web/dou/-/resolucao-de-diretoria-colegiada-rdc-n-657-de-24-de-marco-de-2022-389603457',
+          'Governs the processing of your personal data, including the sensitive health data you record in your journal (Arts. 7, 11, 14 and 18).',
+        url: 'https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm',
       },
       {
-        regulatoryBody: 'Federal Council of Medicine (CFM)',
-        normativeAct: 'Resolution CFM 2.314/2022',
+        regulatoryBody: 'National Consumer Secretariat (Senacon)',
+        normativeAct: 'Law 8,078/1990 (Consumer Protection Code)',
         summary:
-          'Defines telemedicine practice, affirming mandatory direct medical oversight for clinical diagnosis and drug prescribing.',
-        url: 'https://sistemas.cfm.org.br/normas/visualizar/resolucoes/BR/2022/2314',
+          'Protects your consumer rights when subscribing, including the 7-day right of withdrawal (Art. 49).',
+        url: 'https://www.planalto.gov.br/ccivil_03/leis/l8078compilado.htm',
       },
     ];
 
@@ -619,7 +684,7 @@ export class LegalService {
       {
         name: 'SAMU / Emergency Medical Services',
         phone: '192',
-        description: 'Emergency medical dispatch for acute life-threatening situations (or 911 internationally).',
+        description: 'Mobile emergency service in Brazil (elsewhere, call your local emergency number).',
       },
       {
         name: 'Fire & Rescue Services',
@@ -636,10 +701,9 @@ export class LegalService {
     return {
       version,
       language: 'en',
-      disclaimerText:
-        'DualisCheckUp is a mobile preventive self-monitoring and health triage platform bridging physical and psycho-emotional well-being based on recognized clinical protocols. The application DOES NOT provide medical diagnoses, DOES NOT prescribe medications or treatments, and DOES NOT replace in-person clinical consultations or medical advice from a licensed physician. All insights and risk stratifications are strictly for informational and preventive triage purposes.',
+      disclaimerText: INTENDED_USE_STATEMENT.en,
       shortDisclaimer:
-        'DualisCheckUp provides preventive triage and does not replace professional medical evaluation.',
+        'DualisCheckUp is a wellness app, is not a medical device and does not replace a healthcare professional.',
       citations,
       emergencyContacts,
     };
