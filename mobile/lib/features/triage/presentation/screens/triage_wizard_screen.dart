@@ -478,7 +478,14 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
             childAspectRatio: 0.85,
-            children: question.options.map((option) {
+            // 'normal' stays a valid, fully-functional answer key (see
+            // _handleNormalCompletion / isNormalSelection in this file and
+            // TriageQuestionBank) — it is just not rendered as a grid tile,
+            // since the home screen's big icon buttons already cover that
+            // meaning. Only the visual option is removed here.
+            children: question.options
+                .where((option) => option.key != 'normal')
+                .map((option) {
               final isSelected = state.answers[state.currentStep] == option.key;
               final label = TriagePreviewCard.resolveAnswerLabel(context, option.key);
 
