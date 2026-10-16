@@ -130,8 +130,20 @@ void main() {
 
       expect(find.byKey(const Key('start_psicoemocional_triage_button')), findsOneWidget);
       expect(find.byKey(const Key('start_fisica_triage_button')), findsOneWidget);
-      expect(find.text('Iniciar Psicoemocional'), findsOneWidget);
-      expect(find.text('Iniciar Físico'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('start_psicoemocional_triage_button')),
+          matching: find.byIcon(Icons.psychology_rounded),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('start_fisica_triage_button')),
+          matching: find.byIcon(Icons.accessibility_new_rounded),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('QA 3.2: Complete Psicoemocional with optional narrative returns to Home and updates its card',
@@ -173,7 +185,13 @@ void main() {
 
       // Avaliação Física remains pending and untouched
       expect(find.byKey(const Key('start_fisica_triage_button')), findsOneWidget);
-      expect(find.text('Iniciar Físico'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('start_fisica_triage_button')),
+          matching: find.byIcon(Icons.accessibility_new_rounded),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('QA 3.3: Complete both stages updates both cards and shows dailyCheckInCompletedBanner',

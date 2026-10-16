@@ -83,8 +83,20 @@ void main() {
 
       expect(find.byKey(const Key('start_psicoemocional_triage_button')), findsOneWidget);
       expect(find.byKey(const Key('start_fisica_triage_button')), findsOneWidget);
-      expect(find.text('Iniciar Psicoemocional'), findsOneWidget);
-      expect(find.text('Iniciar Físico'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('start_psicoemocional_triage_button')),
+          matching: find.byIcon(Icons.psychology_rounded),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('start_fisica_triage_button')),
+          matching: find.byIcon(Icons.accessibility_new_rounded),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('2. Tapping Iniciar Psicoemocional navigates to Triage Screen with psicoEmocional vertical',
