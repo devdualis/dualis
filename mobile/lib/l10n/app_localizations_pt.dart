@@ -2081,50 +2081,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get loginNoAccountPrompt => 'Ainda não possui conta? ';
 
   @override
-  String get forgotPasswordLink => 'Esqueceu sua senha?';
-
-  @override
-  String get forgotPasswordTitle => 'Redefinir senha';
-
-  @override
-  String get forgotPasswordSubtitle =>
-      'Informe o e-mail da sua conta. Enviaremos um código para redefinir sua senha.';
-
-  @override
-  String get forgotPasswordSendCta => 'Enviar código';
-
-  @override
-  String get forgotPasswordSuccessMessage =>
-      'Se o e-mail estiver cadastrado, um código de redefinição foi enviado.';
-
-  @override
-  String get forgotPasswordBackToLogin => 'Voltar para o login';
-
-  @override
-  String get resetPasswordTitle => 'Criar nova senha';
-
-  @override
-  String get resetPasswordSubtitle =>
-      'Digite o código recebido por e-mail e escolha uma nova senha.';
-
-  @override
-  String get resetPasswordCodeLabel => 'Código de verificação';
-
-  @override
-  String get resetPasswordCodeHint => 'Digite o código de 6 dígitos';
-
-  @override
-  String get resetPasswordCodeRequired =>
-      'O código de verificação é obrigatório.';
-
-  @override
-  String get resetPasswordSubmitCta => 'Redefinir senha';
-
-  @override
-  String get resetPasswordSuccessMessage =>
-      'Senha redefinida com sucesso. Você já pode entrar com a nova senha.';
-
-  @override
   String get registerTitle => 'Criar sua conta';
 
   @override
