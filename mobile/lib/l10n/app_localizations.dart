@@ -3160,6 +3160,18 @@ abstract class AppLocalizations {
   /// **'Se quiser, escreva com suas palavras como você está.'**
   String get wizardNarrativeHint;
 
+  /// No description provided for @wizardStepZeroFreeTextLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Prefere descrever com suas próprias palavras?'**
+  String get wizardStepZeroFreeTextLabel;
+
+  /// No description provided for @wizardStepZeroFreeTextHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se quiser, escreva com suas palavras o que está sentindo.'**
+  String get wizardStepZeroFreeTextHint;
+
   /// No description provided for @deleteHistoryItemIntensity.
   ///
   /// In pt, this message translates to:
@@ -3633,6 +3645,84 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ainda não possui conta? '**
   String get loginNoAccountPrompt;
+
+  /// No description provided for @forgotPasswordLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esqueceu sua senha?'**
+  String get forgotPasswordLink;
+
+  /// No description provided for @forgotPasswordTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Redefinir senha'**
+  String get forgotPasswordTitle;
+
+  /// No description provided for @forgotPasswordSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe o e-mail da sua conta. Enviaremos um código para redefinir sua senha.'**
+  String get forgotPasswordSubtitle;
+
+  /// No description provided for @forgotPasswordSendCta.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar código'**
+  String get forgotPasswordSendCta;
+
+  /// No description provided for @forgotPasswordSuccessMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se o e-mail estiver cadastrado, um código de redefinição foi enviado.'**
+  String get forgotPasswordSuccessMessage;
+
+  /// No description provided for @forgotPasswordBackToLogin.
+  ///
+  /// In pt, this message translates to:
+  /// **'Voltar para o login'**
+  String get forgotPasswordBackToLogin;
+
+  /// No description provided for @resetPasswordTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar nova senha'**
+  String get resetPasswordTitle;
+
+  /// No description provided for @resetPasswordSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o código recebido por e-mail e escolha uma nova senha.'**
+  String get resetPasswordSubtitle;
+
+  /// No description provided for @resetPasswordCodeLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de verificação'**
+  String get resetPasswordCodeLabel;
+
+  /// No description provided for @resetPasswordCodeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o código de 6 dígitos'**
+  String get resetPasswordCodeHint;
+
+  /// No description provided for @resetPasswordCodeRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'O código de verificação é obrigatório.'**
+  String get resetPasswordCodeRequired;
+
+  /// No description provided for @resetPasswordSubmitCta.
+  ///
+  /// In pt, this message translates to:
+  /// **'Redefinir senha'**
+  String get resetPasswordSubmitCta;
+
+  /// No description provided for @resetPasswordSuccessMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Senha redefinida com sucesso. Você já pode entrar com a nova senha.'**
+  String get resetPasswordSuccessMessage;
 
   /// No description provided for @registerTitle.
   ///

@@ -1795,6 +1795,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'If you like, describe in your own words how you are.';
 
   @override
+  String get wizardStepZeroFreeTextLabel =>
+      'Prefer to describe it in your own words?';
+
+  @override
+  String get wizardStepZeroFreeTextHint =>
+      'If you like, describe in your own words what you\'re feeling.';
+
+  @override
   String deleteHistoryItemIntensity(int value) {
     return 'Reported intensity: $value/5';
   }
@@ -2054,6 +2062,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginNoAccountPrompt => 'Don\'t have an account yet? ';
+
+  @override
+  String get forgotPasswordLink => 'Forgot your password?';
+
+  @override
+  String get forgotPasswordTitle => 'Reset password';
+
+  @override
+  String get forgotPasswordSubtitle =>
+      'Enter your account email. We\'ll send you a code to reset your password.';
+
+  @override
+  String get forgotPasswordSendCta => 'Send code';
+
+  @override
+  String get forgotPasswordSuccessMessage =>
+      'If the email is registered, a reset code has been sent.';
+
+  @override
+  String get forgotPasswordBackToLogin => 'Back to login';
+
+  @override
+  String get resetPasswordTitle => 'Create new password';
+
+  @override
+  String get resetPasswordSubtitle =>
+      'Enter the code you received by email and choose a new password.';
+
+  @override
+  String get resetPasswordCodeLabel => 'Verification code';
+
+  @override
+  String get resetPasswordCodeHint => 'Enter the 6-digit code';
+
+  @override
+  String get resetPasswordCodeRequired => 'Verification code is required.';
+
+  @override
+  String get resetPasswordSubmitCta => 'Reset password';
+
+  @override
+  String get resetPasswordSuccessMessage =>
+      'Password reset successfully. You can now log in with your new password.';
 
   @override
   String get registerTitle => 'Create your account';
