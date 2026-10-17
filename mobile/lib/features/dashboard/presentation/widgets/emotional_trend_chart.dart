@@ -99,12 +99,14 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
                       size: 20,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      'Evolução Emocional (Últimos 7 Dias)',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                    Flexible(
+                      child: Text(
+                        'Evolução Emocional (Últimos 7 Dias)',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                        ),
                       ),
                     ),
                   ],
@@ -271,35 +273,26 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
       runSpacing: 4,
       children: dimensionMeta.entries.map((entry) {
         final isHidden = _hiddenDimensions.contains(entry.key);
-        return InkWell(
-          onTap: () {
-            setState(() {
-              if (isHidden) {
-                _hiddenDimensions.remove(entry.key);
-              } else {
-                _hiddenDimensions.add(entry.key);
-              }
-            });
-          },
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: isHidden
-                  ? Colors.grey.shade100
-                  : entry.value.color.withValues(alpha: 0.12),
+        return Semantics(
+          button: true,
+          label: '${entry.value.label}, ${isHidden ? 'oculto' : 'visível'}',
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  if (isHidden) {
+                    _hiddenDimensions.remove(entry.key);
+                  } else {
+                    _hiddenDimensions.add(entry.key);
+                  }
+                });
+              },
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: isHidden ? Colors.grey.shade300 : entry.value.color,
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 7,
-                  height: 7,
+              child: Center(
+                widthFactor: 1,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: isHidden
                         ? (isDark ? AppColors.backgroundDark : Colors.grey.shade100)
@@ -312,16 +305,31 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
                       width: 1,
                     ),
                   ),
-                ),
-                const SizedBox(width: 5),
-                Text(
-                  entry.value.label,
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w500,
-                    color: isHidden ? Colors.grey : Colors.black87,
-                    decoration:
-                        isHidden ? TextDecoration.lineThrough : null,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 7,
+                        height: 7,
+                        decoration: BoxDecoration(
+                          color: isHidden ? Colors.grey : entry.value.color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        entry.value.label,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w500,
+                          color: isHidden
+                              ? (isDark ? AppColors.textSecondaryDark : Colors.grey)
+                              : (isDark ? AppColors.textPrimaryDark : Colors.black87),
+                          decoration:
+                              isHidden ? TextDecoration.lineThrough : null,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
