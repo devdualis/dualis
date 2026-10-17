@@ -100,12 +100,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                       ),
                     ),
                   ),
-                  IconButton(
-                    key: const Key('onboarding_emergency_button'),
-                    icon: const Icon(Icons.emergency_rounded, color: AppColors.emergencyCrimson),
-                    tooltip: 'Recursos de Emergência / SOS',
-                    onPressed: () => context.push(RoutePaths.emergency),
-                  ),
+                  // Space for the global urgent-help button (UrgentHelpOverlay).
+                  const SizedBox(width: 48),
                 ],
               ),
               const SizedBox(height: 16),

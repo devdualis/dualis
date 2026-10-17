@@ -263,15 +263,6 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
             }
           },
         ),
-        actions: [
-          IconButton(
-            key: const Key('verification_emergency_button'),
-            tooltip: 'Recursos de Emergência / SOS',
-            icon: const Icon(Icons.emergency_rounded, color: AppColors.emergencyCrimson),
-            onPressed: () => context.push(RoutePaths.emergency),
-          ),
-          const SizedBox(width: 8),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(

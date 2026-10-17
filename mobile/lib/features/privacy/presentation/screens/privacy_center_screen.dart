@@ -179,15 +179,6 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         elevation: 0,
-        actions: [
-          IconButton(
-            key: const Key('privacy_emergency_button'),
-            tooltip: 'Recursos de Emergência / SOS',
-            icon: const Icon(Icons.emergency_rounded, color: AppColors.emergencyCrimson),
-            onPressed: () => context.push(RoutePaths.emergency),
-          ),
-          const SizedBox(width: 8),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),

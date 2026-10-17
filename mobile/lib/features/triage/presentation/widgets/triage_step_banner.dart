@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/router/route_paths.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Top banner displaying the active clinical vertical and dynamic step progress.
@@ -11,7 +9,6 @@ class TriageStepBanner extends StatelessWidget implements PreferredSizeWidget {
   final int totalSteps;
   final Color activeColor;
   final VoidCallback? onBack;
-  final VoidCallback? onEmergency;
 
   const TriageStepBanner({
     super.key,
@@ -20,7 +17,6 @@ class TriageStepBanner extends StatelessWidget implements PreferredSizeWidget {
     required this.totalSteps,
     required this.activeColor,
     this.onBack,
-    this.onEmergency,
   });
 
   @override
@@ -63,13 +59,8 @@ class TriageStepBanner extends StatelessWidget implements PreferredSizeWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                IconButton(
-                  key: const Key('triage_step_banner_emergency_button'),
-                  constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-                  icon: const Icon(Icons.emergency_rounded, color: Colors.white),
-                  tooltip: l10n.urgentHelpButton,
-                  onPressed: onEmergency ?? () => context.push(RoutePaths.emergency),
-                ),
+                // Space for the global urgent-help button (UrgentHelpOverlay).
+                const SizedBox(width: 56),
               ],
             ),
             Padding(
