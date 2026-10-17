@@ -112,13 +112,23 @@ void main() {
     RoutePaths.onboarding: OnboardingScreen,
   };
 
+  Finder helpControlFor(String location) {
+    if (location == RoutePaths.home) {
+      return find.byKey(const Key('nav_destination_emergency'));
+    }
+    return find.byKey(const Key('urgent_help_button'));
+  }
+
   for (final entry in screens.entries) {
     testWidgets('help is 1 tap away from ${entry.key}', (tester) async {
       await pump(tester, entry.key);
       expect(find.byType(entry.value), findsOneWidget);
 
-      final button = find.byKey(const Key('urgent_help_button'));
+      final button = helpControlFor(entry.key);
       expect(button, findsOneWidget);
+      if (entry.key == RoutePaths.home) {
+        expect(find.byKey(const Key('urgent_help_button')), findsNothing);
+      }
 
       await tester.tap(button);
       await tester.pump();
@@ -135,7 +145,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       expect(find.byType(EmergencyScreen), findsNothing);
       expect(find.byType(entry.value), findsOneWidget);
-      expect(find.byKey(const Key('urgent_help_button')), findsOneWidget);
+      expect(helpControlFor(entry.key), findsOneWidget);
     });
   }
 

@@ -53,8 +53,6 @@ class UrgentHelpOverlay extends StatefulWidget {
 }
 
 class _UrgentHelpOverlayState extends State<UrgentHelpOverlay> {
-  bool _onHelpScreen = false;
-
   @override
   void initState() {
     super.initState();
@@ -67,7 +65,6 @@ class _UrgentHelpOverlayState extends State<UrgentHelpOverlay> {
     if (oldWidget.router != widget.router) {
       oldWidget.router.routerDelegate.removeListener(_onRouteChanged);
       widget.router.routerDelegate.addListener(_onRouteChanged);
-      _onHelpScreen = _isOnHelpScreen();
     }
   }
 
@@ -83,6 +80,12 @@ class _UrgentHelpOverlayState extends State<UrgentHelpOverlay> {
     return router.state.matchedLocation == RoutePaths.emergency;
   }
 
+  bool _homeNavCoversHelp() {
+    final router = widget.router;
+    if (router.routerDelegate.currentConfiguration.isEmpty) return false;
+    return router.state.matchedLocation == RoutePaths.home;
+  }
+
   void _onRouteChanged() {
     // The router lives below this widget and may notify while it is building.
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
@@ -93,14 +96,12 @@ class _UrgentHelpOverlayState extends State<UrgentHelpOverlay> {
   }
 
   void _sync() {
-    if (!mounted) return;
-    final value = _isOnHelpScreen();
-    if (value != _onHelpScreen) setState(() => _onHelpScreen = value);
+    if (mounted) setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final visible = !_onHelpScreen;
+    final visible = !_isOnHelpScreen() && !_homeNavCoversHelp();
 
     return Stack(
       children: [

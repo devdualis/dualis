@@ -10,14 +10,18 @@ enum DualisNavTab {
 }
 
 class DualisBottomNavBar extends StatelessWidget {
+  static const int emergencyIndex = 4;
+
   final int currentIndex;
   final ValueChanged<int> onTap;
+  final VoidCallback onEmergencyTap;
   final bool hasCompletedToday;
 
   const DualisBottomNavBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    required this.onEmergencyTap,
     this.hasCompletedToday = false,
   });
 
@@ -28,6 +32,7 @@ class DualisBottomNavBar extends StatelessWidget {
     final todayOutcomeLabel = l10n?.navTodayOutcome ?? 'Resultado do Dia';
     final historyLabel = l10n?.navHistory ?? 'Histórico & Mapa';
     final hydrationLabel = l10n?.navHydration ?? 'Água';
+    final emergencyLabel = l10n?.urgentHelpButton ?? 'Ajuda urgente';
 
     return Container(
       decoration: BoxDecoration(
@@ -41,8 +46,14 @@ class DualisBottomNavBar extends StatelessWidget {
         ],
       ),
       child: NavigationBar(
-        selectedIndex: currentIndex,
-        onDestinationSelected: onTap,
+        selectedIndex: currentIndex.clamp(0, DualisNavTab.values.length - 1),
+        onDestinationSelected: (index) {
+          if (index == DualisBottomNavBar.emergencyIndex) {
+            onEmergencyTap();
+            return;
+          }
+          onTap(index);
+        },
         backgroundColor: AppColors.surfaceLight,
         indicatorColor: AppColors.clinicalTeal.withValues(alpha: 0.18),
         elevation: 0,
@@ -87,8 +98,28 @@ class DualisBottomNavBar extends StatelessWidget {
             label: '',
             tooltip: hydrationLabel,
           ),
+          NavigationDestination(
+            key: const Key('nav_destination_emergency'),
+            icon: _emergencyGlyph(Icons.emergency_outlined),
+            selectedIcon: _emergencyGlyph(Icons.emergency),
+            label: '',
+            tooltip: emergencyLabel,
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _emergencyGlyph(IconData icon) {
+    return Container(
+      width: 32,
+      height: 32,
+      alignment: Alignment.center,
+      decoration: const BoxDecoration(
+        color: AppColors.emergencyCrimson,
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, size: 18, color: Colors.white),
     );
   }
 }

@@ -261,6 +261,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onTap: (index) {
           setState(() => _currentTabIndex = index);
         },
+        onEmergencyTap: () => context.push(RoutePaths.emergency),
       ),
     );
   }

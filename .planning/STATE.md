@@ -5,10 +5,10 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-10-17T15:42:09.816Z"
-last_activity: 2026-10-16
+last_updated: "2026-10-17T18:59:54.099Z"
+last_activity: 2026-10-17
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: 7621b4581f0042b9f42870c9a37791efc84f4f38
+state_head: 6042a3953157e26d449f1c0ee3885b0891f0a0ca
 progress:
   total_phases: 15
   completed_phases: 10
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-10-16 - Completed quick task 261016-ozk: Triage wizard step-0 icon grid + debounced free-text AI classification + l10n
+Last activity: 2026-10-17 - Completed quick task 261017-m6w: Remove redundant organization card from both result views; 129 tests and simulator verified
 
 Progress: [██████████] 100%
 
@@ -102,6 +102,10 @@ None yet.
 | 261017-l63 | Corregir layout de chips de dimensiones emocionales (wrap compacto) y overflow del badge Intensidade/Nível en registros recientes | 2026-10-17 | e7fc238 | [261017-l63-corregir-layout-de-chips-de-dimensiones-](./quick/261017-l63-corregir-layout-de-chips-de-dimensiones-/) |
 | 261016-ozk | Triage wizard step-0 icon grid + debounced free-text AI classification + l10n | 2026-10-16 | 06ada1f | [261016-ozk-triage-wizard-step-0-icon-grid-free-text](./quick/261016-ozk-triage-wizard-step-0-icon-grid-free-text/) |
 | 261017-hl7 | Stop AiInsightCard on Meu Dia echoing the axis card's own category label when the AI returned nothing (no narrative submitted) | 2026-10-17 | 7621b45 | [261017-hl7-fix-ai-insight-card-duplicate-text](./quick/261017-hl7-fix-ai-insight-card-duplicate-text/) |
+| 261017-lz6 | Fix emotional legend chip wrapping while preserving accessible touch targets; 8 tests and live simulator verified | 2026-10-17 | dbceb89 | [261017-lz6-fix-emotional-legend-chips-expanding-to-](./quick/261017-lz6-fix-emotional-legend-chips-expanding-to-/) |
+| 261017-m4u | Remove level chips from Home and Meu Dia; use shared intensity colors; 129 tests and simulator verified | 2026-10-17 | 642626b | [261017-m4u-remove-intensity-chips-from-home-and-meu](./quick/261017-m4u-remove-intensity-chips-from-home-and-meu/) |
+| 261017-m4j | Move emergency help into the bottom nav as a red item; keep overlay on screens without that bar | 2026-10-17 | uncommitted | [261017-m4j-mover-boton-de-emergencia-al-menu-inferi](./quick/261017-m4j-mover-boton-de-emergencia-al-menu-inferi/) |
+| 261017-m6w | Remove redundant organization card from both result views; 129 tests and simulator verified | 2026-10-17 | 6042a39 | [261017-m6w-remove-redundant-ai-organization-card-fr](./quick/261017-m6w-remove-redundant-ai-organization-card-fr/) |
 
 ## Deferred Items
 
