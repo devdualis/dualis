@@ -5,6 +5,8 @@ import '../../../../core/utils/error_message_resolver.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/router/route_paths.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/anatomical_body_map.dart';
 import '../widgets/journal_pattern_card.dart';
@@ -236,7 +238,15 @@ class HistoricalDashboardScreen extends ConsumerWidget {
             const SizedBox(width: 4),
           ],
           IconButton(
+            key: const Key('dashboard_emergency_button'),
+            icon: const Icon(Icons.emergency_rounded, color: Color(0xFFDC2626)),
+            tooltip: 'Ajuda de Emergência',
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            onPressed: () => context.push(RoutePaths.emergency),
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh_rounded),
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
             onPressed: () =>
                 ref.read(dashboardControllerProvider.notifier).refreshHistory(),
           ),

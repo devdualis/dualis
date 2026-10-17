@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../domain/triage_outcome_models.dart';
 
 class ArticleCard extends StatelessWidget {
@@ -70,17 +71,24 @@ class ArticleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.surfaceDark : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
+        border: Border.all(
+          color: isDark
+              ? AppColors.outlineDark
+              : Colors.black.withValues(alpha: 0.08),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(alpha: isDark ? 0.08 : 0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -103,7 +111,13 @@ class ArticleCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                     decoration: BoxDecoration(
-                      color: _isEmotional ? const Color(0xFFEDE7F6) : const Color(0xFFE0F2F1),
+                      color: _isEmotional
+                          ? (isDark
+                              ? AppColors.softIndigo.withValues(alpha: 0.3)
+                              : const Color(0xFFEDE7F6))
+                          : (isDark
+                              ? AppColors.clinicalTeal.withValues(alpha: 0.3)
+                              : const Color(0xFFE0F2F1)),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -111,14 +125,20 @@ class ArticleCard extends StatelessWidget {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        color: _isEmotional ? const Color(0xFF5E35B1) : const Color(0xFF00796B),
+                        color: _isEmotional
+                            ? (isDark
+                                ? AppColors.clinicalTealLight
+                                : const Color(0xFF5E35B1))
+                            : (isDark
+                                ? AppColors.clinicalTealLight
+                                : const Color(0xFF00796B)),
                       ),
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: isDark ? AppColors.outlineDark : Colors.grey.shade100,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -126,7 +146,9 @@ class ArticleCard extends StatelessWidget {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade700,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : Colors.grey.shade700,
                       ),
                     ),
                   ),
@@ -159,7 +181,7 @@ class ArticleCard extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: Colors.black87,
+              color: isDark ? AppColors.textPrimaryDark : Colors.black87,
               height: 1.3,
             ),
           ),
@@ -169,7 +191,9 @@ class ArticleCard extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: Colors.grey.shade700,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : Colors.grey.shade700,
             ),
           ),
           const SizedBox(height: 8),
@@ -179,37 +203,41 @@ class ArticleCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
-              color: Colors.black54,
+              color: isDark ? AppColors.textSecondaryDark : Colors.black54,
               height: 1.3,
             ),
           ),
           const SizedBox(height: 12),
-          InkWell(
-            onTap: () => _openArticle(context),
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: Text(
-                      'Ler Artigo Completo',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF00796B),
+          Semantics(
+            button: true,
+            label: 'Ler Artigo Completo: ${article.title}',
+            child: InkWell(
+              onTap: () => _openArticle(context),
+              borderRadius: BorderRadius.circular(8),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 48),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        'Ler Artigo Completo',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF00796B),
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 16,
-                    color: Color(0xFF00796B),
-                  ),
-                ],
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 16,
+                      color: Color(0xFF00796B),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

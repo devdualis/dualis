@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:dualis_mobile/core/constants/app_colors.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/dashboard/data/triage_history_remote_data_source.dart';
 import 'package:dualis_mobile/features/dashboard/domain/models/triage_history_models.dart';
@@ -460,21 +461,22 @@ void main() {
       await tester.pumpWidget(_harness(container, const DualAxisTriggerCard()));
       await tester.pumpAndSettle();
 
-      expect(
-        find.descendant(
-          of: find.byKey(const Key('psicoemocional_completed_card')),
-          matching: find.text('Moderada (3)'),
-        ),
-        findsOneWidget,
+      // Chip removed: the completed card's background color is the tier signal.
+      final emotionalCard = tester.widget<Container>(
+        find.byKey(const Key('psicoemocional_completed_card')),
       );
       expect(
-        find.descendant(
-          of: find.byKey(const Key('fisica_completed_card')),
-          matching: find.text('Leve (1-2)'),
-        ),
-        findsOneWidget,
+        (emotionalCard.decoration as BoxDecoration).color,
+        AppColors.intensityModerateBg,
       );
-      expect(find.text('Intensa (4-5)'), findsNothing);
+
+      final physicalCard = tester.widget<Container>(
+        find.byKey(const Key('fisica_completed_card')),
+      );
+      expect(
+        (physicalCard.decoration as BoxDecoration).color,
+        AppColors.intensityMildBg,
+      );
     });
   });
 
@@ -496,7 +498,10 @@ void main() {
 
       expect(container.read(triageOutcomeProvider).outcome?.intensityScore, 2);
       expect(find.text('2. Eixo Avaliação Psico-emocional'), findsOneWidget);
-      expect(find.text('Estresse e Burnout'), findsOneWidget);
+      // Single source of truth: the freshly-resolved trigger-state summary
+      // (mapCategoryLabel('estresse_burnout')) wins over the stale
+      // outcome.secondaryCategoryLabel persisted in _stalePhysicalOutcome().
+      expect(find.text('Estressado(a) ou esgotado(a)'), findsOneWidget);
       expect(find.text('Moderada (3)'), findsOneWidget);
       expect(find.text('Leve (1-2)'), findsOneWidget);
       expect(find.text('Intensa (4-5)'), findsNothing);

@@ -6,6 +6,8 @@ import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/email_verification_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
+import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/emergency/presentation/screens/emergency_screen.dart';
 import '../../features/triage/domain/triage_vertical.dart';
@@ -45,7 +47,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isAuthRoute = currentLoc == RoutePaths.onboarding ||
           currentLoc == RoutePaths.login ||
           currentLoc == RoutePaths.register ||
-          currentLoc == RoutePaths.verifyEmail;
+          currentLoc == RoutePaths.verifyEmail ||
+          currentLoc == RoutePaths.forgotPassword ||
+          currentLoc == RoutePaths.resetPassword;
 
       final isPublicAccessibleRoute = isAuthRoute ||
           currentLoc == RoutePaths.emergency ||
@@ -99,6 +103,19 @@ GoRouter createRouter({
         path: RoutePaths.login,
         name: 'login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.forgotPassword,
+        name: 'forgotPassword',
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.resetPassword,
+        name: 'resetPassword',
+        builder: (context, state) {
+          final email = state.extra as String? ?? '';
+          return ResetPasswordScreen(email: email);
+        },
       ),
       GoRoute(
         path: RoutePaths.home,

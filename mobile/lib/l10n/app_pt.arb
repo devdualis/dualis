@@ -1101,6 +1101,54 @@
   "@passwordComplexityHint": {
     "description": "Hint describing password complexity requirements"
   },
+  "forgotPasswordTitle": "Esqueceu sua senha?",
+  "@forgotPasswordTitle": {
+    "description": "Title of the forgot password screen"
+  },
+  "forgotPasswordSubtitle": "Informe o e-mail vinculado à sua conta e enviaremos um código para redefinir sua senha.",
+  "@forgotPasswordSubtitle": {
+    "description": "Subtitle of the forgot password screen"
+  },
+  "forgotPasswordSendCta": "Enviar Código",
+  "@forgotPasswordSendCta": {
+    "description": "Submit button on the forgot password screen"
+  },
+  "forgotPasswordSuccessMessage": "Se esse e-mail estiver cadastrado, enviamos um código de redefinição para ele.",
+  "@forgotPasswordSuccessMessage": {
+    "description": "Success message shown after requesting a password reset code"
+  },
+  "forgotPasswordBackToLogin": "Voltar ao Login",
+  "@forgotPasswordBackToLogin": {
+    "description": "Link back to the login screen from the forgot password screen"
+  },
+  "resetPasswordTitle": "Redefina sua senha",
+  "@resetPasswordTitle": {
+    "description": "Title of the reset password screen"
+  },
+  "resetPasswordSubtitle": "Informe o código que enviamos e escolha uma nova senha.",
+  "@resetPasswordSubtitle": {
+    "description": "Subtitle of the reset password screen"
+  },
+  "resetPasswordCodeLabel": "Código de Verificação",
+  "@resetPasswordCodeLabel": {
+    "description": "Label for the verification code field on the reset password screen"
+  },
+  "resetPasswordCodeHint": "Código de 6 dígitos",
+  "@resetPasswordCodeHint": {
+    "description": "Hint for the verification code field on the reset password screen"
+  },
+  "resetPasswordCodeRequired": "Informe o código de 6 dígitos",
+  "@resetPasswordCodeRequired": {
+    "description": "Validation error when the verification code is missing or invalid"
+  },
+  "resetPasswordSubmitCta": "Redefinir Senha",
+  "@resetPasswordSubmitCta": {
+    "description": "Submit button on the reset password screen"
+  },
+  "resetPasswordSuccessMessage": "Sua senha foi redefinida. Você já pode fazer login.",
+  "@resetPasswordSuccessMessage": {
+    "description": "Success message shown after resetting the password"
+  },
   "privacyShortcut": "Central de Privacidade e LGPD",
   "@privacyShortcut": {
     "description": "Navigation link to privacy center"

@@ -111,37 +111,44 @@ class _GenderOption extends StatelessWidget {
     );
 
     return Expanded(
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        color: selected ? AppColors.softIndigo : Colors.transparent,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: borderRadius,
-            splashColor: AppColors.softIndigo.withValues(alpha: 0.15),
-            highlightColor: AppColors.softIndigo.withValues(alpha: 0.08),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    icon,
-                    size: 18,
-                    color: selected ? Colors.white : AppColors.textSecondaryLight,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    label,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+      child: Semantics(
+        button: true,
+        selected: selected,
+        label: 'Sexo biológico: $label',
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          constraints: const BoxConstraints(minHeight: 48),
+          color: selected ? AppColors.softIndigo : Colors.transparent,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: borderRadius,
+              splashColor: AppColors.softIndigo.withValues(alpha: 0.15),
+              highlightColor: AppColors.softIndigo.withValues(alpha: 0.08),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 18,
                       color: selected ? Colors.white : AppColors.textSecondaryLight,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    Text(
+                      label,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                        color: selected ? Colors.white : AppColors.textSecondaryLight,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dualis_mobile/core/constants/app_colors.dart';
 import 'package:dualis_mobile/features/dashboard/data/triage_history_remote_data_source.dart';
 import 'package:dualis_mobile/features/dashboard/domain/models/triage_history_models.dart';
 import 'package:dualis_mobile/features/home/domain/trigger_checkin_state.dart';
@@ -184,7 +185,13 @@ void main() {
 
       // Verify completed physical stage card and uncompleted emotional stage button
       expect(find.byKey(const Key('fisica_completed_card')), findsOneWidget);
-      expect(find.text('Leve (1-2)'), findsOneWidget);
+      final physicalCard = tester.widget<Container>(
+        find.byKey(const Key('fisica_completed_card')),
+      );
+      expect(
+        (physicalCard.decoration as BoxDecoration).color,
+        AppColors.intensityMildBg,
+      );
       expect(find.text('“Dor de cabeça”'), findsOneWidget);
       expect(find.byKey(const Key('start_psicoemocional_triage_button')), findsOneWidget);
     });

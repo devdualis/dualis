@@ -12,7 +12,6 @@ import '../../domain/trigger_checkin_state.dart';
 import '../controllers/trigger_checkin_controller.dart';
 import '../widgets/admob_banner_container.dart';
 import '../widgets/dual_axis_trigger_card.dart';
-import '../widgets/today_triage_summary_card.dart';
 import '../../../sync/presentation/widgets/offline_indicator_banner.dart';
 import '../../../sync/presentation/controllers/sync_outbox_worker.dart';
 import '../../../settings/presentation/widgets/avatar_selector_sheet.dart';
@@ -319,8 +318,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     bool viewOnlyActive,
     TriggerCheckInState triggerState,
   ) {
-    final outcomeState = ref.watch(triageOutcomeProvider);
-    final outcome = outcomeState.outcome;
     final useDelegatedAvatar = showsDelegatedActiveProfile(ref);
 
     return Column(
@@ -436,22 +433,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               ),
               const SizedBox(height: 20),
-
-              if (outcome != null) ...[
-                TodayTriageSummaryCard(
-                  outcome: outcome,
-                  onViewFullResult: () {
-                    setState(() => _currentTabIndex = 1);
-                  },
-                  onRetake: viewOnlyActive
-                      ? null
-                      : () {
-                          ref.read(triggerCheckInProvider.notifier).prepareForUpdate();
-                          setState(() => _currentTabIndex = 1);
-                        },
-                ),
-                const SizedBox(height: 20),
-              ],
 
               const DualAxisTriggerCard(),
               const SizedBox(height: 20),

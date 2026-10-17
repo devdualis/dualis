@@ -74,6 +74,7 @@ class _EmergencyScreenState extends ConsumerState<EmergencyScreen> {
         actions: [
           IconButton(
             key: const Key('emergency_close_button'),
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
             icon: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
@@ -199,6 +200,9 @@ class _EmergencyScreenState extends ConsumerState<EmergencyScreen> {
               Center(
                 child: TextButton(
                   key: const Key('emergency_close_text_button'),
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(120, 48),
+                  ),
                   onPressed: _close,
                   child: Text(
                     loc.safetyClose,

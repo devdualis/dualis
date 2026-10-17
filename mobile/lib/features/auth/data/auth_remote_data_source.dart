@@ -115,6 +115,36 @@ class AuthRemoteDataSource {
     return UserProfile.fromJson(response.data ?? {});
   }
 
+  Future<Map<String, dynamic>> forgotPassword({
+    required String email,
+  }) async {
+    final response = await apiClient.post<Map<String, dynamic>>(
+      ApiEndpoints.forgotPassword,
+      data: {
+        'email': email.toLowerCase().trim(),
+      },
+    );
+
+    return response.data ?? {};
+  }
+
+  Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    final response = await apiClient.post<Map<String, dynamic>>(
+      ApiEndpoints.resetPassword,
+      data: {
+        'email': email.toLowerCase().trim(),
+        'code': code.trim(),
+        'newPassword': newPassword,
+      },
+    );
+
+    return response.data ?? {};
+  }
+
   Future<void> changePassword({
     required String token,
     required String currentPassword,

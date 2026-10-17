@@ -194,7 +194,7 @@ void main() {
       );
     });
 
-    testWidgets('QA 3.3: Complete both stages updates both cards and shows dailyCheckInCompletedBanner',
+    testWidgets('QA 3.3: Complete both stages updates both cards without the redundant banner',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1200, 3000);
       tester.view.devicePixelRatio = 2.0;
@@ -221,8 +221,8 @@ void main() {
       await tester.pumpWidget(createTwoStageQATestApp(container: container));
       await tester.pumpAndSettle();
 
-      // Overall completed banner is visible
-      expect(find.byKey(const Key('dailyCheckInCompletedBanner')), findsOneWidget);
+      // Redundant overall banner is gone; each axis card confirms itself
+      expect(find.byKey(const Key('dailyCheckInCompletedBanner')), findsNothing);
 
       // Both cards display their respective summaries
       expect(find.byKey(const Key('psicoemocional_completed_card')), findsOneWidget);

@@ -219,6 +219,7 @@ class HydrationDashboardScreen extends ConsumerWidget {
                       key: const Key('hydration_quick_add_200'),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 10),
+                        minimumSize: const Size(0, 48),
                         side: const BorderSide(color: AppColors.clinicalTeal),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -239,6 +240,7 @@ class HydrationDashboardScreen extends ConsumerWidget {
                       key: const Key('hydration_quick_add_300'),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 10),
+                        minimumSize: const Size(0, 48),
                         side: const BorderSide(color: AppColors.clinicalTeal),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -259,6 +261,7 @@ class HydrationDashboardScreen extends ConsumerWidget {
                       key: const Key('hydration_quick_add_500'),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 10),
+                        minimumSize: const Size(0, 48),
                         side: const BorderSide(color: AppColors.clinicalTeal),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -358,6 +361,8 @@ class HydrationDashboardScreen extends ConsumerWidget {
                 ? null
                 : IconButton(
                     key: Key('delete_water_log_${log.id ?? log.remoteId ?? log.timestamp.millisecondsSinceEpoch}'),
+                    constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                    tooltip: 'Excluir registro',
                     icon: const Icon(Icons.delete_outline, size: 20, color: Colors.grey),
                     onPressed: () {
                       ref

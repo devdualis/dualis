@@ -86,11 +86,11 @@ class _DeleteHistoryItemDialogState extends State<DeleteHistoryItemDialog> {
         ? rawNarrative.trim()
         : null;
 
-    final surfaceColor = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final titleColor = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A);
-    final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569);
-    final cardBgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
-    final cardBorderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final surfaceColor = isDark ? AppColors.surfaceDark : Colors.white;
+    final titleColor = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final subtitleColor = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final cardBgColor = isDark ? AppColors.backgroundDark : AppColors.backgroundLight;
+    final cardBorderColor = isDark ? AppColors.outlineDark : AppColors.outlineLight;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -183,8 +183,8 @@ class _DeleteHistoryItemDialogState extends State<DeleteHistoryItemDialog> {
                           ),
                           decoration: BoxDecoration(
                             color: isDark
-                                ? const Color(0xFF334155)
-                                : Colors.grey.shade200,
+                                ? AppColors.backgroundDark
+                                : AppColors.outlineLight,
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -239,19 +239,19 @@ class _DeleteHistoryItemDialogState extends State<DeleteHistoryItemDialog> {
             ),
             const SizedBox(height: 22),
 
-            // Actions: Cancel & Confirm Discard
+            // Actions: Cancel & Confirm Discard (both with min 48dp height touch target)
             Row(
               children: [
                 Expanded(
                   child: SizedBox(
-                    height: 44,
+                    height: 48,
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                         side: BorderSide(
-                          color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+                          color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
                         ),
                       ),
                       onPressed: _isDeleting ? null : () => Navigator.of(context).pop(null),
@@ -260,7 +260,7 @@ class _DeleteHistoryItemDialogState extends State<DeleteHistoryItemDialog> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.grey.shade300 : const Color(0xFF475569),
+                          color: isDark ? AppColors.textPrimaryDark : AppColors.textSecondaryLight,
                         ),
                       ),
                     ),
@@ -269,7 +269,7 @@ class _DeleteHistoryItemDialogState extends State<DeleteHistoryItemDialog> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: SizedBox(
-                    height: 44,
+                    height: 48,
                     child: FilledButton(
                       key: const Key('confirm_delete_history_item_button'),
                       style: FilledButton.styleFrom(

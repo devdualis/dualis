@@ -20,6 +20,7 @@ import {
   waterIntakeLogs,
   profiles,
   emailVerifications,
+  passwordResets,
 } from '../../database/schema';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import { EmailService } from '../../common/email/email.service';
@@ -30,6 +31,8 @@ import { AuthResponseDto, SanitizedUser, RegisterResponseDto } from './dto/auth-
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ExportedSymptomLogDto, UserDataExportResponseDto } from './dto/export-data.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -284,6 +287,126 @@ export class AuthService {
     await this.emailService.sendVerificationEmail(email, code, user.name);
 
     return { success: true, message: 'Novo código de verificação enviado com sucesso.' };
+  }
+
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ success: boolean; message: string }> {
+    const email = dto.email.toLowerCase().trim();
+    const genericMessage = 'Se o e-mail estiver cadastrado, um código de redefinição foi enviado.';
+
+    const user = await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      const [u] = await tx
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+      return u;
+    });
+
+    if (!user) {
+      return { success: true, message: genericMessage };
+    }
+
+    const latestReset = await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      const [rec] = await tx
+        .select()
+        .from(passwordResets)
+        .where(eq(passwordResets.userId, user.id))
+        .orderBy(desc(passwordResets.createdAt))
+        .limit(1);
+      return rec;
+    });
+
+    if (latestReset) {
+      const diffMs = Date.now() - latestReset.createdAt.getTime();
+      if (diffMs < 60 * 1000) {
+        const remainingSeconds = Math.ceil((60 * 1000 - diffMs) / 1000);
+        throw new BadRequestException(`Aguarde ${remainingSeconds} segundos antes de solicitar um novo código.`);
+      }
+    }
+
+    const code = this.emailService.generateVerificationCode();
+    const codeHash = this.emailService.hashCode(code);
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      await tx
+        .delete(passwordResets)
+        .where(eq(passwordResets.userId, user.id));
+
+      await tx.insert(passwordResets).values({
+        userId: user.id,
+        email,
+        codeHash,
+        attempts: 0,
+        expiresAt,
+      });
+    });
+
+    await this.emailService.sendPasswordResetEmail(email, code, user.name);
+
+    return { success: true, message: genericMessage };
+  }
+
+  async resetPassword(dto: ResetPasswordDto): Promise<{ success: boolean; message: string }> {
+    const email = dto.email.toLowerCase().trim();
+    const code = dto.code.trim();
+
+    const resetRecord = await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      const [record] = await tx
+        .select()
+        .from(passwordResets)
+        .where(eq(passwordResets.email, email))
+        .orderBy(desc(passwordResets.createdAt))
+        .limit(1);
+      return record;
+    });
+
+    if (!resetRecord) {
+      throw new BadRequestException('Nenhuma solicitação de redefinição de senha encontrada para este e-mail.');
+    }
+
+    if (resetRecord.expiresAt.getTime() < Date.now()) {
+      throw new BadRequestException('Código de redefinição expirado. Solicite um novo código.');
+    }
+
+    if (resetRecord.attempts >= 5) {
+      throw new BadRequestException('Limite de tentativas excedido. Solicite um novo código de redefinição.');
+    }
+
+    const isValid = this.emailService.verifyCodeHash(code, resetRecord.codeHash);
+    if (!isValid) {
+      await this.db.transaction(async (tx) => {
+        await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+        await tx
+          .update(passwordResets)
+          .set({ attempts: resetRecord.attempts + 1 })
+          .where(eq(passwordResets.id, resetRecord.id));
+      });
+      throw new BadRequestException('Código de redefinição incorreto.');
+    }
+
+    const newPasswordHash = await hashPassword(dto.newPassword);
+
+    await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      await tx
+        .update(users)
+        .set({
+          passwordHash: newPasswordHash,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, resetRecord.userId));
+
+      await tx
+        .delete(passwordResets)
+        .where(eq(passwordResets.userId, resetRecord.userId));
+    });
+
+    return { success: true, message: 'Senha redefinida com sucesso. Você já pode entrar com a nova senha.' };
   }
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {

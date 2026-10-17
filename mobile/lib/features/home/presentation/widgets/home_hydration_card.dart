@@ -89,8 +89,7 @@ class HomeHydrationCard extends ConsumerWidget {
                   onPressed: () => context.push(RoutePaths.hydration),
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    minimumSize: const Size(48, 48),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -144,6 +143,7 @@ class HomeHydrationCard extends ConsumerWidget {
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: AppColors.clinicalTeal.withValues(alpha: 0.4)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      minimumSize: const Size(0, 48),
                       padding: const EdgeInsets.symmetric(vertical: 8),
                     ),
                     onPressed: () async {
@@ -178,6 +178,7 @@ class HomeHydrationCard extends ConsumerWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.clinicalTealDark,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      minimumSize: const Size(0, 48),
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       elevation: 0,
                     ),

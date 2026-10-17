@@ -943,6 +943,46 @@ class AppLocalizationsEs extends AppLocalizations {
       'Mínimo de 8 caracteres, con mayúscula, minúscula, número y símbolo.';
 
   @override
+  String get forgotPasswordTitle => '¿Olvidaste tu contraseña?';
+
+  @override
+  String get forgotPasswordSubtitle =>
+      'Ingresa el correo vinculado a tu cuenta y te enviaremos un código para restablecer tu contraseña.';
+
+  @override
+  String get forgotPasswordSendCta => 'Enviar Código';
+
+  @override
+  String get forgotPasswordSuccessMessage =>
+      'Si ese correo está registrado, te enviamos un código de restablecimiento.';
+
+  @override
+  String get forgotPasswordBackToLogin => 'Volver al Inicio de Sesión';
+
+  @override
+  String get resetPasswordTitle => 'Restablece tu contraseña';
+
+  @override
+  String get resetPasswordSubtitle =>
+      'Ingresa el código que te enviamos y elige una nueva contraseña.';
+
+  @override
+  String get resetPasswordCodeLabel => 'Código de Verificación';
+
+  @override
+  String get resetPasswordCodeHint => 'Código de 6 dígitos';
+
+  @override
+  String get resetPasswordCodeRequired => 'Ingresa el código de 6 dígitos';
+
+  @override
+  String get resetPasswordSubmitCta => 'Restablecer Contraseña';
+
+  @override
+  String get resetPasswordSuccessMessage =>
+      'Tu contraseña fue restablecida. Ya puedes iniciar sesión.';
+
+  @override
   String get privacyShortcut => 'Centro de Privacidad y LGPD';
 
   @override

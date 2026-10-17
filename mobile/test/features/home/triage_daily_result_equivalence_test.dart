@@ -138,9 +138,15 @@ void main() {
 
   group('Triage Outcome vs Daily Result Equivalence Battery (36 Tests)', () {
     // -------------------------------------------------------------
-    // BLOCK 1: SELF-REPORTED INTENSITY PARITY (Tests 1 to 5)
+    // BLOCK 1: SELF-REPORTED INTENSITY (Tests 1 to 5)
+    // The IntensityMeter card is redundant on "Meu Dia" now that each axis
+    // card already carries its own tier badge (Leve/Moderada/Intensa), so it
+    // was removed there on purpose. TriageOutcomeScreen (the immediate,
+    // single-axis result right after a triage) has no such per-axis badge,
+    // so it keeps the meter as the only place conveying the self-reported
+    // score.
     // -------------------------------------------------------------
-    testWidgets('1. Self-reported intensity 1 is shown identically in both screens',
+    testWidgets('1. Self-reported intensity 1: no longer duplicated on "Meu Dia", still shown on TriageOutcomeScreen',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(intensityScore: 1);
 
@@ -149,8 +155,8 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('1 / 5'), findsOneWidget);
-      expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
+      expect(find.text('1 / 5'), findsNothing);
+      expect(find.text(_pt.outcomeIntensityTitle), findsNothing);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
@@ -161,7 +167,7 @@ void main() {
       expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
     });
 
-    testWidgets('2. Self-reported intensity 2 is shown identically in both screens',
+    testWidgets('2. Self-reported intensity 2: no longer duplicated on "Meu Dia", still shown on TriageOutcomeScreen',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(intensityScore: 2);
 
@@ -170,8 +176,8 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('2 / 5'), findsOneWidget);
-      expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
+      expect(find.text('2 / 5'), findsNothing);
+      expect(find.text(_pt.outcomeIntensityTitle), findsNothing);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
@@ -182,7 +188,7 @@ void main() {
       expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
     });
 
-    testWidgets('3. Self-reported intensity 3 is shown identically in both screens',
+    testWidgets('3. Self-reported intensity 3: no longer duplicated on "Meu Dia", still shown on TriageOutcomeScreen',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(intensityScore: 3);
 
@@ -191,8 +197,8 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('3 / 5'), findsOneWidget);
-      expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
+      expect(find.text('3 / 5'), findsNothing);
+      expect(find.text(_pt.outcomeIntensityTitle), findsNothing);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
@@ -203,7 +209,7 @@ void main() {
       expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
     });
 
-    testWidgets('4. Self-reported intensity 4 is shown identically in both screens',
+    testWidgets('4. Self-reported intensity 4: no longer duplicated on "Meu Dia", still shown on TriageOutcomeScreen',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(intensityScore: 4);
 
@@ -212,8 +218,8 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('4 / 5'), findsOneWidget);
-      expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
+      expect(find.text('4 / 5'), findsNothing);
+      expect(find.text(_pt.outcomeIntensityTitle), findsNothing);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
@@ -224,7 +230,7 @@ void main() {
       expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
     });
 
-    testWidgets('5. Self-reported intensity 5 is shown identically in both screens',
+    testWidgets('5. Self-reported intensity 5: no longer duplicated on "Meu Dia", still shown on TriageOutcomeScreen',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(intensityScore: 5);
 
@@ -233,8 +239,8 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('5 / 5'), findsOneWidget);
-      expect(find.text(_pt.outcomeIntensityTitle), findsOneWidget);
+      expect(find.text('5 / 5'), findsNothing);
+      expect(find.text(_pt.outcomeIntensityTitle), findsNothing);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),

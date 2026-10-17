@@ -238,7 +238,7 @@ void main() {
       expect(find.text('AD'), findsOneWidget);
     });
 
-    testWidgets('8. Both stages completed shows dailyCheckInCompletedBanner',
+    testWidgets('8. Both stages completed shows both summaries without the redundant banner',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1200, 3000);
       tester.view.devicePixelRatio = 2.0;
@@ -261,7 +261,7 @@ void main() {
       await tester.pumpWidget(createTriggerCheckInTestApp(container: container));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('dailyCheckInCompletedBanner')), findsOneWidget);
+      expect(find.byKey(const Key('dailyCheckInCompletedBanner')), findsNothing);
       expect(find.text('Bem / Ótimo'), findsWidgets);
       expect(find.text('Normal / Bom'), findsWidgets);
     });

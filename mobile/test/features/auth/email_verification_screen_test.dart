@@ -95,6 +95,20 @@ class MockAuthRepository implements AuthRepository {
   }) async {}
 
   @override
+  Future<Map<String, dynamic>> forgotPassword({
+    required String email,
+  }) async =>
+      {};
+
+  @override
+  Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async =>
+      {};
+
+  @override
   Future<Map<String, dynamic>> verifyEmail({
     required String email,
     required String code,

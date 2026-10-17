@@ -76,8 +76,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Estado Geral de Hoje'), findsOneWidget);
-      expect(find.text('Pendente'), findsOneWidget);
+      // The top "Estado Geral de Hoje" / "Pendente" header was removed: it
+      // was redundant with "Nenhum registro hoje" below.
+      expect(find.text('Estado Geral de Hoje'), findsNothing);
+      expect(find.text('Pendente'), findsNothing);
       expect(find.text('Nenhum registro hoje'), findsOneWidget);
       expect(find.text('Realizar Check-in Agora'), findsOneWidget);
       expect(find.text('Leituras sobre bem-estar'), findsOneWidget);
@@ -128,10 +130,12 @@ void main() {
       expect(find.text('Alongamento para Coluna Lombar'), findsOneWidget);
       expect(find.text('Sociedade Brasileira de Ortopedia e Traumatologia • Fonte'), findsOneWidget);
       expect(find.text('Atualizar registro de hoje'), findsOneWidget);
-      expect(find.text('Registro concluído'), findsOneWidget);
-      // Self-reported intensity and the static guidance, no care recommendation.
-      expect(find.text('Intensidade que você informou'), findsOneWidget);
-      expect(find.text('3 / 5'), findsOneWidget);
+      // The top "Estado Geral de Hoje" header (with its "Registro concluído"
+      // badge) and the standalone "Intensidade que você informou" meter were
+      // removed: both were redundant with the axis cards' own tier badges.
+      expect(find.text('Registro concluído'), findsNothing);
+      expect(find.text('Intensidade que você informou'), findsNothing);
+      expect(find.text('3 / 5'), findsNothing);
       expect(find.byType(WellnessGuidanceBlock), findsOneWidget);
       expect(find.text('Consulta de Rotina'), findsNothing);
     });
@@ -152,7 +156,6 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Bem-Estar Confirmado'), findsOneWidget);
       expect(find.text('Check-in de Bem-Estar Confirmado'), findsOneWidget);
       expect(find.text('Leituras sobre bem-estar'), findsOneWidget);
       expect(find.text('Conteúdos educativos gerais. Não são orientação para o seu caso.'), findsOneWidget);
@@ -179,7 +182,6 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Sintomas Registrados'), findsOneWidget);
       expect(find.text('Sintomas Registrados no Check-in'), findsOneWidget);
       expect(find.text('1. Eixo Psico-Emocional'), findsOneWidget);
       expect(find.text('Mal / Ruim'), findsOneWidget);
@@ -229,7 +231,6 @@ void main() {
 
       // Must render full outcome, NOT wellness view
       expect(find.text('Emoções sentidas no corpo'), findsOneWidget);
-      expect(find.text('Registro concluído'), findsOneWidget);
       expect(find.byType(WellnessGuidanceBlock), findsOneWidget);
       expect(find.textContaining('Primazia Orgânica'), findsNothing);
       expect(find.text('Check-in de Bem-Estar Confirmado'), findsNothing);

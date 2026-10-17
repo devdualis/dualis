@@ -4,6 +4,7 @@ export * from './user-disclaimer-consents.schema';
 export * from './safety-resource-events.schema';
 export * from './medical-articles.schema';
 export * from './email-verifications.schema';
+export * from './password-resets.schema';
 export * from './symptom-knowledge.schema';
 export * from './water-intake-logs.schema';
 

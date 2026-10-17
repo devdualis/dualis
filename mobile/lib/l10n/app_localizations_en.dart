@@ -940,6 +940,46 @@ class AppLocalizationsEn extends AppLocalizations {
       'Minimum 8 characters, with uppercase, lowercase, number, and special character.';
 
   @override
+  String get forgotPasswordTitle => 'Forgot your password?';
+
+  @override
+  String get forgotPasswordSubtitle =>
+      'Enter the email linked to your account and we\'ll send you a code to reset your password.';
+
+  @override
+  String get forgotPasswordSendCta => 'Send Code';
+
+  @override
+  String get forgotPasswordSuccessMessage =>
+      'If that email is registered, we\'ve sent a reset code to it.';
+
+  @override
+  String get forgotPasswordBackToLogin => 'Back to Login';
+
+  @override
+  String get resetPasswordTitle => 'Reset your password';
+
+  @override
+  String get resetPasswordSubtitle =>
+      'Enter the code we sent you and choose a new password.';
+
+  @override
+  String get resetPasswordCodeLabel => 'Verification Code';
+
+  @override
+  String get resetPasswordCodeHint => '6-digit code';
+
+  @override
+  String get resetPasswordCodeRequired => 'Enter the 6-digit code';
+
+  @override
+  String get resetPasswordSubmitCta => 'Reset Password';
+
+  @override
+  String get resetPasswordSuccessMessage =>
+      'Your password has been reset. You can now log in.';
+
+  @override
   String get privacyShortcut => 'Privacy & Data Center (LGPD)';
 
   @override

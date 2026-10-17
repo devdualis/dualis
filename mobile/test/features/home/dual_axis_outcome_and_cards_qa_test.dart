@@ -86,8 +86,22 @@ void main() {
       expect(find.text('Psicoemocional'), findsOneWidget);
       expect(find.text('Físico'), findsOneWidget);
 
-      // Check badges
-      expect(find.text('Moderada (3)'), findsNWidgets(2));
+      // Chip removed: the completed card's background/border color is now the
+      // only tier signal. Both axes are Moderada (3) here.
+      final psychoCard = tester.widget<Container>(
+        find.byKey(const Key('psicoemocional_completed_card')),
+      );
+      expect(
+        (psychoCard.decoration as BoxDecoration).color,
+        AppColors.intensityModerateBg,
+      );
+      final physCard = tester.widget<Container>(
+        find.byKey(const Key('fisica_completed_card')),
+      );
+      expect(
+        (physCard.decoration as BoxDecoration).color,
+        AppColors.intensityModerateBg,
+      );
 
       // Check that full summaries are rendered
       expect(find.text('Ansiedade e agitação'), findsOneWidget);
@@ -222,6 +236,54 @@ void main() {
       expect(find.text('2. Eixo Avaliação Psico-emocional'), findsOneWidget);
       expect(find.text('Estressado(a) ou esgotado(a)'), findsOneWidget);
       expect(find.textContaining('Componente Associado'), findsNothing);
+    });
+
+    testWidgets(
+        'TodayTriageResultTab emotional axis title uses the trigger state summary, not the stale outcome.secondaryCategoryLabel',
+        (WidgetTester tester) async {
+      // Reproduces the "Meu Dia" bug: a dual check-in where the physical
+      // axis was submitted last (outcome.vertical == 'physical') carries a
+      // stale secondaryCategoryLabel from an earlier submission. The
+      // psico-emocional card title must reflect what the user actually
+      // typed for that axis (triggerState.emotionalSummary), matching the
+      // home screen and the "Você registrou" line below it — never the
+      // physical axis's own label.
+      final physicalOutcome = TriageOutcome(
+        id: 'qa-stale-secondary-1',
+        vertical: 'physical',
+        intensityScore: 4,
+        primaryCategory: 'geniturinario',
+        categoryLabel: 'Baixo ventre e urina',
+        somaticMapping: 'Desconforto na região abdominal baixa',
+        secondaryCategoryLabel: 'Baixo ventre e urina',
+        secondaryIntensityScore: 2,
+        recommendedArticles: const [],
+        recordedAt: DateTime.now(),
+      );
+
+      final triggerState = const TriggerCheckInState(
+        isCompletedToday: true,
+        isPhysicalCompleted: true,
+        physicalStatus: TriggerStatus.badSick,
+        physicalIntensity: 4,
+        physicalSummary: 'Baixo ventre e urina',
+        isEmotionalCompleted: true,
+        emotionalStatus: TriggerStatus.soSo,
+        emotionalIntensity: 2,
+        emotionalSummary: 'Pra baixo',
+      );
+
+      await tester.pumpWidget(
+        _createTestHarness(
+          child: TodayTriageResultTab(onGoToCheckIn: () {}),
+          outcome: physicalOutcome,
+          triggerState: triggerState,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('2. Eixo Avaliação Psico-emocional'), findsOneWidget);
+      expect(find.text('Pra baixo'), findsOneWidget);
     });
 
     for (final (locale, physicalLabel, emotionalLabel) in const [

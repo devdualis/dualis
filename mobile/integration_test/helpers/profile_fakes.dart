@@ -93,6 +93,20 @@ class FakeAuthRepository implements AuthRepository {
     required String currentPassword,
     required String newPassword,
   }) async {}
+
+  @override
+  Future<Map<String, dynamic>> forgotPassword({
+    required String email,
+  }) async =>
+      {};
+
+  @override
+  Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async =>
+      {};
 }
 
 /// Every other feature's HTTP call fails at once as offline. Nothing leaves

@@ -132,6 +132,20 @@ class MockAuthRepository implements AuthRepository {
     required String currentPassword,
     required String newPassword,
   }) async {}
+
+  @override
+  Future<Map<String, dynamic>> forgotPassword({
+    required String email,
+  }) async =>
+      {};
+
+  @override
+  Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async =>
+      {};
 }
 
 class MockPrivacyRemoteDataSource implements PrivacyRemoteDataSource {

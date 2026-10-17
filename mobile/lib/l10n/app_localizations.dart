@@ -1702,6 +1702,78 @@ abstract class AppLocalizations {
   /// **'Mínimo de 8 caracteres, com letra maiúscula, minúscula, número e símbolo.'**
   String get passwordComplexityHint;
 
+  /// Title of the forgot password screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Esqueceu sua senha?'**
+  String get forgotPasswordTitle;
+
+  /// Subtitle of the forgot password screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe o e-mail vinculado à sua conta e enviaremos um código para redefinir sua senha.'**
+  String get forgotPasswordSubtitle;
+
+  /// Submit button on the forgot password screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar Código'**
+  String get forgotPasswordSendCta;
+
+  /// Success message shown after requesting a password reset code
+  ///
+  /// In pt, this message translates to:
+  /// **'Se esse e-mail estiver cadastrado, enviamos um código de redefinição para ele.'**
+  String get forgotPasswordSuccessMessage;
+
+  /// Link back to the login screen from the forgot password screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Voltar ao Login'**
+  String get forgotPasswordBackToLogin;
+
+  /// Title of the reset password screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Redefina sua senha'**
+  String get resetPasswordTitle;
+
+  /// Subtitle of the reset password screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe o código que enviamos e escolha uma nova senha.'**
+  String get resetPasswordSubtitle;
+
+  /// Label for the verification code field on the reset password screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de Verificação'**
+  String get resetPasswordCodeLabel;
+
+  /// Hint for the verification code field on the reset password screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de 6 dígitos'**
+  String get resetPasswordCodeHint;
+
+  /// Validation error when the verification code is missing or invalid
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe o código de 6 dígitos'**
+  String get resetPasswordCodeRequired;
+
+  /// Submit button on the reset password screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Redefinir Senha'**
+  String get resetPasswordSubmitCta;
+
+  /// Success message shown after resetting the password
+  ///
+  /// In pt, this message translates to:
+  /// **'Sua senha foi redefinida. Você já pode fazer login.'**
+  String get resetPasswordSuccessMessage;
+
   /// Navigation link to privacy center
   ///
   /// In pt, this message translates to:
