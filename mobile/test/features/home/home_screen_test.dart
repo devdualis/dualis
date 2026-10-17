@@ -172,7 +172,7 @@ void main() {
       expect(find.text('Settings Screen'), findsOneWidget);
     });
 
-    testWidgets('Renders TodayTriageSummaryCard on main home tab when today triage outcome exists',
+    testWidgets('Shows the completed stage card on the main home tab and the full result on Meu Dia tab',
         (WidgetTester tester) async {
       final mockOutcome = TriageOutcome(
         id: 'checkin-chest-1',
@@ -189,24 +189,12 @@ void main() {
       await tester.pumpWidget(createHomeTestApp(initialOutcome: mockOutcome));
       await tester.pumpAndSettle();
 
-      // Verify TodayTriageSummaryCard is visible on Home Tab with simplified header
-      expect(find.byKey(const Key('today_triage_summary_card')), findsOneWidget);
-      expect(find.text('Registro de hoje concluído'), findsOneWidget);
-      // Self-reported intensity only; no care recommendation, even at 5/5.
-      expect(find.text('Intensidade informada: 5/5'), findsOneWidget);
-      expect(find.text('Atendimento de Emergência'), findsNothing);
-
       // Verify physical stage card is marked completed, NOT displaying uncompleted start button
       expect(find.byKey(const Key('fisica_completed_card')), findsOneWidget);
       expect(find.byKey(const Key('start_fisica_triage_button')), findsNothing);
 
-      // Verify card is clickable to view full outcome
-      final viewFullBtn = find.byKey(const Key('view_full_triage_result_button'));
-      expect(viewFullBtn, findsOneWidget);
-
-      // Tapping card switches tab to Tab 1
-      await tester.ensureVisible(viewFullBtn);
-      await tester.tap(viewFullBtn);
+      // Tapping the "Meu Dia" nav destination switches to Tab 1
+      await tester.tap(find.byKey(const Key('nav_destination_today_outcome')));
       await tester.pumpAndSettle();
 
       // Verify Tab 1 "Meu Dia" is now active

@@ -36,7 +36,6 @@ class DualAxisTriggerCard extends ConsumerWidget {
 
     final isEmotionalCompleted = state.isEmotionalCompleted || isEmotionalFromOutcome;
     final isPhysicalCompleted = state.isPhysicalCompleted || isPhysicalFromOutcome;
-    final isCompletedToday = state.isCompletedToday || outcome != null || (isEmotionalCompleted && isPhysicalCompleted);
 
     final emotionalIntensity = AxisIntensityResolver.resolveDisplayIntensity(
       axis: CheckInAxis.emotional,
@@ -82,7 +81,6 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 : outcome.secondaryCategoryLabel)
             : null);
 
-    final completedTime = state.completedAt ?? outcome?.recordedAt;
     final viewOnly = activeProfileIsViewOnly(ref);
 
     return Card(
@@ -142,46 +140,6 @@ class DualAxisTriggerCard extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Banner geral de conclusão se ambas etapas foram finalizadas
-            if (isCompletedToday &&
-                isEmotionalCompleted &&
-                isPhysicalCompleted) ...[
-              Container(
-                key: const Key('dailyCheckInCompletedBanner'),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: AppColors.clinicalTeal.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppColors.clinicalTeal.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.verified_rounded,
-                      color: AppColors.clinicalTeal,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        completedTime != null
-                            ? 'Check-in diário completo às ${completedTime.hour.toString().padLeft(2, '0')}:${completedTime.minute.toString().padLeft(2, '0')}'
-                            : 'Check-in completo de hoje registrado!',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.clinicalTealDark,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
 
             const Divider(height: 1),
             const SizedBox(height: 16),
@@ -563,7 +521,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 ),
               ),
               onPressed: onStart,
-              icon: const Icon(Icons.play_arrow_rounded, size: 18),
+              icon: Icon(icon, size: 18),
               label: Text(
                 'Iniciar $title',
                 style: GoogleFonts.plusJakartaSans(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../triage_outcome/domain/curated_articles_catalog.dart';
@@ -34,23 +33,12 @@ class TodayTriageResultTab extends ConsumerWidget {
         triggerState.physicalStatus == TriggerStatus.goodNormal &&
         triggerState.naturalLanguageText.trim().isEmpty;
 
-    final now = DateTime.now();
-    final dateFormatted = DateFormat("d 'de' MMMM, yyyy", 'pt_BR').format(now);
-
     return SingleChildScrollView(
       key: const Key('today_triage_result_scroll_view'),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildDayHeader(
-            context,
-            dateFormatted,
-            isCompletedToday,
-            outcome != null,
-            isTrueWellness: isTrueWellness,
-          ),
-          const SizedBox(height: 16),
           if (outcome != null) ...[
             _buildFullOutcomeView(context, ref, outcome),
           ] else if (isCompletedToday && isTrueWellness) ...[
@@ -60,126 +48,6 @@ class TodayTriageResultTab extends ConsumerWidget {
           ] else ...[
             _buildPendingCheckInView(context),
           ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDayHeader(
-    BuildContext context,
-    String dateText,
-    bool isCompleted,
-    bool hasOutcome, {
-    required bool isTrueWellness,
-  }) {
-    final l10n = AppLocalizations.of(context);
-    Color badgeBgColor;
-    Color badgeBorderColor;
-    Color badgeTextColor;
-    String badgeText;
-    IconData headerIcon;
-    Color headerIconColor;
-
-    if (hasOutcome) {
-      badgeBgColor = AppColors.clinicalTeal.withValues(alpha: 0.12);
-      badgeBorderColor = AppColors.clinicalTeal.withValues(alpha: 0.3);
-      badgeTextColor = AppColors.clinicalTealDark;
-      badgeText = l10n.todayOutcomeCompletedBadge;
-      headerIcon = Icons.verified_rounded;
-      headerIconColor = AppColors.clinicalTeal;
-    } else if (isCompleted) {
-      if (isTrueWellness) {
-        badgeBgColor = AppColors.clinicalTeal.withValues(alpha: 0.12);
-        badgeBorderColor = AppColors.clinicalTeal.withValues(alpha: 0.3);
-        badgeTextColor = AppColors.clinicalTealDark;
-        badgeText = 'Bem-Estar Confirmado';
-        headerIcon = Icons.check_circle_rounded;
-        headerIconColor = AppColors.clinicalTeal;
-      } else {
-        badgeBgColor = Colors.amber.shade50;
-        badgeBorderColor = Colors.amber.shade300;
-        badgeTextColor = Colors.amber.shade900;
-        badgeText = 'Sintomas Registrados';
-        headerIcon = Icons.assignment_late_rounded;
-        headerIconColor = Colors.amber.shade800;
-      }
-    } else {
-      badgeBgColor = Colors.orange.shade50;
-      badgeBorderColor = Colors.orange.shade200;
-      badgeTextColor = Colors.orange.shade800;
-      badgeText = 'Pendente';
-      headerIcon = Icons.pending_actions_rounded;
-      headerIconColor = Colors.grey.shade600;
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color:
-              (hasOutcome || isCompleted)
-                  ? (isTrueWellness || hasOutcome
-                      ? AppColors.clinicalTeal.withValues(alpha: 0.3)
-                      : Colors.amber.shade300)
-                  : Colors.grey.shade300,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color:
-                  (hasOutcome || isCompleted)
-                      ? headerIconColor.withValues(alpha: 0.12)
-                      : Colors.grey.shade100,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(headerIcon, color: headerIconColor, size: 24),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Estado Geral de Hoje',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimaryLight,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  dateText,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    color: AppColors.textSecondaryLight,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: badgeBgColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: badgeBorderColor),
-            ),
-            child: Text(
-              badgeText,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: badgeTextColor,
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -374,10 +242,7 @@ class TodayTriageResultTab extends ConsumerWidget {
             // Same axis label with or without an associated component; the
             // component itself is the card's category title.
             axisLabel: l10n.outcomeAxisEmotionalNumbered,
-            categoryTitle:
-                outcome.secondaryCategoryLabel != null
-                    ? outcome.secondaryCategoryLabel!
-                    : emotionalTitle,
+            categoryTitle: emotionalTitle,
             description: emotionalDescription,
             narrative: !isPhysical ? triggerState.emotionalNarrative : null,
             icon: Icons.psychology_rounded,
@@ -411,8 +276,6 @@ class TodayTriageResultTab extends ConsumerWidget {
             isDark: isDark,
           ),
         ],
-        const SizedBox(height: 16),
-        IntensityMeter(score: outcome.intensityScore),
         const SizedBox(height: 16),
         AiInsightCard(
           mappedLayTerm: outcome.aiMappedLayTerm,
