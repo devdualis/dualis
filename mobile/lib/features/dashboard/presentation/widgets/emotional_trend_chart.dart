@@ -248,8 +248,10 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
 
   Widget _buildLegend() {
     return Wrap(
-      spacing: 8,
-      runSpacing: 6,
+      alignment: WrapAlignment.start,
+      runAlignment: WrapAlignment.start,
+      spacing: 6,
+      runSpacing: 4,
       children: dimensionMeta.entries.map((entry) {
         final isHidden = _hiddenDimensions.contains(entry.key);
         return InkWell(
@@ -264,7 +266,7 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
           },
           borderRadius: BorderRadius.circular(20),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
               color: isHidden
                   ? Colors.grey.shade100
@@ -279,18 +281,18 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 8,
-                  height: 8,
+                  width: 7,
+                  height: 7,
                   decoration: BoxDecoration(
                     color: isHidden ? Colors.grey : entry.value.color,
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 5),
                 Text(
                   entry.value.label,
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 10.5,
                     fontWeight: FontWeight.w500,
                     color: isHidden ? Colors.grey : Colors.black87,
                     decoration:
