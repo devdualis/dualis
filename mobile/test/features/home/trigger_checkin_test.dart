@@ -79,12 +79,24 @@ void main() {
 
       expect(find.text('Check-in Diário em 2 Etapas'), findsOneWidget);
       expect(find.text('Psicoemocional'), findsOneWidget);
-      expect(find.text('Avaliação Física'), findsOneWidget);
+      expect(find.text('Físico'), findsOneWidget);
 
       expect(find.byKey(const Key('start_psicoemocional_triage_button')), findsOneWidget);
       expect(find.byKey(const Key('start_fisica_triage_button')), findsOneWidget);
-      expect(find.text('Iniciar Psicoemocional'), findsOneWidget);
-      expect(find.text('Iniciar Avaliação Física'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('start_psicoemocional_triage_button')),
+          matching: find.byIcon(Icons.psychology_rounded),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('start_fisica_triage_button')),
+          matching: find.byIcon(Icons.accessibility_new_rounded),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('2. Tapping Iniciar Psicoemocional navigates to Triage Screen with psicoEmocional vertical',
@@ -108,7 +120,7 @@ void main() {
       expect(navigatedVertical, equals(TriageVertical.psicoEmocional));
     });
 
-    testWidgets('3. Tapping Iniciar Avaliação Física navigates to Triage Screen with fisica vertical',
+    testWidgets('3. Tapping Iniciar Físico navigates to Triage Screen with fisica vertical',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1200, 3000);
       tester.view.devicePixelRatio = 2.0;
@@ -155,7 +167,7 @@ void main() {
       expect(find.byKey(const Key('retake_psicoemocional_button')), findsOneWidget);
 
       // Physical stage is still pending
-      expect(find.text('Avaliação Física'), findsOneWidget);
+      expect(find.text('Físico'), findsOneWidget);
       expect(find.byKey(const Key('start_fisica_triage_button')), findsOneWidget);
     });
 
@@ -222,11 +234,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(AdMobBannerContainer), findsOneWidget);
-      expect(find.text('Parceiro Local • Zero rastreamento clínico'), findsOneWidget);
+      expect(find.text('Parceiro local • Anúncio não usa seus dados de saúde'), findsOneWidget);
       expect(find.text('AD'), findsOneWidget);
     });
 
-    testWidgets('8. Both stages completed shows dailyCheckInCompletedBanner',
+    testWidgets('8. Both stages completed shows both summaries without the redundant banner',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1200, 3000);
       tester.view.devicePixelRatio = 2.0;
@@ -249,7 +261,7 @@ void main() {
       await tester.pumpWidget(createTriggerCheckInTestApp(container: container));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('dailyCheckInCompletedBanner')), findsOneWidget);
+      expect(find.byKey(const Key('dailyCheckInCompletedBanner')), findsNothing);
       expect(find.text('Bem / Ótimo'), findsWidgets);
       expect(find.text('Normal / Bom'), findsWidgets);
     });
@@ -317,13 +329,12 @@ void main() {
             id: 'log-1',
             intensity: 3,
             emotionalDimension: 'depressiva_desanimo',
-            disposition: 'consulta_rotina',
             recordedAt: now,
           ),
         ],
         physicalSummary: {},
         emotionalSummary: [],
-        criticalRecurrences: [],
+        journalPatterns: [],
       );
 
       final container = ProviderContainer(
@@ -354,10 +365,9 @@ void main() {
           // Newer triage entry
           TriageHistoryEntry(
             id: 'triage-log-newer',
+            vertical: 'emotional',
             intensity: 3,
             emotionalDimension: 'somatica',
-            disposition: 'consulta_rotina',
-            organicPrimacyApplied: true,
             narrative: 'aperto no peito e garganta',
             stepAnswers: {'type': 'triage_checkin'},
             recordedAt: later,
@@ -366,7 +376,6 @@ void main() {
           TriageHistoryEntry(
             id: 'checkin-log-older',
             intensity: 1,
-            disposition: 'autocuidado',
             stepAnswers: {
               'type': 'daily_checkin',
               'emotionalStatus': 'goodNormal',
@@ -377,7 +386,7 @@ void main() {
         ],
         physicalSummary: {},
         emotionalSummary: [],
-        criticalRecurrences: [],
+        journalPatterns: [],
       );
 
       final container = ProviderContainer(
@@ -404,7 +413,7 @@ void main() {
         'isCompletedToday': true,
         'isPhysicalCompleted': true,
         'physicalStatus': 'soSo',
-        'physicalSummary': 'Avaliação Física Registrada',
+        'physicalSummary': 'Registro físico salvo',
         'physicalNarrative': '5',
         'naturalLanguageText': '5',
       };
@@ -421,7 +430,7 @@ void main() {
                 isCompletedToday: true,
                 isPhysicalCompleted: true,
                 physicalStatus: TriggerStatus.soSo,
-                physicalSummary: 'Avaliação Física Registrada',
+                physicalSummary: 'Registro físico salvo',
                 physicalNarrative: '5',
               ),
             ),
@@ -459,7 +468,7 @@ void main() {
                 isCompletedToday: true,
                 isPhysicalCompleted: true,
                 physicalStatus: TriggerStatus.soSo,
-                physicalSummary: 'Avaliação Física Registrada',
+                physicalSummary: 'Registro físico salvo',
                 physicalNarrative: 'Dor de cabeça ao acordar',
               ),
             ),

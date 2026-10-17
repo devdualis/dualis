@@ -23,8 +23,8 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
               id: 'art-coluna-01',
               title: 'Ergonomia no Trabalho e Prevenção de Dores Lombares e Cervicais',
               category: 'coluna_dor_dorsal',
-              author: 'Dr. Marcelo Mendes',
-              authorRole: 'Ortopedista e Traumatologista (HCFMUSP / CRM-SP 128.450)',
+              author: 'Sociedade Brasileira de Ortopedia e Traumatologia',
+              authorRole: 'Fonte',
               readTimeMinutes: 5,
               summary: 'Posturas preventivas e exercícios de descompressão da coluna lombar.',
               url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
@@ -73,8 +73,8 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
 
     expect(articles).toHaveLength(1);
     expect(articles[0].id).toBe('art-coluna-01');
-    expect(articles[0].author).toContain('Dr. Marcelo Mendes');
-    expect(articles[0].authorRole).toContain('Ortopedista');
+    expect(articles[0].author).toContain('Sociedade Brasileira de Ortopedia e Traumatologia');
+    expect(articles[0].authorRole).toBe('Fonte');
   });
 
   it('4. Second query with identical symptom hits semantic cache without executing DB query again', async () => {
@@ -106,8 +106,8 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
             id: 'art-ansiedade-01',
             title: 'Manejo da Ansiedade Aguda com Respiração Diafragmática',
             category: 'ansiosa_agitacao',
-            author: 'Dra. Camila Prado',
-            authorRole: 'Psiquiatra Clínica (ABP / CRM-SP 165.340)',
+            author: 'Portal Drauzio Varella',
+            authorRole: 'Fonte',
             readTimeMinutes: 4,
             summary: 'Exercício guiado 4-7-8 para desaceleração do sistema simpático.',
             url: 'https://drauziovarella.uol.com.br/saude-mental/transtornos-de-ansiedade-nao-sao-todos-iguais-entenda-as-caracteristicas-de-cada-tipo/',
@@ -123,7 +123,7 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
 
     expect(articles).toHaveLength(1);
     expect(articles[0].id).toBe('art-ansiedade-01');
-    expect(articles[0].author).toContain('Dra. Camila Prado');
+    expect(articles[0].author).toContain('Portal Drauzio Varella');
   });
 
   it('6. Seed catalog comprehensively covers all 7 emotional dimensions and 12 physical systems across PT, ES, and EN', () => {
@@ -174,6 +174,20 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
       expect(article.keywords.length).toBeGreaterThanOrEqual(4);
       expect(article.url.startsWith('https://')).toBe(true);
       expect(article.url).not.toContain('dualis.health');
+    }
+  });
+
+  it('6b. Seed articles credit the real source organisation, never a person or professional registration', () => {
+    const expectedRole: Record<string, string> = { pt: 'Fonte', en: 'Source', es: 'Fuente' };
+    const banned = /\b(CRM|CRP)\b|CRM-|CRP-|\bDra?\.\s|\bDr\s/;
+    for (const article of vectorService.seedArticles) {
+      const lang = article.language || 'pt';
+      expect(article.authorRole).toBe(expectedRole[lang]);
+      expect(article.author.length).toBeGreaterThan(3);
+      for (const text of [article.author, article.authorRole, article.title, article.summary, article.contentMarkdown]) {
+        expect(text).not.toMatch(banned);
+      }
+      expect(article.contentMarkdown).not.toMatch(/SAMU|\b192\b|\b911\b|capaz de diagnosticar|eletrocardiograma imediato/);
     }
   });
 
@@ -279,6 +293,38 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
 
       expect(mockDb.insert).toHaveBeenCalledTimes(vectorService.seedArticles.length);
       expect(mockDb.update).not.toHaveBeenCalled();
+    });
+
+    it('11. updates rows that still carry a legacy person author so the source attribution reaches the DB', async () => {
+      const legacyRow = buildSeedRow({ author: 'Dra. Camila Prado', authorRole: 'Psiquiatra Clínica (ABP / CRM-SP 165.340)' });
+      const restRows = vectorService.seedArticles.slice(1).map((seed) => ({
+        id: seed.id,
+        language: seed.language || 'pt',
+        title: seed.title,
+        category: seed.category,
+        somaticSystem: seed.somaticSystem ?? null,
+        author: seed.author,
+        authorRole: seed.authorRole,
+        readTimeMinutes: seed.readTimeMinutes,
+        summary: seed.summary,
+        contentMarkdown: seed.contentMarkdown,
+        keywords: seed.keywords,
+        url: seed.url,
+      }));
+
+      mockDb.select = vi.fn().mockReturnValue({
+        from: vi.fn().mockResolvedValue([legacyRow, ...restRows]),
+      });
+      const setMock = vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) });
+      mockDb.update = vi.fn().mockReturnValue({ set: setMock });
+      mockDb.insert = vi.fn();
+
+      await vectorService.ensureSeedArticles();
+
+      expect(mockDb.update).toHaveBeenCalledTimes(1);
+      expect(setMock).toHaveBeenCalledWith(
+        expect.objectContaining({ author: vectorService.seedArticles[0].author, authorRole: 'Fonte' }),
+      );
     });
 
     it('10. fallback by category respects the requested language (ES, EN, PT)', async () => {

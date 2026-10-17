@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/router/route_paths.dart';
 import '../../../features/auth/presentation/controllers/auth_controller.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/dualis_logo.dart';
 import '../../../shared/widgets/dualis_primary_button.dart';
 
@@ -19,6 +20,7 @@ class NotFoundScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isAuthenticated = ref.watch(authControllerProvider).isAuthenticated;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -64,7 +66,7 @@ class NotFoundScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      'ERRO 404',
+                      l10n.notFoundErrorCode,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -75,7 +77,7 @@ class NotFoundScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 14),
                   Text(
-                    'Página Não Encontrada',
+                    l10n.notFoundTitle,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 24,
@@ -85,7 +87,7 @@ class NotFoundScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'A página ou recurso clínico que você tentou acessar não existe, foi movido ou o link expirou.',
+                    l10n.notFoundBody,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14,
@@ -115,7 +117,7 @@ class NotFoundScreen extends ConsumerWidget {
                   const SizedBox(height: 36),
                   DualisPrimaryButton(
                     key: const Key('not_found_home_button'),
-                    text: isAuthenticated ? 'Voltar para o Painel' : 'Ir para o Início',
+                    text: isAuthenticated ? l10n.notFoundBackToDashboard : l10n.notFoundGoHome,
                     icon: const Icon(Icons.home_rounded, color: Colors.white, size: 20),
                     onPressed: () {
                       if (isAuthenticated) {
@@ -136,7 +138,7 @@ class NotFoundScreen extends ConsumerWidget {
                     },
                     icon: const Icon(Icons.arrow_back_rounded, size: 16),
                     label: Text(
-                      'Voltar à tela anterior',
+                      l10n.notFoundGoBack,
                       style: GoogleFonts.plusJakartaSans(
                         fontWeight: FontWeight.w600,
                         color: AppColors.softIndigo,

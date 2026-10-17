@@ -126,12 +126,24 @@ void main() {
 
       expect(find.text('Check-in Diário em 2 Etapas'), findsOneWidget);
       expect(find.text('Psicoemocional'), findsOneWidget);
-      expect(find.text('Avaliação Física'), findsOneWidget);
+      expect(find.text('Físico'), findsOneWidget);
 
       expect(find.byKey(const Key('start_psicoemocional_triage_button')), findsOneWidget);
       expect(find.byKey(const Key('start_fisica_triage_button')), findsOneWidget);
-      expect(find.text('Iniciar Psicoemocional'), findsOneWidget);
-      expect(find.text('Iniciar Avaliação Física'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('start_psicoemocional_triage_button')),
+          matching: find.byIcon(Icons.psychology_rounded),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('start_fisica_triage_button')),
+          matching: find.byIcon(Icons.accessibility_new_rounded),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('QA 3.2: Complete Psicoemocional with optional narrative returns to Home and updates its card',
@@ -173,10 +185,16 @@ void main() {
 
       // Avaliação Física remains pending and untouched
       expect(find.byKey(const Key('start_fisica_triage_button')), findsOneWidget);
-      expect(find.text('Iniciar Avaliação Física'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('start_fisica_triage_button')),
+          matching: find.byIcon(Icons.accessibility_new_rounded),
+        ),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('QA 3.3: Complete both stages updates both cards and shows dailyCheckInCompletedBanner',
+    testWidgets('QA 3.3: Complete both stages updates both cards without the redundant banner',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1200, 3000);
       tester.view.devicePixelRatio = 2.0;
@@ -203,8 +221,8 @@ void main() {
       await tester.pumpWidget(createTwoStageQATestApp(container: container));
       await tester.pumpAndSettle();
 
-      // Overall completed banner is visible
-      expect(find.byKey(const Key('dailyCheckInCompletedBanner')), findsOneWidget);
+      // Redundant overall banner is gone; each axis card confirms itself
+      expect(find.byKey(const Key('dailyCheckInCompletedBanner')), findsNothing);
 
       // Both cards display their respective summaries
       expect(find.byKey(const Key('psicoemocional_completed_card')), findsOneWidget);

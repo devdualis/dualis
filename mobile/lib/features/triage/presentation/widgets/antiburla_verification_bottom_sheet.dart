@@ -110,37 +110,6 @@ class AntiburlaVerificationBottomSheet extends StatelessWidget {
               ),
             ),
 
-            // Biological Discordance Alert (if detected)
-            if (result.biologicalDiscordance) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.amber.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.amber.shade300),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(Icons.info_outline_rounded,
-                        color: Colors.amber.shade900, size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        result.biologicalNotice ??
-                            l10n.antiburlaBiologicalDiscordanceDesc,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.amber.shade900,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-
             const SizedBox(height: 24),
 
             // Binary Choice 1: "É a mesma sensação que voltou"

@@ -4,10 +4,11 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class AvatarPreset {
   final String id;
-  final String label;
+  final String Function(AppLocalizations l10n) label;
   final IconData icon;
   final Color backgroundColor;
   final Color iconColor;
@@ -21,59 +22,68 @@ class AvatarPreset {
   });
 }
 
+String _selfCareLabel(AppLocalizations l10n) => l10n.avatarPresetSelfCare;
+String _balanceLabel(AppLocalizations l10n) => l10n.avatarPresetBalance;
+String _protectionLabel(AppLocalizations l10n) => l10n.avatarPresetProtection;
+String _vitalityLabel(AppLocalizations l10n) => l10n.avatarPresetVitality;
+String _wellbeingLabel(AppLocalizations l10n) => l10n.avatarPresetWellbeing;
+String _energyLabel(AppLocalizations l10n) => l10n.avatarPresetEnergy;
+String _focusLabel(AppLocalizations l10n) => l10n.avatarPresetFocus;
+String _radiantLabel(AppLocalizations l10n) => l10n.avatarPresetRadiant;
+
 final List<AvatarPreset> kAvatarPresets = [
   const AvatarPreset(
     id: 'avatar_doctor',
-    label: 'Clínico',
-    icon: Icons.medical_services_rounded,
+    label: _selfCareLabel,
+    icon: Icons.spa_rounded,
     backgroundColor: Color(0xFF00796B),
     iconColor: Colors.white,
   ),
   const AvatarPreset(
     id: 'avatar_calm',
-    label: 'Equilíbrio',
+    label: _balanceLabel,
     icon: Icons.self_improvement_rounded,
     backgroundColor: Color(0xFF3F51B5),
     iconColor: Colors.white,
   ),
   const AvatarPreset(
     id: 'avatar_shield',
-    label: 'Proteção',
+    label: _protectionLabel,
     icon: Icons.shield_rounded,
     backgroundColor: Color(0xFF0288D1),
     iconColor: Colors.white,
   ),
   const AvatarPreset(
     id: 'avatar_heart',
-    label: 'Vitalidade',
+    label: _vitalityLabel,
     icon: Icons.favorite_rounded,
     backgroundColor: Color(0xFFE91E63),
     iconColor: Colors.white,
   ),
   const AvatarPreset(
     id: 'avatar_leaf',
-    label: 'Bem-estar',
+    label: _wellbeingLabel,
     icon: Icons.eco_rounded,
     backgroundColor: Color(0xFF2E7D32),
     iconColor: Colors.white,
   ),
   const AvatarPreset(
     id: 'avatar_fitness',
-    label: 'Energia',
+    label: _energyLabel,
     icon: Icons.directions_run_rounded,
     backgroundColor: Color(0xFFF57C00),
     iconColor: Colors.white,
   ),
   const AvatarPreset(
     id: 'avatar_mind',
-    label: 'Foco Mental',
+    label: _focusLabel,
     icon: Icons.psychology_rounded,
     backgroundColor: Color(0xFF673AB7),
     iconColor: Colors.white,
   ),
   const AvatarPreset(
     id: 'avatar_sun',
-    label: 'Radiante',
+    label: _radiantLabel,
     icon: Icons.wb_sunny_rounded,
     backgroundColor: Color(0xFFFBC02D),
     iconColor: Color(0xFF3E2723),
@@ -195,6 +205,7 @@ class _AvatarSelectorSheetState extends State<AvatarSelectorSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
       decoration: const BoxDecoration(
@@ -217,7 +228,7 @@ class _AvatarSelectorSheetState extends State<AvatarSelectorSheet> {
           ),
           const SizedBox(height: 18),
           Text(
-            'Escolha seu Avatar',
+            l10n.selectAvatar,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -226,7 +237,7 @@ class _AvatarSelectorSheetState extends State<AvatarSelectorSheet> {
           ),
           const SizedBox(height: 6),
           Text(
-            'Selecione um ícone de autocuidado para personalizar seu perfil.',
+            l10n.avatarSelectorSubtitle,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
               color: AppColors.textSecondaryLight,
@@ -306,7 +317,7 @@ class _AvatarSelectorSheetState extends State<AvatarSelectorSheet> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      preset.label,
+                      preset.label(l10n),
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -338,7 +349,7 @@ class _AvatarSelectorSheetState extends State<AvatarSelectorSheet> {
                 Navigator.of(context).pop();
               },
               child: Text(
-                'Confirmar Avatar',
+                l10n.avatarConfirm,
                 style: GoogleFonts.plusJakartaSans(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,

@@ -1,8 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../../features/emergency/domain/emergency_context.dart';
 import '../../../../features/emergency/domain/red_flag_evaluator.dart';
-import '../../../../features/emergency/presentation/controllers/emergency_controller.dart';
+import '../../../../features/emergency/presentation/widgets/safety_notice_banner.dart';
 import '../../domain/triage_question_bank.dart';
 import '../../domain/triage_vertical.dart';
 import '../../domain/triage_wizard_state.dart';
@@ -14,7 +13,10 @@ final triageWizardNotifierProvider = triageWizardProvider;
 @riverpod
 class TriageWizardNotifier extends _$TriageWizardNotifier {
   @override
-  TriageWizardState build() => const TriageWizardState();
+  TriageWizardState build() {
+    ref.onDispose(SafetyNotice.hide);
+    return const TriageWizardState();
+  }
 
   void setVertical(TriageVertical vertical) {
     state = state.copyWith(activeVertical: vertical, currentStep: 0, answers: {});
@@ -27,21 +29,26 @@ class TriageWizardNotifier extends _$TriageWizardNotifier {
     state = state.copyWith(answers: {0: categoryKey}, currentStep: 1);
   }
 
+  /// Saves the answer. If it is a high self-reported intensity, shows the
+  /// generic, non-blocking safety notice (same text for everyone) and returns
+  /// true. The entry flow is never interrupted.
   bool selectOption(BuildContext context, int stepIndex, String optionKey) {
-    final snapshotAnswers = {...state.answers, stepIndex: optionKey};
-    state = state.copyWith(answers: snapshotAnswers);
+    state = state.copyWith(answers: {...state.answers, stepIndex: optionKey});
 
-    final emergency = _evaluateGate(stepIndex, optionKey);
-    if (emergency != null) {
-      final verticalStr =
-          state.activeVertical == TriageVertical.fisica ? 'physical' : 'emotional';
-      ref.read(emergencyControllerProvider.notifier).triggerEmergency(
-            context,
-            emergency.copyWith(
-              sourceVertical: verticalStr,
-              sourceAnswers: snapshotAnswers,
-            ),
-          );
+    final notice = _safetyNoticeFor(stepIndex, optionKey);
+    if (notice != null) {
+      SafetyNotice.show(context, notice);
+      return true;
+    }
+    return false;
+  }
+
+  /// Checks free text the user typed; self-harm mentions show crisis
+  /// resources, warning-sign expressions show the generic notice.
+  bool checkFreeText(BuildContext context, String text) {
+    final notice = RedFlagEvaluator.evaluateText(text);
+    if (notice != null) {
+      SafetyNotice.show(context, notice);
       return true;
     }
     return false;
@@ -75,79 +82,18 @@ class TriageWizardNotifier extends _$TriageWizardNotifier {
     state = const TriageWizardState();
   }
 
-  EmergencyContext? _evaluateGate(int stepIndex, String optionKey) {
-    final vertical = state.activeVertical;
-
-    if (vertical == TriageVertical.psicoEmocional) {
-      if (stepIndex == 3 || stepIndex == 2) {
-        final intensityMap = {
-          'leve_controlavel': 2,
-          'moderada': 3,
-          'muito_forte': 4,
-          '4': 4,
-          '5': 5,
-        };
-        final intensity = intensityMap[optionKey] ?? int.tryParse(optionKey) ?? 2;
-        final dim = _emotionalDimensionFromStep0();
-        return RedFlagEvaluator.evaluateStructured(
-          systemOrDimension: dim,
-          intensity: intensity,
-          isEmotional: true,
-          selectedSymptom: optionKey,
-        );
-      }
-    } else {
-      if (stepIndex == 3 || stepIndex == 2) {
-        final intensity = int.tryParse(optionKey) ?? 1;
-        final sys = _physicalSystemFromStep0();
-        return RedFlagEvaluator.evaluateStructured(
-          systemOrDimension: sys,
-          intensity: intensity,
-          isEmotional: false,
-          selectedSymptom: optionKey,
-        );
-      }
-    }
-    return null;
-  }
-
-  String _emotionalDimensionFromStep0() {
-    final step0Answer = state.answers[0] ?? '';
-    const map = {
-      'tristeza_desanimo': 'depressive_hopelessness',
-      'depressiva_desanimo': 'depressive_hopelessness',
-      'ansiedade_agitacao': 'anxious_agitation',
-      'ansiosa_agitacao': 'anxious_agitation',
-      'estresse_irritabilidade': 'stress_burnout',
-      'estresse_burnout': 'stress_burnout',
-      'somatica': 'somatica',
-      'sono': 'sono',
-      'cognitiva_foco': 'cognitiva_foco',
-      'autoestima': 'autoestima',
+  SafetyNoticeKind? _safetyNoticeFor(int stepIndex, String optionKey) {
+    if (stepIndex != 2 && stepIndex != 3) return null;
+    const emotionalIntensity = {
+      'leve_controlavel': 2,
+      'moderada': 3,
+      'muito_forte': 4,
     };
-    return map[step0Answer] ?? 'emotional_general';
-  }
-
-  String _physicalSystemFromStep0() {
-    final step0Answer = state.answers[0] ?? '';
-    const map = {
-      'cabeca': 'head_neck',
-      'cabeca_pescoco': 'head_neck',
-      'costas_coluna': 'musculoskeletal_back',
-      'coluna_dor_dorsal': 'musculoskeletal_back',
-      'articulacoes': 'musculoskeletal_joints',
-      'membros_superiores': 'musculoskeletal_joints',
-      'membros_inferiores': 'musculoskeletal_joints',
-      'abdomen_estomago': 'gastrointestinal',
-      'gastrointestinal_abdomen': 'gastrointestinal',
-      'cardiovascular_torax': 'cardiovascular_chest',
-      'respiratorio': 'respiratory',
-      'neurologico': 'neurological',
-      'geniturinario_pelvico': 'general_somatic',
-      'dermatologico': 'general_somatic',
-      'muscular_geral_sistemico': 'general_somatic',
-      'endocrino_metabolico': 'general_somatic',
-    };
-    return map[step0Answer] ?? 'general_somatic';
+    final intensity = int.tryParse(optionKey) ?? emotionalIntensity[optionKey];
+    if (intensity == null) return null;
+    return RedFlagEvaluator.evaluateIntensity(
+      intensity: intensity,
+      bodyAreaKey: state.activeVertical == TriageVertical.fisica ? state.answers[0] : null,
+    );
   }
 }

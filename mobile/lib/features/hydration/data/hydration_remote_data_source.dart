@@ -28,10 +28,16 @@ class HydrationRemoteDataSource {
     required int amountMl,
     String source = 'manual',
     DateTime? timestamp,
+    String? profileId,
   }) async {
     try {
       final token = await _secureStorage.getAccessToken();
       if (token == null || token.isEmpty) return null;
+
+      final headers = <String, dynamic>{
+        'Authorization': 'Bearer $token',
+        if (profileId != null && profileId.isNotEmpty) 'X-Profile-Id': profileId,
+      };
 
       final response = await _apiClient.post(
         ApiEndpoints.hydrationLog,
@@ -40,7 +46,7 @@ class HydrationRemoteDataSource {
           'source': source,
           if (timestamp != null) 'recordedAt': timestamp.toIso8601String(),
         },
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
+        options: Options(headers: headers),
       );
 
       if (response.data is Map<String, dynamic>) {
@@ -61,7 +67,10 @@ class HydrationRemoteDataSource {
     }
   }
 
-  Future<List<WaterIntakeEntry>?> getTodayLogs({DateTime? date}) async {
+  Future<List<WaterIntakeEntry>?> getTodayLogs({
+    DateTime? date,
+    String? profileId,
+  }) async {
     try {
       final token = await _secureStorage.getAccessToken();
       if (token == null || token.isEmpty) return null;
@@ -71,10 +80,15 @@ class HydrationRemoteDataSource {
         queryParams['date'] = date.toIso8601String();
       }
 
+      final headers = <String, dynamic>{
+        'Authorization': 'Bearer $token',
+        if (profileId != null && profileId.isNotEmpty) 'X-Profile-Id': profileId,
+      };
+
       final response = await _apiClient.get(
         ApiEndpoints.hydrationToday,
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
+        options: Options(headers: headers),
       );
 
       if (response.data is Map<String, dynamic>) {
@@ -102,6 +116,7 @@ class HydrationRemoteDataSource {
   Future<Map<DateTime, int>?> getHistoryTotals({
     int days = 7,
     DateTime? referenceDate,
+    String? profileId,
   }) async {
     try {
       final token = await _secureStorage.getAccessToken();
@@ -112,10 +127,15 @@ class HydrationRemoteDataSource {
         if (referenceDate != null) 'referenceDate': referenceDate.toIso8601String(),
       };
 
+      final headers = <String, dynamic>{
+        'Authorization': 'Bearer $token',
+        if (profileId != null && profileId.isNotEmpty) 'X-Profile-Id': profileId,
+      };
+
       final response = await _apiClient.get(
         ApiEndpoints.hydrationHistory,
         queryParameters: queryParams,
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
+        options: Options(headers: headers),
       );
 
       if (response.data is Map<String, dynamic>) {
@@ -137,14 +157,19 @@ class HydrationRemoteDataSource {
     }
   }
 
-  Future<bool> deleteLog(String remoteId) async {
+  Future<bool> deleteLog(String remoteId, {String? profileId}) async {
     try {
       final token = await _secureStorage.getAccessToken();
       if (token == null || token.isEmpty) return false;
 
+      final headers = <String, dynamic>{
+        'Authorization': 'Bearer $token',
+        if (profileId != null && profileId.isNotEmpty) 'X-Profile-Id': profileId,
+      };
+
       final response = await _apiClient.delete(
         ApiEndpoints.hydrationLogItem(remoteId),
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
+        options: Options(headers: headers),
       );
       return response.statusCode == 200;
     } catch (_) {

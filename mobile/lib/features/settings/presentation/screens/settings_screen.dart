@@ -123,6 +123,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showPhotoPickerSheet() {
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -148,7 +149,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             const SizedBox(height: 18),
             Text(
-              'Alterar Foto',
+              l10n.changeAvatar,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -157,7 +158,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Escolha como deseja selecionar sua foto de perfil.',
+              l10n.settingsChangePhotoSubtitle,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
                 color: AppColors.textSecondaryLight,
@@ -167,8 +168,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             // Camera option
             _PhotoOptionTile(
               icon: Icons.camera_alt_rounded,
-              label: 'Câmera',
-              subtitle: 'Tirar uma nova foto',
+              label: l10n.settingsPhotoCamera,
+              subtitle: l10n.settingsPhotoCameraSubtitle,
               color: AppColors.clinicalTeal,
               onTap: () => _pickImage(ImageSource.camera),
             ),
@@ -176,8 +177,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             // Gallery option
             _PhotoOptionTile(
               icon: Icons.photo_library_rounded,
-              label: 'Galeria',
-              subtitle: 'Escolher da biblioteca de fotos',
+              label: l10n.settingsPhotoGallery,
+              subtitle: l10n.settingsPhotoGallerySubtitle,
               color: AppColors.softIndigo,
               onTap: () => _pickImage(ImageSource.gallery),
             ),
@@ -185,8 +186,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             // Presets option
             _PhotoOptionTile(
               icon: Icons.palette_outlined,
-              label: 'Avatares Clínicos',
-              subtitle: 'Escolher um ícone ilustrado de autocuidado',
+              label: l10n.settingsPhotoPresets,
+              subtitle: l10n.settingsPhotoPresetsSubtitle,
               color: AppColors.clinicalTealDark,
               onTap: () {
                 Navigator.of(context).pop();
@@ -213,7 +214,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(
-                  'Cancelar',
+                  l10n.cancel,
                   style: GoogleFonts.plusJakartaSans(
                     color: AppColors.textSecondaryLight,
                     fontWeight: FontWeight.w600,
@@ -370,7 +371,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
         ),
         content: Text(
-          'Deseja realmente encerrar sua sessão? Seus dados clínicos permanecem seguros e criptografados.',
+          l10n.settingsLogoutConfirmBody,
           style: GoogleFonts.plusJakartaSans(fontSize: 14),
         ),
         actions: [
@@ -388,7 +389,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
-              'Sair',
+              l10n.settingsLogoutConfirmAction,
               style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
             ),
           ),
@@ -538,7 +539,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         controller: _nameController,
                         style: GoogleFonts.plusJakartaSans(fontSize: 14),
                         decoration: InputDecoration(
-                          hintText: 'Seu nome completo',
+                          hintText: l10n.settingsNameHint,
                           prefixIcon: const Icon(Icons.badge_outlined, color: AppColors.clinicalTeal),
                           filled: true,
                           fillColor: AppColors.backgroundLight,
@@ -612,7 +613,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 child: Text(
                                   _selectedDateOfBirth != null
                                       ? DateFormat('dd/MM/yyyy').format(_selectedDateOfBirth!)
-                                      : 'Selecione sua data de nascimento',
+                                      : l10n.selectDateOfBirthHint,
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 14,
                                     color: _selectedDateOfBirth != null
@@ -996,14 +997,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         key: const Key('settings_hydration_tile'),
                         leading: const Icon(Icons.water_drop_outlined, color: AppColors.clinicalTeal),
                         title: Text(
-                          'Lembretes e Hidratação',
+                          l10n.settingsRemindersTile,
                           style: GoogleFonts.plusJakartaSans(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
                         ),
                         subtitle: Text(
-                          'Horários de notificações, alarmes e teste com app fechado',
+                          l10n.settingsRemindersSubtitle,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
                             color: AppColors.textSecondaryLight,
@@ -1017,14 +1018,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         key: const Key('settings_terms_tile'),
                         leading: const Icon(Icons.description_outlined, color: AppColors.softIndigo),
                         title: Text(
-                          'Termos de Uso do SaaS',
+                          l10n.settingsTermsTile,
                           style: GoogleFonts.plusJakartaSans(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
                         ),
                         subtitle: Text(
-                          'Condições de uso, planos, cancelamento e reembolso',
+                          l10n.settingsTermsSubtitle,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
                             color: AppColors.textSecondaryLight,
@@ -1038,14 +1039,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         key: const Key('settings_privacy_policy_tile'),
                         leading: const Icon(Icons.policy_outlined, color: AppColors.clinicalTeal),
                         title: Text(
-                          'Política de Privacidade (LGPD)',
+                          l10n.settingsPrivacyPolicyTile,
                           style: GoogleFonts.plusJakartaSans(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
                         ),
                         subtitle: Text(
-                          'Tratamento de dados, direitos do titular e DPO',
+                          l10n.settingsPrivacyPolicySubtitle,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
                             color: AppColors.textSecondaryLight,
@@ -1061,7 +1062,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 20),
               _SectionLabel(
                 icon: Icons.notifications_active_outlined,
-                label: 'Comunicações e Notificações',
+                label: l10n.settingsCommunicationsSection,
                 color: AppColors.clinicalTealDark,
               ),
               const SizedBox(height: 10),
@@ -1081,14 +1082,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         value: true,
                         activeThumbColor: AppColors.clinicalTeal,
                         title: Text(
-                          'Dicas Preventivas e Notificações Educativas',
+                          l10n.settingsEducationalTipsTile,
                           style: GoogleFonts.plusJakartaSans(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
                         ),
                         subtitle: Text(
-                          'Orientações de bem-estar. Você pode revogar (opt-out) a qualquer momento.',
+                          l10n.settingsEducationalTipsSubtitle,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 12,
                             color: AppColors.textSecondaryLight,
@@ -1099,8 +1100,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             SnackBar(
                               content: Text(
                                 val
-                                    ? 'Notificações educativas ativadas.'
-                                    : 'Opt-out confirmado: Notificações educativas desativadas.',
+                                    ? l10n.settingsEducationalTipsOn
+                                    : l10n.settingsEducationalTipsOff,
                               ),
                               backgroundColor: AppColors.clinicalTeal,
                               duration: const Duration(seconds: 2),
@@ -1152,7 +1153,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Operado por DualisCheckUp Saúde e Tecnologia Ltda.\nCNPJ 48.291.834/0001-92 • São Paulo - SP, Brasil\nDPO: dpo@dualischeckup.com',
+                      l10n.settingsOperatorInfo,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,

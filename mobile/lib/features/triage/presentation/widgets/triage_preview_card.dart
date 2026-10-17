@@ -420,7 +420,7 @@ class TriagePreviewCard extends StatelessWidget {
   static String _physicalLocationLabel(String? systemOrDimension) {
     switch (systemOrDimension) {
       case 'dermatologico':
-        return 'Localização da Coceira / Lesão';
+        return 'Localização na Pele';
       case 'gastrointestinal_abdomen':
       case 'respiratorio':
       case 'neurologico':
@@ -441,7 +441,7 @@ class TriagePreviewCard extends StatelessWidget {
     final isEmotional = vertical == TriageVertical.psicoEmocional;
     final stepLabels = isEmotional
         ? [
-            'Natureza do Sintoma',
+            'Sensação Relatada',
             'Tempo / Persistência',
             _emotionalTriggerLabel(answers[0]),
             'Intensidade Relatada',
@@ -500,9 +500,11 @@ class TriagePreviewCard extends StatelessWidget {
                   ? resolveAnswerLabel(context, rawAnswer)
                   : '—';
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
+              return Semantics(
+                label: ': ',
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(
@@ -540,6 +542,7 @@ class TriagePreviewCard extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
                 ),
               );
             }),

@@ -175,65 +175,68 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
 
   Widget _buildDigitInput(int index) {
     return SizedBox(
-      width: 46,
+      width: 48,
       height: 56,
-      child: KeyboardListener(
-        focusNode: FocusNode(),
-        onKeyEvent: (event) {
-          if (event is KeyDownEvent &&
-              event.logicalKey == LogicalKeyboardKey.backspace &&
-              _digitControllers[index].text.isEmpty &&
-              index > 0) {
-            _focusNodes[index - 1].requestFocus();
-          }
-        },
-        child: TextFormField(
-          key: Key('otp_digit_$index'),
-          controller: _digitControllers[index],
-          focusNode: _focusNodes[index],
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.center,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimaryLight,
-          ),
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-            LengthLimitingTextInputFormatter(1),
-          ],
-          decoration: InputDecoration(
-            counterText: '',
-            contentPadding: EdgeInsets.zero,
-            filled: true,
-            fillColor: Colors.white,
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: _digitControllers[index].text.isNotEmpty
-                    ? AppColors.clinicalTeal
-                    : AppColors.outlineLight,
-                width: 1.5,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: AppColors.clinicalTeal,
-                width: 2,
-              ),
-            ),
-          ),
-          onChanged: (value) {
-            if (value.isNotEmpty) {
-              if (index < _codeLength - 1) {
-                _focusNodes[index + 1].requestFocus();
-              } else {
-                _focusNodes[index].unfocus();
-                _handleVerify();
-              }
+      child: Semantics(
+        label: 'Dígito ${index + 1} do código de verificação',
+        child: KeyboardListener(
+          focusNode: FocusNode(),
+          onKeyEvent: (event) {
+            if (event is KeyDownEvent &&
+                event.logicalKey == LogicalKeyboardKey.backspace &&
+                _digitControllers[index].text.isEmpty &&
+                index > 0) {
+              _focusNodes[index - 1].requestFocus();
             }
           },
+          child: TextFormField(
+            key: Key('otp_digit_$index'),
+            controller: _digitControllers[index],
+            focusNode: _focusNodes[index],
+            keyboardType: TextInputType.number,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimaryLight,
+            ),
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(1),
+            ],
+            decoration: InputDecoration(
+              counterText: '',
+              contentPadding: EdgeInsets.zero,
+              filled: true,
+              fillColor: Colors.white,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: _digitControllers[index].text.isNotEmpty
+                      ? AppColors.clinicalTeal
+                      : AppColors.outlineLight,
+                  width: 1.5,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: AppColors.clinicalTeal,
+                  width: 2,
+                ),
+              ),
+            ),
+            onChanged: (value) {
+              if (value.isNotEmpty) {
+                if (index < _codeLength - 1) {
+                  _focusNodes[index + 1].requestFocus();
+                } else {
+                  _focusNodes[index].unfocus();
+                  _handleVerify();
+                }
+              }
+            },
+          ),
         ),
       ),
     );
@@ -250,6 +253,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
+          tooltip: 'Voltar',
           icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.textPrimaryLight),
           onPressed: () {
             if (context.canPop()) {
@@ -259,6 +263,15 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
             }
           },
         ),
+        actions: [
+          IconButton(
+            key: const Key('verification_emergency_button'),
+            tooltip: 'Recursos de Emergência / SOS',
+            icon: const Icon(Icons.emergency_rounded, color: AppColors.emergencyCrimson),
+            onPressed: () => context.push(RoutePaths.emergency),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -354,6 +367,9 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                 ),
               ] else ...[
                 TextButton(
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(48, 48),
+                  ),
                   onPressed: _isResending ? null : _handleResend,
                   child: Text(
                     _isResending ? 'Enviando novo código...' : 'Não recebeu o código? Reenviar',

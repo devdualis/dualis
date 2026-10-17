@@ -19,6 +19,8 @@ import { AuthResponseDto, SanitizedUser, RegisterResponseDto } from './dto/auth-
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
 import { UserDataExportResponseDto } from './dto/export-data.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -60,6 +62,22 @@ export class AuthController {
     @Body() dto: ResendVerificationDto,
   ): Promise<{ success: boolean; message: string }> {
     return this.authService.resendVerification(dto);
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(
+    @Body() dto: ForgotPasswordDto,
+  ): Promise<{ success: boolean; message: string }> {
+    return this.authService.forgotPassword(dto);
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(
+    @Body() dto: ResetPasswordDto,
+  ): Promise<{ success: boolean; message: string }> {
+    return this.authService.resetPassword(dto);
   }
 
   @Post('login')

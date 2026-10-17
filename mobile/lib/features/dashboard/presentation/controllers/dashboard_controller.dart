@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../data/triage_history_remote_data_source.dart';
 import '../../domain/models/triage_history_models.dart';
 import '../widgets/dashboard_segmented_tab.dart';
@@ -28,10 +29,32 @@ class DashboardState {
 }
 
 class DashboardNotifier extends AsyncNotifier<DashboardState> {
+  String? _lastProfileId;
+  int _loadSession = 0;
+
   @override
   Future<DashboardState> build() async {
+    final activeProfileId = ref.watch(
+      activeProfileControllerProvider.select((s) => s.activeProfile?.id),
+    );
+    // When the active profile changes, reset state to loading with NO previous value
+    // so that the previous profile's clinical data is never shown while loading.
+    if (_lastProfileId != activeProfileId) {
+      _lastProfileId = activeProfileId;
+      state = const AsyncLoading();
+    }
+    final session = ++_loadSession;
     final dataSource = ref.watch(triageHistoryDataSourceProvider);
     final history = await dataSource.fetchHistory(days: 14);
+
+    if (session != _loadSession) {
+      return state.value ??
+          DashboardState(
+            selectedTab: DashboardTab.emotional,
+            history: history,
+          );
+    }
+
     return DashboardState(
       selectedTab: DashboardTab.emotional,
       history: history,

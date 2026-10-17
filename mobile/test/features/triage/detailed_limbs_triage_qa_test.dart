@@ -107,7 +107,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Ombro Direito'), findsOneWidget);
-      expect(find.text('Membros Superiores D/E'), findsOneWidget);
+      expect(find.text('Braços'), findsOneWidget);
       expect(find.text('Começou agora'), findsOneWidget);
     });
 
@@ -124,7 +124,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Joelho Esquerdo'), findsOneWidget);
-      expect(find.text('Membros Inferiores D/E'), findsOneWidget);
+      expect(find.text('Pernas'), findsOneWidget);
       expect(find.text('Há alguns dias'), findsOneWidget);
     });
 

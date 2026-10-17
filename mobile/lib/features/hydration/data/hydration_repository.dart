@@ -3,6 +3,8 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/app_database.dart' hide WaterIntakeLog;
 import '../../../../core/security/secure_storage_service.dart';
+import '../../profile/domain/models/profile.dart';
+import '../../profile/presentation/controllers/active_profile_controller.dart';
 import '../domain/models/hydration_settings.dart';
 import '../domain/models/water_intake_log.dart';
 import 'hydration_remote_data_source.dart';
@@ -40,6 +42,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
   final AppDatabase _db;
   final SecureStorageService _storage;
   final HydrationRemoteDataSource? _remoteDataSource;
+  final Ref? _ref;
 
   static const _settingsKey = 'dualis_hydration_settings';
 
@@ -47,9 +50,49 @@ class HydrationRepositoryImpl implements HydrationRepository {
     required AppDatabase db,
     required SecureStorageService storage,
     HydrationRemoteDataSource? remoteDataSource,
+    Ref? ref,
   })  : _db = db,
         _storage = storage,
-        _remoteDataSource = remoteDataSource;
+        _remoteDataSource = remoteDataSource,
+        _ref = ref;
+
+  Profile? get _activeProfile =>
+      _ref?.read(activeProfileControllerProvider).activeProfile;
+
+  String? _resolveProfileId(String? explicitProfileId) =>
+      explicitProfileId ?? _activeProfile?.id;
+
+  bool _resolveIsPrimary(String? resolvedProfileId, bool? explicitIsPrimary) {
+    if (explicitIsPrimary != null) return explicitIsPrimary;
+    final active = _activeProfile;
+    if (active != null) {
+      if (resolvedProfileId == null || resolvedProfileId == active.id) {
+        return active.isPrimary;
+      }
+    }
+    // Default fallback: if resolvedProfileId is null, it's considered primary (pre-v4)
+    return resolvedProfileId == null;
+  }
+
+  Expression<bool> _profileFilter(
+    $WaterIntakeLogsTable tbl,
+    String? profileId,
+    bool isPrimary,
+  ) {
+    if (isPrimary) {
+      if (profileId != null) {
+        return tbl.profileId.equals(profileId) | tbl.profileId.isNull();
+      } else {
+        return tbl.profileId.isNull();
+      }
+    } else {
+      if (profileId != null) {
+        return tbl.profileId.equals(profileId);
+      } else {
+        return tbl.profileId.isNull();
+      }
+    }
+  }
 
   @override
   Future<WaterIntakeEntry> logWaterIntake({
@@ -57,8 +100,10 @@ class HydrationRepositoryImpl implements HydrationRepository {
     required int amountMl,
     String source = 'manual',
     DateTime? timestamp,
+    String? profileId,
   }) async {
     final entryTime = timestamp ?? DateTime.now();
+    final effectiveProfileId = _resolveProfileId(profileId);
 
     String? remoteId;
     if (_remoteDataSource != null && userId.isNotEmpty && userId != 'guest_user') {
@@ -67,6 +112,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
           amountMl: amountMl,
           source: source,
           timestamp: entryTime,
+          profileId: effectiveProfileId,
         );
         remoteId = remoteEntry?.remoteId;
       } catch (_) {}
@@ -78,6 +124,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
       amountMl: Value(amountMl),
       timestamp: Value(entryTime),
       source: Value(source),
+      profileId: Value(effectiveProfileId),
     );
 
     final id = await _db.into(_db.waterIntakeLogs).insert(companion);
@@ -96,18 +143,26 @@ class HydrationRepositoryImpl implements HydrationRepository {
   Future<List<WaterIntakeEntry>> getLogsForDay({
     required String userId,
     required DateTime day,
+    String? profileId,
+    bool? isPrimaryProfile,
   }) async {
     final startOfDay = DateTime(day.year, day.month, day.day, 0, 0, 0);
     final endOfDay = DateTime(day.year, day.month, day.day, 23, 59, 59, 999);
+    final effectiveProfileId = _resolveProfileId(profileId);
+    final isPrimary = _resolveIsPrimary(effectiveProfileId, isPrimaryProfile);
 
     // Sync with remote database when user is authenticated
     if (_remoteDataSource != null && userId.isNotEmpty && userId != 'guest_user') {
       try {
-        final remoteLogs = await _remoteDataSource.getTodayLogs(date: day);
+        final remoteLogs = await _remoteDataSource.getTodayLogs(
+          date: day,
+          profileId: effectiveProfileId,
+        );
         if (remoteLogs != null) {
           final existingRows = await (_db.select(_db.waterIntakeLogs)
                 ..where((tbl) =>
                     tbl.userId.equals(userId) &
+                    _profileFilter(tbl, effectiveProfileId, isPrimary) &
                     tbl.timestamp.isBiggerOrEqualValue(startOfDay) &
                     tbl.timestamp.isSmallerOrEqualValue(endOfDay)))
               .get();
@@ -130,6 +185,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
           final updatedExisting = await (_db.select(_db.waterIntakeLogs)
                 ..where((tbl) =>
                     tbl.userId.equals(userId) &
+                    _profileFilter(tbl, effectiveProfileId, isPrimary) &
                     tbl.timestamp.isBiggerOrEqualValue(startOfDay) &
                     tbl.timestamp.isSmallerOrEqualValue(endOfDay)))
               .get();
@@ -149,6 +205,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
               amountMl: Value(r.amountMl),
               timestamp: Value(r.timestamp),
               source: Value(r.source),
+              profileId: Value(effectiveProfileId),
             );
             await _db.into(_db.waterIntakeLogs).insert(companion);
           }
@@ -159,6 +216,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
     final query = _db.select(_db.waterIntakeLogs)
       ..where((tbl) =>
           tbl.userId.equals(userId) &
+          _profileFilter(tbl, effectiveProfileId, isPrimary) &
           tbl.timestamp.isBiggerOrEqualValue(startOfDay) &
           tbl.timestamp.isSmallerOrEqualValue(endOfDay))
       ..orderBy([
@@ -181,8 +239,17 @@ class HydrationRepositoryImpl implements HydrationRepository {
   }
 
   @override
-  Future<int> getTodayTotalMl({required String userId}) async {
-    final logs = await getLogsForDay(userId: userId, day: DateTime.now());
+  Future<int> getTodayTotalMl({
+    required String userId,
+    String? profileId,
+    bool? isPrimaryProfile,
+  }) async {
+    final logs = await getLogsForDay(
+      userId: userId,
+      day: DateTime.now(),
+      profileId: profileId,
+      isPrimaryProfile: isPrimaryProfile,
+    );
     return logs.fold<int>(0, (int sum, WaterIntakeEntry item) => sum + item.amountMl);
   }
 
@@ -190,8 +257,12 @@ class HydrationRepositoryImpl implements HydrationRepository {
   Future<Map<DateTime, int>> getLast7DaysTotals({
     required String userId,
     DateTime? referenceDate,
+    String? profileId,
+    bool? isPrimaryProfile,
   }) async {
     final refDate = referenceDate ?? DateTime.now();
+    final effectiveProfileId = _resolveProfileId(profileId);
+    final isPrimary = _resolveIsPrimary(effectiveProfileId, isPrimaryProfile);
 
     // Try remote database first if authenticated
     if (_remoteDataSource != null && userId.isNotEmpty && userId != 'guest_user') {
@@ -199,6 +270,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
         final remoteTotals = await _remoteDataSource.getHistoryTotals(
           days: 7,
           referenceDate: refDate,
+          profileId: effectiveProfileId,
         );
         if (remoteTotals != null && remoteTotals.isNotEmpty) {
           return remoteTotals;
@@ -213,14 +285,18 @@ class HydrationRepositoryImpl implements HydrationRepository {
       final targetDate = refDate.subtract(Duration(days: i));
       final normalizedDate =
           DateTime(targetDate.year, targetDate.month, targetDate.day);
-      final logs = await getLogsForDay(userId: userId, day: normalizedDate);
+      final logs = await getLogsForDay(
+        userId: userId,
+        day: normalizedDate,
+        profileId: effectiveProfileId,
+        isPrimaryProfile: isPrimary,
+      );
       final daySum = logs.fold<int>(0, (int sum, WaterIntakeEntry log) => sum + log.amountMl);
       totals[normalizedDate] = daySum;
     }
 
     return totals;
   }
-
 
   @override
   Future<void> deleteLog(int id) async {
@@ -230,7 +306,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
           .getSingleOrNull();
       if (row?.remoteId != null && row!.remoteId!.isNotEmpty) {
         if (_remoteDataSource != null) {
-          await _remoteDataSource.deleteLog(row.remoteId!);
+          await _remoteDataSource.deleteLog(row.remoteId!, profileId: row.profileId);
         }
       }
     } catch (_) {}
@@ -241,7 +317,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
   }
 
   @override
-  Future<void> deleteRemoteLog(String remoteId) async {
+  Future<void> deleteRemoteLog(String remoteId, {String? profileId}) async {
     try {
       await (_db.delete(_db.waterIntakeLogs)
             ..where((tbl) => tbl.remoteId.equals(remoteId)))
@@ -250,7 +326,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
 
     if (_remoteDataSource != null) {
       try {
-        await _remoteDataSource.deleteLog(remoteId);
+        await _remoteDataSource.deleteLog(remoteId, profileId: profileId);
       } catch (_) {}
     }
   }
@@ -284,5 +360,6 @@ final hydrationRepositoryProvider = Provider<HydrationRepository>((ref) {
     db: db,
     storage: storage,
     remoteDataSource: remoteDataSource,
+    ref: ref,
   );
 });

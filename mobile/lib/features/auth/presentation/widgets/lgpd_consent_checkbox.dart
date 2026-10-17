@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class LgpdConsentCheckbox extends StatelessWidget {
   final bool value;
@@ -24,6 +25,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
+        final l10n = AppLocalizations.of(ctx);
         return DraggableScrollableSheet(
           initialChildSize: 0.7,
           minChildSize: 0.5,
@@ -48,7 +50,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Política de Privacidade e Termo de Consentimento (LGPD Art. 11)',
+                    l10n.lgpdConsentSheetTitle,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -57,7 +59,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'O DualisCheckUp é uma plataforma móvel de auto-monitoramento preventivo e triagem de bem-estar físico e psico-emocional. O aplicativo NÃO realiza diagnósticos médicos, NÃO prescreve medicamentos ou tratamentos e NÃO substitui a consulta clínica presencial ou o aconselhamento de um médico devidamente registrado no CRM.',
+                    l10n.lgpdConsentSheetBody,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14,
                       height: 1.5,
@@ -66,7 +68,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Bases Normativas & Regulatórias:',
+                    l10n.lgpdConsentSheetBasesTitle,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -75,10 +77,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '• Anvisa RDC nº 657/2022: Regulamentação de Software como Dispositivo Médico (SaMD).\n'
-                    '• CFM Resolução nº 2.314/2022: Normas de Telemedicina no Brasil.\n'
-                    '• Lei Federal nº 13.709/2018 (LGPD): Art. 11 - Tratamento de dados pessoais sensíveis de saúde.\n'
-                    '• Código de Defesa do Consumidor (CDC): Art. 49 - Direito de Arrependimento em 7 dias.',
+                    l10n.lgpdConsentSheetBases,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
                       height: 1.5,
@@ -94,7 +93,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
                             Navigator.of(ctx).pop();
                             context.push(RoutePaths.termsOfService);
                           },
-                          child: const Text('Ver Termos de Uso'),
+                          child: Text(l10n.lgpdConsentViewTerms),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -107,7 +106,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
                             Navigator.of(ctx).pop();
                             context.push(RoutePaths.privacyPolicy);
                           },
-                          child: const Text('Ver Política Completa'),
+                          child: Text(l10n.lgpdConsentViewPolicy),
                         ),
                       ),
                     ],
@@ -123,6 +122,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return CheckboxListTile(
       key: const Key('lgpdConsentCheckbox'),
       value: value,
@@ -132,7 +132,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
       activeColor: AppColors.softIndigo,
       title: Text.rich(
         TextSpan(
-          text: 'Li e concordo com os ',
+          text: l10n.lgpdConsentPrefix,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 13,
             color: AppColors.textPrimaryLight,
@@ -140,7 +140,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
           ),
           children: [
             TextSpan(
-              text: 'Termos de Uso',
+              text: l10n.lgpdConsentTermsLink,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
                 color: AppColors.softIndigo,
@@ -150,9 +150,9 @@ class LgpdConsentCheckbox extends StatelessWidget {
               recognizer: TapGestureRecognizer()
                 ..onTap = () => context.push(RoutePaths.termsOfService),
             ),
-            const TextSpan(text: ' e a '),
+            TextSpan(text: l10n.lgpdConsentAnd),
             TextSpan(
-              text: 'Política de Privacidade',
+              text: l10n.lgpdConsentPrivacyLink,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
                 color: AppColors.softIndigo,
@@ -162,12 +162,9 @@ class LgpdConsentCheckbox extends StatelessWidget {
               recognizer: TapGestureRecognizer()
                 ..onTap = () => context.push(RoutePaths.privacyPolicy),
             ),
-            const TextSpan(
-              text:
-                  ', e consinto expressamente com o tratamento de meus dados de saúde (LGPD Art. 11). ',
-            ),
+            TextSpan(text: l10n.lgpdConsentSuffix),
             TextSpan(
-              text: '(Saiba mais)',
+              text: l10n.lgpdConsentLearnMore,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 color: AppColors.clinicalTealDark,

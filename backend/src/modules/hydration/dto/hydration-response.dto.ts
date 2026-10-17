@@ -1,6 +1,7 @@
 export class WaterIntakeLogItemDto {
   id!: string;
   userId!: string;
+  profileId!: string;
   amountMl!: number;
   source!: string;
   recordedAt!: string;

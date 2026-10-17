@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { TriageClassificationResult } from '../dto/classify-symptom.dto';
+import { EntryTagResult } from '../dto/classify-symptom.dto';
+
+// Content-safety net (not an assessment): the text mentions wanting to hurt oneself
+// or die. Checked on every entry, independently of which idiom matched first.
+const SELF_HARM_PATTERN =
+  /(vontade\s+de\s+sumir|n[aã]o\s+quero\s+mais\s+viver|quero\s+morrer|pensando\s+em\s+suic[ií]dio|tirar\s+a\s+pr[oó]pria\s+vida|me\s+machucar|me\s+ferir|ganas\s+de\s+morir|quiero\s+morir|quitarme\s+la\s+vida|want\s+to\s+die|kill\s+myself|hurt\s+myself|self[-\s]harm|suicid)/i;
 
 interface IdiomEntry {
   pattern: RegExp;
   vertical: 'physical' | 'emotional';
   systemOrDimension: string;
-  urgencyScore: number;
   mappedLayTerm: string;
-  clinicalConcept: string;
-  isEmergencyCandidate: boolean;
 }
 
 @Injectable()
@@ -18,233 +20,164 @@ export class IdiomDictionaryService {
       pattern: /(dor(\s+\w+)?\s+no\s+peito|aperto(\s+\w+)?\s+no\s+peito|peito(\s+\w+)?\s+apertado|press[aã]o\s+no\s+peito|queima[cç][aã]o\s+no\s+peito|dolor\s+en\s+el\s+pecho|chest\s+pain|pressure\s+in\s+chest|precordialgia)/i,
       vertical: 'physical',
       systemOrDimension: 'cardiovascular_chest',
-      urgencyScore: 5,
       mappedLayTerm: 'dor / aperto no peito',
-      clinicalConcept: 'precordialgia / suspeita de síndrome coronariana aguda',
-      isEmergencyCandidate: true,
     },
     {
       pattern: /(cabe[cç]a(\s+\w+)?\s+explodindo|pior\s+dor\s+de\s+cabe[cç]a|trov[aã]o|thunderclap|cabeza(\s+\w+)?\s+explotando|worst\s+headache)/i,
       vertical: 'physical',
       systemOrDimension: 'head_neck',
-      urgencyScore: 5,
-      mappedLayTerm: 'dor de cabeça súbita e excruciante',
-      clinicalConcept: 'cefaleia em trovoada / suspeita de hemorragia subaracnóidea',
-      isEmergencyCandidate: true,
+      mappedLayTerm: 'dor de cabeça muito forte e repentina',
     },
     {
       pattern: /(falta\s+de\s+ar|n[aã]o\s+consigo\s+respirar|sufocando|asfixia|dificuldade\s+para\s+respirar|falta\s+de\s+aire|shortness\s+of\s+breath)/i,
       vertical: 'physical',
       systemOrDimension: 'respiratory',
-      urgencyScore: 5,
-      mappedLayTerm: 'falta de ar aguda',
-      clinicalConcept: 'dispneia aguda / insuficiência respiratória',
-      isEmergencyCandidate: true,
+      mappedLayTerm: 'falta de ar',
     },
     {
       pattern: /(boca\s+torta|fraqueza\s+de\s+um\s+lado|bra[cç]o\s+dormente|fala\s+enrolada|boca\s+torcida|facial\s+droop|slurred\s+speech|hemiparesia)/i,
       vertical: 'physical',
       systemOrDimension: 'neurological',
-      urgencyScore: 5,
-      mappedLayTerm: 'déficit neurológico focal súbito',
-      clinicalConcept: 'suspeita de acidente vascular cerebral (AVC)',
-      isEmergencyCandidate: true,
+      mappedLayTerm: 'fraqueza de um lado / fala enrolada',
     },
     {
       pattern: /(vontade\s+de\s+sumir|n[aã]o\s+quero\s+mais\s+viver|pensando\s+em\s+suic[ií]dio|tirar\s+a\s+pr[oó]pria\s+vida|ganas\s+de\s+morir|want\s+to\s+die|suicid)/i,
       vertical: 'emotional',
       systemOrDimension: 'depressive_hopelessness',
-      urgencyScore: 5,
-      mappedLayTerm: 'ideação autolesiva / desesperança profunda',
-      clinicalConcept: 'crise suicida aguda / risco à integridade física',
-      isEmergencyCandidate: true,
+      mappedLayTerm: 'vontade de se ferir / desesperança',
     },
     {
       pattern: /(crise\s+de\s+p[aâ]nico|ataque\s+de\s+p[aâ]nico|cora[cç][aã]o\s+disparado|sensa[cç][aã]o\s+de\s+morte|medo\s+s[uú]bito\s+de\s+morrer|panic\s+attack)/i,
       vertical: 'emotional',
       systemOrDimension: 'anxious_agitation',
-      urgencyScore: 4,
-      mappedLayTerm: 'crise aguda de pânico',
-      clinicalConcept: 'transtorno de ansiedade / crise de pânico paroxística',
-      isEmergencyCandidate: true,
+      mappedLayTerm: 'crise de pânico',
     },
     {
       pattern: /(dor\s+de\s+cabe[cç]a|enxaqueca|cefaleia|cabeza|headache|migraine)/i,
       vertical: 'physical',
       systemOrDimension: 'head_neck',
-      urgencyScore: 2,
       mappedLayTerm: 'dor de cabeça',
-      clinicalConcept: 'cefaleia tensional / migrânea',
-      isEmergencyCandidate: false,
     },
     {
       pattern: /(c[oó]lica\s+renal|c[aá]lculo\s+renal|pedra\s+nos\s+rins|virilha\s+ao\s+urinar|desce\s+para\s+a\s+virilha)/i,
       vertical: 'physical',
       systemOrDimension: 'geniturinario_pelvico',
-      urgencyScore: 4,
-      mappedLayTerm: 'cólica renal aguda',
-      clinicalConcept: 'cólica nefrética / suspeita de cálculo renal',
-      isEmergencyCandidate: false,
+      mappedLayTerm: 'cólica / dor na região dos rins',
     },
     {
       pattern: /(dor(\s+\w+)?\s+nas\s+costas|dor\s+muscular\s+nas\s+costas|coluna|lombar|lombalgia|espalda|back\s+pain)/i,
       vertical: 'physical',
       systemOrDimension: 'musculoskeletal_back',
-      urgencyScore: 2,
       mappedLayTerm: 'dor nas costas / coluna',
-      clinicalConcept: 'lombalgia mecânica / cervicalgia',
-      isEmergencyCandidate: false,
     },
     {
       pattern: /(joelho|articula[cç][aã]o|juntas|articulaciones|joint\s+pain|knee|pernas\s+pesadas|incha[cç]o\s+nos\s+tornozelos|calcanhar|panturrilha)/i,
       vertical: 'physical',
       systemOrDimension: 'membros_inferiores',
-      urgencyScore: 2,
-      mappedLayTerm: 'dor em membros inferiores / articulação',
-      clinicalConcept: 'artralgia / dor musculoesquelética de membro inferior',
-      isEmergencyCandidate: false,
+      mappedLayTerm: 'dor nas pernas / articulações',
     },
     {
       pattern: /\b(ombro|bra[cç]o|punho|tendinite|cotovelo)\b/i,
       vertical: 'physical',
       systemOrDimension: 'membros_superiores',
-      urgencyScore: 2,
-      mappedLayTerm: 'dor em membros superiores / ombro / braço',
-      clinicalConcept: 'tendinopatia / dor musculoesquelética de membro superior',
-      isEmergencyCandidate: false,
+      mappedLayTerm: 'dor no ombro / braço',
     },
     {
       pattern: /(est[oô]mago|azia|queima[cç][aã]o|barriga|abd[oô]men|gastrite|stomach\s+ache|acid\s+reflux)/i,
       vertical: 'physical',
       systemOrDimension: 'gastrointestinal',
-      urgencyScore: 2,
-      mappedLayTerm: 'desconforto gástrico / dor abdominal',
-      clinicalConcept: 'dispepsia funcional / refluxo gastresofágico',
-      isEmergencyCandidate: false,
+      mappedLayTerm: 'desconforto no estômago / barriga',
     },
     {
       pattern: /(tontura|vertigem|labirintite|perda\s+de\s+equil[ií]brio)/i,
       vertical: 'physical',
       systemOrDimension: 'neurological',
-      urgencyScore: 2,
       mappedLayTerm: 'tontura / vertigem',
-      clinicalConcept: 'vestibulopatia / disfunção vestibular periférica',
-      isEmergencyCandidate: false,
     },
     {
       pattern: /(dor\s+ao\s+urinar|ard[eê]ncia\s+ao\s+urinar|c[oó]lica\s+renal|dor\s+p[eé]lvica|baixo\s+ventre)/i,
       vertical: 'physical',
       systemOrDimension: 'geniturinario_pelvico',
-      urgencyScore: 2,
-      mappedLayTerm: 'desconforto urinário / pélvico',
-      clinicalConcept: 'disúria / queixa funcional pélvica',
-      isEmergencyCandidate: false,
+      mappedLayTerm: 'desconforto ao urinar / baixo ventre',
     },
     {
       pattern: /(coceira|manchas\s+na\s+pele|urtic[aá]ria|alergia\s+na\s+pele|prurido)/i,
       vertical: 'physical',
       systemOrDimension: 'dermatologico',
-      urgencyScore: 2,
-      mappedLayTerm: 'alergia / lesão de pele',
-      clinicalConcept: 'dermatite / reação alérgica cutânea',
-      isEmergencyCandidate: false,
+      mappedLayTerm: 'coceira / manchas na pele',
     },
     {
       pattern: /(dor\s+no\s+corpo\s+todo|moleza|febre|calafrio|dor\s+nos\s+m[uú]sculos|mialgia)/i,
       vertical: 'physical',
       systemOrDimension: 'muscular_geral_sistemico',
-      urgencyScore: 2,
       mappedLayTerm: 'dor muscular / indisposição geral',
-      clinicalConcept: 'mialgia difusa / queixa sistêmica',
-      isEmergencyCandidate: false,
     },
     {
       pattern: /(sede\s+excessiva|perda\s+de\s+peso\s+repentina|cansa[cç]o\s+extremo)/i,
       vertical: 'physical',
       systemOrDimension: 'endocrino_metabolico',
-      urgencyScore: 2,
-      mappedLayTerm: 'alteração metabólica / sede excessiva',
-      clinicalConcept: 'avaliação metabólica / desgaste energético',
-      isEmergencyCandidate: false,
+      mappedLayTerm: 'muita sede / cansaço extremo',
     },
     {
       pattern: /(ansiedade|ansioso|agitado|nervoso|preocupa[cç][aã]o|ansiedad|anxiety|nervous)/i,
       vertical: 'emotional',
       systemOrDimension: 'anxious_agitation',
-      urgencyScore: 2,
       mappedLayTerm: 'ansiedade / preocupação',
-      clinicalConcept: 'estado ansioso / hiperativação autonômica',
-      isEmergencyCandidate: false,
     },
     {
       pattern: /(tristeza|triste|des[aâ]nimo|deprimido|choro|sadness|low\s+mood)/i,
       vertical: 'emotional',
       systemOrDimension: 'depressive_hopelessness',
-      urgencyScore: 2,
       mappedLayTerm: 'tristeza / desânimo',
-      clinicalConcept: 'rebaixamento de humor / distimia leve',
-      isEmergencyCandidate: false,
     },
     {
       pattern: /(estresse|estressado|irritado|irritabilidade|paci[eê]ncia\s+curta|estr[eé]s|stress|burnout)/i,
       vertical: 'emotional',
       systemOrDimension: 'stress_burnout',
-      urgencyScore: 2,
       mappedLayTerm: 'estresse / irritabilidade',
-      clinicalConcept: 'sobrecarga alostática / esgotamento psicofisiológico',
-      isEmergencyCandidate: false,
     },
     {
       pattern: /(n[oó]\s+na\s+garganta|aperto\s+na\s+garganta|gastrite\s+nervosa)/i,
       vertical: 'emotional',
       systemOrDimension: 'somatica',
-      urgencyScore: 2,
-      mappedLayTerm: 'manifestação psicossomática',
-      clinicalConcept: 'somatização de estresse emocional',
-      isEmergencyCandidate: false,
+      mappedLayTerm: 'nó na garganta',
     },
     {
       pattern: /(ins[oô]nia|sono\s+ruim|acordo\s+de\s+madrugada|pesadelo|durmo\s+demais|pegar\s+no\s+sono|dificuldade\s+para\s+.*sono)/i,
       vertical: 'emotional',
       systemOrDimension: 'sono',
-      urgencyScore: 2,
-      mappedLayTerm: 'distúrbio do sono',
-      clinicalConcept: 'insônia / alteração do padrão de repouso',
-      isEmergencyCandidate: false,
+      mappedLayTerm: 'sono ruim',
     },
     {
       pattern: /(n[eé]voa\s+mental|brain\s+fog|sem\s+foco|mente\s+lerda|cansa[cç]o\s+mental|fadiga\s+mental|mente\s+pesada|mental\s+fatigue)/i,
       vertical: 'emotional',
       systemOrDimension: 'cognitiva_foco',
-      urgencyScore: 2,
       mappedLayTerm: 'cansaço mental / névoa mental',
-      clinicalConcept: 'fadiga cognitiva / sobrecarga atencional',
-      isEmergencyCandidate: false,
     },
     {
       pattern: /(culpa|incapaz|me\s+sinto\s+um\s+lixo|autocr[ií]tica)/i,
       vertical: 'emotional',
       systemOrDimension: 'autoestima',
-      urgencyScore: 2,
-      mappedLayTerm: 'autocrítica severa / sentimento de culpa',
-      clinicalConcept: 'autoimagem fragilizada / distorção de autoeficácia',
-      isEmergencyCandidate: false,
+      mappedLayTerm: 'autocrítica / sentimento de culpa',
     },
   ];
 
-  match(text: string): TriageClassificationResult | null {
+  mentionsSelfHarm(text: string): boolean {
+    return SELF_HARM_PATTERN.test(text);
+  }
+
+  match(text: string): EntryTagResult | null {
     const start = performance.now();
     const clean = text.trim();
 
     for (const entry of this.entries) {
       if (entry.pattern.test(clean)) {
         return {
-          primaryVertical: entry.vertical,
-          systemOrDimension: entry.systemOrDimension,
-          urgencyScore: entry.urgencyScore,
-          mappedLayTerm: entry.mappedLayTerm,
-          clinicalConcept: entry.clinicalConcept,
-          isEmergencyCandidate: entry.isEmergencyCandidate,
+          isOffTopic: false,
+          vertical: entry.vertical,
+          bodyAreaOrMood: entry.systemOrDimension,
+          layTerm: entry.mappedLayTerm,
+          mentionsSelfHarm: this.mentionsSelfHarm(clean),
           confidence: 0.95,
           source: 'dictionary_fallback',
           latencyMs: Math.round(performance.now() - start),

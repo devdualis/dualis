@@ -1,46 +1,49 @@
 class SymptomClassification {
-  final String primaryVertical;
-  final String systemOrDimension;
-  final int urgencyScore;
-  final String mappedLayTerm;
-  final String clinicalConcept;
-  final bool isEmergencyCandidate;
   final bool isOffTopic;
-  final double confidence;
-  final String source;
+  final String? vertical;
+  final String? bodyAreaOrMood;
+  final String? layTerm;
+  final bool mentionsSelfHarm;
 
   const SymptomClassification({
-    required this.primaryVertical,
-    required this.systemOrDimension,
-    required this.urgencyScore,
-    required this.mappedLayTerm,
-    required this.clinicalConcept,
-    required this.isEmergencyCandidate,
     this.isOffTopic = false,
-    required this.confidence,
-    required this.source,
+    this.vertical,
+    this.bodyAreaOrMood,
+    this.layTerm,
+    this.mentionsSelfHarm = false,
   });
 
   factory SymptomClassification.fromJson(Map<String, dynamic> json) {
+    if (json.containsKey('bodyAreaOrMood') || json.containsKey('layTerm')) {
+      return SymptomClassification(
+        isOffTopic: json['isOffTopic'] as bool? ?? false,
+        vertical: json['vertical'] as String?,
+        bodyAreaOrMood: json['bodyAreaOrMood'] as String?,
+        layTerm: json['layTerm'] as String?,
+        mentionsSelfHarm: json['mentionsSelfHarm'] as bool? ?? false,
+      );
+    }
+
     return SymptomClassification(
-      primaryVertical: json['primaryVertical'] as String? ?? 'physical',
-      systemOrDimension: json['systemOrDimension'] as String? ?? 'general_somatic',
-      urgencyScore: (json['urgencyScore'] as num?)?.toInt() ?? 2,
-      mappedLayTerm: json['mappedLayTerm'] as String? ?? '',
-      clinicalConcept: json['clinicalConcept'] as String? ?? '',
-      isEmergencyCandidate: json['isEmergencyCandidate'] as bool? ?? false,
       isOffTopic: json['isOffTopic'] as bool? ?? false,
-      confidence: (json['confidence'] as num?)?.toDouble() ?? 0.7,
-      source: json['source'] as String? ?? 'dictionary_fallback',
+      vertical: json['primaryVertical'] as String?,
+      bodyAreaOrMood: json['systemOrDimension'] as String?,
+      layTerm: json['mappedLayTerm'] as String?,
+      mentionsSelfHarm: json['isEmergencyCandidate'] as bool? ?? false,
     );
   }
 
-  /// The AI/idiom classification engine and the triage wizard's question bank grew
-  /// slightly different vocabularies for the same systems/dimensions over time.
-  /// This normalizes a classification's [systemOrDimension] to the wizard's
-  /// TriageOption key so it can be used to pre-select the step-0 category.
+  String get primaryVertical => vertical ?? 'physical';
+
+  String get systemOrDimension => bodyAreaOrMood ?? 'general_somatic';
+
+  String get mappedLayTerm => layTerm ?? '';
+
+  double get confidence => 0.7;
+
+  String get source => 'dictionary_fallback';
+
   static const Map<String, String> _wizardCategoryAliases = {
-    // Physical
     'cardiovascular_chest': 'cardiovascular_torax',
     'head_neck': 'cabeca_pescoco',
     'respiratory': 'respiratorio',
@@ -49,7 +52,6 @@ class SymptomClassification {
     'musculoskeletal_joints': 'membros_superiores',
     'gastrointestinal': 'gastrointestinal_abdomen',
     'general_somatic': 'muscular_geral_sistemico',
-    // Emotional
     'anxious_agitation': 'ansiosa_agitacao',
     'depressive_hopelessness': 'depressiva_desanimo',
     'stress_burnout': 'estresse_burnout',
@@ -57,5 +59,7 @@ class SymptomClassification {
   };
 
   String get wizardCategoryKey =>
-      _wizardCategoryAliases[systemOrDimension] ?? systemOrDimension;
+      _wizardCategoryAliases[bodyAreaOrMood ?? systemOrDimension] ??
+      bodyAreaOrMood ??
+      systemOrDimension;
 }

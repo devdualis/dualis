@@ -51,7 +51,7 @@ describe('Legal & Regulatory Disclaimer Endpoint (DISC-01) & Security Headers', 
     }
   });
 
-  it('GET /v1/legal/disclaimer (default) returns 200 with Brazilian Portuguese regulatory metadata', async () => {
+  it('GET /v1/legal/disclaimer (default) returns 200 with Brazilian Portuguese wellness intended-use statement', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/v1/legal/disclaimer',
@@ -63,7 +63,8 @@ describe('Legal & Regulatory Disclaimer Endpoint (DISC-01) & Security Headers', 
     expect(body).toHaveProperty('version');
     expect(body).toHaveProperty('language', 'pt-BR');
     expect(body).toHaveProperty('disclaimerText');
-    expect(body.disclaimerText).toContain('NÃO realiza diagnósticos médicos');
+    expect(body.disclaimerText).toContain('não é um dispositivo médico');
+    expect(body.disclaimerText).not.toMatch(/triagem|RDC|SaMD|CFM/);
     expect(body).toHaveProperty('shortDisclaimer');
     expect(body).toHaveProperty('citations');
     expect(body.citations.length).toBeGreaterThanOrEqual(2);
@@ -88,8 +89,8 @@ describe('Legal & Regulatory Disclaimer Endpoint (DISC-01) & Security Headers', 
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.payload);
     expect(body).toHaveProperty('language', 'es');
-    expect(body.disclaimerText).toContain('NO realiza diagnósticos médicos');
-    expect(body.shortDisclaimer).toContain('no reemplaza la evaluación médica profesional');
+    expect(body.disclaimerText).toContain('no es un dispositivo médico');
+    expect(body.shortDisclaimer).toContain('no reemplaza a un profesional de la salud');
   });
 
   it('GET /v1/legal/disclaimer?lang=en returns 200 with English localized disclaimer', async () => {
@@ -101,8 +102,8 @@ describe('Legal & Regulatory Disclaimer Endpoint (DISC-01) & Security Headers', 
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.payload);
     expect(body).toHaveProperty('language', 'en');
-    expect(body.disclaimerText).toContain('DOES NOT provide medical diagnoses');
-    expect(body.shortDisclaimer).toContain('does not replace professional medical evaluation');
+    expect(body.disclaimerText).toContain('is not a medical device');
+    expect(body.shortDisclaimer).toContain('does not replace a healthcare professional');
   });
 
   it('Response headers include strict HSTS, X-Frame-Options, and Content-Type-Options', async () => {

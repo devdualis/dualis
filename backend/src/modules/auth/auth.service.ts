@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, sql, desc } from 'drizzle-orm';
+import { eq, sql, desc, inArray } from 'drizzle-orm';
 import * as crypto from 'crypto';
 import { DRIZZLE_DB } from '../../database/database.service';
 import * as schema from '../../database/schema';
@@ -16,8 +16,11 @@ import {
   users,
   userDisclaimerConsents,
   symptomLogs,
-  triageEmergencyEvents,
+  safetyResourceEvents,
+  waterIntakeLogs,
+  profiles,
   emailVerifications,
+  passwordResets,
 } from '../../database/schema';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import { EmailService } from '../../common/email/email.service';
@@ -28,11 +31,14 @@ import { AuthResponseDto, SanitizedUser, RegisterResponseDto } from './dto/auth-
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
-import { UserDataExportResponseDto } from './dto/export-data.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ExportedSymptomLogDto, UserDataExportResponseDto } from './dto/export-data.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { StorageService } from '../../common/storage/storage.service';
 import { JwtPayload } from './strategies/jwt.strategy';
+import { LEGAL_DOCUMENTS_VERSION } from '../legal/legal.service';
 
 @Injectable()
 export class AuthService {
@@ -93,7 +99,7 @@ export class AuthService {
 
       await tx.insert(userDisclaimerConsents).values({
         userId: newUserId,
-        disclaimerVersion: dto.disclaimerVersion || '2026.1',
+        disclaimerVersion: dto.disclaimerVersion || LEGAL_DOCUMENTS_VERSION,
         ipAddressHash,
         userAgent: userAgent || 'Unknown',
       });
@@ -283,6 +289,126 @@ export class AuthService {
     return { success: true, message: 'Novo código de verificação enviado com sucesso.' };
   }
 
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ success: boolean; message: string }> {
+    const email = dto.email.toLowerCase().trim();
+    const genericMessage = 'Se o e-mail estiver cadastrado, um código de redefinição foi enviado.';
+
+    const user = await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      const [u] = await tx
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+      return u;
+    });
+
+    if (!user) {
+      return { success: true, message: genericMessage };
+    }
+
+    const latestReset = await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      const [rec] = await tx
+        .select()
+        .from(passwordResets)
+        .where(eq(passwordResets.userId, user.id))
+        .orderBy(desc(passwordResets.createdAt))
+        .limit(1);
+      return rec;
+    });
+
+    if (latestReset) {
+      const diffMs = Date.now() - latestReset.createdAt.getTime();
+      if (diffMs < 60 * 1000) {
+        const remainingSeconds = Math.ceil((60 * 1000 - diffMs) / 1000);
+        throw new BadRequestException(`Aguarde ${remainingSeconds} segundos antes de solicitar um novo código.`);
+      }
+    }
+
+    const code = this.emailService.generateVerificationCode();
+    const codeHash = this.emailService.hashCode(code);
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      await tx
+        .delete(passwordResets)
+        .where(eq(passwordResets.userId, user.id));
+
+      await tx.insert(passwordResets).values({
+        userId: user.id,
+        email,
+        codeHash,
+        attempts: 0,
+        expiresAt,
+      });
+    });
+
+    await this.emailService.sendPasswordResetEmail(email, code, user.name);
+
+    return { success: true, message: genericMessage };
+  }
+
+  async resetPassword(dto: ResetPasswordDto): Promise<{ success: boolean; message: string }> {
+    const email = dto.email.toLowerCase().trim();
+    const code = dto.code.trim();
+
+    const resetRecord = await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      const [record] = await tx
+        .select()
+        .from(passwordResets)
+        .where(eq(passwordResets.email, email))
+        .orderBy(desc(passwordResets.createdAt))
+        .limit(1);
+      return record;
+    });
+
+    if (!resetRecord) {
+      throw new BadRequestException('Nenhuma solicitação de redefinição de senha encontrada para este e-mail.');
+    }
+
+    if (resetRecord.expiresAt.getTime() < Date.now()) {
+      throw new BadRequestException('Código de redefinição expirado. Solicite um novo código.');
+    }
+
+    if (resetRecord.attempts >= 5) {
+      throw new BadRequestException('Limite de tentativas excedido. Solicite um novo código de redefinição.');
+    }
+
+    const isValid = this.emailService.verifyCodeHash(code, resetRecord.codeHash);
+    if (!isValid) {
+      await this.db.transaction(async (tx) => {
+        await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+        await tx
+          .update(passwordResets)
+          .set({ attempts: resetRecord.attempts + 1 })
+          .where(eq(passwordResets.id, resetRecord.id));
+      });
+      throw new BadRequestException('Código de redefinição incorreto.');
+    }
+
+    const newPasswordHash = await hashPassword(dto.newPassword);
+
+    await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      await tx
+        .update(users)
+        .set({
+          passwordHash: newPasswordHash,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, resetRecord.userId));
+
+      await tx
+        .delete(passwordResets)
+        .where(eq(passwordResets.userId, resetRecord.userId));
+    });
+
+    return { success: true, message: 'Senha redefinida com sucesso. Você já pode entrar com a nova senha.' };
+  }
+
   async login(dto: LoginDto): Promise<AuthResponseDto> {
     const email = dto.email.toLowerCase().trim();
 
@@ -350,22 +476,72 @@ export class AuthService {
         .from(userDisclaimerConsents)
         .where(eq(userDisclaimerConsents.userId, userId));
 
-      const symptomRecords = await tx
+      // Clinical data belongs to profiles. The export covers every profile this
+      // account owns: the primary profile (top level) and its dependents (grouped).
+      // Profiles shared with the caller by other accounts are not the caller's data.
+      const ownedProfiles = await tx
         .select()
-        .from(symptomLogs)
-        .where(eq(symptomLogs.userId, userId));
+        .from(profiles)
+        .where(eq(profiles.accountOwnerId, userId));
+      const ownedProfileIds = ownedProfiles.map((p) => p.id);
 
-      const emergencyRecords = await tx
-        .select()
-        .from(triageEmergencyEvents)
-        .where(eq(triageEmergencyEvents.userId, userId));
+      const symptomRecords = ownedProfileIds.length
+        ? await tx
+            .select()
+            .from(symptomLogs)
+            .where(inArray(symptomLogs.profileId, ownedProfileIds))
+        : [];
+
+      const safetyRecords = ownedProfileIds.length
+        ? await tx
+            .select()
+            .from(safetyResourceEvents)
+            .where(inArray(safetyResourceEvents.profileId, ownedProfileIds))
+        : [];
+
+      const waterRecords = ownedProfileIds.length
+        ? await tx
+            .select()
+            .from(waterIntakeLogs)
+            .where(inArray(waterIntakeLogs.profileId, ownedProfileIds))
+        : [];
+
+      const clinicalDataFor = (profileId: string | undefined) => ({
+        symptomLogs: symptomRecords
+          .filter((s) => s.profileId === profileId)
+          .map((s) => this.toExportedSymptomLog(s)),
+        safetyResourceEvents: safetyRecords
+          .filter((e) => e.profileId === profileId)
+          .map((e) => ({
+            id: e.id,
+            action: e.action,
+            channel: e.channel,
+            clientTimestamp: e.clientTimestamp.toISOString(),
+            createdAt: e.createdAt.toISOString(),
+          })),
+        waterIntakeLogs: waterRecords
+          .filter((w) => w.profileId === profileId)
+          .map((w) => ({
+            id: w.id,
+            amountMl: w.amountMl,
+            source: w.source,
+            recordedAt: w.recordedAt.toISOString(),
+          })),
+      });
+
+      const primaryProfile = ownedProfiles.find((p) => p.profileType === 'primary');
+      const dependentProfiles = ownedProfiles
+        .filter((p) => p.profileType !== 'primary')
+        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
       return {
         metadata: {
           exportDate: new Date().toISOString(),
-          formatVersion: '1.0',
+          formatVersion: '1.2',
           legalBasis: 'LGPD Art. 18, V (Portabilidade de Dados)',
           dataController: 'DualisCheckUp Saúde Digital Ltda.',
+          legacyFieldsNote:
+            'Os campos em "legacy" vêm de uma versão anterior do app e não são mais gravados. Estão incluídos apenas para que você tenha acesso ao seu histórico completo.',
         },
         profile: {
           id: userRecord.id,
@@ -384,44 +560,60 @@ export class AuthService {
           ipAddressHash: c.ipAddressHash,
           userAgent: c.userAgent,
         })),
-        symptomLogs: symptomRecords.map((s) => {
-          let decryptedNarrative: string | null = null;
-          if (s.encryptedNarrative) {
-            try {
-              decryptedNarrative = this.encryptionService.decrypt(s.encryptedNarrative);
-            } catch {
-              decryptedNarrative = null;
-            }
-          }
-          let parsedAnswers: any = null;
-          if (s.stepAnswers) {
-            try {
-              parsedAnswers = JSON.parse(s.stepAnswers);
-            } catch {
-              parsedAnswers = s.stepAnswers;
-            }
-          }
-          return {
-            id: s.id,
-            intensity: s.intensity,
-            anatomicalSystem: s.anatomicalSystem,
-            emotionalDimension: s.emotionalDimension,
-            disposition: s.disposition,
-            decryptedNarrative,
-            stepAnswers: parsedAnswers,
-            recordedAt: s.recordedAt.toISOString(),
-          };
-        }),
-        emergencyEvents: emergencyRecords.map((e) => ({
-          id: e.id,
-          triggerCategory: e.triggerCategory,
-          severityLevel: e.severityLevel,
-          sourceVertical: e.sourceVertical,
-          actionTaken: e.actionTaken,
-          reportedAt: e.reportedAt.toISOString(),
+        ...clinicalDataFor(primaryProfile?.id),
+        dependentProfiles: dependentProfiles.map((p) => ({
+          profile: {
+            id: p.id,
+            name: p.name,
+            profileType: p.profileType,
+            dateOfBirth: p.dateOfBirth ?? null,
+            gender: p.gender ?? null,
+            createdAt: p.createdAt.toISOString(),
+          },
+          ...clinicalDataFor(p.id),
         })),
       };
     });
+  }
+
+  private toExportedSymptomLog(s: typeof symptomLogs.$inferSelect): ExportedSymptomLogDto {
+    let decryptedNarrative: string | null = null;
+    if (s.encryptedNarrative) {
+      try {
+        decryptedNarrative = this.encryptionService.decrypt(s.encryptedNarrative);
+      } catch {
+        decryptedNarrative = null;
+      }
+    }
+    let parsedAnswers: any = null;
+    if (s.stepAnswers) {
+      let rawAnswers = s.stepAnswers;
+      if (rawAnswers.startsWith('v1:')) {
+        try {
+          rawAnswers = this.encryptionService.decrypt(rawAnswers);
+        } catch {
+          // keep the stored value if decryption fails
+        }
+      }
+      try {
+        parsedAnswers = JSON.parse(rawAnswers);
+      } catch {
+        parsedAnswers = rawAnswers;
+      }
+    }
+    return {
+      id: s.id,
+      intensity: s.intensity,
+      anatomicalSystem: s.anatomicalSystem,
+      emotionalDimension: s.emotionalDimension,
+      legacy: {
+        disposition: s.disposition,
+        organicPrimacyApplied: s.organicPrimacyApplied,
+      },
+      decryptedNarrative,
+      stepAnswers: parsedAnswers,
+      recordedAt: s.recordedAt.toISOString(),
+    };
   }
 
   async deleteUserAccount(

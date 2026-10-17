@@ -10,10 +10,122 @@
       "breakpoints": true
     },
     {
-      "idx": 1,
+      "when": 1790274900000,
+      "tag": "0001_enable_rls",
+      "breakpoints": true,
+      "version": "7",
+      "idx": 1
+    },
+    {
+      "idx": 2,
       "version": "7",
       "when": 1790275174088,
       "tag": "0001_gigantic_namor",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790275174076,
+      "tag": "0002_auth_lookup_policy",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790275174077,
+      "tag": "0003_triage_emergency_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790275174078,
+      "tag": "0004_symptom_logs_outcomes",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790275174079,
+      "tag": "0005_symptom_logs_temporal_index",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790275174080,
+      "tag": "0006_symptom_logs_client_session_id",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790275174081,
+      "tag": "0007_medical_articles_pgvector",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790275174082,
+      "tag": "0008_user_avatar",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790275174083,
+      "tag": "0009_email_verification",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1790275174084,
+      "tag": "0010_symptom_knowledge_pgvector",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1790275174085,
+      "tag": "0011_medical_articles_language",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790275174086,
+      "tag": "0012_water_intake_logs",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1790275174089,
+      "tag": "0013_multi_profile_guardianship_sharing",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1790275174090,
+      "tag": "0014_profile_scoped_clinical_data",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1790275174091,
+      "tag": "0015_wellness_repositioning",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1790275174092,
+      "tag": "0016_password_resets",
       "breakpoints": true
     }
   ]

@@ -1,17 +1,24 @@
-import 'emergency_context.dart';
-import 'emergency_trigger_category.dart';
+/// Which generic safety notice to show inline. Never names a condition and
+/// never carries a level: every trigger of the same kind shows the same text.
+enum SafetyNoticeKind {
+  /// "If this is an emergency, don't use the app: call {number} now."
+  general,
 
-/// Clinical red-flag evaluation engine based on Manchester Triage System (MTS)
-/// and Emergency Severity Index (ESI) Level 4–5 criteria.
+  /// Crisis resources (emotional support line + emergency number) for text
+  /// that mentions wanting to hurt oneself or die.
+  selfHarm,
+}
+
+/// Content-safety matcher for journal entries.
 ///
-/// Operates 100% deterministically and synchronously (<1ms) without network
-/// or LLM dependencies.
+/// It does not assess anything: it only decides whether to show a generic,
+/// non-blocking safety notice that is identical for every user. Runs offline
+/// and synchronously.
 class RedFlagEvaluator {
   const RedFlagEvaluator._();
 
-  /// Trilingual regex pattern detecting suicidal ideation and acute self-harm intent
-  /// in Brazilian Portuguese, Spanish, and English.
-  static final RegExp suicideRegex = RegExp(
+  /// Mentions of wanting to hurt oneself or die (pt-BR, es, en).
+  static final RegExp selfHarmPattern = RegExp(
     r'(quero|vou)\s+(me\s+)?(matar|morrer)|'
     r'(tirar|acabar\s+com)\s+(a\s+)?(minha\s+)?vida|'
     r'suic[ií]d|'
@@ -22,282 +29,68 @@ class RedFlagEvaluator {
     caseSensitive: false,
   );
 
-  /// Trilingual regex pattern detecting Cincinnati pre-hospital stroke signs
-  /// (facial droop, arm weakness, speech difficulty).
-  static final RegExp strokeRegex = RegExp(
-    r'boca\s+torta|rosto\s+torto|paralisia\s+facial|'
-    r'perda\s+de\s+for[çc]a\s+no\s+bra[çc]o|dorm[êe]ncia\s+no\s+bra[çc]o|'
-    r'fala\s+arrastada|n[ãa]o\s+consigo\s+falar|'
-    r'cara\s+torcida|dificultad\s+para\s+hablar|p[eé]rdida\s+de\s+fuerza|'
-    r'facial\s+droop|slurred\s+speech|arm\s+weakness|hemipares',
-    caseSensitive: false,
-  );
+  /// Expressions from the public "call the emergency number if…" warning
+  /// signs (pt-BR, es, en). A match only shows the generic notice.
+  static final List<RegExp> warningSignPatterns = [
+    RegExp(
+      r'(dor|aperto|press[ãa]o)\s+(forte\s+)?no\s+peito|peito\s+queimando|'
+      r'dolor\s+en\s+el\s+pecho|chest\s+pain|infarto|heart\s+attack|ataque\s+card[ií]aco',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'boca\s+torta|rosto\s+torto|paralisia\s+facial|'
+      r'perda\s+de\s+for[çc]a\s+no\s+bra[çc]o|dorm[êe]ncia\s+no\s+bra[çc]o|'
+      r'fala\s+(arrastada|enrolada)|n[ãa]o\s+consigo\s+falar|'
+      r'cara\s+torcida|dificultad\s+para\s+hablar|p[eé]rdida\s+de\s+fuerza|'
+      r'facial\s+droop|slurred\s+speech|arm\s+weakness',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'n[ãa]o\s+consigo\s+respirar|falta\s+de\s+ar\s+(sufocante|intensa)|garganta\s+fechando|'
+      r'no\s+puedo\s+respirar|garganta\s+cerrada|asfixia|'
+      r"can('|no|\s+no)t\s+breathe|throat\s+closing|suffocating",
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'pior\s+dor\s+de\s+cabe[çc]a\s+da\s+(minha\s+)?vida|'
+      r'peor\s+dolor\s+de\s+cabeza\s+de\s+mi\s+vida|'
+      r'worst\s+headache\s+of\s+my\s+life',
+      caseSensitive: false,
+    ),
+  ];
 
-  /// Trilingual regex pattern detecting crushing, acute, or radiating cardiac chest pain.
-  static final RegExp chestPainRegex = RegExp(
-    r'(dor|aperto|press[ãa]o)\s+no\s+peito(\s+(irradiando|forte|insuport[aá]vel))?|'
-    r'peito\s+queimando.*(bra[çc]o|mand[ií]bula)?|'
-    r'dolor\s+en\s+el\s+pecho(\s+irradiando)?|'
-    r'crushing\s+chest\s+pain|chest\s+pain|infarto|heart\s+attack|ataque\s+card[ií]aco',
-    caseSensitive: false,
-  );
+  /// Body areas where a self-reported 4/5 also shows the generic notice
+  /// (chest, breathing, head).
+  static const Set<String> _areasNoticedAtFour = {
+    'cardiovascular_torax',
+    'respiratorio',
+    'cabeca',
+    'cabeca_pescoco',
+    'neurologico',
+  };
 
-  /// Trilingual regex pattern detecting acute upper airway obstruction, anaphylaxis,
-  /// or severe dyspneic suffocation.
-  static final RegExp airwayRegex = RegExp(
-    r'n[ãa]o\s+consigo\s+respirar|falta\s+de\s+ar\s+sufocante|garganta\s+fechando|'
-    r'no\s+puedo\s+respirar|garganta\s+cerrada|asfixia|'
-    r'can(\x27|not|\s+not)\s+breathe|throat\s+closing|suffocating|stridor',
-    caseSensitive: false,
-  );
-
-  /// Trilingual regex pattern detecting sudden-onset maximum intensity ("thunderclap")
-  /// headache suggestive of subarachnoid hemorrhage.
-  static final RegExp thunderclapRegex = RegExp(
-    r'pior\s+dor\s+de\s+cabe[çc]a\s+da\s+(minha\s+)?vida|'
-    r'dor\s+s[uú]bita\s+explosiva\s+na\s+cabe[çc]a|'
-    r'peor\s+dolor\s+de\s+cabeza\s+de\s+mi\s+vida|'
-    r'worst\s+headache\s+of\s+my\s+life|thunderclap\s+headache',
-    caseSensitive: false,
-  );
-
-  /// Scans raw lay text inputs across pt-BR, es, and en for acute red-flag conditions.
-  ///
-  /// Returns an [EmergencyContext] immediately if a high-lethality pattern is detected,
-  /// or `null` if no emergency regex matched.
-  static EmergencyContext? evaluateText(String text) {
-    final cleanText = text.trim();
-    if (cleanText.isEmpty) return null;
-
-    final suicideMatch = suicideRegex.firstMatch(cleanText);
-    if (suicideMatch != null) {
-      return EmergencyContext(
-        category: EmergencyTriggerCategory.suicidalCrisis,
-        severityLevel: 5,
-        isEmotional: true,
-        detectedAt: DateTime.now(),
-        rawTriggerPhrase: suicideMatch.group(0),
-      );
+  /// Free text: self-harm mentions show crisis resources; warning-sign
+  /// expressions show the generic notice; anything else shows nothing.
+  static SafetyNoticeKind? evaluateText(String text) {
+    final clean = text.trim();
+    if (clean.isEmpty) return null;
+    if (selfHarmPattern.hasMatch(clean)) return SafetyNoticeKind.selfHarm;
+    if (warningSignPatterns.any((p) => p.hasMatch(clean))) {
+      return SafetyNoticeKind.general;
     }
-
-    final chestMatch = chestPainRegex.firstMatch(cleanText);
-    if (chestMatch != null) {
-      return EmergencyContext(
-        category: EmergencyTriggerCategory.chestPain,
-        severityLevel: 5,
-        isEmotional: false,
-        detectedAt: DateTime.now(),
-        rawTriggerPhrase: chestMatch.group(0),
-      );
-    }
-
-    final strokeMatch = strokeRegex.firstMatch(cleanText);
-    if (strokeMatch != null) {
-      return EmergencyContext(
-        category: EmergencyTriggerCategory.neurologicalStroke,
-        severityLevel: 5,
-        isEmotional: false,
-        detectedAt: DateTime.now(),
-        rawTriggerPhrase: strokeMatch.group(0),
-      );
-    }
-
-    final airwayMatch = airwayRegex.firstMatch(cleanText);
-    if (airwayMatch != null) {
-      return EmergencyContext(
-        category: EmergencyTriggerCategory.anaphylaxisAirway,
-        severityLevel: 5,
-        isEmotional: false,
-        detectedAt: DateTime.now(),
-        rawTriggerPhrase: airwayMatch.group(0),
-      );
-    }
-
-    final thunderclapMatch = thunderclapRegex.firstMatch(cleanText);
-    if (thunderclapMatch != null) {
-      return EmergencyContext(
-        category: EmergencyTriggerCategory.thunderclapHeadache,
-        severityLevel: 5,
-        isEmotional: false,
-        detectedAt: DateTime.now(),
-        rawTriggerPhrase: thunderclapMatch.group(0),
-      );
-    }
-
     return null;
   }
 
-  /// Evaluates structured triage selections against Manchester/ESI Level 4–5 criteria.
-  ///
-  /// Intercepts:
-  /// - Intensity == 5: On any organ or emotional dimension (Level 5 / MTS Red / ESI 1).
-  /// - Intensity == 4: On vital anatomical systems (`cardiovascular_chest`, `respiratory`,
-  ///   `neurological`, `head_neck`) or acute emotional crisis dimensions (`depressive_hopelessness`,
-  ///   `anxious_agitation`, `stress_burnout`).
-  ///
-  /// Returns `null` for non-emergency presentations (intensity < 4 or non-critical organs at Level 4).
-  static EmergencyContext? evaluateStructured({
-    required String systemOrDimension,
+  /// Self-reported intensity: 5 anywhere, or 4 on chest / breathing / head
+  /// ([bodyAreaKey] is the step-0 answer key), shows the generic notice.
+  static SafetyNoticeKind? evaluateIntensity({
     required int intensity,
-    required bool isEmotional,
-    String? selectedSymptom,
+    String? bodyAreaKey,
   }) {
-    if (intensity < 4) {
-      return null;
+    if (intensity >= 5) return SafetyNoticeKind.general;
+    if (intensity == 4 && _areasNoticedAtFour.contains(bodyAreaKey)) {
+      return SafetyNoticeKind.general;
     }
-
-    final phrase = selectedSymptom ?? '$systemOrDimension (intensity $intensity)';
-    final now = DateTime.now();
-
-    if (intensity == 5) {
-      if (isEmotional) {
-        switch (systemOrDimension) {
-          case 'depressive_hopelessness':
-            return EmergencyContext(
-              category: EmergencyTriggerCategory.suicidalCrisis,
-              severityLevel: 5,
-              isEmotional: true,
-              detectedAt: now,
-              rawTriggerPhrase: phrase,
-            );
-          case 'anxious_agitation':
-            return EmergencyContext(
-              category: EmergencyTriggerCategory.anxiousPanicCollapse,
-              severityLevel: 5,
-              isEmotional: true,
-              detectedAt: now,
-              rawTriggerPhrase: phrase,
-            );
-          case 'stress_burnout':
-            return EmergencyContext(
-              category: EmergencyTriggerCategory.severePsychosisDelirium,
-              severityLevel: 5,
-              isEmotional: true,
-              detectedAt: now,
-              rawTriggerPhrase: phrase,
-            );
-          default:
-            return EmergencyContext(
-              category: EmergencyTriggerCategory.generalCriticalIntensity,
-              severityLevel: 5,
-              isEmotional: true,
-              detectedAt: now,
-              rawTriggerPhrase: phrase,
-            );
-        }
-      } else {
-        switch (systemOrDimension) {
-          case 'cardiovascular_chest':
-            return EmergencyContext(
-              category: EmergencyTriggerCategory.chestPain,
-              severityLevel: 5,
-              isEmotional: false,
-              detectedAt: now,
-              rawTriggerPhrase: phrase,
-            );
-          case 'respiratory':
-            return EmergencyContext(
-              category: EmergencyTriggerCategory.respiratoryDistress,
-              severityLevel: 5,
-              isEmotional: false,
-              detectedAt: now,
-              rawTriggerPhrase: phrase,
-            );
-          case 'neurological':
-            return EmergencyContext(
-              category: EmergencyTriggerCategory.neurologicalStroke,
-              severityLevel: 5,
-              isEmotional: false,
-              detectedAt: now,
-              rawTriggerPhrase: phrase,
-            );
-          case 'head_neck':
-            return EmergencyContext(
-              category: EmergencyTriggerCategory.anaphylaxisAirway,
-              severityLevel: 5,
-              isEmotional: false,
-              detectedAt: now,
-              rawTriggerPhrase: phrase,
-            );
-          default:
-            return EmergencyContext(
-              category: EmergencyTriggerCategory.generalCriticalIntensity,
-              severityLevel: 5,
-              isEmotional: false,
-              detectedAt: now,
-              rawTriggerPhrase: phrase,
-            );
-        }
-      }
-    }
-
-    // intensity == 4
-    if (isEmotional) {
-      switch (systemOrDimension) {
-        case 'depressive_hopelessness':
-          return EmergencyContext(
-            category: EmergencyTriggerCategory.suicidalCrisis,
-            severityLevel: 4,
-            isEmotional: true,
-            detectedAt: now,
-            rawTriggerPhrase: phrase,
-          );
-        case 'anxious_agitation':
-          return EmergencyContext(
-            category: EmergencyTriggerCategory.anxiousPanicCollapse,
-            severityLevel: 4,
-            isEmotional: true,
-            detectedAt: now,
-            rawTriggerPhrase: phrase,
-          );
-        case 'stress_burnout':
-          return EmergencyContext(
-            category: EmergencyTriggerCategory.severePsychosisDelirium,
-            severityLevel: 4,
-            isEmotional: true,
-            detectedAt: now,
-            rawTriggerPhrase: phrase,
-          );
-        default:
-          return null;
-      }
-    } else {
-      switch (systemOrDimension) {
-        case 'cardiovascular_chest':
-          return EmergencyContext(
-            category: EmergencyTriggerCategory.chestPain,
-            severityLevel: 4,
-            isEmotional: false,
-            detectedAt: now,
-            rawTriggerPhrase: phrase,
-          );
-        case 'respiratory':
-          return EmergencyContext(
-            category: EmergencyTriggerCategory.respiratoryDistress,
-            severityLevel: 4,
-            isEmotional: false,
-            detectedAt: now,
-            rawTriggerPhrase: phrase,
-          );
-        case 'neurological':
-          return EmergencyContext(
-            category: EmergencyTriggerCategory.neurologicalStroke,
-            severityLevel: 4,
-            isEmotional: false,
-            detectedAt: now,
-            rawTriggerPhrase: phrase,
-          );
-        case 'head_neck':
-          return EmergencyContext(
-            category: EmergencyTriggerCategory.anaphylaxisAirway,
-            severityLevel: 4,
-            isEmotional: false,
-            detectedAt: now,
-            rawTriggerPhrase: phrase,
-          );
-        default:
-          return null;
-      }
-    }
+    return null;
   }
 }

@@ -130,7 +130,7 @@ class _EmptyHistoryDataSource extends TriageHistoryRemoteDataSource {
         logs: [],
         physicalSummary: {},
         emotionalSummary: [],
-        criticalRecurrences: [],
+        journalPatterns: [],
       );
 }
 
@@ -575,9 +575,9 @@ void main() {
       final es = await firstCheckin(const Locale('es'));
       final en = await firstCheckin(const Locale('en'));
 
-      expect(pt[#title], '🩺 Check-in Diário Dualis (08:00)');
-      expect(es[#title], '🩺 Check-in diario Dualis (08:00)');
-      expect(en[#title], '🩺 Dualis Daily Check-in (08:00)');
+      expect(pt[#title], '🌿 Check-in Diário Dualis (08:00)');
+      expect(es[#title], '🌿 Check-in diario Dualis (08:00)');
+      expect(en[#title], '🌿 Dualis Daily Check-in (08:00)');
       expect(es[#body], lookupAppLocalizations(const Locale('es')).notifCheckinBody);
       expect(en[#body], isNot(pt[#body]));
       final channel = (en[#notificationDetails] as NotificationDetails).android!;

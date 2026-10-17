@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class IntensityMeter extends StatelessWidget {
   final int score;
@@ -26,25 +27,9 @@ class IntensityMeter extends StatelessWidget {
     }
   }
 
-  String _getLabelForScore(int score) {
-    switch (score) {
-      case 1:
-        return 'Leve / Mínimo';
-      case 2:
-        return 'Moderado Baixo';
-      case 3:
-        return 'Moderado / Atenção';
-      case 4:
-        return 'Significativo / Agudo';
-      case 5:
-        return 'Crítico / Alerta';
-      default:
-        return 'Nível $score';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final activeColor = _getColorForLevel(score);
 
     return Container(
@@ -69,7 +54,7 @@ class IntensityMeter extends StatelessWidget {
             children: [
               Flexible(
                 child: Text(
-                  'Nível de Intensidade',
+                  l10n.outcomeIntensityTitle,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -84,33 +69,24 @@ class IntensityMeter extends StatelessWidget {
                   color: activeColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '$score / 5',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: activeColor,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        _getLabelForScore(score),
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: activeColor,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  '$score / 5',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: activeColor,
+                  ),
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.outcomeIntensityDescription,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              color: Colors.black54,
+            ),
           ),
           const SizedBox(height: 14),
           Row(

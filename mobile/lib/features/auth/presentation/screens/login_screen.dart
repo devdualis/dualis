@@ -45,13 +45,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } else if (mounted) {
       final rawError = ref.read(authControllerProvider).errorMessage;
       if (rawError != null) {
-        final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
-        final errorText = l10n != null
-            ? ErrorMessageResolver.resolve(rawError, l10n)
-            : ((rawError.toLowerCase().contains('unauthorized') ||
-                    rawError.toLowerCase().contains('401'))
-                ? 'Credenciais inválidas. Verifique seu e-mail e senha.'
-                : rawError);
+        final errorText =
+            ErrorMessageResolver.resolve(rawError, AppLocalizations.of(context));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorText),
@@ -66,6 +61,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -98,7 +94,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ),
                 Text(
-                  'Entrar no DualisCheckUp',
+                  l10n.loginTitle,
                   style: GoogleFonts.inter(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
@@ -107,7 +103,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Acesse seu prontuário e histórico de triagens preventivas com segurança.',
+                  l10n.loginSubtitle,
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     color: AppColors.textSecondaryLight,
@@ -117,8 +113,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 32),
                 DualisTextField(
                   key: const Key('loginEmailField'),
-                  labelText: 'E-mail',
-                  hintText: 'seu.email@exemplo.com',
+                  labelText: l10n.email,
+                  hintText: l10n.authEmailHint,
                   controller: _emailController,
                   validator: FormValidators.validateEmail,
                   keyboardType: TextInputType.emailAddress,
@@ -128,9 +124,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 16),
                 DualisTextField(
                   key: const Key('loginPasswordField'),
-                  labelText: 'Senha',
+                  labelText: l10n.password,
                   controller: _passwordController,
-                  validator: (v) => (v == null || v.isEmpty) ? 'Senha é obrigatória.' : null,
+                  validator: (v) => (v == null || v.isEmpty) ? l10n.loginPasswordRequired : null,
                   obscureText: _obscurePassword,
                   textInputAction: TextInputAction.done,
                   prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondaryLight),
@@ -145,7 +141,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 28),
                 DualisPrimaryButton(
                   key: const Key('loginSubmitButton'),
-                  text: 'Entrar',
+                  text: l10n.screen1SecondaryCta,
                   isLoading: authState.isLoading,
                   onPressed: authState.isLoading ? null : _handleLogin,
                 ),
@@ -156,14 +152,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     onPressed: () => context.go(RoutePaths.register),
                     child: Text.rich(
                       TextSpan(
-                        text: 'Ainda não possui conta? ',
+                        text: l10n.loginNoAccountPrompt,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14,
                           color: AppColors.textSecondaryLight,
                         ),
                         children: [
                           TextSpan(
-                            text: 'Criar Conta',
+                            text: l10n.screen1PrimaryCta,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,

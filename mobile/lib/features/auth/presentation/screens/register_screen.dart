@@ -82,9 +82,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       initialDate: initial,
       firstDate: DateTime(now.year - 120),
       lastDate: now,
-      helpText: 'Selecione a data de nascimento',
-      cancelText: 'Cancelar',
-      confirmText: 'Confirmar',
+      helpText: AppLocalizations.of(context).registerDobPickerHelp,
+      cancelText: AppLocalizations.of(context).cancel,
+      confirmText: AppLocalizations.of(context).registerDobPickerConfirm,
     );
 
     if (picked != null) {
@@ -151,9 +151,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     } else if (mounted) {
       final error = ref.read(authControllerProvider).errorMessage;
       if (error != null) {
-        final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
-        final resolvedError = l10n != null ? ErrorMessageResolver.resolve(error, l10n) : error;
-        final isConflict = resolvedError == l10n?.errorEmailAlreadyExists ||
+        final l10n = AppLocalizations.of(context);
+        final resolvedError = ErrorMessageResolver.resolve(error, l10n);
+        final isConflict = resolvedError == l10n.errorEmailAlreadyExists ||
             error.toLowerCase().contains('já cadastrado') ||
             error.toLowerCase().contains('already') ||
             error.toLowerCase().contains('registrado');
@@ -164,7 +164,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             duration: Duration(seconds: isConflict ? 6 : 4),
             action: isConflict
                 ? SnackBarAction(
-                    label: 'Entrar',
+                    label: l10n.screen1SecondaryCta,
                     textColor: Colors.white,
                     onPressed: () {
                       if (mounted) context.go(RoutePaths.login);
@@ -180,6 +180,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -212,7 +213,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                 ),
                 Text(
-                  'Criar sua conta',
+                  l10n.registerTitle,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -221,7 +222,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Informe seus dados clínicos e cadastrais para personalizar sua triagem preventiva.',
+                  l10n.registerSubtitle,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 14,
                     color: AppColors.textSecondaryLight,
@@ -233,8 +234,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 // 1. Nome Completo
                 DualisTextField(
                   key: const Key('fullNameField'),
-                  labelText: 'Nome Completo',
-                  hintText: 'Ex: Carlos Silva',
+                  labelText: l10n.fullName,
+                  hintText: l10n.registerNameHint,
                   controller: _nameController,
                   validator: FormValidators.validateName,
                   keyboardType: TextInputType.name,
@@ -246,9 +247,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 // 2. Data de Nascimento
                 DualisTextField(
                   key: const Key('birthDateField'),
-                  labelText: 'Data de Nascimento',
-                  hintText: 'DD/MM/AAAA',
-                  helperText: 'Ex: 15/08/1990 ou selecione pelo calendário.',
+                  labelText: l10n.birthDate,
+                  hintText: l10n.registerDobHint,
+                  helperText: l10n.registerDobHelper,
                   controller: _dobController,
                   validator: FormValidators.validateDateOfBirth,
                   keyboardType: TextInputType.number,
@@ -279,8 +280,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 // 4. E-mail
                 DualisTextField(
                   key: const Key('emailField'),
-                  labelText: 'E-mail',
-                  hintText: 'seu.email@exemplo.com',
+                  labelText: l10n.email,
+                  hintText: l10n.authEmailHint,
                   controller: _emailController,
                   validator: FormValidators.validateEmail,
                   keyboardType: TextInputType.emailAddress,
@@ -292,9 +293,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 // 5. Senha
                 DualisTextField(
                   key: const Key('passwordField'),
-                  labelText: 'Senha',
-                  hintText: 'Mínimo 8 caracteres',
-                  helperText: 'Use 8+ caracteres com maiúscula, número e símbolo.',
+                  labelText: l10n.password,
+                  hintText: l10n.registerPasswordHint,
+                  helperText: l10n.registerPasswordHelper,
                   controller: _passwordController,
                   validator: FormValidators.validatePassword,
                   obscureText: _obscurePassword,
@@ -348,7 +349,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Lembretes e Controle de Hidratação',
+                                    l10n.registerHydrationTitle,
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 15,
                                       fontWeight: FontWeight.bold,
@@ -356,7 +357,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                     ),
                                   ),
                                   Text(
-                                    'Configure seus hábitos preventivos',
+                                    l10n.registerHydrationSubtitle,
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 12,
                                       color: AppColors.textSecondaryLight,
@@ -372,7 +373,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           key: const Key('register_water_reminder_switch'),
                           contentPadding: EdgeInsets.zero,
                           title: Text(
-                            'Alerta para tomar água a cada 2h',
+                            l10n.registerWaterReminderTitle,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -380,7 +381,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             ),
                           ),
                           subtitle: Text(
-                            'Horários pares: 8h, 10h, 12h, 14h, 16h, 18h e 20h',
+                            l10n.registerWaterReminderSubtitle,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
                               color: AppColors.textSecondaryLight,
@@ -397,7 +398,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         if (_waterReminderEnabled) ...[
                           const Divider(height: 16),
                           Text(
-                            'Tipo de lembrete / som:',
+                            l10n.registerReminderStyleLabel,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -410,7 +411,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               Expanded(
                                 child: ChoiceChip(
                                   key: const Key('register_reminder_style_chime'),
-                                  label: const Text('Aviso (Mensagem)'),
+                                  label: Text(l10n.registerReminderStyleChime),
                                   selected: _reminderSoundStyle == ReminderSoundStyle.whatsappChime,
                                   selectedColor: AppColors.clinicalTealDark,
                                   labelStyle: GoogleFonts.plusJakartaSans(
@@ -432,7 +433,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               Expanded(
                                 child: ChoiceChip(
                                   key: const Key('register_reminder_style_alarm'),
-                                  label: const Text('Alarme Telefônico'),
+                                  label: Text(l10n.registerReminderStyleAlarm),
                                   selected: _reminderSoundStyle == ReminderSoundStyle.phoneAlarm,
                                   selectedColor: AppColors.clinicalTealDark,
                                   labelStyle: GoogleFonts.plusJakartaSans(
@@ -457,7 +458,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             key: const Key('register_water_tracking_switch'),
                             contentPadding: EdgeInsets.zero,
                             title: Text(
-                              'Controle de quantidade consumida',
+                              l10n.registerWaterTrackingTitle,
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -466,8 +467,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             ),
                             subtitle: Text(
                               _waterTrackingEnabled
-                                  ? 'Ao tocar no alarme, o app abre para registrar a quantidade de água'
-                                  : 'Apenas soa o lembrete no horário, sem abrir preenchimento',
+                                  ? l10n.registerWaterTrackingOnDesc
+                                  : l10n.registerWaterTrackingOffDesc,
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 12,
                                 color: AppColors.textSecondaryLight,
@@ -502,7 +503,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 // 7. Primary CTA: Finalizar Cadastro (Strictly gated)
                 DualisPrimaryButton(
                   key: const Key('submitRegisterButton'),
-                  text: 'Finalizar Cadastro',
+                  text: l10n.screen2PrimaryCta,
                   isLoading: authState.isLoading,
                   onPressed: _isFormValid && !authState.isLoading ? _handleRegister : null,
                 ),
@@ -515,14 +516,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     onPressed: () => context.go(RoutePaths.login),
                     child: Text.rich(
                       TextSpan(
-                        text: 'Já possui uma conta? ',
+                        text: l10n.registerHaveAccountPrompt,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14,
                           color: AppColors.textSecondaryLight,
                         ),
                         children: [
                           TextSpan(
-                            text: 'Entrar',
+                            text: l10n.screen1SecondaryCta,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,

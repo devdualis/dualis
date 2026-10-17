@@ -65,6 +65,7 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
       hashCode: vi.fn().mockReturnValue('mock-hash-123456'),
       verifyCodeHash: vi.fn().mockImplementation((code: string, hash: string) => code === '123456'),
       sendVerificationEmail: vi.fn().mockResolvedValue(undefined),
+      sendPasswordResetEmail: vi.fn().mockResolvedValue(undefined),
       getLastSentCode: vi.fn().mockReturnValue('123456'),
     };
 
@@ -546,6 +547,160 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
       await expect(
         authService.verifyEmail({ email, code: '999999' }),
       ).rejects.toThrow('Código de verificação incorreto.');
+
+      expect(mockSet).toHaveBeenCalledWith({ attempts: 1 });
+    });
+  });
+
+  describe('Scenario 9b: Forgot Password Flow', () => {
+    it('returns generic success and sends reset email when user exists', async () => {
+      const email = 'patient@example.com';
+      const user = {
+        id: 'user-uuid-123',
+        name: 'Patient Test',
+        email,
+      };
+
+      mockTxSelect
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([user]),
+            }),
+          }),
+        })
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              orderBy: vi.fn().mockReturnValue({
+                limit: vi.fn().mockResolvedValue([]),
+              }),
+            }),
+          }),
+        });
+
+      mockTxDelete.mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) });
+      mockTxInsert.mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) });
+
+      const result = await authService.forgotPassword({ email });
+
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('Se o e-mail estiver cadastrado');
+    });
+
+    it('returns generic success without sending email when user does not exist', async () => {
+      mockTxSelect.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([]),
+          }),
+        }),
+      });
+
+      const result = await authService.forgotPassword({ email: 'ghost@example.com' });
+
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('Se o e-mail estiver cadastrado');
+    });
+  });
+
+  describe('Scenario 9c: Reset Password Flow', () => {
+    it('resets password with a valid code', async () => {
+      const email = 'patient@example.com';
+      const userId = 'user-uuid-123';
+      const resetRecord = {
+        id: 'reset-uuid-1',
+        userId,
+        email,
+        codeHash: 'mock-hash-123456',
+        attempts: 0,
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+        createdAt: new Date(),
+      };
+
+      mockTxSelect.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([resetRecord]),
+            }),
+          }),
+        }),
+      });
+
+      mockTxUpdate.mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue(undefined),
+        }),
+      });
+      mockTxDelete.mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) });
+
+      const result = await authService.resetPassword({
+        email,
+        code: '123456',
+        newPassword: 'NewSecurePass123!',
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects reset when code is expired', async () => {
+      const email = 'patient@example.com';
+      const resetRecord = {
+        id: 'reset-uuid-1',
+        userId: 'user-uuid-123',
+        email,
+        codeHash: 'mock-hash-123456',
+        attempts: 0,
+        expiresAt: new Date(Date.now() - 1000),
+        createdAt: new Date(),
+      };
+
+      mockTxSelect.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([resetRecord]),
+            }),
+          }),
+        }),
+      });
+
+      await expect(
+        authService.resetPassword({ email, code: '123456', newPassword: 'NewSecurePass123!' }),
+      ).rejects.toThrow('Código de redefinição expirado. Solicite um novo código.');
+    });
+
+    it('rejects reset when code is incorrect and increments attempts', async () => {
+      const email = 'patient@example.com';
+      const resetRecord = {
+        id: 'reset-uuid-1',
+        userId: 'user-uuid-123',
+        email,
+        codeHash: 'mock-hash-123456',
+        attempts: 0,
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+        createdAt: new Date(),
+      };
+
+      mockTxSelect.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            orderBy: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([resetRecord]),
+            }),
+          }),
+        }),
+      });
+
+      const mockSet = vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue(undefined),
+      });
+      mockTxUpdate.mockReturnValue({ set: mockSet });
+
+      await expect(
+        authService.resetPassword({ email, code: '999999', newPassword: 'NewSecurePass123!' }),
+      ).rejects.toThrow('Código de redefinição incorreto.');
 
       expect(mockSet).toHaveBeenCalledWith({ attempts: 1 });
     });

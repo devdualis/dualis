@@ -3,12 +3,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/triage_outcome_models.dart';
 import '../widgets/intensity_meter.dart';
-import '../widgets/disposition_card.dart';
-import '../widgets/organic_primacy_banner.dart';
 import '../widgets/article_card.dart';
 import '../widgets/ai_insight_card.dart';
+import '../widgets/wellness_guidance_block.dart';
+import '../widgets/dual_axis_static_note.dart';
 
 class TriageOutcomeScreen extends StatelessWidget {
   final TriageOutcome outcome;
@@ -20,6 +21,7 @@ class TriageOutcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isPhysical = outcome.vertical == 'physical';
     final verticalColor = isPhysical ? AppColors.clinicalTeal : AppColors.softIndigo;
 
@@ -30,7 +32,7 @@ class TriageOutcomeScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Resultado da Triagem',
+          l10n.outcomeScreenTitle,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -48,6 +50,14 @@ class TriageOutcomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                l10n.outcomeScreenSubtitle,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  color: Colors.black54,
+                ),
+              ),
+              const SizedBox(height: 12),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -148,25 +158,17 @@ class TriageOutcomeScreen extends StatelessWidget {
                 ].reduce((a, b) => a > b ? a : b),
               ),
               const SizedBox(height: 16),
-              if (outcome.organicPrimacyApplied) ...[
-                OrganicPrimacyBanner(notice: outcome.organicPrimacyNotice),
+              if (outcome.loggedBothAxesToday) ...[
+                const DualAxisStaticNote(),
                 const SizedBox(height: 16),
               ],
-              if (outcome.aiClinicalConcept != null &&
-                  outcome.aiClinicalConcept!.isNotEmpty) ...[
-                AiInsightCard(
-                  mappedLayTerm: outcome.aiMappedLayTerm,
-                  clinicalConcept: outcome.aiClinicalConcept!,
-                  source: outcome.aiSource,
-                  isCrossVerticalSomatic: outcome.isCrossVerticalSomatic,
-                  contextNote: outcome.crossVerticalContextNote,
-                ),
-                const SizedBox(height: 16),
-              ],
-              DispositionCard(
-                disposition: outcome.careDisposition,
-                category: outcome.primaryCategory,
+              AiInsightCard(
+                mappedLayTerm: outcome.aiMappedLayTerm,
+                bodyAreaOrMood: outcome.aiBodyAreaOrMood,
               ),
+              if (outcome.aiMappedLayTerm != null || outcome.aiBodyAreaOrMood != null)
+                const SizedBox(height: 16),
+              const WellnessGuidanceBlock(),
               const SizedBox(height: 24),
               Row(
                 children: [
@@ -176,19 +178,21 @@ class TriageOutcomeScreen extends StatelessWidget {
                     size: 20,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    'Artigos Médicos Recomendados',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black87,
+                  Expanded(
+                    child: Text(
+                      l10n.outcomeWellnessReadingsTitle,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 4),
               Text(
-                'Conteúdos preventivos elaborados por especialistas renomados',
+                l10n.outcomeWellnessReadingsDisclaimer,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12.5,
                   color: Colors.black54,
@@ -197,7 +201,7 @@ class TriageOutcomeScreen extends StatelessWidget {
               const SizedBox(height: 12),
               if (outcome.recommendedArticles.isEmpty)
                 Text(
-                  'Nenhum artigo disponível no momento.',
+                  l10n.outcomeArticlesEmpty,
                   style: GoogleFonts.plusJakartaSans(color: Colors.black54),
                 )
               else
@@ -216,7 +220,7 @@ class TriageOutcomeScreen extends StatelessWidget {
                 ),
                 onPressed: () => context.go(RoutePaths.home),
                 child: Text(
-                  'Concluir e Voltar ao Início',
+                  l10n.outcomeDoneButton,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,

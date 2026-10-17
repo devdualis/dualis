@@ -63,18 +63,18 @@ class AppColors {
   /// Tier 1-2: Leve
   static const Color intensityMild = Color(0xFFFFD54F);
   static const Color intensityMildText = Color(0xFF3E2723);
-  static const Color intensityMildBg = Color(0xFFFFFDE7);
-  static const Color intensityMildBorder = Color(0xFFFFE082);
+  static const Color intensityMildBg = Color(0xFFFFF8E1);
+  static const Color intensityMildBorder = Color(0xFFFFB300);
 
   /// Tier 3: Moderada
   static const Color intensityModerate = Color(0xFFFF8A65);
   static const Color intensityModerateText = Color(0xFFFFFFFF);
-  static const Color intensityModerateBg = Color(0xFFFBE9E7);
-  static const Color intensityModerateBorder = Color(0xFFFFAB91);
+  static const Color intensityModerateBg = Color(0xFFFFE0B2);
+  static const Color intensityModerateBorder = Color(0xFFFB8C00);
 
   /// Tier 4-5: Intensa / Crítico
   static const Color intensityIntense = Color(0xFFE53935);
   static const Color intensityIntenseText = Color(0xFFFFFFFF);
-  static const Color intensityIntenseBg = Color(0xFFFFEBEE);
-  static const Color intensityIntenseBorder = Color(0xFFEF9A9A);
+  static const Color intensityIntenseBg = Color(0xFFFFCDD2);
+  static const Color intensityIntenseBorder = Color(0xFFD32F2F);
 }

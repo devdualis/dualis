@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 
 class ApiEndpoints {
   static String get _defaultBaseUrl {
-    if (kIsWeb) return 'http://localhost:3000';
+    if (kIsWeb) return 'http://localhost:8888';
     try {
       if (Platform.isAndroid) {
         // 10.0.2.2 is exclusively for the Android Studio Emulator (AVD/QEMU).
@@ -11,10 +11,10 @@ class ApiEndpoints {
         // communicate with the host machine at 127.0.0.1.
         final isEmulator = File('/dev/qemu_pipe').existsSync() ||
             File('/dev/socket/qemud').existsSync();
-        return isEmulator ? 'http://10.0.2.2:3000' : 'http://127.0.0.1:3000';
+        return isEmulator ? 'http://10.0.2.2:8888' : 'http://127.0.0.1:8888';
       }
     } catch (_) {}
-    return 'http://localhost:3000';
+    return 'http://localhost:8888';
   }
 
   static const String _envBaseUrl = String.fromEnvironment('API_BASE_URL');
@@ -29,6 +29,8 @@ class ApiEndpoints {
   static const String refresh = '/v1/auth/refresh';
   static const String updateProfile = '/v1/auth/profile';
   static const String changePassword = '/v1/auth/change-password';
+  static const String forgotPassword = '/v1/auth/forgot-password';
+  static const String resetPassword = '/v1/auth/reset-password';
 
   static const String disclaimer = '/v1/legal/disclaimer';
   static const String consent = '/v1/legal/consent';

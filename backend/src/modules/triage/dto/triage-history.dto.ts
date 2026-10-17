@@ -12,28 +12,30 @@ export class GetTriageHistoryQueryDto {
 
 export interface TriageLogItemDto {
   id: string;
+  /** Intensity the person reported (0 = not reported). */
   intensity: number;
   anatomicalSystem: string | null;
   emotionalDimension: string | null;
-  disposition: string | null;
-  organicPrimacyApplied?: boolean;
+  /**
+   * Vertical the person chose for the entry. Tells the primary axis when both
+   * anatomicalSystem and emotionalDimension are set. null when unknown.
+   */
+  vertical: 'physical' | 'emotional' | null;
   narrative?: string | null;
   stepAnswers: Record<string, any> | null;
   recordedAt: string;
 }
 
-export interface CriticalRecurrenceDto {
-  id: string;
-  vertical: 'physical' | 'emotional';
+/**
+ * Descriptive insight over the person's own entries ("Padrões nos seus registros"):
+ * how many times a category was logged with high reported intensity in the window.
+ * No clinical judgement; the app builds the localized text from these fields.
+ */
+export interface JournalPatternDto {
   category: string;
-  categoryLabel: string;
-  title: string;
-  description: string;
-  intensity: number;
-  frequencyCount: number;
+  vertical: 'physical' | 'emotional';
+  count: number;
   windowDays: number;
-  recommendedArticleTitle: string;
-  recommendedArticleUrl: string;
 }
 
 export interface EmotionalDayDataDto {
@@ -45,5 +47,5 @@ export interface TriageHistoryResponseDto {
   logs: TriageLogItemDto[];
   physicalSummary: Record<string, number>;
   emotionalSummary: EmotionalDayDataDto[];
-  criticalRecurrences: CriticalRecurrenceDto[];
+  journalPatterns: JournalPatternDto[];
 }

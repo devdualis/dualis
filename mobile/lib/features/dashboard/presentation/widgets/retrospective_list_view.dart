@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/clinical/clinical_intensity_tier.dart';
+import '../../../../core/clinical/self_reported_intensity_band.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/triage_history_models.dart';
@@ -21,53 +21,38 @@ class RetrospectiveListView extends StatelessWidget {
   });
 
   static Color getIntensityColor(int intensity) {
-    return ClinicalIntensityTier.fromIntensity(intensity).color;
-  }
-
-  static String formatDisposition(String? disposition) {
-    switch (disposition) {
-      case 'auto_cuidado':
-        return 'Autocuidado';
-      case 'consulta_rotina':
-        return 'Consulta de Rotina';
-      case 'pronto_atendimento':
-        return 'Pronto Atendimento';
-      case 'emergencia':
-        return 'Emergência';
-      default:
-        return 'Acompanhamento';
-    }
+    return SelfReportedIntensityBand.fromIntensity(intensity).color;
   }
 
   static final Map<String, String> _categoryLabels = {
-    'cabeca_pescoco': 'Cabeça e Pescoço',
-    'cardiovascular_torax': 'Cardiovascular / Tórax',
-    'respiratorio': 'Respiratório',
-    'gastrointestinal_abdomen': 'Gastrointestinal / Abdômen',
-    'coluna_dorsal': 'Coluna Dorsal',
-    'coluna_dor_dorsal': 'Coluna Dorsal',
-    'coluna_dor_lombar': 'Coluna Lombar',
-    'membros_superiores': 'Membros Superiores',
-    'membros_superiores_d': 'Membros Superiores (D)',
-    'membros_superiores_e': 'Membros Superiores (E)',
-    'membros_inferiores': 'Membros Inferiores',
-    'membros_inferiores_d': 'Membros Inferiores (D)',
-    'membros_inferiores_e': 'Membros Inferiores (E)',
-    'muscular_geral_sistemico': 'Muscular Geral / Sistêmico',
-    'endocrino_metabolico': 'Endócrino / Metabólico',
-    'neurologico': 'Neurológico',
-    'geniturinario_pelvico': 'Geniturinário / Pélvico',
-    'dermatologico': 'Dermatológico',
-    'geral_fisico': 'Saúde Física Geral',
-    'ansiosa_agitacao': 'Ansiosa / Agitação',
-    'depressiva_desanimo': 'Depressiva / Desânimo',
-    'estresse_burnout': 'Estresse / Burnout',
-    'somatica': 'Somática (Psicossomática)',
-    'sono': 'Sono e Ritmo Circadiano',
-    'cognitiva_foco': 'Cognitiva / Foco',
-    'autoestima': 'Autoestima / Autoimagem',
-    'geral_emocional': 'Saúde Emocional Geral',
-    'geral': 'Saúde Geral e Bem-Estar',
+    'cabeca_pescoco': 'Cabeça e pescoço',
+    'cardiovascular_torax': 'Peito',
+    'respiratorio': 'Respiração',
+    'gastrointestinal_abdomen': 'Barriga e estômago',
+    'coluna_dorsal': 'Costas',
+    'coluna_dor_dorsal': 'Costas',
+    'coluna_dor_lombar': 'Costas (lombar)',
+    'membros_superiores': 'Braços e mãos',
+    'membros_superiores_d': 'Braço direito',
+    'membros_superiores_e': 'Braço esquerdo',
+    'membros_inferiores': 'Pernas e pés',
+    'membros_inferiores_d': 'Perna direita',
+    'membros_inferiores_e': 'Perna esquerda',
+    'muscular_geral_sistemico': 'Corpo todo',
+    'endocrino_metabolico': 'Energia e apetite',
+    'neurologico': 'Tontura e equilíbrio',
+    'geniturinario_pelvico': 'Baixo ventre e urina',
+    'dermatologico': 'Pele',
+    'geral_fisico': 'Registro físico',
+    'ansiosa_agitacao': 'Ansiedade e agitação',
+    'depressiva_desanimo': 'Pra baixo',
+    'estresse_burnout': 'Estressado(a) ou esgotado(a)',
+    'somatica': 'Emoções sentidas no corpo',
+    'sono': 'Sono ruim',
+    'cognitiva_foco': 'Cansaço mental e foco',
+    'autoestima': 'Autoestima',
+    'geral_emocional': 'Registro emocional',
+    'geral': 'Bem-estar geral',
   };
 
   static String _formatCategoryKey(String key) {
@@ -178,6 +163,7 @@ class RetrospectiveListView extends StatelessWidget {
       itemBuilder: (context, index) {
         final entry = filtered[index];
         final intensityColor = getIntensityColor(entry.intensity);
+        final intensityLabel = AppLocalizations.of(context).historyIntensityInformed(entry.intensity);
         final causes = entry.stepAnswers?['causes'] ??
             entry.stepAnswers?['gatilhos'] ??
             entry.stepAnswers?['motivo'];
@@ -230,7 +216,7 @@ class RetrospectiveListView extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                'Nível ${entry.intensity}',
+                                intensityLabel,
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -264,30 +250,6 @@ class RetrospectiveListView extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            if (entry.disposition != null)
-                              Flexible(
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 3,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF00796B).withValues(alpha: 0.08),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    formatDisposition(entry.disposition),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xFF00796B),
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ),
                           ],
                         ),
                         if (causes != null && causes.toString().isNotEmpty) ...[

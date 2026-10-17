@@ -146,7 +146,7 @@ class _EmptyHistoryDataSource extends TriageHistoryRemoteDataSource {
         logs: [],
         physicalSummary: {},
         emotionalSummary: [],
-        criticalRecurrences: [],
+        journalPatterns: [],
       );
 }
 
@@ -294,11 +294,9 @@ void main() {
                 id: 'o-1',
                 vertical: 'physical',
                 intensityScore: 2,
-                careDisposition: CareDisposition.selfCare,
                 primaryCategory: 'cabeca_pescoco',
                 categoryLabel: 'Cabeça e Pescoço',
                 somaticMapping: 'Cefaleia',
-                organicPrimacyApplied: false,
                 recommendedArticles: const [],
                 recordedAt: DateTime.now(),
               ),

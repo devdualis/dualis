@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/router/route_paths.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Top banner displaying the active clinical vertical and dynamic step progress.
@@ -9,6 +11,7 @@ class TriageStepBanner extends StatelessWidget implements PreferredSizeWidget {
   final int totalSteps;
   final Color activeColor;
   final VoidCallback? onBack;
+  final VoidCallback? onEmergency;
 
   const TriageStepBanner({
     super.key,
@@ -17,6 +20,7 @@ class TriageStepBanner extends StatelessWidget implements PreferredSizeWidget {
     required this.totalSteps,
     required this.activeColor,
     this.onBack,
+    this.onEmergency,
   });
 
   @override
@@ -25,7 +29,9 @@ class TriageStepBanner extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final progress = (currentStep + 1) / totalSteps;
+    final progress = totalSteps > 0
+        ? ((currentStep + 1) / totalSteps).clamp(0.0, 1.0)
+        : 0.0;
 
     return Container(
       color: activeColor,
@@ -57,34 +63,51 @@ class TriageStepBanner extends StatelessWidget implements PreferredSizeWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(width: 48),
+                IconButton(
+                  key: const Key('triage_step_banner_emergency_button'),
+                  constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                  icon: const Icon(Icons.emergency_rounded, color: Colors.white),
+                  tooltip: l10n.urgentHelpButton,
+                  onPressed: onEmergency ?? () => context.push(RoutePaths.emergency),
+                ),
               ],
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        backgroundColor: Colors.white.withValues(alpha: 0.3),
-                        valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                        minHeight: 6,
+              child: Semantics(
+                label: l10n.triageStep(currentStep + 1, totalSteps),
+                value: '${(progress * 100).toInt()}%',
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween<double>(begin: 0.0, end: progress),
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          builder: (context, animatedValue, _) {
+                            return LinearProgressIndicator(
+                              value: animatedValue,
+                              backgroundColor: Colors.white.withValues(alpha: 0.3),
+                              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                              minHeight: 6,
+                            );
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    l10n.triageStep(currentStep + 1, totalSteps),
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                    const SizedBox(width: 12),
+                    Text(
+                      l10n.triageStep(currentStep + 1, totalSteps),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

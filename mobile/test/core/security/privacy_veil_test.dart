@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dualis_mobile/core/security/biometric_service.dart';
+import 'package:dualis_mobile/l10n/app_localizations.dart';
 import 'package:dualis_mobile/shared/widgets/privacy_veil_overlay.dart';
 
 class MockBiometricService extends Mock implements BiometricService {}
@@ -15,12 +16,15 @@ void main() {
 
   Widget createVeilTestApp({bool initialLocked = false}) {
     return MaterialApp(
+      locale: const Locale('pt'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: PrivacyVeilOverlay(
           biometricService: mockBiometricService,
           initialLocked: initialLocked,
           child: const Center(
-            child: Text('Confidential Health Records (Patient 101)'),
+            child: Text('Private wellness entries (User 101)'),
           ),
         ),
       ),
@@ -35,7 +39,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text('Confidential Health Records (Patient 101)'),
+        find.text('Private wellness entries (User 101)'),
         findsOneWidget,
       );
       expect(find.byKey(const Key('privacyVeilBackdrop')), findsNothing);
@@ -60,7 +64,7 @@ void main() {
       expect(find.byType(BackdropFilter), findsOneWidget);
       expect(find.text('Dados de Saúde Protegidos'), findsOneWidget);
       expect(
-        find.text('Autentique-se com biometria ou senha para acessar seu prontuário.'),
+        find.text('Autentique-se com biometria ou senha para acessar seus registros.'),
         findsOneWidget,
       );
       expect(find.byKey(const Key('privacyVeilUnlockButton')), findsOneWidget);
@@ -117,7 +121,7 @@ void main() {
       // Veil is lifted
       expect(find.byKey(const Key('privacyVeilBackdrop')), findsNothing);
       expect(
-        find.text('Confidential Health Records (Patient 101)'),
+        find.text('Private wellness entries (User 101)'),
         findsOneWidget,
       );
     });

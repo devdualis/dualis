@@ -2,10 +2,15 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/api_endpoints.dart';
 import '../security/secure_storage_service.dart';
+import 'profile_header_interceptor.dart';
 
 final apiClientProvider = Provider<ApiClient>((ref) {
   final secureStorage = ref.watch(secureStorageServiceProvider);
-  return ApiClient(secureStorage: secureStorage);
+  final profileInterceptor = ProfileHeaderInterceptor(ref: ref);
+  return ApiClient(
+    secureStorage: secureStorage,
+    profileHeaderInterceptor: profileInterceptor,
+  );
 });
 
 class ApiClient {
@@ -14,8 +19,11 @@ class ApiClient {
 
   static Future<String?>? _refreshFuture;
 
-  ApiClient({Dio? customDio, SecureStorageService? secureStorage})
-      : dio = customDio ??
+  ApiClient({
+    Dio? customDio,
+    SecureStorageService? secureStorage,
+    ProfileHeaderInterceptor? profileHeaderInterceptor,
+  })  : dio = customDio ??
             Dio(
               BaseOptions(
                 baseUrl: ApiEndpoints.baseUrl,
@@ -30,6 +38,9 @@ class ApiClient {
               ),
             ),
         _secureStorage = secureStorage ?? SecureStorageService() {
+    if (profileHeaderInterceptor != null) {
+      dio.interceptors.add(profileHeaderInterceptor);
+    }
     dio.interceptors.add(
       InterceptorsWrapper(onError: _onError),
     );
@@ -142,6 +153,22 @@ class ApiClient {
     CancelToken? cancelToken,
   }) {
     return dio.patch<T>(
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      options: options,
+      cancelToken: cancelToken,
+    );
+  }
+
+  Future<Response<T>> put<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) {
+    return dio.put<T>(
       path,
       data: data,
       queryParameters: queryParameters,

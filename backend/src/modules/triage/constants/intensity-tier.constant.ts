@@ -1,17 +1,18 @@
 /**
- * Single Source of Truth for clinical intensity states and tiers across the Dualis backend.
- * Synchronized with mobile client's ClinicalIntensityTier.
+ * Display bands for the intensity the person reported themselves (1 to 5).
+ * Bands only group the person's own rating for colouring; they are not a clinical
+ * scale and carry no judgement. Synchronized with the mobile client's intensity bands.
  */
 
-export enum ClinicalIntensityTier {
+export enum SelfReportedIntensityBand {
   NONE = 'none',
   MILD = 'mild',
   MODERATE = 'moderate',
   INTENSE = 'intense',
 }
 
-export interface ClinicalIntensityTierMetadata {
-  tier: ClinicalIntensityTier;
+export interface SelfReportedIntensityBandMetadata {
+  band: SelfReportedIntensityBand;
   label: string;
   minScore: number;
   maxScore: number;
@@ -19,23 +20,21 @@ export interface ClinicalIntensityTierMetadata {
   textColor: string;
   cardBgColor: string;
   borderColor: string;
-  isCritical: boolean;
 }
 
-export const CLINICAL_INTENSITY_TIERS: Record<ClinicalIntensityTier, ClinicalIntensityTierMetadata> = {
-  [ClinicalIntensityTier.NONE]: {
-    tier: ClinicalIntensityTier.NONE,
-    label: 'Sem dor',
+export const SELF_REPORTED_INTENSITY_BANDS: Record<SelfReportedIntensityBand, SelfReportedIntensityBandMetadata> = {
+  [SelfReportedIntensityBand.NONE]: {
+    band: SelfReportedIntensityBand.NONE,
+    label: 'Sem registro',
     minScore: 0,
     maxScore: 0,
     hexColor: '#CFD8DC',
     textColor: '#37474F',
     cardBgColor: '#F5F7F8',
     borderColor: '#CFD8DC',
-    isCritical: false,
   },
-  [ClinicalIntensityTier.MILD]: {
-    tier: ClinicalIntensityTier.MILD,
+  [SelfReportedIntensityBand.MILD]: {
+    band: SelfReportedIntensityBand.MILD,
     label: 'Leve (1-2)',
     minScore: 1,
     maxScore: 2,
@@ -43,10 +42,9 @@ export const CLINICAL_INTENSITY_TIERS: Record<ClinicalIntensityTier, ClinicalInt
     textColor: '#3E2723',
     cardBgColor: '#FFFDE7',
     borderColor: '#FFE082',
-    isCritical: false,
   },
-  [ClinicalIntensityTier.MODERATE]: {
-    tier: ClinicalIntensityTier.MODERATE,
+  [SelfReportedIntensityBand.MODERATE]: {
+    band: SelfReportedIntensityBand.MODERATE,
     label: 'Moderada (3)',
     minScore: 3,
     maxScore: 3,
@@ -54,42 +52,37 @@ export const CLINICAL_INTENSITY_TIERS: Record<ClinicalIntensityTier, ClinicalInt
     textColor: '#FFFFFF',
     cardBgColor: '#FBE9E7',
     borderColor: '#FFAB91',
-    isCritical: false,
   },
-  [ClinicalIntensityTier.INTENSE]: {
-    tier: ClinicalIntensityTier.INTENSE,
-    label: 'Intensa (4-5)',
+  [SelfReportedIntensityBand.INTENSE]: {
+    band: SelfReportedIntensityBand.INTENSE,
+    label: 'Forte (4-5)',
     minScore: 4,
     maxScore: 5,
     hexColor: '#E53935',
     textColor: '#FFFFFF',
     cardBgColor: '#FFEBEE',
     borderColor: '#EF9A9A',
-    isCritical: true,
   },
 };
 
 /**
- * Resolves the ClinicalIntensityTier from a numerical score (0 to 5).
+ * Resolves the display band from the reported intensity (0 to 5).
  */
-export function getIntensityTier(score: number): ClinicalIntensityTier {
-  if (score <= 0) return ClinicalIntensityTier.NONE;
-  if (score <= 2) return ClinicalIntensityTier.MILD;
-  if (score === 3) return ClinicalIntensityTier.MODERATE;
-  return ClinicalIntensityTier.INTENSE;
+export function getIntensityBand(score: number): SelfReportedIntensityBand {
+  if (score <= 0) return SelfReportedIntensityBand.NONE;
+  if (score <= 2) return SelfReportedIntensityBand.MILD;
+  if (score === 3) return SelfReportedIntensityBand.MODERATE;
+  return SelfReportedIntensityBand.INTENSE;
 }
 
 /**
- * Returns metadata for a numerical intensity score.
+ * Returns display metadata for a reported intensity.
  */
-export function getIntensityTierMetadata(score: number): ClinicalIntensityTierMetadata {
-  const tier = getIntensityTier(score);
-  return CLINICAL_INTENSITY_TIERS[tier];
+export function getIntensityBandMetadata(score: number): SelfReportedIntensityBandMetadata {
+  return SELF_REPORTED_INTENSITY_BANDS[getIntensityBand(score)];
 }
 
 /**
- * Returns true if the score is in the critical/acute range (4-5).
+ * Minimum reported intensity counted as "high" in descriptive journal patterns.
  */
-export function isCriticalIntensity(score: number): boolean {
-  return score >= 4;
-}
+export const HIGH_REPORTED_INTENSITY = 4;

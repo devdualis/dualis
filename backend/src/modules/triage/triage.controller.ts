@@ -16,6 +16,12 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import {
+  ActiveProfile,
+  ProfileAccess,
+  ProfileContext,
+  ProfileContextGuard,
+} from '../profiles/profile-context';
 import { CheckAntiburlaDto, AntiburlaCheckResponseDto } from './dto/antiburla.dto';
 import { SubmitTriageDto, TriageOutcomeResponseDto } from './dto/triage-outcome.dto';
 import {
@@ -30,7 +36,8 @@ import { TriageOutcomeService } from './services/triage-outcome.service';
 import { AntiburlaService } from './services/antiburla.service';
 import { TriageHistoryService } from './services/triage-history.service';
 
-@Controller({ path: 'triage', version: '1' })
+// `journal` is the current prefix; `triage` stays as an alias for published app versions.
+@Controller({ path: ['journal', 'triage'], version: '1' })
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
 export class TriageController {
   constructor(
@@ -44,7 +51,8 @@ export class TriageController {
 
   @Post('outcome')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
+  @ProfileAccess('write')
+  @UseGuards(JwtAuthGuard, ProfileContextGuard)
   @UsePipes(
     new ValidationPipe({
       whitelist: true,
@@ -55,15 +63,17 @@ export class TriageController {
   )
   async createOutcome(
     @Request() req: any,
+    @ActiveProfile() profile: ProfileContext,
     @Body() dto: SubmitTriageDto,
   ): Promise<TriageOutcomeResponseDto> {
     const userId = req.user?.id || req.user?.userId || req.user?.sub;
-    return this.triageOutcomeService.processOutcome(userId, dto);
+    return this.triageOutcomeService.processOutcome(userId, profile.profileId, dto);
   }
 
   @Post('daily-checkin')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
+  @ProfileAccess('write')
+  @UseGuards(JwtAuthGuard, ProfileContextGuard)
   @UsePipes(
     new ValidationPipe({
       whitelist: true,
@@ -74,15 +84,17 @@ export class TriageController {
   )
   async createDailyCheckIn(
     @Request() req: any,
+    @ActiveProfile() profile: ProfileContext,
     @Body() dto: SubmitDailyCheckInDto,
   ): Promise<DailyCheckInResponseDto> {
     const userId = req.user?.id || req.user?.userId || req.user?.sub;
-    return this.triageOutcomeService.recordDailyCheckIn(userId, dto);
+    return this.triageOutcomeService.recordDailyCheckIn(userId, profile.profileId, dto);
   }
 
-  @Post('antiburla-check')
+  @Post(['recurrence-check', 'antiburla-check'])
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
+  @ProfileAccess('read')
+  @UseGuards(JwtAuthGuard, ProfileContextGuard)
   @UsePipes(
     new ValidationPipe({
       whitelist: true,
@@ -93,15 +105,17 @@ export class TriageController {
   )
   async checkAntiburla(
     @Request() req: any,
+    @ActiveProfile() profile: ProfileContext,
     @Body() dto: CheckAntiburlaDto,
   ): Promise<AntiburlaCheckResponseDto> {
     const userId = req.user?.id || req.user?.userId || req.user?.sub;
-    return this.antiburlaService.checkHistoricalConsistency(userId, dto);
+    return this.antiburlaService.checkHistoricalConsistency(userId, profile.profileId, dto);
   }
 
   @Get('history')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
+  @ProfileAccess('read')
+  @UseGuards(JwtAuthGuard, ProfileContextGuard)
   @UsePipes(
     new ValidationPipe({
       whitelist: true,
@@ -112,20 +126,23 @@ export class TriageController {
   )
   async getHistory(
     @Request() req: any,
+    @ActiveProfile() profile: ProfileContext,
     @Query() query: GetTriageHistoryQueryDto,
   ): Promise<TriageHistoryResponseDto> {
     const userId = req.user?.id || req.user?.userId || req.user?.sub;
-    return this.triageHistoryService.getHistory(userId, query);
+    return this.triageHistoryService.getHistory(userId, profile.profileId, query);
   }
 
   @Delete('history/:id')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
+  @ProfileAccess('write')
+  @UseGuards(JwtAuthGuard, ProfileContextGuard)
   async deleteHistoryItem(
     @Request() req: any,
+    @ActiveProfile() profile: ProfileContext,
     @Param('id', new ParseUUIDPipe()) id: string,
   ): Promise<{ success: boolean; id: string }> {
     const userId = req.user?.id || req.user?.userId || req.user?.sub;
-    return this.triageHistoryService.deleteHistoryItem(userId, id);
+    return this.triageHistoryService.deleteHistoryItem(userId, profile.profileId, id);
   }
 }

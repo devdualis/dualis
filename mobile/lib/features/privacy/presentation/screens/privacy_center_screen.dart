@@ -47,6 +47,9 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
           ),
           actions: [
             TextButton(
+              style: TextButton.styleFrom(
+                minimumSize: const Size(48, 48),
+              ),
               onPressed: () => Navigator.of(dialogContext).pop(),
               child: Text(l10n.close),
             ),
@@ -110,6 +113,9 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
               ),
               actions: [
                 TextButton(
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(48, 48),
+                  ),
                   onPressed: () => Navigator.of(dialogContext).pop(),
                   child: Text(l10n.cancel),
                 ),
@@ -117,6 +123,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                   key: const Key('confirm_permanent_deletion_button'),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.emergencyCrimson,
+                    minimumSize: const Size(80, 48),
                   ),
                   onPressed: isValid
                       ? () async {
@@ -172,6 +179,15 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         elevation: 0,
+        actions: [
+          IconButton(
+            key: const Key('privacy_emergency_button'),
+            tooltip: 'Recursos de Emergência / SOS',
+            icon: const Icon(Icons.emergency_rounded, color: AppColors.emergencyCrimson),
+            onPressed: () => context.push(RoutePaths.emergency),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
@@ -275,10 +291,10 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
             const SizedBox(height: 24),
             Container(
               decoration: BoxDecoration(
-                color: const Color(0xFFFFF5F5),
+                color: AppColors.emergencySurfaceRed,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: const Color(0xFFFFCDD2),
+                  color: AppColors.emergencyCrimson.withValues(alpha: 0.3),
                   width: 1.5,
                 ),
               ),
@@ -415,6 +431,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.softIndigo,
                               side: const BorderSide(color: AppColors.softIndigo),
+                              minimumSize: const Size(48, 48),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -431,6 +448,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                             style: FilledButton.styleFrom(
                               backgroundColor: AppColors.softIndigo,
                               foregroundColor: Colors.white,
+                              minimumSize: const Size(48, 48),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),

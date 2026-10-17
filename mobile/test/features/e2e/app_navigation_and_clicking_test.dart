@@ -132,6 +132,20 @@ class MockAuthRepository implements AuthRepository {
     required String currentPassword,
     required String newPassword,
   }) async {}
+
+  @override
+  Future<Map<String, dynamic>> forgotPassword({
+    required String email,
+  }) async =>
+      {};
+
+  @override
+  Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async =>
+      {};
 }
 
 class MockPrivacyRemoteDataSource implements PrivacyRemoteDataSource {
@@ -162,7 +176,7 @@ class MockTriageHistoryDataSource implements TriageHistoryRemoteDataSource {
       logs: [],
       physicalSummary: {},
       emotionalSummary: [],
-      criticalRecurrences: [],
+      journalPatterns: [],
     );
   }
 
@@ -277,7 +291,7 @@ void main() {
       // =========================================================================
       // 1. ONBOARDING SCREEN
       // =========================================================================
-      expect(find.text('Triagem Preventiva Unificada'), findsOneWidget);
+      expect(find.text('Diário de Bem-Estar Integrado'), findsOneWidget);
       expect(find.text('Criar Conta'), findsOneWidget);
       expect(find.text('Entrar'), findsOneWidget);
 

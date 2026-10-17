@@ -6,6 +6,8 @@ import 'package:dualis_mobile/features/dashboard/domain/models/triage_history_mo
 import 'package:dualis_mobile/features/dashboard/presentation/screens/historical_dashboard_screen.dart';
 import 'package:dualis_mobile/features/dashboard/presentation/widgets/anatomical_body_map.dart';
 import 'package:dualis_mobile/features/dashboard/presentation/widgets/emotional_trend_chart.dart';
+import 'package:dualis_mobile/features/dashboard/presentation/widgets/journal_pattern_card.dart';
+import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 class MockTriageHistoryRemoteDataSource implements TriageHistoryRemoteDataSource {
   final TriageHistoryResponse mockResponse;
@@ -37,7 +39,6 @@ void main() {
             intensity: 4,
             anatomicalSystem: 'coluna_dorsal',
             emotionalDimension: null,
-            disposition: 'consulta_rotina',
             stepAnswers: {'causes': 'postura'},
             recordedAt: DateTime.parse('2026-09-14T10:00:00.000Z'),
           ),
@@ -46,7 +47,6 @@ void main() {
             intensity: 3,
             anatomicalSystem: null,
             emotionalDimension: 'estresse_burnout',
-            disposition: 'auto_cuidado',
             stepAnswers: {'causes': 'trabalho'},
             recordedAt: DateTime.parse('2026-09-13T10:00:00.000Z'),
           ),
@@ -65,19 +65,12 @@ void main() {
             dimensions: {'estresse_burnout': 4},
           ),
         ],
-        criticalRecurrences: [
-          const CriticalRecurrenceItem(
-            id: 'rec-1',
+        journalPatterns: const [
+          JournalPatternItem(
             vertical: 'emotional',
             category: 'estresse_burnout',
-            categoryLabel: 'Estresse / Burnout',
-            title: 'Foco de Atenção: Estresse / Burnout',
-            description: 'Identificamos nível 4 em 6 dos últimos 10 dias.',
-            intensity: 4,
-            frequencyCount: 6,
+            count: 6,
             windowDays: 10,
-            recommendedArticleTitle: 'Manejo do Burnout',
-            recommendedArticleUrl: 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout',
           ),
         ],
       );
@@ -96,6 +89,9 @@ void main() {
             ),
           ],
           child: const MaterialApp(
+            locale: Locale('pt'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: HistoricalDashboardScreen(),
           ),
         ),
@@ -107,7 +103,10 @@ void main() {
       expect(find.text('Psico-Emocional'), findsOneWidget);
       expect(find.text('Física'), findsOneWidget);
       expect(find.byType(EmotionalTrendChart), findsOneWidget);
-      expect(find.text('Foco de Atenção: Estresse / Burnout'), findsOneWidget);
+      expect(find.byType(JournalPatternCard), findsOneWidget);
+      expect(find.text('Padrões nos seus registros'), findsOneWidget);
+      expect(find.textContaining('6 vezes nos últimos 10 dias'), findsOneWidget);
+      expect(find.textContaining('Foco de Atenção'), findsNothing);
       expect(find.text('Registros Emocionais Recentes'), findsOneWidget);
     });
 
@@ -124,6 +123,9 @@ void main() {
             ),
           ],
           child: const MaterialApp(
+            locale: Locale('pt'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: HistoricalDashboardScreen(),
           ),
         ),
@@ -140,7 +142,7 @@ void main() {
       expect(find.byType(AnatomicalBodyMap), findsOneWidget);
       expect(find.text('Mapa Corporal 2D (Últimos 14 Dias)'), findsOneWidget);
       expect(find.text('Registros Físicos Recentes'), findsOneWidget);
-      expect(find.text('COLUNA DORSAL'), findsOneWidget);
+      expect(find.text('COSTAS'), findsOneWidget);
     });
 
     testWidgets('3. Tapping delete icon opens confirmation dialog and confirms deletion', (tester) async {
@@ -156,6 +158,9 @@ void main() {
             triageHistoryDataSourceProvider.overrideWithValue(mockDataSource),
           ],
           child: const MaterialApp(
+            locale: Locale('pt'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: HistoricalDashboardScreen(),
           ),
         ),

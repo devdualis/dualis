@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ClinicalIntensityTier - Single Source of Truth', () {
-    test('tier score mapping adheres to the 4-tier clinical scale', () {
+    test('self-reported intensity maps to 4 descriptive bands', () {
       expect(ClinicalIntensityTier.fromScore(null), ClinicalIntensityTier.none);
       expect(ClinicalIntensityTier.fromScore(-1), ClinicalIntensityTier.none);
       expect(ClinicalIntensityTier.fromScore(0), ClinicalIntensityTier.none);
@@ -27,7 +27,7 @@ void main() {
     });
 
     test('canonical labels and score ranges match specification', () {
-      expect(ClinicalIntensityTier.none.label, 'Sem dor');
+      expect(ClinicalIntensityTier.none.label, 'Sem registro');
       expect(ClinicalIntensityTier.none.scoreRangeDescription, '0');
 
       expect(ClinicalIntensityTier.mild.label, 'Leve (1-2)');
@@ -48,25 +48,18 @@ void main() {
 
       expect(ClinicalIntensityTier.mild.color, const Color(0xFFFFD54F));
       expect(ClinicalIntensityTier.mild.textColor, const Color(0xFF3E2723));
-      expect(ClinicalIntensityTier.mild.cardBgColor, const Color(0xFFFFFDE7));
-      expect(ClinicalIntensityTier.mild.borderColor, const Color(0xFFFFE082));
+      expect(ClinicalIntensityTier.mild.cardBgColor, const Color(0xFFFFF8E1));
+      expect(ClinicalIntensityTier.mild.borderColor, const Color(0xFFFFB300));
 
       expect(ClinicalIntensityTier.moderate.color, const Color(0xFFFF8A65));
       expect(ClinicalIntensityTier.moderate.textColor, const Color(0xFFFFFFFF));
-      expect(ClinicalIntensityTier.moderate.cardBgColor, const Color(0xFFFBE9E7));
-      expect(ClinicalIntensityTier.moderate.borderColor, const Color(0xFFFFAB91));
+      expect(ClinicalIntensityTier.moderate.cardBgColor, const Color(0xFFFFE0B2));
+      expect(ClinicalIntensityTier.moderate.borderColor, const Color(0xFFFB8C00));
 
       expect(ClinicalIntensityTier.intense.color, const Color(0xFFE53935));
       expect(ClinicalIntensityTier.intense.textColor, const Color(0xFFFFFFFF));
-      expect(ClinicalIntensityTier.intense.cardBgColor, const Color(0xFFFFEBEE));
-      expect(ClinicalIntensityTier.intense.borderColor, const Color(0xFFEF9A9A));
-    });
-
-    test('isCritical flag only activates for intense (scores 4-5)', () {
-      expect(ClinicalIntensityTier.none.isCritical, isFalse);
-      expect(ClinicalIntensityTier.mild.isCritical, isFalse);
-      expect(ClinicalIntensityTier.moderate.isCritical, isFalse);
-      expect(ClinicalIntensityTier.intense.isCritical, isTrue);
+      expect(ClinicalIntensityTier.intense.cardBgColor, const Color(0xFFFFCDD2));
+      expect(ClinicalIntensityTier.intense.borderColor, const Color(0xFFD32F2F));
     });
 
     test('containsScore correctly validates boundaries', () {

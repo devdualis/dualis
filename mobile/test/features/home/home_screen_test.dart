@@ -122,7 +122,7 @@ void main() {
       expect(find.text('rinconrj@gmail.com'), findsOneWidget);
 
       // Verify LGPD badge
-      expect(find.text('Prontuário Ativo & Protegido (LGPD Art. 11)'), findsOneWidget);
+      expect(find.text('Seus registros estão protegidos'), findsOneWidget);
 
       expect(find.byKey(const Key('home_settings_button')), findsOneWidget);
       expect(find.byKey(const Key('home_profile_card')), findsOneWidget);
@@ -172,17 +172,15 @@ void main() {
       expect(find.text('Settings Screen'), findsOneWidget);
     });
 
-    testWidgets('Renders TodayTriageSummaryCard on main home tab when today triage outcome exists',
+    testWidgets('Shows the completed stage card on the main home tab and the full result on Meu Dia tab',
         (WidgetTester tester) async {
       final mockOutcome = TriageOutcome(
-        id: 'triage-cardio-critical-1',
+        id: 'checkin-chest-1',
         vertical: 'physical',
         intensityScore: 5,
-        careDisposition: CareDisposition.emergency,
         primaryCategory: 'cardiovascular_torax',
-        categoryLabel: 'Cardiovascular e Tórax',
-        somaticMapping: 'Sensação de aperto torácico ou palpitação funcional',
-        organicPrimacyApplied: false,
+        categoryLabel: 'Peito',
+        somaticMapping: 'Aperto no peito e coração acelerado',
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
         aiMappedLayTerm: 'Dor e aperto no peito',
@@ -191,27 +189,17 @@ void main() {
       await tester.pumpWidget(createHomeTestApp(initialOutcome: mockOutcome));
       await tester.pumpAndSettle();
 
-      // Verify TodayTriageSummaryCard is visible on Home Tab with simplified header
-      expect(find.byKey(const Key('today_triage_summary_card')), findsOneWidget);
-      expect(find.text('Triagem de Hoje Concluída'), findsOneWidget);
-      expect(find.text('Atendimento de Emergência'), findsWidgets);
-
       // Verify physical stage card is marked completed, NOT displaying uncompleted start button
       expect(find.byKey(const Key('fisica_completed_card')), findsOneWidget);
       expect(find.byKey(const Key('start_fisica_triage_button')), findsNothing);
 
-      // Verify card is clickable to view full outcome
-      final viewFullBtn = find.byKey(const Key('view_full_triage_result_button'));
-      expect(viewFullBtn, findsOneWidget);
-
-      // Tapping card switches tab to Tab 1
-      await tester.ensureVisible(viewFullBtn);
-      await tester.tap(viewFullBtn);
+      // Tapping the "Meu Dia" nav destination switches to Tab 1
+      await tester.tap(find.byKey(const Key('nav_destination_today_outcome')));
       await tester.pumpAndSettle();
 
-      // Verify Tab 1 "Resultado do Dia" is now active
+      // Verify Tab 1 "Meu Dia" is now active
       expect(find.byKey(const Key('today_triage_result_scroll_view')), findsOneWidget);
-      expect(find.text('Resultado do Dia'), findsOneWidget);
+      expect(find.text('Meu Dia'), findsOneWidget);
     });
   });
 }

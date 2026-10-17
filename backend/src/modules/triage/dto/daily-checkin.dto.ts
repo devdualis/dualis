@@ -25,10 +25,12 @@ export class SubmitDailyCheckInDto {
   language?: string;
 }
 
+/**
+ * Quick check-in: stores only the state the person declared (good / so-so / bad).
+ * No intensity is inferred and no care recommendation is produced (plan F4, B-02).
+ */
 export interface DailyCheckInResponseDto {
   id: string;
-  intensity: number;
-  disposition: string;
   emotionalStatus: TriggerStatusType;
   physicalStatus: TriggerStatusType;
   recordedAt: string;

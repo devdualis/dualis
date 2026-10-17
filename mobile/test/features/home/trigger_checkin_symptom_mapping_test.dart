@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dualis_mobile/core/constants/app_colors.dart';
 import 'package:dualis_mobile/features/dashboard/data/triage_history_remote_data_source.dart';
 import 'package:dualis_mobile/features/dashboard/domain/models/triage_history_models.dart';
 import 'package:dualis_mobile/features/home/domain/trigger_checkin_state.dart';
@@ -33,11 +34,9 @@ void main() {
         id: 'dual-triage-1',
         vertical: 'physical',
         intensityScore: 1, // Leve / Mínimo
-        careDisposition: CareDisposition.selfCare,
         primaryCategory: 'cabeca_pescoco',
         categoryLabel: 'Cabeça e Pescoço',
         somaticMapping: 'Cefaleia / Desconforto crânio-cervical',
-        organicPrimacyApplied: true,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
         secondaryCategoryLabel: 'Dimensão Sono / Ritmo Circadiano',
@@ -65,11 +64,9 @@ void main() {
         id: 'physical-triage-1',
         vertical: 'physical',
         intensityScore: 1,
-        careDisposition: CareDisposition.selfCare,
         primaryCategory: 'cabeca_pescoco',
         categoryLabel: 'Cabeça e Pescoço',
         somaticMapping: 'Cefaleia / Desconforto crânio-cervical',
-        organicPrimacyApplied: false,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
         secondaryCategoryLabel: null,
@@ -91,11 +88,9 @@ void main() {
         id: 'severe-triage-1',
         vertical: 'physical',
         intensityScore: 4,
-        careDisposition: CareDisposition.urgentCare,
         primaryCategory: 'cardiovascular_torax',
         categoryLabel: 'Cardiovascular e Tórax',
         somaticMapping: 'Sensação de aperto torácico funcional / Palpitações',
-        organicPrimacyApplied: false,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
       );
@@ -117,14 +112,13 @@ void main() {
             intensity: 1, // Mild headache and sleep disruption
             anatomicalSystem: 'cabeca_pescoco',
             emotionalDimension: 'sono',
-            disposition: 'auto_cuidado',
             narrative: 'Dor de cabeça',
             recordedAt: now,
           ),
         ],
         physicalSummary: {},
         emotionalSummary: [],
-        criticalRecurrences: [],
+        journalPatterns: [],
       );
 
       final container = ProviderContainer(
@@ -154,11 +148,9 @@ void main() {
         id: 'widget-test-outcome',
         vertical: 'physical',
         intensityScore: 1,
-        careDisposition: CareDisposition.selfCare,
         primaryCategory: 'cabeca_pescoco',
         categoryLabel: 'Cabeça e Pescoço',
         somaticMapping: 'Cefaleia / Desconforto crânio-cervical',
-        organicPrimacyApplied: true,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
         secondaryCategoryLabel: 'Dimensão Sono / Ritmo Circadiano',
@@ -193,7 +185,13 @@ void main() {
 
       // Verify completed physical stage card and uncompleted emotional stage button
       expect(find.byKey(const Key('fisica_completed_card')), findsOneWidget);
-      expect(find.text('Leve (1-2)'), findsOneWidget);
+      final physicalCard = tester.widget<Container>(
+        find.byKey(const Key('fisica_completed_card')),
+      );
+      expect(
+        (physicalCard.decoration as BoxDecoration).color,
+        AppColors.intensityMildBg,
+      );
       expect(find.text('“Dor de cabeça”'), findsOneWidget);
       expect(find.byKey(const Key('start_psicoemocional_triage_button')), findsOneWidget);
     });
@@ -210,11 +208,9 @@ void main() {
         id: 'physical-only-headache',
         vertical: 'physical',
         intensityScore: 2, // Dor de cabeça leve/moderada -> soSo
-        careDisposition: CareDisposition.routineConsultation,
         primaryCategory: 'cabeca_pescoco',
         categoryLabel: 'Cabeça e Pescoço',
         somaticMapping: 'Cefaleia',
-        organicPrimacyApplied: false,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
         secondaryCategoryLabel: null,
@@ -240,11 +236,9 @@ void main() {
         id: 'emotional-only-anxiety',
         vertical: 'emotional',
         intensityScore: 4, // Severe anxiety -> badSick
-        careDisposition: CareDisposition.urgentCare,
         primaryCategory: 'ansiosa_agitacao',
         categoryLabel: 'Ansiedade e Agitação',
         somaticMapping: 'Angústia e inquietação psíquica',
-        organicPrimacyApplied: false,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
         secondaryCategoryLabel: null,
@@ -268,7 +262,6 @@ void main() {
         id: 'log-1-emotional',
         intensity: 3,
         emotionalDimension: 'sono_vigilia',
-        disposition: 'consulta_rotina',
         recordedAt: now.subtract(const Duration(hours: 3)),
       );
       // Log 2: latest physical triage today (intensity 2 -> soSo)
@@ -276,7 +269,6 @@ void main() {
         id: 'log-2-physical',
         intensity: 2,
         anatomicalSystem: 'cabeca_pescoco',
-        disposition: 'auto_cuidado',
         recordedAt: now.subtract(const Duration(minutes: 30)),
       );
 
@@ -284,7 +276,7 @@ void main() {
         logs: [log2, log1],
         physicalSummary: const {},
         emotionalSummary: const [],
-        criticalRecurrences: const [],
+        journalPatterns: const [],
       );
 
       final container = ProviderContainer(

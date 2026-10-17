@@ -55,11 +55,9 @@ void main() {
         id: 'out-1',
         vertical: 'physical',
         intensityScore: 3,
-        careDisposition: CareDisposition.routineConsultation,
         primaryCategory: 'cabeca',
         categoryLabel: 'Cabeça',
         somaticMapping: 'Cefaleia',
-        organicPrimacyApplied: false,
         recommendedArticles: [],
         recordedAt: DateTime.now(),
       );
@@ -135,6 +133,61 @@ void main() {
       expect(updatedRecord.status, equals('failed'));
       expect(updatedRecord.attempts, equals(1));
       expect(updatedRecord.lastError, contains('503 Service Unavailable'));
+    });
+
+    test('sends stored profileId explicitly via submitTriageForProfile when outbox item has profileId', () async {
+      await repository.enqueueTriageCheckIn(
+        vertical: 'physical',
+        answers: {0: 'dor_de_cabeca'},
+        clientSessionId: 'session-profile-1',
+        profileId: 'profile-dep-123',
+      );
+
+      final dummyOutcome = TriageOutcome(
+        id: 'out-profile-1',
+        vertical: 'physical',
+        intensityScore: 3,
+        primaryCategory: 'cabeca',
+        categoryLabel: 'Cabeça',
+        somaticMapping: 'Cefaleia',
+        recommendedArticles: [],
+        recordedAt: DateTime.now(),
+      );
+
+      when(() => mockDataSource.submitTriageForProfile(
+            vertical: any(named: 'vertical'),
+            answers: any(named: 'answers'),
+            narrative: any(named: 'narrative'),
+            token: any(named: 'token'),
+            clientSessionId: any(named: 'clientSessionId'),
+            language: any(named: 'language'),
+            profileId: any(named: 'profileId'),
+          )).thenAnswer((_) async => dummyOutcome);
+
+      final container = ProviderContainer(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          triageOutboxRepositoryProvider.overrideWithValue(repository),
+          triageOutcomeDataSourceProvider.overrideWithValue(mockDataSource),
+          connectivityServiceProvider.overrideWithValue(mockConnectivity),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final worker = container.read(syncOutboxWorkerProvider.notifier);
+      final count = await worker.syncPendingOutbox();
+      expect(count, equals(1));
+
+      verify(() => mockDataSource.submitTriageForProfile(
+            vertical: 'physical',
+            answers: {0: 'dor_de_cabeca'},
+            narrative: null,
+            clientSessionId: 'session-profile-1',
+            profileId: 'profile-dep-123',
+          )).called(1);
+
+      final pending = await repository.getPendingOutboxItems();
+      expect(pending, isEmpty);
     });
 
     testWidgets('OfflineIndicatorBanner shows offline state and pending sync count', (tester) async {

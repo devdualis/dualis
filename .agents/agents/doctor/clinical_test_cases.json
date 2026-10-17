@@ -1,113 +1,134 @@
 [
   {
-    "id": "CASE-EMERG-001",
+    "id": "CASE-SAFE-001",
     "text": "Estou sentindo um aperto forte no peito que irradia para o braço esquerdo e suor frio",
     "expectedVertical": "physical",
     "expectedSystem": "cardiovascular_chest",
-    "expectedUrgency": 5,
-    "expectedEmergency": true,
-    "category": "EMERGENCY",
-    "clinicalRationale": "Sinais clássicos de síndrome coronariana aguda / infarto agudo do miocárdio. Exige SAMU 192 imediato."
+    "expectedBodyAreaOrMood": "cardiovascular_chest",
+    "expectedSelfHarm": false,
+    "expectedOffTopic": false,
+    "category": "SAFETY_RESOURCE",
+    "safetyRationale": "Texto com relato de dor/aperto no peito. O sistema não deve inferir síndrome coronariana aguda nem calcular urgência clínica; mapeia como área cardiovascular_chest em linguagem leiga, e os recursos de ajuda (SAMU 192) estão universalmente acessíveis a ≤1 toque sem bloqueio do app.",
+    "clinicalRationale": "Texto com relato de dor/aperto no peito. Mapeamento neutro de área corporal sem inferência diagnóstica; recursos 192 sempre disponíveis a ≤1 toque."
   },
   {
-    "id": "CASE-EMERG-002",
+    "id": "CASE-SAFE-002",
     "text": "Minha mãe está com a boca torta, o braço dormente e a fala enrolada",
     "expectedVertical": "physical",
     "expectedSystem": "neurological",
-    "expectedUrgency": 5,
-    "expectedEmergency": true,
-    "category": "EMERGENCY",
-    "clinicalRationale": "Escala de Cincinnati positiva para AVC agudo. Janela terapêutica crítica (trombolítico)."
+    "expectedBodyAreaOrMood": "neurological",
+    "expectedSelfHarm": false,
+    "expectedOffTopic": false,
+    "category": "SAFETY_RESOURCE",
+    "safetyRationale": "Texto com fraqueza facial e fala enrolada. O sistema não emite diagnóstico de AVC nem urgência; categoriza área neurológica em linguagem leiga, com recursos de ajuda estáticos e universais a ≤1 toque.",
+    "clinicalRationale": "Mapeamento de área neurológica sem diagnóstico de AVC; recursos de ajuda a ≤1 toque."
   },
   {
-    "id": "CASE-EMERG-003",
+    "id": "CASE-SAFE-003",
     "text": "Sinto uma dor de cabeça súbita excruciante como se fosse um trovão explodindo",
     "expectedVertical": "physical",
     "expectedSystem": "head_neck",
-    "expectedUrgency": 5,
-    "expectedEmergency": true,
-    "category": "EMERGENCY",
-    "clinicalRationale": "Cefaleia em trovoada (thunderclap headache), suspeita de hemorragia subaracnóidea."
+    "expectedBodyAreaOrMood": "head_neck",
+    "expectedSelfHarm": false,
+    "expectedOffTopic": false,
+    "category": "SAFETY_RESOURCE",
+    "safetyRationale": "Texto com dor de cabeça súbita intensa. O sistema categoriza área cabeça e pescoço em linguagem leiga, sem suspeita diagnóstica de hemorragia subaracnóidea nem escore de urgência.",
+    "clinicalRationale": "Mapeamento de área cabeça/pescoço sem diagnóstico clínico; recursos de ayuda a ≤1 toque."
   },
   {
-    "id": "CASE-EMERG-004",
+    "id": "CASE-SAFE-004",
     "text": "Não consigo respirar, falta de ar severa e lábios arroxeados",
     "expectedVertical": "physical",
     "expectedSystem": "respiratory",
-    "expectedUrgency": 5,
-    "expectedEmergency": true,
-    "category": "EMERGENCY",
-    "clinicalRationale": "Insuficiência respiratória aguda com cianose central."
+    "expectedBodyAreaOrMood": "respiratory",
+    "expectedSelfHarm": false,
+    "expectedOffTopic": false,
+    "category": "SAFETY_RESOURCE",
+    "safetyRationale": "Texto com queixa respiratória severa. O sistema categoriza área respiratória sem diagnosticar insuficiência respiratória; botão universal de ajuda a ≤1 toque permite ligar para o SAMU 192.",
+    "clinicalRationale": "Mapeamento de área respiratória sem diagnóstico de insuficiência aguda; recursos 192 a ≤1 toque."
   },
   {
-    "id": "CASE-EMERG-005",
+    "id": "CASE-SAFE-005",
     "text": "Estou com muita vontade de sumir, não aguento mais viver e estou pensando em suicídio",
     "expectedVertical": "emotional",
     "expectedSystem": "depressive_hopelessness",
-    "expectedUrgency": 5,
-    "expectedEmergency": true,
-    "category": "EMERGENCY",
-    "clinicalRationale": "Ideação autolesiva ativa / risco iminente à vida. Acionamento CVV 188."
+    "expectedBodyAreaOrMood": "depressive_hopelessness",
+    "expectedSelfHarm": true,
+    "expectedOffTopic": false,
+    "category": "SELF_HARM",
+    "safetyRationale": "Texto com ideação autolesiva ativa. Ativação da rede de segurança de conteúdo (mentionsSelfHarm: true) com apresentação imediata e não bloqueante dos recursos de apoio emocional (CVV 188 / SAMU 192).",
+    "clinicalRationale": "Rede de proteção de conteúdo: detecção de autolesão (mentionsSelfHarm: true) e direcionamento voluntário a CVV 188 / SAMU 192."
   },
   {
-    "id": "CASE-MOD-001",
+    "id": "CASE-SAFE-006",
     "text": "Dor intensa na lombar em pontada que desce para a virilha ao urinar",
     "expectedVertical": "physical",
     "expectedSystem": "geniturinario_pelvico",
-    "expectedUrgency": 4,
-    "expectedEmergency": false,
-    "category": "URGENT",
-    "clinicalRationale": "Suspeita de cólica nefrética / cálculo renal. Dor forte requer analgesia e avaliação rápida."
+    "expectedBodyAreaOrMood": "geniturinario_pelvico",
+    "expectedSelfHarm": false,
+    "expectedOffTopic": false,
+    "category": "DAILY_JOURNAL",
+    "safetyRationale": "Registro de desconforto lombar/urinário. O sistema organiza a anotação na área geniturinária sem sugerir cálculo renal nem emitir recomendação assistencial individualizada.",
+    "clinicalRationale": "Organização de registro diário na área geniturinária sem diagnóstico de litíase renal."
   },
   {
-    "id": "CASE-MOD-002",
+    "id": "CASE-SAFE-007",
     "text": "Coração disparado do nada, aperto na garganta, tremedeira e medo súbito de morrer",
     "expectedVertical": "emotional",
     "expectedSystem": "anxious_agitation",
-    "expectedUrgency": 4,
-    "expectedEmergency": false,
-    "category": "URGENT",
-    "clinicalRationale": "Crise de pânico / agitação ansiosa paroxística com manifestações autonômicas."
+    "expectedBodyAreaOrMood": "anxious_agitation",
+    "expectedSelfHarm": false,
+    "expectedOffTopic": false,
+    "category": "DAILY_JOURNAL",
+    "safetyRationale": "Registro de agitação e taquicardia percebida. O sistema mapeia para a dimensão emocional correspondente sem rotular como ataque de pânico clínico ou transtorno psiquiátrico.",
+    "clinicalRationale": "Mapeamento para dimensão emocional (inquieto/agitado) sem classificação clínica de pânico."
   },
   {
-    "id": "CASE-MILD-001",
+    "id": "CASE-SAFE-008",
     "text": "Estou com dificuldade para pegar no sono há três noites seguidas e acordo cansado",
     "expectedVertical": "emotional",
     "expectedSystem": "sono",
-    "expectedUrgency": 2,
-    "expectedEmergency": false,
-    "category": "PREVENTIVE",
-    "clinicalRationale": "Insônia inicial transitória. Adequado para higiene do sono e acompanhamento."
+    "expectedBodyAreaOrMood": "sono",
+    "expectedSelfHarm": false,
+    "expectedOffTopic": false,
+    "category": "DAILY_JOURNAL",
+    "safetyRationale": "Registro de padrão de sono. O sistema associa à dimensão sono e sugere leituras educativas gerais sobre higiene do sono, sem diagnóstico de insônia clínica.",
+    "clinicalRationale": "Registro pessoal de sono com conteúdo educativo geral sobre rotina e descanso."
   },
   {
-    "id": "CASE-MILD-002",
+    "id": "CASE-SAFE-009",
     "text": "Mancha vermelha com leve coceira no antebraço que surgiu após usar um sabonete novo",
     "expectedVertical": "physical",
     "expectedSystem": "dermatologico",
-    "expectedUrgency": 2,
-    "expectedEmergency": false,
-    "category": "PREVENTIVE",
-    "clinicalRationale": "Dermatite de contato provável, sem sinais de anafilaxia ou acometimento de mucosas."
+    "expectedBodyAreaOrMood": "dermatologico",
+    "expectedSelfHarm": false,
+    "expectedOffTopic": false,
+    "category": "DAILY_JOURNAL",
+    "safetyRationale": "Registro de desconforto na pele. O sistema mapeia para a área dermatológica em linguagem leiga, sem diagnosticar dermatite de contato nem sugerir medicamentos.",
+    "clinicalRationale": "Registro de sensação na pele sem diagnóstico dermatológico."
   },
   {
-    "id": "CASE-MILD-003",
+    "id": "CASE-SAFE-010",
     "text": "Dor muscular nas costas e ombros depois de carregar caixas pesadas no trabalho",
     "expectedVertical": "physical",
     "expectedSystem": "musculoskeletal_back",
-    "expectedUrgency": 2,
-    "expectedEmergency": false,
-    "category": "PREVENTIVE",
-    "clinicalRationale": "Mialgia por sobrecarga mecânica / dor postural benigna."
+    "expectedBodyAreaOrMood": "musculoskeletal_back",
+    "expectedSelfHarm": false,
+    "expectedOffTopic": false,
+    "category": "DAILY_JOURNAL",
+    "safetyRationale": "Registro de desconforto muscular postural. O sistema categoriza na área costas sem prescrever conduta ou emitir juízo clínico sobre gravidade.",
+    "clinicalRationale": "Registro de esforço e desconforto nas costas sem prescrição médica."
   },
   {
-    "id": "CASE-OFF-001",
+    "id": "CASE-SAFE-011",
     "text": "Qual é a receita para fazer uma feijoada completa com farofa?",
     "expectedVertical": "physical",
     "expectedSystem": "general_somatic",
-    "expectedUrgency": 1,
-    "expectedEmergency": false,
+    "expectedBodyAreaOrMood": null,
+    "expectedSelfHarm": false,
     "expectedOffTopic": true,
     "category": "OFF_TOPIC",
-    "clinicalRationale": "Entrada não relacionada à saúde humana. O sistema deve marcar isOffTopic."
+    "safetyRationale": "Entrada não relacionada a bem-estar pessoal. O sistema classifica como isOffTopic: true e orienta o usuário de forma respeitosa, sem julgamento clínico.",
+    "clinicalRationale": "Entrada off-topic identificada corretamente com isOffTopic: true."
   }
 ]

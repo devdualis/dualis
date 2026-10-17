@@ -6,9 +6,9 @@ import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/email_verification_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
+import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
-import '../../features/emergency/domain/emergency_context.dart';
-import '../../features/emergency/domain/emergency_trigger_category.dart';
 import '../../features/emergency/presentation/screens/emergency_screen.dart';
 import '../../features/triage/domain/triage_vertical.dart';
 import '../../features/triage/presentation/screens/triage_wizard_screen.dart';
@@ -20,6 +20,7 @@ import '../../features/privacy/presentation/screens/terms_of_service_screen.dart
 import '../../features/privacy/presentation/screens/privacy_policy_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/hydration/presentation/screens/hydration_dashboard_screen.dart';
+import '../../features/profile/presentation/screens/family_sharing_screen.dart';
 import '../presentation/screens/not_found_screen.dart';
 import 'route_paths.dart';
 
@@ -46,7 +47,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isAuthRoute = currentLoc == RoutePaths.onboarding ||
           currentLoc == RoutePaths.login ||
           currentLoc == RoutePaths.register ||
-          currentLoc == RoutePaths.verifyEmail;
+          currentLoc == RoutePaths.verifyEmail ||
+          currentLoc == RoutePaths.forgotPassword ||
+          currentLoc == RoutePaths.resetPassword;
 
       final isPublicAccessibleRoute = isAuthRoute ||
           currentLoc == RoutePaths.emergency ||
@@ -102,6 +105,19 @@ GoRouter createRouter({
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
+        path: RoutePaths.forgotPassword,
+        name: 'forgotPassword',
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.resetPassword,
+        name: 'resetPassword',
+        builder: (context, state) {
+          final email = state.extra as String? ?? '';
+          return ResetPasswordScreen(email: email);
+        },
+      ),
+      GoRoute(
         path: RoutePaths.home,
         name: 'home',
         builder: (context, state) => const HomeScreen(),
@@ -109,16 +125,7 @@ GoRouter createRouter({
       GoRoute(
         path: RoutePaths.emergency,
         name: 'emergency',
-        builder: (context, state) {
-          final emergencyContext = state.extra as EmergencyContext? ??
-              EmergencyContext(
-                category: EmergencyTriggerCategory.generalCriticalIntensity,
-                severityLevel: 5,
-                isEmotional: false,
-                detectedAt: DateTime.now(),
-              );
-          return EmergencyScreen(emergencyContext: emergencyContext);
-        },
+        builder: (context, state) => const EmergencyScreen(),
       ),
       GoRoute(
         path: RoutePaths.triage,
@@ -131,6 +138,7 @@ GoRouter createRouter({
               isDual: args.isDual,
               naturalLanguageText: args.naturalLanguageText,
               preselectedCategoryKey: args.preselectedCategoryKey,
+              mentionsSelfHarm: args.mentionsSelfHarm,
             );
           }
           final vertical =
@@ -146,12 +154,10 @@ GoRouter createRouter({
               TriageOutcome(
                 id: 'default-outcome',
                 vertical: 'physical',
-                intensityScore: 2,
-                careDisposition: CareDisposition.selfCare,
+                intensityScore: 0,
                 primaryCategory: 'geral',
-                categoryLabel: 'Avaliação Física Geral',
-                somaticMapping: 'Sintomas autolimitados',
-                organicPrimacyApplied: false,
+                categoryLabel: '',
+                somaticMapping: '',
                 recommendedArticles: const [],
                 recordedAt: DateTime.now(),
               );
@@ -177,6 +183,11 @@ GoRouter createRouter({
         path: RoutePaths.hydration,
         name: 'hydration',
         builder: (context, state) => const HydrationDashboardScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.familySharing,
+        name: 'familySharing',
+        builder: (context, state) => const FamilySharingScreen(),
       ),
       GoRoute(
         path: RoutePaths.termsOfService,

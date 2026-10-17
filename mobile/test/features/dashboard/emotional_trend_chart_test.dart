@@ -49,7 +49,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Evolução Emocional (Últimos 7 Dias)'), findsOneWidget);
-      expect(find.text('Estresse / Burnout'), findsOneWidget);
+      expect(find.text('Estresse'), findsOneWidget);
       expect(find.text('Ansiedade'), findsOneWidget);
     });
   });

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,15 +25,19 @@ import 'package:dualis_mobile/features/sync/data/triage_outbox_repository.dart';
 import 'package:dualis_mobile/features/home/domain/axis_intensity_resolver.dart';
 import 'package:dualis_mobile/features/home/domain/trigger_checkin_state.dart';
 import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
+import '../../domain/symptom_classification.dart';
 import '../../../../core/network/connectivity_service.dart';
 import '../../../../l10n/locale_provider.dart';
 import 'package:uuid/uuid.dart';
+import '../../../emergency/domain/red_flag_evaluator.dart';
+import '../../../emergency/presentation/widgets/safety_notice_banner.dart';
 
 class TriageWizardScreen extends ConsumerStatefulWidget {
   final TriageVertical vertical;
   final bool isDual;
   final String? naturalLanguageText;
   final String? preselectedCategoryKey;
+  final bool mentionsSelfHarm;
 
   const TriageWizardScreen({
     super.key,
@@ -39,6 +45,7 @@ class TriageWizardScreen extends ConsumerStatefulWidget {
     this.isDual = false,
     this.naturalLanguageText,
     this.preselectedCategoryKey,
+    this.mentionsSelfHarm = false,
   });
 
   @override
@@ -49,7 +56,15 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
   Color _prevColor = AppColors.softIndigo;
   TriageOutcome? _physicalOutcome;
   late final TextEditingController _narrativeController;
+  late final TextEditingController _stepZeroFreeTextController;
+  Timer? _stepZeroClassificationDebounce;
   bool _isSubmitting = false;
+  // Shown once, before the step-0 category grid, matching the product's
+  // "Bem/Normal · Mais ou menos · Mal/Ruim" entry question. Skipped when an
+  // AI-detected category already arrived from Home's free-text classifier
+  // (widget.preselectedCategoryKey), since that path already knows the user
+  // isn't "Bem/Normal".
+  late bool _showIntroQuestion;
 
   @override
   void initState() {
@@ -59,6 +74,9 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
         ? widget.naturalLanguageText!
         : '';
     _narrativeController = TextEditingController(text: initialNarrative);
+    _stepZeroFreeTextController = TextEditingController();
+    _showIntroQuestion = widget.preselectedCategoryKey == null ||
+        widget.preselectedCategoryKey!.isEmpty;
     _prevColor = widget.vertical == TriageVertical.psicoEmocional
         ? AppColors.softIndigo
         : AppColors.clinicalTeal;
@@ -70,13 +88,55 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
       if (categoryKey != null && categoryKey.isNotEmpty) {
         notifier.presetCategoryAndSkip(categoryKey);
       }
+      // Safety net: text typed on Home (local patterns) or flagged by the AI.
+      if (!mounted) return;
+      if (widget.mentionsSelfHarm) {
+        SafetyNotice.show(context, SafetyNoticeKind.selfHarm);
+      } else if (initialNarrative.trim().isNotEmpty) {
+        notifier.checkFreeText(context, initialNarrative);
+      }
     });
   }
 
   @override
   void dispose() {
+    _stepZeroClassificationDebounce?.cancel();
     _narrativeController.dispose();
+    _stepZeroFreeTextController.dispose();
     super.dispose();
+  }
+
+  /// Debounces the step-0 free-text input (~600ms) and, on a successful,
+  /// non-off-topic classification, highlights the matching icon tile via the
+  /// same `selectOption` mechanism tapping a tile uses. This is a convenience
+  /// layer only: the user still taps "Next" themselves and can tap a
+  /// different tile afterward to override the suggestion. Errors, offline
+  /// failures, and off-topic results are swallowed silently — the icon grid
+  /// remains the fallback.
+  void _onStepZeroFreeTextChanged(String text) {
+    _stepZeroClassificationDebounce?.cancel();
+    if (text.trim().isEmpty) return;
+    _stepZeroClassificationDebounce = Timer(const Duration(milliseconds: 600), () async {
+      if (!mounted) return;
+      SymptomClassification classification;
+      try {
+        classification =
+            await ref.read(symptomClassificationDataSourceProvider).classify(text);
+      } catch (_) {
+        return;
+      }
+      if (!mounted) return;
+      if (classification.mentionsSelfHarm) {
+        SafetyNotice.show(context, SafetyNoticeKind.selfHarm);
+        return;
+      }
+      if (classification.isOffTopic) return;
+      ref.read(triageWizardNotifierProvider.notifier).selectOption(
+            context,
+            0,
+            classification.wizardCategoryKey,
+          );
+    });
   }
 
   Color _getActiveColor(TriageVertical vertical) {
@@ -161,6 +221,11 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     final state = ref.watch(triageWizardNotifierProvider);
+
+    if (_showIntroQuestion) {
+      return _buildIntroScreen(context, state, l10n, isDark);
+    }
+
     final questions = TriageQuestionBank.forVertical(
       state.activeVertical,
       systemKey: state.answers[0],
@@ -264,6 +329,119 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
     );
   }
 
+  /// The entry question shown before the step-0 category grid: a quick,
+  /// non-clinical self-report ("Bem/Normal", "Mais ou menos", "Mal/Ruim").
+  /// "Bem/Normal" ends today's entry immediately via the same
+  /// _handleNormalCompletion path the category grid's own Normal key uses.
+  /// The other two just reveal the category grid below — no severity score
+  /// or clinical judgment is derived from this choice (see CLAUDE.md).
+  Widget _buildIntroScreen(
+    BuildContext context,
+    TriageWizardState state,
+    AppLocalizations l10n,
+    bool isDark,
+  ) {
+    final activeColor = _getActiveColor(state.activeVertical);
+    final bannerTitle = state.activeVertical == TriageVertical.psicoEmocional
+        ? l10n.triageBannerEmotional
+        : l10n.triageBannerPhysical;
+
+    return Scaffold(
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      // Plain AppBar (not TriageStepBanner) on purpose: this entry question
+      // sits before the 5-step wizard, so a "step X of Y" progress bar here
+      // would misrepresent where the user actually is.
+      appBar: AppBar(
+        backgroundColor: activeColor,
+        foregroundColor: Colors.white,
+        centerTitle: true,
+        title: Text(
+          bannerTitle,
+          style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+          tooltip: l10n.triageBack,
+        ),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.wizardIntroTitle,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  height: 1.35,
+                ),
+              ),
+              const SizedBox(height: 24),
+              _IntroOptionTile(
+                icon: Icons.sentiment_satisfied_alt_rounded,
+                color: AppColors.dualisSymbolGreen,
+                label: l10n.wizardIntroOptionGoodLabel,
+                caption: l10n.wizardIntroOptionGoodCaption,
+                isLoading: _isSubmitting,
+                onTap: _isSubmitting
+                    ? null
+                    : () => _handleNormalCompletion(context, state),
+              ),
+              const SizedBox(height: 14),
+              _IntroOptionTile(
+                icon: Icons.sentiment_neutral_rounded,
+                color: Colors.amber.shade700,
+                label: l10n.wizardIntroOptionSoSoLabel,
+                caption: l10n.wizardIntroOptionSoSoCaption,
+                isLoading: false,
+                onTap: _isSubmitting
+                    ? null
+                    : () => setState(() => _showIntroQuestion = false),
+              ),
+              const SizedBox(height: 14),
+              _IntroOptionTile(
+                icon: Icons.sentiment_dissatisfied_rounded,
+                color: const Color(0xFFE57373),
+                label: l10n.wizardIntroOptionBadLabel,
+                caption: l10n.wizardIntroOptionBadCaption,
+                isLoading: false,
+                onTap: _isSubmitting
+                    ? null
+                    : () => setState(() => _showIntroQuestion = false),
+              ),
+              const Spacer(),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 16,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n.wizardIntroFootnote,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildDetectedCategoryBanner(
     BuildContext context,
     Color activeColor,
@@ -342,7 +520,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
                       Icon(Icons.edit_note_rounded, size: 20, color: activeColor),
                       const SizedBox(width: 8),
                       Text(
-                        'Descrição opcional (em suas palavras)',
+                        AppLocalizations.of(context).wizardNarrativeLabel,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -365,7 +543,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
                           : AppColors.textPrimaryLight,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'Descreva como você está se sentindo com base nos sintomas...',
+                      hintText: AppLocalizations.of(context).wizardNarrativeHint,
                       hintStyle: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         color: isDark
@@ -411,6 +589,89 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
                 );
           },
         ),
+      );
+    }
+
+    if (state.currentStep == 0 && question.stepIndex == 0) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          GridView.count(
+            crossAxisCount: 3,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: 0.85,
+            // 'normal' stays a valid, fully-functional answer key (see
+            // _handleNormalCompletion / isNormalSelection in this file and
+            // TriageQuestionBank) — it is just not rendered as a grid tile,
+            // since the home screen's big icon buttons already cover that
+            // meaning. Only the visual option is removed here.
+            children: question.options
+                .where((option) => option.key != 'normal')
+                .map((option) {
+              final isSelected = state.answers[state.currentStep] == option.key;
+              final label = TriagePreviewCard.resolveAnswerLabel(context, option.key);
+
+              return _IconOptionTile(
+                optionKey: option.key,
+                label: label,
+                isSelected: isSelected,
+                activeColor: activeColor,
+                onTap: () {
+                  ref.read(triageWizardNotifierProvider.notifier).selectOption(
+                        context,
+                        state.currentStep,
+                        option.key,
+                      );
+                },
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            AppLocalizations.of(context).wizardStepZeroFreeTextLabel,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            key: const Key('triageStepZeroFreeTextInput'),
+            controller: _stepZeroFreeTextController,
+            maxLines: 3,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+            ),
+            onChanged: _onStepZeroFreeTextChanged,
+            decoration: InputDecoration(
+              hintText: AppLocalizations.of(context).wizardStepZeroFreeTextHint,
+              hintStyle: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Colors.grey.withValues(alpha: 0.3),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: activeColor,
+                  width: 1.5,
+                ),
+              ),
+              contentPadding: const EdgeInsets.all(12),
+            ),
+          ),
+        ],
       );
     }
 
@@ -475,6 +736,16 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
                               int.tryParse(widget.naturalLanguageText!.trim()) == null)
                           ? widget.naturalLanguageText!.trim()
                           : null);
+
+                  // Safety net for the text written in the wizard itself. The
+                  // notice lives on the root messenger, so it stays visible
+                  // after navigating home.
+                  if (narrativeInput.isNotEmpty &&
+                      narrativeInput != (widget.naturalLanguageText ?? '').trim()) {
+                    ref
+                        .read(triageWizardNotifierProvider.notifier)
+                        .checkFreeText(context, narrativeInput);
+                  }
 
                   ref.read(triageWizardNotifierProvider.notifier).advance();
 
@@ -550,7 +821,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
                     final emoLabel = currentTrigger.emotionalSummary ?? emoOutcome?.categoryLabel;
                     final emoMapping = currentTrigger.emotionalNarrative ??
                         emoOutcome?.somaticMapping ??
-                        'Avaliação Psicoemocional Registrada';
+                        'Registro emocional salvo';
                     final emoScore = AxisIntensityResolver.resolveDisplayIntensity(
                       axis: CheckInAxis.emotional,
                       state: currentTrigger,
@@ -569,7 +840,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
                     final physLabel = currentTrigger.physicalSummary ?? physOutcome?.categoryLabel;
                     final physMapping = currentTrigger.physicalNarrative ??
                         physOutcome?.somaticMapping ??
-                        'Avaliação Física Registrada';
+                        'Registro físico salvo';
                     final physScore = AxisIntensityResolver.resolveDisplayIntensity(
                       axis: CheckInAxis.physical,
                       state: currentTrigger,
@@ -761,7 +1032,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
         final emoLabel = currentTrigger.emotionalSummary ?? emoOutcome?.categoryLabel;
         final emoMapping = currentTrigger.emotionalNarrative ??
             emoOutcome?.somaticMapping ??
-            'Avaliação Psicoemocional Registrada';
+            'Registro emocional salvo';
         final emoScore = AxisIntensityResolver.resolveDisplayIntensity(
           axis: CheckInAxis.emotional,
           state: currentTrigger,
@@ -780,7 +1051,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
         final physLabel = currentTrigger.physicalSummary ?? physOutcome?.categoryLabel;
         final physMapping = currentTrigger.physicalNarrative ??
             physOutcome?.somaticMapping ??
-            'Avaliação Física Registrada';
+            'Registro físico salvo';
         final physScore = AxisIntensityResolver.resolveDisplayIntensity(
           axis: CheckInAxis.physical,
           state: currentTrigger,
@@ -864,5 +1135,195 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
     if (context.mounted) {
       ref.read(triageWizardNotifierProvider.notifier).advance();
     }
+  }
+}
+
+/// Maps step-0 (body-area/mood) option keys to a representative Material
+/// icon. Purely a presentation concern resolved at render time — the
+/// underlying option keys and their category semantics are untouched.
+const Map<String, IconData> _stepZeroOptionIcons = {
+  // Physical
+  'cabeca_pescoco': Icons.face,
+  'cardiovascular_torax': Icons.favorite,
+  'respiratorio': Icons.air,
+  'gastrointestinal_abdomen': Icons.restaurant,
+  'coluna_dor_dorsal': Icons.accessibility,
+  'membros_superiores': Icons.back_hand,
+  'membros_inferiores': Icons.directions_walk,
+  'neurologico': Icons.psychology_alt,
+  'geniturinario_pelvico': Icons.wc,
+  'dermatologico': Icons.healing,
+  'muscular_geral_sistemico': Icons.fitness_center,
+  'endocrino_metabolico': Icons.bolt,
+  // Emotional
+  'ansiosa_agitacao': Icons.bolt,
+  'depressiva_desanimo': Icons.cloud,
+  'estresse_burnout': Icons.whatshot,
+  'somatica': Icons.favorite_border,
+  'sono': Icons.bedtime,
+  'cognitiva_foco': Icons.lightbulb,
+  'autoestima': Icons.star,
+  // Shared by both verticals
+  'normal': Icons.sentiment_satisfied,
+};
+
+/// Circular icon tile for the step-0 body-area/mood grid. Visually replaces
+/// [TriageOptionChip] for step 0 only; tapping triggers the same
+/// `selectOption` call that the chip used to trigger.
+/// One row of the intro question (Bem/Normal, Mais ou menos, Mal/Ruim):
+/// colored circle icon + label + short caption, tappable.
+class _IntroOptionTile extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String label;
+  final String caption;
+  final bool isLoading;
+  final VoidCallback? onTap;
+
+  const _IntroOptionTile({
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.caption,
+    required this.isLoading,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: isLoading
+                    ? Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: color),
+                      )
+                    : Icon(icon, color: color, size: 26),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      caption,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12.5,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _IconOptionTile extends StatelessWidget {
+  final String optionKey;
+  final String label;
+  final bool isSelected;
+  final Color activeColor;
+  final VoidCallback onTap;
+
+  const _IconOptionTile({
+    required this.optionKey,
+    required this.label,
+    required this.isSelected,
+    required this.activeColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final icon = _stepZeroOptionIcons[optionKey] ?? Icons.circle_outlined;
+
+    final textColor = isSelected
+        ? activeColor
+        : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: activeColor.withValues(alpha: isSelected ? 0.25 : 0.1),
+                border: isSelected
+                    ? Border.all(color: activeColor, width: 2.0)
+                    : null,
+              ),
+              child: Icon(
+                icon,
+                size: 26,
+                color: isSelected
+                    ? activeColor
+                    : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11.5,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: textColor,
+                height: 1.2,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

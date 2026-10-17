@@ -13,24 +13,27 @@ class AnimatedPageIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(count, (index) {
-        final isActive = index == currentIndex;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          height: 8,
-          width: isActive ? 24 : 8,
-          decoration: BoxDecoration(
-            color: isActive
-                ? AppColors.softIndigo
-                : AppColors.outlineLight,
-            borderRadius: BorderRadius.circular(12),
-          ),
-        );
-      }),
+    return Semantics(
+      label: 'Página ${currentIndex + 1} de $count',
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(count, (index) {
+          final isActive = index == currentIndex;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            height: 8,
+            width: isActive ? 24 : 8,
+            decoration: BoxDecoration(
+              color: isActive
+                  ? AppColors.softIndigo
+                  : AppColors.outlineLight,
+              borderRadius: BorderRadius.circular(12),
+            ),
+          );
+        }),
+      ),
     );
   }
 }
