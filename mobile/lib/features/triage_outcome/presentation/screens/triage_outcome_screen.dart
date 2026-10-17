@@ -7,7 +7,6 @@ import '../../../../l10n/app_localizations.dart';
 import '../../domain/triage_outcome_models.dart';
 import '../widgets/intensity_meter.dart';
 import '../widgets/article_card.dart';
-import '../widgets/ai_insight_card.dart';
 import '../widgets/wellness_guidance_block.dart';
 import '../widgets/dual_axis_static_note.dart';
 
@@ -162,12 +161,6 @@ class TriageOutcomeScreen extends StatelessWidget {
                 const DualAxisStaticNote(),
                 const SizedBox(height: 16),
               ],
-              AiInsightCard(
-                mappedLayTerm: outcome.aiMappedLayTerm,
-                bodyAreaOrMood: outcome.aiBodyAreaOrMood,
-              ),
-              if (outcome.aiMappedLayTerm != null || outcome.aiBodyAreaOrMood != null)
-                const SizedBox(height: 16),
               const WellnessGuidanceBlock(),
               const SizedBox(height: 24),
               Row(

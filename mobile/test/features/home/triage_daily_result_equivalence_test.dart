@@ -705,9 +705,9 @@ void main() {
     });
 
     // -------------------------------------------------------------
-    // BLOCK 7: "HOW WE ORGANISED YOUR NOTE" CARD (Tests 25 to 27)
+    // BLOCK 7: REDUNDANT ORGANIZATION CARD REMOVED (Tests 25 to 27)
     // -------------------------------------------------------------
-    testWidgets('25. AI card shows the lay term the person used on both screens',
+    testWidgets('25. AI tags do not add redundant lay-term text to either result screen',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
         aiMappedLayTerm: 'dor de cabeça latejante',
@@ -720,17 +720,19 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text(_pt.outcomeAiInsightLayTerm('dor de cabeça latejante')), findsOneWidget);
+      expect(find.text(_pt.outcomeAiInsightLayTerm('dor de cabeça latejante')), findsNothing);
+      expect(find.text(outcome.categoryLabel), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text(_pt.outcomeAiInsightLayTerm('dor de cabeça latejante')), findsOneWidget);
+      expect(find.text(_pt.outcomeAiInsightLayTerm('dor de cabeça latejante')), findsNothing);
+      expect(find.text(outcome.categoryLabel), findsOneWidget);
     });
 
-    testWidgets('26. AI card title and area render on both screens, never clinical wording',
+    testWidgets('26. Organization title and area are omitted on both screens even with AI tags',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
         aiMappedLayTerm: 'dor nas costas ao sentar',
@@ -743,8 +745,8 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text(_pt.outcomeAiInsightTitle), findsOneWidget);
-      expect(find.text(_pt.outcomeAiInsightArea('Costas')), findsOneWidget);
+      expect(find.text(_pt.outcomeAiInsightTitle), findsNothing);
+      expect(find.text(_pt.outcomeAiInsightArea('Costas')), findsNothing);
       expect(find.text('Informação Clínica Complementar'), findsNothing);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
@@ -752,12 +754,12 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text(_pt.outcomeAiInsightTitle), findsOneWidget);
-      expect(find.text(_pt.outcomeAiInsightArea('Costas')), findsOneWidget);
+      expect(find.text(_pt.outcomeAiInsightTitle), findsNothing);
+      expect(find.text(_pt.outcomeAiInsightArea('Costas')), findsNothing);
       expect(find.text('Informação Clínica Complementar'), findsNothing);
     });
 
-    testWidgets('27. AI card is omitted on the outcome screen when there are no AI tags',
+    testWidgets('27. Organization card is omitted on both screens when there are no AI tags',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
         aiMappedLayTerm: null,
@@ -776,6 +778,7 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
+      expect(find.text(_pt.outcomeAiInsightTitle), findsNothing);
       expect(find.text('Informação Clínica Complementar'), findsNothing);
     });
 

@@ -9,7 +9,6 @@ import '../../../triage_outcome/domain/triage_outcome_models.dart';
 import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import '../../../triage_outcome/presentation/widgets/article_card.dart';
 import '../../../triage_outcome/presentation/widgets/intensity_meter.dart';
-import '../../../triage_outcome/presentation/widgets/ai_insight_card.dart';
 import '../../../triage_outcome/presentation/widgets/wellness_guidance_block.dart';
 import '../../../triage_outcome/presentation/widgets/dual_axis_static_note.dart';
 import '../../domain/axis_intensity_resolver.dart';
@@ -276,11 +275,6 @@ class TodayTriageResultTab extends ConsumerWidget {
             isDark: isDark,
           ),
         ],
-        const SizedBox(height: 16),
-        AiInsightCard(
-          mappedLayTerm: outcome.aiMappedLayTerm,
-          bodyAreaOrMood: outcome.aiBodyAreaOrMood ?? outcome.categoryLabel,
-        ),
         const SizedBox(height: 16),
         const WellnessGuidanceBlock(),
         const SizedBox(height: 24),
