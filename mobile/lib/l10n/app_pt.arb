@@ -1960,5 +1960,13 @@
   "outcomeTodayStatusSoSo": "Mais ou menos",
   "outcomeTodayStatusBad": "Mal",
   "outcomeHistoryDetailTitle": "Detalhes do registro",
-  "outcomeHistoryNoNarrative": "Você não adicionou uma descrição neste registro."
+  "outcomeHistoryNoNarrative": "Você não adicionou uma descrição neste registro.",
+  "wizardIntroTitle": "Como você está se sentindo hoje?",
+  "wizardIntroOptionGoodLabel": "Bem / Normal",
+  "wizardIntroOptionGoodCaption": "Encerra o registro de hoje",
+  "wizardIntroOptionSoSoLabel": "Mais ou menos",
+  "wizardIntroOptionSoSoCaption": "Vamos te ajudar a descrever melhor",
+  "wizardIntroOptionBadLabel": "Mal / Ruim",
+  "wizardIntroOptionBadCaption": "Vamos com mais cuidado nas próximas perguntas",
+  "wizardIntroFootnote": "Esta é a pergunta inicial de todos os registros. É rápida e ajuda a personalizar sua experiência."
 }

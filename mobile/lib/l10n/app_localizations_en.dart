@@ -2285,4 +2285,31 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get outcomeHistoryNoNarrative =>
       'You did not add a description to this entry.';
+
+  @override
+  String get wizardIntroTitle => 'How are you feeling today?';
+
+  @override
+  String get wizardIntroOptionGoodLabel => 'Good / Normal';
+
+  @override
+  String get wizardIntroOptionGoodCaption => 'Ends today\'s entry';
+
+  @override
+  String get wizardIntroOptionSoSoLabel => 'So-so';
+
+  @override
+  String get wizardIntroOptionSoSoCaption =>
+      'We will help you describe it better';
+
+  @override
+  String get wizardIntroOptionBadLabel => 'Bad / Not well';
+
+  @override
+  String get wizardIntroOptionBadCaption =>
+      'We will go a bit more carefully on the next questions';
+
+  @override
+  String get wizardIntroFootnote =>
+      'This is the first question of every entry. It is quick and helps personalize your experience.';
 }

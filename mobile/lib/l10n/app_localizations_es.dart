@@ -2308,4 +2308,31 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get outcomeHistoryNoNarrative =>
       'No agregaste una descripción en este registro.';
+
+  @override
+  String get wizardIntroTitle => '¿Cómo te sentís hoy?';
+
+  @override
+  String get wizardIntroOptionGoodLabel => 'Bien / Normal';
+
+  @override
+  String get wizardIntroOptionGoodCaption => 'Termina el registro de hoy';
+
+  @override
+  String get wizardIntroOptionSoSoLabel => 'Más o menos';
+
+  @override
+  String get wizardIntroOptionSoSoCaption =>
+      'Te vamos a ayudar a describirlo mejor';
+
+  @override
+  String get wizardIntroOptionBadLabel => 'Mal / No muy bien';
+
+  @override
+  String get wizardIntroOptionBadCaption =>
+      'Vamos con más cuidado en las próximas preguntas';
+
+  @override
+  String get wizardIntroFootnote =>
+      'Esta es la pregunta inicial de todos los registros. Es rápida y ayuda a personalizar tu experiencia.';
 }

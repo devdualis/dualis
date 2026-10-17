@@ -4023,6 +4023,54 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Você não adicionou uma descrição neste registro.'**
   String get outcomeHistoryNoNarrative;
+
+  /// No description provided for @wizardIntroTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como você está se sentindo hoje?'**
+  String get wizardIntroTitle;
+
+  /// No description provided for @wizardIntroOptionGoodLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bem / Normal'**
+  String get wizardIntroOptionGoodLabel;
+
+  /// No description provided for @wizardIntroOptionGoodCaption.
+  ///
+  /// In pt, this message translates to:
+  /// **'Encerra o registro de hoje'**
+  String get wizardIntroOptionGoodCaption;
+
+  /// No description provided for @wizardIntroOptionSoSoLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais ou menos'**
+  String get wizardIntroOptionSoSoLabel;
+
+  /// No description provided for @wizardIntroOptionSoSoCaption.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos te ajudar a descrever melhor'**
+  String get wizardIntroOptionSoSoCaption;
+
+  /// No description provided for @wizardIntroOptionBadLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mal / Ruim'**
+  String get wizardIntroOptionBadLabel;
+
+  /// No description provided for @wizardIntroOptionBadCaption.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos com mais cuidado nas próximas perguntas'**
+  String get wizardIntroOptionBadCaption;
+
+  /// No description provided for @wizardIntroFootnote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta é a pergunta inicial de todos os registros. É rápida e ajuda a personalizar sua experiência.'**
+  String get wizardIntroFootnote;
 }
 
 class _AppLocalizationsDelegate

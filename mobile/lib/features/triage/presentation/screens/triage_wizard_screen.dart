@@ -59,6 +59,12 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
   late final TextEditingController _stepZeroFreeTextController;
   Timer? _stepZeroClassificationDebounce;
   bool _isSubmitting = false;
+  // Shown once, before the step-0 category grid, matching the product's
+  // "Bem/Normal · Mais ou menos · Mal/Ruim" entry question. Skipped when an
+  // AI-detected category already arrived from Home's free-text classifier
+  // (widget.preselectedCategoryKey), since that path already knows the user
+  // isn't "Bem/Normal".
+  late bool _showIntroQuestion;
 
   @override
   void initState() {
@@ -69,6 +75,8 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
         : '';
     _narrativeController = TextEditingController(text: initialNarrative);
     _stepZeroFreeTextController = TextEditingController();
+    _showIntroQuestion = widget.preselectedCategoryKey == null ||
+        widget.preselectedCategoryKey!.isEmpty;
     _prevColor = widget.vertical == TriageVertical.psicoEmocional
         ? AppColors.softIndigo
         : AppColors.clinicalTeal;
@@ -213,6 +221,11 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     final state = ref.watch(triageWizardNotifierProvider);
+
+    if (_showIntroQuestion) {
+      return _buildIntroScreen(context, state, l10n, isDark);
+    }
+
     final questions = TriageQuestionBank.forVertical(
       state.activeVertical,
       systemKey: state.answers[0],
@@ -313,6 +326,119 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
           ),
         );
       },
+    );
+  }
+
+  /// The entry question shown before the step-0 category grid: a quick,
+  /// non-clinical self-report ("Bem/Normal", "Mais ou menos", "Mal/Ruim").
+  /// "Bem/Normal" ends today's entry immediately via the same
+  /// _handleNormalCompletion path the category grid's own Normal key uses.
+  /// The other two just reveal the category grid below — no severity score
+  /// or clinical judgment is derived from this choice (see CLAUDE.md).
+  Widget _buildIntroScreen(
+    BuildContext context,
+    TriageWizardState state,
+    AppLocalizations l10n,
+    bool isDark,
+  ) {
+    final activeColor = _getActiveColor(state.activeVertical);
+    final bannerTitle = state.activeVertical == TriageVertical.psicoEmocional
+        ? l10n.triageBannerEmotional
+        : l10n.triageBannerPhysical;
+
+    return Scaffold(
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      // Plain AppBar (not TriageStepBanner) on purpose: this entry question
+      // sits before the 5-step wizard, so a "step X of Y" progress bar here
+      // would misrepresent where the user actually is.
+      appBar: AppBar(
+        backgroundColor: activeColor,
+        foregroundColor: Colors.white,
+        centerTitle: true,
+        title: Text(
+          bannerTitle,
+          style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+          tooltip: l10n.triageBack,
+        ),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.wizardIntroTitle,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  height: 1.35,
+                ),
+              ),
+              const SizedBox(height: 24),
+              _IntroOptionTile(
+                icon: Icons.sentiment_satisfied_alt_rounded,
+                color: AppColors.dualisSymbolGreen,
+                label: l10n.wizardIntroOptionGoodLabel,
+                caption: l10n.wizardIntroOptionGoodCaption,
+                isLoading: _isSubmitting,
+                onTap: _isSubmitting
+                    ? null
+                    : () => _handleNormalCompletion(context, state),
+              ),
+              const SizedBox(height: 14),
+              _IntroOptionTile(
+                icon: Icons.sentiment_neutral_rounded,
+                color: Colors.amber.shade700,
+                label: l10n.wizardIntroOptionSoSoLabel,
+                caption: l10n.wizardIntroOptionSoSoCaption,
+                isLoading: false,
+                onTap: _isSubmitting
+                    ? null
+                    : () => setState(() => _showIntroQuestion = false),
+              ),
+              const SizedBox(height: 14),
+              _IntroOptionTile(
+                icon: Icons.sentiment_dissatisfied_rounded,
+                color: const Color(0xFFE57373),
+                label: l10n.wizardIntroOptionBadLabel,
+                caption: l10n.wizardIntroOptionBadCaption,
+                isLoading: false,
+                onTap: _isSubmitting
+                    ? null
+                    : () => setState(() => _showIntroQuestion = false),
+              ),
+              const Spacer(),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 16,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n.wizardIntroFootnote,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -1044,6 +1170,92 @@ const Map<String, IconData> _stepZeroOptionIcons = {
 /// Circular icon tile for the step-0 body-area/mood grid. Visually replaces
 /// [TriageOptionChip] for step 0 only; tapping triggers the same
 /// `selectOption` call that the chip used to trigger.
+/// One row of the intro question (Bem/Normal, Mais ou menos, Mal/Ruim):
+/// colored circle icon + label + short caption, tappable.
+class _IntroOptionTile extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String label;
+  final String caption;
+  final bool isLoading;
+  final VoidCallback? onTap;
+
+  const _IntroOptionTile({
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.caption,
+    required this.isLoading,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: isLoading
+                    ? Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: color),
+                      )
+                    : Icon(icon, color: color, size: 26),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      caption,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12.5,
+                        color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _IconOptionTile extends StatelessWidget {
   final String optionKey;
   final String label;

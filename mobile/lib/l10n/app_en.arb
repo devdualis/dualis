@@ -653,5 +653,13 @@
   "outcomeTodayStatusSoSo": "So-so",
   "outcomeTodayStatusBad": "Not well",
   "outcomeHistoryDetailTitle": "Entry details",
-  "outcomeHistoryNoNarrative": "You did not add a description to this entry."
+  "outcomeHistoryNoNarrative": "You did not add a description to this entry.",
+  "wizardIntroTitle": "How are you feeling today?",
+  "wizardIntroOptionGoodLabel": "Good / Normal",
+  "wizardIntroOptionGoodCaption": "Ends today's entry",
+  "wizardIntroOptionSoSoLabel": "So-so",
+  "wizardIntroOptionSoSoCaption": "We will help you describe it better",
+  "wizardIntroOptionBadLabel": "Bad / Not well",
+  "wizardIntroOptionBadCaption": "We will go a bit more carefully on the next questions",
+  "wizardIntroFootnote": "This is the first question of every entry. It is quick and helps personalize your experience."
 }
