@@ -80,45 +80,58 @@ class TriageIntensitySelector extends StatelessWidget {
                 ? AppColors.emergencyCrimson
                 : activeColor;
 
-            return InkWell(
-              onTap: () => onSelect(value),
-              borderRadius: BorderRadius.circular(28),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? itemColor
-                      : (isDark
-                          ? AppColors.surfaceDark
-                          : AppColors.surfaceLight),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isSelected ? itemColor : itemColor.withValues(alpha: 0.4),
-                    width: isSelected ? 2.5 : 1.5,
-                  ),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: itemColor.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          ),
-                        ]
-                      : null,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  '$value',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
+            final semanticDesc = value == 1
+                ? ' ($value: ${l10n.triageIntensityMin})'
+                : (value == 5 ? ' ($value: ${l10n.triageIntensityMax})' : '');
+
+            return Semantics(
+              button: true,
+              selected: isSelected,
+              label: '${l10n.triageIntensityLabel(value)}$semanticDesc',
+              child: InkWell(
+                onTap: () => onSelect(value),
+                borderRadius: BorderRadius.circular(28),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
                     color: isSelected
-                        ? Colors.white
+                        ? itemColor
                         : (isDark
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textPrimaryLight),
+                            ? AppColors.surfaceDark
+                            : AppColors.surfaceLight),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isSelected
+                          ? itemColor
+                          : (isDark
+                              ? AppColors.outlineDark
+                              : itemColor.withValues(alpha: 0.4)),
+                      width: isSelected ? 2.5 : 1.5,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: itemColor.withValues(alpha: 0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '$value',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: isSelected
+                          ? Colors.white
+                          : (isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimaryLight),
+                    ),
                   ),
                 ),
               ),

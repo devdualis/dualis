@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
+import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../triage/domain/triage_vertical.dart';
 import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import '../../domain/axis_intensity_resolver.dart';
@@ -29,14 +30,12 @@ class DualAxisTriggerCard extends ConsumerWidget {
         (outcome.vertical == 'emotional' || hasSecondaryEmotional);
 
     final hasSecondaryPhysical = outcome != null &&
-        (outcome.vertical == 'emotional' &&
-            (outcome.organicPrimacyApplied || outcome.secondaryCategoryLabel != null));
+        (outcome.vertical == 'emotional' && outcome.secondaryCategoryLabel != null);
     final isPhysicalFromOutcome = outcome != null &&
         (outcome.vertical == 'physical' || hasSecondaryPhysical);
 
     final isEmotionalCompleted = state.isEmotionalCompleted || isEmotionalFromOutcome;
     final isPhysicalCompleted = state.isPhysicalCompleted || isPhysicalFromOutcome;
-    final isCompletedToday = state.isCompletedToday || outcome != null || (isEmotionalCompleted && isPhysicalCompleted);
 
     final emotionalIntensity = AxisIntensityResolver.resolveDisplayIntensity(
       axis: CheckInAxis.emotional,
@@ -82,7 +81,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 : outcome.secondaryCategoryLabel)
             : null);
 
-    final completedTime = state.completedAt ?? outcome?.recordedAt;
+    final viewOnly = activeProfileIsViewOnly(ref);
 
     return Card(
       elevation: 0,
@@ -142,48 +141,10 @@ class DualAxisTriggerCard extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
 
-            // Banner geral de conclusão se ambas etapas foram finalizadas
-            if (isCompletedToday &&
-                isEmotionalCompleted &&
-                isPhysicalCompleted) ...[
-              Container(
-                key: const Key('dailyCheckInCompletedBanner'),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: AppColors.clinicalTeal.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppColors.clinicalTeal.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.verified_rounded,
-                      color: AppColors.clinicalTeal,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        completedTime != null
-                            ? 'Check-in diário completo às ${completedTime.hour.toString().padLeft(2, '0')}:${completedTime.minute.toString().padLeft(2, '0')}'
-                            : 'Check-in completo de hoje registrado!',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.clinicalTealDark,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-
             const Divider(height: 1),
             const SizedBox(height: 16),
+
+            if (viewOnly) const ActiveProfileReadOnlyNote(),
 
             // Etapa 1: Psicoemocional
             _buildStageCard(
@@ -222,14 +183,15 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 );
               },
               isDark: isDark,
+              viewOnly: viewOnly,
             ),
 
             const SizedBox(height: 16),
 
-            // Etapa 2: Avaliação Física
+            // Etapa 2: Físico
             _buildStageCard(
               context: context,
-              title: 'Avaliação Física',
+              title: 'Físico',
               subtitle: 'Dores corporais, desconforto somático ou fadiga',
               icon: Icons.accessibility_new_rounded,
               accentColor: AppColors.dualisSymbolBlue,
@@ -261,6 +223,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 );
               },
               isDark: isDark,
+              viewOnly: viewOnly,
             ),
           ],
         ),
@@ -285,6 +248,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
     required VoidCallback onStart,
     required VoidCallback onRetake,
     required bool isDark,
+    required bool viewOnly,
   }) {
     if (isCompleted) {
       final tier = intensity != null
@@ -410,20 +374,80 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                key: Key(retakeKey),
-                onPressed: onRetake,
-                icon: const Icon(Icons.refresh_rounded, size: 16),
-                label: const Text('Atualizar'),
-                style: TextButton.styleFrom(
-                  foregroundColor: accentColor,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  visualDensity: VisualDensity.compact,
+            if (!viewOnly) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  key: Key(retakeKey),
+                  onPressed: onRetake,
+                  icon: const Icon(Icons.refresh_rounded, size: 16),
+                  label: const Text('Atualizar'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: accentColor,
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    visualDensity: VisualDensity.compact,
+                  ),
                 ),
               ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    if (viewOnly) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: accentColor, size: 22),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimaryLight,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -497,7 +521,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 ),
               ),
               onPressed: onStart,
-              icon: const Icon(Icons.play_arrow_rounded, size: 18),
+              icon: Icon(icon, size: 18),
               label: Text(
                 'Iniciar $title',
                 style: GoogleFonts.plusJakartaSans(

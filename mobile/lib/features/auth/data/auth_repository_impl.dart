@@ -41,6 +41,16 @@ abstract class AuthRepository {
     required String currentPassword,
     required String newPassword,
   });
+
+  Future<Map<String, dynamic>> forgotPassword({
+    required String email,
+  });
+
+  Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  });
 }
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -124,6 +134,26 @@ class AuthRepositoryImpl implements AuthRepository {
     return remoteDataSource.changePassword(
       token: token,
       currentPassword: currentPassword,
+      newPassword: newPassword,
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> forgotPassword({
+    required String email,
+  }) {
+    return remoteDataSource.forgotPassword(email: email);
+  }
+
+  @override
+  Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) {
+    return remoteDataSource.resetPassword(
+      email: email,
+      code: code,
       newPassword: newPassword,
     );
   }

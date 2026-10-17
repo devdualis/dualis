@@ -3,47 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:dualis_mobile/features/emergency/domain/emergency_context.dart';
-import 'package:dualis_mobile/features/emergency/domain/emergency_trigger_category.dart';
-import 'package:dualis_mobile/features/emergency/presentation/controllers/emergency_controller.dart';
 import 'package:dualis_mobile/features/triage/domain/triage_vertical.dart';
 import 'package:dualis_mobile/features/triage/presentation/controllers/triage_wizard_notifier.dart';
 
 class MockBuildContext extends Mock implements BuildContext {}
 
-class FakeEmergencyContext extends Fake implements EmergencyContext {}
-
-class TestEmergencyController extends EmergencyController {
-  EmergencyContext? lastTriggered;
-  int triggerCount = 0;
-
-  @override
-  void triggerEmergency(BuildContext context, EmergencyContext emergencyContext) {
-    lastTriggered = emergencyContext;
-    triggerCount++;
-  }
-}
-
 void main() {
   setUpAll(() {
-    registerFallbackValue(FakeEmergencyContext());
     registerFallbackValue(MockBuildContext());
   });
 
   group('TriageWizardNotifier', () {
     late ProviderContainer container;
     late MockBuildContext mockContext;
-    late TestEmergencyController testEmergencyController;
 
     setUp(() {
       mockContext = MockBuildContext();
-      testEmergencyController = TestEmergencyController();
-      container = ProviderContainer(
-        overrides: [
-          emergencyControllerProvider
-              .overrideWith(() => testEmergencyController),
-        ],
-      );
+      container = ProviderContainer();
     });
 
     tearDown(() {
@@ -91,16 +67,15 @@ void main() {
       expect(state.answers[0], equals('cansaco_mental'));
     });
 
-    test('5. Step 0 selection with tristeza_desanimo does NOT trigger emergency (gate only at Step 2)', () {
+    test('5. Step 0 selection with tristeza_desanimo shows no safety notice (only intensity steps can)', () {
       final notifier = container.read(triageWizardNotifierProvider.notifier);
       final triggered = notifier.selectOption(mockContext, 0, 'tristeza_desanimo');
 
       expect(triggered, isFalse);
-      expect(testEmergencyController.triggerCount, equals(0));
       expect(container.read(triageWizardNotifierProvider).answers[0], equals('tristeza_desanimo'));
     });
 
-    test('6. Step 2 selection with muito_forte (after tristeza_desanimo at Step 0) triggers emergency', () {
+    test('6. Emotional muito_forte (self-reported 4) saves the answer without a notice; crisis text is handled by checkFreeText', () {
       final notifier = container.read(triageWizardNotifierProvider.notifier);
       notifier.selectOption(mockContext, 0, 'tristeza_desanimo');
       notifier.advance(); // to step 1
@@ -108,13 +83,14 @@ void main() {
       notifier.advance(); // to step 2
 
       final triggered = notifier.selectOption(mockContext, 2, 'muito_forte');
-      expect(triggered, isTrue);
-      expect(testEmergencyController.triggerCount, equals(1));
-      expect(testEmergencyController.lastTriggered?.category, equals(EmergencyTriggerCategory.suicidalCrisis));
-      expect(testEmergencyController.lastTriggered?.severityLevel, equals(4));
+      expect(triggered, isFalse);
+      final state = container.read(triageWizardNotifierProvider);
+      expect(state.answers[2], equals('muito_forte'));
+      expect(state.currentStep, equals(2), reason: 'the notice never interrupts the entry flow');
+      expect(state.canAdvance, isTrue);
     });
 
-    test('7. Step 2 physical selection with intensity 5 (cabeca at Step 0) triggers emergency', () {
+    test('7. Step 2 physical selection with intensity 5 shows the generic safety notice and keeps the answer', () {
       final notifier = container.read(triageWizardNotifierProvider.notifier);
       notifier.setVertical(TriageVertical.fisica);
       notifier.selectOption(mockContext, 0, 'cabeca');
@@ -124,11 +100,13 @@ void main() {
 
       final triggered = notifier.selectOption(mockContext, 2, '5');
       expect(triggered, isTrue);
-      expect(testEmergencyController.triggerCount, equals(1));
-      expect(testEmergencyController.lastTriggered?.severityLevel, equals(5));
+      final state = container.read(triageWizardNotifierProvider);
+      expect(state.answers[2], equals('5'));
+      expect(state.currentStep, equals(2), reason: 'the notice never interrupts the entry flow');
+      expect(state.canAdvance, isTrue);
     });
 
-    test('8. Step 2 physical selection with intensity 3 (costas_coluna) does NOT trigger emergency', () {
+    test('8. Step 2 physical selection with intensity 3 (costas_coluna) shows no safety notice', () {
       final notifier = container.read(triageWizardNotifierProvider.notifier);
       notifier.setVertical(TriageVertical.fisica);
       notifier.selectOption(mockContext, 0, 'costas_coluna');
@@ -138,8 +116,26 @@ void main() {
 
       final triggered = notifier.selectOption(mockContext, 2, '3');
       expect(triggered, isFalse);
-      expect(testEmergencyController.triggerCount, equals(0));
       expect(container.read(triageWizardNotifierProvider).answers[2], equals('3'));
+    });
+
+    test('8b. Step 2 physical intensity 4 shows the notice only for chest, breathing or head', () {
+      final notifier = container.read(triageWizardNotifierProvider.notifier);
+      notifier.setVertical(TriageVertical.fisica);
+      notifier.selectOption(mockContext, 0, 'costas_coluna');
+      expect(notifier.selectOption(mockContext, 2, '4'), isFalse);
+
+      notifier.setVertical(TriageVertical.fisica);
+      notifier.selectOption(mockContext, 0, 'cabeca');
+      expect(notifier.selectOption(mockContext, 2, '4'), isTrue);
+    });
+
+    test('8c. checkFreeText flags self-harm and warning-sign text, ignores neutral text', () {
+      final notifier = container.read(triageWizardNotifierProvider.notifier);
+      expect(notifier.checkFreeText(mockContext, 'hoje eu quero morrer'), isTrue);
+      expect(notifier.checkFreeText(mockContext, 'dor forte no peito'), isTrue);
+      expect(notifier.checkFreeText(mockContext, 'dormi pouco e estou cansado'), isFalse);
+      expect(notifier.checkFreeText(mockContext, '   '), isFalse);
     });
 
     test('9. AutoDispose semantics: fresh container starts with clean initial state', () {

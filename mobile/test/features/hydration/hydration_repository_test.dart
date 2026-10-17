@@ -1,3 +1,6 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dualis_mobile/features/profile/domain/models/profile.dart';
+import 'package:dualis_mobile/features/profile/presentation/controllers/active_profile_controller.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dualis_mobile/core/database/app_database.dart';
@@ -9,6 +12,13 @@ import 'package:mocktail/mocktail.dart';
 
 class MockSecureStorageService extends Mock implements SecureStorageService {}
 class MockHydrationRemoteDataSource extends Mock implements HydrationRemoteDataSource {}
+
+class _TestActiveProfileController extends ActiveProfileController {
+  final ActiveProfileState _testState;
+  _TestActiveProfileController(this._testState);
+  @override
+  ActiveProfileState build() => _testState;
+}
 
 void main() {
   late AppDatabase db;
@@ -223,6 +233,96 @@ void main() {
 
       final logsAfterServerEmpty = await repository.getLogsForDay(userId: userId, day: now);
       expect(logsAfterServerEmpty, isEmpty);
+    });
+
+    test('filters local logs by active profile: primary includes legacy nulls, non-primary is isolated', () async {
+      const userId = 'user-123';
+      final now = DateTime.now();
+
+      when(() => remoteDataSource.logWater(
+            amountMl: any(named: 'amountMl'),
+            source: any(named: 'source'),
+            timestamp: any(named: 'timestamp'),
+          )).thenAnswer((_) async => null);
+      when(() => remoteDataSource.getTodayLogs(date: any(named: 'date')))
+          .thenAnswer((_) async => null);
+
+      await db.into(db.waterIntakeLogs).insert(
+            WaterIntakeLogsCompanion.insert(
+              userId: userId,
+              amountMl: 200,
+            ),
+          );
+
+      const primaryProfile = Profile(
+        id: 'prof-primary-1',
+        name: 'Primary User',
+        profileType: ProfileType.primary,
+        ownership: ProfileOwnership.own,
+        accessLevel: ProfileAccessLevel.owner,
+      );
+
+      const childProfile = Profile(
+        id: 'prof-child-2',
+        name: 'Child User',
+        profileType: ProfileType.dependentMinor,
+        ownership: ProfileOwnership.dependent,
+        accessLevel: ProfileAccessLevel.owner,
+      );
+
+      final containerPrimary = ProviderContainer(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          secureStorageServiceProvider.overrideWithValue(storage),
+          hydrationRemoteDataSourceProvider.overrideWithValue(remoteDataSource),
+          activeProfileControllerProvider.overrideWith(
+            () => _TestActiveProfileController(
+              const ActiveProfileState(
+                profiles: [primaryProfile, childProfile],
+                activeProfileId: 'prof-primary-1',
+              ),
+            ),
+          ),
+        ],
+      );
+      addTearDown(containerPrimary.dispose);
+
+      final primaryRepo = containerPrimary.read(hydrationRepositoryProvider);
+
+      await primaryRepo.logWaterIntake(userId: userId, amountMl: 300, timestamp: now);
+
+      final primaryTotal = await primaryRepo.getTodayTotalMl(userId: userId);
+      expect(primaryTotal, equals(500));
+
+      final containerChild = ProviderContainer(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          secureStorageServiceProvider.overrideWithValue(storage),
+          hydrationRemoteDataSourceProvider.overrideWithValue(remoteDataSource),
+          activeProfileControllerProvider.overrideWith(
+            () => _TestActiveProfileController(
+              const ActiveProfileState(
+                profiles: [primaryProfile, childProfile],
+                activeProfileId: 'prof-child-2',
+              ),
+            ),
+          ),
+        ],
+      );
+      addTearDown(containerChild.dispose);
+
+      final childRepo = containerChild.read(hydrationRepositoryProvider);
+
+      final childTotalBefore = await childRepo.getTodayTotalMl(userId: userId);
+      expect(childTotalBefore, equals(0));
+
+      await childRepo.logWaterIntake(userId: userId, amountMl: 150, timestamp: now);
+
+      final childTotalAfter = await childRepo.getTodayTotalMl(userId: userId);
+      expect(childTotalAfter, equals(150));
+
+      final primaryTotalAfter = await primaryRepo.getTodayTotalMl(userId: userId);
+      expect(primaryTotalAfter, equals(500));
     });
   });
 }

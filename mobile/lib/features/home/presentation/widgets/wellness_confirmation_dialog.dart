@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 
 /// Preventive wellness confirmation dialog presented when both clinical axes report [Bem / Normal].
 class WellnessConfirmationDialog extends StatelessWidget {
@@ -47,7 +48,7 @@ class WellnessConfirmationDialog extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            'Tudo Bem por Aqui!',
+            AppLocalizations.of(context).wellnessConfirmTitle,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -57,7 +58,7 @@ class WellnessConfirmationDialog extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Que excelente notícia! Você indicou estar se sentindo bem tanto física quanto emocionalmente hoje.\n\nSeu check-in preventivo diário foi concluído com sucesso e seus dados estão protegidos. Continue cultivando bons hábitos de autocuidado!',
+            AppLocalizations.of(context).wellnessConfirmBody,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 14,
               color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
@@ -81,7 +82,7 @@ class WellnessConfirmationDialog extends StatelessWidget {
                 onDismiss();
               },
               child: Text(
-                'Concluir Check-in',
+                AppLocalizations.of(context).wellnessConfirmButton,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,

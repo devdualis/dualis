@@ -1,5 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../domain/models/triage_history_models.dart';
 
 class EmotionalTrendChart extends StatefulWidget {
@@ -18,8 +20,8 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
   static const Map<String, ({String label, Color color})> dimensionMeta = {
     'ansiosa_agitacao': (label: 'Ansiedade', color: Color(0xFF7E57C2)),
     'depressiva_desanimo': (label: 'Desânimo', color: Color(0xFF5C6BC0)),
-    'estresse_burnout': (label: 'Estresse / Burnout', color: Color(0xFFFF7043)),
-    'somatica': (label: 'Somática', color: Color(0xFF26A69A)),
+    'estresse_burnout': (label: 'Estresse', color: Color(0xFFFF7043)),
+    'somatica': (label: 'Tensão no corpo', color: Color(0xFF26A69A)),
     'sono': (label: 'Sono', color: Color(0xFF3949AB)),
     'cognitiva_foco': (label: 'Foco / Atenção', color: Color(0xFF00ACC1)),
     'autoestima': (label: 'Autoestima', color: Color(0xFFEC407A)),
@@ -29,8 +31,11 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     if (widget.data.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(isDark);
     }
 
     final activeKeys = dimensionMeta.keys.where((key) {
@@ -60,7 +65,7 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
               radius: 4,
               color: meta.color,
               strokeWidth: 1.5,
-              strokeColor: Colors.white,
+              strokeColor: isDark ? AppColors.surfaceDark : Colors.white,
             );
           },
         ),
@@ -76,26 +81,30 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
       children: [
         Card(
           elevation: 0.5,
+          color: isDark ? AppColors.surfaceDark : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Colors.grey.shade200),
+            side: BorderSide(color: isDark ? AppColors.outlineDark : AppColors.outlineLight),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.show_chart_rounded,
-                        color: Color(0xFF3F51B5), size: 20),
-                    SizedBox(width: 8),
+                    const Icon(
+                      Icons.show_chart_rounded,
+                      color: AppColors.softIndigo,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
                     Text(
                       'Evolução Emocional (Últimos 7 Dias)',
-                      style: TextStyle(
+                      style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF263238),
+                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
                       ),
                     ),
                   ],
@@ -106,7 +115,7 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
                   child: LineChart(
                     LineChartData(
                       minX: 0,
-                      maxX: (widget.data.length - 1).toDouble().clamp(0, 6),
+                      maxX: (widget.data.length - 1).toDouble().clamp(1.0, 6.0),
                       minY: 0,
                       maxY: 5,
                       lineTouchData: LineTouchData(
@@ -118,7 +127,7 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
                               final intensity = barSpot.y.toInt();
                               return LineTooltipItem(
                                 '${meta.label}: $intensity/5',
-                                const TextStyle(
+                                GoogleFonts.plusJakartaSans(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 12,
@@ -147,9 +156,9 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
                                 padding: const EdgeInsets.only(top: 6),
                                 child: Text(
                                   label,
-                                  style: TextStyle(
+                                  style: GoogleFonts.plusJakartaSans(
                                     fontSize: 10,
-                                    color: Colors.grey.shade600,
+                                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -166,9 +175,9 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
                               if (value == 0) return const SizedBox.shrink();
                               return Text(
                                 value.toInt().toString(),
-                                style: TextStyle(
+                                style: GoogleFonts.plusJakartaSans(
                                   fontSize: 11,
-                                  color: Colors.grey.shade600,
+                                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
                                 ),
                               );
                             },
@@ -185,7 +194,7 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
                         show: true,
                         horizontalInterval: 1,
                         getDrawingHorizontalLine: (value) => FlLine(
-                          color: Colors.grey.shade200,
+                          color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
                           strokeWidth: 1,
                         ),
                         drawVerticalLine: false,
@@ -193,8 +202,8 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
                       borderData: FlBorderData(
                         show: true,
                         border: Border(
-                          bottom: BorderSide(color: Colors.grey.shade300),
-                          left: BorderSide(color: Colors.grey.shade300),
+                          bottom: BorderSide(color: isDark ? AppColors.outlineDark : AppColors.outlineLight),
+                          left: BorderSide(color: isDark ? AppColors.outlineDark : AppColors.outlineLight),
                         ),
                       ),
                       lineBarsData: lineBarsData,
@@ -206,38 +215,46 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
           ),
         ),
         const SizedBox(height: 12),
-        _buildLegend(),
+        _buildLegend(isDark),
       ],
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(bool isDark) {
     return Card(
       elevation: 0.5,
+      color: isDark ? AppColors.surfaceDark : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: isDark ? AppColors.outlineDark : AppColors.outlineLight),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
         child: Center(
           child: Column(
             children: [
-              Icon(Icons.timeline_rounded, size: 44, color: Colors.grey.shade400),
+              Icon(
+                Icons.timeline_rounded,
+                size: 44,
+                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+              ),
               const SizedBox(height: 12),
               Text(
                 'Sem registros emocionais nesta semana',
-                style: TextStyle(
+                style: GoogleFonts.plusJakartaSans(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade700,
+                  color: isDark ? AppColors.textPrimaryDark : AppColors.textSecondaryLight,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 'Realize check-ins diários para visualizar o gráfico de tendências.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                ),
               ),
             ],
           ),
@@ -246,58 +263,71 @@ class _EmotionalTrendChartState extends State<EmotionalTrendChart> {
     );
   }
 
-  Widget _buildLegend() {
+  Widget _buildLegend(bool isDark) {
     return Wrap(
       spacing: 8,
-      runSpacing: 6,
+      runSpacing: 4,
       children: dimensionMeta.entries.map((entry) {
         final isHidden = _hiddenDimensions.contains(entry.key);
-        return InkWell(
-          onTap: () {
-            setState(() {
-              if (isHidden) {
-                _hiddenDimensions.remove(entry.key);
-              } else {
-                _hiddenDimensions.add(entry.key);
-              }
-            });
-          },
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: isHidden
-                  ? Colors.grey.shade100
-                  : entry.value.color.withValues(alpha: 0.12),
+        return Semantics(
+          button: true,
+          label: '${entry.value.label}, ${isHidden ? 'oculto' : 'visível'}',
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  if (isHidden) {
+                    _hiddenDimensions.remove(entry.key);
+                  } else {
+                    _hiddenDimensions.add(entry.key);
+                  }
+                });
+              },
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: isHidden ? Colors.grey.shade300 : entry.value.color,
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: isHidden ? Colors.grey : entry.value.color,
-                    shape: BoxShape.circle,
+                    color: isHidden
+                        ? (isDark ? AppColors.backgroundDark : Colors.grey.shade100)
+                        : entry.value.color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isHidden
+                          ? (isDark ? AppColors.outlineDark : Colors.grey.shade300)
+                          : entry.value.color,
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: isHidden ? Colors.grey : entry.value.color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        entry.value.label,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: isHidden
+                              ? (isDark ? AppColors.textSecondaryDark : Colors.grey)
+                              : (isDark ? AppColors.textPrimaryDark : Colors.black87),
+                          decoration:
+                              isHidden ? TextDecoration.lineThrough : null,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 6),
-                Text(
-                  entry.value.label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: isHidden ? Colors.grey : Colors.black87,
-                    decoration:
-                        isHidden ? TextDecoration.lineThrough : null,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         );

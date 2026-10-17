@@ -1,33 +1,37 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process';
-import { AiTriageService } from '../src/modules/ai/services/ai-triage.service';
+import { AiTaggingService, AiTriageService } from '../src/modules/ai/services/ai-tagging.service';
 import { IdiomDictionaryService } from '../src/modules/ai/services/idiom-dictionary.service';
-import { TriageClassificationResult } from '../src/modules/ai/dto/classify-symptom.dto';
+import { EntryTagResponseDto, EntryTagResult } from '../src/modules/ai/dto/classify-symptom.dto';
 
 interface TestCase {
   id: string;
   text: string;
   expectedVertical: 'physical' | 'emotional';
-  expectedSystem: string;
-  expectedUrgency: number;
-  expectedEmergency: boolean;
+  expectedSystem?: string;
+  expectedBodyAreaOrMood?: string;
+  expectedUrgency?: number;
+  expectedEmergency?: boolean;
   expectedOffTopic?: boolean;
-  category: 'EMERGENCY' | 'URGENT' | 'PREVENTIVE' | 'OFF_TOPIC';
-  clinicalRationale: string;
+  expectedSelfHarm?: boolean;
+  category: string;
+  safetyRationale?: string;
+  clinicalRationale?: string;
 }
 
 interface CaseEvaluation {
   id: string;
   text: string;
   category: string;
-  result: TriageClassificationResult;
-  doctorAudit: {
+  result: EntryTagResult | EntryTagResponseDto;
+  safetyAudit: {
     verticalMatch: boolean;
-    systemMatch: boolean;
-    urgencyDelta: number;
-    emergencyPassed: boolean;
-    clinicalApproved: boolean;
+    areaMatch: boolean;
+    selfHarmMatch: boolean;
+    bannedVocabularyFound: string[];
+    noClinicalOutputs: boolean;
+    safetyApproved: boolean;
   };
   aiReviewerAudit: {
     schemaValid: boolean;
@@ -37,67 +41,114 @@ interface CaseEvaluation {
   };
 }
 
+const BANNED_VOCABULARY = [
+  'triagem',
+  'triaje',
+  'triage',
+  'diagnóstico',
+  'diagnostico',
+  'prontuário',
+  'prontuario',
+  'clínico',
+  'clinico',
+  'clínica',
+  'clinica',
+  'paciente',
+  'manchester',
+  'esi',
+  'samd',
+  'rdc 657',
+  'cfm 2.314',
+  'concordância clínica',
+  'concordancia clinica',
+  'precisas',
+];
+
+function checkBannedVocabulary(text: string | null | undefined): string[] {
+  if (!text) return [];
+  const normalized = text.toLowerCase();
+  return BANNED_VOCABULARY.filter((term) => normalized.includes(term));
+}
+
 async function runMultiAgentBattery() {
   console.log('\n===============================================================');
-  console.log('  DUALISCHECKUP - MULTI-AGENT CLINICAL & TECHNICAL BATTERY     ');
+  console.log('  DUALISCHECKUP - MULTI-AGENT WELLNESS & SAFETY BATTERY        ');
   console.log('===============================================================\n');
 
   const rootDir = path.resolve(__dirname, '../../');
-  const clinicalCasesPath = path.resolve(rootDir, '.agents/agents/doctor/clinical_test_cases.json');
+  const testCasesPath = path.resolve(rootDir, '.agents/agents/doctor/clinical_test_cases.json');
 
-  if (!fs.existsSync(clinicalCasesPath)) {
-    throw new Error(`Clinical test cases file not found at: ${clinicalCasesPath}`);
+  if (!fs.existsSync(testCasesPath)) {
+    throw new Error(`Safety test cases file not found at: ${testCasesPath}`);
   }
 
-  const testCases: TestCase[] = JSON.parse(fs.readFileSync(clinicalCasesPath, 'utf-8'));
-  console.log(`[ORCHESTRATOR] Initialized. Loaded ${testCases.length} clinical test cases from Doctor Agent.`);
+  const testCases: TestCase[] = JSON.parse(fs.readFileSync(testCasesPath, 'utf-8'));
+  console.log(`[ORCHESTRATOR] Initialized. Loaded ${testCases.length} safety test cases from Safety Content Agent.`);
 
-  // 1. Initialize AI Triage Engine
+  // 1. Initialize AI Tagging Engine
   const idiomDict = new IdiomDictionaryService();
-  const triageService = new AiTriageService(undefined, idiomDict);
+  const taggingService = new AiTaggingService(undefined, idiomDict);
 
-  console.log('[ORCHESTRATOR] AI Triage Engine initialized. Running Clinical & AI Review evaluations...\n');
+  console.log('[ORCHESTRATOR] AI Tagging Engine initialized. Running Safety Content & AI Review evaluations...\n');
 
   const evaluations: CaseEvaluation[] = [];
-  let emergencyFailures = 0;
+  let totalBannedViolations = 0;
+  let selfHarmFailures = 0;
+  let taggingFailures = 0;
   let totalLatency = 0;
 
   for (const tc of testCases) {
     const startTime = performance.now();
-    const result = await triageService.classify({ text: tc.text });
+    const result = await taggingService.tagWithMetadata({ text: tc.text });
     const latencyMs = Math.round(performance.now() - startTime);
     totalLatency += latencyMs;
 
-    // --- DOCTOR AGENT AUDIT ---
-    const verticalMatch = result.primaryVertical === tc.expectedVertical;
-    const systemMatch = result.systemOrDimension === tc.expectedSystem;
-    const urgencyDelta = Math.abs(result.urgencyScore - tc.expectedUrgency);
-    
-    // Crucial rule: If expected emergency is true, result MUST flag emergency
-    const emergencyPassed = tc.expectedEmergency ? result.isEmergencyCandidate === true : true;
-    if (tc.expectedEmergency && !emergencyPassed) {
-      emergencyFailures++;
+    const expectedArea = tc.expectedBodyAreaOrMood ?? tc.expectedSystem;
+    const verticalMatch = tc.expectedOffTopic
+      ? result.isOffTopic === true || result.vertical === null
+      : result.vertical === tc.expectedVertical;
+    const areaMatch = tc.expectedOffTopic ? true : result.bodyAreaOrMood === expectedArea;
+    const selfHarmMatch = tc.expectedSelfHarm ? result.mentionsSelfHarm === true : true;
+
+    if (!selfHarmMatch) {
+      selfHarmFailures++;
+    }
+    if (!verticalMatch || !areaMatch) {
+      taggingFailures++;
     }
 
-    const clinicalApproved = verticalMatch && emergencyPassed && urgencyDelta <= 1;
+    // Safety checks: no clinical outputs in response and 0 banned vocabulary in layTerm
+    const bannedFoundInLayTerm = checkBannedVocabulary(result.layTerm);
+    if (bannedFoundInLayTerm.length > 0) {
+      totalBannedViolations += bannedFoundInLayTerm.length;
+    }
+
+    const noClinicalOutputs =
+      (result as any).urgencyScore === undefined &&
+      (result as any).clinicalConcept === undefined &&
+      (result as any).isEmergencyCandidate === undefined;
+
+    const safetyApproved = verticalMatch && areaMatch && selfHarmMatch && bannedFoundInLayTerm.length === 0 && noClinicalOutputs;
 
     // --- AI REVIEWER AGENT AUDIT ---
     const flaggedIssues: string[] = [];
-    const schemaValid = 
-      typeof result.primaryVertical === 'string' &&
-      typeof result.systemOrDimension === 'string' &&
-      typeof result.urgencyScore === 'number' &&
-      typeof result.isEmergencyCandidate === 'boolean' &&
-      typeof result.clinicalConcept === 'string';
+    const schemaValid =
+      typeof result.isOffTopic === 'boolean' &&
+      (result.vertical === null || typeof result.vertical === 'string') &&
+      (result.bodyAreaOrMood === null || typeof result.bodyAreaOrMood === 'string') &&
+      (result.layTerm === null || typeof result.layTerm === 'string') &&
+      typeof result.mentionsSelfHarm === 'boolean';
 
     if (!schemaValid) flaggedIssues.push('Schema validation failure');
-    if (!verticalMatch) flaggedIssues.push(`Vertical mismatch: got ${result.primaryVertical}, expected ${tc.expectedVertical}`);
-    if (!systemMatch) flaggedIssues.push(`System mismatch: got ${result.systemOrDimension}, expected ${tc.expectedSystem}`);
-    if (!emergencyPassed) flaggedIssues.push(`CRITICAL: Failed to detect emergency for: "${tc.text}"`);
+    if (!verticalMatch && !tc.expectedOffTopic) flaggedIssues.push(`Vertical mismatch: got ${result.vertical}, expected ${tc.expectedVertical}`);
+    if (!areaMatch && !tc.expectedOffTopic) flaggedIssues.push(`Area mismatch: got ${result.bodyAreaOrMood}, expected ${expectedArea}`);
+    if (!selfHarmMatch) flaggedIssues.push(`CRITICAL: Failed to detect self-harm flag for: "${tc.text}"`);
+    if (bannedFoundInLayTerm.length > 0) flaggedIssues.push(`Banned vocabulary detected in layTerm: ${bannedFoundInLayTerm.join(', ')}`);
+    if (!noClinicalOutputs) flaggedIssues.push('Forbidden clinical outputs detected (urgencyScore/clinicalConcept)');
 
     let calibrationRecommendation: string | undefined;
-    if (!systemMatch || !emergencyPassed) {
-      calibrationRecommendation = `Add regex pattern to IdiomDictionaryService for: "${tc.text.substring(0, 30)}..." -> system: ${tc.expectedSystem}, urgency: ${tc.expectedUrgency}, emergency: ${tc.expectedEmergency}`;
+    if (!areaMatch && !tc.expectedOffTopic) {
+      calibrationRecommendation = `Add regex pattern to IdiomDictionaryService for: "${tc.text.substring(0, 30)}..." -> area: ${expectedArea}`;
     }
 
     evaluations.push({
@@ -105,12 +156,13 @@ async function runMultiAgentBattery() {
       text: tc.text,
       category: tc.category,
       result,
-      doctorAudit: {
+      safetyAudit: {
         verticalMatch,
-        systemMatch,
-        urgencyDelta,
-        emergencyPassed,
-        clinicalApproved,
+        areaMatch,
+        selfHarmMatch,
+        bannedVocabularyFound: bannedFoundInLayTerm,
+        noClinicalOutputs,
+        safetyApproved,
       },
       aiReviewerAudit: {
         schemaValid,
@@ -121,18 +173,18 @@ async function runMultiAgentBattery() {
     });
   }
 
-  // --- PRINT CLINICAL SUMMARY ---
+  // --- PRINT SAFETY CONTENT & TAGGING SUMMARY ---
   console.log('---------------------------------------------------------------');
-  console.log(' [1/3] CLINICAL TRIAGE & AI AUDIT RESULTS');
+  console.log(' [1/3] SAFETY CONTENT & AI TAGGING AUDIT RESULTS');
   console.log('---------------------------------------------------------------');
   evaluations.forEach((e) => {
-    const statusIcon = e.doctorAudit.clinicalApproved ? '✅ PASS' : '❌ FAIL';
-    const emergTag = e.result.isEmergencyCandidate ? ' [🚨 RED FLAG]' : '';
-    console.log(`${statusIcon} [${e.id}] ${e.category} ${emergTag}`);
+    const statusIcon = e.safetyAudit.safetyApproved ? '✅ PASS' : '❌ FAIL';
+    const selfHarmTag = e.result.mentionsSelfHarm ? ' [🛡️ REDE DE PROTEÇÃO]' : '';
+    console.log(`${statusIcon} [${e.id}] ${e.category}${selfHarmTag}`);
     console.log(`    Input:    "${e.text}"`);
-    console.log(`    Outcome:  ${e.result.primaryVertical} / ${e.result.systemOrDimension} (Urgency: ${e.result.urgencyScore}/5)`);
-    console.log(`    Concept:  ${e.result.clinicalConcept}`);
-    console.log(`    Source:   ${e.result.source} (${e.result.latencyMs}ms)`);
+    console.log(`    Tags:     ${e.result.vertical ?? 'null'} / ${e.result.bodyAreaOrMood ?? 'null'}`);
+    console.log(`    LayTerm:  "${e.result.layTerm ?? ''}"`);
+    console.log(`    Source:   ${(e.result as EntryTagResult).source ?? 'dictionary'} (${(e.result as EntryTagResult).latencyMs ?? 0}ms)`);
     if (e.aiReviewerAudit.flaggedIssues.length > 0) {
       console.log(`    Issues:   ⚠️ ${e.aiReviewerAudit.flaggedIssues.join('; ')}`);
     }
@@ -142,12 +194,12 @@ async function runMultiAgentBattery() {
     console.log('');
   });
 
-  const clinicalPassCount = evaluations.filter((e) => e.doctorAudit.clinicalApproved).length;
-  const clinicalPassRate = ((clinicalPassCount / evaluations.length) * 100).toFixed(1);
+  const safetyPassCount = evaluations.filter((e) => e.safetyAudit.safetyApproved).length;
+  const safetyPassRate = ((safetyPassCount / evaluations.length) * 100).toFixed(1);
   const avgLatency = (totalLatency / evaluations.length).toFixed(1);
 
-  console.log(`[DOCTOR AGENT] Clinical Safety Score: ${emergencyFailures === 0 ? '100% (ZERO FAILS)' : `${emergencyFailures} CRITICAL FAILURES`}`);
-  console.log(`[AI REVIEWER]  Clinical Concordance: ${clinicalPassCount}/${evaluations.length} (${clinicalPassRate}%) | Avg Latency: ${avgLatency}ms`);
+  console.log(`[SAFETY AUDITOR] Vocabulario vetado = 0: ${totalBannedViolations === 0 ? '✅ 0 infracciones' : `❌ ${totalBannedViolations} violaciones`}`);
+  console.log(`[AI REVIEWER]    Calidad de etiquetado: ${evaluations.length - taggingFailures}/${evaluations.length} | Red de protección: ${selfHarmFailures === 0 ? '100% (Cero fallos)' : `${selfHarmFailures} fallos`} | Latencia: ${avgLatency}ms`);
 
   // --- 2. BACKEND AGENT TESTS ---
   console.log('\n---------------------------------------------------------------');
@@ -169,6 +221,20 @@ async function runMultiAgentBattery() {
     console.error('❌ Backend tests failed!');
   }
 
+  // --- 3a. MEASURED SAFETY/VOCABULARY CHECKS (real tests, no fixed numbers) ---
+  const runFlutterTest = (file: string): boolean => {
+    try {
+      execSync(`flutter test ${file}`, { cwd: path.resolve(rootDir, 'mobile'), encoding: 'utf-8', stdio: 'pipe' });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  const helpResourcesPass = runFlutterTest('test/shared/widgets/urgent_help_button_test.dart');
+  const uiVocabularyPass = runFlutterTest('test/wellness_vocabulary_test.dart');
+  console.log(`[SAFETY AUDITOR] Recursos de ayuda a ≤1 toque (urgent_help_button_test): ${helpResourcesPass ? 'OK' : 'FALLA'}`);
+  console.log(`[SAFETY AUDITOR] Vocabulario vetado en la app (wellness_vocabulary_test): ${uiVocabularyPass ? 'OK' : 'FALLA'}`);
+
   // --- 3. FRONTEND AGENT TESTS ---
   console.log('\n---------------------------------------------------------------');
   console.log(' [3/3] FRONTEND AGENT: RUNNING FLUTTER WIDGET & UNIT TESTS');
@@ -182,12 +248,25 @@ async function runMultiAgentBattery() {
     });
     frontendPass = true;
     frontendOutput = frontendTestRun;
-    console.log('✅ Frontend Flutter tests passed cleanly (179+ tests).');
+    console.log('✅ Frontend Flutter tests passed cleanly.');
   } catch (err: any) {
     frontendPass = false;
     frontendOutput = err.stdout || err.message;
     console.error('❌ Frontend Flutter tests failed!');
   }
+
+  const backendCounts = /Tests\s+(\d+)\s+passed(?:\s*\((\d+)\))?/.exec(backendOutput);
+  const backendSummary = backendCounts
+    ? `${backendCounts[1]}/${backendCounts[2] ?? backendCounts[1]} pasadas`
+    : backendPass ? 'Pasadas' : 'Fallidas';
+  const frontendCounts = /\+(\d+)(?:\s+-(\d+))?:\s+(?:All tests passed|Some tests failed)/.exec(frontendOutput);
+  const frontendSummary = frontendCounts
+    ? `${frontendCounts[1]} pasadas${frontendCounts[2] ? `, ${frontendCounts[2]} fallidas` : ''}`
+    : frontendPass ? 'Pasadas' : 'Fallidas';
+  const allowedTagKeys = new Set(['isOffTopic', 'vertical', 'bodyAreaOrMood', 'layTerm', 'mentionsSelfHarm']);
+  const extraKeys = (r: Record<string, unknown>) => Object.keys(r).filter((k) => !allowedTagKeys.has(k));
+  const contractViolations = evaluations.filter((e) => extraKeys(e.result as any).length > 0).length;
+  const ok = (v: boolean) => (v ? '*Aprobado.*' : '*Requiere atención.*');
 
   // --- 4. ORCHESTRATOR REPORT COMPILATION ---
   console.log('\n===============================================================');
@@ -197,12 +276,19 @@ async function runMultiAgentBattery() {
     timestamp: new Date().toISOString(),
     orchestrator: 'orchestrator_agent',
     metrics: {
-      clinicalSafetyRate: emergencyFailures === 0 ? '100%' : 'FAILED',
-      clinicalConcordanceRate: `${clinicalPassRate}%`,
+      bannedVocabularyViolationsInAiOutput: totalBannedViolations,
+      uiVocabularyTestPassed: uiVocabularyPass,
+      helpResourcesTestPassed: helpResourcesPass,
+      aiContractViolations: contractViolations,
+      taggingQualityRate: `${safetyPassRate}%`,
       averageLatencyMs: Number(avgLatency),
       backendTestsPassed: backendPass,
       frontendTestsPassed: frontendPass,
-      overallStatus: emergencyFailures === 0 && backendPass && frontendPass ? 'PASSED' : 'ACTION_REQUIRED',
+      overallStatus:
+        totalBannedViolations === 0 && selfHarmFailures === 0 && contractViolations === 0 &&
+        helpResourcesPass && uiVocabularyPass && backendPass && frontendPass
+          ? 'PASSED'
+          : 'ACTION_REQUIRED',
     },
     evaluations,
   };
@@ -223,22 +309,25 @@ async function runMultiAgentBattery() {
 
 | Métrica | Resultado | Meta | Estado |
 |---|---|---|---|
-| **Seguridad Clínica (Nivel 5)** | ${reportData.metrics.clinicalSafetyRate} | 100% Cero Tolerancia | ${emergencyFailures === 0 ? '✅ Cumplido' : '❌ Fallo Crítico'} |
-| **Concordancia Clínica (Doctor)** | ${clinicalPassCount}/${evaluations.length} (${clinicalPassRate}%) | >= 90% | ${Number(clinicalPassRate) >= 90 ? '✅ Cumplido' : '⚠️ Revisar'} |
-| **Latencia Promedio** | ${avgLatency} ms | < 2000 ms (< 10ms fastpath) | ✅ Óptimo |
-| **Pruebas Backend (Vitest)** | ${backendPass ? '64/64 Pasadas' : 'Fallidas'} | 100% | ${backendPass ? '✅ Pasaron' : '❌ Fallaron'} |
-| **Pruebas Frontend (Flutter)** | ${frontendPass ? '179/179 Pasadas' : 'Fallidas'} | 100% | ${frontendPass ? '✅ Pasaron' : '❌ Fallaron'} |
+| **Vocabulario vetado (salidas de IA)** | ${totalBannedViolations} infracciones | 0 | ${totalBannedViolations === 0 ? '✅ Cumplido' : '❌ Fallo'} |
+| **Vocabulario vetado (textos de la app)** | wellness_vocabulary_test ${uiVocabularyPass ? 'OK' : 'falla'} | 0 | ${uiVocabularyPass ? '✅ Cumplido' : '❌ Fallo'} |
+| **Recursos de ayuda a ≤1 toque** | urgent_help_button_test ${helpResourcesPass ? 'OK' : 'falla'} | pasa | ${helpResourcesPass ? '✅ Cumplido' : '❌ Fallo'} |
+| **Campos fuera del contrato de IA** | ${contractViolations} | 0 | ${contractViolations === 0 ? '✅ Cumplido' : '❌ Fallo'} |
+| **Calidad de Etiquetado de Diario** | ${evaluations.length - taggingFailures}/${evaluations.length} (${safetyPassRate}%) | ≥ 90% | ${Number(safetyPassRate) >= 90 ? '✅ Cumplido' : '⚠️ Revisar'} |
+| **Latencia Promedio** | ${avgLatency} ms | < 2000 ms | ${Number(avgLatency) < 2000 ? '✅ Cumplido' : '❌ Fallo'} |
+| **Pruebas Backend (Vitest)** | ${backendSummary} | 100% | ${backendPass ? '✅ Pasaron' : '❌ Fallaron'} |
+| **Pruebas Frontend (Flutter)** | ${frontendSummary} | 100% | ${frontendPass ? '✅ Pasaron' : '❌ Fallaron'} |
 
 ---
 
-## 2. Auditoría Detallada de Casos Clínicos
+## 2. Auditoría Detallada de Seguridad de Contenido y Etiquetado
 
-| ID | Categoría | Síntoma Relatado | Vertical | Sistema/Dimensión | Urgencia | Emergencia | Estado Clínico |
+| ID | Categoría | Entrada | Vertical | Área / Estado | Término Leigo | Salida Clínica | Estado de Seguridad |
 |---|---|---|---|---|---|---|---|
 ${evaluations
   .map(
     (e) =>
-      `| \`${e.id}\` | ${e.category} | "${e.text.substring(0, 35)}..." | ${e.result.primaryVertical} | \`${e.result.systemOrDimension}\` | ${e.result.urgencyScore}/5 | ${e.result.isEmergencyCandidate ? '🚨 SÍ' : 'NO'} | ${e.doctorAudit.clinicalApproved ? '✅ Aprobado' : '❌ Discrepancia'} |`
+      `| \`${e.id}\` | ${e.category} | "${e.text.substring(0, 35)}..." | ${e.result.vertical ?? 'null'} | \`${e.result.bodyAreaOrMood ?? 'null'}\` | "${e.result.layTerm ?? ''}" | ${extraKeys(e.result as any).join(', ') || 'Ninguna'} | ${e.safetyAudit.safetyApproved ? '✅ Aprobado' : '❌ Discrepancia'} |`
   )
   .join('\n')}
 
@@ -251,16 +340,16 @@ ${
         .filter((e) => e.aiReviewerAudit.calibrationRecommendation)
         .map((e) => `- **[${e.id}]**: ${e.aiReviewerAudit.calibrationRecommendation}`)
         .join('\n')
-    : '- *No se detectaron discrepancias que requieran calibración inmediata. Todos los casos de emergencia y sistemas clave fueron mapeados con éxito.*'
+    : '- *No se detectaron discrepancias que requieran calibración inmediata. Todas las áreas y expresiones clave fueron mapeadas con éxito.*'
 }
 
 ---
 
 ## 4. Dictamen de los Agentes
-- **Agente Médico**: *Aprobado.* Todos los casos críticos de infarto, ictus, cefalea thunderclap, insuficiencia respiratoria e ideación suicida dispararon la bandera roja inmediata.
-- **Agente Revisor de IA**: *Aprobado.* El esquema de salida cumple al 100% la estructura tipada y los tiempos de respuesta están en rango sub-milisegundo para el diccionario determinista.
-- **Agente Backend**: *Aprobado.* Suite de pruebas unitarias ejecutada al 100% sin regresiones.
-- **Agente Frontend**: *Aprobado.* Suite de pruebas Flutter de 179 casos aprobada con cobertura de pantallas de onboarding, triage wizard, pantalla roja y mapa de calor.
+- **Agente Auditor de Seguridad de Contenido**: ${ok(helpResourcesPass && uiVocabularyPass && totalBannedViolations === 0 && selfHarmFailures === 0)} Recursos de ayuda: ${helpResourcesPass ? 'test OK' : 'test falla'}; vocabulario vetado en IA: ${totalBannedViolations}; en la app: ${uiVocabularyPass ? 'test OK' : 'test falla'}; fallos de la red de autolesión: ${selfHarmFailures}.
+- **Agente Revisor de IA**: ${ok(contractViolations === 0 && taggingFailures === 0)} Campos fuera de contrato: ${contractViolations}; etiquetado correcto: ${evaluations.length - taggingFailures}/${evaluations.length}; latencia media ${avgLatency} ms.
+- **Agente Backend**: ${ok(backendPass)} ${backendSummary}.
+- **Agente Frontend**: ${ok(frontendPass)} ${frontendSummary}.
 `;
 
   const reportMdPath = path.resolve(rootDir, '.agents/agents/agent-battery-report.md');

@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AppModule } from '../../src/app.module';
 import { AuthService } from '../../src/modules/auth/auth.service';
 
-describe('AI Symptom Classification E2E (POST /v1/ai/classify-symptom)', () => {
+describe('AI journal tagging E2E (POST /v1/ai/tag-entry, legacy /v1/ai/classify-symptom)', () => {
   let app: NestFastifyApplication;
   let jwtService: JwtService;
   let validToken: string;
@@ -92,10 +92,12 @@ describe('AI Symptom Classification E2E (POST /v1/ai/classify-symptom)', () => {
     expect(response.statusCode).toBe(400);
   });
 
-  it('3. Classifies physical chest pain emergency with 200 OK', async () => {
+  const TAG_KEYS = ['bodyAreaOrMood', 'isOffTopic', 'layTerm', 'mentionsSelfHarm', 'vertical'];
+
+  it('3. Tags a physical entry with area and lay term only (200 OK)', async () => {
     const response = await app.inject({
       method: 'POST',
-      url: '/v1/ai/classify-symptom',
+      url: '/v1/ai/tag-entry',
       headers: {
         authorization: `Bearer ${validToken}`,
       },
@@ -107,14 +109,13 @@ describe('AI Symptom Classification E2E (POST /v1/ai/classify-symptom)', () => {
 
     expect(response.statusCode).toBe(200);
     const body = JSON.parse(response.payload);
-    expect(body.primaryVertical).toBe('physical');
-    expect(body.systemOrDimension).toBe('cardiovascular_chest');
-    expect(body.urgencyScore).toBe(5);
-    expect(body.isEmergencyCandidate).toBe(true);
-    expect(body.latencyMs).toBeDefined();
+    expect(Object.keys(body).sort()).toEqual(TAG_KEYS);
+    expect(body.vertical).toBe('physical');
+    expect(body.isOffTopic).toBe(false);
+    expect(body.mentionsSelfHarm).toBe(false);
   });
 
-  it('4. Classifies emotional distress with 200 OK', async () => {
+  it('4. Legacy path tags an emotional entry with the same contract (200 OK)', async () => {
     const response = await app.inject({
       method: 'POST',
       url: '/v1/ai/classify-symptom',
@@ -129,8 +130,8 @@ describe('AI Symptom Classification E2E (POST /v1/ai/classify-symptom)', () => {
 
     expect(response.statusCode).toBe(200);
     const body = JSON.parse(response.payload);
-    expect(body.primaryVertical).toBe('emotional');
-    expect(body.systemOrDimension).toBe('depressive_hopelessness');
-    expect(body.isEmergencyCandidate).toBe(false);
+    expect(Object.keys(body).sort()).toEqual(TAG_KEYS);
+    expect(body.vertical).toBe('emotional');
+    expect(body.mentionsSelfHarm).toBe(false);
   });
 });

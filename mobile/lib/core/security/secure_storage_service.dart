@@ -115,7 +115,8 @@ class SecureStorageService {
     await _storage.delete(key: key);
   }
 
-  static const String _prefixTodayTriageOutcome = 'dualis_today_triage_outcome_';
+  // v2: wellness labels (outcomes cached before the repositioning carry clinical text).
+  static const String _prefixTodayTriageOutcome = 'dualis_today_triage_outcome_v2_';
 
   Future<void> saveTodayTriageOutcome({
     required String userId,

@@ -79,7 +79,7 @@ Widget createHydrationQATestApp({
     logs: [],
     physicalSummary: {},
     emotionalSummary: [],
-    criticalRecurrences: [],
+    journalPatterns: [],
   );
 
   final router = GoRouter(

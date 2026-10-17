@@ -317,6 +317,46 @@ class AuthController extends Notifier<AuthState> {
     }
   }
 
+  Future<bool> forgotPassword({
+    required String email,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      await _repository.forgotPassword(email: email);
+      state = state.copyWith(isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: _extractErrorMessage(e),
+      );
+      return false;
+    }
+  }
+
+  Future<bool> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      await _repository.resetPassword(
+        email: email,
+        code: code,
+        newPassword: newPassword,
+      );
+      state = state.copyWith(isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: _extractErrorMessage(e),
+      );
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     await _cancelLocalReminders();
     await _secureStorage.clearAll();

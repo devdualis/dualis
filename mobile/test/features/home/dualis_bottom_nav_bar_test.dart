@@ -28,7 +28,7 @@ void main() {
 
       // Verify text labels are hidden for clean icon-only bottom bar
       expect(find.text('Início'), findsNothing);
-      expect(find.text('Resultado do Dia'), findsNothing);
+      expect(find.text('Meu Dia'), findsNothing);
       expect(find.text('Histórico & Mapa'), findsNothing);
       expect(find.text('Água'), findsNothing);
     });

@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/config/feature_flags.dart';
 import '../../../../core/utils/error_message_resolver.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../profile/presentation/widgets/active_profile_banner.dart';
+import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/router/route_paths.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/anatomical_body_map.dart';
-import '../widgets/critical_recurrence_card.dart';
+import '../widgets/journal_pattern_card.dart';
 import '../widgets/dashboard_segmented_tab.dart';
 import '../widgets/emotional_trend_chart.dart';
 import '../widgets/retrospective_list_view.dart';
@@ -25,7 +30,7 @@ class HistoricalDashboardScreen extends ConsumerWidget {
           final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
           final errorText = l10n != null
               ? ErrorMessageResolver.resolve(err, l10n)
-              : (l10n?.errorLoadHistory ?? 'Não foi possível carregar o histórico de triagens.');
+              : (l10n?.errorLoadHistory ?? 'Não foi possível carregar o histórico de registros.');
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -77,6 +82,7 @@ class HistoricalDashboardScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const ActiveProfileBanner(),
                   DashboardSegmentedTab(
                     selectedTab: tab,
                     onTabChanged: (newTab) {
@@ -164,7 +170,7 @@ class HistoricalDashboardScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 8),
                           ...recurrences.map(
-                            (r) => CriticalRecurrenceCard(item: r),
+                            (r) => JournalPatternCard(item: r),
                           ),
                         ],
                         const SizedBox(height: 20),
@@ -193,9 +199,12 @@ class HistoricalDashboardScreen extends ConsumerWidget {
                           entries: state.history.logs,
                           verticalFilter:
                               isEmotional ? 'emotional' : 'physical',
-                          onDeleteEntry: (id) => ref
-                              .read(dashboardControllerProvider.notifier)
-                              .deleteHistoryEntry(id),
+                          // VIEW_ONLY profiles cannot delete (backend 403).
+                          onDeleteEntry: activeProfileIsViewOnly(ref)
+                              ? null
+                              : (id) => ref
+                                  .read(dashboardControllerProvider.notifier)
+                                  .deleteHistoryEntry(id),
                         ),
                         const SizedBox(height: 32),
                       ],
@@ -224,8 +233,20 @@ class HistoricalDashboardScreen extends ConsumerWidget {
         backgroundColor: Colors.white,
         foregroundColor: const Color(0xFF1E293B),
         actions: [
+          if (ref.watch(premiumProfilesEnabledProvider)) ...[
+            const ProfileAppBarPill(),
+            const SizedBox(width: 4),
+          ],
+          IconButton(
+            key: const Key('dashboard_emergency_button'),
+            icon: const Icon(Icons.emergency_rounded, color: Color(0xFFDC2626)),
+            tooltip: 'Ajuda de Emergência',
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            onPressed: () => context.push(RoutePaths.emergency),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
             onPressed: () =>
                 ref.read(dashboardControllerProvider.notifier).refreshHistory(),
           ),

@@ -1,26 +1,27 @@
 import { BadRequestException, Body, Controller, HttpCode, HttpStatus, Inject, Post, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ClassifySymptomDto, TriageClassificationResult } from './dto/classify-symptom.dto';
-import { AiTriageService } from './services/ai-triage.service';
+import { EntryTagResponseDto, TagEntryDto } from './dto/classify-symptom.dto';
+import { AiTaggingService } from './services/ai-tagging.service';
 
 @Controller({ path: 'ai', version: '1' })
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
 export class AiController {
   constructor(
-    @Inject(AiTriageService)
-    private readonly aiTriageService: AiTriageService,
+    @Inject(AiTaggingService)
+    private readonly aiTaggingService: AiTaggingService,
   ) {}
 
-  @Post('classify-symptom')
+  /** `tag-entry` is the current path; `classify-symptom` stays as an alias for published app versions. */
+  @Post(['tag-entry', 'classify-symptom'])
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  async classifySymptom(
+  async tagEntry(
     @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
-    dto: ClassifySymptomDto,
-  ): Promise<TriageClassificationResult> {
+    dto: TagEntryDto,
+  ): Promise<EntryTagResponseDto> {
     if (!dto || !dto.text || typeof dto.text !== 'string' || dto.text.trim().length < 2) {
-      throw new BadRequestException('O texto do sintoma deve ter pelo menos 2 caracteres.');
+      throw new BadRequestException('O texto deve ter pelo menos 2 caracteres.');
     }
-    return this.aiTriageService.classify(dto);
+    return this.aiTaggingService.tagEntry(dto);
   }
 }

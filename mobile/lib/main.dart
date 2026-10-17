@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'core/app_config/app_version_gate.dart';
 import 'core/notifications/app_notification_center.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/controllers/auth_controller.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/locale_provider.dart';
+import 'shared/widgets/urgent_help_button.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,7 +64,11 @@ class _DualisAppState extends ConsumerState<DualisApp> {
       ],
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) {
-        return child ?? const SizedBox.shrink();
+        // The urgent-help bar stays reachable even when an update is required.
+        return UrgentHelpOverlay(
+          router: router,
+          child: AppVersionGate(child: child ?? const SizedBox.shrink()),
+        );
       },
     );
   }

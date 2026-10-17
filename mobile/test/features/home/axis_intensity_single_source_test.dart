@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:dualis_mobile/core/constants/app_colors.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/dashboard/data/triage_history_remote_data_source.dart';
 import 'package:dualis_mobile/features/dashboard/domain/models/triage_history_models.dart';
@@ -74,7 +75,7 @@ class _FakeHistoryDataSource extends TriageHistoryRemoteDataSource {
         logs: List.of(logs),
         physicalSummary: const {},
         emotionalSummary: const [],
-        criticalRecurrences: const [],
+        journalPatterns: const [],
       );
 }
 
@@ -95,14 +96,13 @@ String _todayStr() {
 }
 
 /// Emotional estresse_burnout record, intensity 3, cross-vertically tagged
-/// with a physical system (organic primacy applied by the backend).
+/// with a physical system; the backend returns the submitted vertical.
 TriageHistoryEntry _e(String id, int minutes) => TriageHistoryEntry(
       id: id,
       intensity: 3,
       emotionalDimension: 'estresse_burnout',
       anatomicalSystem: 'neurologico',
-      organicPrimacyApplied: true,
-      disposition: 'consulta_rotina',
+      vertical: 'emotional',
       narrative: 'muito estresse no trabalho',
       recordedAt: _todayAt(minutes),
     );
@@ -113,8 +113,7 @@ TriageHistoryEntry _p1({bool withEmotionalTag = true}) => TriageHistoryEntry(
       intensity: 2,
       anatomicalSystem: 'neurologico',
       emotionalDimension: withEmotionalTag ? 'estresse_burnout' : null,
-      organicPrimacyApplied: false,
-      disposition: 'auto_cuidado',
+      vertical: 'physical',
       narrative: 'tontura',
       recordedAt: _todayAt(12),
     );
@@ -126,11 +125,9 @@ TriageOutcome _stalePhysicalOutcome() => TriageOutcome(
       id: 'p1',
       vertical: 'physical',
       intensityScore: 2,
-      careDisposition: CareDisposition.selfCare,
       primaryCategory: 'neurologico',
       categoryLabel: 'Sistema Neurológico',
       somaticMapping: 'Tontura / Instabilidade postural e equilíbrio',
-      organicPrimacyApplied: false,
       recommendedArticles: const [],
       recordedAt: _todayAt(12),
       secondaryCategoryLabel: 'Estresse e Burnout',
@@ -187,6 +184,38 @@ Future<void> _flush() async {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  group('triggerStatusFromStepAnswer', () {
+    test('parses enum names and declared-state labels', () {
+      expect(triggerStatusFromStepAnswer('badSick'), TriggerStatus.badSick);
+      expect(triggerStatusFromStepAnswer('mal'), TriggerStatus.badSick);
+      expect(triggerStatusFromStepAnswer('soSo'), TriggerStatus.soSo);
+      expect(triggerStatusFromStepAnswer('mais ou menos'), TriggerStatus.soSo);
+      expect(triggerStatusFromStepAnswer('goodNormal'), TriggerStatus.goodNormal);
+      expect(triggerStatusFromStepAnswer('bem'), TriggerStatus.goodNormal);
+    });
+
+    test('reads axis status from daily check-in stepAnswers', () {
+      final log = TriageHistoryEntry(
+        id: 'dc-1',
+        intensity: 0,
+        stepAnswers: const {
+          'type': 'daily_checkin',
+          'emotionalStatus': 'badSick',
+          'physicalStatus': 'goodNormal',
+        },
+        recordedAt: DateTime.now(),
+      );
+      expect(
+        declaredStatusOnLog(log, CheckInAxis.emotional),
+        TriggerStatus.badSick,
+      );
+      expect(
+        declaredStatusOnLog(log, CheckInAxis.physical),
+        TriggerStatus.goodNormal,
+      );
+    });
+  });
+
   group('triggerStatusFromIntensity', () {
     test('maps scores to statuses', () {
       expect(triggerStatusFromIntensity(null), TriggerStatus.goodNormal);
@@ -205,6 +234,7 @@ void main() {
       String? anatomical,
       String? emotional,
       bool organic = false,
+      String? vertical,
       Map<String, dynamic>? stepAnswers,
     }) =>
         TriageHistoryEntry(
@@ -213,6 +243,7 @@ void main() {
           anatomicalSystem: anatomical,
           emotionalDimension: emotional,
           organicPrimacyApplied: organic,
+          vertical: vertical,
           stepAnswers: stepAnswers,
           recordedAt: _todayAt(1),
         );
@@ -236,14 +267,31 @@ void main() {
       expect(AxisIntensityResolver.primaryAxisOf(log(anatomical: 'neurologico')),
           CheckInAxis.physical);
     });
-    test('both + organicPrimacyApplied -> emotional', () {
+    test('both + vertical emotional -> emotional', () {
+      expect(
+        AxisIntensityResolver.primaryAxisOf(
+            log(anatomical: 'neurologico', emotional: 'sono', vertical: 'emotional')),
+        CheckInAxis.emotional,
+      );
+    });
+    test('both + vertical physical -> physical (vertical beats legacy flag)', () {
+      expect(
+        AxisIntensityResolver.primaryAxisOf(log(
+            anatomical: 'neurologico',
+            emotional: 'sono',
+            organic: true,
+            vertical: 'physical')),
+        CheckInAxis.physical,
+      );
+    });
+    test('legacy row: both + organicPrimacyApplied -> emotional', () {
       expect(
         AxisIntensityResolver.primaryAxisOf(
             log(anatomical: 'neurologico', emotional: 'sono', organic: true)),
         CheckInAxis.emotional,
       );
     });
-    test('both without organicPrimacyApplied -> physical', () {
+    test('legacy row: both without vertical or flag -> physical', () {
       expect(
         AxisIntensityResolver.primaryAxisOf(
             log(anatomical: 'neurologico', emotional: 'sono')),
@@ -327,11 +375,9 @@ void main() {
         id: 'e1',
         vertical: 'emotional',
         intensityScore: 3,
-        careDisposition: CareDisposition.routineConsultation,
         primaryCategory: 'estresse_burnout',
         categoryLabel: 'Estresse e Burnout',
         somaticMapping: '',
-        organicPrimacyApplied: true,
         recommendedArticles: const [],
         recordedAt: _todayAt(10),
       );
@@ -374,11 +420,9 @@ void main() {
         id: 'e1',
         vertical: 'emotional',
         intensityScore: 3,
-        careDisposition: CareDisposition.routineConsultation,
         primaryCategory: 'estresse_burnout',
         categoryLabel: 'Estresse e Burnout',
         somaticMapping: '',
-        organicPrimacyApplied: false,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
       ));
@@ -417,21 +461,22 @@ void main() {
       await tester.pumpWidget(_harness(container, const DualAxisTriggerCard()));
       await tester.pumpAndSettle();
 
-      expect(
-        find.descendant(
-          of: find.byKey(const Key('psicoemocional_completed_card')),
-          matching: find.text('Moderada (3)'),
-        ),
-        findsOneWidget,
+      // Chip removed: the completed card's background color is the tier signal.
+      final emotionalCard = tester.widget<Container>(
+        find.byKey(const Key('psicoemocional_completed_card')),
       );
       expect(
-        find.descendant(
-          of: find.byKey(const Key('fisica_completed_card')),
-          matching: find.text('Leve (1-2)'),
-        ),
-        findsOneWidget,
+        (emotionalCard.decoration as BoxDecoration).color,
+        AppColors.intensityModerateBg,
       );
-      expect(find.text('Intensa (4-5)'), findsNothing);
+
+      final physicalCard = tester.widget<Container>(
+        find.byKey(const Key('fisica_completed_card')),
+      );
+      expect(
+        (physicalCard.decoration as BoxDecoration).color,
+        AppColors.intensityMildBg,
+      );
     });
   });
 
@@ -453,7 +498,10 @@ void main() {
 
       expect(container.read(triageOutcomeProvider).outcome?.intensityScore, 2);
       expect(find.text('2. Eixo Avaliação Psico-emocional'), findsOneWidget);
-      expect(find.text('Estresse e Burnout'), findsOneWidget);
+      // Single source of truth: the freshly-resolved trigger-state summary
+      // (mapCategoryLabel('estresse_burnout')) wins over the stale
+      // outcome.secondaryCategoryLabel persisted in _stalePhysicalOutcome().
+      expect(find.text('Estressado(a) ou esgotado(a)'), findsOneWidget);
       expect(find.text('Moderada (3)'), findsOneWidget);
       expect(find.text('Leve (1-2)'), findsOneWidget);
       expect(find.text('Intensa (4-5)'), findsNothing);

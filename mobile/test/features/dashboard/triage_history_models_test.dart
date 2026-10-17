@@ -1,107 +1,137 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dualis_mobile/features/dashboard/domain/models/triage_history_models.dart';
 
+/// Round-trips through jsonEncode/jsonDecode so maps have the same runtime
+/// types as a real API payload (`Map<String, dynamic>`).
+Map<String, dynamic> _payload(Object json) =>
+    jsonDecode(jsonEncode(json)) as Map<String, dynamic>;
+
 void main() {
-  group('Triage History Models Tests', () {
-    test('TriageHistoryEntry parses valid json correctly', () {
-      final json = {
+  group('TriageHistoryModels', () {
+    test('TriageHistoryEntry parses a journal entry', () {
+      final entry = TriageHistoryEntry.fromJson(_payload({
         'id': 'log-1',
         'intensity': 4,
         'anatomicalSystem': 'coluna_dorsal',
         'emotionalDimension': null,
-        'disposition': 'consulta_rotina',
         'stepAnswers': {'causes': 'postura'},
         'recordedAt': '2026-09-14T10:00:00.000Z',
-      };
-
-      final entry = TriageHistoryEntry.fromJson(json);
+      }));
 
       expect(entry.id, 'log-1');
       expect(entry.intensity, 4);
       expect(entry.anatomicalSystem, 'coluna_dorsal');
       expect(entry.emotionalDimension, isNull);
-      expect(entry.disposition, 'consulta_rotina');
       expect(entry.stepAnswers?['causes'], 'postura');
       expect(entry.recordedAt, DateTime.parse('2026-09-14T10:00:00.000Z'));
     });
 
-    test('CriticalRecurrenceItem parses valid json correctly', () {
-      final json = {
-        'id': 'rec-1',
-        'vertical': 'emotional',
-        'category': 'estresse_burnout',
-        'categoryLabel': 'Estresse / Burnout',
-        'title': 'Foco de Atenção: Estresse / Burnout',
-        'description': 'Identificamos nível 4 em 6 dos últimos 10 dias.',
-        'intensity': 4,
-        'frequencyCount': 6,
-        'windowDays': 10,
-        'recommendedArticleTitle': 'Manejo do Burnout',
-        'recommendedArticleUrl': 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout',
-      };
+    test('TriageHistoryEntry parses vertical; unknown values become null', () {
+      Map<String, dynamic> json(Object? vertical) => _payload({
+            'id': 'log-v',
+            'intensity': 3,
+            'anatomicalSystem': 'cabeca_pescoco',
+            'emotionalDimension': 'ansiosa_agitacao',
+            'vertical': vertical,
+            'recordedAt': '2026-09-14T10:00:00.000Z',
+          });
 
-      final item = CriticalRecurrenceItem.fromJson(json);
-
-      expect(item.id, 'rec-1');
-      expect(item.vertical, 'emotional');
-      expect(item.category, 'estresse_burnout');
-      expect(item.categoryLabel, 'Estresse / Burnout');
-      expect(item.intensity, 4);
-      expect(item.frequencyCount, 6);
-      expect(item.windowDays, 10);
-      expect(item.recommendedArticleTitle, 'Manejo do Burnout');
+      expect(TriageHistoryEntry.fromJson(json('emotional')).vertical, 'emotional');
+      expect(TriageHistoryEntry.fromJson(json('physical')).vertical, 'physical');
+      expect(TriageHistoryEntry.fromJson(json(null)).vertical, isNull);
+      expect(TriageHistoryEntry.fromJson(json('other')).vertical, isNull);
+      expect(TriageHistoryEntry.fromJson(json('emotional')).toJson()['vertical'], 'emotional');
     });
 
-    test('TriageHistoryResponse parses full response payload and empty fallback', () {
-      final json = {
+    test('TriageHistoryEntry tolerates legacy disposition fields from old caches', () {
+      final entry = TriageHistoryEntry.fromJson(_payload({
+        'id': 'abc',
+        'intensity': 4,
+        'anatomicalSystem': 'respiratorio',
+        'disposition': 'consulta_rotina',
+        'organicPrimacyApplied': true,
+        'recordedAt': '2026-01-01T12:00:00.000Z',
+      }));
+
+      expect(entry.id, 'abc');
+      expect(entry.intensity, 4);
+      expect(entry.anatomicalSystem, 'respiratorio');
+    });
+
+    test('JournalPatternItem parses the descriptive contract', () {
+      final item = JournalPatternItem.fromJson(_payload({
+        'category': 'estresse_burnout',
+        'vertical': 'emotional',
+        'count': 6,
+        'windowDays': 10,
+      }));
+
+      expect(item.category, 'estresse_burnout');
+      expect(item.vertical, 'emotional');
+      expect(item.count, 6);
+      expect(item.windowDays, 10);
+    });
+
+    test('TriageHistoryResponse parses journalPatterns and legacy criticalRecurrences', () {
+      final response = TriageHistoryResponse.fromJson(_payload({
         'logs': [
           {
             'id': 'log-1',
             'intensity': 3,
             'anatomicalSystem': 'cabeca_pescoco',
             'emotionalDimension': null,
-            'disposition': 'auto_cuidado',
             'stepAnswers': null,
             'recordedAt': '2026-09-14T12:00:00.000Z',
-          }
+          },
         ],
         'physicalSummary': {'cabeca_pescoco': 3, 'coluna_dorsal': 0},
         'emotionalSummary': [
           {
             'date': '2026-09-14',
-            'dimensions': {'estresse_burnout': 2}
-          }
+            'dimensions': {'ansiosa_agitacao': 2},
+          },
         ],
-        'criticalRecurrences': [
+        'journalPatterns': [
           {
-            'id': 'rec-1',
-            'vertical': 'emotional',
-            'category': 'estresse_burnout',
-            'categoryLabel': 'Estresse / Burnout',
-            'title': 'Alerta',
-            'description': 'Recorrência alta',
-            'intensity': 4,
-            'frequencyCount': 3,
+            'category': 'cabeca_pescoco',
+            'vertical': 'physical',
+            'count': 2,
             'windowDays': 10,
-            'recommendedArticleTitle': 'Burnout',
-            'recommendedArticleUrl': 'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/sindrome-de-burnout',
-          }
+          },
         ],
-      };
-
-      final response = TriageHistoryResponse.fromJson(json);
+      }));
 
       expect(response.logs, hasLength(1));
+      expect(response.logs.first.anatomicalSystem, 'cabeca_pescoco');
       expect(response.physicalSummary['cabeca_pescoco'], 3);
-      expect(response.emotionalSummary, hasLength(1));
-      expect(response.emotionalSummary.first.dimensions['estresse_burnout'], 2);
-      expect(response.criticalRecurrences, hasLength(1));
+      expect(response.emotionalSummary.first.dimensions['ansiosa_agitacao'], 2);
+      expect(response.journalPatterns, hasLength(1));
+      expect(response.journalPatterns.first.count, 2);
+      expect(response.journalPatterns.first.category, 'cabeca_pescoco');
 
+      final legacy = TriageHistoryResponse.fromJson(_payload({
+        'logs': [],
+        'physicalSummary': {},
+        'emotionalSummary': [],
+        'criticalRecurrences': [
+          {
+            'category': 'ansiosa_agitacao',
+            'vertical': 'emotional',
+            'frequencyCount': 3,
+            'windowDays': 10,
+          },
+        ],
+      }));
+      expect(legacy.journalPatterns.first.category, 'ansiosa_agitacao');
+      expect(legacy.journalPatterns.first.count, 3);
+    });
+
+    test('empty response', () {
       final emptyResponse = TriageHistoryResponse.empty();
       expect(emptyResponse.logs, isEmpty);
-      expect(emptyResponse.physicalSummary, isEmpty);
-      expect(emptyResponse.emotionalSummary, isEmpty);
-      expect(emptyResponse.criticalRecurrences, isEmpty);
+      expect(emptyResponse.journalPatterns, isEmpty);
     });
   });
 }

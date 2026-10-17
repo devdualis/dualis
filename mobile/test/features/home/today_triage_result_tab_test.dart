@@ -7,6 +7,7 @@ import 'package:dualis_mobile/features/home/presentation/controllers/trigger_che
 import 'package:dualis_mobile/features/home/presentation/widgets/today_triage_result_tab.dart';
 import 'package:dualis_mobile/features/triage_outcome/domain/triage_outcome_models.dart';
 import 'package:dualis_mobile/features/triage_outcome/presentation/controllers/triage_outcome_controller.dart';
+import 'package:dualis_mobile/features/triage_outcome/presentation/widgets/wellness_guidance_block.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 Widget createTestWrapper({
@@ -75,11 +76,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Estado Geral de Hoje'), findsOneWidget);
-      expect(find.text('Pendente'), findsOneWidget);
-      expect(find.text('Nenhuma avaliação realizada hoje'), findsOneWidget);
+      // The top "Estado Geral de Hoje" / "Pendente" header was removed: it
+      // was redundant with "Nenhum registro hoje" below.
+      expect(find.text('Estado Geral de Hoje'), findsNothing);
+      expect(find.text('Pendente'), findsNothing);
+      expect(find.text('Nenhum registro hoje'), findsOneWidget);
       expect(find.text('Realizar Check-in Agora'), findsOneWidget);
-      expect(find.text('Artigos Sugeridos para Você'), findsOneWidget);
+      expect(find.text('Leituras sobre bem-estar'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('today_start_checkin_cta_button')));
       await tester.pumpAndSettle();
@@ -92,18 +95,16 @@ void main() {
         id: 'out-123',
         vertical: 'physical',
         intensityScore: 3,
-        careDisposition: CareDisposition.routineConsultation,
         primaryCategory: 'coluna_dorsal',
         categoryLabel: 'Coluna e Dor Dorsal',
         somaticMapping: 'Dor paravertebral postural leve',
-        organicPrimacyApplied: false,
         recommendedArticles: const [
           RecommendedArticle(
             id: 'art-coluna-1',
             title: 'Alongamento para Coluna Lombar',
             category: 'coluna',
-            author: 'Dr. Marcos Lima',
-            authorRole: 'Fisioterapeuta Especialista em Coluna',
+            author: 'Sociedade Brasileira de Ortopedia e Traumatologia',
+            authorRole: 'Fonte',
             readTimeMinutes: 4,
             summary: 'Exercícios práticos para alívio de sobrecarga postural.',
             url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
@@ -125,10 +126,18 @@ void main() {
 
       expect(find.text('Coluna e Dor Dorsal'), findsOneWidget);
       expect(find.text('Dor paravertebral postural leve'), findsOneWidget);
-      expect(find.text('Artigos Sugeridos para Você'), findsOneWidget);
+      expect(find.text('Leituras sobre bem-estar'), findsOneWidget);
       expect(find.text('Alongamento para Coluna Lombar'), findsOneWidget);
-      expect(find.text('Atualizar Triagem de Hoje'), findsOneWidget);
-      expect(find.text('Triagem Concluída'), findsOneWidget);
+      expect(find.text('Sociedade Brasileira de Ortopedia e Traumatologia • Fonte'), findsOneWidget);
+      expect(find.text('Atualizar registro de hoje'), findsOneWidget);
+      // The top "Estado Geral de Hoje" header (with its "Registro concluído"
+      // badge) and the standalone "Intensidade que você informou" meter were
+      // removed: both were redundant with the axis cards' own tier badges.
+      expect(find.text('Registro concluído'), findsNothing);
+      expect(find.text('Intensidade que você informou'), findsNothing);
+      expect(find.text('3 / 5'), findsNothing);
+      expect(find.byType(WellnessGuidanceBlock), findsOneWidget);
+      expect(find.text('Consulta de Rotina'), findsNothing);
     });
 
     testWidgets('Renders wellness check-in confirmation view with preventive articles',
@@ -147,9 +156,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Bem-Estar Confirmado'), findsOneWidget);
       expect(find.text('Check-in de Bem-Estar Confirmado'), findsOneWidget);
-      expect(find.text('Artigos Preventivos do Dia'), findsOneWidget);
+      expect(find.text('Leituras sobre bem-estar'), findsOneWidget);
+      expect(find.text('Conteúdos educativos gerais. Não são orientação para o seu caso.'), findsOneWidget);
       expect(find.text('Higiene do Sono e Repouso Restaurador'), findsOneWidget);
       expect(find.text('Revisar Respostas do Check-in'), findsOneWidget);
     });
@@ -173,21 +182,20 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Sintomas Registrados'), findsOneWidget);
       expect(find.text('Sintomas Registrados no Check-in'), findsOneWidget);
       expect(find.text('1. Eixo Psico-Emocional'), findsOneWidget);
       expect(find.text('Mal / Ruim'), findsOneWidget);
       expect(find.text('2. Eixo Avaliação Física'), findsOneWidget);
       expect(find.text('Mais ou menos'), findsOneWidget);
       expect(find.text('Relato: "coceira no braco"'), findsOneWidget);
-      expect(find.text('Artigos Sugeridos para Seus Sintomas'), findsOneWidget);
+      expect(find.text('Leituras relacionadas ao tema que você registrou'), findsOneWidget);
 
-      // Verify tailored articles for skin / pruritus / upper limbs are suggested
+      // General readings related to skin / upper limbs (topic, not a recommendation)
       expect(find.text('Prurido Cutâneo, Alergias e Cuidados com a Pele'), findsOneWidget);
       expect(find.text('Sobrecarga Musculoesquelética em Braços e Ombros'), findsOneWidget);
 
       // Verify CTA button
-      expect(find.text('Completar Triagem Clínica Detalhada'), findsOneWidget);
+      expect(find.text('Fazer registro detalhado'), findsOneWidget);
       await tester.ensureVisible(find.byKey(const Key('today_start_full_triage_button')));
       await tester.tap(find.byKey(const Key('today_start_full_triage_button')));
       await tester.pumpAndSettle();
@@ -200,12 +208,9 @@ void main() {
         id: 'out-regression-1',
         vertical: 'emotional',
         intensityScore: 3,
-        careDisposition: CareDisposition.routineConsultation,
         primaryCategory: 'somatica',
-        categoryLabel: 'Dimensão Somática (Psicossomática)',
-        somaticMapping: 'Manifestação somatizada de sobrecarga emocional (nó na garganta / aperto torácico)',
-        organicPrimacyApplied: true,
-        organicPrimacyNotice: 'Atenção Clínica (Primazia Orgânica): Sintomas físicos concorrentes exigem que causas orgânicas sejam avaliadas presencialmente por um médico antes de atribuí-los unicamente ao estresse psicológico.',
+        categoryLabel: 'Emoções sentidas no corpo',
+        somaticMapping: 'Nó na garganta e aperto no peito',
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
       );
@@ -225,9 +230,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Must render full outcome, NOT wellness view
-      expect(find.text('Dimensão Somática (Psicossomática)'), findsOneWidget);
-      expect(find.text('Triagem Concluída'), findsOneWidget);
-      expect(find.textContaining('Primazia Orgânica'), findsWidgets);
+      expect(find.text('Emoções sentidas no corpo'), findsOneWidget);
+      expect(find.byType(WellnessGuidanceBlock), findsOneWidget);
+      expect(find.textContaining('Primazia Orgânica'), findsNothing);
       expect(find.text('Check-in de Bem-Estar Confirmado'), findsNothing);
     });
   });

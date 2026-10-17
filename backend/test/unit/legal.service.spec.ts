@@ -1,7 +1,15 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { LegalService } from '../../src/modules/legal/legal.service';
+import {
+  LegalService,
+  LEGAL_DOCUMENTS_VERSION,
+  INTENDED_USE_STATEMENT,
+} from '../../src/modules/legal/legal.service';
+
+// Terms that would describe the product as a medical device / triage tool (plan §2, L-01..L-07).
+const BANNED_LEGAL_TERMS =
+  /RDC|657\/2022|CFM|2\.314|SaMD|estratifica|stratification|triag|triaj|protocolos? cl[ií]nicos|clinical protocols|aut[oô]nom|autonomous|Art\. 11, II|PCI-DSS|prontu[aá]rio/i;
 
 describe('LegalService - SaaS Legal Foundations', () => {
   let service: LegalService;
@@ -14,9 +22,9 @@ describe('LegalService - SaaS Legal Foundations', () => {
           provide: ConfigService,
           useValue: {
             get: (key: string) => {
-              if (key === 'TERMS_VERSION') return '2026.1';
-              if (key === 'PRIVACY_VERSION') return '2026.1';
-              if (key === 'SECURITY_VERSION') return '2026.1';
+              if (key === 'TERMS_VERSION') return '2026.2';
+              if (key === 'PRIVACY_VERSION') return '2026.2';
+              if (key === 'SECURITY_VERSION') return '2026.2';
               return null;
             },
           },
@@ -37,7 +45,7 @@ describe('LegalService - SaaS Legal Foundations', () => {
   });
 
   describe('Terms of Service (Video 2 - Requisito 2: Términos de Uso)', () => {
-    it('should return complete Portuguese SaaS terms with CDC refund rights & medical disclaimers', () => {
+    it('should return complete Portuguese SaaS terms with CDC refund rights', () => {
       const terms = service.getTermsOfService('pt-BR');
       expect(terms.language).toBe('pt-BR');
       expect(terms.title).toContain('Termos e Condições de Uso');
@@ -67,9 +75,10 @@ describe('LegalService - SaaS Legal Foundations', () => {
       expect(privacy.lgpdCompliance.dpoContact).toBe('dpo@dualischeckup.com');
       expect(privacy.lgpdCompliance.rights.length).toBeGreaterThan(3);
 
-      const paymentSec = privacy.sections.find((s) => s.sectionId === '3-pagamentos-e-pci');
+      const paymentSec = privacy.sections.find((s) => s.sectionId === '4-pagamentos');
       expect(paymentSec).toBeDefined();
-      expect(paymentSec?.content).toContain('PCI-DSS');
+      expect(paymentSec?.content).toContain('NUNCA');
+      expect(paymentSec?.content).not.toContain('PCI-DSS');
     });
   });
 
@@ -83,11 +92,53 @@ describe('LegalService - SaaS Legal Foundations', () => {
     });
   });
 
-  describe('Medical Disclaimer & Emergency Protocol', () => {
-    it('should preserve existing clinical disclaimer with Anvisa and CFM citations', () => {
+  describe('Wellness intended use (plan F1)', () => {
+    const langs = ['pt-BR', 'en', 'es'] as const;
+
+    it.each(langs)('legal texts in %s contain no medical-device or triage claims', (lang) => {
+      const docs = [
+        service.getTermsOfService(lang),
+        service.getPrivacyPolicy(lang),
+        service.getMedicalDisclaimer(lang),
+      ];
+      const serialized = JSON.stringify(docs);
+      expect(serialized).not.toMatch(BANNED_LEGAL_TERMS);
+    });
+
+    it.each(langs)('terms section 2 "Nature of the Service" is the canonical intended-use statement (%s)', (lang) => {
+      const terms = service.getTermsOfService(lang);
+      const section2 = terms.sections.find((s) => s.sectionId.startsWith('2-'));
+      expect(section2?.content).toBe(INTENDED_USE_STATEMENT[lang]);
+    });
+
+    it('pt-BR terms section is titled "2. Natureza do Serviço"', () => {
+      const terms = service.getTermsOfService('pt-BR');
+      expect(terms.sections[1].title).toBe('2. Natureza do Serviço');
+    });
+
+    it.each(langs)('privacy policy uses LGPD Art. 11, I consent and discloses Google Gemini + international transfer (%s)', (lang) => {
+      const privacy = service.getPrivacyPolicy(lang);
+      expect(privacy.lgpdCompliance.legalBases[0]).toContain('Art. 11, I');
+      expect(privacy.lgpdCompliance.legalBases.join(' ')).not.toMatch(/VIII/);
+      const serialized = JSON.stringify(privacy.sections);
+      expect(serialized).toContain('Gemini');
+      expect(serialized).toContain('Art. 33');
+    });
+  });
+
+  describe('Disclaimer & Emergency Contacts', () => {
+    it('returns the intended-use statement, LGPD/CDC citations only, and help numbers', () => {
       const disclaimer = service.getMedicalDisclaimer('pt-BR');
-      expect(disclaimer.citations.some((c) => c.regulatoryBody.includes('Anvisa'))).toBe(true);
+      expect(disclaimer.disclaimerText).toBe(INTENDED_USE_STATEMENT['pt-BR']);
+      expect(disclaimer.citations.map((c) => c.normativeAct).join(' ')).toMatch(/LGPD/);
+      expect(disclaimer.citations.some((c) => /Anvisa|SaMD|CFM/.test(c.regulatoryBody))).toBe(false);
       expect(disclaimer.emergencyContacts.some((c) => c.phone === '192')).toBe(true);
+      expect(disclaimer.emergencyContacts.some((c) => c.phone === '188')).toBe(true);
+    });
+
+    it('defaults the disclaimer version to the bumped 2026.2 so every user re-consents', () => {
+      expect(LEGAL_DOCUMENTS_VERSION).toBe('2026.2');
+      expect(service.getMedicalDisclaimer('pt-BR').version).toBe('2026.2');
     });
   });
 });

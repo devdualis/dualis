@@ -80,7 +80,7 @@ void main() {
       throw StateError('Unexpected path ${options.path}');
     });
 
-    final dio = Dio(BaseOptions(baseUrl: 'http://localhost:3000'))
+    final dio = Dio(BaseOptions(baseUrl: 'http://localhost:8888'))
       ..httpClientAdapter = adapter;
     final client = ApiClient(customDio: dio, secureStorage: storage);
 
@@ -126,7 +126,7 @@ void main() {
       throw StateError('Unexpected path ${options.path}');
     });
 
-    final dio = Dio(BaseOptions(baseUrl: 'http://localhost:3000'))
+    final dio = Dio(BaseOptions(baseUrl: 'http://localhost:8888'))
       ..httpClientAdapter = adapter;
     final client = ApiClient(customDio: dio, secureStorage: storage);
 
@@ -155,7 +155,7 @@ void main() {
       throw StateError('Unexpected path ${options.path}');
     });
 
-    final dio = Dio(BaseOptions(baseUrl: 'http://localhost:3000'))
+    final dio = Dio(BaseOptions(baseUrl: 'http://localhost:8888'))
       ..httpClientAdapter = adapter;
     final client = ApiClient(customDio: dio, secureStorage: storage);
 
@@ -185,7 +185,7 @@ void main() {
       throw StateError('Unexpected path ${options.path}');
     });
 
-    final dio = Dio(BaseOptions(baseUrl: 'http://localhost:3000'))
+    final dio = Dio(BaseOptions(baseUrl: 'http://localhost:8888'))
       ..httpClientAdapter = adapter;
     final client = ApiClient(customDio: dio, secureStorage: storage);
 

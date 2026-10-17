@@ -8,10 +8,9 @@ import { EncryptionService } from '../../../common/encryption/encryption.service
 import { ArticlesCatalogService } from './articles-catalog.service';
 import { ArticlesVectorService } from './articles-vector.service';
 import { MEDICAL_ARTICLES_SEED } from '../data/medical-articles.seed';
-import { AiTriageService } from '../../ai/services/ai-triage.service';
-import { TriageClassificationResult } from '../../ai/dto/classify-symptom.dto';
+import { AiTaggingService } from '../../ai/services/ai-tagging.service';
+import { EntryTagResult } from '../../ai/dto/classify-symptom.dto';
 import {
-  CareDisposition,
   RecommendedArticleDto,
   SubmitTriageDto,
   TriageOutcomeResponseDto,
@@ -21,10 +20,161 @@ import {
   DailyCheckInResponseDto,
 } from '../dto/daily-checkin.dto';
 
+type Lang = 'pt' | 'en' | 'es';
+type Localized = Record<Lang, string>;
+type Vertical = 'physical' | 'emotional';
+
 interface CategoryMapping {
   code: string;
   label: string;
   somaticNormalized: string;
+}
+
+// Plain-language names for each category code (plan R3: name the area or mood the
+// person picked, never a condition or "system"). Codes are stable identifiers.
+const PHYSICAL_LABELS: Record<string, Localized> = {
+  normal: { pt: 'Sem desconforto registrado', en: 'No discomfort logged', es: 'Sin molestias registradas' },
+  cabeca_pescoco: { pt: 'Cabeça e pescoço', en: 'Head and neck', es: 'Cabeza y cuello' },
+  cardiovascular_torax: { pt: 'Peito', en: 'Chest', es: 'Pecho' },
+  respiratorio: { pt: 'Respiração', en: 'Breathing', es: 'Respiración' },
+  gastrointestinal_abdomen: { pt: 'Barriga e estômago', en: 'Stomach and belly', es: 'Estómago y vientre' },
+  coluna_dor_dorsal: { pt: 'Costas', en: 'Back', es: 'Espalda' },
+  membros_superiores: { pt: 'Braços e mãos', en: 'Arms and hands', es: 'Brazos y manos' },
+  membros_inferiores: { pt: 'Pernas e pés', en: 'Legs and feet', es: 'Piernas y pies' },
+  neurologico: { pt: 'Tontura e equilíbrio', en: 'Dizziness and balance', es: 'Mareo y equilibrio' },
+  geniturinario_pelvico: { pt: 'Baixo ventre e urina', en: 'Lower belly and urination', es: 'Bajo vientre y orina' },
+  dermatologico: { pt: 'Pele', en: 'Skin', es: 'Piel' },
+  muscular_geral_sistemico: { pt: 'Corpo todo', en: 'Whole body', es: 'Todo el cuerpo' },
+  endocrino_metabolico: { pt: 'Energia e apetite', en: 'Energy and appetite', es: 'Energía y apetito' },
+};
+
+const EMOTIONAL_LABELS: Record<string, Localized> = {
+  normal: { pt: 'Bem emocionalmente', en: 'Feeling good emotionally', es: 'Bien emocionalmente' },
+  ansiosa_agitacao: { pt: 'Ansiedade e agitação', en: 'Anxious and restless', es: 'Ansiedad e inquietud' },
+  depressiva_desanimo: { pt: 'Pra baixo', en: 'Feeling down', es: 'Decaído(a)' },
+  estresse_burnout: { pt: 'Estressado(a) ou esgotado(a)', en: 'Stressed or worn out', es: 'Estresado(a) o agotado(a)' },
+  somatica: { pt: 'Emoções sentidas no corpo', en: 'Emotions felt in the body', es: 'Emociones sentidas en el cuerpo' },
+  sono: { pt: 'Sono ruim', en: 'Poor sleep', es: 'Dormir mal' },
+  cognitiva_foco: { pt: 'Cansaço mental e foco', en: 'Mental tiredness and focus', es: 'Cansancio mental y concentración' },
+  autoestima: { pt: 'Autoestima', en: 'Self-esteem', es: 'Autoestima' },
+};
+
+// Wizard answers, legacy keys and AI tag keys -> category code.
+const PHYSICAL_ALIASES: Record<string, string> = {
+  normal: 'normal',
+  bem_normal: 'normal',
+  cabeca: 'cabeca_pescoco',
+  cabeca_pescoco: 'cabeca_pescoco',
+  head_neck: 'cabeca_pescoco',
+  cardiovascular: 'cardiovascular_torax',
+  cardiovascular_torax: 'cardiovascular_torax',
+  cardiovascular_chest: 'cardiovascular_torax',
+  respiratorio: 'respiratorio',
+  respiratory: 'respiratorio',
+  abdomen: 'gastrointestinal_abdomen',
+  abdomen_estomago: 'gastrointestinal_abdomen',
+  gastrointestinal_abdomen: 'gastrointestinal_abdomen',
+  gastrointestinal: 'gastrointestinal_abdomen',
+  costas: 'coluna_dor_dorsal',
+  costas_coluna: 'coluna_dor_dorsal',
+  coluna: 'coluna_dor_dorsal',
+  coluna_dor_dorsal: 'coluna_dor_dorsal',
+  dor_lombar_costas: 'coluna_dor_dorsal',
+  lombar: 'coluna_dor_dorsal',
+  musculoskeletal_back: 'coluna_dor_dorsal',
+  membros_superiores: 'membros_superiores',
+  membros_inferiores: 'membros_inferiores',
+  articulacoes: 'membros_superiores',
+  musculoskeletal_joints: 'membros_superiores',
+  neurologico: 'neurologico',
+  neurological: 'neurologico',
+  geniturinario_pelvico: 'geniturinario_pelvico',
+  dermatologico: 'dermatologico',
+  muscular_geral_sistemico: 'muscular_geral_sistemico',
+  general_somatic: 'muscular_geral_sistemico',
+  endocrino_metabolico: 'endocrino_metabolico',
+};
+
+const EMOTIONAL_ALIASES: Record<string, string> = {
+  normal: 'normal',
+  bem_normal: 'normal',
+  ansiedade: 'ansiosa_agitacao',
+  ansiedade_agitacao: 'ansiosa_agitacao',
+  ansiosa_agitacao: 'ansiosa_agitacao',
+  anxious_agitation: 'ansiosa_agitacao',
+  tristeza: 'depressiva_desanimo',
+  tristeza_desanimo: 'depressiva_desanimo',
+  depressiva_desanimo: 'depressiva_desanimo',
+  depressive_hopelessness: 'depressiva_desanimo',
+  estresse: 'estresse_burnout',
+  estresse_irritabilidade: 'estresse_burnout',
+  estresse_burnout: 'estresse_burnout',
+  stress_burnout: 'estresse_burnout',
+  somatico: 'somatica',
+  somatica: 'somatica',
+  sono: 'sono',
+  sono_cognitiva: 'sono',
+  cansaco: 'sono',
+  cansaco_mental: 'cognitiva_foco',
+  cognitiva_foco: 'cognitiva_foco',
+  emotional_general: 'cognitiva_foco',
+  autoestima: 'autoestima',
+};
+
+// Detailed body sub-parts picked in the wizard (step 3).
+const SUBPARTS: Record<string, { code: string; label: Localized }> = {
+  ombro_direito: { code: 'membros_superiores', label: { pt: 'ombro direito', en: 'right shoulder', es: 'hombro derecho' } },
+  ombro_esquerdo: { code: 'membros_superiores', label: { pt: 'ombro esquerdo', en: 'left shoulder', es: 'hombro izquierdo' } },
+  braco_direito: { code: 'membros_superiores', label: { pt: 'braço direito', en: 'right arm', es: 'brazo derecho' } },
+  braco_esquerdo: { code: 'membros_superiores', label: { pt: 'braço esquerdo', en: 'left arm', es: 'brazo izquierdo' } },
+  cotovelo_direito: { code: 'membros_superiores', label: { pt: 'cotovelo direito', en: 'right elbow', es: 'codo derecho' } },
+  cotovelo_esquerdo: { code: 'membros_superiores', label: { pt: 'cotovelo esquerdo', en: 'left elbow', es: 'codo izquierdo' } },
+  antebraco_direito: { code: 'membros_superiores', label: { pt: 'antebraço direito', en: 'right forearm', es: 'antebrazo derecho' } },
+  antebraco_esquerdo: { code: 'membros_superiores', label: { pt: 'antebraço esquerdo', en: 'left forearm', es: 'antebrazo izquierdo' } },
+  punho_direito: { code: 'membros_superiores', label: { pt: 'punho direito', en: 'right wrist', es: 'muñeca derecha' } },
+  punho_esquerdo: { code: 'membros_superiores', label: { pt: 'punho esquerdo', en: 'left wrist', es: 'muñeca izquierda' } },
+  mao_dedos_direito: { code: 'membros_superiores', label: { pt: 'mão e dedos direitos', en: 'right hand and fingers', es: 'mano y dedos derechos' } },
+  mao_dedos_esquerdo: { code: 'membros_superiores', label: { pt: 'mão e dedos esquerdos', en: 'left hand and fingers', es: 'mano y dedos izquierdos' } },
+  membros_superiores_bilateral: { code: 'membros_superiores', label: { pt: 'os dois braços', en: 'both arms', es: 'ambos brazos' } },
+  coxa_quadril_direito: { code: 'membros_inferiores', label: { pt: 'coxa ou quadril direito', en: 'right thigh or hip', es: 'muslo o cadera derecha' } },
+  coxa_quadril_esquerdo: { code: 'membros_inferiores', label: { pt: 'coxa ou quadril esquerdo', en: 'left thigh or hip', es: 'muslo o cadera izquierda' } },
+  joelho_direito: { code: 'membros_inferiores', label: { pt: 'joelho direito', en: 'right knee', es: 'rodilla derecha' } },
+  joelho_esquerdo: { code: 'membros_inferiores', label: { pt: 'joelho esquerdo', en: 'left knee', es: 'rodilla izquierda' } },
+  canela_panturrilha_direito: { code: 'membros_inferiores', label: { pt: 'canela ou panturrilha direita', en: 'right shin or calf', es: 'espinilla o pantorrilla derecha' } },
+  canela_panturrilha_esquerdo: { code: 'membros_inferiores', label: { pt: 'canela ou panturrilha esquerda', en: 'left shin or calf', es: 'espinilla o pantorrilla izquierda' } },
+  tornozelo_direito: { code: 'membros_inferiores', label: { pt: 'tornozelo direito', en: 'right ankle', es: 'tobillo derecho' } },
+  tornozelo_esquerdo: { code: 'membros_inferiores', label: { pt: 'tornozelo esquerdo', en: 'left ankle', es: 'tobillo izquierdo' } },
+  pe_dedos_direito: { code: 'membros_inferiores', label: { pt: 'pé direito', en: 'right foot', es: 'pie derecho' } },
+  pe_dedos_esquerdo: { code: 'membros_inferiores', label: { pt: 'pé esquerdo', en: 'left foot', es: 'pie izquierdo' } },
+  membros_inferiores_bilateral: { code: 'membros_inferiores', label: { pt: 'as duas pernas', en: 'both legs', es: 'ambas piernas' } },
+};
+
+const GENERIC_VERTICAL_LABELS: Record<Vertical, Localized> = {
+  physical: { pt: 'Corpo', en: 'Body', es: 'Cuerpo' },
+  emotional: { pt: 'Emoções', en: 'Emotions', es: 'Emociones' },
+};
+
+const FEELING_WELL: Localized = {
+  pt: 'Você registrou que está se sentindo bem.',
+  en: 'You logged that you are feeling well.',
+  es: 'Registraste que te sientes bien.',
+};
+
+const LOGGED_PREFIX: Localized = { pt: 'Você registrou', en: 'You logged', es: 'Registraste' };
+
+// Plan B-09: one static note, the same for everyone, when an entry touches both body
+// and emotions. No differential reasoning.
+const BODY_AND_EMOTIONS_NOTE: Localized = {
+  pt: 'Você registrou sensações no corpo e nas emoções hoje. Se algum desconforto físico persistir ou piorar, converse com um profissional de saúde.',
+  en: 'You logged sensations in your body and in your emotions today. If any physical discomfort persists or gets worse, talk to a health professional.',
+  es: 'Hoy registraste sensaciones en el cuerpo y en las emociones. Si alguna molestia física persiste o empeora, habla con un profesional de la salud.',
+};
+
+function resolveLang(language?: string): Lang {
+  const lang = (language || 'pt').toLowerCase();
+  if (lang.startsWith('es')) return 'es';
+  if (lang.startsWith('en')) return 'en';
+  return 'pt';
 }
 
 @Injectable()
@@ -40,8 +190,8 @@ export class TriageOutcomeService {
     articlesVector?: ArticlesVectorService | ArticlesCatalogService,
     @Optional() @Inject(ArticlesCatalogService)
     articlesCatalog?: ArticlesCatalogService,
-    @Optional() @Inject(AiTriageService)
-    private readonly aiTriage?: AiTriageService,
+    @Optional() @Inject(AiTaggingService)
+    private readonly aiTagging?: AiTaggingService,
   ) {
     if (articlesVector && 'searchArticles' in articlesVector) {
       this.articlesVector = articlesVector as ArticlesVectorService;
@@ -55,408 +205,26 @@ export class TriageOutcomeService {
     }
   }
 
-  private readonly physicalMappings: Record<string, CategoryMapping> = {
-    normal: {
-      code: 'normal',
-      label: 'Estado de Saúde Normal',
-      somaticNormalized: 'Sem alterações somáticas ou queixas físicas',
-    },
-    bem_normal: {
-      code: 'normal',
-      label: 'Estado de Saúde Normal',
-      somaticNormalized: 'Sem alterações somáticas ou queixas físicas',
-    },
-    cabeca: {
-      code: 'cabeca_pescoco',
-      label: 'Cabeça e Pescoço',
-      somaticNormalized: 'Cefaleia / Desconforto crânio-cervical',
-    },
-    cabeca_pescoco: {
-      code: 'cabeca_pescoco',
-      label: 'Cabeça e Pescoço',
-      somaticNormalized: 'Cefaleia / Desconforto crânio-cervical',
-    },
-    head_neck: {
-      code: 'cabeca_pescoco',
-      label: 'Cabeça e Pescoço',
-      somaticNormalized: 'Cefaleia / Desconforto crânio-cervical',
-    },
-    cardiovascular: {
-      code: 'cardiovascular_torax',
-      label: 'Cardiovascular e Tórax',
-      somaticNormalized: 'Sensação de aperto torácico funcional / Palpitações',
-    },
-    cardiovascular_torax: {
-      code: 'cardiovascular_torax',
-      label: 'Cardiovascular e Tórax',
-      somaticNormalized: 'Sensação de aperto torácico funcional / Palpitações',
-    },
-    cardiovascular_chest: {
-      code: 'cardiovascular_torax',
-      label: 'Cardiovascular e Tórax',
-      somaticNormalized: 'Sensação de aperto torácico funcional / Palpitações',
-    },
-    respiratorio: {
-      code: 'respiratorio',
-      label: 'Sistema Respiratório',
-      somaticNormalized: 'Desconforto respiratório / Dispneia funcional',
-    },
-    respiratory: {
-      code: 'respiratorio',
-      label: 'Sistema Respiratório',
-      somaticNormalized: 'Desconforto respiratório / Dispneia funcional',
-    },
-    abdomen: {
-      code: 'gastrointestinal_abdomen',
-      label: 'Gastrointestinal e Abdômen',
-      somaticNormalized: 'Desconforto epigástrico / Dispepsia funcional',
-    },
-    abdomen_estomago: {
-      code: 'gastrointestinal_abdomen',
-      label: 'Gastrointestinal e Abdômen',
-      somaticNormalized: 'Desconforto epigástrico / Dispepsia funcional',
-    },
-    gastrointestinal_abdomen: {
-      code: 'gastrointestinal_abdomen',
-      label: 'Gastrointestinal e Abdômen',
-      somaticNormalized: 'Desconforto epigástrico / Dispepsia funcional',
-    },
-    gastrointestinal: {
-      code: 'gastrointestinal_abdomen',
-      label: 'Gastrointestinal e Abdômen',
-      somaticNormalized: 'Desconforto epigástrico / Dispepsia funcional',
-    },
-    costas: {
-      code: 'coluna_dor_dorsal',
-      label: 'Coluna e Dor Dorsal',
-      somaticNormalized: 'Dor lombar / Tensão paravertebral postural',
-    },
-    costas_coluna: {
-      code: 'coluna_dor_dorsal',
-      label: 'Coluna e Dor Dorsal',
-      somaticNormalized: 'Dor lombar / Tensão paravertebral postural',
-    },
-    coluna: {
-      code: 'coluna_dor_dorsal',
-      label: 'Coluna e Dor Dorsal',
-      somaticNormalized: 'Dor lombar / Tensão paravertebral postural',
-    },
-    coluna_dor_dorsal: {
-      code: 'coluna_dor_dorsal',
-      label: 'Coluna e Dor Dorsal',
-      somaticNormalized: 'Dor lombar / Tensão paravertebral postural',
-    },
-    dor_lombar_costas: {
-      code: 'coluna_dor_dorsal',
-      label: 'Coluna e Dor Dorsal',
-      somaticNormalized: 'Dor lombar / Tensão paravertebral postural',
-    },
-    lombar: {
-      code: 'coluna_dor_dorsal',
-      label: 'Coluna e Dor Dorsal',
-      somaticNormalized: 'Dor lombar / Tensão paravertebral postural',
-    },
-    musculoskeletal_back: {
-      code: 'coluna_dor_dorsal',
-      label: 'Coluna e Dor Dorsal',
-      somaticNormalized: 'Dor lombar / Tensão paravertebral postural',
-    },
-    membros_superiores: {
-      code: 'membros_superiores',
-      label: 'Membros Superiores D/E',
-      somaticNormalized: 'Desconforto musculoarticular nos membros superiores',
-    },
-    // Subpartes detalhadas - Membros Superiores
-    ombro_direito: {
-      code: 'membros_superiores',
-      label: 'Membros Superiores (Ombro Direito)',
-      somaticNormalized: 'Dor / Desconforto no ombro direito',
-    },
-    ombro_esquerdo: {
-      code: 'membros_superiores',
-      label: 'Membros Superiores (Ombro Esquerdo)',
-      somaticNormalized: 'Dor / Desconforto no ombro esquerdo',
-    },
-    braco_direito: {
-      code: 'membros_superiores',
-      label: 'Membros Superiores (Braço Direito)',
-      somaticNormalized: 'Dor muscular no braço direito',
-    },
-    braco_esquerdo: {
-      code: 'membros_superiores',
-      label: 'Membros Superiores (Braço Esquerdo)',
-      somaticNormalized: 'Dor muscular no braço esquerdo',
-    },
-    cotovelo_direito: {
-      code: 'membros_superiores',
-      label: 'Membros Superiores (Cotovelo Direito)',
-      somaticNormalized: 'Dor articular no cotovelo direito',
-    },
-    cotovelo_esquerdo: {
-      code: 'membros_superiores',
-      label: 'Membros Superiores (Cotovelo Esquerdo)',
-      somaticNormalized: 'Dor articular no cotovelo esquerdo',
-    },
-    antebraco_direito: {
-      code: 'membros_superiores',
-      label: 'Membros Superiores (Antebraço Direito)',
-      somaticNormalized: 'Dor muscular no antebraço direito',
-    },
-    antebraco_esquerdo: {
-      code: 'membros_superiores',
-      label: 'Membros Superiores (Antebraço Esquerdo)',
-      somaticNormalized: 'Dor muscular no antebraço esquerdo',
-    },
-    punho_direito: {
-      code: 'membros_superiores',
-      label: 'Membros Superiores (Punho Direito)',
-      somaticNormalized: 'Dor ou sobrecarga no punho direito',
-    },
-    punho_esquerdo: {
-      code: 'membros_superiores',
-      label: 'Membros Superiores (Punho Esquerdo)',
-      somaticNormalized: 'Dor ou sobrecarga no punho esquerdo',
-    },
-    mao_dedos_direito: {
-      code: 'membros_superiores',
-      label: 'Membros Superiores (Mão e Dedos Direito)',
-      somaticNormalized: 'Desconforto na mão ou dedos direitos',
-    },
-    mao_dedos_esquerdo: {
-      code: 'membros_superiores',
-      label: 'Membros Superiores (Mão e Dedos Esquerdo)',
-      somaticNormalized: 'Desconforto na mão ou dedos esquerdos',
-    },
-    membros_superiores_bilateral: {
-      code: 'membros_superiores',
-      label: 'Membros Superiores (Bilateral)',
-      somaticNormalized: 'Dor musculoarticular em ambos os membros superiores',
-    },
-    membros_inferiores: {
-      code: 'membros_inferiores',
-      label: 'Membros Inferiores D/E',
-      somaticNormalized: 'Desconforto musculoarticular nos membros inferiores',
-    },
-    // Subpartes detalhadas - Membros Inferiores
-    coxa_quadril_direito: {
-      code: 'membros_inferiores',
-      label: 'Membros Inferiores (Coxa / Quadril Direito)',
-      somaticNormalized: 'Dor musculoarticular no quadril ou coxa direita',
-    },
-    coxa_quadril_esquerdo: {
-      code: 'membros_inferiores',
-      label: 'Membros Inferiores (Coxa / Quadril Esquerdo)',
-      somaticNormalized: 'Dor musculoarticular no quadril ou coxa esquerda',
-    },
-    joelho_direito: {
-      code: 'membros_inferiores',
-      label: 'Membros Inferiores (Joelho Direito)',
-      somaticNormalized: 'Dor articular no joelho direito',
-    },
-    joelho_esquerdo: {
-      code: 'membros_inferiores',
-      label: 'Membros Inferiores (Joelho Esquerdo)',
-      somaticNormalized: 'Dor articular no joelho esquerdo',
-    },
-    canela_panturrilha_direito: {
-      code: 'membros_inferiores',
-      label: 'Membros Inferiores (Canela / Panturrilha Direita)',
-      somaticNormalized: 'Sobrecarga ou dor na panturrilha/canela direita',
-    },
-    canela_panturrilha_esquerdo: {
-      code: 'membros_inferiores',
-      label: 'Membros Inferiores (Canela / Panturrilha Esquerda)',
-      somaticNormalized: 'Sobrecarga ou dor na panturrilha/canela esquerda',
-    },
-    tornozelo_direito: {
-      code: 'membros_inferiores',
-      label: 'Membros Inferiores (Tornozelo Direito)',
-      somaticNormalized: 'Entorse ou dor no tornozelo direito',
-    },
-    tornozelo_esquerdo: {
-      code: 'membros_inferiores',
-      label: 'Membros Inferiores (Tornozelo Esquerdo)',
-      somaticNormalized: 'Entorse ou dor no tornozelo esquerdo',
-    },
-    pe_dedos_direito: {
-      code: 'membros_inferiores',
-      label: 'Membros Inferiores (Pé / Dedos Direito)',
-      somaticNormalized: 'Dor no pé ou dedos do pé direito',
-    },
-    pe_dedos_esquerdo: {
-      code: 'membros_inferiores',
-      label: 'Membros Inferiores (Pé / Dedos Esquerdo)',
-      somaticNormalized: 'Dor no pé ou dedos do pé esquerdo',
-    },
-    membros_inferiores_bilateral: {
-      code: 'membros_inferiores',
-      label: 'Membros Inferiores (Bilateral)',
-      somaticNormalized: 'Sobrecarga ou dor musculoarticular em ambos os membros inferiores',
-    },
-    articulacoes: {
-      code: 'membros_superiores',
-      label: 'Membros e Articulações',
-      somaticNormalized: 'Artralgia / Desconforto musculoarticular periférico',
-    },
-    musculoskeletal_joints: {
-      code: 'membros_superiores',
-      label: 'Membros e Articulações',
-      somaticNormalized: 'Artralgia / Desconforto musculoarticular periférico',
-    },
-    neurologico: {
-      code: 'neurologico',
-      label: 'Sistema Neurológico',
-      somaticNormalized: 'Tontura / Instabilidade postural e equilíbrio',
-    },
-    neurological: {
-      code: 'neurologico',
-      label: 'Sistema Neurológico',
-      somaticNormalized: 'Tontura / Instabilidade postural e equilíbrio',
-    },
-    geniturinario_pelvico: {
-      code: 'geniturinario_pelvico',
-      label: 'Geniturinário e Pélvico',
-      somaticNormalized: 'Desconforto pélvico / Queixas urinárias funcionais',
-    },
-    dermatologico: {
-      code: 'dermatologico',
-      label: 'Sistema Dermatológico',
-      somaticNormalized: 'Prurido cutâneo / Hipersensibilidade dermatológica',
-    },
-    muscular_geral_sistemico: {
-      code: 'muscular_geral_sistemico',
-      label: 'Sistema Muscular / Geral Sistêmico',
-      somaticNormalized: 'Mialgia difusa / Sobrecarga fisiológica sistêmica',
-    },
-    general_somatic: {
-      code: 'muscular_geral_sistemico',
-      label: 'Sistema Muscular / Geral Sistêmico',
-      somaticNormalized: 'Mialgia difusa / Sobrecarga fisiológica sistêmica',
-    },
-    endocrino_metabolico: {
-      code: 'endocrino_metabolico',
-      label: 'Endócrino e Metabólico',
-      somaticNormalized: 'Oscilação metabólica / Desgaste energético',
-    },
-  };
+  private aliasesFor(vertical: Vertical): Record<string, string> {
+    return vertical === 'physical' ? PHYSICAL_ALIASES : EMOTIONAL_ALIASES;
+  }
 
-  private readonly emotionalMappings: Record<string, CategoryMapping> = {
-    normal: {
-      code: 'normal',
-      label: 'Estado Emocional Normal / Bem',
-      somaticNormalized: 'Equilíbrio emocional / Sem queixas de sobrecarga',
-    },
-    bem_normal: {
-      code: 'normal',
-      label: 'Estado Emocional Normal / Bem',
-      somaticNormalized: 'Equilíbrio emocional / Sem queixas de sobrecarga',
-    },
-    ansiedade: {
-      code: 'ansiosa_agitacao',
-      label: 'Dimensão Ansiosa / Agitação',
-      somaticNormalized: 'Ansiedade antecipatória / Tensão psicomotora',
-    },
-    ansiedade_agitacao: {
-      code: 'ansiosa_agitacao',
-      label: 'Dimensão Ansiosa / Agitação',
-      somaticNormalized: 'Ansiedade antecipatória / Tensão psicomotora',
-    },
-    ansiosa_agitacao: {
-      code: 'ansiosa_agitacao',
-      label: 'Dimensão Ansiosa / Agitação',
-      somaticNormalized: 'Ansiedade antecipatória / Tensão psicomotora',
-    },
-    anxious_agitation: {
-      code: 'ansiosa_agitacao',
-      label: 'Dimensão Ansiosa / Agitação',
-      somaticNormalized: 'Ansiedade antecipatória / Tensão psicomotora',
-    },
-    tristeza: {
-      code: 'depressiva_desanimo',
-      label: 'Dimensão Depressiva / Desânimo',
-      somaticNormalized: 'Desânimo transitório / Anedonia leve a moderada',
-    },
-    tristeza_desanimo: {
-      code: 'depressiva_desanimo',
-      label: 'Dimensão Depressiva / Desânimo',
-      somaticNormalized: 'Desânimo transitório / Anedonia leve a moderada',
-    },
-    depressiva_desanimo: {
-      code: 'depressiva_desanimo',
-      label: 'Dimensão Depressiva / Desânimo',
-      somaticNormalized: 'Desânimo transitório / Anedonia leve a moderada',
-    },
-    depressive_hopelessness: {
-      code: 'depressiva_desanimo',
-      label: 'Dimensão Depressiva / Desânimo',
-      somaticNormalized: 'Desânimo transitório / Anedonia leve a moderada',
-    },
-    estresse: {
-      code: 'estresse_burnout',
-      label: 'Dimensão Estresse / Burnout',
-      somaticNormalized: 'Sobrecarga de estresse cognitivo / Esgotamento funcional',
-    },
-    estresse_irritabilidade: {
-      code: 'estresse_burnout',
-      label: 'Dimensão Estresse / Burnout',
-      somaticNormalized: 'Sobrecarga de estresse cognitivo / Esgotamento funcional',
-    },
-    estresse_burnout: {
-      code: 'estresse_burnout',
-      label: 'Dimensão Estresse / Burnout',
-      somaticNormalized: 'Sobrecarga de estresse cognitivo / Esgotamento funcional',
-    },
-    stress_burnout: {
-      code: 'estresse_burnout',
-      label: 'Dimensão Estresse / Burnout',
-      somaticNormalized: 'Sobrecarga de estresse cognitivo / Esgotamento funcional',
-    },
-    somatico: {
-      code: 'somatica',
-      label: 'Dimensão Somática (Psicossomática)',
-      somaticNormalized: 'Manifestação somatizada de sobrecarga emocional (nó na garganta / aperto torácico)',
-    },
-    somatica: {
-      code: 'somatica',
-      label: 'Dimensão Somática (Psicossomática)',
-      somaticNormalized: 'Manifestação somatizada de sobrecarga emocional (nó na garganta / aperto torácico)',
-    },
-    sono: {
-      code: 'sono',
-      label: 'Dimensão Sono / Ritmo Circadiano',
-      somaticNormalized: 'Privação do descanso fisiológico / Sono não-reparador',
-    },
-    sono_cognitiva: {
-      code: 'sono',
-      label: 'Dimensão Sono / Ritmo Circadiano',
-      somaticNormalized: 'Privação do descanso fisiológico / Sono não-reparador',
-    },
-    cansaco: {
-      code: 'sono',
-      label: 'Dimensão Sono / Ritmo Circadiano',
-      somaticNormalized: 'Fadiga mental / Privação do descanso fisiológico',
-    },
-    cansaco_mental: {
-      code: 'cognitiva_foco',
-      label: 'Dimensão Cognitiva / Foco',
-      somaticNormalized: 'Fadiga mental / Névoa cognitiva e dispersão atencional',
-    },
-    cognitiva_foco: {
-      code: 'cognitiva_foco',
-      label: 'Dimensão Cognitiva / Foco',
-      somaticNormalized: 'Fadiga mental / Névoa cognitiva e dispersão atencional',
-    },
-    emotional_general: {
-      code: 'cognitiva_foco',
-      label: 'Dimensão Cognitiva / Foco',
-      somaticNormalized: 'Fadiga mental / Névoa cognitiva e dispersão atencional',
-    },
-    autoestima: {
-      code: 'autoestima',
-      label: 'Dimensão Autoestima / Autoimagem',
-      somaticNormalized: 'Autocrítica severa / Insegurança situacional',
-    },
-  };
+  /** Resolves a wizard answer / AI key to its category code, if known. */
+  private resolveCode(key: string, vertical: Vertical): string | undefined {
+    if (vertical === 'physical' && SUBPARTS[key]) return SUBPARTS[key].code;
+    return this.aliasesFor(vertical)[key];
+  }
+
+  private describe(code: string, vertical: Vertical, lang: Lang, subPartLabel?: string): CategoryMapping {
+    const labels = vertical === 'physical' ? PHYSICAL_LABELS : EMOTIONAL_LABELS;
+    const base = labels[code]?.[lang] ?? GENERIC_VERTICAL_LABELS[vertical][lang];
+    const label = subPartLabel ? `${base} (${subPartLabel})` : base;
+    return {
+      code,
+      label,
+      somaticNormalized: code === 'normal' ? FEELING_WELL[lang] : `${LOGGED_PREFIX[lang]}: ${label}.`,
+    };
+  }
 
   private readonly categoryKeywords: Record<string, string[]> = MEDICAL_ARTICLES_SEED.reduce(
     (acc, article) => {
@@ -483,24 +251,18 @@ export class TriageOutcomeService {
   }
 
   /**
-   * Scores the free-text narrative against every real article category's keyword set
-   * (sourced from the medical articles seed) so daily check-ins map to an actual
-   * clinical dimension instead of a placeholder category with no matching content.
+   * Scores the free-text narrative against every article category's keyword set
+   * (sourced from the articles seed) so daily check-ins are filed under a category
+   * that has matching reading content. Organises the entry only; nothing is assessed.
    */
-  private classifyCategory(text: string, vertical: 'physical' | 'emotional'): string {
+  private classifyCategory(text: string, vertical: Vertical): string {
     const defaultCategory = vertical === 'physical' ? 'muscular_geral_sistemico' : 'estresse_burnout';
     const normalized = this.normalizeText(text || '');
     if (!normalized) {
       return defaultCategory;
     }
 
-    const candidateCategories = [
-      ...new Set(
-        Object.values(vertical === 'physical' ? this.physicalMappings : this.emotionalMappings).map(
-          (m) => m.code,
-        ),
-      ),
-    ];
+    const candidateCategories = [...new Set(Object.values(this.aliasesFor(vertical)))];
 
     let bestCategory = defaultCategory;
     let bestScore = 0;
@@ -521,83 +283,64 @@ export class TriageOutcomeService {
     return bestCategory;
   }
 
+  /** Exact alias first, then the loose substring match the wizard has always relied on. */
+  private resolveWizardCode(step1: string, vertical: Vertical): string | undefined {
+    const exact = this.resolveCode(step1, vertical);
+    if (exact) return exact;
+    const keys = [
+      ...Object.keys(this.aliasesFor(vertical)),
+      ...(vertical === 'physical' ? Object.keys(SUBPARTS) : []),
+    ];
+    const fuzzy = keys.find((k) => step1.includes(k) || k.includes(step1));
+    return fuzzy ? this.resolveCode(fuzzy, vertical) : undefined;
+  }
+
   async processOutcome(
     userId: string,
+    profileId: string,
     dto: SubmitTriageDto,
   ): Promise<TriageOutcomeResponseDto> {
     if (!userId) {
-      throw new BadRequestException('ID do usuário ausente para processamento do desfecho.');
+      throw new BadRequestException('ID do usuário ausente para processamento do registro.');
+    }
+    if (!profileId) {
+      throw new BadRequestException('ID do perfil ausente para processamento do registro.');
     }
 
     const { vertical, answers, narrative } = dto;
+    const lang = resolveLang(dto.language);
     const isZeroIndexed = answers[0] !== undefined || answers['0'] !== undefined;
     const step1 = ((isZeroIndexed ? (answers[0] || answers['0']) : (answers[1] || answers['1'])) || '').toLowerCase();
     const subPart = ((isZeroIndexed ? (answers[2] || answers['2']) : (answers[3] || answers['3'])) || '').toLowerCase();
+    const isFeelingWell = step1 === 'normal' || step1 === 'bem_normal';
 
-    let mapping: CategoryMapping | undefined;
-    if (vertical === 'physical') {
-      mapping = this.physicalMappings[step1] ||
-        Object.entries(this.physicalMappings).find(([k]) => step1.includes(k) || k.includes(step1))?.[1];
-      if (!mapping) {
-        mapping = {
-          code: 'muscular_geral_sistemico',
-          label: 'Avaliação Física Sistêmica',
-          somaticNormalized: 'Desconforto corporal geral',
-        };
-      }
-      if (subPart && this.physicalMappings[subPart]) {
-        mapping = {
-          ...mapping,
-          label: this.physicalMappings[subPart].label,
-          somaticNormalized: this.physicalMappings[subPart].somaticNormalized,
-        };
-      }
-    } else {
-      mapping = this.emotionalMappings[step1] ||
-        Object.entries(this.emotionalMappings).find(([k]) => step1.includes(k) || k.includes(step1))?.[1];
-      if (!mapping) {
-        mapping = {
-          code: 'estresse_burnout',
-          label: 'Dimensão Estresse e Bem-Estar Emocional',
-          somaticNormalized: 'Sobrecarga emocional geral',
-        };
-      }
-    }
+    const fallbackCode = vertical === 'physical' ? 'muscular_geral_sistemico' : 'estresse_burnout';
+    const code = this.resolveWizardCode(step1, vertical) ?? fallbackCode;
+    const subPartLabel = vertical === 'physical' && SUBPARTS[subPart] ? SUBPARTS[subPart].label[lang] : undefined;
+    const mapping = this.describe(code, vertical, lang, subPartLabel);
 
-    // Intensity extraction: handles step 3 (new 4-step wizard) or step 2 (legacy 3-step wizard)
+    // Intensity is the person's own rating: step 3 (4-step wizard) or step 2 (legacy 3-step).
     let intensityRaw = (answers[3] || answers['3'] || answers[2] || answers['2'] || '').toString();
     const ans3 = (answers[3] ?? answers['3'] ?? '').toString();
     const ans2 = (answers[2] ?? answers['2'] ?? '').toString();
-    if (ans3 && (/^[1-5]$/.test(ans3.trim()) || ['leve_controlavel', 'moderada', 'muito_forte', 'grave', 'crise'].includes(ans3.toLowerCase().trim()))) {
+    const isIntensityAnswer = (v: string) =>
+      /^[1-5]$/.test(v.trim()) || ['leve_controlavel', 'moderada', 'muito_forte', 'grave', 'crise'].includes(v.toLowerCase().trim());
+    if (ans3 && isIntensityAnswer(ans3)) {
       intensityRaw = ans3;
-    } else if (ans2 && (/^[1-5]$/.test(ans2.trim()) || ['leve_controlavel', 'moderada', 'muito_forte', 'grave', 'crise'].includes(ans2.toLowerCase().trim()))) {
+    } else if (ans2 && isIntensityAnswer(ans2)) {
       intensityRaw = ans2;
     }
 
-    const userLang = (dto.language || 'pt').toLowerCase();
-
     let intensityScore = 2;
-    if (step1 === 'normal' || step1 === 'bem_normal') {
+    if (isFeelingWell) {
       intensityScore = 0;
-      if (userLang === 'es') {
-        mapping = {
-          code: 'normal',
-          label: vertical === 'physical' ? 'Estado de Salud Normal' : 'Estado Emocional Normal / Bien',
-          somaticNormalized: vertical === 'physical' ? 'Sin quejas clínicas reportadas. Estado de salud preservado.' : 'Equilibrio emocional / Sin quejas de sobrecarga',
-        };
-      } else if (userLang === 'en') {
-        mapping = {
-          code: 'normal',
-          label: vertical === 'physical' ? 'Normal Health Status' : 'Normal / Good Emotional State',
-          somaticNormalized: vertical === 'physical' ? 'No clinical complaints reported. Preserved health status.' : 'Emotional balance / No overload complaints',
-        };
-      }
     } else if (vertical === 'physical') {
       const numeric = parseInt(intensityRaw, 10);
       if (!isNaN(numeric) && numeric >= 1 && numeric <= 5) {
         intensityScore = numeric;
       }
     } else {
+      // Emotional wizard options are words on the same self-rated 1-5 scale.
       const lowerRaw = intensityRaw.toLowerCase();
       if (lowerRaw.includes('muito_forte') || lowerRaw.includes('grave') || lowerRaw.includes('crise') || lowerRaw === '4' || lowerRaw === '5') {
         intensityScore = 4;
@@ -608,110 +351,42 @@ export class TriageOutcomeService {
       }
     }
 
-    let aiMappedLayTerm: string | undefined;
-    let aiClinicalConcept: string | undefined;
-    let aiSource: TriageOutcomeResponseDto['aiSource'];
-    let aiConfidence: number | undefined;
-    let classification: TriageClassificationResult | undefined;
-
-    if (this.aiTriage && narrative && narrative.trim().length >= 2 && step1 !== 'normal' && step1 !== 'bem_normal') {
+    let tags: EntryTagResult | undefined;
+    if (this.aiTagging && narrative && narrative.trim().length >= 2 && !isFeelingWell) {
       try {
-        classification = await this.aiTriage.classify({ text: narrative, language: userLang as any });
-        aiMappedLayTerm = classification.mappedLayTerm;
-        aiClinicalConcept = classification.clinicalConcept;
-        aiSource = classification.source;
-        aiConfidence = classification.confidence;
+        const result = await this.aiTagging.tagWithMetadata({ text: narrative, language: lang });
+        tags = result.isOffTopic ? undefined : result;
       } catch (err) {
-        this.logger.warn(`AI classification of narrative failed: ${(err as Error).message}`);
+        this.logger.warn(`AI tagging of narrative failed: ${(err as Error).message}`);
       }
     }
 
-    let organicPrimacyApplied = false;
-    let organicPrimacyNotice: string | undefined;
+    // The narrative may mention the other vertical (e.g. a headache in an emotional
+    // entry). Record it as a second tag and show the same static note to everyone.
     let secondaryCategoryLabel: string | undefined;
     let secondarySomaticMapping: string | undefined;
     let secondaryIntensityScore: number | undefined;
-    let isCrossVerticalSomatic = false;
+    let secondaryCode: string | null = null;
     let crossVerticalContextNote: string | undefined;
+    const otherVertical: Vertical = vertical === 'physical' ? 'emotional' : 'physical';
+    const isCrossVerticalSomatic = !!tags && tags.vertical === otherVertical;
 
-    const somaticKeywords = ['peito', 'coraç', 'ar', 'respir', 'garganta', 'estômago', 'nó', 'aperto', 'cabeça', 'cabeca', 'dor'];
-    const narrativeHasSomatic = narrative && somaticKeywords.some((kw) => narrative.toLowerCase().includes(kw));
-    const isPsychosomaticDimension = step1 === 'somatico' || step1 === 'somatica';
-    const narrativeIsPhysical = classification?.primaryVertical === 'physical';
-
-    if (vertical === 'emotional' && step1 !== 'normal' && step1 !== 'bem_normal') {
-      if (narrativeIsPhysical || narrativeHasSomatic || isPsychosomaticDimension) {
-        organicPrimacyApplied = true;
-        organicPrimacyNotice =
-          'Atenção Clínica (Primazia Orgânica): Sintomas físicos concorrentes exigem que causas orgânicas sejam avaliadas presencialmente por um médico antes de atribuí-los unicamente ao estresse psicológico.';
-      }
-
-      if (narrativeIsPhysical && classification) {
-        const physicalCategory = this.physicalMappings[classification.systemOrDimension];
-        if (physicalCategory) {
-          secondaryCategoryLabel = physicalCategory.label;
-          secondarySomaticMapping = physicalCategory.somaticNormalized;
-        } else {
-          secondaryCategoryLabel = 'Avaliação Física';
-          secondarySomaticMapping = 'Sintoma físico relatado';
-        }
-        secondaryIntensityScore = intensityScore;
-        isCrossVerticalSomatic = true;
-        if (userLang === 'es') {
-          crossVerticalContextNote =
-            'Manifestación física concurrente identificada en el relato. En cuadros de ansiedad y tensión psicomotora, las cefaleas y dolores musculares son frecuentes como somatización, pero requieren valoración médica para descartar causas orgánicas primarias.';
-        } else if (userLang === 'en') {
-          crossVerticalContextNote =
-            'Concurrent physical symptom identified in narrative. In cases of anxiety and psychomotor tension, headaches and muscle tension are common somatic manifestations, but require medical evaluation to rule out primary organic causes.';
-        } else {
-          crossVerticalContextNote =
-            'Manifestação física concorrente identificada no relato. Em quadros de ansiedade e tensão psicomotora, cefaleias e dores musculares são frequentes como somatização, mas exigem avaliação clínica para descartar causas orgânicas primárias.';
-        }
-      }
-    } else if (vertical === 'physical') {
-      const narrativeIsEmotional = classification?.primaryVertical === 'emotional';
-      if (narrativeIsEmotional && classification) {
-        const emotionalCategory = this.emotionalMappings[classification.systemOrDimension];
-        if (emotionalCategory) {
-          secondaryCategoryLabel = emotionalCategory.label;
-          secondarySomaticMapping = emotionalCategory.somaticNormalized;
-        } else {
-          secondaryCategoryLabel = 'Dimensão Emocional';
-          secondarySomaticMapping = 'Componente emocional relatado';
-        }
-        secondaryIntensityScore = intensityScore;
-        isCrossVerticalSomatic = true;
-        if (userLang === 'es') {
-          crossVerticalContextNote =
-            'Factor psicoemocional concurrente identificado en el relato que puede amplificar la percepción del malestar físico.';
-        } else if (userLang === 'en') {
-          crossVerticalContextNote =
-            'Concurrent psycho-emotional factor identified in narrative that may amplify physical discomfort perception.';
-        } else {
-          crossVerticalContextNote =
-            'Fator psicoemocional concorrente identificado no relato que pode amplificar a percepção de desconforto físico.';
-        }
-      }
+    if (isCrossVerticalSomatic && tags) {
+      secondaryCode = (tags.bodyAreaOrMood && this.resolveCode(tags.bodyAreaOrMood, otherVertical)) || null;
+      const secondary = secondaryCode
+        ? this.describe(secondaryCode, otherVertical, lang)
+        : { label: GENERIC_VERTICAL_LABELS[otherVertical][lang], somaticNormalized: `${LOGGED_PREFIX[lang]}: ${GENERIC_VERTICAL_LABELS[otherVertical][lang]}.` };
+      secondaryCategoryLabel = secondary.label;
+      secondarySomaticMapping = secondary.somaticNormalized;
+      secondaryIntensityScore = intensityScore;
+      crossVerticalContextNote = BODY_AND_EMOTIONS_NOTE[lang];
     }
 
-    let careDisposition: CareDisposition;
-    if (intensityScore <= 2) {
-      careDisposition = 'auto_cuidado';
-    } else if (intensityScore === 3) {
-      careDisposition = 'consulta_rotina';
-    } else if (intensityScore === 4) {
-      careDisposition = 'pronto_atendimento';
-    } else {
-      careDisposition = 'emergencia';
-    }
-
-    if (organicPrimacyApplied && careDisposition === 'auto_cuidado') {
-      careDisposition = 'consulta_rotina';
-    }
-
-    if (classification?.isEmergencyCandidate) {
-      careDisposition = 'emergencia';
-    }
+    const aiFields = {
+      aiMappedLayTerm: tags?.layTerm ?? undefined,
+      aiSource: tags?.source,
+      aiConfidence: tags?.confidence,
+    };
 
     let recommendedArticles: RecommendedArticleDto[] = [];
     if (this.articlesVector) {
@@ -719,11 +394,28 @@ export class TriageOutcomeService {
         queryText: narrative,
         category: mapping.code,
         vertical,
-        language: userLang,
+        language: lang,
       });
     } else if (this.articlesCatalog) {
-      recommendedArticles = this.articlesCatalog.getArticlesForCategory(mapping.code, userLang);
+      recommendedArticles = this.articlesCatalog.getArticlesForCategory(mapping.code, lang);
     }
+
+    const buildResponse = (id: string, intensity: number, recordedAt: Date): TriageOutcomeResponseDto => ({
+      id,
+      vertical,
+      intensityScore: intensity,
+      primaryCategory: mapping.code,
+      categoryLabel: mapping.label,
+      somaticMapping: mapping.somaticNormalized,
+      recommendedArticles,
+      recordedAt: recordedAt.toISOString(),
+      secondaryCategoryLabel,
+      secondarySomaticMapping,
+      secondaryIntensityScore,
+      isCrossVerticalSomatic,
+      crossVerticalContextNote,
+      ...aiFields,
+    });
 
     if (dto.clientSessionId) {
       const existing = await this.db.transaction(async (tx) => {
@@ -737,50 +429,29 @@ export class TriageOutcomeService {
 
       if (existing.length > 0) {
         const record = existing[0];
-        return {
-          id: record.id,
-          vertical,
-          intensityScore: record.intensity,
-          careDisposition: (record.disposition as CareDisposition) || careDisposition,
-          primaryCategory: mapping.code,
-          categoryLabel: mapping.label,
-          somaticMapping: mapping.somaticNormalized,
-          organicPrimacyApplied: record.organicPrimacyApplied,
-          organicPrimacyNotice,
-          recommendedArticles,
-          recordedAt: record.recordedAt.toISOString(),
-          secondaryCategoryLabel,
-          secondarySomaticMapping,
-          secondaryIntensityScore,
-          isCrossVerticalSomatic,
-          crossVerticalContextNote,
-          aiMappedLayTerm,
-          aiClinicalConcept,
-          aiSource,
-          aiConfidence,
-        };
+        return buildResponse(record.id, record.intensity, record.recordedAt);
       }
     }
 
     const encryptedNarrative = narrative ? this.encryptionService.encrypt(narrative) : null;
-    const encryptedStepAnswers = this.encryptionService.encrypt(JSON.stringify(answers));
+    // _entryVertical keeps the submitted vertical so history can tell the primary axis of
+    // a cross-tagged entry (stripped again by TriageHistoryService).
+    const encryptedStepAnswers = this.encryptionService.encrypt(
+      JSON.stringify({ ...answers, _entryVertical: vertical }),
+    );
 
+    // disposition and organic_primacy_applied are legacy columns (migration 0015): not written.
     const [savedRecord] = await this.db.transaction(async (tx) => {
       await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`);
       return tx
         .insert(symptomLogs)
         .values({
           userId,
+          profileId,
           encryptedNarrative,
           intensity: intensityScore,
-          anatomicalSystem: vertical === 'physical'
-            ? mapping.code
-            : (isCrossVerticalSomatic && classification ? classification.systemOrDimension : null),
-          emotionalDimension: vertical === 'emotional'
-            ? mapping.code
-            : (isCrossVerticalSomatic && classification ? classification.systemOrDimension : null),
-          disposition: careDisposition,
-          organicPrimacyApplied,
+          anatomicalSystem: vertical === 'physical' ? mapping.code : secondaryCode,
+          emotionalDimension: vertical === 'emotional' ? mapping.code : secondaryCode,
           stepAnswers: encryptedStepAnswers,
           clientSessionId: dto.clientSessionId || null,
           recordedAt: new Date(),
@@ -788,53 +459,42 @@ export class TriageOutcomeService {
         .returning();
     });
 
-    return {
-      id: savedRecord.id,
-      vertical,
-      intensityScore,
-      careDisposition,
-      primaryCategory: mapping.code,
-      categoryLabel: mapping.label,
-      somaticMapping: mapping.somaticNormalized,
-      organicPrimacyApplied,
-      organicPrimacyNotice,
-      recommendedArticles,
-      recordedAt: savedRecord.recordedAt.toISOString(),
-      secondaryCategoryLabel,
-      secondarySomaticMapping,
-      secondaryIntensityScore,
-      isCrossVerticalSomatic,
-      crossVerticalContextNote,
-      aiMappedLayTerm,
-      aiClinicalConcept,
-      aiSource,
-      aiConfidence,
-    };
+    return buildResponse(savedRecord.id, intensityScore, savedRecord.recordedAt);
   }
 
   async recordDailyCheckIn(
     userId: string,
+    profileId: string,
     dto: SubmitDailyCheckInDto,
   ): Promise<DailyCheckInResponseDto> {
     if (!userId) {
       throw new BadRequestException('ID do usuário ausente para registro de check-in diário.');
     }
-
-    let intensity = 1;
-    let disposition: CareDisposition = 'auto_cuidado';
-    if (dto.emotionalStatus === 'badSick' || dto.physicalStatus === 'badSick') {
-      intensity = 4;
-      disposition = 'pronto_atendimento';
-    } else if (dto.emotionalStatus === 'soSo' || dto.physicalStatus === 'soSo') {
-      intensity = 3;
-      disposition = 'consulta_rotina';
+    if (!profileId) {
+      throw new BadRequestException('ID do perfil ausente para registro de check-in diário.');
     }
+
+    // Plan B-02: only the declared state (good / so-so / bad) is stored, inside the
+    // encrypted payload. No intensity is inferred (0 = not reported) and no care
+    // recommendation is produced.
+    const narrative = dto.naturalLanguageText?.trim() || '';
+    const physicalCategory =
+      dto.physicalStatus !== 'goodNormal' ? this.classifyCategory(narrative, 'physical') : null;
+    const emotionalCategory =
+      dto.emotionalStatus !== 'goodNormal' ? this.classifyCategory(narrative, 'emotional') : null;
+
+    // Only one side reported as not good: that side is the entry's vertical.
+    const entryVertical: Vertical | undefined =
+      physicalCategory && !emotionalCategory ? 'physical'
+        : emotionalCategory && !physicalCategory ? 'emotional'
+          : undefined;
 
     const payload = {
       type: 'daily_checkin',
       emotionalStatus: dto.emotionalStatus,
       physicalStatus: dto.physicalStatus,
       naturalLanguageText: dto.naturalLanguageText || '',
+      ...(entryVertical ? { _entryVertical: entryVertical } : {}),
     };
 
     const encryptedStepAnswers = this.encryptionService.encrypt(JSON.stringify(payload));
@@ -842,24 +502,17 @@ export class TriageOutcomeService {
       ? this.encryptionService.encrypt(dto.naturalLanguageText)
       : null;
 
-    const narrative = dto.naturalLanguageText?.trim() || '';
-    const physicalCategory =
-      dto.physicalStatus !== 'goodNormal' ? this.classifyCategory(narrative, 'physical') : null;
-    const emotionalCategory =
-      dto.emotionalStatus !== 'goodNormal' ? this.classifyCategory(narrative, 'emotional') : null;
-
     const [savedRecord] = await this.db.transaction(async (tx) => {
       await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`);
       return tx
         .insert(symptomLogs)
         .values({
           userId,
+          profileId,
           encryptedNarrative,
-          intensity,
+          intensity: 0,
           anatomicalSystem: physicalCategory,
           emotionalDimension: emotionalCategory,
-          disposition,
-          organicPrimacyApplied: false,
           stepAnswers: encryptedStepAnswers,
           clientSessionId: null,
           recordedAt: new Date(),
@@ -867,7 +520,7 @@ export class TriageOutcomeService {
         .returning();
     });
 
-    const userLang = (dto.language || 'pt').toLowerCase();
+    const userLang = resolveLang(dto.language);
     let recommendedArticles: RecommendedArticleDto[] = [];
     if (this.articlesVector && narrative.length >= 2) {
       try {
@@ -929,8 +582,6 @@ export class TriageOutcomeService {
 
     return {
       id: savedRecord.id,
-      intensity,
-      disposition,
       emotionalStatus: dto.emotionalStatus,
       physicalStatus: dto.physicalStatus,
       recordedAt: savedRecord.recordedAt.toISOString(),

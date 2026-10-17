@@ -36,7 +36,6 @@ void main() {
           id: 'log-intensity-$score',
           intensity: int.parse(score),
           anatomicalSystem: 'neurologico',
-          disposition: 'auto_cuidado',
           narrative: null,
           stepAnswers: {
             '0': 'neurologico',
@@ -49,6 +48,9 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
+            locale: const Locale('pt'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: Builder(
                 builder: (context) => ElevatedButton(
@@ -99,7 +101,6 @@ void main() {
           id: 'log-factor-$factorKey',
           intensity: 2,
           anatomicalSystem: 'muscular_geral',
-          disposition: 'auto_cuidado',
           narrative: null,
           stepAnswers: {
             '0': 'muscular_geral',
@@ -112,6 +113,9 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
+            locale: const Locale('pt'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: Builder(
                 builder: (context) => ElevatedButton(
@@ -142,7 +146,6 @@ void main() {
         id: 'log-custom-factor',
         intensity: 3,
         anatomicalSystem: 'dermatologico',
-        disposition: 'consulta_rotina',
         narrative: null,
         stepAnswers: {
           '0': 'dermatologico',
@@ -155,6 +158,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: Builder(
               builder: (context) => ElevatedButton(
@@ -182,7 +188,6 @@ void main() {
           id: 'log-dirty-narrative-$dirtyNarrative',
           intensity: 3,
           anatomicalSystem: 'neurologico',
-          disposition: 'auto_cuidado',
           narrative: dirtyNarrative,
           stepAnswers: {
             '0': 'neurologico',
@@ -196,6 +201,9 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
+            locale: const Locale('pt'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: Builder(
                 builder: (context) => ElevatedButton(
@@ -215,7 +223,7 @@ void main() {
         expect(find.text('4'), findsNothing);
         expect(find.text('10'), findsNothing);
         expect(
-          find.text('Nenhuma descrição adicional relatada pelo paciente nesta triagem.'),
+          find.text('Você não adicionou uma descrição neste registro.'),
           findsOneWidget,
           reason: 'A numeric string must be treated as no narrative provided',
         );
@@ -279,11 +287,9 @@ void main() {
         id: 'out-1',
         vertical: 'physical',
         intensityScore: 2,
-        careDisposition: CareDisposition.selfCare,
         primaryCategory: 'neurologico',
         categoryLabel: 'Neurológico',
         somaticMapping: 'Neurológico',
-        organicPrimacyApplied: false,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
         // No AI mapped lay term
@@ -311,11 +317,9 @@ void main() {
         id: 'out-2',
         vertical: 'physical',
         intensityScore: 3,
-        careDisposition: CareDisposition.routineConsultation,
         primaryCategory: 'neurologico',
         categoryLabel: 'Neurológico',
         somaticMapping: 'Neurológico',
-        organicPrimacyApplied: false,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
         aiMappedLayTerm: '5', // Dirty AI term
@@ -454,11 +458,9 @@ void main() {
         id: 'out-today',
         vertical: 'physical',
         intensityScore: 2,
-        careDisposition: CareDisposition.selfCare,
         primaryCategory: 'neurologico',
         categoryLabel: 'Neurológico',
         somaticMapping: 'Neurológico',
-        organicPrimacyApplied: false,
         recommendedArticles: const [],
         recordedAt: DateTime.now(),
       );

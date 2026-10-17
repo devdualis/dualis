@@ -3,6 +3,8 @@ class RoutePaths {
   static const String register = '/register';
   static const String verifyEmail = '/verify-email';
   static const String login = '/login';
+  static const String forgotPassword = '/forgot-password';
+  static const String resetPassword = '/reset-password';
   static const String home = '/home';
   static const String emergency = '/emergency';
   static const String triage = '/triage';
@@ -11,6 +13,7 @@ class RoutePaths {
   static const String privacyCenter = '/privacy-center';
   static const String settings = '/settings';
   static const String hydration = '/hydration';
+  static const String familySharing = '/family-sharing';
   static const String termsOfService = '/terms-of-service';
   static const String privacyPolicy = '/privacy-policy';
   static const String notFound = '/404';

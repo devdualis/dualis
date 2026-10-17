@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/notifications/hydration_notification_service.dart';
 import '../../../../l10n/locale_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../data/hydration_repository.dart';
 import '../../domain/models/hydration_settings.dart';
 import '../../domain/models/water_intake_log.dart';
@@ -54,11 +55,15 @@ class HydrationState {
 }
 
 class HydrationController extends Notifier<HydrationState> {
+  int _loadSession = 0;
+
   @override
   HydrationState build() {
     // Fresh state per signed-in user: logout (user -> null) resets hydration
     // data instead of leaking the previous user's logs into the next session.
     ref.watch(authControllerProvider.select((auth) => auth.user?.id));
+    // Reload when active profile changes and clear previous data while loading.
+    ref.watch(activeProfileControllerProvider.select((s) => s.activeProfile?.id));
     // Pending reminders carry the language they were scheduled in.
     ref.listen<Locale>(localeProvider, (previous, next) {
       if (previous != next) _rescheduleRemindersForLocale();
@@ -80,6 +85,8 @@ class HydrationController extends Notifier<HydrationState> {
 
   Future<void> loadData() async {
     final userId = _currentUserId;
+    final activeProfileId = ref.read(activeProfileControllerProvider).activeProfile?.id;
+    final session = ++_loadSession;
     state = state.copyWith(isLoading: true);
     try {
       final settings = await _repository.getSettings();
@@ -92,8 +99,12 @@ class HydrationController extends Notifier<HydrationState> {
         userId: _currentUserId,
       );
 
-      // The signed-in user changed mid-load: that user's own load wins.
-      if (_currentUserId != userId) return;
+      // Discard stale load if user, session, or active profile changed mid-load
+      if (session != _loadSession ||
+          _currentUserId != userId ||
+          ref.read(activeProfileControllerProvider).activeProfile?.id != activeProfileId) {
+        return;
+      }
 
       state = state.copyWith(
         isLoading: false,

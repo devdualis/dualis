@@ -8,7 +8,6 @@ void main() {
     final testEntry = TriageHistoryEntry(
       id: 'entry-test-123',
       intensity: 3,
-      disposition: 'consulta_rotina',
       anatomicalSystem: 'cardiovascular_torax',
       recordedAt: DateTime(2026, 9, 27, 14, 30),
       narrative: 'Sensação de aperto no peito após estresse intenso no trabalho.',
@@ -38,8 +37,8 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining('27/09/2026 às 14:30'), findsOneWidget);
-      expect(find.text('CARDIOVASCULAR / TÓRAX'), findsOneWidget);
-      expect(find.text('Nível 3'), findsOneWidget);
+      expect(find.text('PEITO'), findsOneWidget);
+      expect(find.text('Intensidade informada: 3/5'), findsOneWidget);
       expect(
         find.text('"Sensação de aperto no peito após estresse intenso no trabalho."'),
         findsOneWidget,

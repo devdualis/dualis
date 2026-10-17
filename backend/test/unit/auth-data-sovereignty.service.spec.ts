@@ -83,67 +83,89 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       );
     });
 
-    it('exports complete user data package with decrypted narratives and parsed answers', async () => {
+    const primaryProfileId = '11111111-1111-1111-1111-111111111111';
+    const dependentProfileId = '22222222-2222-2222-2222-222222222222';
+
+    const mockSelectSequence = (results: any[]) => {
       let callCount = 0;
       mockTxSelect.mockImplementation(() => {
-        callCount++;
+        const rows = results[callCount++] ?? [];
+        // First query (users) ends with .limit(); the rest resolve at .where().
         if (callCount === 1) {
           return {
             from: vi.fn().mockReturnValue({
-              where: vi.fn().mockReturnValue({
-                limit: vi.fn().mockResolvedValue([mockUser]),
-              }),
-            }),
-          };
-        }
-        if (callCount === 2) {
-          return {
-            from: vi.fn().mockReturnValue({
-              where: vi.fn().mockResolvedValue([
-                {
-                  id: 'consent-1',
-                  disclaimerVersion: '2026.1',
-                  acceptedAt: new Date('2026-01-01T10:00:00Z'),
-                  ipAddressHash: 'hash123',
-                  userAgent: 'Flutter/iOS',
-                },
-              ]),
-            }),
-          };
-        }
-        if (callCount === 3) {
-          return {
-            from: vi.fn().mockReturnValue({
-              where: vi.fn().mockResolvedValue([
-                {
-                  id: 'log-1',
-                  intensity: 3,
-                  anatomicalSystem: 'respiratorio',
-                  emotionalDimension: null,
-                  disposition: 'consulta_eletiva',
-                  encryptedNarrative: 'narrativa_cifrada',
-                  stepAnswers: JSON.stringify({ question1: 'tosse leve' }),
-                  recordedAt: new Date('2026-01-05T14:00:00Z'),
-                },
-              ]),
+              where: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(rows) }),
             }),
           };
         }
         return {
-          from: vi.fn().mockReturnValue({
-            where: vi.fn().mockResolvedValue([
-              {
-                id: 'emerg-1',
-                triggerCategory: 'dor_toracica_critica',
-                severityLevel: 5,
-                sourceVertical: 'fisico',
-                actionTaken: 'chamou_samu',
-                reportedAt: new Date('2026-01-08T09:30:00Z'),
-              },
-            ]),
-          }),
+          from: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(rows) }),
         };
       });
+    };
+
+    const consent = {
+      id: 'consent-1',
+      disclaimerVersion: '2026.1',
+      acceptedAt: new Date('2026-01-01T10:00:00Z'),
+      ipAddressHash: 'hash123',
+      userAgent: 'Flutter/iOS',
+    };
+
+    const ownedProfiles = [
+      {
+        id: dependentProfileId,
+        accountOwnerId: mockUserId,
+        profileType: 'dependent_minor',
+        name: 'Lucas Santos',
+        dateOfBirth: '2018-03-10',
+        gender: 'masculino',
+        createdAt: new Date('2026-02-01T10:00:00Z'),
+      },
+      {
+        id: primaryProfileId,
+        accountOwnerId: mockUserId,
+        profileType: 'primary',
+        name: 'Maria Santos',
+        dateOfBirth: '1992-07-20',
+        gender: 'feminino',
+        createdAt: new Date('2026-01-01T10:00:00Z'),
+      },
+    ];
+
+    const symptomRow = (id: string, profileId: string) => ({
+      id,
+      userId: mockUserId,
+      profileId,
+      intensity: 3,
+      anatomicalSystem: 'respiratorio',
+      emotionalDimension: null,
+      disposition: 'consulta_eletiva',
+      organicPrimacyApplied: true,
+      encryptedNarrative: 'narrativa_cifrada',
+      stepAnswers: JSON.stringify({ question1: 'tosse leve' }),
+      recordedAt: new Date('2026-01-05T14:00:00Z'),
+    });
+
+    it('exports complete user data package with decrypted narratives and parsed answers', async () => {
+      mockSelectSequence([
+        [mockUser],
+        [consent],
+        ownedProfiles,
+        [symptomRow('log-1', primaryProfileId)],
+        [
+          {
+            id: 'safety-1',
+            userId: mockUserId,
+            profileId: primaryProfileId,
+            action: 'call_started',
+            channel: 'tel:192',
+            clientTimestamp: new Date('2026-01-08T09:30:00Z'),
+            createdAt: new Date('2026-01-08T09:30:01Z'),
+          },
+        ],
+        [],
+      ]);
 
       const result = await authService.exportUserData(mockUserId);
 
@@ -155,9 +177,73 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       expect(result.symptomLogs).toHaveLength(1);
       expect(result.symptomLogs[0].decryptedNarrative).toBe('decrypted:narrativa_cifrada');
       expect(result.symptomLogs[0].stepAnswers).toEqual({ question1: 'tosse leve' });
-      expect(result.emergencyEvents).toHaveLength(1);
-      expect(result.emergencyEvents[0].triggerCategory).toBe('dor_toracica_critica');
+      // Former assessment fields are exported only inside the labelled legacy block.
+      expect(result.symptomLogs[0].legacy).toEqual({ disposition: 'consulta_eletiva', organicPrimacyApplied: true });
+      expect(result.symptomLogs[0]).not.toHaveProperty('disposition');
+      expect(result.metadata.legacyFieldsNote).toContain('legacy');
+      expect(result.safetyResourceEvents).toEqual([
+        {
+          id: 'safety-1',
+          action: 'call_started',
+          channel: 'tel:192',
+          clientTimestamp: '2026-01-08T09:30:00.000Z',
+          createdAt: '2026-01-08T09:30:01.000Z',
+        },
+      ]);
+      expect(result.waterIntakeLogs).toEqual([]);
       expect(mockEncryptionService.decrypt).toHaveBeenCalledWith('narrativa_cifrada');
+    });
+
+    it('groups owned dependents clinical data per profile, apart from the primary profile', async () => {
+      mockSelectSequence([
+        [mockUser],
+        [consent],
+        ownedProfiles,
+        [symptomRow('log-own', primaryProfileId), symptomRow('log-lucas', dependentProfileId)],
+        [],
+        [
+          {
+            id: 'water-lucas',
+            profileId: dependentProfileId,
+            amountMl: 200,
+            source: 'manual',
+            recordedAt: new Date('2026-02-02T08:00:00Z'),
+          },
+        ],
+      ]);
+
+      const result = await authService.exportUserData(mockUserId);
+
+      expect(result.symptomLogs.map((l) => l.id)).toEqual(['log-own']);
+      expect(result.waterIntakeLogs).toEqual([]);
+      expect(result.dependentProfiles).toHaveLength(1);
+
+      const lucas = result.dependentProfiles[0];
+      expect(lucas.profile).toEqual({
+        id: dependentProfileId,
+        name: 'Lucas Santos',
+        profileType: 'dependent_minor',
+        dateOfBirth: '2018-03-10',
+        gender: 'masculino',
+        createdAt: '2026-02-01T10:00:00.000Z',
+      });
+      expect(lucas.symptomLogs.map((l) => l.id)).toEqual(['log-lucas']);
+      expect(lucas.safetyResourceEvents).toEqual([]);
+      expect(lucas.waterIntakeLogs).toEqual([
+        { id: 'water-lucas', amountMl: 200, source: 'manual', recordedAt: '2026-02-02T08:00:00.000Z' },
+      ]);
+    });
+
+    it('skips clinical queries when the account owns no profile yet', async () => {
+      mockSelectSequence([[mockUser], [], []]);
+
+      const result = await authService.exportUserData(mockUserId);
+
+      expect(mockTxSelect).toHaveBeenCalledTimes(3);
+      expect(result.symptomLogs).toEqual([]);
+      expect(result.safetyResourceEvents).toEqual([]);
+      expect(result.waterIntakeLogs).toEqual([]);
+      expect(result.dependentProfiles).toEqual([]);
     });
   });
 

@@ -3,7 +3,12 @@ class TriageHistoryEntry {
   final int intensity;
   final String? anatomicalSystem;
   final String? emotionalDimension;
+  /// Vertical the person chose for the entry ('physical' | 'emotional'), or
+  /// null when unknown. Tells the primary axis of a dual-tagged entry.
+  final String? vertical;
+  /// Legacy field from old cached payloads; never shown.
   final String? disposition;
+  /// Legacy flag from old cached payloads; the API no longer returns it.
   final bool organicPrimacyApplied;
   final String? narrative;
   final Map<String, dynamic>? stepAnswers;
@@ -14,6 +19,7 @@ class TriageHistoryEntry {
     required this.intensity,
     this.anatomicalSystem,
     this.emotionalDimension,
+    this.vertical,
     this.disposition,
     this.organicPrimacyApplied = false,
     this.narrative,
@@ -27,6 +33,11 @@ class TriageHistoryEntry {
       intensity: (json['intensity'] as num).toInt(),
       anatomicalSystem: json['anatomicalSystem'] as String?,
       emotionalDimension: json['emotionalDimension'] as String?,
+      vertical: switch (json['vertical']) {
+        'physical' => 'physical',
+        'emotional' => 'emotional',
+        _ => null,
+      },
       disposition: json['disposition'] as String?,
       organicPrimacyApplied: json['organicPrimacyApplied'] as bool? ?? false,
       narrative: json['narrative'] as String?,
@@ -43,8 +54,9 @@ class TriageHistoryEntry {
       'intensity': intensity,
       'anatomicalSystem': anatomicalSystem,
       'emotionalDimension': emotionalDimension,
-      'disposition': disposition,
-      'organicPrimacyApplied': organicPrimacyApplied,
+      'vertical': vertical,
+      if (disposition != null) 'disposition': disposition,
+      if (organicPrimacyApplied) 'organicPrimacyApplied': organicPrimacyApplied,
       if (narrative != null) 'narrative': narrative,
       'stepAnswers': stepAnswers,
       'recordedAt': recordedAt.toIso8601String(),
@@ -52,65 +64,40 @@ class TriageHistoryEntry {
   }
 }
 
-class CriticalRecurrenceItem {
-  final String id;
-  final String vertical;
+class JournalPatternItem {
   final String category;
-  final String categoryLabel;
-  final String title;
-  final String description;
-  final int intensity;
-  final int frequencyCount;
+  final String vertical;
+  final int count;
   final int windowDays;
-  final String recommendedArticleTitle;
-  final String recommendedArticleUrl;
 
-  const CriticalRecurrenceItem({
-    required this.id,
-    required this.vertical,
+  const JournalPatternItem({
     required this.category,
-    required this.categoryLabel,
-    required this.title,
-    required this.description,
-    required this.intensity,
-    required this.frequencyCount,
+    required this.vertical,
+    required this.count,
     required this.windowDays,
-    required this.recommendedArticleTitle,
-    required this.recommendedArticleUrl,
   });
 
-  factory CriticalRecurrenceItem.fromJson(Map<String, dynamic> json) {
-    return CriticalRecurrenceItem(
-      id: json['id'] as String,
-      vertical: json['vertical'] as String,
-      category: json['category'] as String,
-      categoryLabel: json['categoryLabel'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String,
-      intensity: (json['intensity'] as num).toInt(),
-      frequencyCount: (json['frequencyCount'] as num).toInt(),
-      windowDays: (json['windowDays'] as num).toInt(),
-      recommendedArticleTitle: json['recommendedArticleTitle'] as String,
-      recommendedArticleUrl: json['recommendedArticleUrl'] as String,
+  factory JournalPatternItem.fromJson(Map<String, dynamic> json) {
+    return JournalPatternItem(
+      category: json['category'] as String? ?? '',
+      vertical: json['vertical'] as String? ?? 'physical',
+      count: (json['count'] as num?)?.toInt() ??
+          (json['frequencyCount'] as num?)?.toInt() ??
+          0,
+      windowDays: (json['windowDays'] as num?)?.toInt() ?? 10,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'vertical': vertical,
-      'category': category,
-      'categoryLabel': categoryLabel,
-      'title': title,
-      'description': description,
-      'intensity': intensity,
-      'frequencyCount': frequencyCount,
-      'windowDays': windowDays,
-      'recommendedArticleTitle': recommendedArticleTitle,
-      'recommendedArticleUrl': recommendedArticleUrl,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'category': category,
+        'vertical': vertical,
+        'count': count,
+        'windowDays': windowDays,
+      };
 }
+
+@Deprecated('Use JournalPatternItem')
+typedef CriticalRecurrenceItem = JournalPatternItem;
 
 class EmotionalDayData {
   final String date;
@@ -145,13 +132,13 @@ class TriageHistoryResponse {
   final List<TriageHistoryEntry> logs;
   final Map<String, int> physicalSummary;
   final List<EmotionalDayData> emotionalSummary;
-  final List<CriticalRecurrenceItem> criticalRecurrences;
+  final List<JournalPatternItem> journalPatterns;
 
   const TriageHistoryResponse({
     required this.logs,
     required this.physicalSummary,
     required this.emotionalSummary,
-    required this.criticalRecurrences,
+    required this.journalPatterns,
   });
 
   factory TriageHistoryResponse.fromJson(Map<String, dynamic> json) {
@@ -171,16 +158,18 @@ class TriageHistoryResponse {
         .map((e) => EmotionalDayData.fromJson(e as Map<String, dynamic>))
         .toList();
 
-    final rawRec = json['criticalRecurrences'] as List<dynamic>? ?? [];
-    final criticalRecurrences = rawRec
-        .map((e) => CriticalRecurrenceItem.fromJson(e as Map<String, dynamic>))
+    final rawPatterns = json['journalPatterns'] as List<dynamic>? ??
+        json['criticalRecurrences'] as List<dynamic>? ??
+        [];
+    final journalPatterns = rawPatterns
+        .map((e) => JournalPatternItem.fromJson(e as Map<String, dynamic>))
         .toList();
 
     return TriageHistoryResponse(
       logs: logs,
       physicalSummary: physicalSummary,
       emotionalSummary: emotionalSummary,
-      criticalRecurrences: criticalRecurrences,
+      journalPatterns: journalPatterns,
     );
   }
 
@@ -188,13 +177,13 @@ class TriageHistoryResponse {
     List<TriageHistoryEntry>? logs,
     Map<String, int>? physicalSummary,
     List<EmotionalDayData>? emotionalSummary,
-    List<CriticalRecurrenceItem>? criticalRecurrences,
+    List<JournalPatternItem>? journalPatterns,
   }) {
     return TriageHistoryResponse(
       logs: logs ?? this.logs,
       physicalSummary: physicalSummary ?? this.physicalSummary,
       emotionalSummary: emotionalSummary ?? this.emotionalSummary,
-      criticalRecurrences: criticalRecurrences ?? this.criticalRecurrences,
+      journalPatterns: journalPatterns ?? this.journalPatterns,
     );
   }
 
@@ -203,7 +192,10 @@ class TriageHistoryResponse {
       logs: [],
       physicalSummary: {},
       emotionalSummary: [],
-      criticalRecurrences: [],
+      journalPatterns: [],
     );
   }
+
+  @Deprecated('Use journalPatterns')
+  List<JournalPatternItem> get criticalRecurrences => journalPatterns;
 }

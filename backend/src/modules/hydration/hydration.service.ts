@@ -16,10 +16,12 @@ export class HydrationService {
     private readonly databaseService: DatabaseService,
   ) {}
 
-  async logWater(userId: string, dto: LogWaterDto): Promise<WaterIntakeLogItemDto> {
-    if (!userId) {
-      throw new BadRequestException('User ID is required');
-    }
+  async logWater(
+    userId: string,
+    profileId: string,
+    dto: LogWaterDto,
+  ): Promise<WaterIntakeLogItemDto> {
+    this.assertIds(userId, profileId);
 
     const recordedAt = dto.recordedAt ? new Date(dto.recordedAt) : new Date();
 
@@ -28,6 +30,7 @@ export class HydrationService {
         .insert(waterIntakeLogs)
         .values({
           userId,
+          profileId,
           amountMl: dto.amountMl,
           source: dto.source || 'manual',
           recordedAt,
@@ -37,6 +40,7 @@ export class HydrationService {
       return {
         id: inserted.id,
         userId: inserted.userId,
+        profileId: inserted.profileId,
         amountMl: inserted.amountMl,
         source: inserted.source,
         recordedAt: inserted.recordedAt.toISOString(),
@@ -45,10 +49,12 @@ export class HydrationService {
     });
   }
 
-  async getTodayLogs(userId: string, dateStr?: string): Promise<HydrationTodayResponseDto> {
-    if (!userId) {
-      throw new BadRequestException('User ID is required');
-    }
+  async getTodayLogs(
+    userId: string,
+    profileId: string,
+    dateStr?: string,
+  ): Promise<HydrationTodayResponseDto> {
+    this.assertIds(userId, profileId);
 
     let targetDate = new Date();
     if (dateStr) {
@@ -71,7 +77,7 @@ export class HydrationService {
         .from(waterIntakeLogs)
         .where(
           and(
-            eq(waterIntakeLogs.userId, userId),
+            eq(waterIntakeLogs.profileId, profileId),
             gte(waterIntakeLogs.recordedAt, startOfDay),
             lte(waterIntakeLogs.recordedAt, endOfDay),
           ),
@@ -81,6 +87,7 @@ export class HydrationService {
       const logs: WaterIntakeLogItemDto[] = records.map((r) => ({
         id: r.id,
         userId: r.userId,
+        profileId: r.profileId,
         amountMl: r.amountMl,
         source: r.source,
         recordedAt: r.recordedAt.toISOString(),
@@ -98,12 +105,11 @@ export class HydrationService {
 
   async getHistory(
     userId: string,
+    profileId: string,
     days = 7,
     referenceDateStr?: string,
   ): Promise<HydrationHistoryResponseDto> {
-    if (!userId) {
-      throw new BadRequestException('User ID is required');
-    }
+    this.assertIds(userId, profileId);
 
     let refDate = new Date();
     if (referenceDateStr) {
@@ -127,7 +133,7 @@ export class HydrationService {
         .from(waterIntakeLogs)
         .where(
           and(
-            eq(waterIntakeLogs.userId, userId),
+            eq(waterIntakeLogs.profileId, profileId),
             gte(waterIntakeLogs.recordedAt, startDate),
             lte(waterIntakeLogs.recordedAt, endDate),
           ),
@@ -171,15 +177,17 @@ export class HydrationService {
     });
   }
 
-  async deleteLog(userId: string, id: string): Promise<{ success: boolean; id: string }> {
-    if (!userId) {
-      throw new BadRequestException('User ID is required');
-    }
+  async deleteLog(
+    userId: string,
+    profileId: string,
+    id: string,
+  ): Promise<{ success: boolean; id: string }> {
+    this.assertIds(userId, profileId);
 
     return this.databaseService.withRls(userId, async (tx) => {
       const deleted = await tx
         .delete(waterIntakeLogs)
-        .where(and(eq(waterIntakeLogs.id, id), eq(waterIntakeLogs.userId, userId)))
+        .where(and(eq(waterIntakeLogs.id, id), eq(waterIntakeLogs.profileId, profileId)))
         .returning();
 
       if (deleted.length === 0) {
@@ -188,5 +196,14 @@ export class HydrationService {
 
       return { success: true, id };
     });
+  }
+
+  private assertIds(userId: string, profileId: string): void {
+    if (!userId) {
+      throw new BadRequestException('User ID is required');
+    }
+    if (!profileId) {
+      throw new BadRequestException('Profile ID is required');
+    }
   }
 }

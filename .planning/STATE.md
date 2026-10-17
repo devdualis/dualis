@@ -1,20 +1,20 @@
 ---
 gsd_state_version: "1.0"
-milestone: v1.0
-current_phase: 10
-current_phase_name: lgpd-data-sovereignty-account-deletion
-status: complete
-stopped_at: Milestone v1.0 fully executed and verified (Phases 1-10 complete)
-last_updated: "2026-09-26T01:35:02.541Z"
-last_activity: 2026-09-25
-last_activity_desc: Executed and verified Phase 10 (Plans 10-01 and 10-02)
-state_head: b74f69f19846a830c2abcb9046a69fcbd835fef5
+milestone: v2.0
+current_phase: 11
+current_phase_name: multi-profile-legal-guardianship-consensual-sharing
+status: planning
+stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
+last_updated: "2026-10-17T15:42:09.816Z"
+last_activity: 2026-10-16
+last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
+state_head: 7621b4581f0042b9f42870c9a37791efc84f4f38
 progress:
-  total_phases: 10
+  total_phases: 15
   completed_phases: 10
-  total_plans: 20
+  total_plans: 31
   completed_plans: 20
-milestone_name: milestone
+milestone_name: v2.0-premium-advanced
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 
 ## Current Position
 
-Phase: 10 (lgpd-data-sovereignty-account-deletion) — COMPLETE
-Plan: 2 of 2
-Status: Milestone v1.0 Complete — 100% requirements verified
-Last activity: 2026-09-26 - Completed quick task 260926-en3: Configure API_BASE_URL default in mobile-release workflow
+Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
+Plan: 0 of 3
+Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
+Last activity: 2026-10-16 - Completed quick task 261016-ozk: Triage wizard step-0 icon grid + debounced free-text AI classification + l10n
 
 Progress: [██████████] 100%
 
@@ -80,6 +80,7 @@ Recent decisions affecting current work:
 - [Init]: Module 1 Onboarding & Identity includes 3-card value carousel (Screen 1) and Simplified Registration (Screen 2 / RF-007) with mandatory LGPD health data consent.
 - [Init]: Screen 3 Unified Trigger includes 3 distinct choices: Good/Normal (instant exit), So-so (standard triage), and Bad/Sick (high-sensitivity triage), plus AdMob container.
 - [Init]: PostgreSQL environment strategy: Supabase free tier for development sandbox; Google Cloud SQL (São Paulo southamerica-east1) for production. Drizzle ORM provides standard connection string compatibility (DATABASE_URL) across both.
+- [Phase 11]: Widget tests do not close a v2 UI phase. Sign-off is a live Flutter session: `integration_test` plus a Dart driver pass (`dtd`, `widget_inspector`, `flutter_driver_command`, `get_runtime_errors`) on a simulator with the premium flag on.
 
 ### Pending Todos
 
@@ -98,6 +99,8 @@ None yet.
 | 2 | Fix Home check-in card showing stale/AI-derived description; only show text typed in that axis's triage (b5c32a0) | 2026-09-25 | b5c32a0 | — |
 | 3 | Fix 15 flutter analyze issues failing mobile CI | 2026-09-26 | dc9ab03 | — |
 | 4 | Fix time-of-day flakiness in trigger_checkin_symptom_mapping_test test 8 (anchor clock to midday; failed on UTC CI 00:00–03:00) | 2026-09-26 | b74f69f | — |
+| 261016-ozk | Triage wizard step-0 icon grid + debounced free-text AI classification + l10n | 2026-10-16 | 06ada1f | [261016-ozk-triage-wizard-step-0-icon-grid-free-text](./quick/261016-ozk-triage-wizard-step-0-icon-grid-free-text/) |
+| 261017-hl7 | Stop AiInsightCard on Meu Dia echoing the axis card's own category label when the AI returned nothing (no narrative submitted) | 2026-10-17 | 7621b45 | [261017-hl7-fix-ai-insight-card-duplicate-text](./quick/261017-hl7-fix-ai-insight-card-duplicate-text/) |
 
 ## Deferred Items
 

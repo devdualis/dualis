@@ -1,5 +1,6 @@
-import { pgTable, uuid, varchar, text, integer, real, boolean, timestamp, vector, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, real, timestamp, vector, index } from 'drizzle-orm/pg-core';
 
+// Entry-tagging cache: vertical, body area or mood, and lay term only (no clinical columns since 0015).
 export const symptomKnowledge = pgTable(
   'symptom_knowledge',
   {
@@ -7,10 +8,7 @@ export const symptomKnowledge = pgTable(
     inputText: text('input_text').notNull(),
     vertical: varchar('vertical', { length: 16 }).notNull(),
     systemOrDimension: varchar('system_or_dimension', { length: 64 }).notNull(),
-    urgencyScore: integer('urgency_score').notNull(),
     mappedLayTerm: text('mapped_lay_term').notNull(),
-    clinicalConcept: text('clinical_concept').notNull(),
-    isEmergencyCandidate: boolean('is_emergency_candidate').notNull().default(false),
     confidence: real('confidence').notNull(),
     source: varchar('source', { length: 32 }).notNull(),
     embedding: vector('embedding', { dimensions: 768 }),

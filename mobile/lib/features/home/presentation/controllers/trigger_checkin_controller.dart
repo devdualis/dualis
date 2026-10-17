@@ -11,6 +11,7 @@ import '../../../../l10n/locale_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../dashboard/data/triage_history_remote_data_source.dart';
 import '../../../dashboard/domain/models/triage_history_models.dart';
+import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../../triage/data/symptom_classification_remote_data_source.dart';
 import '../../../triage/domain/triage_vertical.dart';
 import '../../../triage_outcome/domain/triage_outcome_models.dart';
@@ -37,16 +38,57 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
   SymptomClassificationRemoteDataSource get _classificationDataSource =>
       ref.read(symptomClassificationDataSourceProvider);
 
+  bool _isDisposed = false;
+  String? _lastProfileId;
+
+  String _scopedUserId(String userId) {
+    if (_isDisposed) return userId;
+    try {
+      final profileId = ref.read(activeProfileControllerProvider).activeProfile?.id;
+      return (profileId != null && profileId.isNotEmpty) ? '${userId}_$profileId' : userId;
+    } catch (_) {
+      return userId;
+    }
+  }
+
   @override
   TriggerCheckInState build() {
+    _isDisposed = false;
+    ref.onDispose(() {
+      _isDisposed = true;
+    });
+
+    final activeProfileId = ref.watch(
+      activeProfileControllerProvider.select((s) => s.activeProfile?.id),
+    );
+    if (_lastProfileId != activeProfileId) {
+      _lastProfileId = activeProfileId;
+      Future.microtask(() {
+        if (_isDisposed) return;
+        try {
+          if (ref.exists(triageOutcomeProvider)) {
+            ref.read(triageOutcomeProvider.notifier).reset();
+            ref.read(triageOutcomeProvider.notifier).loadTodayOutcome();
+          }
+        } catch (_) {}
+      });
+    }
+
     // Pending reminders carry the language they were scheduled in: re-arm
     // them when the app language changes (only while someone is signed in).
     ref.listen<Locale>(localeProvider, (previous, next) {
+      if (_isDisposed) return;
       if (previous == next) return;
-      if (!ref.read(authControllerProvider).isAuthenticated) return;
-      _syncCheckInReminders();
+      try {
+        if (!ref.read(authControllerProvider).isAuthenticated) return;
+        _syncCheckInReminders();
+      } catch (_) {}
     });
-    Future.microtask(() => loadTodayCheckIn());
+    Future.microtask(() {
+      if (!_isDisposed) {
+        loadTodayCheckIn();
+      }
+    });
     return const TriggerCheckInState();
   }
 
@@ -71,18 +113,13 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     return '$y-$m-$day';
   }
 
-  TriggerStatus? _parseTriggerStatus(dynamic value) {
-    if (value == null) return null;
-    final str = value.toString();
-    for (final s in TriggerStatus.values) {
-      if (s.name == str) return s;
-    }
-    return null;
-  }
+  TriggerStatus? _parseTriggerStatus(dynamic value) =>
+      triggerStatusFromStepAnswer(value);
 
   Future<void> _loadLocalTodayCheckIn([DateTime? now]) async {
     try {
-      final userId = await _storage.getUserId() ?? 'anonymous';
+      final baseUserId = await _storage.getUserId() ?? 'anonymous';
+      final userId = _scopedUserId(baseUserId);
       final saved = await _storage.getDailyCheckIn(userId);
       if (saved == null) {
         final today = _getTodayDateString(now);
@@ -184,15 +221,23 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
 
         if (rec != null &&
             (chk == null || !rec.recordedAt.isBefore(chk.recordedAt))) {
+          final declaredOnRec = declaredStatusOnLog(rec, axis);
           final code = AxisIntensityResolver.categoryCodeFor(rec, axis);
+          final status = declaredOnRec ??
+              (rec.intensity > 0
+                  ? triggerStatusFromIntensity(rec.intensity)
+                  : (chkStatus ?? TriggerStatus.goodNormal));
+          final intensity = rec.intensity > 0
+              ? rec.intensity
+              : (declaredOnRec ?? chkStatus)?.defaultIntensity;
           return (
-            status: triggerStatusFromIntensity(rec.intensity),
-            intensity: rec.intensity,
+            status: status,
+            intensity: intensity,
             completed: true,
             summary: currentSummary ??
                 (code != null
                     ? mapCategoryLabel(code)
-                    : (isEmotional ? 'Psicoemocional' : 'Avaliação Física')),
+                    : (isEmotional ? 'Psicoemocional' : 'Registro físico')),
             // A description belongs to the triage it was typed in: only the
             // axis's own record supplies it, and the record wins over local
             // state so an older triage's text never lingers.
@@ -262,18 +307,31 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
   }
 
   Future<void> loadTodayCheckIn([DateTime? now]) async {
+    if (_isDisposed) return;
+    // Abort only if the active profile changed mid-load; overlapping loads for
+    // the same profile are idempotent and must all finish.
+    final currentScope = _scopedUserId('');
     await _loadLocalTodayCheckIn(now);
+    if (_isDisposed || _scopedUserId('') != currentScope) {
+      return;
+    }
     await _syncTodayCheckInFromRemote(now);
+    if (_isDisposed || _scopedUserId('') != currentScope) {
+      return;
+    }
     try {
-      await ref
-          .read(dailyCheckinNotificationServiceProvider)
-          .scheduleDailyCheckInReminders(isCompletedToday: state.isCompletedToday);
+      if (!_isDisposed) {
+        await ref
+            .read(dailyCheckinNotificationServiceProvider)
+            .scheduleDailyCheckInReminders(isCompletedToday: state.isCompletedToday);
+      }
     } catch (_) {}
   }
 
   Future<void> _persistCurrentState() async {
     try {
-      final userId = await _storage.getUserId() ?? 'anonymous';
+      final baseUserId = await _storage.getUserId() ?? 'anonymous';
+      final userId = _scopedUserId(baseUserId);
       final today = _getTodayDateString();
       final toSave = state.copyWith(checkInDate: today);
       await _storage.saveDailyCheckIn(
@@ -352,6 +410,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
         naturalLanguageText: state.naturalLanguageText,
         preselectedCategoryKey: classification.wizardCategoryKey,
         isOffTopic: classification.isOffTopic,
+        mentionsSelfHarm: classification.mentionsSelfHarm,
       );
     } catch (_) {
       return null;
@@ -366,6 +425,11 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     TriageOutcome outcome, {
     Object? narrative = _keepNarrative,
   }) {
+    // Quick daily check-ins persist intensity 0; axis state lives in stepAnswers.
+    if (outcome.intensityScore <= 0) {
+      return;
+    }
+
     final today = _getTodayDateString(outcome.recordedAt);
     final isPhysical = outcome.vertical == 'physical';
 
@@ -403,7 +467,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
         physicalIntensity = state.physicalIntensity;
         physicalStatus = state.physicalStatus ??
             triggerStatusFromIntensity(state.physicalIntensity);
-      } else if (outcome.organicPrimacyApplied || outcome.secondaryCategoryLabel != null) {
+      } else if (outcome.secondaryCategoryLabel != null) {
         final secScore = outcome.secondaryIntensityScore ?? outcome.intensityScore;
         physicalIntensity = secScore;
         physicalStatus = triggerStatusFromIntensity(secScore);
@@ -413,7 +477,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       }
     }
 
-    final summary = outcome.categoryLabel.isNotEmpty ? outcome.categoryLabel : (isPhysical ? 'Avaliação Física' : 'Psicoemocional');
+    final summary = outcome.categoryLabel.isNotEmpty ? outcome.categoryLabel : (isPhysical ? 'Registro físico' : 'Psicoemocional');
     // The AI's mapped lay term is never used here: it is not the user's text.
     final isSubmission = !identical(narrative, _keepNarrative);
     final typed = isSubmission ? (narrative as String?)?.trim() : null;
@@ -522,14 +586,9 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
                   state.physicalStatus == TriggerStatus.soSo)
               ? 3
               : 1);
-      final disposition = intensity == 4
-          ? 'pronto_atendimento'
-          : (intensity == 3 ? 'consulta_rotina' : 'auto_cuidado');
-
       ref.read(triageOutcomeProvider.notifier).setOutcomeFromCheckIn(
             id: 'checkin-${DateTime.now().millisecondsSinceEpoch}',
             intensity: intensity,
-            disposition: disposition,
             emotionalStatus: state.emotionalStatus?.name ?? 'goodNormal',
             physicalStatus: state.physicalStatus?.name ?? 'goodNormal',
             naturalLanguageText: state.naturalLanguageText,
@@ -559,7 +618,6 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
         final data = response.data as Map<String, dynamic>;
         final id = data['id'] as String? ?? 'checkin-${DateTime.now().millisecondsSinceEpoch}';
         final intensity = (data['intensity'] as num?)?.toInt() ?? 1;
-        final disposition = data['disposition'] as String? ?? 'auto_cuidado';
         List<RecommendedArticle>? articles;
         if (data['recommendedArticles'] is List) {
           articles = (data['recommendedArticles'] as List)
@@ -576,7 +634,6 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
           ref.read(triageOutcomeProvider.notifier).setOutcomeFromCheckIn(
                 id: id,
                 intensity: intensity,
-                disposition: disposition,
                 emotionalStatus: state.emotionalStatus?.name ?? 'goodNormal',
                 physicalStatus: state.physicalStatus?.name ?? 'goodNormal',
                 naturalLanguageText: state.naturalLanguageText,
@@ -629,7 +686,8 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
 
   Future<void> _clearStorage() async {
     try {
-      final userId = await _storage.getUserId() ?? 'anonymous';
+      final baseUserId = await _storage.getUserId() ?? 'anonymous';
+      final userId = _scopedUserId(baseUserId);
       await _storage.clearDailyCheckIn(userId);
     } catch (_) {}
   }

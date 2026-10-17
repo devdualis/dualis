@@ -3,24 +3,29 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/database/app_database.dart';
+import '../../profile/presentation/controllers/active_profile_controller.dart';
 
 final triageOutboxRepositoryProvider = Provider<TriageOutboxRepository>((ref) {
   final db = ref.watch(appDatabaseProvider);
-  return TriageOutboxRepository(db);
+  return TriageOutboxRepository(db, ref: ref);
 });
 
 class TriageOutboxRepository {
   final AppDatabase _db;
+  final Ref? _ref;
   final Uuid _uuid = const Uuid();
 
-  TriageOutboxRepository(this._db);
+  TriageOutboxRepository(this._db, {Ref? ref}) : _ref = ref;
 
   Future<TriageOutboxData> enqueueTriageCheckIn({
     required String vertical,
     required Map<int, String> answers,
     String? narrative,
     String? clientSessionId,
+    String? profileId,
   }) async {
+    final effectiveProfileId = profileId ??
+        _ref?.read(activeProfileControllerProvider).activeProfile?.id;
     final sessionId = clientSessionId ?? _uuid.v4();
     final jsonAnswers = jsonEncode(answers.map((k, v) => MapEntry(k.toString(), v)));
 
@@ -31,6 +36,7 @@ class TriageOutboxRepository {
       narrative: Value(narrative),
       status: const Value('pending'),
       attempts: const Value(0),
+      profileId: Value(effectiveProfileId),
     );
 
     final id = await _db.into(_db.triageOutbox).insert(companion);

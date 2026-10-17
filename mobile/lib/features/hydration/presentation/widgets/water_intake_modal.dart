@@ -151,6 +151,9 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                 ),
               ),
               IconButton(
+                key: const Key('water_intake_modal_close_button'),
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                tooltip: 'Fechar',
                 icon: const Icon(Icons.close, color: AppColors.textSecondaryLight),
                 onPressed: () => Navigator.of(context).pop(),
               ),
@@ -251,6 +254,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                 return ChoiceChip(
                   key: Key('water_preset_${ml}ml'),
                   selected: isSelected,
+                  materialTapTargetSize: MaterialTapTargetSize.padded,
                   label: Text('$ml ml'),
                   labelStyle: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
@@ -277,6 +281,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
               ChoiceChip(
                 key: const Key('water_preset_custom'),
                 selected: _isCustom,
+                materialTapTargetSize: MaterialTapTargetSize.padded,
                 label: const Text('Outro valor'),
                 labelStyle: GoogleFonts.plusJakartaSans(
                   fontSize: 13,

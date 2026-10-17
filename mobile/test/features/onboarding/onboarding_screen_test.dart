@@ -63,10 +63,10 @@ void main() {
     expect(find.byType(DualisLogo), findsOneWidget);
 
     // Initial Card 1
-    expect(find.text('Triagem Preventiva Unificada'), findsOneWidget);
+    expect(find.text('Diário de Bem-Estar Integrado'), findsOneWidget);
     expect(
       find.text(
-        'Conecte sua saúde física e estado psico-emocional em um único fluxo diário inteligente, garantindo cuidado holístico e sem ruídos.',
+        'Registre como você está no corpo e nas emoções em um único check-in diário de 1 minuto.',
       ),
       findsOneWidget,
     );
@@ -77,6 +77,14 @@ void main() {
 
     // Page indicator
     expect(find.byType(AnimatedPageIndicator), findsOneWidget);
+
+    // Intended-use statement: wellness app, not a medical device
+    expect(
+      find.text(
+        'O DualisCheckUp é um aplicativo de bem-estar e autoconhecimento. Não é um dispositivo médico e não substitui um profissional de saúde.',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Swiping carousel advances through 3 value proposition cards',
@@ -85,16 +93,16 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify Card 1
-    expect(find.text('Triagem Preventiva Unificada'), findsOneWidget);
+    expect(find.text('Diário de Bem-Estar Integrado'), findsOneWidget);
 
     // Swipe to Card 2
     await tester.drag(find.byType(PageView), const Offset(-500, 0));
     await tester.pumpAndSettle();
 
-    expect(find.text('Registros Médicos Blindados'), findsOneWidget);
+    expect(find.text('Seus Dados Protegidos'), findsOneWidget);
     expect(
       find.text(
-        'Seu histórico clínico protegido por criptografia AES-256 e custodiado sob os mais rigorosos padrões da LGPD. Você é o único dono dos seus dados.',
+        'Seus registros de bem-estar ficam criptografados e sob seu controle, conforme a LGPD.',
       ),
       findsOneWidget,
     );
@@ -103,10 +111,10 @@ void main() {
     await tester.drag(find.byType(PageView), const Offset(-500, 0));
     await tester.pumpAndSettle();
 
-    expect(find.text('Orientações Preventivas Precisas'), findsOneWidget);
+    expect(find.text('Conteúdos para Hábitos Saudáveis'), findsOneWidget);
     expect(
       find.text(
-        'Recomendações e artigos de especialistas médicos renomados sem diagnósticos falsos ou alarmismos desnecessários.',
+        'Leituras curtas e gerais sobre sono, estresse, postura, hidratação e mais.',
       ),
       findsOneWidget,
     );

@@ -1,22 +1,107 @@
 import 'package:flutter/material.dart';
 import '../../../../core/clinical/clinical_intensity_tier.dart';
+import '../../../../l10n/app_localizations.dart';
+
+/// Lay-language grouping used by the "all areas" list.
+enum BodyAreaGroup { head, trunk, limbs, wholeBody }
 
 class AnatomicalRegion {
   final String key;
-  final String label;
-  final String categoryGroup;
+  final BodyAreaGroup group;
   final IconData icon;
-  final String clinicalHint;
   final Rect relativeBounds;
 
   const AnatomicalRegion({
     required this.key,
-    required this.label,
-    required this.categoryGroup,
+    required this.group,
     required this.icon,
-    required this.clinicalHint,
     required this.relativeBounds,
   });
+
+  /// Everyday name of the body area (never a medical system name).
+  String label(AppLocalizations l10n) {
+    switch (key) {
+      case 'cabeca_pescoco':
+        return l10n.bodyMapRegionHeadNeck;
+      case 'neurologico':
+        return l10n.bodyMapRegionDizziness;
+      case 'coluna_dorsal':
+        return l10n.bodyMapRegionBack;
+      case 'respiratorio':
+        return l10n.bodyMapRegionBreathing;
+      case 'cardiovascular_torax':
+        return l10n.bodyMapRegionChest;
+      case 'gastrointestinal_abdomen':
+        return l10n.bodyMapRegionBelly;
+      case 'geniturinario_pelvico':
+        return l10n.bodyMapRegionPelvic;
+      case 'membros_superiores_d':
+        return l10n.bodyMapRegionRightArm;
+      case 'membros_superiores_e':
+        return l10n.bodyMapRegionLeftArm;
+      case 'membros_inferiores_d':
+        return l10n.bodyMapRegionRightLeg;
+      case 'membros_inferiores_e':
+        return l10n.bodyMapRegionLeftLeg;
+      case 'dermatologico':
+        return l10n.bodyMapRegionSkin;
+      case 'muscular_geral_sistemico':
+        return l10n.bodyMapRegionWholeBody;
+      case 'endocrino_metabolico':
+        return l10n.bodyMapRegionEnergy;
+      default:
+        return key;
+    }
+  }
+
+  /// Examples of what people usually log for this area, in lay words.
+  String areaHint(AppLocalizations l10n) {
+    switch (key) {
+      case 'cabeca_pescoco':
+        return l10n.bodyMapRegionHeadNeckHint;
+      case 'neurologico':
+        return l10n.bodyMapRegionDizzinessHint;
+      case 'coluna_dorsal':
+        return l10n.bodyMapRegionBackHint;
+      case 'respiratorio':
+        return l10n.bodyMapRegionBreathingHint;
+      case 'cardiovascular_torax':
+        return l10n.bodyMapRegionChestHint;
+      case 'gastrointestinal_abdomen':
+        return l10n.bodyMapRegionBellyHint;
+      case 'geniturinario_pelvico':
+        return l10n.bodyMapRegionPelvicHint;
+      case 'membros_superiores_d':
+        return l10n.bodyMapRegionRightArmHint;
+      case 'membros_superiores_e':
+        return l10n.bodyMapRegionLeftArmHint;
+      case 'membros_inferiores_d':
+        return l10n.bodyMapRegionRightLegHint;
+      case 'membros_inferiores_e':
+        return l10n.bodyMapRegionLeftLegHint;
+      case 'dermatologico':
+        return l10n.bodyMapRegionSkinHint;
+      case 'muscular_geral_sistemico':
+        return l10n.bodyMapRegionWholeBodyHint;
+      case 'endocrino_metabolico':
+        return l10n.bodyMapRegionEnergyHint;
+      default:
+        return '';
+    }
+  }
+
+  static String groupLabel(BodyAreaGroup group, AppLocalizations l10n) {
+    switch (group) {
+      case BodyAreaGroup.head:
+        return l10n.bodyMapGroupHead;
+      case BodyAreaGroup.trunk:
+        return l10n.bodyMapGroupTrunk;
+      case BodyAreaGroup.limbs:
+        return l10n.bodyMapGroupLimbs;
+      case BodyAreaGroup.wholeBody:
+        return l10n.bodyMapGroupWholeBody;
+    }
+  }
 }
 
 enum _BodyViewMode {
@@ -45,114 +130,86 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
   static const List<AnatomicalRegion> regions = [
     AnatomicalRegion(
       key: 'cabeca_pescoco',
-      label: 'Cabeça e Pescoço',
-      categoryGroup: 'Cabeça & Nervos',
+      group: BodyAreaGroup.head,
       icon: Icons.face_rounded,
-      clinicalHint: 'Cefaleia, dores cervicais, rigidez no pescoço',
       relativeBounds: Rect.fromLTWH(0.38, 0.07, 0.24, 0.10),
     ),
     AnatomicalRegion(
       key: 'neurologico',
-      label: 'Neurológico (Cranial)',
-      categoryGroup: 'Cabeça & Nervos',
+      group: BodyAreaGroup.head,
       icon: Icons.psychology_rounded,
-      clinicalHint: 'Tonturas, vertigens, equilíbrio, cefaleias atípicas',
       relativeBounds: Rect.fromLTWH(0.35, 0.01, 0.30, 0.06),
     ),
     AnatomicalRegion(
       key: 'coluna_dorsal',
-      label: 'Coluna e Dor Dorsal',
-      categoryGroup: 'Tórax & Tronco',
+      group: BodyAreaGroup.trunk,
       icon: Icons.view_headline_rounded,
-      clinicalHint: 'Dores posturais, coluna dorsal e lombar',
       relativeBounds: Rect.fromLTWH(0.44, 0.17, 0.12, 0.30),
     ),
     AnatomicalRegion(
       key: 'respiratorio',
-      label: 'Respiratório (Pulmões)',
-      categoryGroup: 'Tórax & Tronco',
+      group: BodyAreaGroup.trunk,
       icon: Icons.air_rounded,
-      clinicalHint: 'Dispneia funcional, tosse, desconforto pulmonar',
       relativeBounds: Rect.fromLTWH(0.35, 0.18, 0.15, 0.14),
     ),
     AnatomicalRegion(
       key: 'cardiovascular_torax',
-      label: 'Cardiovascular / Tórax',
-      categoryGroup: 'Tórax & Tronco',
+      group: BodyAreaGroup.trunk,
       icon: Icons.favorite_rounded,
-      clinicalHint: 'Sensação de aperto torácico, palpitações',
       relativeBounds: Rect.fromLTWH(0.50, 0.18, 0.15, 0.14),
     ),
     AnatomicalRegion(
       key: 'gastrointestinal_abdomen',
-      label: 'Gastrointestinal / Abdômen',
-      categoryGroup: 'Tórax & Tronco',
+      group: BodyAreaGroup.trunk,
       icon: Icons.lunch_dining_rounded,
-      clinicalHint: 'Desconforto gástrico, cólicas, refluxo',
       relativeBounds: Rect.fromLTWH(0.36, 0.33, 0.28, 0.13),
     ),
     AnatomicalRegion(
       key: 'geniturinario_pelvico',
-      label: 'Geniturinário / Pélvico',
-      categoryGroup: 'Tórax & Tronco',
+      group: BodyAreaGroup.trunk,
       icon: Icons.health_and_safety_rounded,
-      clinicalHint: 'Desconforto pélvico e queixas urinárias',
       relativeBounds: Rect.fromLTWH(0.38, 0.47, 0.24, 0.10),
     ),
     AnatomicalRegion(
       key: 'membros_superiores_d',
-      label: 'Membros Superiores (D)',
-      categoryGroup: 'Membros',
+      group: BodyAreaGroup.limbs,
       icon: Icons.front_hand_rounded,
-      clinicalHint: 'Braço, ombro, cotovelo ou punho direito',
       relativeBounds: Rect.fromLTWH(0.18, 0.18, 0.16, 0.32),
     ),
     AnatomicalRegion(
       key: 'membros_superiores_e',
-      label: 'Membros Superiores (E)',
-      categoryGroup: 'Membros',
+      group: BodyAreaGroup.limbs,
       icon: Icons.front_hand_rounded,
-      clinicalHint: 'Braço, ombro, cotovelo ou punho esquerdo',
       relativeBounds: Rect.fromLTWH(0.66, 0.18, 0.16, 0.32),
     ),
     AnatomicalRegion(
       key: 'membros_inferiores_d',
-      label: 'Membros Inferiores (D)',
-      categoryGroup: 'Membros',
+      group: BodyAreaGroup.limbs,
       icon: Icons.accessibility_rounded,
-      clinicalHint: 'Quadril, coxa, joelho ou tornozelo direito',
       relativeBounds: Rect.fromLTWH(0.31, 0.58, 0.16, 0.38),
     ),
     AnatomicalRegion(
       key: 'membros_inferiores_e',
-      label: 'Membros Inferiores (E)',
-      categoryGroup: 'Membros',
+      group: BodyAreaGroup.limbs,
       icon: Icons.accessibility_rounded,
-      clinicalHint: 'Quadril, coxa, joelho ou tornozelo esquerdo',
       relativeBounds: Rect.fromLTWH(0.53, 0.58, 0.16, 0.38),
     ),
     AnatomicalRegion(
       key: 'dermatologico',
-      label: 'Dermatológico (Pele)',
-      categoryGroup: 'Sistêmico & Pele',
+      group: BodyAreaGroup.wholeBody,
       icon: Icons.spa_rounded,
-      clinicalHint: 'Prurido, lesões cutâneas, sensibilidade na pele',
       relativeBounds: Rect.fromLTWH(0.24, 0.12, 0.52, 0.78),
     ),
     AnatomicalRegion(
       key: 'muscular_geral_sistemico',
-      label: 'Muscular Geral / Sistêmico',
-      categoryGroup: 'Sistêmico & Pele',
+      group: BodyAreaGroup.wholeBody,
       icon: Icons.fitness_center_rounded,
-      clinicalHint: 'Mialgia difusa, cansaço muscular corporal amplo',
       relativeBounds: Rect.zero,
     ),
     AnatomicalRegion(
       key: 'endocrino_metabolico',
-      label: 'Endócrino / Metabólico',
-      categoryGroup: 'Sistêmico & Pele',
+      group: BodyAreaGroup.wholeBody,
       icon: Icons.bolt_rounded,
-      clinicalHint: 'Oscilações energéticas, metabolismo e sede',
       relativeBounds: Rect.zero,
     ),
   ];
@@ -239,6 +296,7 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final selectedRegion = regions.firstWhere(
       (r) => r.key == _selectedRegionKey,
       orElse: () => regions.first,
@@ -249,7 +307,7 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildViewModeToggle(),
+        _buildViewModeToggle(l10n),
         const SizedBox(height: 8),
         if (_viewMode == _BodyViewMode.map) ...[
           Center(
@@ -282,20 +340,20 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
           const SizedBox(height: 8),
           _buildLegendBar(),
           const SizedBox(height: 10),
-          _buildSystemicSection(),
+          _buildSystemicSection(l10n),
         ] else ...[
-          _buildCompleteSystemsMatrix(),
+          _buildCompleteSystemsMatrix(l10n),
           const SizedBox(height: 8),
           _buildLegendBar(),
         ],
         const SizedBox(height: 10),
         if (_selectedRegionKey != null)
-          _buildRegionDetailCard(selectedRegion, selectedIntensity),
+          _buildRegionDetailCard(selectedRegion, selectedIntensity, l10n),
       ],
     );
   }
 
-  Widget _buildViewModeToggle() {
+  Widget _buildViewModeToggle(AppLocalizations l10n) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey.shade100,
@@ -306,7 +364,7 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
         children: [
           Expanded(
             child: _buildToggleButton(
-              title: 'Mapa Anatômico',
+              title: l10n.bodyMapViewMap,
               icon: Icons.accessibility_new_rounded,
               isSelected: _viewMode == _BodyViewMode.map,
               onTap: () => setState(() => _viewMode = _BodyViewMode.map),
@@ -314,7 +372,7 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
           ),
           Expanded(
             child: _buildToggleButton(
-              title: 'Todos os 12 Sistemas',
+              title: l10n.bodyMapViewAll,
               icon: Icons.grid_view_rounded,
               isSelected: _viewMode == _BodyViewMode.grid,
               onTap: () => setState(() => _viewMode = _BodyViewMode.grid),
@@ -417,7 +475,7 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
     );
   }
 
-  Widget _buildSystemicSection() {
+  Widget _buildSystemicSection(AppLocalizations l10n) {
     final systemicKeys = [
       'dermatologico',
       'muscular_geral_sistemico',
@@ -432,7 +490,7 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
             Icon(Icons.layers_outlined, size: 14, color: Colors.grey.shade700),
             const SizedBox(width: 5),
             Text(
-              'Sistemas Gerais & Cutâneos',
+              l10n.bodyMapGroupWholeBody,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -481,10 +539,10 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
                       const SizedBox(height: 6),
                       Text(
                         key == 'dermatologico'
-                            ? 'Pele'
+                            ? l10n.bodyMapShortSkin
                             : key == 'muscular_geral_sistemico'
-                                ? 'Muscular'
-                                : 'Endócrino',
+                                ? l10n.bodyMapShortWholeBody
+                                : l10n.bodyMapShortEnergy,
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight:
@@ -503,7 +561,7 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          intensity > 0 ? '$intensity/5' : 'Normal',
+                          intensity > 0 ? '$intensity/5' : '—',
                           style: const TextStyle(
                             fontSize: 9.5,
                             fontWeight: FontWeight.bold,
@@ -522,10 +580,10 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
     );
   }
 
-  Widget _buildCompleteSystemsMatrix() {
-    final groups = <String, List<AnatomicalRegion>>{};
+  Widget _buildCompleteSystemsMatrix(AppLocalizations l10n) {
+    final groups = <BodyAreaGroup, List<AnatomicalRegion>>{};
     for (final reg in regions) {
-      groups.putIfAbsent(reg.categoryGroup, () => []).add(reg);
+      groups.putIfAbsent(reg.group, () => []).add(reg);
     }
 
     return Column(
@@ -537,7 +595,7 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                entry.key,
+                AnatomicalRegion.groupLabel(entry.key, l10n),
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -586,7 +644,7 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                reg.label,
+                                reg.label(l10n),
                                 style: TextStyle(
                                   fontSize: 12.5,
                                   fontWeight: isSelected
@@ -596,7 +654,7 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
                                 ),
                               ),
                               Text(
-                                reg.clinicalHint,
+                                reg.areaHint(l10n),
                                 style: TextStyle(
                                   fontSize: 10.5,
                                   color: Colors.grey.shade600,
@@ -616,7 +674,7 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            intensity > 0 ? '$intensity/5' : 'Sem dor',
+                            intensity > 0 ? '$intensity/5' : l10n.heatLegendNone,
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -636,53 +694,59 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
     );
   }
 
-  Widget _buildRegionDetailCard(AnatomicalRegion region, int intensity) {
+  Widget _buildRegionDetailCard(
+    AnatomicalRegion region,
+    int intensity,
+    AppLocalizations l10n,
+  ) {
+    String regionLabel(String key) =>
+        regions.firstWhere((r) => r.key == key).label(l10n);
     final heatColor = getHeatColor(intensity);
     String subtitle;
     VoidCallback? onSelectOpposite;
     String? oppositeActionLabel;
 
     if (intensity > 0) {
-      subtitle = 'Intensidade máxima nos últimos 14 dias: Nível $intensity\n${region.clinicalHint}';
+      subtitle = '${l10n.bodyMapMaxIntensity(intensity)}\n${region.areaHint(l10n)}';
     } else {
       if (region.key == 'membros_superiores_e' &&
           (widget.physicalSummary['membros_superiores_d'] ?? 0) > 0) {
         final other = widget.physicalSummary['membros_superiores_d']!;
-        subtitle =
-            'Sem sintomas no lado esquerdo nos últimos 14 dias.\n(Membro Superior Direito possui registro Nível $other)';
-        oppositeActionLabel = 'Ver Membro Direito (D)';
+        final otherArea = regionLabel('membros_superiores_d');
+        subtitle = l10n.bodyMapNoEntriesThisSide(otherArea, other);
+        oppositeActionLabel = l10n.bodyMapViewOtherSide(otherArea);
         onSelectOpposite = () {
           _selectRegion('membros_superiores_d');
         };
       } else if (region.key == 'membros_superiores_d' &&
           (widget.physicalSummary['membros_superiores_e'] ?? 0) > 0) {
         final other = widget.physicalSummary['membros_superiores_e']!;
-        subtitle =
-            'Sem sintomas no lado direito nos últimos 14 dias.\n(Membro Superior Esquerdo possui registro Nível $other)';
-        oppositeActionLabel = 'Ver Membro Esquerdo (E)';
+        final otherArea = regionLabel('membros_superiores_e');
+        subtitle = l10n.bodyMapNoEntriesThisSide(otherArea, other);
+        oppositeActionLabel = l10n.bodyMapViewOtherSide(otherArea);
         onSelectOpposite = () {
           _selectRegion('membros_superiores_e');
         };
       } else if (region.key == 'membros_inferiores_e' &&
           (widget.physicalSummary['membros_inferiores_d'] ?? 0) > 0) {
         final other = widget.physicalSummary['membros_inferiores_d']!;
-        subtitle =
-            'Sem sintomas no lado esquerdo nos últimos 14 dias.\n(Membro Inferior Direito possui registro Nível $other)';
-        oppositeActionLabel = 'Ver Membro Direito (D)';
+        final otherArea = regionLabel('membros_inferiores_d');
+        subtitle = l10n.bodyMapNoEntriesThisSide(otherArea, other);
+        oppositeActionLabel = l10n.bodyMapViewOtherSide(otherArea);
         onSelectOpposite = () {
           _selectRegion('membros_inferiores_d');
         };
       } else if (region.key == 'membros_inferiores_d' &&
           (widget.physicalSummary['membros_inferiores_e'] ?? 0) > 0) {
         final other = widget.physicalSummary['membros_inferiores_e']!;
-        subtitle =
-            'Sem sintomas no lado direito nos últimos 14 dias.\n(Membro Inferior Esquerdo possui registro Nível $other)';
-        oppositeActionLabel = 'Ver Membro Esquerdo (E)';
+        final otherArea = regionLabel('membros_inferiores_e');
+        subtitle = l10n.bodyMapNoEntriesThisSide(otherArea, other);
+        oppositeActionLabel = l10n.bodyMapViewOtherSide(otherArea);
         onSelectOpposite = () {
           _selectRegion('membros_inferiores_e');
         };
       } else {
-        subtitle = 'Nenhum sintoma registrado nos últimos 14 dias';
+        subtitle = l10n.bodyMapNoEntries14Days;
       }
     }
 
@@ -714,7 +778,7 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
                     children: [
                       Flexible(
                         child: Text(
-                          region.label,
+                          region.label(l10n),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
@@ -730,7 +794,7 @@ class _AnatomicalBodyMapState extends State<AnatomicalBodyMap> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          region.categoryGroup,
+                          AnatomicalRegion.groupLabel(region.group, l10n),
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.bold,

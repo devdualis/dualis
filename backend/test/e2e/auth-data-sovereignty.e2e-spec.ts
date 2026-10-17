@@ -45,9 +45,10 @@ class MockAuthService {
     return {
       metadata: {
         exportDate: new Date().toISOString(),
-        formatVersion: '1.0',
+        formatVersion: '1.2',
         legalBasis: 'LGPD Art. 18, V (Portabilidade de Dados)',
         dataController: 'DualisCheckUp Saúde Digital Ltda.',
+        legacyFieldsNote: 'Os campos em "legacy" vêm de uma versão anterior do app e não são mais gravados.',
       },
       profile: {
         id: testUserId,
@@ -73,13 +74,31 @@ class MockAuthService {
           intensity: 2,
           anatomicalSystem: 'respiratorio',
           emotionalDimension: null,
-          disposition: 'autocuidado',
+          legacy: { disposition: 'autocuidado', organicPrimacyApplied: false },
           decryptedNarrative: 'Leve desconforto respiratório matinal',
           stepAnswers: { questions: ['sintoma iniciado hoje'] },
           recordedAt: '2026-01-02T08:00:00.000Z',
         },
       ],
-      emergencyEvents: [],
+      safetyResourceEvents: [],
+      waterIntakeLogs: [],
+      dependentProfiles: [
+        {
+          profile: {
+            id: 'd0000000-0000-4000-8000-000000000001',
+            name: 'Lucas Oliveira',
+            profileType: 'dependent_minor',
+            dateOfBirth: '2018-03-10',
+            gender: 'masculino',
+            createdAt: '2026-02-01T10:00:00.000Z',
+          },
+          symptomLogs: [],
+          safetyResourceEvents: [],
+          waterIntakeLogs: [
+            { id: 'water-e2e-1', amountMl: 200, source: 'manual', recordedAt: '2026-02-02T08:00:00.000Z' },
+          ],
+        },
+      ],
     };
   }
 
@@ -170,7 +189,12 @@ describe('Auth LGPD Data Sovereignty E2E (SEC-03)', () => {
       expect(data.consents).toHaveLength(1);
       expect(data.symptomLogs).toHaveLength(1);
       expect(data.symptomLogs[0].decryptedNarrative).toBe('Leve desconforto respiratório matinal');
-      expect(data.emergencyEvents).toEqual([]);
+      expect(data.safetyResourceEvents).toEqual([]);
+      expect(data.symptomLogs[0].legacy).toEqual({ disposition: 'autocuidado', organicPrimacyApplied: false });
+      expect(data.symptomLogs[0]).not.toHaveProperty('disposition');
+      expect(data.dependentProfiles).toHaveLength(1);
+      expect(data.dependentProfiles[0].profile.name).toBe('Lucas Oliveira');
+      expect(data.dependentProfiles[0].waterIntakeLogs).toHaveLength(1);
     });
   });
 

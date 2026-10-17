@@ -27,12 +27,12 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
       return callback(tx);
     });
 
-    const result = await service.getHistory('usr-1', { days: 14 });
+    const result = await service.getHistory('usr-1', 'prof-usr-1', { days: 14 });
 
     expect(result.logs).toHaveLength(0);
     expect(result.physicalSummary.cabeca_pescoco).toBe(0);
     expect(result.emotionalSummary).toHaveLength(7);
-    expect(result.criticalRecurrences).toHaveLength(0);
+    expect(result.journalPatterns).toHaveLength(0);
   });
 
   it('2. aggregates physical max intensity per anatomical system (DASH-02)', async () => {
@@ -90,13 +90,61 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
       return callback(tx);
     });
 
-    const result = await service.getHistory('usr-1', { days: 14 });
+    const result = await service.getHistory('usr-1', 'prof-usr-1', { days: 14 });
 
     expect(result.logs).toHaveLength(3);
     expect(result.physicalSummary.cabeca_pescoco).toBe(4);
     expect(result.physicalSummary.coluna_dorsal).toBe(5);
     expect(result.physicalSummary.cardiovascular_torax).toBe(0);
     expect(result.logs[0].stepAnswers).toEqual({ causes: 'stress' });
+  });
+
+  it('2c. exposes the entry vertical and strips _entryVertical from stepAnswers', async () => {
+    const today = new Date();
+    const base = { userId: 'usr-1', intensity: 3, recordedAt: today, createdAt: today, updatedAt: today };
+    const mockRows = [
+      {
+        ...base,
+        id: 'new-emotional',
+        anatomicalSystem: 'cabeca_pescoco',
+        emotionalDimension: 'ansiosa_agitacao',
+        organicPrimacyApplied: false,
+        stepAnswers: '{"1":"ansiedade","_entryVertical":"emotional"}',
+      },
+      {
+        ...base,
+        id: 'legacy-emotional',
+        anatomicalSystem: 'cabeca_pescoco',
+        emotionalDimension: 'ansiosa_agitacao',
+        organicPrimacyApplied: true,
+        stepAnswers: '{"1":"ansiedade"}',
+      },
+      {
+        ...base,
+        id: 'legacy-unknown',
+        anatomicalSystem: 'cabeca_pescoco',
+        emotionalDimension: null,
+        organicPrimacyApplied: false,
+        stepAnswers: null,
+      },
+    ];
+
+    mockDb.transaction.mockImplementation(async (callback: any) =>
+      callback({
+        execute: vi.fn().mockResolvedValue(true),
+        select: vi.fn().mockReturnValue({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({ orderBy: vi.fn().mockResolvedValue(mockRows) }),
+          }),
+        }),
+      }),
+    );
+
+    const result = await service.getHistory('usr-1', 'prof-usr-1', { days: 14 });
+
+    expect(result.logs.map((l) => l.vertical)).toEqual(['emotional', 'emotional', null]);
+    expect(result.logs[0].stepAnswers).toEqual({ 1: 'ansiedade' });
+    expect(result.logs[0].stepAnswers).not.toHaveProperty('_entryVertical');
   });
 
   it('2b. aggregates upper and lower limbs with side discernment in physicalSummary', async () => {
@@ -142,7 +190,7 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
       return callback(tx);
     });
 
-    const result = await service.getHistory('usr-1', { days: 14 });
+    const result = await service.getHistory('usr-1', 'prof-usr-1', { days: 14 });
 
     expect(result.physicalSummary.membros_superiores).toBe(3);
     expect(result.physicalSummary.membros_superiores_d).toBe(3);
@@ -152,7 +200,7 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
     expect(result.physicalSummary.membros_inferiores_d).toBe(0);
   });
 
-  it('3. detects critical recurrences when dimension intensity >= 4 on multiple days (DASH-04)', async () => {
+  it('3. reports a descriptive journal pattern when a category was logged with high intensity twice (DASH-04)', async () => {
     const today = new Date();
     const mockRows = [
       {
@@ -195,16 +243,14 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
       return callback(tx);
     });
 
-    const result = await service.getHistory('usr-1', { days: 14 });
+    const result = await service.getHistory('usr-1', 'prof-usr-1', { days: 14 });
 
-    expect(result.criticalRecurrences.length).toBeGreaterThan(0);
-    const recurrence = result.criticalRecurrences[0];
-    expect(recurrence.vertical).toBe('emotional');
-    expect(recurrence.category).toBe('estresse_burnout');
-    expect(recurrence.title).toContain('Foco de Atenção');
-    expect(recurrence.intensity).toBe(4);
-    expect(recurrence.frequencyCount).toBe(2);
-    expect(recurrence.recommendedArticleTitle).toBeDefined();
+    expect(result.journalPatterns).toEqual([
+      { category: 'estresse_burnout', vertical: 'emotional', count: 2, windowDays: 10 },
+    ]);
+    expect(result).not.toHaveProperty('criticalRecurrences');
+    expect(result.logs[0]).not.toHaveProperty('disposition');
+    expect(result.logs[0]).not.toHaveProperty('organicPrimacyApplied');
   });
 
   it('4. deletes existing history item and returns success (LGPD / User Data Discard)', async () => {
@@ -231,7 +277,7 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
       return callback(tx);
     });
 
-    const result = await service.deleteHistoryItem('usr-1', 'log-delete-1');
+    const result = await service.deleteHistoryItem('usr-1', 'prof-usr-1', 'log-delete-1');
 
     expect(result).toEqual({ success: true, id: 'log-delete-1' });
     expect(deleteMock).toHaveBeenCalled();
@@ -251,7 +297,7 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
       return callback(tx);
     });
 
-    await expect(service.deleteHistoryItem('usr-1', 'non-existent-log')).rejects.toThrow(
+    await expect(service.deleteHistoryItem('usr-1', 'prof-usr-1', 'non-existent-log')).rejects.toThrow(
       'Registro de histórico não encontrado.',
     );
   });

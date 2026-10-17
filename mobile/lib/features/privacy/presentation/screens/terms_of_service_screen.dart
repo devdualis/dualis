@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
 
 class TermsOfServiceScreen extends StatelessWidget {
@@ -10,6 +11,7 @@ class TermsOfServiceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
@@ -17,7 +19,7 @@ class TermsOfServiceScreen extends StatelessWidget {
         elevation: 0,
         scrolledUnderElevation: 1,
         title: Text(
-          'Termos de Uso do SaaS',
+          l10n.termsAppBarTitle,
           style: GoogleFonts.plusJakartaSans(
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -60,7 +62,7 @@ class TermsOfServiceScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Termos e Condições de Uso',
+                      l10n.termsHeaderTitle,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -69,7 +71,7 @@ class TermsOfServiceScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Versão 2026.1 • Atualizado em 01/10/2026',
+                      l10n.termsVersionLine,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         color: AppColors.textSecondaryLight,
@@ -78,7 +80,7 @@ class TermsOfServiceScreen extends StatelessWidget {
                     ),
                     const Divider(height: 24),
                     Text(
-                      'Contrato de prestação de serviços de software em nuvem (SaaS) celebrado entre o Usuário e a DualisCheckUp Saúde e Tecnologia Ltda., inscrita no CNPJ sob o nº 48.291.834/0001-92, com sede em São Paulo/SP, Brasil.',
+                      l10n.termsIntro,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         color: AppColors.textSecondaryLight,
@@ -92,71 +94,65 @@ class TermsOfServiceScreen extends StatelessWidget {
 
               // Section 1
               _LegalSectionCard(
-                title: '1. Aceitação e Capacidade Civil',
+                title: l10n.termsSection1Title,
                 icon: Icons.assignment_turned_in_outlined,
                 color: AppColors.clinicalTeal,
-                content:
-                    'Ao cadastrar-se ou utilizar o DualisCheckUp, você declara possuir capacidade civil plena (maior de 18 anos ou emancipado) e manifesta concordância integral com estes Termos de Uso e com nossa Política de Privacidade.',
+                content: l10n.termsSection1Body,
               ),
               const SizedBox(height: 16),
 
-              // Section 2
+              // Section 2: intended use (wellness, not a medical device)
               _LegalSectionCard(
-                title: '2. Limitação de Responsabilidade Médica (SaMD)',
-                icon: Icons.medical_services_outlined,
-                color: AppColors.emergencyCrimson,
-                content:
-                    'O DualisCheckUp é uma plataforma tecnológica de suporte ao bem-estar e estratificação de risco preventivo, classificada conforme a Resolução RDC Anvisa nº 657/2022 e a Resolução CFM nº 2.314/2022:',
-                bullets: const [
-                  'O software NÃO realiza diagnósticos nosológicos e NÃO prescreve medicações.',
-                  'A triagem NÃO substitui consultas médicas presenciais ou pareceres de especialistas.',
-                  'Em caso de dor aguda intensa, sintomas neurológicos súbitos ou risco de vida, ligue imediatamente para o SAMU (192) ou compareça à emergência hospitalar mais próxima.',
+                title: l10n.termsSection2Title,
+                icon: Icons.spa_outlined,
+                color: AppColors.clinicalTeal,
+                content: l10n.termsSection2Body,
+                bullets: [
+                  l10n.termsSection2Bullet1,
+                  l10n.termsSection2Bullet2,
+                  l10n.termsSection2Bullet3,
                 ],
               ),
               const SizedBox(height: 16),
 
               // Section 3
               _LegalSectionCard(
-                title: '3. Planos SaaS, Cobrança e Reembolso',
+                title: l10n.termsSection3Title,
                 icon: Icons.credit_card_outlined,
                 color: AppColors.softIndigo,
-                content:
-                    'O serviço oferece planos com renovação automática periódica geridos por intermediadores com certificação PCI-DSS:',
-                bullets: const [
-                  'Cancelamento Facilitado: Você pode cancelar sua assinatura a qualquer momento no app com um toque, sem fidelidade ou taxas de cancelamento.',
-                  'Direito de Arrependimento (CDC Art. 49): Garantia de reembolso integral em até 7 (sete) dias corridos a partir da contratação inicial.',
-                  'Acesso Contínuo: O cancelamento interrompe faturas subsequentes e preserva seu acesso até o término do ciclo mensal contratado.',
+                content: l10n.termsSection3Body,
+                bullets: [
+                  l10n.termsSection3Bullet1,
+                  l10n.termsSection3Bullet2,
+                  l10n.termsSection3Bullet3,
                 ],
               ),
               const SizedBox(height: 16),
 
               // Section 4
               _LegalSectionCard(
-                title: '4. Propriedade Intelectual',
+                title: l10n.termsSection4Title,
                 icon: Icons.copyright_outlined,
                 color: AppColors.clinicalTealDark,
-                content:
-                    'Todos os direitos de propriedade intelectual sobre os algoritmos heurísticos, árvores de triagem, modelos de IA, interfaces e marcas pertencem com exclusividade à DualisCheckUp Saúde e Tecnologia Ltda. É estritamente vedada a reprodução, engenharia reversa ou mineração de dados.',
+                content: l10n.termsSection4Body,
               ),
               const SizedBox(height: 16),
 
               // Section 5
               _LegalSectionCard(
-                title: '5. Suspensão por Violação de Segurança',
+                title: l10n.termsSection5Title,
                 icon: Icons.shield_outlined,
                 color: AppColors.softIndigo,
-                content:
-                    'Contas que executarem tentativas de invasão, ataques de força bruta, testes de penetração não autorizados ou submissão de dados fraudulentos serão imediatamente bloqueadas, com encaminhamento às autoridades competentes.',
+                content: l10n.termsSection5Body,
               ),
               const SizedBox(height: 16),
 
               // Section 6
               _LegalSectionCard(
-                title: '6. Foro e Contato Jurídico',
+                title: l10n.termsSection6Title,
                 icon: Icons.gavel_outlined,
                 color: AppColors.textPrimaryLight,
-                content:
-                    'Estes termos são regidos pelas leis brasileiras. Fica eleito o Foro da Comarca de São Paulo/SP como único competente para dirimir litígios decorrentes deste contrato.\n\nPara dúvidas ou notificações legais: legal@dualischeckup.com.',
+                content: l10n.termsSection6Body,
               ),
               const SizedBox(height: 32),
             ],

@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import 'dualis_logo.dart';
 import '../../core/security/app_lifecycle_observer.dart';
 import '../../core/security/biometric_service.dart';
@@ -63,7 +64,7 @@ class PrivacyVeilOverlayState extends State<PrivacyVeilOverlay> {
   Future<void> unlock() async {
     try {
       final success = await _biometricService.authenticate(
-        localizedReason: 'Autentique-se para acessar seus dados de saúde confidenciais.',
+        localizedReason: AppLocalizations.of(context).privacyVeilBiometricReason,
       );
 
       if (success && mounted) {
@@ -131,7 +132,7 @@ class PrivacyVeilOverlayState extends State<PrivacyVeilOverlay> {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Dados de Saúde Protegidos',
+                        AppLocalizations.of(context).privacyVeilTitle,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 22,
@@ -142,7 +143,7 @@ class PrivacyVeilOverlayState extends State<PrivacyVeilOverlay> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Autentique-se com biometria ou senha para acessar seu prontuário.',
+                        AppLocalizations.of(context).privacyVeilBody,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14,
@@ -167,7 +168,7 @@ class PrivacyVeilOverlayState extends State<PrivacyVeilOverlay> {
                           onPressed: unlock,
                           icon: const Icon(Icons.fingerprint, size: 22),
                           label: Text(
-                            'Desbloquear',
+                            AppLocalizations.of(context).privacyVeilUnlock,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -181,7 +182,7 @@ class PrivacyVeilOverlayState extends State<PrivacyVeilOverlay> {
                           key: const Key('privacyVeilFallbackButton'),
                           onPressed: forceUnlock,
                           child: Text(
-                            'Desbloquear manualmente',
+                            AppLocalizations.of(context).privacyVeilUnlockManually,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 14,
                               color: AppColors.clinicalTeal,

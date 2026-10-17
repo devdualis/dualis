@@ -6,12 +6,16 @@ import * as schema from '../../../database/schema';
 import { symptomLogs } from '../../../database/schema';
 import { EncryptionService } from '../../../common/encryption/encryption.service';
 import {
-  CriticalRecurrenceDto,
   EmotionalDayDataDto,
   GetTriageHistoryQueryDto,
+  JournalPatternDto,
   TriageHistoryResponseDto,
   TriageLogItemDto,
 } from '../dto/triage-history.dto';
+import { HIGH_REPORTED_INTENSITY } from '../constants/intensity-tier.constant';
+
+const JOURNAL_PATTERN_WINDOW_DAYS = 10;
+const JOURNAL_PATTERN_MIN_COUNT = 2;
 
 const PHYSICAL_SYSTEM_KEYS = [
   'cabeca_pescoco',
@@ -40,156 +44,6 @@ const EMOTIONAL_DIMENSION_KEYS = [
   'autoestima',
 ];
 
-const CATEGORY_LABELS: Record<string, string> = {
-  cabeca_pescoco: 'Cabeça e Pescoço',
-  cardiovascular_torax: 'Cardiovascular / Tórax',
-  respiratorio: 'Respiratório',
-  gastrointestinal_abdomen: 'Gastrointestinal / Abdômen',
-  coluna_dorsal: 'Coluna e Dor Dorsal',
-  coluna_dor_dorsal: 'Coluna e Dor Dorsal',
-  coluna_dor_lombar: 'Coluna e Dor Lombar',
-  membros_superiores: 'Membros Superiores',
-  membros_superiores_d: 'Membros Superiores (D)',
-  membros_superiores_e: 'Membros Superiores (E)',
-  membros_inferiores: 'Membros Inferiores',
-  membros_inferiores_d: 'Membros Inferiores (D)',
-  membros_inferiores_e: 'Membros Inferiores (E)',
-  muscular_geral_sistemico: 'Muscular Geral e Sistêmico',
-  endocrino_metabolico: 'Endócrino / Metabólico',
-  neurologico: 'Neurológico',
-  geniturinario_pelvico: 'Geniturinário / Pélvico',
-  dermatologico: 'Dermatológico',
-  geral_fisico: 'Saúde Física Geral',
-  ansiosa_agitacao: 'Ansiosa / Agitação',
-  depressiva_desanimo: 'Depressiva / Desânimo',
-  estresse_burnout: 'Estresse / Burnout',
-  somatica: 'Somática (Psicossomática)',
-  sono: 'Sono e Ritmo Circadiano',
-  cognitiva_foco: 'Cognitiva / Foco',
-  autoestima: 'Autoestima / Autoimagem',
-  geral_emocional: 'Saúde Emocional Geral',
-  geral: 'Saúde Geral e Bem-Estar',
-};
-
-const RECOMMENDED_ARTICLES: Record<string, { title: string; url: string }> = {
-  estresse_burnout: {
-    title: 'Manejo do Burnout e Técnicas de Descompressão Diária',
-    url: 'https://drauziovarella.uol.com.br/psiquiatria/sindrome-de-burnout-esgotamento-profissional/',
-  },
-  ansiosa_agitacao: {
-    title: 'Protocolos de Respiração e Manejo da Ansiedade',
-    url: 'https://drauziovarella.uol.com.br/saude-mental/transtornos-de-ansiedade-nao-sao-todos-iguais-entenda-as-caracteristicas-de-cada-tipo/',
-  },
-  depressiva_desanimo: {
-    title: 'Ativação Comportamental e Cuidados na Depressão',
-    url: 'https://www.paho.org/pt/topicos/depressao',
-  },
-  somatica: {
-    title: 'Conexão Mente e Corpo: Sintomas Psicossomáticos',
-    url: 'https://drauziovarella.uol.com.br/psiquiatria/conexao-entre-mente-e-corpo-como-as-emocoes-afetam-a-saude/',
-  },
-  sono: {
-    title: 'Guia Completo de Higiene do Sono e Ritmo Circadiano',
-    url: 'https://drauziovarella.uol.com.br/neurologia/higiene-do-sono-conheca-11-dicas-para-dormir-melhor/',
-  },
-  cognitiva_foco: {
-    title: 'Estímulo Cognitivo, Clareza Mental e Foco',
-    url: 'https://drauziovarella.uol.com.br/neurologia/como-estimular-o-cerebro-no-dia-a-dia/',
-  },
-  autoestima: {
-    title: 'Fortalecimento da Autoestima e Bem-Estar Psicológico',
-    url: 'https://www.paho.org/pt/topicos/saude-mental',
-  },
-  geral_emocional: {
-    title: 'Guia de Saúde Mental e Equilíbrio Emocional',
-    url: 'https://www.paho.org/pt/topicos/saude-mental',
-  },
-  cabeca_pescoco: {
-    title: 'Prevenção de Cefaleias Tensionais e Cuidados Cervicais',
-    url: 'https://sbcefaleia.com.br/noticias.php?id=350',
-  },
-  cardiovascular_torax: {
-    title: 'Saúde Cardiovascular e Reconhecimento de Sinais de Alerta',
-    url: 'https://drauziovarella.uol.com.br/entrevistas-2/arritmia-cardiaca-entrevista/',
-  },
-  respiratorio: {
-    title: 'Cuidados Respiratórios e Manejo de Falta de Ar',
-    url: 'https://sbpt.org.br/portal/publico-geral/doencas/falta-de-ar/',
-  },
-  gastrointestinal_abdomen: {
-    title: 'Saúde Digestiva e Prevenção do Refluxo Gastroesofágico',
-    url: 'https://drauziovarella.uol.com.br/gastroenterologia/refluxo-saiba-o-que-e-os-sintomas-e-as-formas-de-tratamento/',
-  },
-  coluna_dorsal: {
-    title: 'Postura Laboral e Exercícios Preventivos para a Coluna',
-    url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
-  },
-  coluna_dor_dorsal: {
-    title: 'Postura Laboral e Exercícios Preventivos para a Coluna',
-    url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
-  },
-  coluna_dor_lombar: {
-    title: 'Cuidados Posturais e Descompressão Lombar',
-    url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
-  },
-  membros_superiores: {
-    title: 'Prevenção de Tendinites e Sobrecarga em Braços e Ombros',
-    url: 'https://drauziovarella.uol.com.br/podcasts/tendinite/',
-  },
-  membros_superiores_d: {
-    title: 'Prevenção de Tendinites e Sobrecarga em Braços e Ombros',
-    url: 'https://drauziovarella.uol.com.br/podcasts/tendinite/',
-  },
-  membros_superiores_e: {
-    title: 'Prevenção de Tendinites e Sobrecarga em Braços e Ombros',
-    url: 'https://drauziovarella.uol.com.br/podcasts/tendinite/',
-  },
-  membros_inferiores: {
-    title: 'Prevenção de Lesões Articulares e Entorses',
-    url: 'https://sbot.org.br/entorse-de-tornozelo/',
-  },
-  membros_inferiores_d: {
-    title: 'Prevenção de Lesões Articulares e Entorses',
-    url: 'https://sbot.org.br/entorse-de-tornozelo/',
-  },
-  membros_inferiores_e: {
-    title: 'Prevenção de Lesões Articulares e Entorses',
-    url: 'https://sbot.org.br/entorse-de-tornozelo/',
-  },
-  muscular_geral_sistemico: {
-    title: 'Recuperação Muscular e Prevenção de Fadiga Corporal',
-    url: 'https://drauziovarella.uol.com.br/ortopedia/dor-muscular/',
-  },
-  endocrino_metabolico: {
-    title: 'Saúde Metabólica, Energia e Equilíbrio Hormonal',
-    url: 'https://www.endocrino.org.br/diabetes/',
-  },
-  neurologico: {
-    title: 'Prevenção e Cuidados com o Sistema Neurológico',
-    url: 'https://drauziovarella.uol.com.br/neurologia/neuropatia-periferica-doenca-dos-nervos-exige-atencao-e-controle-das-causas/',
-  },
-  geniturinario_pelvico: {
-    title: 'Saúde do Trato Urinário e Prevenção de Infecções',
-    url: 'https://portaldaurologia.org.br/doencas/infeccao-urinaria/',
-  },
-  dermatologico: {
-    title: 'Cuidados com a Barreira Cutânea e Alívio de Irritações',
-    url: 'https://www.sbd.org.br/doencas/urticaria/',
-  },
-  geral_fisico: {
-    title: 'Guia de Prevenção e Hábitos para a Saúde Integral',
-    url: 'https://www.paho.org/pt/topicos/curso-vida-saudavel',
-  },
-  geral: {
-    title: 'Guia de Prevenção e Autocuidado Consciente',
-    url: 'https://www.paho.org/pt/topicos/curso-vida-saudavel',
-  },
-  default: {
-    title: 'Guia de Prevenção e Autocuidado Consciente',
-    url: 'https://www.paho.org/pt/topicos/curso-vida-saudavel',
-  },
-};
-
 @Injectable()
 export class TriageHistoryService {
   constructor(
@@ -200,10 +54,14 @@ export class TriageHistoryService {
 
   async getHistory(
     userId: string,
+    profileId: string,
     query?: GetTriageHistoryQueryDto,
   ): Promise<TriageHistoryResponseDto> {
     if (!userId) {
       throw new BadRequestException('ID do usuário ausente para consulta de histórico.');
+    }
+    if (!profileId) {
+      throw new BadRequestException('ID do perfil ausente para consulta de histórico.');
     }
 
     const windowDays = Math.min(Math.max(query?.days || 14, 1), 30);
@@ -216,7 +74,7 @@ export class TriageHistoryService {
         .from(symptomLogs)
         .where(
           and(
-            eq(symptomLogs.userId, userId),
+            eq(symptomLogs.profileId, profileId),
             gte(symptomLogs.recordedAt, cutoffDate),
           ),
         )
@@ -255,13 +113,25 @@ export class TriageHistoryService {
         }
       }
 
+      let vertical: TriageLogItemDto['vertical'] = null;
+      if (parsedAnswers && typeof parsedAnswers === 'object' && !Array.isArray(parsedAnswers)) {
+        const { _entryVertical: entryVertical, ...visibleAnswers } = parsedAnswers;
+        if (entryVertical === 'physical' || entryVertical === 'emotional') {
+          vertical = entryVertical;
+        }
+        parsedAnswers = visibleAnswers;
+      }
+      // Legacy rows: organic primacy was only applied to emotional entries.
+      if (!vertical && row.organicPrimacyApplied) {
+        vertical = 'emotional';
+      }
+
       return {
         id: row.id,
         intensity: row.intensity,
         anatomicalSystem: row.anatomicalSystem,
         emotionalDimension: row.emotionalDimension,
-        disposition: row.disposition,
-        organicPrimacyApplied: row.organicPrimacyApplied,
+        vertical,
         narrative: decryptedNarrative,
         stepAnswers: parsedAnswers,
         recordedAt: row.recordedAt.toISOString(),
@@ -331,22 +201,26 @@ export class TriageHistoryService {
     }
 
     const emotionalSummary = this.buildEmotionalSummary(rows);
-    const criticalRecurrences = this.evaluateCriticalRecurrences(rows);
+    const journalPatterns = this.findJournalPatterns(rows);
 
     return {
       logs,
       physicalSummary,
       emotionalSummary,
-      criticalRecurrences,
+      journalPatterns,
     };
   }
 
   async deleteHistoryItem(
     userId: string,
+    profileId: string,
     id: string,
   ): Promise<{ success: boolean; id: string }> {
     if (!userId) {
       throw new BadRequestException('ID do usuário ausente para exclusão de registro.');
+    }
+    if (!profileId) {
+      throw new BadRequestException('ID do perfil ausente para exclusão de registro.');
     }
     if (!id) {
       throw new BadRequestException('ID do registro ausente.');
@@ -360,7 +234,7 @@ export class TriageHistoryService {
         .where(
           and(
             eq(symptomLogs.id, id),
-            eq(symptomLogs.userId, userId),
+            eq(symptomLogs.profileId, profileId),
           ),
         );
 
@@ -373,7 +247,7 @@ export class TriageHistoryService {
         .where(
           and(
             eq(symptomLogs.id, id),
-            eq(symptomLogs.userId, userId),
+            eq(symptomLogs.profileId, profileId),
           ),
         );
 
@@ -412,83 +286,35 @@ export class TriageHistoryService {
     return result;
   }
 
-  private evaluateCriticalRecurrences(
+  /**
+   * "Padrões nos seus registros": counts, per category, the entries the person logged
+   * with high intensity (their own rating) in the last 10 days. Descriptive only.
+   */
+  private findJournalPatterns(
     rows: Array<typeof symptomLogs.$inferSelect>,
-  ): CriticalRecurrenceDto[] {
-    const recurrences: CriticalRecurrenceDto[] = [];
-    const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
-    const recentRows = rows.filter((r) => r.recordedAt >= tenDaysAgo);
+  ): JournalPatternDto[] {
+    const windowStart = new Date(Date.now() - JOURNAL_PATTERN_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+    const counts = new Map<string, JournalPatternDto>();
 
-    const emotionalHighCounts: Record<string, { count: number; maxIntensity: number }> = {};
-    for (const row of recentRows) {
-      if (row.emotionalDimension && row.intensity >= 4) {
-        const key = row.emotionalDimension;
-        if (!emotionalHighCounts[key]) {
-          emotionalHighCounts[key] = { count: 0, maxIntensity: row.intensity };
-        }
-        emotionalHighCounts[key].count += 1;
-        emotionalHighCounts[key].maxIntensity = Math.max(
-          emotionalHighCounts[key].maxIntensity,
-          row.intensity,
-        );
-      }
+    const count = (category: string | null, vertical: JournalPatternDto['vertical']) => {
+      if (!category) return;
+      const key = `${vertical}:${category}`;
+      const pattern = counts.get(key) ?? { category, vertical, count: 0, windowDays: JOURNAL_PATTERN_WINDOW_DAYS };
+      pattern.count += 1;
+      counts.set(key, pattern);
+    };
+
+    for (const row of rows) {
+      if (row.recordedAt < windowStart || row.intensity < HIGH_REPORTED_INTENSITY) continue;
+      count(row.emotionalDimension, 'emotional');
+      count(row.anatomicalSystem, 'physical');
     }
 
-    for (const [key, data] of Object.entries(emotionalHighCounts)) {
-      if (data.count >= 2) {
-        const label = CATEGORY_LABELS[key] || key;
-        const article = RECOMMENDED_ARTICLES[key] || RECOMMENDED_ARTICLES.default;
-        recurrences.push({
-          id: `recurrence-emotional-${key}`,
-          vertical: 'emotional',
-          category: key,
-          categoryLabel: label,
-          title: `Foco de Atenção: ${label}`,
-          description: `Identificamos que a sua dimensão ${label} esteve em nível ${data.maxIntensity} em ${data.count} registros nos últimos 10 dias. Considerou ler nosso artigo preventivo?`,
-          intensity: data.maxIntensity,
-          frequencyCount: data.count,
-          windowDays: 10,
-          recommendedArticleTitle: article.title,
-          recommendedArticleUrl: article.url,
-        });
-      }
-    }
-
-    const physicalHighCounts: Record<string, { count: number; maxIntensity: number }> = {};
-    for (const row of recentRows) {
-      if (row.anatomicalSystem && row.intensity >= 4) {
-        const key = row.anatomicalSystem;
-        if (!physicalHighCounts[key]) {
-          physicalHighCounts[key] = { count: 0, maxIntensity: row.intensity };
-        }
-        physicalHighCounts[key].count += 1;
-        physicalHighCounts[key].maxIntensity = Math.max(
-          physicalHighCounts[key].maxIntensity,
-          row.intensity,
-        );
-      }
-    }
-
-    for (const [key, data] of Object.entries(physicalHighCounts)) {
-      if (data.count >= 2) {
-        const label = CATEGORY_LABELS[key] || key;
-        const article = RECOMMENDED_ARTICLES[key] || RECOMMENDED_ARTICLES.default;
-        recurrences.push({
-          id: `recurrence-physical-${key}`,
-          vertical: 'physical',
-          category: key,
-          categoryLabel: label,
-          title: `Foco de Atenção: ${label}`,
-          description: `Identificamos que o sistema ${label} esteve com desconforto severo em ${data.count} registros nos últimos 10 dias. Considerou ler nosso artigo preventivo?`,
-          intensity: data.maxIntensity,
-          frequencyCount: data.count,
-          windowDays: 10,
-          recommendedArticleTitle: article.title,
-          recommendedArticleUrl: article.url,
-        });
-      }
-    }
-
-    return recurrences;
+    const patterns = [...counts.values()].filter((p) => p.count >= JOURNAL_PATTERN_MIN_COUNT);
+    // Emotional first, as before, so the app's ordering does not change.
+    return [
+      ...patterns.filter((p) => p.vertical === 'emotional'),
+      ...patterns.filter((p) => p.vertical === 'physical'),
+    ];
   }
 }

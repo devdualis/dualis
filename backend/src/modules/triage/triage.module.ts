@@ -2,6 +2,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { DatabaseModule } from '../../database/database.module';
 import { EncryptionModule } from '../../common/encryption/encryption.module';
 import { AiModule } from '../ai/ai.module';
+import { ProfilesModule } from '../profiles/profiles.module';
 import { ArticlesCatalogService } from './services/articles-catalog.service';
 import { ArticleEmbeddingService } from './services/article-embedding.service';
 import { ArticlesVectorService } from './services/articles-vector.service';
@@ -11,7 +12,7 @@ import { TriageHistoryService } from './services/triage-history.service';
 import { TriageController } from './triage.controller';
 
 @Module({
-  imports: [DatabaseModule, EncryptionModule, forwardRef(() => AiModule)],
+  imports: [DatabaseModule, EncryptionModule, forwardRef(() => AiModule), ProfilesModule],
   controllers: [TriageController],
   providers: [
     ArticlesCatalogService,

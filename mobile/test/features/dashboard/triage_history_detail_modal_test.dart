@@ -3,19 +3,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:dualis_mobile/features/dashboard/domain/models/triage_history_models.dart';
 import 'package:dualis_mobile/features/dashboard/presentation/widgets/retrospective_list_view.dart';
 import 'package:dualis_mobile/features/dashboard/presentation/widgets/triage_history_detail_modal.dart';
+import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 void main() {
   group('TriageHistoryDetailModal & History Item Click Widget Tests', () {
-    testWidgets('1. Tapping a historical record opens modal with symptoms, time, level, disposition and narrative', (tester) async {
+    testWidgets('1. Tapping a historical record opens modal with symptoms, time, intensity and narrative', (tester) async {
       final entries = [
         TriageHistoryEntry(
           id: 'log-modal-1',
           intensity: 4,
           anatomicalSystem: 'coluna_dorsal',
           emotionalDimension: null,
-          disposition: 'pronto_atendimento',
           narrative: 'Dor aguda na região lombar após esforço físico intenso no treino.',
-          organicPrimacyApplied: true,
           stepAnswers: {
             '1': 'comecou_hoje',
             '3': 'sim_carregou_peso',
@@ -27,6 +26,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('pt'),
           home: Scaffold(
             body: SingleChildScrollView(
               child: RetrospectiveListView(
@@ -48,23 +50,20 @@ void main() {
 
       // Verify modal is open
       expect(find.byKey(const Key('triage_history_detail_modal')), findsOneWidget);
-      expect(find.text('Detalhes da Triagem'), findsOneWidget);
+      expect(find.text('Detalhes do registro'), findsOneWidget);
 
       // Verify Category & Vertical
       expect(find.text('AVALIAÇÃO FÍSICA'), findsOneWidget);
       expect(find.byKey(const Key('modal_category_badge')), findsOneWidget);
-      expect(find.text('COLUNA DORSAL'), findsWidgets);
+      expect(find.text('COSTAS'), findsWidgets);
 
       // Verify Level (Nível 4)
       expect(find.byKey(const Key('modal_intensity_badge')), findsOneWidget);
-      expect(find.text('Nível 4 - Severo / Urgente'), findsOneWidget);
-
-      // Verify Disposition (Pronto Atendimento)
-      expect(find.byKey(const Key('modal_disposition_badge')), findsOneWidget);
-      expect(find.text('Pronto Atendimento'), findsWidgets);
-
-      // Verify Organic Primacy Banner
-      expect(find.textContaining('Primazia Orgânica'), findsOneWidget);
+      expect(find.text('Intensidade informada: 4/5'), findsWidgets);
+      // No care recommendation or clinical reasoning in the journal entry.
+      expect(find.byKey(const Key('modal_disposition_badge')), findsNothing);
+      expect(find.text('Pronto Atendimento'), findsNothing);
+      expect(find.textContaining('Primazia Orgânica'), findsNothing);
 
       // Verify Symptoms & Step answers
       expect(find.text('Começou hoje'), findsOneWidget);
@@ -90,7 +89,6 @@ void main() {
           intensity: 2,
           anatomicalSystem: null,
           emotionalDimension: 'estresse_burnout',
-          disposition: 'auto_cuidado',
           narrative: 'Sobrecarga de prazos de entrega esta semana.',
           stepAnswers: {
             'type': 'daily_checkin',
@@ -103,6 +101,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('pt'),
           home: Scaffold(
             body: SingleChildScrollView(
               child: RetrospectiveListView(
@@ -122,9 +123,8 @@ void main() {
 
       expect(find.byKey(const Key('triage_history_detail_modal')), findsOneWidget);
       expect(find.text('AUTOAVALIAÇÃO EMOCIONAL'), findsOneWidget);
-      expect(find.text('ESTRESSE / BURNOUT'), findsWidgets);
-      expect(find.text('Nível 2 - Leve'), findsOneWidget);
-      expect(find.text('Autocuidado'), findsWidgets);
+      expect(find.text('ESTRESSADO(A) OU ESGOTADO(A)'), findsWidgets);
+      expect(find.text('Intensidade informada: 2/5'), findsWidgets);
 
       // Verify Daily Check-In axes
       expect(find.text('Eixo Psico-Emocional'), findsOneWidget);
@@ -150,7 +150,6 @@ void main() {
         id: 'log-no-narrative',
         intensity: 3,
         anatomicalSystem: 'respiratorio',
-        disposition: 'consulta_rotina',
         narrative: null,
         stepAnswers: null,
         recordedAt: DateTime.parse('2026-09-17T11:00:00.000Z'),
@@ -158,6 +157,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('pt'),
           home: Scaffold(
             body: Builder(
               builder: (context) => ElevatedButton(
@@ -174,12 +176,10 @@ void main() {
 
       expect(find.byKey(const Key('triage_history_detail_modal')), findsOneWidget);
       expect(find.byKey(const Key('modal_category_badge')), findsOneWidget);
-      expect(find.text('RESPIRATÓRIO'), findsWidgets);
-      expect(find.text('Nível 3 - Moderado'), findsOneWidget);
-      expect(find.byKey(const Key('modal_disposition_badge')), findsOneWidget);
-      expect(find.text('Consulta de Rotina'), findsOneWidget);
+      expect(find.text('RESPIRAÇÃO'), findsWidgets);
+      expect(find.text('Intensidade informada: 3/5'), findsOneWidget);
       expect(
-        find.text('Nenhuma descrição adicional relatada pelo paciente nesta triagem.'),
+        find.text('Você não adicionou uma descrição neste registro.'),
         findsOneWidget,
       );
     });
@@ -189,7 +189,6 @@ void main() {
         id: 'log-numeric-step3',
         intensity: 2,
         anatomicalSystem: 'neurologico',
-        disposition: 'auto_cuidado',
         narrative: null,
         stepAnswers: {
           '0': 'neurologico',
@@ -202,6 +201,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('pt'),
           home: Scaffold(
             body: Builder(
               builder: (context) => ElevatedButton(
@@ -230,7 +232,6 @@ void main() {
         id: 'log-numeric-narrative',
         intensity: 5,
         anatomicalSystem: 'cabeca_pescoco',
-        disposition: 'emergencia_imediata',
         narrative: '5', // Leaked intensity/number instead of actual description
         stepAnswers: {
           '0': 'cabeca_pescoco',
@@ -243,6 +244,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('pt'),
           home: Scaffold(
             body: Builder(
               builder: (context) => ElevatedButton(
@@ -260,9 +264,42 @@ void main() {
       // The narrative should NOT display "5"
       expect(find.text('5'), findsNothing);
       expect(
-        find.text('Nenhuma descrição adicional relatada pelo paciente nesta triagem.'),
+        find.text('Você não adicionou uma descrição neste registro.'),
         findsOneWidget,
       );
+    });
+
+    testWidgets('6. Emotional entry with a physical cross-tag is shown as emotional (vertical field)', (tester) async {
+      final entry = TriageHistoryEntry(
+        id: 'log-cross-tag',
+        intensity: 3,
+        anatomicalSystem: 'cabeca_pescoco',
+        emotionalDimension: 'ansiosa_agitacao',
+        vertical: 'emotional',
+        recordedAt: DateTime.parse('2026-09-25T12:00:00.000Z'),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('pt'),
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () => TriageHistoryDetailModal.show(context, entry),
+                child: const Text('Open Modal'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Modal'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('AUTOAVALIAÇÃO EMOCIONAL'), findsOneWidget);
+      expect(find.text('AVALIAÇÃO FÍSICA'), findsNothing);
     });
   });
 }

@@ -123,4 +123,73 @@ export class EmailService {
   getLastSentCode(email: string): string | undefined {
     return this.sentCodesMemory.get(email.toLowerCase().trim())?.code;
   }
+
+  async sendPasswordResetEmail(to: string, code: string, name?: string): Promise<void> {
+    const normalizedEmail = to.toLowerCase().trim();
+    this.sentCodesMemory.set(normalizedEmail, { code, sentAt: new Date() });
+
+    const recipientName = name ? name.split(' ')[0] : 'Paciente';
+    const mailFrom =
+      this.configService?.get<string>('MAIL_FROM') ||
+      process.env.MAIL_FROM ||
+      'DualisCheckUp <dev@wgi.one>';
+
+    this.logger.log(
+      `[EmailService] Preparando envio de redefinição de senha para ${normalizedEmail}: [${code}] (Destinatário: ${recipientName})`,
+    );
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="pt-BR">
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #F8FAFC; color: #1E293B; margin: 0; padding: 20px; }
+          .container { max-width: 520px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #E2E8F0; }
+          .header { text-align: center; margin-bottom: 24px; }
+          .title { font-size: 24px; font-weight: bold; color: #00796B; margin: 0; }
+          .subtitle { font-size: 14px; color: #64748B; margin-top: 4px; }
+          .content { font-size: 16px; line-height: 1.6; color: #334155; margin-bottom: 24px; }
+          .code-box { background-color: #F0FDFA; border: 2px dashed #00796B; border-radius: 12px; padding: 18px; text-align: center; margin: 24px 0; }
+          .code { font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #00796B; font-family: monospace; }
+          .footer { font-size: 12px; color: #94A3B8; text-align: center; border-top: 1px solid #E2E8F0; padding-top: 16px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1 class="title">DualisCheckUp</h1>
+            <p class="subtitle">Triagem Preventiva e Histórico Clínico Unificado</p>
+          </div>
+          <div class="content">
+            <p>Olá, <strong>${recipientName}</strong>,</p>
+            <p>Recebemos uma solicitação para redefinir a senha da sua conta no <strong>DualisCheckUp</strong>. Utilize o código abaixo para criar uma nova senha:</p>
+            <div class="code-box">
+              <span class="code">${code}</span>
+            </div>
+            <p>Este código expira em <strong>15 minutos</strong>. Se você não solicitou a redefinição de senha, ignore esta mensagem com segurança; sua senha atual continuará válida.</p>
+          </div>
+          <div class="footer">
+            <p>&copy; 2026 DualisCheckUp. Em conformidade com a LGPD (Lei nº 13.709/2018).</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    if (this.transporter && process.env.NODE_ENV !== 'test') {
+      try {
+        await this.transporter.sendMail({
+          from: mailFrom,
+          to: normalizedEmail,
+          subject: `${code} é seu código de redefinição de senha DualisCheckUp`,
+          text: `Olá ${recipientName}, seu código de redefinição de senha do DualisCheckUp é: ${code}. Ele expira em 15 minutos. Se você não solicitou, ignore esta mensagem.`,
+          html: htmlContent,
+        });
+        this.logger.log(`[EmailService] E-mail de redefinição de senha enviado com sucesso para ${normalizedEmail}`);
+      } catch (err: any) {
+        this.logger.error(`[EmailService] Falha ao enviar via SMTP: ${err.message}`, err.stack);
+      }
+    }
+  }
 }

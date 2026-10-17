@@ -109,7 +109,7 @@ class TelephonyFallbackDialog extends StatelessWidget {
         const SizedBox(height: 6),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Fechar'),
+          child: Text(loc.safetyClose),
         ),
       ],
     );

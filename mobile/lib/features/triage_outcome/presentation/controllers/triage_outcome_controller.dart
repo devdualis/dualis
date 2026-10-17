@@ -59,6 +59,7 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
   }
 
   void _syncWithTriggerCheckIn(TriageOutcome outcome) {
+    if (outcome.intensityScore <= 0) return;
     try {
       ref.read(triggerCheckInProvider.notifier).markCompletedWithOutcome(outcome);
     } catch (_) {}
@@ -102,10 +103,11 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
 
       todayLogs.sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
       final triageLogs = todayLogs
-          .where((log) => log.stepAnswers?['type'] != 'daily_checkin')
+          .where((log) => !AxisIntensityResolver.isDailyCheckIn(log))
           .toList();
-      final targetLog = triageLogs.isNotEmpty ? triageLogs.first : todayLogs.first;
+      if (triageLogs.isEmpty) return;
 
+      final targetLog = triageLogs.first;
       final outcome = _buildOutcomeFromHistoryEntry(targetLog, todayLogs);
       if (outcome != null) {
         state = state.copyWith(outcome: outcome);
@@ -121,7 +123,6 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
   ) {
     final isPhysical = log.anatomicalSystem != null && log.anatomicalSystem != 'geral_emocional';
     final isDual = log.anatomicalSystem != null && log.emotionalDimension != null;
-    final isOrganicPrimacy = log.organicPrimacyApplied || isDual;
 
     // Vertical follows the record's own (primary) axis, not its cross-vertical tag.
     final primaryAxis = AxisIntensityResolver.primaryAxisOf(log) ??
@@ -148,14 +149,10 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
       id: log.id,
       vertical: primaryAxis.outcomeVertical,
       intensityScore: log.intensity,
-      careDisposition: CareDisposition.fromCode(log.disposition),
       primaryCategory: primaryCode,
       categoryLabel: _mapCategoryLabel(primaryCode),
       somaticMapping: _mapSomaticDescription(primaryCode),
-      organicPrimacyApplied: isOrganicPrimacy,
-      organicPrimacyNotice: isOrganicPrimacy
-          ? 'Atenção Clínica (Primazia Orgânica): Sintomas físicos concorrentes exigem que causas orgânicas sejam avaliadas presencialmente por um médico antes de atribuí-los unicamente ao estresse psicológico.'
-          : null,
+      loggedBothAxesToday: isDual,
       recommendedArticles: articles,
       recordedAt: log.recordedAt.toLocal(),
       secondaryCategoryLabel:
@@ -178,7 +175,6 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
   Future<void> setOutcomeFromCheckIn({
     required String id,
     required int intensity,
-    required String disposition,
     required String emotionalStatus,
     required String physicalStatus,
     String? naturalLanguageText,
@@ -225,14 +221,10 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
       id: id,
       vertical: isPhysical ? 'physical' : 'emotional',
       intensityScore: intensity,
-      careDisposition: CareDisposition.fromCode(disposition),
       primaryCategory: primaryCode,
       categoryLabel: mapCategoryLabel(primaryCode),
       somaticMapping: mapSomaticDescription(primaryCode),
-      organicPrimacyApplied: isDual,
-      organicPrimacyNotice: isDual
-          ? 'Atenção Clínica (Primazia Orgânica): Sintomas físicos concorrentes exigem que causas orgânicas sejam avaliadas presencialmente por um médico antes de atribuí-los unicamente ao estresse psicológico.'
-          : null,
+      loggedBothAxesToday: isDual,
       recommendedArticles: resolvedArticles,
       recordedAt: recordedAt ?? DateTime.now(),
       secondaryCategoryLabel: secondaryCode != null ? mapCategoryLabel(secondaryCode) : null,
@@ -268,7 +260,7 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
       await _persistOutcome(outcome);
       _syncWithTriggerCheckIn(outcome);
     } catch (e) {
-      String cleanError = 'Não foi possível carregar o resultado da triagem.';
+      String cleanError = 'Não foi possível carregar seu registro.';
       if (e is DioException) {
         if (e.type == DioExceptionType.connectionError ||
             e.type == DioExceptionType.connectionTimeout ||
@@ -301,120 +293,75 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
   }
 }
 
+// Plain-language names (plan R3), kept in sync with PHYSICAL_LABELS /
+// EMOTIONAL_LABELS in backend triage-outcome.service.ts.
 String mapCategoryLabel(String code) {
   switch (code) {
     case 'normal':
     case 'bem_normal':
-      return 'Bem / Normal';
+      return 'Bem';
     case 'cabeca_pescoco':
     case 'cabeca':
-      return 'Cabeça e Pescoço';
+      return 'Cabeça e pescoço';
     case 'cardiovascular_torax':
     case 'cardiovascular':
-      return 'Cardiovascular e Tórax';
+      return 'Peito';
     case 'respiratorio':
-      return 'Sistema Respiratório';
+      return 'Respiração';
     case 'gastrointestinal_abdomen':
     case 'abdomen':
-      return 'Gastrointestinal e Abdômen';
+      return 'Barriga e estômago';
     case 'coluna_dor_lombar':
     case 'coluna':
-      return 'Coluna e Dor Lombar';
     case 'coluna_dor_dorsal':
     case 'coluna_dorsal':
-      return 'Coluna e Dor Dorsal';
+      return 'Costas';
     case 'membros_superiores':
-      return 'Membros Superiores e Articulações';
+      return 'Braços e mãos';
     case 'membros_inferiores':
-      return 'Membros Inferiores';
+      return 'Pernas e pés';
+    case 'neurologico':
+      return 'Tontura e equilíbrio';
+    case 'geniturinario_pelvico':
+      return 'Baixo ventre e urina';
     case 'dermatologico':
-      return 'Dermatológico / Pele';
+      return 'Pele';
     case 'muscular_geral_sistemico':
-      return 'Sistema Muscular / Geral Sistêmico';
+      return 'Corpo todo';
+    case 'endocrino_metabolico':
+      return 'Energia e apetite';
     case 'geral_fisico':
-      return 'Avaliação Física Geral';
+      return 'Registro físico';
     case 'ansiosa_agitacao':
     case 'ansiedade':
-      return 'Dimensão Ansiosa / Agitação';
+      return 'Ansiedade e agitação';
     case 'depressiva_desanimo':
     case 'tristeza':
-      return 'Dimensão Depressiva / Desânimo';
+      return 'Pra baixo';
     case 'estresse_burnout':
     case 'estresse':
-      return 'Estresse e Burnout';
+      return 'Estressado(a) ou esgotado(a)';
     case 'cognitiva_foco':
-      return 'Cognição e Foco';
+      return 'Cansaço mental e foco';
     case 'sono_vigilia':
     case 'sono':
-      return 'Sono e Ritmo Circadiano';
+      return 'Sono ruim';
     case 'somatica':
     case 'somatico':
     case 'somatizacao_tensao':
-      return 'Dimensão Somática (Psicossomática)';
+      return 'Emoções sentidas no corpo';
     case 'autoestima':
-      return 'Autoestima e Autoimagem';
+      return 'Autoestima';
     case 'geral_emocional':
-      return 'Avaliação Psico-Emocional Geral';
+      return 'Registro emocional';
     default:
-      return 'Avaliação de Saúde';
+      return 'Seu registro';
   }
 }
 
-String mapSomaticDescription(String code) {
-  switch (code) {
-    case 'dermatologico':
-      return 'Prurido cutâneo / Desconforto na pele';
-    case 'membros_superiores':
-      return 'Desconforto musculoesquelético nos braços e ombros';
-    case 'membros_inferiores':
-      return 'Desconforto musculoesquelético nos membros inferiores';
-    case 'cabeca_pescoco':
-    case 'cabeca':
-      return 'Cefaleia / Desconforto crânio-cervical';
-    case 'cardiovascular_torax':
-    case 'cardiovascular':
-      return 'Sensação de aperto torácico ou palpitação funcional';
-    case 'respiratorio':
-      return 'Desconforto respiratório ou cansaço aos esforços';
-    case 'gastrointestinal_abdomen':
-    case 'abdomen':
-      return 'Desconforto abdominal ou queixa digestiva';
-    case 'coluna_dor_lombar':
-    case 'coluna':
-      return 'Desconforto na coluna / Lombalgia tensional';
-    case 'coluna_dor_dorsal':
-    case 'coluna_dorsal':
-      return 'Desconforto musculoesquelético dorsal / Tensão escapular';
-    case 'muscular_geral_sistemico':
-      return 'Dores musculares difusas ou tensão corporal';
-    case 'geral_fisico':
-      return 'Desconforto somático ou queixa física reportada';
-    case 'depressiva_desanimo':
-    case 'tristeza':
-      return 'Desânimo / Fadiga emocional transitória';
-    case 'ansiosa_agitacao':
-    case 'ansiedade':
-      return 'Tensão psicomotora / Ansiedade antecipatória';
-    case 'estresse_burnout':
-    case 'estresse':
-      return 'Exaustão emocional / Sobrecarga de estresse';
-    case 'cognitiva_foco':
-      return 'Dificuldade de concentração ou sobrecarga cognitiva';
-    case 'sono_vigilia':
-    case 'sono':
-      return 'Desregulação do padrão de sono / Fadiga circadiana';
-    case 'somatica':
-    case 'somatico':
-    case 'somatizacao_tensao':
-      return 'Manifestação somatizada de sobrecarga emocional (nó na garganta / aperto torácico)';
-    case 'autoestima':
-      return 'Insegurança emocional / Autocrítica acentuada';
-    case 'geral_emocional':
-      return 'Alteração no bem-estar psico-emocional';
-    default:
-      return 'Sintomatologia reportada no check-in diário';
-  }
-}
+/// Repeats what the person picked; never reinterprets it (audit C-32).
+String mapSomaticDescription(String code) =>
+    'Você registrou: ${mapCategoryLabel(code)}';
 
 final triageOutcomeProvider =
     NotifierProvider<TriageOutcomeNotifier, TriageOutcomeState>(

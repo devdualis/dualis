@@ -82,15 +82,31 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
           child: Column(
             children: [
               const SizedBox(height: 8),
-              // Branded Header with Animated Medical Shield Emblem Logo
-              ScaleTransition(
-                scale: _scaleAnimation,
-                child: const DualisLogo(
-                  key: Key('onboarding_brand_header'),
-                  variant: DualisLogoVariant.horizontal,
-                  width: 180,
-                  withProtectionArea: true,
-                ),
+              // Branded Header with Dualis Logo and Emergency Action
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(width: 48), // visual balance
+                  Expanded(
+                    child: Center(
+                      child: ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: const DualisLogo(
+                          key: Key('onboarding_brand_header'),
+                          variant: DualisLogoVariant.horizontal,
+                          width: 180,
+                          withProtectionArea: true,
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    key: const Key('onboarding_emergency_button'),
+                    icon: const Icon(Icons.emergency_rounded, color: AppColors.emergencyCrimson),
+                    tooltip: 'Recursos de Emergência / SOS',
+                    onPressed: () => context.push(RoutePaths.emergency),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               // Value Proposition Carousel (3 Cards)
@@ -153,7 +169,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
+              // Intended-use statement (wellness app, not a medical device)
+              Text(
+                l10n.onboardingIntendedUseNote,
+                key: const Key('onboarding_intended_use_note'),
+                textAlign: TextAlign.center,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  height: 1.4,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 16),
             ],
           ),
         ),
