@@ -502,9 +502,19 @@ void main() {
       // (mapCategoryLabel('estresse_burnout')) wins over the stale
       // outcome.secondaryCategoryLabel persisted in _stalePhysicalOutcome().
       expect(find.text('Estressado(a) ou esgotado(a)'), findsOneWidget);
-      expect(find.text('Moderada (3)'), findsOneWidget);
-      expect(find.text('Leve (1-2)'), findsOneWidget);
+      expect(find.text('Moderada (3)'), findsNothing);
+      expect(find.text('Leve (1-2)'), findsNothing);
       expect(find.text('Intensa (4-5)'), findsNothing);
+      for (final entry in {
+        '1. Eixo Avaliação Física': AppColors.intensityMildBg,
+        '2. Eixo Avaliação Psico-emocional': AppColors.intensityModerateBg,
+      }.entries) {
+        final card = tester.widget<Container>(find.ancestor(
+          of: find.text(entry.key),
+          matching: find.byType(Container),
+        ).first);
+        expect((card.decoration as BoxDecoration).color, entry.value);
+      }
     });
   });
 

@@ -361,9 +361,11 @@ class TodayTriageResultTab extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: accentColor.withValues(alpha: 0.08),
+        color: isDark ? AppColors.surfaceDark : tier.cardBgColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accentColor.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: isDark ? tier.color.withValues(alpha: 0.5) : tier.borderColor,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -385,6 +387,7 @@ class TodayTriageResultTab extends ConsumerWidget {
                   children: [
                     Text(
                       axisLabel,
+                      semanticsLabel: '$axisLabel, ${tier.label}',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -404,24 +407,6 @@ class TodayTriageResultTab extends ConsumerWidget {
                       ),
                     ),
                   ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: tier.color,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  tier.label,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: tier.textColor,
-                  ),
                 ),
               ),
             ],

@@ -284,27 +284,13 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     title,
+                    semanticsLabel: '$title, ${tier.localizedLabel(context)}',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: isDark
                           ? AppColors.textPrimaryDark
                           : AppColors.textPrimaryLight,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: tier.color,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    tier.label,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: tier.textColor,
                     ),
                   ),
                 ),

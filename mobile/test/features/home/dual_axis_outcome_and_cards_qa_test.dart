@@ -85,6 +85,7 @@ void main() {
       // Check titles
       expect(find.text('Psicoemocional'), findsOneWidget);
       expect(find.text('Físico'), findsOneWidget);
+      expect(find.text('Moderada (3)'), findsNothing);
 
       // Chip removed: the completed card's background/border color is now the
       // only tier signal. Both axes are Moderada (3) here.
@@ -173,8 +174,15 @@ void main() {
       expect(find.text('2. Eixo Avaliação Psico-emocional'), findsOneWidget);
       expect(find.text('Ansiedade e agitação'), findsOneWidget);
 
-      // 2. Both status badges must appear with unified ClinicalIntensityTier
-      expect(find.text('Moderada (3)'), findsNWidgets(2));
+      // 2. Both cards convey their level through color, without chips.
+      expect(find.text('Moderada (3)'), findsNothing);
+      for (final label in ['1. Eixo Avaliação Física', '2. Eixo Avaliação Psico-emocional']) {
+        final card = tester.widget<Container>(find.ancestor(
+          of: find.text(label),
+          matching: find.byType(Container),
+        ).first);
+        expect((card.decoration as BoxDecoration).color, AppColors.intensityModerateBg);
+      }
 
       // 3. Articles section must contain both Physical and Emotional articles
       expect(find.text('Leituras sobre bem-estar'), findsOneWidget);
@@ -225,11 +233,19 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Physical card (level 2) must display Leve (1-2) chip
-      expect(find.text('Leve (1-2)'), findsOneWidget);
-
-      // Associated component card (level 4) must display Intensa (4-5) chip
-      expect(find.text('Intensa (4-5)'), findsOneWidget);
+      // Each axis uses its own level color, without visible level chips.
+      expect(find.text('Leve (1-2)'), findsNothing);
+      expect(find.text('Intensa (4-5)'), findsNothing);
+      for (final entry in {
+        '1. Eixo Avaliação Física': AppColors.intensityMildBg,
+        '2. Eixo Avaliação Psico-emocional': AppColors.intensityIntenseBg,
+      }.entries) {
+        final card = tester.widget<Container>(find.ancestor(
+          of: find.text(entry.key),
+          matching: find.byType(Container),
+        ).first);
+        expect((card.decoration as BoxDecoration).color, entry.value);
+      }
 
       // Verify categories
       expect(find.text('Tontura e equilíbrio'), findsOneWidget);
