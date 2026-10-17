@@ -99,6 +99,7 @@ None yet.
 | 2 | Fix Home check-in card showing stale/AI-derived description; only show text typed in that axis's triage (b5c32a0) | 2026-09-25 | b5c32a0 | — |
 | 3 | Fix 15 flutter analyze issues failing mobile CI | 2026-09-26 | dc9ab03 | — |
 | 4 | Fix time-of-day flakiness in trigger_checkin_symptom_mapping_test test 8 (anchor clock to midday; failed on UTC CI 00:00–03:00) | 2026-09-26 | b74f69f | — |
+| 261017-l63 | Corregir layout de chips de dimensiones emocionales (wrap compacto) y overflow del badge Intensidade/Nível en registros recientes | 2026-10-17 | e7fc238 | [261017-l63-corregir-layout-de-chips-de-dimensiones-](./quick/261017-l63-corregir-layout-de-chips-de-dimensiones-/) |
 | 261016-ozk | Triage wizard step-0 icon grid + debounced free-text AI classification + l10n | 2026-10-16 | 06ada1f | [261016-ozk-triage-wizard-step-0-icon-grid-free-text](./quick/261016-ozk-triage-wizard-step-0-icon-grid-free-text/) |
 | 261017-hl7 | Stop AiInsightCard on Meu Dia echoing the axis card's own category label when the AI returned nothing (no narrative submitted) | 2026-10-17 | 7621b45 | [261017-hl7-fix-ai-insight-card-duplicate-text](./quick/261017-hl7-fix-ai-insight-card-duplicate-text/) |
 
