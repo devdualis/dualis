@@ -5,10 +5,10 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-10-17T18:59:54.099Z"
+last_updated: "2026-10-17T22:36:03.938Z"
 last_activity: 2026-10-17
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: 6042a3953157e26d449f1c0ee3885b0891f0a0ca
+state_head: defcd2d2c64be576d87c7cbbca61a2d3477aed72
 progress:
   total_phases: 15
   completed_phases: 10
@@ -106,6 +106,7 @@ None yet.
 | 261017-m4u | Remove level chips from Home and Meu Dia; use shared intensity colors; 129 tests and simulator verified | 2026-10-17 | 642626b | [261017-m4u-remove-intensity-chips-from-home-and-meu](./quick/261017-m4u-remove-intensity-chips-from-home-and-meu/) |
 | 261017-m4j | Move emergency help into the bottom nav as a red item; keep overlay on screens without that bar | 2026-10-17 | uncommitted | [261017-m4j-mover-boton-de-emergencia-al-menu-inferi](./quick/261017-m4j-mover-boton-de-emergencia-al-menu-inferi/) |
 | 261017-m6w | Remove redundant organization card from both result views; 129 tests and simulator verified | 2026-10-17 | 6042a39 | [261017-m6w-remove-redundant-ai-organization-card-fr](./quick/261017-m6w-remove-redundant-ai-organization-card-fr/) |
+| 13 | Remover SOS duplicado sob o botão flutuante de ajuda urgente | 2026-10-17 | defcd2d | — |
 
 ## Deferred Items
 
