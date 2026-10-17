@@ -5,8 +5,9 @@ import '../../core/constants/app_colors.dart';
 import '../../core/router/route_paths.dart';
 import '../../l10n/app_localizations.dart';
 
-/// Slim "Ajuda urgente" bar that opens the help resources screen.
-/// Does not depend on any user data.
+/// Small round "Ajuda urgente" button that opens the help resources screen.
+/// Sits top-right, near the settings icon, so it is never in the path of
+/// routine taps (bottom nav / check-in actions). Does not depend on any user data.
 class UrgentHelpButton extends StatelessWidget {
   final VoidCallback onPressed;
 
@@ -21,26 +22,16 @@ class UrgentHelpButton extends StatelessWidget {
       excludeSemantics: true,
       child: Material(
         color: AppColors.emergencySurfaceRed,
+        shape: const CircleBorder(),
+        elevation: 3,
         child: InkWell(
           key: const Key('urgent_help_button'),
           onTap: onPressed,
-          child: SizedBox(
-            height: 40,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.phone_in_talk_rounded, size: 18, color: AppColors.emergencyCrimson),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: AppColors.emergencyCrimson,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
+          customBorder: const CircleBorder(),
+          child: const SizedBox(
+            width: 44,
+            height: 44,
+            child: Icon(Icons.phone_in_talk_rounded, size: 20, color: AppColors.emergencyCrimson),
           ),
         ),
       ),
@@ -109,25 +100,21 @@ class _UrgentHelpOverlayState extends State<UrgentHelpOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    final media = MediaQuery.of(context);
-    final visible = media.viewInsets.bottom == 0 && !_onHelpScreen;
+    final visible = !_onHelpScreen;
 
-    return Column(
+    return Stack(
       children: [
-        Expanded(
-          // Same widget structure either way so screen state is kept.
-          child: MediaQuery(
-            data: visible ? media.removePadding(removeBottom: true) : media,
-            child: widget.child,
-          ),
-        ),
+        widget.child,
         if (visible)
-          ColoredBox(
-            color: AppColors.emergencySurfaceRed,
+          Positioned(
+            top: 0,
+            right: 0,
             child: SafeArea(
-              top: false,
-              child: UrgentHelpButton(
-                onPressed: () => widget.router.push(RoutePaths.emergency),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8, right: 12),
+                child: UrgentHelpButton(
+                  onPressed: () => widget.router.push(RoutePaths.emergency),
+                ),
               ),
             ),
           ),

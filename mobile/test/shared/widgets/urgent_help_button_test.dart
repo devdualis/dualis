@@ -119,7 +119,6 @@ void main() {
 
       final button = find.byKey(const Key('urgent_help_button'));
       expect(button, findsOneWidget);
-      expect(find.text('Ajuda urgente'), findsOneWidget);
 
       await tester.tap(button);
       await tester.pump();
@@ -140,11 +139,13 @@ void main() {
     });
   }
 
-  testWidgets('button sits below the screen and does not cover it', (tester) async {
+  testWidgets('button floats in the top-right corner, away from the bottom nav', (tester) async {
     await pump(tester, RoutePaths.login);
-    final buttonTop = tester.getTopLeft(find.byKey(const Key('urgent_help_button'))).dy;
-    final screenBottom = tester.getBottomLeft(find.byType(LoginScreen)).dy;
-    expect(screenBottom, lessThanOrEqualTo(buttonTop));
+    final buttonTopLeft = tester.getTopLeft(find.byKey(const Key('urgent_help_button')));
+    final screenSize = tester.view.physicalSize / tester.view.devicePixelRatio;
+    // Near the top (well above the midpoint) and near the right edge.
+    expect(buttonTopLeft.dy, lessThan(screenSize.height / 4));
+    expect(buttonTopLeft.dx, greaterThan(screenSize.width / 2));
   });
 
   testWidgets('real app root (main.dart) shows the button on first launch', (tester) async {
