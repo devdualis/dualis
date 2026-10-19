@@ -5,10 +5,10 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-10-17T22:36:03.938Z"
+last_updated: "2026-10-19T16:47:40.711Z"
 last_activity: 2026-10-17
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: defcd2d2c64be576d87c7cbbca61a2d3477aed72
+state_head: 4c1cacc4379a8e7cb981517ed5f71e0ac5cb626a
 progress:
   total_phases: 15
   completed_phases: 10
@@ -107,6 +107,7 @@ None yet.
 | 261017-m4j | Move emergency help into the bottom nav as a red item; keep overlay on screens without that bar | 2026-10-17 | uncommitted | [261017-m4j-mover-boton-de-emergencia-al-menu-inferi](./quick/261017-m4j-mover-boton-de-emergencia-al-menu-inferi/) |
 | 261017-m6w | Remove redundant organization card from both result views; 129 tests and simulator verified | 2026-10-17 | 6042a39 | [261017-m6w-remove-redundant-ai-organization-card-fr](./quick/261017-m6w-remove-redundant-ai-organization-card-fr/) |
 | 13 | Remover SOS duplicado sob o botão flutuante de ajuda urgente | 2026-10-17 | defcd2d | — |
+| 14 | Adiar rebuild do UrgentHelpOverlay para post-frame (setState durante build no arranque) | 2026-10-19 | 4c1cacc | — |
 
 ## Deferred Items
 
