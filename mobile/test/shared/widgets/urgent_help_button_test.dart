@@ -158,6 +158,38 @@ void main() {
     expect(buttonTopLeft.dx, greaterThan(screenSize.width / 2));
   });
 
+  testWidgets('no setState during build when the app is attached like runApp', (tester) async {
+    // runApp builds the first tree outside a frame (scheduler idle), and the
+    // router notifies while AppVersionGate (here: Builder) is building.
+    final router = GoRouter(
+      initialLocation: RoutePaths.login,
+      routes: [GoRoute(path: RoutePaths.login, builder: (_, __) => const SizedBox())],
+    );
+    final app = MaterialApp.router(
+      routerConfig: router,
+      locale: const Locale('pt', 'BR'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      builder: (context, child) => UrgentHelpOverlay(
+        router: router,
+        child: Builder(builder: (_) => child!),
+      ),
+    );
+    final show = ValueNotifier(false);
+    addTearDown(show.dispose);
+    await tester.pumpWidget(ValueListenableBuilder<bool>(
+      valueListenable: show,
+      builder: (_, on, __) => on ? app : const SizedBox(),
+    ));
+    // Test frames always build inside persistentCallbacks; build directly instead.
+    show.value = true;
+    tester.binding.buildOwner!.buildScope(tester.binding.rootElement!);
+    await tester.pump();
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const Key('urgent_help_button')), findsOneWidget);
+  });
+
   testWidgets('real app root (main.dart) shows the button on first launch', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: DualisApp()));
     await tester.pumpAndSettle();

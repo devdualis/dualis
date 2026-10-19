@@ -86,17 +86,20 @@ class _UrgentHelpOverlayState extends State<UrgentHelpOverlay> {
     return router.state.matchedLocation == RoutePaths.home;
   }
 
-  void _onRouteChanged() {
-    // The router lives below this widget and may notify while it is building.
-    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-      SchedulerBinding.instance.addPostFrameCallback((_) => _sync());
-    } else {
-      _sync();
-    }
-  }
+  bool _syncScheduled = false;
 
-  void _sync() {
-    if (mounted) setState(() {});
+  void _onRouteChanged() {
+    // The router lives below this widget and may notify while the tree is
+    // building, even outside a frame (runApp's first build runs with the
+    // scheduler idle), so always rebuild after the current frame.
+    if (_syncScheduled) return;
+    _syncScheduled = true;
+    SchedulerBinding.instance
+      ..addPostFrameCallback((_) {
+        _syncScheduled = false;
+        if (mounted) setState(() {});
+      })
+      ..ensureVisualUpdate();
   }
 
   @override
