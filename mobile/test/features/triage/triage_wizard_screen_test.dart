@@ -7,6 +7,7 @@ import 'package:dualis_mobile/core/network/connectivity_service.dart';
 import 'package:dualis_mobile/core/notifications/daily_checkin_notification_service.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
+import 'package:dualis_mobile/features/dashboard/presentation/screens/check_in_summary_screen.dart';
 import 'package:dualis_mobile/features/emergency/presentation/widgets/safety_notice_banner.dart';
 import 'package:dualis_mobile/features/triage/data/antiburla_remote_data_source.dart';
 import 'package:dualis_mobile/features/triage/domain/triage_vertical.dart';
@@ -412,7 +413,7 @@ void main() {
       expect(find.text('Mal / Ruim'), findsOneWidget);
     });
 
-    testWidgets('12. Psycho-emotional vertical: Selecting Normal and clicking complete does not advance to onset step 2',
+    testWidgets('12. Psycho-emotional vertical: Selecting Normal skips onset step 2 and shows the emotional trend',
         (tester) async {
       final fakeOutcomeDataSource = FakeTriageOutcomeRemoteDataSource();
       final router = GoRouter(
@@ -421,6 +422,17 @@ void main() {
           GoRoute(
             path: RoutePaths.home,
             builder: (context, state) => const Scaffold(body: Text('Home Screen Destination')),
+          ),
+          GoRoute(
+            path: RoutePaths.checkInSummary,
+            builder: (context, state) {
+              final args = state.extra as CheckInSummaryArgs;
+              return Scaffold(
+                body: Text(
+                  'Summary map=${args.showBodyMap} emotional=${args.showEmotionalTrend}',
+                ),
+              );
+            },
           ),
           GoRoute(
             path: RoutePaths.triage,
@@ -466,11 +478,11 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Navigated directly to Home
-      expect(find.text('Home Screen Destination'), findsOneWidget);
+      // Shows the emotional trend before returning Home
+      expect(find.text('Summary map=false emotional=true'), findsOneWidget);
     });
 
-    testWidgets('13. Physical vertical: Selecting Normal and clicking complete does not show onset question',
+    testWidgets('13. Physical vertical: Selecting Normal skips the onset question and shows the body map',
         (tester) async {
       final fakeOutcomeDataSource = FakeTriageOutcomeRemoteDataSource();
       final router = GoRouter(
@@ -479,6 +491,17 @@ void main() {
           GoRoute(
             path: RoutePaths.home,
             builder: (context, state) => const Scaffold(body: Text('Home Screen Destination')),
+          ),
+          GoRoute(
+            path: RoutePaths.checkInSummary,
+            builder: (context, state) {
+              final args = state.extra as CheckInSummaryArgs;
+              return Scaffold(
+                body: Text(
+                  'Summary map=${args.showBodyMap} emotional=${args.showEmotionalTrend}',
+                ),
+              );
+            },
           ),
           GoRoute(
             path: RoutePaths.triage,
@@ -522,8 +545,8 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Navigated directly to Home
-      expect(find.text('Home Screen Destination'), findsOneWidget);
+      // Shows the body map before returning Home
+      expect(find.text('Summary map=true emotional=false'), findsOneWidget);
     });
   });
 

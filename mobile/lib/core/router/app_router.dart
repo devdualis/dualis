@@ -14,6 +14,7 @@ import '../../features/triage/domain/triage_vertical.dart';
 import '../../features/triage/presentation/screens/triage_wizard_screen.dart';
 import '../../features/triage_outcome/domain/triage_outcome_models.dart';
 import '../../features/triage_outcome/presentation/screens/triage_outcome_screen.dart';
+import '../../features/dashboard/presentation/screens/check_in_summary_screen.dart';
 import '../../features/dashboard/presentation/screens/historical_dashboard_screen.dart';
 import '../../features/privacy/presentation/screens/privacy_center_screen.dart';
 import '../../features/privacy/presentation/screens/terms_of_service_screen.dart';
@@ -163,6 +164,17 @@ GoRouter createRouter({
               );
           return TriageOutcomeScreen(outcome: outcome);
         },
+      ),
+      GoRoute(
+        path: RoutePaths.checkInSummary,
+        name: 'checkInSummary',
+        builder: (context, state) => CheckInSummaryScreen(
+          args: state.extra as CheckInSummaryArgs? ??
+              const CheckInSummaryArgs(
+                showBodyMap: true,
+                showEmotionalTrend: true,
+              ),
+        ),
       ),
       GoRoute(
         path: RoutePaths.history,

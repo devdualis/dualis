@@ -2352,4 +2352,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get wizardIntroFootnote =>
       'This is the first question of every entry. It is quick and helps personalize your experience.';
+
+  @override
+  String get checkInSummaryTitle => 'Entry saved';
+
+  @override
+  String get checkInSummaryBackHome => 'Back to home';
+
+  @override
+  String checkInSummaryBackHomeCountdown(int seconds) {
+    return 'Back to home ($seconds)';
+  }
 }

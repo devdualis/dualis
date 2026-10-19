@@ -6,7 +6,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 import '../controllers/dashboard_controller.dart';
-import '../widgets/anatomical_body_map.dart';
+import '../widgets/body_map_card.dart';
 import '../widgets/journal_pattern_card.dart';
 import '../widgets/dashboard_segmented_tab.dart';
 import '../widgets/emotional_trend_chart.dart';
@@ -102,48 +102,13 @@ class HistoricalDashboardScreen extends ConsumerWidget {
                             data: state.history.emotionalSummary,
                           ),
                         ] else ...[
-                          Card(
-                            elevation: 0.5,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              side: BorderSide(color: Colors.grey.shade200),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                children: [
-                                  const Row(
-                                    children: [
-                                      Icon(
-                                        Icons.accessibility_new_rounded,
-                                        color: Color(0xFF00796B),
-                                        size: 20,
-                                      ),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'Mapa Corporal 2D (Últimos 14 Dias)',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF263238),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 16),
-                                  AnatomicalBodyMap(
-                                    physicalSummary:
-                                        state.history.physicalSummary,
-                                    onRegionSelected: (key) {
-                                      ref
-                                          .read(
-                                              dashboardControllerProvider.notifier)
-                                          .selectRegion(key);
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
+                          BodyMapCard(
+                            physicalSummary: state.history.physicalSummary,
+                            onRegionSelected: (key) {
+                              ref
+                                  .read(dashboardControllerProvider.notifier)
+                                  .selectRegion(key);
+                            },
                           ),
                         ],
                         if (recurrences.isNotEmpty) ...[

@@ -22,6 +22,7 @@ import '../../data/antiburla_remote_data_source.dart';
 import 'package:dualis_mobile/features/triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import 'package:dualis_mobile/features/triage_outcome/domain/triage_outcome_models.dart';
 import 'package:dualis_mobile/features/sync/data/triage_outbox_repository.dart';
+import 'package:dualis_mobile/features/dashboard/presentation/screens/check_in_summary_screen.dart';
 import 'package:dualis_mobile/features/home/domain/axis_intensity_resolver.dart';
 import 'package:dualis_mobile/features/home/domain/trigger_checkin_state.dart';
 import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
@@ -860,7 +861,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
 
                   if (context.mounted) {
                     ref.read(triageWizardNotifierProvider.notifier).reset();
-                    context.go(RoutePaths.home);
+                    _goToCheckInSummary(context, verticalStr);
                   }
                 } finally {
                   if (mounted) {
@@ -933,6 +934,18 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
+    );
+  }
+
+  /// After saving, show the history view of each axis answered in this
+  /// session (body map / emotional trend) before returning Home.
+  void _goToCheckInSummary(BuildContext context, String verticalStr) {
+    context.go(
+      RoutePaths.checkInSummary,
+      extra: CheckInSummaryArgs(
+        showBodyMap: verticalStr == 'physical' || _physicalOutcome != null,
+        showEmotionalTrend: verticalStr == 'emotional',
+      ),
     );
   }
 
@@ -1074,7 +1087,7 @@ class _TriageWizardScreenState extends ConsumerState<TriageWizardScreen> {
 
       if (context.mounted) {
         ref.read(triageWizardNotifierProvider.notifier).reset();
-        context.go(RoutePaths.home);
+        _goToCheckInSummary(context, verticalStr);
       }
     } finally {
       if (mounted) {

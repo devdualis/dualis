@@ -2016,5 +2016,15 @@
   "wizardIntroOptionSoSoCaption": "Vamos te ajudar a descrever melhor",
   "wizardIntroOptionBadLabel": "Mal / Ruim",
   "wizardIntroOptionBadCaption": "Vamos com mais cuidado nas próximas perguntas",
-  "wizardIntroFootnote": "Esta é a pergunta inicial de todos os registros. É rápida e ajuda a personalizar sua experiência."
+  "wizardIntroFootnote": "Esta é a pergunta inicial de todos os registros. É rápida e ajuda a personalizar sua experiência.",
+  "checkInSummaryTitle": "Registro salvo",
+  "checkInSummaryBackHome": "Voltar ao início",
+  "checkInSummaryBackHomeCountdown": "Voltar ao início ({seconds})",
+  "@checkInSummaryBackHomeCountdown": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  }
 }

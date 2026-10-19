@@ -4143,6 +4143,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Esta é a pergunta inicial de todos os registros. É rápida e ajuda a personalizar sua experiência.'**
   String get wizardIntroFootnote;
+
+  /// No description provided for @checkInSummaryTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registro salvo'**
+  String get checkInSummaryTitle;
+
+  /// No description provided for @checkInSummaryBackHome.
+  ///
+  /// In pt, this message translates to:
+  /// **'Voltar ao início'**
+  String get checkInSummaryBackHome;
+
+  /// No description provided for @checkInSummaryBackHomeCountdown.
+  ///
+  /// In pt, this message translates to:
+  /// **'Voltar ao início ({seconds})'**
+  String checkInSummaryBackHomeCountdown(int seconds);
 }
 
 class _AppLocalizationsDelegate

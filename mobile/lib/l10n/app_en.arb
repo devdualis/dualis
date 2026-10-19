@@ -673,5 +673,8 @@
   "wizardIntroOptionSoSoCaption": "We will help you describe it better",
   "wizardIntroOptionBadLabel": "Bad / Not well",
   "wizardIntroOptionBadCaption": "We will go a bit more carefully on the next questions",
-  "wizardIntroFootnote": "This is the first question of every entry. It is quick and helps personalize your experience."
+  "wizardIntroFootnote": "This is the first question of every entry. It is quick and helps personalize your experience.",
+  "checkInSummaryTitle": "Entry saved",
+  "checkInSummaryBackHome": "Back to home",
+  "checkInSummaryBackHomeCountdown": "Back to home ({seconds})"
 }

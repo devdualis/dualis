@@ -2375,4 +2375,15 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get wizardIntroFootnote =>
       'Esta es la pregunta inicial de todos los registros. Es rápida y ayuda a personalizar tu experiencia.';
+
+  @override
+  String get checkInSummaryTitle => 'Registro guardado';
+
+  @override
+  String get checkInSummaryBackHome => 'Volver al inicio';
+
+  @override
+  String checkInSummaryBackHomeCountdown(int seconds) {
+    return 'Volver al inicio ($seconds)';
+  }
 }
