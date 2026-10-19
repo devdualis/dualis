@@ -5,10 +5,10 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-10-19T16:47:40.711Z"
+last_updated: "2026-10-19T16:53:35.875Z"
 last_activity: 2026-10-17
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: 4c1cacc4379a8e7cb981517ed5f71e0ac5cb626a
+state_head: 3acc498027d8d871f1055600ff39cffc9da9be48
 progress:
   total_phases: 15
   completed_phases: 10
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-10-17 - Completed quick task 261017-m6w: Remove redundant organization card from both result views; 129 tests and simulator verified
+Last activity: 2026-10-19 - Completed quick task 261019-iyj: Summary screen with body map / emotional trend after check-in; 534 tests and simulator verified
 
 Progress: [██████████] 100%
 
@@ -108,6 +108,7 @@ None yet.
 | 261017-m6w | Remove redundant organization card from both result views; 129 tests and simulator verified | 2026-10-17 | 6042a39 | [261017-m6w-remove-redundant-ai-organization-card-fr](./quick/261017-m6w-remove-redundant-ai-organization-card-fr/) |
 | 13 | Remover SOS duplicado sob o botão flutuante de ajuda urgente | 2026-10-17 | defcd2d | — |
 | 14 | Adiar rebuild do UrgentHelpOverlay para post-frame (setState durante build no arranque) | 2026-10-19 | 4c1cacc | — |
+| 261019-iyj | Mostrar mapa corporal após avaliação física e evolução emocional após a emocional (tela de resumo, volta ao início em 5 s) | 2026-10-19 | 3acc498 | [261019-iyj-mostrar-mapa-corporal-tras-evaluacion-fi](./quick/261019-iyj-mostrar-mapa-corporal-tras-evaluacion-fi/) |
 
 ## Deferred Items
 
