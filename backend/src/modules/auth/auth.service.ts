@@ -432,9 +432,14 @@ export class AuthService {
     }
 
     if (user.isEmailVerified === false) {
-      throw new UnauthorizedException('E-mail não verificado. Por favor, confirme seu e-mail antes de entrar.');
+      // `code` lets the app open the verification screen instead of a generic error.
+      throw new UnauthorizedException({
+        statusCode: 401,
+        error: 'Unauthorized',
+        code: 'EMAIL_NOT_VERIFIED',
+        message: 'E-mail não verificado. Por favor, confirme seu e-mail antes de entrar.',
+      });
     }
-
 
     const sanitizedUser: SanitizedUser = {
       id: user.id,

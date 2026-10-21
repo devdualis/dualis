@@ -423,12 +423,14 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
         }),
       });
 
-      await expect(
-        authService.login({
-          email: 'maria.unverified@example.com',
-          password,
-        }),
-      ).rejects.toThrow('E-mail não verificado. Por favor, confirme seu e-mail antes de entrar.');
+      const attempt = authService.login({
+        email: 'maria.unverified@example.com',
+        password,
+      });
+      await expect(attempt).rejects.toThrow('E-mail não verificado. Por favor, confirme seu e-mail antes de entrar.');
+      await expect(attempt).rejects.toMatchObject({
+        response: expect.objectContaining({ code: 'EMAIL_NOT_VERIFIED' }),
+      });
     });
   });
 
