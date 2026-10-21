@@ -5,10 +5,10 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-10-19T16:53:35.875Z"
-last_activity: 2026-10-17
+last_updated: "2026-10-21T14:33:00.552Z"
+last_activity: 2026-10-19
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: 3acc498027d8d871f1055600ff39cffc9da9be48
+state_head: ee74c87370b3d1cfafc7cdaf845c3e8f7534b27f
 progress:
   total_phases: 15
   completed_phases: 10
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-10-19 - Completed quick task 261019-iyj: Summary screen with body map / emotional trend after check-in; 534 tests and simulator verified
+Last activity: 2026-10-21 - Completed quick task 261021-fx4: Email verification screen returns while the email is unverified (restart + login); 541 tests
 
 Progress: [██████████] 100%
 
@@ -109,6 +109,7 @@ None yet.
 | 13 | Remover SOS duplicado sob o botão flutuante de ajuda urgente | 2026-10-17 | defcd2d | — |
 | 14 | Adiar rebuild do UrgentHelpOverlay para post-frame (setState durante build no arranque) | 2026-10-19 | 4c1cacc | — |
 | 261019-iyj | Mostrar mapa corporal após avaliação física e evolução emocional após a emocional (tela de resumo, volta ao início em 5 s) | 2026-10-19 | 3acc498 | [261019-iyj-mostrar-mapa-corporal-tras-evaluacion-fi](./quick/261019-iyj-mostrar-mapa-corporal-tras-evaluacion-fi/) |
+| 261021-fx4 | Mostrar siempre la verificación de email mientras no esté validado | 2026-10-21 | ee74c87 | [261021-fx4-mostrar-siempre-la-verificaci-n-de-email](./quick/261021-fx4-mostrar-siempre-la-verificaci-n-de-email/) |
 
 ## Deferred Items
 
