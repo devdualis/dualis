@@ -8,6 +8,10 @@ class AuthState {
   final String? accessToken;
   final String? refreshToken;
 
+  /// Email registered but not yet verified. While set (and logged out), the
+  /// app keeps sending the user back to the verification screen.
+  final String? pendingVerificationEmail;
+
   const AuthState({
     this.isLoading = false,
     this.isAuthenticated = false,
@@ -15,6 +19,7 @@ class AuthState {
     this.errorMessage,
     this.accessToken,
     this.refreshToken,
+    this.pendingVerificationEmail,
   });
 
   const AuthState.initial()
@@ -23,7 +28,8 @@ class AuthState {
         user = null,
         errorMessage = null,
         accessToken = null,
-        refreshToken = null;
+        refreshToken = null,
+        pendingVerificationEmail = null;
 
   AuthState copyWith({
     bool? isLoading,
@@ -32,6 +38,8 @@ class AuthState {
     String? errorMessage,
     String? accessToken,
     String? refreshToken,
+    String? pendingVerificationEmail,
+    bool clearPendingVerification = false,
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
@@ -40,6 +48,9 @@ class AuthState {
       errorMessage: errorMessage,
       accessToken: accessToken ?? this.accessToken,
       refreshToken: refreshToken ?? this.refreshToken,
+      pendingVerificationEmail: clearPendingVerification
+          ? null
+          : pendingVerificationEmail ?? this.pendingVerificationEmail,
     );
   }
 }

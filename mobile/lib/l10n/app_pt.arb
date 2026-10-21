@@ -1237,6 +1237,10 @@
   "@errorEmailVerificationCodeInvalid": {
     "description": "Friendly verification code error"
   },
+  "loginEmailNotVerified": "Seu e-mail ainda não foi verificado. Digite o código enviado ou peça um novo.",
+  "@loginEmailNotVerified": {
+    "description": "Shown when login fails because the email is not verified; the app then opens the verification screen"
+  },
   "emailVerificationSuccess": "E-mail verificado com sucesso! Bem-vindo ao DualisCheckUp.",
   "@emailVerificationSuccess": {
     "description": "Email verification success message"

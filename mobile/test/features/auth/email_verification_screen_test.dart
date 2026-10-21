@@ -36,6 +36,11 @@ class MockSecureStorageService extends SecureStorageService {
 
   @override
   Future<void> clearAll() async {}
+
+  String? pendingEmail;
+
+  @override
+  Future<String?> getPendingVerificationEmail() async => pendingEmail;
 }
 
 class MockAuthRepository implements AuthRepository {
@@ -158,6 +163,7 @@ class MockAuthRepository implements AuthRepository {
 Widget createTestWidget({
   required MockAuthRepository mockRepo,
   required String email,
+  ProviderContainer? container,
 }) {
   final router = GoRouter(
     initialLocation: RoutePaths.verifyEmail,
@@ -181,11 +187,14 @@ Widget createTestWidget({
     ],
   );
 
-  return ProviderScope(
-    overrides: [
-      authRepositoryProvider.overrideWithValue(mockRepo),
-      secureStorageServiceProvider.overrideWithValue(MockSecureStorageService()),
-    ],
+  return UncontrolledProviderScope(
+    container: container ??
+        ProviderContainer(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(mockRepo),
+            secureStorageServiceProvider.overrideWithValue(MockSecureStorageService()),
+          ],
+        ),
     child: MaterialApp.router(
       routerConfig: router,
       locale: const Locale('pt', 'BR'),
@@ -263,29 +272,53 @@ void main() {
       expect(find.text('Código de verificação incorreto ou expirado.'), findsOneWidget);
     });
 
-    testWidgets('Resend countdown timer updates and shows resend button when time elapses',
+    testWidgets('Reopened without a fresh code: resend is available right away, then cools down',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestWidget(mockRepo: mockRepo, email: testEmail));
+      await tester.pumpAndSettle();
+
+      // No code was sent in this session (app restart or login), so no wait.
+      expect(find.textContaining('Reenviar código em'), findsNothing);
+      final resendButtonFinder = find.text('Não recebeu o código? Reenviar');
+      expect(resendButtonFinder, findsOneWidget);
+
+      await tester.ensureVisible(resendButtonFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(resendButtonFinder);
       await tester.pump();
 
+      expect(mockRepo.resendCalled, isTrue);
+      expect(mockRepo.lastEmail, testEmail);
+      expect(find.text('Novo código enviado para seu e-mail.'), findsOneWidget);
       expect(find.textContaining('Reenviar código em'), findsOneWidget);
 
       // Fast forward 61 seconds for cooldown to expire
       await tester.pump(const Duration(seconds: 61));
       await tester.pumpAndSettle();
+      expect(find.text('Não recebeu o código? Reenviar'), findsOneWidget);
+    });
 
-      final resendButtonFinder = find.text('Não recebeu o código? Reenviar');
-      expect(resendButtonFinder, findsOneWidget);
+    testWidgets('Falls back to the remembered pending email when the route has none',
+        (WidgetTester tester) async {
+      // App restarted logged out with a registration still unverified.
+      final container = ProviderContainer(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(mockRepo),
+          secureStorageServiceProvider
+              .overrideWithValue(MockSecureStorageService()..pendingEmail = testEmail),
+        ],
+      );
+      addTearDown(container.dispose);
+      await container.read(authControllerProvider.notifier).restoreSession();
 
-      // Scroll into view and tap resend
-      await tester.ensureVisible(resendButtonFinder);
+      await tester.pumpWidget(createTestWidget(
+        mockRepo: mockRepo,
+        email: '',
+        container: container,
+      ));
       await tester.pumpAndSettle();
-      await tester.tap(resendButtonFinder);
-      await tester.pumpAndSettle();
 
-      expect(mockRepo.resendCalled, isTrue);
-      expect(mockRepo.lastEmail, testEmail);
-      expect(find.text('Novo código enviado para seu e-mail.'), findsOneWidget);
+      expect(find.text('p***t@dualishealth.com'), findsOneWidget);
     });
   });
 }

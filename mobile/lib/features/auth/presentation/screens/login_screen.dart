@@ -42,6 +42,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     if (success && mounted) {
       context.go(RoutePaths.home);
+    } else if (mounted &&
+        ref.read(authControllerProvider.notifier).lastLoginNeedsVerification) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).loginEmailNotVerified),
+          backgroundColor: AppColors.clinicalTeal,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      context.go(RoutePaths.verifyEmail, extra: _emailController.text.trim());
     } else if (mounted) {
       final rawError = ref.read(authControllerProvider).errorMessage;
       if (rawError != null) {

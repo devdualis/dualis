@@ -140,6 +140,18 @@ class MockSecureStorage extends SecureStorageService {
 
   @override
   Future<void> clearAll() async {}
+
+  String? pendingEmail;
+
+  @override
+  Future<void> savePendingVerificationEmail(String email) async {
+    pendingEmail = email;
+  }
+
+  @override
+  Future<void> clearPendingVerificationEmail() async {
+    pendingEmail = null;
+  }
 }
 
 Widget createLoginTestApp({
@@ -163,6 +175,12 @@ Widget createLoginTestApp({
         path: RoutePaths.onboarding,
         builder: (context, state) => const Scaffold(
           body: Center(child: Text('Onboarding Screen')),
+        ),
+      ),
+      GoRoute(
+        path: RoutePaths.verifyEmail,
+        builder: (context, state) => Scaffold(
+          body: Center(child: Text('Verify Screen ${state.extra}')),
         ),
       ),
     ],
@@ -264,6 +282,46 @@ void main() {
       expect(mockRepo.loginCalled, isTrue);
       expect(
         find.text('E-mail ou senha incorretos. Por favor, verifique suas credenciais.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('4b. Login with an unverified email opens the verification screen',
+        (tester) async {
+      mockRepo.shouldSucceed = false;
+      mockRepo.failureDioError = DioException(
+        requestOptions: RequestOptions(path: '/auth/login'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/auth/login'),
+          statusCode: 401,
+          data: {
+            'statusCode': 401,
+            'code': 'EMAIL_NOT_VERIFIED',
+            'message': 'E-mail não verificado. Por favor, confirme seu e-mail antes de entrar.',
+          },
+        ),
+        type: DioExceptionType.badResponse,
+      );
+
+      await tester.pumpWidget(createLoginTestApp(repository: mockRepo));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('loginEmailField')),
+        'paciente@exemplo.com',
+      );
+      await tester.enterText(
+        find.byKey(const Key('loginPasswordField')),
+        'SenhaSegura123!',
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('loginSubmitButton')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Verify Screen paciente@exemplo.com'), findsOneWidget);
+      expect(
+        find.text('Seu e-mail ainda não foi verificado. Digite o código enviado ou peça um novo.'),
         findsOneWidget,
       );
     });

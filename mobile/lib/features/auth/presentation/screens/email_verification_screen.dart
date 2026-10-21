@@ -36,10 +36,25 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
   bool _canResend = false;
   bool _isResending = false;
 
+  /// Route email, or the remembered pending one when the app reopened here.
+  late final String _email = widget.email.isNotEmpty
+      ? widget.email
+      : ref.read(authControllerProvider).pendingVerificationEmail ?? '';
+
   @override
   void initState() {
     super.initState();
-    _startResendTimer();
+    // Count down only for a code sent moments ago in this session; after a
+    // restart or a login the user may ask for a new code right away.
+    final remaining = ref
+        .read(authControllerProvider.notifier)
+        .resendCooldownRemaining(const Duration(seconds: _resendCooldownSeconds));
+    if (remaining > Duration.zero) {
+      _startResendTimer(seconds: remaining.inSeconds.clamp(1, _resendCooldownSeconds));
+    } else {
+      _secondsRemaining = 0;
+      _canResend = true;
+    }
     for (int i = 0; i < _codeLength; i++) {
       _digitControllers[i].addListener(_onCodeChanged);
     }
@@ -57,9 +72,9 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
     super.dispose();
   }
 
-  void _startResendTimer() {
+  void _startResendTimer({int seconds = _resendCooldownSeconds}) {
     setState(() {
-      _secondsRemaining = _resendCooldownSeconds;
+      _secondsRemaining = seconds;
       _canResend = false;
     });
     _resendTimer?.cancel();
@@ -107,7 +122,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
 
     final code = _currentCode;
     final success = await ref.read(authControllerProvider.notifier).verifyEmail(
-          email: widget.email,
+          email: _email,
           code: code,
         );
 
@@ -143,7 +158,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
 
     final success = await ref
         .read(authControllerProvider.notifier)
-        .resendVerificationCode(email: widget.email);
+        .resendVerificationCode(email: _email);
 
     if (!mounted) return;
     setState(() {
@@ -245,7 +260,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
-    final masked = _maskEmail(widget.email);
+    final masked = _maskEmail(_email);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,

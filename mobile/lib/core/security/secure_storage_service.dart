@@ -13,6 +13,8 @@ class SecureStorageService {
   static const String _keyUserId = 'dualis_user_id';
   static const String _keyUserProfile = 'dualis_user_profile';
   static const String _keyBiometricEnabled = 'dualis_biometric_enabled';
+  static const String _keyPendingVerificationEmail =
+      'dualis_pending_verification_email';
   static const String _prefixDailyCheckIn = 'dualis_daily_checkin_';
 
   final FlutterSecureStorage _storage;
@@ -74,6 +76,17 @@ class SecureStorageService {
       await _storage.delete(key: _keyUserProfile);
     } catch (_) {}
   }
+
+  /// Email of an account registered but not yet verified. Survives app
+  /// restarts so the verification screen can come back until it is verified.
+  Future<void> savePendingVerificationEmail(String email) =>
+      _storage.write(key: _keyPendingVerificationEmail, value: email);
+
+  Future<String?> getPendingVerificationEmail() =>
+      _storage.read(key: _keyPendingVerificationEmail);
+
+  Future<void> clearPendingVerificationEmail() =>
+      _storage.delete(key: _keyPendingVerificationEmail);
 
   Future<bool> isBiometricEnabled() async {
     final val = await _storage.read(key: _keyBiometricEnabled);

@@ -24,6 +24,59 @@ class AuthController extends Notifier<AuthState> {
   AuthRepository get _repository => ref.read(authRepositoryProvider);
   SecureStorageService get _secureStorage => ref.read(secureStorageServiceProvider);
 
+  DateTime? _lastCodeSentAt;
+
+  /// True when the last [login] failed only because the email is not
+  /// verified yet; the login screen then opens the verification screen.
+  bool lastLoginNeedsVerification = false;
+
+  /// Time left before a new verification code may be requested. Zero when
+  /// no code was sent during this app session (e.g. after a restart or a
+  /// login), so the user can ask for a new one right away.
+  Duration resendCooldownRemaining(Duration cooldown) {
+    final sentAt = _lastCodeSentAt;
+    if (sentAt == null) return Duration.zero;
+    final remaining = cooldown - DateTime.now().difference(sentAt);
+    return remaining.isNegative ? Duration.zero : remaining;
+  }
+
+  Future<void> _rememberPendingVerification(String email) async {
+    state = state.copyWith(pendingVerificationEmail: email);
+    try {
+      await _secureStorage.savePendingVerificationEmail(email);
+    } catch (_) {}
+  }
+
+  Future<void> _forgetPendingVerification() async {
+    _lastCodeSentAt = null;
+    // State mirrors storage (restoreSession loads it), so skip the write
+    // when nothing is pending.
+    if (state.pendingVerificationEmail == null) return;
+    try {
+      await _secureStorage.clearPendingVerificationEmail();
+    } catch (_) {}
+  }
+
+  Future<String?> _readPendingVerificationEmail() async {
+    try {
+      final email = await _secureStorage.getPendingVerificationEmail();
+      return (email == null || email.isEmpty) ? null : email;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  bool _isEmailNotVerifiedError(dynamic e) {
+    if (e is! DioException) return false;
+    final data = e.response?.data;
+    if (data is! Map) return false;
+    if (data['code'] == 'EMAIL_NOT_VERIFIED') return true;
+    // Backends older than the `code` field only send the message.
+    final message = data['message'];
+    return message is String &&
+        message.toLowerCase().contains('e-mail não verificado');
+  }
+
   String _extractErrorMessage(dynamic e) {
     if (e is DioException) {
       final response = e.response;
@@ -52,7 +105,12 @@ class AuthController extends Notifier<AuthState> {
       final cachedProfile = await _secureStorage.getUserProfile();
 
       if (token == null || token.isEmpty) {
-        state = state.copyWith(isLoading: false, isAuthenticated: false);
+        final pendingEmail = await _readPendingVerificationEmail();
+        state = state.copyWith(
+          isLoading: false,
+          isAuthenticated: false,
+          pendingVerificationEmail: pendingEmail,
+        );
         return;
       }
 
@@ -127,15 +185,21 @@ class AuthController extends Notifier<AuthState> {
           userId: user.id,
         );
         await _secureStorage.saveUserProfile(user);
+        await _forgetPendingVerification();
         state = state.copyWith(
           isLoading: false,
           isAuthenticated: true,
           user: user,
           accessToken: accessToken,
           refreshToken: refreshToken,
+          clearPendingVerification: true,
         );
       } else {
-        // Pending email verification
+        // Pending email verification: remembered across app restarts.
+        _lastCodeSentAt = DateTime.now();
+        await _rememberPendingVerification(
+          (user != null && user.email.isNotEmpty) ? user.email : email,
+        );
         state = state.copyWith(
           isLoading: false,
           isAuthenticated: false,
@@ -172,6 +236,7 @@ class AuthController extends Notifier<AuthState> {
         );
         await _secureStorage.saveUserProfile(user);
       }
+      await _forgetPendingVerification();
 
       state = state.copyWith(
         isLoading: false,
@@ -179,6 +244,7 @@ class AuthController extends Notifier<AuthState> {
         user: user,
         accessToken: accessToken,
         refreshToken: refreshToken,
+        clearPendingVerification: true,
       );
       return true;
     } catch (e) {
@@ -196,6 +262,7 @@ class AuthController extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       await _repository.resendVerification(email: email);
+      _lastCodeSentAt = DateTime.now();
       state = state.copyWith(isLoading: false);
       return true;
     } catch (e) {
@@ -212,6 +279,7 @@ class AuthController extends Notifier<AuthState> {
     required String password,
   }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
+    lastLoginNeedsVerification = false;
     try {
       final res = await _repository.login(email: email, password: password);
       final userJson = res['user'] as Map<String, dynamic>? ?? {};
@@ -227,6 +295,7 @@ class AuthController extends Notifier<AuthState> {
         );
         await _secureStorage.saveUserProfile(user);
       }
+      await _forgetPendingVerification();
 
       state = state.copyWith(
         isLoading: false,
@@ -234,9 +303,14 @@ class AuthController extends Notifier<AuthState> {
         user: user,
         accessToken: accessToken,
         refreshToken: refreshToken,
+        clearPendingVerification: true,
       );
       return true;
     } catch (e) {
+      if (_isEmailNotVerifiedError(e)) {
+        lastLoginNeedsVerification = true;
+        await _rememberPendingVerification(email);
+      }
       state = state.copyWith(
         isLoading: false,
         errorMessage: _extractErrorMessage(e),
@@ -360,6 +434,7 @@ class AuthController extends Notifier<AuthState> {
   Future<void> logout() async {
     await _cancelLocalReminders();
     await _secureStorage.clearAll();
+    _lastCodeSentAt = null;
     state = const AuthState.initial();
   }
 

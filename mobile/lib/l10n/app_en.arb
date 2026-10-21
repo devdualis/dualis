@@ -301,6 +301,7 @@
   "errorEmailAlreadyExists": "This email address is already registered on our platform.",
   "errorSessionExpired": "Your session has expired. Please log in again.",
   "errorEmailVerificationCodeInvalid": "Incorrect or expired verification code. Check the digits or request a new code.",
+  "loginEmailNotVerified": "Your email is not verified yet. Enter the code we sent or request a new one.",
   "emailVerificationSuccess": "Email verified successfully! Welcome to DualisCheckUp.",
   "newCodeSentSuccess": "A new code has been sent to your email.",
   "errorUpdateProfile": "Could not update profile. Please try again.",

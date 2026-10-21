@@ -61,6 +61,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (isLoggedIn && isAuthRoute) {
         return RoutePaths.home;
       }
+      // An account still waiting for email verification reopens on the
+      // verification screen instead of the start screen. Login, register
+      // and help resources stay reachable.
+      if (!isLoggedIn &&
+          authState.pendingVerificationEmail != null &&
+          currentLoc == RoutePaths.onboarding) {
+        return RoutePaths.verifyEmail;
+      }
       if (!isLoggedIn && !isPublicAccessibleRoute) {
         return RoutePaths.onboarding;
       }

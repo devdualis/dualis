@@ -1061,6 +1061,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Código de verificação incorreto ou expirado. Verifique os dígitos ou solicite um novo código.';
 
   @override
+  String get loginEmailNotVerified =>
+      'Seu e-mail ainda não foi verificado. Digite o código enviado ou peça um novo.';
+
+  @override
   String get emailVerificationSuccess =>
       'E-mail verificado com sucesso! Bem-vindo ao DualisCheckUp.';
 

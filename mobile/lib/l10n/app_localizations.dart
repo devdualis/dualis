@@ -1906,6 +1906,12 @@ abstract class AppLocalizations {
   /// **'Código de verificação incorreto ou expirado. Verifique os dígitos ou solicite um novo código.'**
   String get errorEmailVerificationCodeInvalid;
 
+  /// Shown when login fails because the email is not verified; the app then opens the verification screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu e-mail ainda não foi verificado. Digite o código enviado ou peça um novo.'**
+  String get loginEmailNotVerified;
+
   /// Email verification success message
   ///
   /// In pt, this message translates to:
