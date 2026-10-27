@@ -1,0 +1,25 @@
+{
+  "fecha": "2026-10-27",
+  "unitarias_iniciales": 209,
+  "e2e_iniciales": 102,
+  "rls_iniciales": 48,
+  "e2e_finales": 102,
+  "rls_finales": 49,
+  "flutter_final": {
+    "aprobadas": 494,
+    "fallidas": 13,
+    "errores_finalizacion": true
+  },
+  "bateria_sesion": {
+    "bannedVocabularyViolationsInAiOutput": 0,
+    "uiVocabularyTestPassed": true,
+    "helpResourcesTestPassed": true,
+    "aiContractViolations": 0,
+    "taggingQualityRate": "100.0%",
+    "averageLatencyMs": 0.3,
+    "backendTestsPassed": true,
+    "frontendTestsPassed": false,
+    "overallStatus": "ACTION_REQUIRED"
+  },
+  "checkout_modificado_concurrentemente": true
+}

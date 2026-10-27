@@ -1,0 +1,26 @@
+{
+  "conditionCreated": 201,
+  "A/journal/entries?days=30": {
+    "status": 200,
+    "count": 16
+  },
+  "B/journal/entries?days=30": {
+    "status": 200,
+    "count": 0
+  },
+  "B-profile-A/journal/entries?days=30": {
+    "status": 403
+  },
+  "A/journal/conditions": {
+    "status": 200,
+    "count": 1
+  },
+  "B/journal/conditions": {
+    "status": 200,
+    "count": 0
+  },
+  "B-profile-A/journal/conditions": {
+    "status": 403
+  },
+  "BArchiveA": 404
+}

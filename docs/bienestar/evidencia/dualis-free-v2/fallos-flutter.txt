@@ -1,0 +1,17 @@
+flutter test --concurrency=2
+494 aprobadas; 13 fallidas.
+Hubo errores de finalización de procesos y directorios temporales.
+
+mobile/test/features/dashboard/historical_dashboard_screen_test.dart: HistoricalDashboardScreen (30-day journal dashboard) requests a 30-day window for entries and summary
+mobile/test/features/dashboard/historical_dashboard_screen_test.dart: HistoricalDashboardScreen (30-day journal dashboard) shows time bar, body map counts and item lines from local counts
+mobile/test/features/dashboard/historical_dashboard_screen_test.dart: HistoricalDashboardScreen (30-day journal dashboard) entries older than 30 days are left out of the lines
+mobile/test/features/dashboard/historical_dashboard_screen_test.dart: HistoricalDashboardScreen (30-day journal dashboard) shows at most 5 item lines, the rest behind "Ver mais"
+mobile/test/features/dashboard/historical_dashboard_screen_test.dart: HistoricalDashboardScreen (30-day journal dashboard) co-occurrence sentence counts days, without cause
+mobile/test/features/dashboard/historical_dashboard_screen_test.dart: HistoricalDashboardScreen (30-day journal dashboard) uses the summary endpoint when available
+mobile/test/features/dashboard/historical_dashboard_screen_test.dart: HistoricalDashboardScreen (30-day journal dashboard) legacy entries render with their saved text and are not deletable
+mobile/test/features/dashboard/historical_dashboard_screen_test.dart: HistoricalDashboardScreen (30-day journal dashboard) custom items keep the words the person wrote
+mobile/test/features/dashboard/historical_dashboard_screen_test.dart: HistoricalDashboardScreen (30-day journal dashboard) deleting an entry asks first and calls the API
+mobile/test/features/dashboard/historical_dashboard_screen_test.dart: HistoricalDashboardScreen (30-day journal dashboard) water line uses the 30-day hydration totals
+mobile/test/features/journal_insights/journal_insights_models_test.dart: sentences only count, framed by the marker seen on more days
+mobile/test/features/sync/sync_outbox_worker_test.dart: SyncOutboxWorker & Offline Sync Tests (SYNC-01) OfflineIndicatorBanner shows offline state and pending sync count
+mobile/test/shared/widgets/urgent_help_button_test.dart: help is 1 tap away from /home
