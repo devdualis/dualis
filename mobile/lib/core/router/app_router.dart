@@ -10,8 +10,8 @@ import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/emergency/presentation/screens/emergency_screen.dart';
-import '../../features/triage/domain/triage_vertical.dart';
-import '../../features/triage/presentation/screens/triage_wizard_screen.dart';
+import '../../features/journal/presentation/screens/journal_flow_screen.dart';
+import '../../features/journal/presentation/screens/my_conditions_screen.dart';
 import '../../features/triage_outcome/domain/triage_outcome_models.dart';
 import '../../features/triage_outcome/presentation/screens/triage_outcome_screen.dart';
 import '../../features/dashboard/presentation/screens/check_in_summary_screen.dart';
@@ -137,23 +137,16 @@ GoRouter createRouter({
         builder: (context, state) => const EmergencyScreen(),
       ),
       GoRoute(
-        path: RoutePaths.triage,
-        name: 'triage',
-        builder: (context, state) {
-          if (state.extra is TriageNavigationArgs) {
-            final args = state.extra as TriageNavigationArgs;
-            return TriageWizardScreen(
-              vertical: args.initialVertical,
-              isDual: args.isDual,
-              naturalLanguageText: args.naturalLanguageText,
-              preselectedCategoryKey: args.preselectedCategoryKey,
-              mentionsSelfHarm: args.mentionsSelfHarm,
-            );
-          }
-          final vertical =
-              state.extra as TriageVertical? ?? TriageVertical.psicoEmocional;
-          return TriageWizardScreen(vertical: vertical);
-        },
+        path: RoutePaths.journal,
+        name: 'journal',
+        builder: (context, state) => JournalFlowScreen(
+          args: state.extra as JournalFlowArgs? ?? const JournalFlowArgs(),
+        ),
+      ),
+      GoRoute(
+        path: RoutePaths.myConditions,
+        name: 'myConditions',
+        builder: (context, state) => const MyConditionsScreen(),
       ),
       GoRoute(
         path: RoutePaths.triageOutcome,

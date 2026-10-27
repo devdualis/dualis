@@ -34,6 +34,23 @@ final List<({String name, RegExp pattern})> bannedTerms = [
   (name: 'pronto atendimento', pattern: _word(r'pronto[\s-]+atendimento')),
   (name: 'concordância clínica', pattern: _word(r'concord[aâ]ncia\s+cl[ií]nica')),
   (name: 'precisas', pattern: _word('precisas')),
+  // Strategy §15 (Dualis Free): disorder names and clinical grouping.
+  (name: 'transtorno/disorder', pattern: _word(r'(?:transtornos?|trastornos?|disorders?)')),
+  (name: 'TAG', pattern: _word('TAG', caseSensitive: true)),
+  (name: 'TOC', pattern: _word('TOC', caseSensitive: true)),
+  (name: 'TEPT', pattern: _word('TEPT', caseSensitive: true)),
+  (name: 'bipolar', pattern: _word(r'bipolar(?:es)?')),
+  (name: 'ciclotimia', pattern: _word(r'ciclot[ií]m\p{L}*|cyclothym\p{L}*')),
+  (name: 'borderline', pattern: _word('borderline')),
+  (name: 'grupo clínico', pattern: _word(r'grupos?\s+cl[ií]nicos?')),
+  (name: 'sintoma estruturado', pattern: _word(r'sintomas?\s+estruturados?')),
+  (name: 'esfera', pattern: _word(r'esferas?')),
+  (name: 'vertical de tratamento', pattern: _word(r'verticais?\s+de\s+tratamento')),
+  (name: 'anedonia', pattern: _word(r'anh?edonia')),
+  (name: 'radiculopatia', pattern: _word(r'radiculopat\p{L}*')),
+  (name: 'costocondrite', pattern: _word(r'costocondri\p{L}*|costochondri\p{L}*')),
+  (name: 'isquemia', pattern: _word(r'isqu[eé]mi\p{L}*|ischemi\p{L}*|ischaemi\p{L}*')),
+  (name: '☠️', pattern: RegExp('\u2620')),
 ];
 
 RegExp _word(String body, {bool caseSensitive = false}) => RegExp(
@@ -224,6 +241,12 @@ void main() {
       );
       expect(findBannedTerms('Não esqueça: faça sua triagem, e veja o diagnóstico.'), isNotEmpty);
       expect(findBannedTerms('Resiliência e esforço'), isEmpty);
+      expect(findBannedTerms('Sinais de transtorno bipolar'), containsAll(['transtorno/disorder', 'bipolar']));
+      expect(findBannedTerms('Grupo 09 TAG'), contains('TAG'));
+      expect(findBannedTerms('Esfera: radiculopatia'), containsAll(['esfera', 'radiculopatia']));
+      expect(findBannedTerms('Paralisante ☠️'), contains('☠️'));
+      expect(findBannedTerms('Tag da etiqueta'), isEmpty);
+      expect(findBannedTerms('Toque no mapa'), isEmpty);
       expect(isIdentifierLiteral('triage_outcome'), isTrue);
       expect(isIdentifierLiteral('/v1/triage/outcome'), isTrue);
       expect(isIdentifierLiteral('clinicalConcept'), isTrue);

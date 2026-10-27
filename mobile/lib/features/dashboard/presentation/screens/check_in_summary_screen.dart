@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../journal/domain/journal_models.dart';
 import '../../domain/models/triage_history_models.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/body_map_card.dart';
@@ -17,9 +18,13 @@ class CheckInSummaryArgs {
   final bool showBodyMap;
   final bool showEmotionalTrend;
 
+  /// Journal v2 entry that was just saved (may be waiting to sync).
+  final JournalEntry? entry;
+
   const CheckInSummaryArgs({
     this.showBodyMap = false,
     this.showEmotionalTrend = false,
+    this.entry,
   });
 }
 

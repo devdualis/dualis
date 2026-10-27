@@ -30,7 +30,7 @@ Widget createHomeTestApp({
         ),
       ),
       GoRoute(
-        path: RoutePaths.triage,
+        path: RoutePaths.journal,
         builder: (context, state) => const Scaffold(
           body: Center(child: Text('Triage Screen')),
         ),

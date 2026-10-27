@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/connectivity_service.dart';
+import '../../../journal/data/journal_repository.dart';
 import '../../../triage_outcome/data/triage_outcome_remote_data_source.dart';
 import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import '../../data/triage_outbox_repository.dart';
@@ -94,6 +95,12 @@ class SyncOutboxWorker extends Notifier<SyncState> {
           );
         }
       }
+
+      // Journal v2 entries saved offline (idempotent by clientId).
+      try {
+        successfullySynced +=
+            await ref.read(journalRepositoryProvider).syncPending();
+      } catch (_) {}
 
       state = state.copyWith(
         isSyncing: false,
