@@ -6,12 +6,12 @@ import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
+import '../../../../shared/widgets/landscape_background.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../domain/home_greeting.dart';
 import '../../domain/trigger_checkin_state.dart';
 import '../controllers/trigger_checkin_controller.dart';
-import '../widgets/admob_banner_container.dart';
 import '../widgets/dual_axis_trigger_card.dart';
 import '../../../sync/presentation/widgets/offline_indicator_banner.dart';
 import '../../../sync/presentation/controllers/sync_outbox_worker.dart';
@@ -20,7 +20,7 @@ import '../widgets/dualis_bottom_nav_bar.dart';
 import '../widgets/today_triage_result_tab.dart';
 import 'dart:async';
 import '../../../dashboard/presentation/screens/historical_dashboard_screen.dart';
-import '../../../dashboard/presentation/controllers/dashboard_controller.dart';
+import '../../../journal_insights/presentation/controllers/journal_insights_controller.dart';
 import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import '../../../../core/notifications/hydration_notification_service.dart';
 import '../../../../core/notifications/daily_checkin_notification_service.dart';
@@ -144,6 +144,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const SizedBox(width: 8),
         ],
         _AppBarIconButton(
+          key: const Key('home_library_button'),
+          icon: Icons.menu_book_outlined,
+          color: AppColors.clinicalTealDark,
+          tooltip: l10n.xv2LibTitle,
+          onTap: () => context.push(RoutePaths.library),
+        ),
+        const SizedBox(width: 8),
+        _AppBarIconButton(
           key: const Key('home_settings_button'),
           icon: Icons.settings_outlined,
           color: AppColors.clinicalTealDark,
@@ -167,6 +175,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const SizedBox(width: 8),
         ],
         _AppBarIconButton(
+          key: const Key('home_library_button'),
+          icon: Icons.menu_book_outlined,
+          color: AppColors.clinicalTealDark,
+          tooltip: l10n.xv2LibTitle,
+          onTap: () => context.push(RoutePaths.library),
+        ),
+        const SizedBox(width: 8),
+        _AppBarIconButton(
           key: const Key('home_settings_button'),
           icon: Icons.settings_outlined,
           color: AppColors.clinicalTealDark,
@@ -177,7 +193,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ];
     } else if (_currentTabIndex == 2) {
       appBarTitle = Text(
-        'Histórico & Tendências',
+        l10n.xv2DashTitle,
         style: GoogleFonts.plusJakartaSans(
           fontSize: 18,
           fontWeight: FontWeight.bold,
@@ -194,9 +210,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           icon: Icons.refresh_rounded,
           color: AppColors.clinicalTealDark,
           tooltip: 'Atualizar',
-          onTap: () => ref.read(dashboardControllerProvider.notifier).refreshHistory(),
+          onTap: () => ref.read(journalInsightsControllerProvider.notifier).refresh(),
         ),
         const SizedBox(width: 4),
+        _AppBarIconButton(
+          key: const Key('home_library_button'),
+          icon: Icons.menu_book_outlined,
+          color: AppColors.clinicalTealDark,
+          tooltip: l10n.xv2LibTitle,
+          onTap: () => context.push(RoutePaths.library),
+        ),
+        const SizedBox(width: 8),
         _AppBarIconButton(
           key: const Key('home_settings_button'),
           icon: Icons.settings_outlined,
@@ -220,6 +244,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const ProfileAppBarPill(),
           const SizedBox(width: 8),
         ],
+        _AppBarIconButton(
+          key: const Key('home_library_button'),
+          icon: Icons.menu_book_outlined,
+          color: AppColors.clinicalTealDark,
+          tooltip: l10n.xv2LibTitle,
+          onTap: () => context.push(RoutePaths.library),
+        ),
+        const SizedBox(width: 8),
         _AppBarIconButton(
           key: const Key('home_settings_button'),
           icon: Icons.settings_outlined,
@@ -326,7 +358,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   ) {
     final useDelegatedAvatar = showsDelegatedActiveProfile(ref);
 
-    return Column(
+    // Subtle bundled landscape (strategy §12), same for everyone each day.
+    return LandscapeBackground(
+      spec: landscapeForDay(ref.read(homeClockProvider)()),
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const ActiveProfileBanner(),
@@ -441,14 +476,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 20),
 
               const DualAxisTriggerCard(),
-              const SizedBox(height: 20),
-              const AdMobBannerContainer(),
               const SizedBox(height: 16),
             ],
           ),
         ),
         ),
       ],
+      ),
     );
   }
 }
