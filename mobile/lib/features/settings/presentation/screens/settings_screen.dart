@@ -110,23 +110,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  void _showAvatarSelectorSheet() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (ctx) => AvatarSelectorSheet(
-        currentPicture: _selectedPicture,
-        onSelected: (avatarId) {
-          setState(() {
-            _selectedPicture = avatarId;
-            _localImageBytes = null;
-          });
-        },
-      ),
-    );
-  }
-
   void _showPhotoPickerSheet() {
     final l10n = AppLocalizations.of(context);
     showModalBottomSheet(
@@ -515,7 +498,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(height: 10),
                       Center(
                         child: TextButton.icon(
-                          onPressed: _showAvatarSelectorSheet,
+                          onPressed: _showPhotoPickerSheet,
                           icon: const Icon(Icons.palette_outlined, size: 16),
                           label: Text(
                             l10n.changeAvatar,

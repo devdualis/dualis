@@ -209,7 +209,7 @@ void main() {
       expect(find.byKey(const Key('settings_change_password_button')), findsOneWidget);
     });
 
-    testWidgets('2. Tapping avatar opens AvatarSelectorSheet', (tester) async {
+    testWidgets('2. Alterar Foto offers camera, gallery and avatars', (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -220,6 +220,11 @@ void main() {
       final changeAvatarBtn = find.text('Alterar Foto');
       await tester.ensureVisible(changeAvatarBtn);
       await tester.tap(changeAvatarBtn);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Câmera'), findsOneWidget);
+      expect(find.text('Galeria'), findsOneWidget);
+      await tester.tap(find.text('Avatares'));
       await tester.pumpAndSettle();
 
       expect(find.byType(AvatarSelectorSheet), findsOneWidget);
