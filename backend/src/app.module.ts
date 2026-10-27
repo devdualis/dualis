@@ -8,7 +8,6 @@ import { LegalModule } from './modules/legal/legal.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { SafetyModule } from './modules/safety/safety.module';
 import { AppConfigModule } from './modules/app-config/app-config.module';
-import { AiModule } from './modules/ai/ai.module';
 import { TriageModule } from './modules/triage/triage.module';
 import { HydrationModule } from './modules/hydration/hydration.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
@@ -60,7 +59,6 @@ import { JournalModule } from './modules/journal/journal.module';
     AuthModule,
     SafetyModule,
     AppConfigModule,
-    AiModule,
     TriageModule,
     HydrationModule,
     ProfilesModule,

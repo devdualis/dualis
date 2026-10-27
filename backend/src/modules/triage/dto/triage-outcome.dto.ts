@@ -51,13 +51,4 @@ export interface TriageOutcomeResponseDto {
   somaticMapping: string;
   recommendedArticles: RecommendedArticleDto[];
   recordedAt: string;
-  secondaryCategoryLabel?: string;
-  secondarySomaticMapping?: string;
-  secondaryIntensityScore?: number;
-  isCrossVerticalSomatic?: boolean;
-  /** Static note shown when the entry mentions both body and emotions; same text for everyone. */
-  crossVerticalContextNote?: string;
-  aiMappedLayTerm?: string;
-  aiSource?: 'gemini' | 'idiom_cache' | 'dictionary_fallback' | 'vector_match';
-  aiConfidence?: number;
 }

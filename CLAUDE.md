@@ -27,7 +27,7 @@ DualisCheckUp is a wellness and self-awareness mobile app. It helps users keep a
 - **Backend Platform:** NestJS 12 (`@nestjs/core` v12.0.1) running on Node.js 22 LTS with the Fastify HTTP adapter for low routing overhead.
 - **Data Tier:** PostgreSQL 16/17 with native Row-Level Security (`app.current_user_id`), `btree_gist` temporal range indexing for 14-day history queries, and Drizzle ORM (v0.45.2) as the primary type-safe SQL layer.
 - **Asynchronous Task & Cache Tier:** Redis 7 with BullMQ (v6.3.4) and `@nestjs/bullmq` (v12.0.0) for background lab document ingestion and response caching.
-- **AI Journal Tagging Engine:** Google Gemini 2.5 Flash (`gemini-2.5-flash`) through the Gemini Developer API (API key) via the unified `@google/genai` (v2.22.0) SDK using strict JSON Schema structured outputs. It only organises free text by body area or mood; it never assesses severity. Migration to Vertex AI in a Brazil/EU region is pending (plan F9, `docs/bienestar/PLAN-TECNICO-BIENESTAR.md`).
+- **AI Journal Tagging Engine:** Removido do produto (estratégia §18 decisão 1; revisões #1 e #9). O diário opera sem categorização por IA e sem envio de texto livre a LLMs.
 - **OCR Engine:** Google Cloud Vision API (`@google-cloud/vision` v6.1.0) / AWS Textract (`@aws-sdk/client-textract` v3.750.x) for high-accuracy Brazilian Portuguese printed-document text extraction.
 
 ## Recommended Stack
@@ -262,7 +262,7 @@ El proyecto cuenta con una batería de agentes especializados para el desarrollo
 
 ### 3. Agente Revisor y Calibrador de IA (`ai_reviewer_agent`)
 - **Directorio:** `.agents/agents/ai_reviewer/agent.md`
-- **Rol:** Auditor técnico del motor de etiquetado semántico de diario (`AiTaggingService` / alias `AiTriageService`). Verifica cumplimiento estricto del JSON Schema de etiquetado (`isOffTopic`, `vertical`, `bodyAreaOrMood`, `layTerm`, `mentionsSelfHarm`), latencia (<2s), ausencia de campos clínicos o de urgencia (`urgencyScore`, `clinicalConcept`, `isEmergencyCandidate`), y calibra los diccionarios deterministas de lenguaje cotidiano.
+- **Rol:** Auditor técnico del cumplimiento del contrato de diario (`CONTRATO-JOURNAL-V2.md`) y ausencia de vocabulario vetado. El motor de etiquetado de diario por IA fue removido del producto (estrategia §18 decisión 1; hallazgos #1 y #9).
 
 ### 4. Agente Backend (`backend_agent`)
 - **Directorio:** `.agents/agents/backend/agent.md`
