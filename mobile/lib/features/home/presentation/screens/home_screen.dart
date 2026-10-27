@@ -8,6 +8,7 @@ import '../../../../core/router/route_paths.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../domain/home_greeting.dart';
 import '../../domain/trigger_checkin_state.dart';
 import '../controllers/trigger_checkin_controller.dart';
 import '../widgets/admob_banner_container.dart';
@@ -24,6 +25,7 @@ import '../../../triage_outcome/presentation/controllers/triage_outcome_controll
 import '../../../../core/notifications/hydration_notification_service.dart';
 import '../../../../core/notifications/daily_checkin_notification_service.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
+import '../../../hydration/presentation/hydration_reminder_offer.dart';
 import '../../../hydration/presentation/screens/hydration_dashboard_screen.dart';
 import '../../../hydration/presentation/widgets/water_intake_modal.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
@@ -76,6 +78,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(triggerCheckInProvider.notifier).loadTodayCheckIn();
       ref.read(triageOutcomeProvider.notifier).loadTodayOutcome();
       ref.read(hydrationControllerProvider.notifier).loadData();
+      if (mounted && ref.read(authControllerProvider).isAuthenticated) {
+        await ref.read(hydrationReminderOfferProvider).maybeShow(context);
+      }
     });
   }
 
@@ -372,11 +377,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       ? AppLocalizations.of(context)
                                           .activeProfileCardTitle(
                                               cardDisplayName)
-                                      : (cardDisplayName.isEmpty
-                                          ? AppLocalizations.of(context)
-                                              .homeGreetingNoName
-                                          : AppLocalizations.of(context)
-                                              .homeGreeting(cardDisplayName)),
+                                      : homeGreetingText(
+                                          AppLocalizations.of(context),
+                                          cardDisplayName,
+                                          ref.read(homeClockProvider)(),
+                                        ),
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,

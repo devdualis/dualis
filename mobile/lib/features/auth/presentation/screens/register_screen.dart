@@ -17,6 +17,7 @@ import '../widgets/biological_sex_selector.dart';
 import '../widgets/lgpd_consent_checkbox.dart';
 import '../../../hydration/domain/models/hydration_settings.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
+import '../../../hydration/presentation/hydration_reminder_offer.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -37,11 +38,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _lgpdConsent = false;
   bool _obscurePassword = true;
   DateTime? _selectedDate;
-
-  // Hydration & Water Alert Settings (1.1.1 & 1.1.2)
-  bool _waterReminderEnabled = true;
-  bool _waterTrackingEnabled = true;
-  ReminderSoundStyle _reminderSoundStyle = ReminderSoundStyle.whatsappChime;
 
   @override
   void initState() {
@@ -130,15 +126,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         );
 
     if (success && mounted) {
-      // Save hydration settings configured at registration
+      // Registration asks only for the minimum. Water reminders stay off
+      // until the person says yes to the offer on Home (strategy §13).
       await ref.read(hydrationControllerProvider.notifier).updateSettings(
-            HydrationSettings(
-              reminderEnabled: _waterReminderEnabled,
-              trackingEnabled: _waterTrackingEnabled,
-              reminderSoundStyle: _reminderSoundStyle,
-              dailyTargetMl: 2000,
-            ),
+            const HydrationSettings(reminderEnabled: false),
           );
+      await ref.read(hydrationReminderOfferProvider).markPending();
 
       if (!mounted) return;
 
@@ -311,180 +304,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         _obscurePassword = !_obscurePassword;
                       });
                     },
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // 6. Hábitos Saudáveis & Hidratação (1.1.1 & 1.1.2)
-                Card(
-                  key: const Key('register_hydration_card'),
-                  elevation: 0.5,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: Colors.grey.shade200),
-                  ),
-                  color: AppColors.surfaceLight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: AppColors.clinicalTeal.withValues(alpha: 0.12),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.water_drop_rounded,
-                                color: AppColors.clinicalTealDark,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    l10n.registerHydrationTitle,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.textPrimaryLight,
-                                    ),
-                                  ),
-                                  Text(
-                                    l10n.registerHydrationSubtitle,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 12,
-                                      color: AppColors.textSecondaryLight,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        SwitchListTile(
-                          key: const Key('register_water_reminder_switch'),
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            l10n.registerWaterReminderTitle,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimaryLight,
-                            ),
-                          ),
-                          subtitle: Text(
-                            l10n.registerWaterReminderSubtitle,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
-                              color: AppColors.textSecondaryLight,
-                            ),
-                          ),
-                          value: _waterReminderEnabled,
-                          activeThumbColor: AppColors.clinicalTealDark,
-                          onChanged: (val) {
-                            setState(() {
-                              _waterReminderEnabled = val;
-                            });
-                          },
-                        ),
-                        if (_waterReminderEnabled) ...[
-                          const Divider(height: 16),
-                          Text(
-                            l10n.registerReminderStyleLabel,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimaryLight,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: ChoiceChip(
-                                  key: const Key('register_reminder_style_chime'),
-                                  label: Text(l10n.registerReminderStyleChime),
-                                  selected: _reminderSoundStyle == ReminderSoundStyle.whatsappChime,
-                                  selectedColor: AppColors.clinicalTealDark,
-                                  labelStyle: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11,
-                                    color: _reminderSoundStyle == ReminderSoundStyle.whatsappChime
-                                        ? Colors.white
-                                        : AppColors.textPrimaryLight,
-                                  ),
-                                  onSelected: (val) {
-                                    if (val) {
-                                      setState(() {
-                                        _reminderSoundStyle = ReminderSoundStyle.whatsappChime;
-                                      });
-                                    }
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: ChoiceChip(
-                                  key: const Key('register_reminder_style_alarm'),
-                                  label: Text(l10n.registerReminderStyleAlarm),
-                                  selected: _reminderSoundStyle == ReminderSoundStyle.phoneAlarm,
-                                  selectedColor: AppColors.clinicalTealDark,
-                                  labelStyle: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11,
-                                    color: _reminderSoundStyle == ReminderSoundStyle.phoneAlarm
-                                        ? Colors.white
-                                        : AppColors.textPrimaryLight,
-                                  ),
-                                  onSelected: (val) {
-                                    if (val) {
-                                      setState(() {
-                                        _reminderSoundStyle = ReminderSoundStyle.phoneAlarm;
-                                      });
-                                    }
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          SwitchListTile(
-                            key: const Key('register_water_tracking_switch'),
-                            contentPadding: EdgeInsets.zero,
-                            title: Text(
-                              l10n.registerWaterTrackingTitle,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimaryLight,
-                              ),
-                            ),
-                            subtitle: Text(
-                              _waterTrackingEnabled
-                                  ? l10n.registerWaterTrackingOnDesc
-                                  : l10n.registerWaterTrackingOffDesc,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
-                                color: AppColors.textSecondaryLight,
-                              ),
-                            ),
-                            value: _waterTrackingEnabled,
-                            activeThumbColor: AppColors.clinicalTealDark,
-                            onChanged: (val) {
-                              setState(() {
-                                _waterTrackingEnabled = val;
-                              });
-                            },
-                          ),
-                        ],
-                      ],
-                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
