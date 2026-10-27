@@ -1,4 +1,4 @@
-import { Lang } from '../triage/services/triage-outcome.service';
+import { Lang } from '../../common/i18n/lang';
 
 export interface HouseAdDto {
   id: string;
@@ -80,14 +80,14 @@ const HOUSE_ADS: LocalizedAd[] = [
     assetKey: 'house_ad_ubo',
     url: 'https://example.com/ubo',
     title: {
-      pt: 'UBO: caminhadas em grupo',
-      en: 'UBO: group walks',
-      es: 'UBO: caminatas en grupo',
+      pt: 'UBO: caminhe junto',
+      en: 'UBO: walk together',
+      es: 'UBO: camina en compañía',
     },
     body: {
-      pt: 'Encontre grupos de caminhada perto de você. Exemplo de anúncio.',
-      en: 'Find walking groups near you. Sample ad.',
-      es: 'Encuentra grupos de caminata cerca de ti. Anuncio de ejemplo.',
+      pt: 'Encontre pessoas para caminhar perto de você. Exemplo de anúncio.',
+      en: 'Find people to walk with near you. Sample ad.',
+      es: 'Encuentra personas para caminar cerca de ti. Anuncio de ejemplo.',
     },
   },
 ];

@@ -9,11 +9,8 @@ import { and, asc, desc, eq, gte, inArray, isNull, sql } from 'drizzle-orm';
 import { DatabaseService, DrizzleTransaction } from '../../database/database.service';
 import { journalEntries, journalItems, symptomLogs, userConditions } from '../../database/schema';
 import { EncryptionService } from '../../common/encryption/encryption.service';
-import {
-  EMOTIONAL_LABELS,
-  PHYSICAL_LABELS,
-  resolveLang,
-} from '../triage/services/triage-outcome.service';
+import { Lang, resolveLang } from '../../common/i18n/lang';
+import { EMOTIONAL_LABELS, PHYSICAL_LABELS } from '../triage/services/triage-outcome.service';
 import { JOURNAL_LIMITS } from './constants/journal-keys.constant';
 import {
   CreateJournalEntryDto,
@@ -314,7 +311,7 @@ export class JournalService {
   }
 
   /** Old entries keep their stored area or mood, shown with its plain-language name. */
-  private toLegacyDto(row: LegacyRow, lang: ReturnType<typeof resolveLang>): LegacyJournalEntryDto {
+  private toLegacyDto(row: LegacyRow, lang: Lang): LegacyJournalEntryDto {
     const intensity = row.intensity >= 1 && row.intensity <= 5 ? row.intensity : null;
     const items: LegacyJournalItemDto[] = [];
     if (row.emotionalDimension && row.emotionalDimension !== 'normal') {

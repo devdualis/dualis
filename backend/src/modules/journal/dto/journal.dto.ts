@@ -171,7 +171,7 @@ export class JournalDaysQueryDto {
   @Max(JOURNAL_LIMITS.maxDays)
   days?: number;
 
-  /** Minutes east of UTC on the device (e.g. -180 for Brasília), used to group by day. */
+  /** Minutes east of UTC on the device (e.g. -180 for Brasília), used to count calendar days. */
   @IsOptional()
   @Type(() => Number)
   @IsInt()

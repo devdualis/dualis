@@ -1,7 +1,7 @@
 /**
  * Journal v2 keys (docs/bienestar/CONTRATO-JOURNAL-V2.md). Single source for the backend
  * validation; the mobile app mirrors these lists. Keys name what the person chose,
- * nothing else: no grouping and no meaning is attached to them.
+ * nothing else is attached to them.
  */
 
 /** Emotional choices: time -> branch -> options. optionKey = `<time>.<branch>.<option>`. */

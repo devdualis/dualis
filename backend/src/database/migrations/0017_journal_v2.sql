@@ -3,7 +3,7 @@
 -- (general mood, triggers, free note) with N items (the option the person chose or the
 -- words they wrote, body side, persistence, self-reported intensity 1-5), plus the
 -- conditions the person names themselves ("Minhas condições").
--- Stores choices as given. No grouping, no interpretation.
+-- Stores choices as given, without interpreting them.
 -- Free text columns (note, trigger_note, custom_label, label) hold AES-256-GCM ciphertext.
 -- RLS mirrors symptom_logs (0014): read = owner or ACCEPTED grantee, write = owner or
 -- CO_MANAGE grantee, inserts pin user_id (author) to the caller.

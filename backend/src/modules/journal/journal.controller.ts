@@ -23,7 +23,7 @@ import {
   ProfileContext,
   ProfileContextGuard,
 } from '../profiles/profile-context';
-import { resolveLang } from '../triage/services/triage-outcome.service';
+import { resolveLang } from '../../common/i18n/lang';
 import {
   CreateConditionDto,
   CreateJournalEntryDto,

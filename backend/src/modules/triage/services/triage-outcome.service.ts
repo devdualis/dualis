@@ -5,6 +5,7 @@ import { DRIZZLE_DB } from '../../../database/database.service';
 import * as schema from '../../../database/schema';
 import { symptomLogs } from '../../../database/schema';
 import { EncryptionService } from '../../../common/encryption/encryption.service';
+import { Lang, Localized, resolveLang } from '../../../common/i18n/lang';
 import { ArticlesCatalogService } from './articles-catalog.service';
 import { ArticlesVectorService } from './articles-vector.service';
 import { MEDICAL_ARTICLES_SEED } from '../data/medical-articles.seed';
@@ -20,8 +21,6 @@ import {
   DailyCheckInResponseDto,
 } from '../dto/daily-checkin.dto';
 
-export type Lang = 'pt' | 'en' | 'es';
-export type Localized = Record<Lang, string>;
 type Vertical = 'physical' | 'emotional';
 
 interface CategoryMapping {
@@ -169,13 +168,6 @@ const BODY_AND_EMOTIONS_NOTE: Localized = {
   en: 'You logged sensations in your body and in your emotions today. If any physical discomfort persists or gets worse, talk to a health professional.',
   es: 'Hoy registraste sensaciones en el cuerpo y en las emociones. Si alguna molestia física persiste o empeora, habla con un profesional de la salud.',
 };
-
-export function resolveLang(language?: string): Lang {
-  const lang = (language || 'pt').toLowerCase();
-  if (lang.startsWith('es')) return 'es';
-  if (lang.startsWith('en')) return 'en';
-  return 'pt';
-}
 
 @Injectable()
 export class TriageOutcomeService {
