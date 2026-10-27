@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../domain/journal_labels.dart';
+import '../../../journal/presentation/journal_labels.dart';
 
 /// White card with a title, shared by the dashboard sections.
 class InsightsCard extends StatelessWidget {

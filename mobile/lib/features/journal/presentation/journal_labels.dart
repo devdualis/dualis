@@ -6,6 +6,37 @@ import '../../../l10n/app_localizations.dart';
 class JournalLabels {
   JournalLabels._();
 
+  static const List<String> times = ['passado', 'presente', 'futuro'];
+  static const List<String> regions = [
+    'cabeca',
+    'peito',
+    'barriga',
+    'costas',
+    'membros',
+  ];
+  static const List<String> triggers = [
+    'trabalho',
+    'familia',
+    'sono',
+    'alimentacao',
+    'esforco',
+    'queda',
+    'medicamento',
+    'clima',
+    'nao_sei',
+    'outro',
+  ];
+
+  /// Any summary marker: option, branch, bare region/time, or `trigger:<key>`.
+  static String? marker(AppLocalizations l10n, String key) {
+    if (key.startsWith('trigger:')) return _triggerOrNull(l10n, key.substring(8));
+    return _optionOrNull(l10n, key) ??
+        _branchOrNull(l10n, key) ??
+        region(l10n, key) ??
+        time(l10n, key) ??
+        _triggerOrNull(l10n, key);
+  }
+
   /// Text of a final option key (`<root>.<branch>.<option>`).
   static String option(AppLocalizations l10n, String key) {
     switch (key) {
@@ -78,6 +109,11 @@ class JournalLabels {
     }
   }
 
+  static String? _optionOrNull(AppLocalizations l10n, String key) {
+    final text = option(l10n, key);
+    return text == key ? null : text;
+  }
+
   /// Text of a branch key (`<root>.<branch>`).
   static String branch(AppLocalizations l10n, String key) {
     switch (key) {
@@ -118,6 +154,11 @@ class JournalLabels {
     }
   }
 
+  static String? _branchOrNull(AppLocalizations l10n, String key) {
+    final text = branch(l10n, key);
+    return text == key ? null : text;
+  }
+
   /// Text of a time (emotional) or body region (physical).
   static String root(AppLocalizations l10n, String key) {
     switch (key) {
@@ -141,6 +182,29 @@ class JournalLabels {
         return key;
     }
   }
+
+  static String? region(AppLocalizations l10n, String key) => switch (key) {
+        'cabeca' => l10n.jv2RegionCabeca,
+        'peito' => l10n.jv2RegionPeito,
+        'barriga' => l10n.jv2RegionBarriga,
+        'costas' => l10n.jv2RegionCostas,
+        'membros' => l10n.jv2RegionMembros,
+        _ => null,
+      };
+
+  static String? time(AppLocalizations l10n, String key) => switch (key) {
+        'passado' => l10n.jv2TimePassado,
+        'presente' => l10n.jv2TimePresente,
+        'futuro' => l10n.jv2TimeFuturo,
+        _ => null,
+      };
+
+  static String? timeShort(AppLocalizations l10n, String key) => switch (key) {
+        'passado' => l10n.jv2TimeShortPassado,
+        'presente' => l10n.jv2TimeShortPresente,
+        'futuro' => l10n.jv2TimeShortFuturo,
+        _ => null,
+      };
 
   /// Text of a trigger key.
   static String trigger(AppLocalizations l10n, String key) {
@@ -168,6 +232,11 @@ class JournalLabels {
       default:
         return key;
     }
+  }
+
+  static String? _triggerOrNull(AppLocalizations l10n, String key) {
+    final text = trigger(l10n, key);
+    return text == key ? null : text;
   }
 
   /// Text of a persistence key.
