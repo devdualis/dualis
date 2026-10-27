@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/security/secure_storage_service.dart';
+import '../../../../core/utils/local_day.dart';
 import '../domain/models/water_intake_log.dart';
 
 final hydrationRemoteDataSourceProvider = Provider<HydrationRemoteDataSource>((ref) {
@@ -124,6 +125,7 @@ class HydrationRemoteDataSource {
 
       final queryParams = <String, dynamic>{
         'days': days,
+        'tzOffset': localTzOffsetMinutes(),
         if (referenceDate != null) 'referenceDate': referenceDate.toIso8601String(),
       };
 
