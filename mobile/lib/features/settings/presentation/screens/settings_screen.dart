@@ -994,6 +994,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       const Divider(height: 1, color: AppColors.outlineLight),
                       ListTile(
+                        key: const Key('settings_my_conditions_tile'),
+                        leading: const Icon(Icons.edit_note_rounded, color: AppColors.softIndigo),
+                        title: Text(
+                          l10n.jv2ConditionsTitle,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        subtitle: Text(
+                          l10n.jv2ConditionsSettingsSubtitle,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
+                        onTap: () => context.push(RoutePaths.myConditions),
+                      ),
+                      const Divider(height: 1, color: AppColors.outlineLight),
+                      ListTile(
                         key: const Key('settings_hydration_tile'),
                         leading: const Icon(Icons.water_drop_outlined, color: AppColors.clinicalTeal),
                         title: Text(

@@ -35,8 +35,6 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
   SecureStorageService get _storage => ref.read(secureStorageServiceProvider);
   TriageHistoryRemoteDataSource get _historyDataSource =>
       ref.read(triageHistoryDataSourceProvider);
-  SymptomClassificationRemoteDataSource get _classificationDataSource =>
-      ref.read(symptomClassificationDataSourceProvider);
 
   bool _isDisposed = false;
   String? _lastProfileId;
@@ -376,45 +374,6 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       checkInDate: _getTodayDateString(),
     );
     _persistCurrentState();
-  }
-
-  /// Classifies the typed symptom text and builds navigation args to open the
-  /// triage wizard pre-set to the right vertical/category, so free text always
-  /// reaches the onset/severity questions instead of being silently discarded.
-  ///
-  /// Returns `null` when there is no text to classify, or when classification
-  /// fails (offline, error) — callers should fall back to axis-only routing.
-  Future<TriageNavigationArgs?> resolveTextDrivenNavigation() async {
-    final text = state.naturalLanguageText.trim();
-    if (text.isEmpty) return null;
-
-    try {
-      final classification = await _classificationDataSource.classify(text);
-      final vertical = classification.primaryVertical == 'emotional'
-          ? TriageVertical.psicoEmocional
-          : TriageVertical.fisica;
-      final hasCrossVertical = (classification.primaryVertical == 'physical' &&
-              state.emotionalStatus != null &&
-              state.emotionalStatus != TriggerStatus.goodNormal) ||
-          (classification.primaryVertical == 'emotional' &&
-              state.physicalStatus != null &&
-              state.physicalStatus != TriggerStatus.goodNormal);
-
-      final isDual = (state.emotionalStatus != TriggerStatus.goodNormal &&
-              state.physicalStatus != TriggerStatus.goodNormal) ||
-          hasCrossVertical;
-
-      return TriageNavigationArgs(
-        initialVertical: vertical,
-        isDual: isDual,
-        naturalLanguageText: state.naturalLanguageText,
-        preselectedCategoryKey: classification.wizardCategoryKey,
-        isOffTopic: classification.isOffTopic,
-        mentionsSelfHarm: classification.mentionsSelfHarm,
-      );
-    } catch (_) {
-      return null;
-    }
   }
 
   /// [narrative] is the free text the user typed in the triage that produced

@@ -17,7 +17,7 @@ class SymptomClassificationRemoteDataSource {
   Future<SymptomClassification> classify(String text) async {
     final authToken = await _secureStorage.getAccessToken();
     final response = await _apiClient.post(
-      ApiEndpoints.classifySymptom,
+      ApiEndpoints.tagEntry,
       data: {
         'text': text,
         'language': 'pt',

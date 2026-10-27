@@ -3,32 +3,28 @@ import 'package:dualis_mobile/features/triage/domain/symptom_classification.dart
 
 void main() {
   group('SymptomClassification', () {
-    test('parses wellness tagging schema', () {
+    test('parses the tagging schema', () {
       final c = SymptomClassification.fromJson({
         'isOffTopic': false,
         'vertical': 'physical',
         'bodyAreaOrMood': 'cabeca_pescoco',
         'layTerm': 'dor de cabeça',
-        'mentionsSelfHarm': false,
       });
 
       expect(c.vertical, 'physical');
+      expect(c.bodyAreaOrMood, 'cabeca_pescoco');
       expect(c.layTerm, 'dor de cabeça');
-      expect(c.wizardCategoryKey, 'cabeca_pescoco');
     });
 
-    test('tolerates legacy triage schema', () {
+    test('ignores fields that are not tags', () {
       final c = SymptomClassification.fromJson({
-        'primaryVertical': 'physical',
-        'systemOrDimension': 'head_neck',
-        'mappedLayTerm': 'cefaleia',
+        'vertical': 'emotional',
+        'mentionsSelfHarm': true,
         'urgencyScore': 5,
-        'clinicalConcept': 'ignored',
-        'isEmergencyCandidate': true,
       });
 
-      expect(c.systemOrDimension, 'head_neck');
-      expect(c.wizardCategoryKey, 'cabeca_pescoco');
+      expect(c.vertical, 'emotional');
+      expect(c.isOffTopic, isFalse);
     });
   });
 }

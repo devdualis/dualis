@@ -144,34 +144,6 @@
   "@emergencyCopiedToast": {
     "description": "Toast or snackbar message indicating emergency number was copied"
   },
-  "triageBannerEmotional": "Registro emocional de hoje",
-  "@triageBannerEmotional": {
-    "description": "Banner text for emotional triage vertical"
-  },
-  "triageBannerPhysical": "Registro físico de hoje",
-  "@triageBannerPhysical": {
-    "description": "Banner text for physical triage vertical"
-  },
-  "triageStep": "Passo {step} de {total}",
-  "@triageStep": {
-    "description": "Step progress indicator",
-    "placeholders": {
-      "step": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "triageNext": "Próximo",
-  "@triageNext": {
-    "description": "Button to advance to next triage step"
-  },
-  "triageBack": "Voltar",
-  "@triageBack": {
-    "description": "Button to go back to previous triage step"
-  },
   "triageConfirm": "Confirmar",
   "@triageConfirm": {
     "description": "Confirm button label"
@@ -179,611 +151,6 @@
   "triagePreviewTitle": "Revise seu registro",
   "@triagePreviewTitle": {
     "description": "Title of the preview step card"
-  },
-  "triagePreviewSubmit": "Confirmar e Finalizar",
-  "@triagePreviewSubmit": {
-    "description": "Final submission CTA button"
-  },
-  "triageQ1Emotional": "Olhando para o seu lado emocional e mental, qual palavra descreve melhor o que você está sentindo agora?",
-  "@triageQ1Emotional": {
-    "description": "Question 1 emotional"
-  },
-  "triageOptNormal": "Normal / Me sinto bem",
-  "@triageOptNormal": {
-    "description": "Opção de triagem: Normal / Me sinto bem"
-  },
-  "triageSaveNormal": "Concluir como Normal / Bem",
-  "@triageSaveNormal": {
-    "description": "Botão de salvar triagem imediatamente como normal"
-  },
-  "triageOptAnsiedade": "Ansiedade / Agitação",
-  "@triageOptAnsiedade": {
-    "description": "Emotional option: Anxiety/Agitation"
-  },
-  "triageOptTristeza": "Tristeza / Desânimo",
-  "@triageOptTristeza": {
-    "description": "Emotional option: Sadness/Discouragement"
-  },
-  "triageOptEstresse": "Estresse / Irritabilidade",
-  "@triageOptEstresse": {
-    "description": "Emotional option: Stress/Irritability"
-  },
-  "triageOptCansaco": "Cansaço Mental",
-  "@triageOptCansaco": {
-    "description": "Emotional option: Mental Fatigue"
-  },
-  "triageOptAnsiosaAgitacao": "Inquieto(a) / Agitado(a)",
-  "@triageOptAnsiosaAgitacao": {
-    "description": "Emotional dimension 1: Ansiosa / Agitação"
-  },
-  "triageOptDepressivaDesanimo": "Pra baixo / Desanimado(a)",
-  "@triageOptDepressivaDesanimo": {
-    "description": "Emotional dimension 2: Depressiva / Desânimo"
-  },
-  "triageOptEstresseBurnout": "Estressado(a) / Esgotado(a)",
-  "@triageOptEstresseBurnout": {
-    "description": "Emotional dimension 3: Estresse / Burnout"
-  },
-  "triageOptSomatica": "Tensão no corpo",
-  "@triageOptSomatica": {
-    "description": "Emotional dimension 4: Somática (Psicossomática)"
-  },
-  "triageOptSono": "Sono ruim ou sono demais",
-  "@triageOptSono": {
-    "description": "Emotional dimension 5: Sono (Insônia/Hipersônia)"
-  },
-  "triageOptCognitivaFoco": "Dificuldade de foco",
-  "@triageOptCognitivaFoco": {
-    "description": "Emotional dimension 6: Cognitiva / Foco"
-  },
-  "triageOptAutoestima": "Autoestima / Autoimagem",
-  "@triageOptAutoestima": {
-    "description": "Emotional dimension 7: Autoestima / Autoimagem"
-  },
-  "triageQ2Emotional": "Você tem se sentido assim frequentemente nos últimos dias ou é algo muito específico de hoje?",
-  "@triageQ2Emotional": {
-    "description": "Question 2 emotional"
-  },
-  "triageOptComecouHoje": "Começou hoje",
-  "@triageOptComecouHoje": {
-    "description": "Persistence option: Started today"
-  },
-  "triageOptJaFazDias": "Já faz alguns dias",
-  "@triageOptJaFazDias": {
-    "description": "Persistence option: A few days ago"
-  },
-  "triageOptConstanteSemanas": "É algo constante há semanas",
-  "@triageOptConstanteSemanas": {
-    "description": "Persistence option: Constant for weeks"
-  },
-  "triageQ3Emotional": "Essa sensação está parecendo um leve incômodo de fundo ou algo forte que está acelerando seus pensamentos?",
-  "@triageQ3Emotional": {
-    "description": "Question 3 emotional"
-  },
-  "triageOptLeveControlavel": "Leve e controlável",
-  "@triageOptLeveControlavel": {
-    "description": "Emotional intensity: Mild and controllable"
-  },
-  "triageOptModerada": "Moderada",
-  "@triageOptModerada": {
-    "description": "Emotional intensity: Moderate"
-  },
-  "triageOptMuitoForte": "Muito forte e difícil de segurar",
-  "@triageOptMuitoForte": {
-    "description": "Emotional intensity: Very strong and hard to control"
-  },
-  "triageQ4Emotional": "Você consegue identificar se existe um motivo principal para isso estar acontecendo hoje?",
-  "@triageQ4Emotional": {
-    "description": "Question 4 emotional generic"
-  },
-  "triageQ4Ansiedade": "O que parece estar disparando essa sensação de ansiedade, agitação ou aperto?",
-  "@triageQ4Ansiedade": {
-    "description": "Question 4 anxiety and agitation"
-  },
-  "triageQ4Depressao": "Você consegue identificar se algum acontecimento recente ou sentimento pesou mais no seu desânimo?",
-  "@triageQ4Depressao": {
-    "description": "Question 4 depression and discouragement"
-  },
-  "triageQ4EstresseBurnout": "De onde vem a maior parte da pressão ou esgotamento que você está sentindo?",
-  "@triageQ4EstresseBurnout": {
-    "description": "Question 4 stress and burnout"
-  },
-  "triageQ4Somatica": "Essa tensão no corpo ou aperto físico costuma piorar em quais situações?",
-  "@triageQ4Somatica": {
-    "description": "Question 4 somatic tension"
-  },
-  "triageQ4Sono": "Qual tem sido a principal dificuldade que atrapalha suas noites de sono?",
-  "@triageQ4Sono": {
-    "description": "Question 4 sleep disturbances"
-  },
-  "triageQ4CognitivaFoco": "O que mais parece estar prejudicando sua concentração ou clareza mental?",
-  "@triageQ4CognitivaFoco": {
-    "description": "Question 4 cognitive focus"
-  },
-  "triageQ4Autoestima": "O que tem despertado com mais intensidade essa sensação de insegurança ou autocrítica?",
-  "@triageQ4Autoestima": {
-    "description": "Question 4 self-esteem"
-  },
-  "triageOptTrabalho": "Trabalho / Estudos",
-  "@triageOptTrabalho": {
-    "description": "Trigger option: Work/Studies"
-  },
-  "triageOptFamilia": "Família / Relacionamentos",
-  "@triageOptFamilia": {
-    "description": "Trigger option: Family/Relationships"
-  },
-  "triageOptNoiteRuim": "Noite ruim de sono",
-  "@triageOptNoiteRuim": {
-    "description": "Trigger option: Poor sleep"
-  },
-  "triageOptNaoSei": "Não sei dizer",
-  "@triageOptNaoSei": {
-    "description": "Trigger option: Cannot tell"
-  },
-  "triageOptSimCobrancaPrazos": "Sobrecarga de tarefas, prazos ou expectativas",
-  "@triageOptSimCobrancaPrazos": {
-    "description": "Emotional trigger: Overwhelmed by tasks or deadlines"
-  },
-  "triageOptSimConflitoRelacionamento": "Conflito ou discussão com pessoa próxima",
-  "@triageOptSimConflitoRelacionamento": {
-    "description": "Emotional trigger: Interpersonal conflict"
-  },
-  "triageOptSimIncertezaFuturo": "Medo de mudanças, notícias ou incerteza futura",
-  "@triageOptSimIncertezaFuturo": {
-    "description": "Emotional trigger: Uncertainty or fear of change"
-  },
-  "triageOptSimExcessoEstimulantes": "Excesso de café, energéticos ou ambiente agitado",
-  "@triageOptSimExcessoEstimulantes": {
-    "description": "Emotional trigger: Excess caffeine or agitation"
-  },
-  "triageOptNaoSeiDizerEmocional": "Não sei identificar, surgiu de repente",
-  "@triageOptNaoSeiDizerEmocional": {
-    "description": "Emotional trigger: Cannot identify, sudden onset"
-  },
-  "triageOptSimPerdaLuto": "Perda, término de relacionamento ou luto",
-  "@triageOptSimPerdaLuto": {
-    "description": "Emotional trigger: Loss, breakup or grief"
-  },
-  "triageOptSimSolidaoIsolamento": "Sensação de solidão, isolamento ou incompreensão",
-  "@triageOptSimSolidaoIsolamento": {
-    "description": "Emotional trigger: Loneliness or isolation"
-  },
-  "triageOptSimFrustracaoDesilusao": "Frustração com algo que não saiu como esperado",
-  "@triageOptSimFrustracaoDesilusao": {
-    "description": "Emotional trigger: Frustration or disappointment"
-  },
-  "triageOptSimCansacoAcumulado": "Cansaço prolongado sem pausas para recuperação",
-  "@triageOptSimCansacoAcumulado": {
-    "description": "Emotional trigger: Accumulated exhaustion without breaks"
-  },
-  "triageOptSimPressaoTrabalho": "Excesso de carga horária, cobranças ou prazos no trabalho",
-  "@triageOptSimPressaoTrabalho": {
-    "description": "Emotional trigger: Work pressure or excessive hours"
-  },
-  "triageOptSimResponsabilidadesCasa": "Cuidados familiares, finanças ou tarefas domésticas",
-  "@triageOptSimResponsabilidadesCasa": {
-    "description": "Emotional trigger: Family, financial or domestic strain"
-  },
-  "triageOptSimFaltaDescanso": "Sem tempo livre para lazer, repouso ou desconectar",
-  "@triageOptSimFaltaDescanso": {
-    "description": "Emotional trigger: Lack of rest or downtime"
-  },
-  "triageOptSimAmbienteToxico": "Relações difíceis ou ambiente diário desgastante",
-  "@triageOptSimAmbienteToxico": {
-    "description": "Emotional trigger: Toxic or straining environment"
-  },
-  "triageOptSimDuranteTrabalho": "Durante a jornada de trabalho ou momentos de pressão",
-  "@triageOptSimDuranteTrabalho": {
-    "description": "Emotional trigger: During work or intense pressure"
-  },
-  "triageOptSimDiscussaoConflito": "Logo após discussões, desentendimentos ou sustos",
-  "@triageOptSimDiscussaoConflito": {
-    "description": "Emotional trigger: After conflict or fright"
-  },
-  "triageOptSimFinalDoDia": "No fim do dia, ao tentar relaxar ou deitar",
-  "@triageOptSimFinalDoDia": {
-    "description": "Emotional trigger: End of day when attempting to rest"
-  },
-  "triageOptSimPreocupacaoConstante": "Em qualquer momento ao pensar nos problemas",
-  "@triageOptSimPreocupacaoConstante": {
-    "description": "Emotional trigger: Whenever thinking about issues"
-  },
-  "triageOptSimDificuldadePegarSono": "Cabeça acelerada / pensamentos na hora de dormir",
-  "@triageOptSimDificuldadePegarSono": {
-    "description": "Emotional trigger: Racing thoughts at bedtime"
-  },
-  "triageOptSimAcordaMadrugada": "Acordar no meio da noite e não conseguir voltar a dormir",
-  "@triageOptSimAcordaMadrugada": {
-    "description": "Emotional trigger: Middle of the night awakening"
-  },
-  "triageOptSimSonoAgitadoPesadelos": "Sono leve, agitado, com pesadelos ou despertares",
-  "@triageOptSimSonoAgitadoPesadelos": {
-    "description": "Emotional trigger: Restless sleep or nightmares"
-  },
-  "triageOptSimHorarioIrregularTelas": "Uso de celular/telas até tarde ou horários irregulares",
-  "@triageOptSimHorarioIrregularTelas": {
-    "description": "Emotional trigger: Late screens or irregular sleep habits"
-  },
-  "triageOptSimSobrecargaMultitarefas": "Muitas coisas para fazer ao mesmo tempo / excesso de estímulos",
-  "@triageOptSimSobrecargaMultitarefas": {
-    "description": "Emotional trigger: Multitasking overload"
-  },
-  "triageOptSimPreocupacaoIntrusiva": "Pensamentos de preocupação que interrompem o raciocínio",
-  "@triageOptSimPreocupacaoIntrusiva": {
-    "description": "Emotional trigger: Intrusive worried thoughts"
-  },
-  "triageOptSimExaustaoMental": "Cansaço mental acumulado após muitas horas de esforço",
-  "@triageOptSimExaustaoMental": {
-    "description": "Emotional trigger: Accumulated mental exhaustion"
-  },
-  "triageOptSimFaltaMotivacao": "Desinteresse, falta de energia ou apatia com as tarefas",
-  "@triageOptSimFaltaMotivacao": {
-    "description": "Emotional trigger: Lack of motivation or apathy"
-  },
-  "triageOptSimComparacaoRedes": "Comparação com outras pessoas (redes sociais ou colegas)",
-  "@triageOptSimComparacaoRedes": {
-    "description": "Emotional trigger: Comparison on social media or peers"
-  },
-  "triageOptSimMedoFalharJulgamento": "Medo de errar, não corresponder ou ser julgado",
-  "@triageOptSimMedoFalharJulgamento": {
-    "description": "Emotional trigger: Fear of failure or judgment"
-  },
-  "triageOptSimCriticaRejeicao": "Crítica recente recebida ou sensação de rejeição",
-  "@triageOptSimCriticaRejeicao": {
-    "description": "Emotional trigger: Recent criticism or rejection"
-  },
-  "triageOptSimDesvalorizacaoPropria": "Dificuldade em reconhecer suas próprias conquistas",
-  "@triageOptSimDesvalorizacaoPropria": {
-    "description": "Emotional trigger: Difficulty acknowledging own achievements"
-  },
-  "triagePreviewEmotional": "Revise seu registro",
-  "@triagePreviewEmotional": {
-    "description": "Emotional preview step description"
-  },
-  "triageQ1Physical": "Vamos falar sobre a parte física. Onde você está sentindo esse desconforto ou dor principal?",
-  "@triageQ1Physical": {
-    "description": "Question 1 physical"
-  },
-  "triageOptCabeca": "Cabeça",
-  "@triageOptCabeca": {
-    "description": "Physical location: Head"
-  },
-  "triageOptCostas": "Costas / Coluna",
-  "@triageOptCostas": {
-    "description": "Physical location: Back/Spine"
-  },
-  "triageOptArticulacoes": "Articulações (Joelho, Ombro, etc.)",
-  "@triageOptArticulacoes": {
-    "description": "Physical location: Joints"
-  },
-  "triageOptAbdomen": "Abdômen / Estômago",
-  "@triageOptAbdomen": {
-    "description": "Physical location: Abdomen/Stomach"
-  },
-  "triageOptCabecaPescoco": "Cabeça e pescoço",
-  "@triageOptCabecaPescoco": {
-    "description": "Physical system 1: Cabeça e Pescoço"
-  },
-  "triageOptCardiovascularTorax": "Peito",
-  "@triageOptCardiovascularTorax": {
-    "description": "Physical system 2: Cardiovascular / Tórax"
-  },
-  "triageOptRespiratorio": "Respiração",
-  "@triageOptRespiratorio": {
-    "description": "Physical system 3: Sistema Respiratório"
-  },
-  "triageOptGastrointestinalAbdomen": "Barriga",
-  "@triageOptGastrointestinalAbdomen": {
-    "description": "Physical system 4: Gastrointestinal / Abdômen"
-  },
-  "triageOptColunaDorDorsal": "Costas",
-  "@triageOptColunaDorDorsal": {
-    "description": "Physical system 5: Coluna e Dor Dorsal"
-  },
-  "triageOptMembrosSuperiores": "Braços",
-  "@triageOptMembrosSuperiores": {
-    "description": "Physical system 6: Membros Superiores D/E"
-  },
-  "triageOptMembrosInferiores": "Pernas",
-  "@triageOptMembrosInferiores": {
-    "description": "Physical system 7: Membros Inferiores D/E"
-  },
-  "triageOptNeurologico": "Tontura / formigamento",
-  "@triageOptNeurologico": {
-    "description": "Physical system 8: Sistema Neurológico"
-  },
-  "triageOptGeniturinarioPelvico": "Região íntima / urinária",
-  "@triageOptGeniturinarioPelvico": {
-    "description": "Physical system 9: Geniturinário / Pélvico"
-  },
-  "triageOptDermatologico": "Pele",
-  "@triageOptDermatologico": {
-    "description": "Physical system 10: Sistema Dermatológico"
-  },
-  "triageOptMuscularGeralSistemico": "Corpo todo / cansaço",
-  "@triageOptMuscularGeralSistemico": {
-    "description": "Physical system 11: Muscular / Geral Sistêmico"
-  },
-  "triageOptEndocrinoMetabolico": "Sede, fome ou energia",
-  "@triageOptEndocrinoMetabolico": {
-    "description": "Physical system 12: Endócrino / Metabólico"
-  },
-  "triageQ2Physical": "Há quanto tempo você sente esse desconforto?",
-  "@triageQ2Physical": {
-    "description": "Question 2 physical"
-  },
-  "triageOptComecouAgora": "Começou agora",
-  "@triageOptComecouAgora": {
-    "description": "Physical persistence: Started now"
-  },
-  "triageOptHaAlgunsDias": "Há alguns dias",
-  "@triageOptHaAlgunsDias": {
-    "description": "Physical persistence: A few days ago"
-  },
-  "triageOptCronica": "Já faz bastante tempo",
-  "@triageOptCronica": {
-    "description": "Physical persistence: Chronic"
-  },
-  "triageQ3Physical": "Em uma escala de 1 a 5 (onde 1 é quase imperceptível e 5 é insuportável), como está agora?",
-  "@triageQ3Physical": {
-    "description": "Question 3 physical"
-  },
-  "triageQ4Physical": "Você lembra de ter feito algum esforço atípico, exercício pesado ou sofrido alguma batida/queda recentemente?",
-  "@triageQ4Physical": {
-    "description": "Question 4 physical generic"
-  },
-  "triageQ4CabecaPescoco": "Você notou algum fator associado, como estresse intenso, muitas horas em telas, noite mal dormida ou sinusite/resfriado?",
-  "@triageQ4CabecaPescoco": {
-    "description": "Question 4 head and neck"
-  },
-  "triageQ4CardiovascularTorax": "O desconforto no peito ou palpitação começou após esforço físico, estresse emocional ou consumo de estimulantes?",
-  "@triageQ4CardiovascularTorax": {
-    "description": "Question 4 cardiovascular and chest"
-  },
-  "triageQ4Respiratorio": "Você teve contato com poeira, fumaça, ar frio ou está com sintomas de gripe/resfriado?",
-  "@triageQ4Respiratorio": {
-    "description": "Question 4 respiratory"
-  },
-  "triageQ4Gastrointestinal": "Você ingeriu algum alimento diferente ou pesado, tomou remédios recentes ou ficou muito tempo em jejum?",
-  "@triageQ4Gastrointestinal": {
-    "description": "Question 4 gastrointestinal"
-  },
-  "triageQ4ColunaDorDorsal": "Você carregou peso excessivo, permaneceu muito tempo em má postura ou sofreu algum impacto/queda?",
-  "@triageQ4ColunaDorDorsal": {
-    "description": "Question 4 spine and back"
-  },
-  "triageQ4MembrosSuperiores": "Você realizou movimentos repetitivos (digitação, esforço manual), treino de braço/ombro ou sofreu impacto/queda?",
-  "@triageQ4MembrosSuperiores": {
-    "description": "Question 4 upper limbs"
-  },
-  "triageQ4MembrosInferiores": "Você fez caminhada longa, corrida, ficou muito tempo em pé/sentado ou sofreu torção/tropeço?",
-  "@triageQ4MembrosInferiores": {
-    "description": "Question 4 lower limbs"
-  },
-  "triageQ4Neurologico": "O sintoma surgiu após levantar-se rápido, ficar sem comer/beber água, crise de ansiedade ou posição desconfortável?",
-  "@triageQ4Neurologico": {
-    "description": "Question 4 neurological"
-  },
-  "triageQ4Geniturinario": "Você percebeu relação com pouca água/reter urina, ciclo menstrual, relação íntima ou uso de roupas úmidas?",
-  "@triageQ4Geniturinario": {
-    "description": "Question 4 genitourinary and pelvic"
-  },
-  "triageQ4Dermatological": "Você notou algo que possa ter causado isso, como um produto novo, exposição ao sol/calor ou contato com algo (planta, inseto, substância)?",
-  "@triageQ4Dermatological": {
-    "description": "Question 4 dermatological"
-  },
-  "triageQ4MuscularGeral": "Você sente isso associado a cansaço extremo, início de gripe/virose, falta de descanso ou desidratação?",
-  "@triageQ4MuscularGeral": {
-    "description": "Question 4 muscular general"
-  },
-  "triageQ4EndocrinoMetabolico": "Você notou relação com jejum prolongado, refeição açucarada, alteração de medicamento ou calor excessivo?",
-  "@triageQ4EndocrinoMetabolico": {
-    "description": "Question 4 endocrine and metabolic"
-  },
-  "triageOptSimExercicio": "Sim, exercício intenso",
-  "@triageOptSimExercicio": {
-    "description": "Physical trigger: Intense exercise"
-  },
-  "triageOptSimQueda": "Sim, sofri uma queda",
-  "@triageOptSimQueda": {
-    "description": "Physical trigger: Fall/impact"
-  },
-  "triageOptNaoComecouNada": "Não, começou do nada",
-  "@triageOptNaoComecouNada": {
-    "description": "Physical trigger: Started out of nowhere"
-  },
-  "triageOptSimProdutoNovo": "Sim, usei um produto novo (cosmético, sabonete, etc.)",
-  "@triageOptSimProdutoNovo": {
-    "description": "Dermatological trigger: New product"
-  },
-  "triageOptSimExposicaoSolCalor": "Sim, houve exposição ao sol, calor ou suor intenso",
-  "@triageOptSimExposicaoSolCalor": {
-    "description": "Dermatological trigger: Sun/heat exposure"
-  },
-  "triageOptSimPicadaContato": "Sim, tive contato com planta, inseto ou substância",
-  "@triageOptSimPicadaContato": {
-    "description": "Dermatological trigger: Insect/plant/substance contact"
-  },
-  "triageOptSimEstresseSono": "Estresse ou sono irregular",
-  "@triageOptSimEstresseSono": {
-    "description": "Trigger: Stress or irregular sleep"
-  },
-  "triageOptSimTelasEsforcoVisual": "Muitas horas em telas / esforço visual",
-  "@triageOptSimTelasEsforcoVisual": {
-    "description": "Trigger: Screen time / eye strain"
-  },
-  "triageOptSimPosturaPescoco": "Tensão muscular ou má postura no pescoço",
-  "@triageOptSimPosturaPescoco": {
-    "description": "Trigger: Muscle tension / neck posture"
-  },
-  "triageOptSimResfriadoSinusite": "Sintomas de resfriado ou sinusite",
-  "@triageOptSimResfriadoSinusite": {
-    "description": "Trigger: Cold or sinusitis"
-  },
-  "triageOptSimEsforcoFisico": "Logo após esforço físico ou caminhada",
-  "@triageOptSimEsforcoFisico": {
-    "description": "Trigger: After physical exertion"
-  },
-  "triageOptSimEstresseAnsiedade": "Momento de forte ansiedade ou estresse",
-  "@triageOptSimEstresseAnsiedade": {
-    "description": "Trigger: Anxiety or acute stress"
-  },
-  "triageOptSimCafeinaEstimulante": "Consumo de café, energético ou estimulante",
-  "@triageOptSimCafeinaEstimulante": {
-    "description": "Trigger: Caffeine or stimulant intake"
-  },
-  "triageOptNaoSurgiuEmRepouso": "Não, surgiu espontaneamente ou em repouso",
-  "@triageOptNaoSurgiuEmRepouso": {
-    "description": "Trigger: At rest or spontaneous"
-  },
-  "triageOptSimAlergiaAmbiente": "Exposição a poeira, mofo, fumaça ou ar-condicionado",
-  "@triageOptSimAlergiaAmbiente": {
-    "description": "Trigger: Dust, smoke, allergen exposure"
-  },
-  "triageOptSimGripeInfeccao": "Sintomas de gripe, resfriado ou dor de garganta",
-  "@triageOptSimGripeInfeccao": {
-    "description": "Trigger: Flu or respiratory infection"
-  },
-  "triageOptSimMudancaClima": "Mudança brusca de temperatura ou ar frio",
-  "@triageOptSimMudancaClima": {
-    "description": "Trigger: Weather change or cold air"
-  },
-  "triageOptSimAlimentacaoDiferente": "Alimento diferente, pesado ou suspeito",
-  "@triageOptSimAlimentacaoDiferente": {
-    "description": "Trigger: Unusual or heavy food"
-  },
-  "triageOptSimMedicamentoRecente": "Uso recente de medicamento ou anti-inflamatório",
-  "@triageOptSimMedicamentoRecente": {
-    "description": "Trigger: Recent medication"
-  },
-  "triageOptSimJejumEstresse": "Longo período de jejum ou estresse intenso",
-  "@triageOptSimJejumEstresse": {
-    "description": "Trigger: Fasting or severe stress"
-  },
-  "triageOptNaoSemRelacaoAlimento": "Não, começou sem relação com alimentação",
-  "@triageOptNaoSemRelacaoAlimento": {
-    "description": "Trigger: Unrelated to food"
-  },
-  "triageOptSimCarregouPeso": "Pegou peso ou fez esforço lombar",
-  "@triageOptSimCarregouPeso": {
-    "description": "Trigger: Heavy lifting"
-  },
-  "triageOptSimPosturaProlongada": "Muito tempo sentado ou má postura ao dormir",
-  "@triageOptSimPosturaProlongada": {
-    "description": "Trigger: Prolonged sitting or poor posture"
-  },
-  "triageOptSimMauJeitoQueda": "Movimento brusco ('mau jeito') ou impacto/queda",
-  "@triageOptSimMauJeitoQueda": {
-    "description": "Trigger: Awkward movement or impact"
-  },
-  "triageOptSimMovimentoRepetitivo": "Movimentos repetitivos (digitação, celular, trabalho manual)",
-  "@triageOptSimMovimentoRepetitivo": {
-    "description": "Trigger: Repetitive motions"
-  },
-  "triageOptSimTreinoSobrecarga": "Exercício físico ou sobrecarga nos braços/ombros",
-  "@triageOptSimTreinoSobrecarga": {
-    "description": "Trigger: Arm/shoulder workout or strain"
-  },
-  "triageOptSimTraumaPancada": "Pancada, queda ou dormiu de mau jeito sobre o braço",
-  "@triageOptSimTraumaPancada": {
-    "description": "Trigger: Direct impact or slept on arm"
-  },
-  "triageOptSimCaminhadaCorrida": "Caminhada longa, corrida ou esporte recente",
-  "@triageOptSimCaminhadaCorrida": {
-    "description": "Trigger: Long walk or sports"
-  },
-  "triageOptSimTempoEmPeSentado": "Muitas horas em pé ou muito tempo sentado",
-  "@triageOptSimTempoEmPeSentado": {
-    "description": "Trigger: Long standing or sitting"
-  },
-  "triageOptSimTorcaoTropeco": "Torção no tornozelo/joelho, tropeço ou queda",
-  "@triageOptSimTorcaoTropeco": {
-    "description": "Trigger: Sprain, stumble, or fall"
-  },
-  "triageOptSimLevantarRapido": "Ao levantar-se rapidamente ou mudar de posição",
-  "@triageOptSimLevantarRapido": {
-    "description": "Trigger: Standing up quickly"
-  },
-  "triageOptSimJejumDesidratacao": "Horas sem se alimentar ou pouca ingestão de água",
-  "@triageOptSimJejumDesidratacao": {
-    "description": "Trigger: Fasting or dehydration"
-  },
-  "triageOptSimAnsiedadeHiperventilacao": "Durante momento de tensão ou respiração acelerada",
-  "@triageOptSimAnsiedadeHiperventilacao": {
-    "description": "Trigger: Tension or hyperventilation"
-  },
-  "triageOptSimCompressaoPostural": "Membro pressionado ou postura comprimindo nervo",
-  "@triageOptSimCompressaoPostural": {
-    "description": "Trigger: Nerve compression posture"
-  },
-  "triageOptSimBaixaIngestaoUrina": "Pouca ingestão de água ou segurou urina por muito tempo",
-  "@triageOptSimBaixaIngestaoUrina": {
-    "description": "Trigger: Low water or held urine"
-  },
-  "triageOptSimCicloMenstrual": "Período pré-menstrual ou menstrual",
-  "@triageOptSimCicloMenstrual": {
-    "description": "Trigger: Menstrual cycle"
-  },
-  "triageOptSimPosRelacaoIntima": "Após relação íntima ou troca de produtos íntimos",
-  "@triageOptSimPosRelacaoIntima": {
-    "description": "Trigger: Post intimacy or intimate product"
-  },
-  "triageOptSimRoupasUmidas": "Uso de roupas úmidas ou muito apertadas",
-  "@triageOptSimRoupasUmidas": {
-    "description": "Trigger: Damp or tight clothing"
-  },
-  "triageOptSimCansacoEsgotamento": "Cansaço extremo, sobrecarga ou noites sem dormir",
-  "@triageOptSimCansacoEsgotamento": {
-    "description": "Trigger: Extreme fatigue or sleepless nights"
-  },
-  "triageOptSimSintomasGripeVirose": "Sensação de febre, calafrio ou início de virose",
-  "@triageOptSimSintomasGripeVirose": {
-    "description": "Trigger: Fever or viral symptoms"
-  },
-  "triageOptSimAtividadeGlobal": "Atividade física atípica (mudança, faxina pesada)",
-  "@triageOptSimAtividadeGlobal": {
-    "description": "Trigger: Atypical whole-body activity"
-  },
-  "triageOptSimDesidratacaoCalor": "Pouca hidratação ou exposição prolongada ao calor",
-  "@triageOptSimDesidratacaoCalor": {
-    "description": "Trigger: Dehydration or prolonged heat"
-  },
-  "triageOptSimJejumAlimentacao": "Horas sem comer ou após refeição pesada/açucarada",
-  "@triageOptSimJejumAlimentacao": {
-    "description": "Trigger: Fasting or heavy sugary meal"
-  },
-  "triageOptSimAjusteMedicamento": "Esqueceu ou alterou dose de medicamento habitual",
-  "@triageOptSimAjusteMedicamento": {
-    "description": "Trigger: Missed or altered medication"
-  },
-  "triageOptSimCalorDesidratacao": "Ambiente muito quente ou baixa ingestão de líquidos",
-  "@triageOptSimCalorDesidratacao": {
-    "description": "Trigger: High heat or low fluids"
-  },
-  "triageOptSimEstresseSobrecarga": "Pico recente de estresse ou quebra de rotina",
-  "@triageOptSimEstresseSobrecarga": {
-    "description": "Trigger: Acute stress or routine disruption"
-  },
-  "triagePreviewPhysical": "Revise seu registro",
-  "@triagePreviewPhysical": {
-    "description": "Physical preview step description"
-  },
-  "triageIntensityLabel": "Intensidade: {value}",
-  "@triageIntensityLabel": {
-    "description": "Intensity label",
-    "placeholders": {
-      "value": {
-        "type": "int"
-      }
-    }
-  },
-  "triageIntensityMin": "Quase imperceptível",
-  "@triageIntensityMin": {
-    "description": "Intensity scale minimum label"
-  },
-  "triageIntensityMax": "Insuportável",
-  "@triageIntensityMax": {
-    "description": "Intensity scale maximum label"
   },
   "outcomeScreenTitle": "Resumo do seu registro",
   "@outcomeScreenTitle": {
@@ -821,51 +188,6 @@
   "outcomeDoneButton": "Concluir e Voltar ao Início",
   "@outcomeDoneButton": {
     "description": "Button to finish triage and return home"
-  },
-  "antiburlaTitle": "Isso já apareceu antes?",
-  "@antiburlaTitle": {
-    "description": "Screen 5 Antiburla Bottom Sheet title"
-  },
-  "antiburlaDialogPrompt": "Você registrou um sintoma similar há {days} dias. É a mesma sensação que voltou ou algo totalmente novo?",
-  "@antiburlaDialogPrompt": {
-    "description": "Empathetic question prompt for Antiburla historical check",
-    "placeholders": {
-      "days": {
-        "type": "int"
-      }
-    }
-  },
-  "antiburlaOptionRecurring": "É a mesma sensação que voltou",
-  "@antiburlaOptionRecurring": {
-    "description": "Button label when symptom is recurring from previous episode"
-  },
-  "antiburlaOptionRecurringDesc": "Vamos registrar como algo que voltou, para seu diário ficar organizado.",
-  "@antiburlaOptionRecurringDesc": {
-    "description": "Explanation for recurring symptom choice"
-  },
-  "antiburlaOptionNew": "É um sentimento completamente novo",
-  "@antiburlaOptionNew": {
-    "description": "Button label when symptom is an isolated new occurrence"
-  },
-  "antiburlaOptionNewDesc": "Manteremos registrado como um evento agudo que começou hoje.",
-  "@antiburlaOptionNewDesc": {
-    "description": "Explanation for new symptom choice"
-  },
-  "offTopicNarrativeTitle": "Isso parece um sintoma?",
-  "@offTopicNarrativeTitle": {
-    "description": "Title for the off-topic narrative confirmation bottom sheet"
-  },
-  "offTopicNarrativeDesc": "O texto que você escreveu não parece descrever um sintoma físico ou emocional. Deseja revisar sua descrição ou continuar mesmo assim?",
-  "@offTopicNarrativeDesc": {
-    "description": "Body text for the off-topic narrative confirmation bottom sheet"
-  },
-  "offTopicNarrativeEditButton": "Editar Descrição",
-  "@offTopicNarrativeEditButton": {
-    "description": "Button to go back and edit the free-text narrative"
-  },
-  "offTopicNarrativeContinueButton": "Continuar Mesmo Assim",
-  "@offTopicNarrativeContinueButton": {
-    "description": "Button to proceed despite the off-topic narrative warning"
   },
   "offlineBannerText": "Modo Offline — Seus check-ins serão salvos localmente e sincronizados automaticamente.",
   "@offlineBannerText": {
@@ -1657,16 +979,6 @@
       }
     }
   },
-  "safetyNoticeGeneral": "Se isso for uma emergência, não use o app: ligue {number} agora.",
-  "@safetyNoticeGeneral": {
-    "description": "Same non-blocking notice for everyone. Never name a condition.",
-    "placeholders": {
-      "number": {
-        "type": "String"
-      }
-    }
-  },
-  "safetyNoticeOpenResources": "Ver contatos de ajuda",
   "urgentHelpButton": "Ajuda urgente",
   "@urgentHelpButton": {
     "description": "Global button that opens the help resources screen."
@@ -1757,10 +1069,6 @@
   "privacyVeilBiometricReason": "Autentique-se para acessar seus registros.",
   "privacyVeilUnlock": "Desbloquear",
   "privacyVeilUnlockManually": "Desbloquear manualmente",
-  "wizardNarrativeLabel": "Descrição opcional (em suas palavras)",
-  "wizardNarrativeHint": "Se quiser, escreva com suas palavras como você está.",
-  "wizardStepZeroFreeTextLabel": "Prefere descrever com suas próprias palavras?",
-  "wizardStepZeroFreeTextHint": "Se quiser, escreva com suas palavras o que está sentindo.",
   "deleteHistoryItemIntensity": "Intensidade informada: {value}/5",
   "@deleteHistoryItemIntensity": {
     "placeholders": {
@@ -2013,14 +1321,6 @@
   "outcomeTodayStatusBad": "Mal",
   "outcomeHistoryDetailTitle": "Detalhes do registro",
   "outcomeHistoryNoNarrative": "Você não adicionou uma descrição neste registro.",
-  "wizardIntroTitle": "Como você está se sentindo hoje?",
-  "wizardIntroOptionGoodLabel": "Bem / Normal",
-  "wizardIntroOptionGoodCaption": "Encerra o registro de hoje",
-  "wizardIntroOptionSoSoLabel": "Mais ou menos",
-  "wizardIntroOptionSoSoCaption": "Vamos te ajudar a descrever melhor",
-  "wizardIntroOptionBadLabel": "Mal / Ruim",
-  "wizardIntroOptionBadCaption": "Vamos com mais cuidado nas próximas perguntas",
-  "wizardIntroFootnote": "Esta é a pergunta inicial de todos os registros. É rápida e ajuda a personalizar sua experiência.",
   "checkInSummaryTitle": "Registro salvo",
   "checkInSummaryBackHome": "Voltar ao início",
   "checkInSummaryBackHomeCountdown": "Voltar ao início ({seconds})",
@@ -2030,5 +1330,215 @@
         "type": "int"
       }
     }
-  }
+  },
+  "jv2FlowTitle": "Registro do dia",
+  "jv2Back": "Voltar",
+  "jv2Continue": "Continuar",
+  "jv2Skip": "Pular",
+  "jv2Save": "Salvar registro",
+  "jv2Yes": "Sim",
+  "jv2No": "Não, continuar",
+  "jv2Cancel": "Cancelar",
+  "jv2Remove": "Remover",
+  "jv2HelloName": "Olá, {name}!",
+  "@jv2HelloName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jv2Hello": "Olá!",
+  "jv2GoodMorning": "Bom dia.",
+  "jv2GoodAfternoon": "Boa tarde.",
+  "jv2GoodEvening": "Boa noite.",
+  "jv2MoodQuestion": "Como você está se sentindo hoje?",
+  "jv2MoodBem": "Bem",
+  "jv2MoodNormal": "Normal",
+  "jv2MoodNaoTaoBem": "Não tão bem",
+  "jv2AreaQuestion": "O que você quer registrar?",
+  "jv2AreaHint": "Você pode marcar mais de um.",
+  "jv2AreaEmotional": "Como me sinto",
+  "jv2AreaEmotionalHint": "Emoções e humor",
+  "jv2AreaPhysical": "Meu corpo",
+  "jv2AreaPhysicalHint": "Onde sinto desconforto",
+  "jv2AreaConditions": "Minhas condições",
+  "jv2ConditionCardQuestion": "Como você está com {label} hoje?",
+  "@jv2ConditionCardQuestion": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "jv2TimeQuestion": "Isso que você sente tem mais a ver com…",
+  "jv2TimePassado": "O que já passou",
+  "jv2TimePresente": "O momento atual",
+  "jv2TimeFuturo": "O que vem pela frente",
+  "jv2BranchQuestion": "O que combina mais com você agora?",
+  "jv2OptionsQuestion": "Marque o que combina com você.",
+  "jv2MultiSelectHint": "Você pode marcar mais de um.",
+  "jv2WriteMine": "Escrever o meu",
+  "jv2WriteMineHint": "Em poucas palavras",
+  "jv2WriteMineAdd": "Adicionar",
+  "jv2MoreQuestion": "Quer registrar mais alguma coisa?",
+  "jv2MoreBodyQuestion": "Quer marcar outra parte do corpo?",
+  "jv2BodyQuestion": "Onde você sente desconforto agora?",
+  "jv2BodyHint": "Toque em uma ou mais partes.",
+  "jv2BodyFront": "De frente",
+  "jv2BodyBack": "De costas",
+  "jv2ItemLimit": "Você chegou ao limite de {max} itens neste registro.",
+  "@jv2ItemLimit": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "jv2BranchPassadoTristeza": "Tristeza ou saudade",
+  "jv2BranchPassadoMemoria": "Uma memória que incomoda",
+  "jv2BranchPresenteEnergia": "Sem energia",
+  "jv2BranchPresenteSobrecarga": "Irritado(a) ou sobrecarregado(a)",
+  "jv2BranchFuturoMente": "Mente acelerada",
+  "jv2BranchFuturoMedo": "Medo de algo dar errado",
+  "jv2OptPassadoTristezaCulpa": "Culpa ou arrependimento",
+  "jv2OptPassadoTristezaSaudade": "Falta de alguém ou de como as coisas eram",
+  "jv2OptPassadoMemoriaLembranca": "Uma lembrança ruim que volta",
+  "jv2OptPassadoMemoriaMagoa": "Fico remoendo mágoas antigas",
+  "jv2OptPresenteEnergiaCorpo": "Corpo pesado, tenso ou dolorido",
+  "jv2OptPresenteEnergiaDesligado": "No piloto automático, meio desligado",
+  "jv2OptPresenteSobrecargaPaciencia": "Sem paciência, explodindo por pouco",
+  "jv2OptPresenteSobrecargaAperto": "Aperto no peito e momentos de desespero",
+  "jv2OptFuturoMenteAntecipar": "Fico antecipando problemas",
+  "jv2OptFuturoMenteCobranca": "Cobrança por perfeição ou controle",
+  "jv2OptFuturoMedoJulgamento": "Medo de falhar ou ser julgado(a)",
+  "jv2OptFuturoMedoDesanimo": "Desânimo com o rumo das coisas",
+  "jv2RegionCabeca": "Cabeça e pescoço",
+  "jv2RegionPeito": "Peito",
+  "jv2RegionBarriga": "Barriga",
+  "jv2RegionCostas": "Costas",
+  "jv2RegionMembros": "Braços, pernas e mãos",
+  "jv2BranchCabecaPressao": "Aperto, peso ou pressão",
+  "jv2BranchCabecaSentidos": "Olhos, boca ou garganta",
+  "jv2BranchPeitoRespiracao": "Respiração diferente",
+  "jv2BranchPeitoIncomodo": "Incômodo no peito ou costelas",
+  "jv2BranchBarrigaQueimacao": "Queimação ou enjoo",
+  "jv2BranchBarrigaColica": "Cólica ou estufamento",
+  "jv2BranchCostasRigidez": "Rigidez ou travamento",
+  "jv2BranchCostasFisgada": "Dor que fisga ao mexer",
+  "jv2BranchMembrosCansaco": "Cansaço ou dor",
+  "jv2BranchMembrosFormigamento": "Formigamento",
+  "jv2OptCabecaPressaoTemporas": "Dor ou pressão nas têmporas ou testa",
+  "jv2OptCabecaPressaoLatejando": "Latejando, com incômodo à luz ou ao barulho",
+  "jv2OptCabecaSentidosGarganta": "Garganta arranhando ou seca",
+  "jv2OptCabecaSentidosOlhos": "Olhos pesados ou ardendo",
+  "jv2OptPeitoRespiracaoCurta": "Respiração curta",
+  "jv2OptPeitoRespiracaoTosse": "Tosse ou peito carregado",
+  "jv2OptPeitoIncomodoBatedeira": "Coração acelerado ou batedeira",
+  "jv2OptPeitoIncomodoCostelas": "Pontada nas costelas ao respirar fundo",
+  "jv2OptBarrigaQueimacaoSubindo": "Queimação subindo",
+  "jv2OptBarrigaQueimacaoEnjoo": "Enjoo",
+  "jv2OptBarrigaColicaGases": "Gases ou barriga estufada",
+  "jv2OptBarrigaColicaPontadas": "Cólica ou pontadas",
+  "jv2OptCostasRigidezOmbros": "Pescoço e ombros duros",
+  "jv2OptCostasRigidezLombar": "Peso na lombar",
+  "jv2OptCostasFisgadaIrradia": "Pontada que desce para braço ou perna",
+  "jv2OptCostasFisgadaAoMexer": "Dor ao mexer",
+  "jv2OptMembrosCansacoJuntas": "Juntas doloridas",
+  "jv2OptMembrosCansacoPesados": "Braços ou pernas cansados",
+  "jv2OptMembrosFormigamentoDormentes": "Mãos ou pés formigando ou dormentes",
+  "jv2OptMembrosFormigamentoChoque": "Sensação de choque",
+  "jv2PersistenceQuestion": "Há quanto tempo você percebe isso?",
+  "jv2PersistenceHoje": "Começou hoje",
+  "jv2PersistenceDiasSemanas": "Alguns dias ou semanas",
+  "jv2PersistenceMesesAnos": "Meses ou anos",
+  "jv2PersistenceOptional": "Há quanto tempo? (opcional)",
+  "jv2IntensityQuestion": "Agora, quanto isso pesa no seu dia?",
+  "jv2IntensityCompactQuestion": "Para cada item, quanto pesa no seu dia?",
+  "jv2IntensityLevel": "{level} de 5",
+  "@jv2IntensityLevel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "jv2IntensityEmotional1": "Passa rápido, sigo meu dia normalmente.",
+  "jv2IntensityEmotional2": "Percebo, mas consigo manter o foco.",
+  "jv2IntensityEmotional3": "Está tirando minha energia ou foco.",
+  "jv2IntensityEmotional4": "Está mudando minha rotina (sono, tarefas, convívio).",
+  "jv2IntensityEmotional5": "Está me travando quase por completo hoje.",
+  "jv2IntensityPhysical1": "Sinto, mas não atrapalha nada.",
+  "jv2IntensityPhysical2": "Incomoda, mas mantenho minhas atividades.",
+  "jv2IntensityPhysical3": "Diminuiu meu ritmo ou me fez pausar.",
+  "jv2IntensityPhysical4": "Não consigo fazer direito o que preciso.",
+  "jv2IntensityPhysical5": "Está me travando quase por completo hoje.",
+  "jv2EmergencyLine": "Se for uma emergência, use o botão Ajuda ou ligue 192.",
+  "jv2TriggersQuestion": "Tem algo que pode ter contribuído hoje?",
+  "jv2TriggerTrabalho": "Trabalho ou estudos",
+  "jv2TriggerFamilia": "Família ou relações",
+  "jv2TriggerSono": "Noite mal dormida",
+  "jv2TriggerAlimentacao": "Alimentação",
+  "jv2TriggerEsforco": "Esforço físico",
+  "jv2TriggerQueda": "Queda ou mau jeito",
+  "jv2TriggerMedicamento": "Medicamento novo",
+  "jv2TriggerClima": "Clima ou ambiente",
+  "jv2TriggerNaoSei": "Não sei",
+  "jv2TriggerOutro": "Outro",
+  "jv2TriggerNoteHint": "Conte em poucas palavras",
+  "jv2NoteQuestion": "Quer contar mais?",
+  "jv2NoteHint": "Escreva com suas palavras (opcional)",
+  "jv2SaveError": "Não foi possível salvar agora. Tente de novo.",
+  "jv2SavedOffline": "Registro salvo no aparelho. Ele será enviado quando houver conexão.",
+  "jv2ConditionsTitle": "Minhas condições",
+  "jv2ConditionsSubtitle": "Informadas por você. Escreva com suas palavras; cada uma aparece no seu registro diário com a mesma escala de 1 a 5.",
+  "jv2ConditionsAdd": "Adicionar",
+  "jv2ConditionsFieldHint": "Ex.: Enxaqueca",
+  "jv2ConditionsEmpty": "Você ainda não adicionou nenhuma.",
+  "jv2ConditionsArchive": "Arquivar",
+  "jv2ConditionsArchiveConfirm": "Arquivar \"{label}\"? Seus registros antigos continuam com esse nome.",
+  "@jv2ConditionsArchiveConfirm": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "jv2ConditionsLimit": "Você pode acompanhar até {max}.",
+  "@jv2ConditionsLimit": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "jv2ConditionsOffline": "Sem conexão. Tente de novo quando estiver online.",
+  "jv2ConditionsError": "Não foi possível salvar. Tente de novo.",
+  "jv2ConditionsSettingsSubtitle": "Acompanhe, com suas palavras, algo que você já conhece",
+  "jv2PhraseTime1": "Entendi. Vamos registrar isso com calma.",
+  "jv2PhraseTime2": "Obrigado por contar. Vamos anotar isso.",
+  "jv2PhraseTime3": "Tudo bem. Um passo de cada vez.",
+  "jv2PhraseTime4": "Certo. Vamos registrar do seu jeito.",
+  "jv2PhrasePassado1": "A mente às vezes volta no tempo. Vamos anotar isso.",
+  "jv2PhrasePassado2": "Obrigado por contar. Tem a ver com o quê?",
+  "jv2PhrasePassado3": "Vamos registrar isso com calma.",
+  "jv2PhrasePresente1": "Vamos anotar o que está pesando hoje.",
+  "jv2PhrasePresente2": "Entendi. O que combina mais com agora?",
+  "jv2PhrasePresente3": "Obrigado por contar. Vamos registrar isso.",
+  "jv2PhraseFuturo1": "Pensar no que vem pela frente faz parte. Vamos anotar.",
+  "jv2PhraseFuturo2": "Entendi. O que combina mais com você?",
+  "jv2PhraseFuturo3": "Obrigado por contar. Vamos registrar isso com calma.",
+  "jv2PhraseBody1": "Vamos anotar o que você sente no corpo.",
+  "jv2PhraseBody2": "Toque onde você sente desconforto.",
+  "jv2PhraseBody3": "Obrigado por contar. Onde você sente isso?",
+  "jv2PhraseRegion1": "Vamos anotar o que você sente aqui.",
+  "jv2PhraseRegion2": "Entendi. Como é essa sensação?",
+  "jv2PhraseRegion3": "Obrigado por contar. O que combina mais?",
+  "jv2PhraseRegion4": "Registrar ajuda você a acompanhar seu dia a dia.",
+  "jv2PhraseIntensity1": "Você escolhe o número. A escala é sua.",
+  "jv2PhraseIntensity2": "Não existe resposta certa. Vale o que você sente.",
+  "jv2PhraseIntensity3": "Quase lá. Só mais um pouco.",
+  "jv2PhraseTriggers1": "Se quiser, marque o que pode ter contribuído.",
+  "jv2PhraseTriggers2": "É opcional. Você pode pular.",
+  "jv2PhraseTriggers3": "Quase pronto. Algo marcou o seu dia?"
 }

@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
 import 'package:dualis_mobile/features/home/presentation/screens/home_screen.dart';
+import 'package:dualis_mobile/features/journal/presentation/controllers/journal_flow_state.dart';
+import 'package:dualis_mobile/features/journal/presentation/screens/journal_flow_screen.dart';
 import 'package:dualis_mobile/features/triage/domain/triage_vertical.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
@@ -21,12 +23,14 @@ Widget createTwoStageQATestApp({
         builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
-        path: RoutePaths.triage,
+        path: RoutePaths.journal,
         builder: (context, state) {
-          final TriageNavigationArgs args = state.extra is TriageNavigationArgs
-              ? state.extra as TriageNavigationArgs
-              : const TriageNavigationArgs(initialVertical: TriageVertical.psicoEmocional);
-          return _MockTriageStep4Screen(vertical: args.initialVertical);
+          final args = state.extra as JournalFlowArgs?;
+          return _MockTriageStep4Screen(
+            vertical: args?.initialArea == JournalArea.physical
+                ? TriageVertical.fisica
+                : TriageVertical.psicoEmocional,
+          );
         },
       ),
     ],

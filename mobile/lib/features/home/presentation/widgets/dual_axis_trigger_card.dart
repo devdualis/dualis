@@ -6,7 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
-import '../../../triage/domain/triage_vertical.dart';
+import '../../../journal/presentation/controllers/journal_flow_state.dart';
+import '../../../journal/presentation/screens/journal_flow_screen.dart';
 import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import '../../domain/axis_intensity_resolver.dart';
 import '../../domain/trigger_checkin_state.dart';
@@ -165,21 +166,15 @@ class DualAxisTriggerCard extends ConsumerWidget {
               retakeKey: 'retake_psicoemocional_button',
               onStart: () {
                 context.push(
-                  RoutePaths.triage,
-                  extra: TriageNavigationArgs(
-                    initialVertical: TriageVertical.psicoEmocional,
-                    isDual: false,
-                  ),
+                  RoutePaths.journal,
+                  extra: const JournalFlowArgs(initialArea: JournalArea.emotional),
                 );
               },
               onRetake: () {
                 notifier.prepareForUpdate();
                 context.push(
-                  RoutePaths.triage,
-                  extra: TriageNavigationArgs(
-                    initialVertical: TriageVertical.psicoEmocional,
-                    isDual: false,
-                  ),
+                  RoutePaths.journal,
+                  extra: const JournalFlowArgs(initialArea: JournalArea.emotional),
                 );
               },
               isDark: isDark,
@@ -205,21 +200,15 @@ class DualAxisTriggerCard extends ConsumerWidget {
               retakeKey: 'retake_fisica_button',
               onStart: () {
                 context.push(
-                  RoutePaths.triage,
-                  extra: TriageNavigationArgs(
-                    initialVertical: TriageVertical.fisica,
-                    isDual: false,
-                  ),
+                  RoutePaths.journal,
+                  extra: const JournalFlowArgs(initialArea: JournalArea.physical),
                 );
               },
               onRetake: () {
                 notifier.prepareForUpdate();
                 context.push(
-                  RoutePaths.triage,
-                  extra: TriageNavigationArgs(
-                    initialVertical: TriageVertical.fisica,
-                    isDual: false,
-                  ),
+                  RoutePaths.journal,
+                  extra: const JournalFlowArgs(initialArea: JournalArea.physical),
                 );
               },
               isDark: isDark,

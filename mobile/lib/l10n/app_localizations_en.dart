@@ -126,569 +126,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emergencyCopiedToast => 'Number copied to clipboard.';
 
   @override
-  String get triageBannerEmotional => 'Today\'s emotional check-in';
-
-  @override
-  String get triageBannerPhysical => 'Today\'s physical check-in';
-
-  @override
-  String triageStep(int step, int total) {
-    return 'Step $step of $total';
-  }
-
-  @override
-  String get triageNext => 'Next';
-
-  @override
-  String get triageBack => 'Back';
-
-  @override
   String get triageConfirm => 'Confirm';
 
   @override
   String get triagePreviewTitle => 'Review your entry';
-
-  @override
-  String get triagePreviewSubmit => 'Confirm and Submit';
-
-  @override
-  String get triageQ1Emotional =>
-      'Looking at your emotional and mental side, which word best describes how you feel right now?';
-
-  @override
-  String get triageOptNormal => 'Normal / Feeling well';
-
-  @override
-  String get triageSaveNormal => 'Complete as Normal / Well';
-
-  @override
-  String get triageOptAnsiedade => 'Anxiety / Agitation';
-
-  @override
-  String get triageOptTristeza => 'Sadness / Low Mood';
-
-  @override
-  String get triageOptEstresse => 'Stress / Irritability';
-
-  @override
-  String get triageOptCansaco => 'Mental Fatigue';
-
-  @override
-  String get triageOptAnsiosaAgitacao => 'Restless / Agitated';
-
-  @override
-  String get triageOptDepressivaDesanimo => 'Feeling low / Discouraged';
-
-  @override
-  String get triageOptEstresseBurnout => 'Stressed / Worn out';
-
-  @override
-  String get triageOptSomatica => 'Tension in the body';
-
-  @override
-  String get triageOptSono => 'Poor sleep or too much sleep';
-
-  @override
-  String get triageOptCognitivaFoco => 'Trouble focusing';
-
-  @override
-  String get triageOptAutoestima => 'Self-esteem / Self-image';
-
-  @override
-  String get triageQ2Emotional =>
-      'Have you felt this way frequently in recent days or is it very specific to today?';
-
-  @override
-  String get triageOptComecouHoje => 'Started today';
-
-  @override
-  String get triageOptJaFazDias => 'A few days ago';
-
-  @override
-  String get triageOptConstanteSemanas => 'Constant for weeks';
-
-  @override
-  String get triageQ3Emotional =>
-      'Does this feeling seem like a mild background nuisance or something strong accelerating your thoughts?';
-
-  @override
-  String get triageOptLeveControlavel => 'Mild and controllable';
-
-  @override
-  String get triageOptModerada => 'Moderate';
-
-  @override
-  String get triageOptMuitoForte => 'Very strong and hard to manage';
-
-  @override
-  String get triageQ4Emotional =>
-      'Can you identify if there is a primary reason for this happening today?';
-
-  @override
-  String get triageQ4Ansiedade =>
-      'What seems to be triggering this feeling of anxiety, restlessness, or tension?';
-
-  @override
-  String get triageQ4Depressao =>
-      'Can you identify if a recent event or specific feeling contributed to this low mood?';
-
-  @override
-  String get triageQ4EstresseBurnout =>
-      'Where is most of the pressure or exhaustion you are experiencing coming from?';
-
-  @override
-  String get triageQ4Somatica =>
-      'In which situations does this physical tension or body discomfort tend to worsen?';
-
-  @override
-  String get triageQ4Sono =>
-      'What has been the main issue disrupting your sleep?';
-
-  @override
-  String get triageQ4CognitivaFoco =>
-      'What seems to be interfering most with your concentration or mental clarity?';
-
-  @override
-  String get triageQ4Autoestima =>
-      'What has been triggering this sense of self-doubt or self-criticism most intensely?';
-
-  @override
-  String get triageOptTrabalho => 'Work / Studies';
-
-  @override
-  String get triageOptFamilia => 'Family / Relationships';
-
-  @override
-  String get triageOptNoiteRuim => 'Poor night of sleep';
-
-  @override
-  String get triageOptNaoSei => 'Cannot tell';
-
-  @override
-  String get triageOptSimCobrancaPrazos =>
-      'Overwhelmed by tasks, deadlines, or expectations';
-
-  @override
-  String get triageOptSimConflitoRelacionamento =>
-      'Conflict or argument with someone close';
-
-  @override
-  String get triageOptSimIncertezaFuturo =>
-      'Fear of changes, news, or future uncertainty';
-
-  @override
-  String get triageOptSimExcessoEstimulantes =>
-      'Excess coffee, energy drinks, or noisy environment';
-
-  @override
-  String get triageOptNaoSeiDizerEmocional =>
-      'Cannot identify, started suddenly';
-
-  @override
-  String get triageOptSimPerdaLuto => 'Loss, breakup, or grieving';
-
-  @override
-  String get triageOptSimSolidaoIsolamento =>
-      'Feeling lonely, isolated, or misunderstood';
-
-  @override
-  String get triageOptSimFrustracaoDesilusao =>
-      'Disappointment when things did not go as hoped';
-
-  @override
-  String get triageOptSimCansacoAcumulado =>
-      'Prolonged fatigue without recovery breaks';
-
-  @override
-  String get triageOptSimPressaoTrabalho =>
-      'Excessive workload, demands, or tight deadlines';
-
-  @override
-  String get triageOptSimResponsabilidadesCasa =>
-      'Family caregiving, finances, or household chores';
-
-  @override
-  String get triageOptSimFaltaDescanso =>
-      'Lack of free time for leisure, rest, or disconnecting';
-
-  @override
-  String get triageOptSimAmbienteToxico =>
-      'Difficult interpersonal dynamics or stressful routine';
-
-  @override
-  String get triageOptSimDuranteTrabalho =>
-      'During work shifts or high-pressure moments';
-
-  @override
-  String get triageOptSimDiscussaoConflito =>
-      'Immediately after arguments, conflicts, or shock';
-
-  @override
-  String get triageOptSimFinalDoDia =>
-      'At the end of the day when attempting to rest or sleep';
-
-  @override
-  String get triageOptSimPreocupacaoConstante =>
-      'Whenever thinking about challenging issues';
-
-  @override
-  String get triageOptSimDificuldadePegarSono =>
-      'Racing thoughts or active mind at bedtime';
-
-  @override
-  String get triageOptSimAcordaMadrugada =>
-      'Waking up in the middle of the night and unable to sleep';
-
-  @override
-  String get triageOptSimSonoAgitadoPesadelos =>
-      'Restless, light sleep with nightmares or frequent waking';
-
-  @override
-  String get triageOptSimHorarioIrregularTelas =>
-      'Late-night screen use or irregular sleep schedule';
-
-  @override
-  String get triageOptSimSobrecargaMultitarefas =>
-      'Multitasking overload or too many stimuli at once';
-
-  @override
-  String get triageOptSimPreocupacaoIntrusiva =>
-      'Intrusive worry thoughts interrupting focus';
-
-  @override
-  String get triageOptSimExaustaoMental =>
-      'Mental exhaustion accumulated after prolonged effort';
-
-  @override
-  String get triageOptSimFaltaMotivacao =>
-      'Disinterest, lack of energy, or apathy toward tasks';
-
-  @override
-  String get triageOptSimComparacaoRedes =>
-      'Comparing yourself to others on social media or peers';
-
-  @override
-  String get triageOptSimMedoFalharJulgamento =>
-      'Fear of failing, falling short, or being judged';
-
-  @override
-  String get triageOptSimCriticaRejeicao =>
-      'Recent criticism received or feeling rejected';
-
-  @override
-  String get triageOptSimDesvalorizacaoPropria =>
-      'Difficulty acknowledging your own accomplishments';
-
-  @override
-  String get triagePreviewEmotional => 'Review your entry';
-
-  @override
-  String get triageQ1Physical =>
-      'Let us talk about the physical aspect. Where are you feeling this primary discomfort or pain?';
-
-  @override
-  String get triageOptCabeca => 'Head';
-
-  @override
-  String get triageOptCostas => 'Back / Spine';
-
-  @override
-  String get triageOptArticulacoes => 'Joints (Knee, Shoulder, etc.)';
-
-  @override
-  String get triageOptAbdomen => 'Abdomen / Stomach';
-
-  @override
-  String get triageOptCabecaPescoco => 'Head and neck';
-
-  @override
-  String get triageOptCardiovascularTorax => 'Chest';
-
-  @override
-  String get triageOptRespiratorio => 'Breathing';
-
-  @override
-  String get triageOptGastrointestinalAbdomen => 'Belly';
-
-  @override
-  String get triageOptColunaDorDorsal => 'Back';
-
-  @override
-  String get triageOptMembrosSuperiores => 'Arms';
-
-  @override
-  String get triageOptMembrosInferiores => 'Legs';
-
-  @override
-  String get triageOptNeurologico => 'Dizziness / tingling';
-
-  @override
-  String get triageOptGeniturinarioPelvico => 'Intimate / urinary area';
-
-  @override
-  String get triageOptDermatologico => 'Skin';
-
-  @override
-  String get triageOptMuscularGeralSistemico => 'Whole body / tiredness';
-
-  @override
-  String get triageOptEndocrinoMetabolico => 'Thirst, hunger or energy';
-
-  @override
-  String get triageQ2Physical =>
-      'How long have you been feeling this discomfort?';
-
-  @override
-  String get triageOptComecouAgora => 'Started just now';
-
-  @override
-  String get triageOptHaAlgunsDias => 'A few days ago';
-
-  @override
-  String get triageOptCronica => 'It\'s been going on for a long time';
-
-  @override
-  String get triageQ3Physical =>
-      'On a scale of 1 to 5 (where 1 is barely noticeable and 5 is unbearable), how is it right now?';
-
-  @override
-  String get triageQ4Physical =>
-      'Do you recall doing atypical strenuous exercise, heavy exertion, or suffering a fall/impact recently?';
-
-  @override
-  String get triageQ4CabecaPescoco =>
-      'Did you notice any contributing factor, such as intense stress, prolonged screen time, poor sleep, or a cold/sinus issue?';
-
-  @override
-  String get triageQ4CardiovascularTorax =>
-      'Did the chest discomfort or palpitations start after physical exertion, emotional stress, or stimulant intake?';
-
-  @override
-  String get triageQ4Respiratorio =>
-      'Were you exposed to dust, smoke, cold air, or do you have symptoms of a cold or flu?';
-
-  @override
-  String get triageQ4Gastrointestinal =>
-      'Did you eat something unusual or heavy, take medications recently, or fast for a prolonged period?';
-
-  @override
-  String get triageQ4ColunaDorDorsal =>
-      'Did you lift heavy objects, remain in poor posture for a long time, or experience an impact/fall?';
-
-  @override
-  String get triageQ4MembrosSuperiores =>
-      'Did you perform repetitive motions (typing, manual work), upper body training, or suffer an impact/fall?';
-
-  @override
-  String get triageQ4MembrosInferiores =>
-      'Did you go on a long walk/run, stand or sit for many hours, or suffer a twist/trip/fall?';
-
-  @override
-  String get triageQ4Neurologico =>
-      'Did the symptom occur after standing up quickly, skipping meals/water, anxiety, or an awkward posture?';
-
-  @override
-  String get triageQ4Geniturinario =>
-      'Did you notice any link to low hydration, holding urine, menstrual cycle, intimacy, or wet/tight clothing?';
-
-  @override
-  String get triageQ4Dermatological =>
-      'Did you notice anything that might have triggered this, like a new product, sun/heat exposure, or contact with something (plant, insect, substance)?';
-
-  @override
-  String get triageQ4MuscularGeral =>
-      'Is this associated with extreme fatigue, early cold/flu symptoms, lack of rest, or dehydration?';
-
-  @override
-  String get triageQ4EndocrinoMetabolico =>
-      'Did you notice any connection to prolonged fasting, sugary meals, medication changes, or intense heat?';
-
-  @override
-  String get triageOptSimExercicio => 'Yes, intense exercise';
-
-  @override
-  String get triageOptSimQueda => 'Yes, suffered a fall';
-
-  @override
-  String get triageOptNaoComecouNada => 'No, started out of nowhere';
-
-  @override
-  String get triageOptSimProdutoNovo =>
-      'Yes, I used a new product (cosmetic, soap, etc.)';
-
-  @override
-  String get triageOptSimExposicaoSolCalor =>
-      'Yes, there was sun exposure, heat, or intense sweating';
-
-  @override
-  String get triageOptSimPicadaContato =>
-      'Yes, I had contact with a plant, insect, or substance';
-
-  @override
-  String get triageOptSimEstresseSono => 'Stress or irregular sleep';
-
-  @override
-  String get triageOptSimTelasEsforcoVisual =>
-      'Prolonged screen time / eye strain';
-
-  @override
-  String get triageOptSimPosturaPescoco =>
-      'Muscle tension or poor neck posture';
-
-  @override
-  String get triageOptSimResfriadoSinusite => 'Cold or sinusitis symptoms';
-
-  @override
-  String get triageOptSimEsforcoFisico =>
-      'Right after physical exertion or walking';
-
-  @override
-  String get triageOptSimEstresseAnsiedade =>
-      'During intense anxiety or stress';
-
-  @override
-  String get triageOptSimCafeinaEstimulante =>
-      'After coffee, energy drink, or stimulant';
-
-  @override
-  String get triageOptNaoSurgiuEmRepouso =>
-      'No, started spontaneously or at rest';
-
-  @override
-  String get triageOptSimAlergiaAmbiente =>
-      'Exposure to dust, mold, smoke, or AC';
-
-  @override
-  String get triageOptSimGripeInfeccao => 'Cold, flu, or sore throat symptoms';
-
-  @override
-  String get triageOptSimMudancaClima => 'Sudden weather change or cold air';
-
-  @override
-  String get triageOptSimAlimentacaoDiferente =>
-      'Unusual, heavy, or suspicious food';
-
-  @override
-  String get triageOptSimMedicamentoRecente =>
-      'Recent medication or anti-inflammatory use';
-
-  @override
-  String get triageOptSimJejumEstresse => 'Prolonged fasting or intense stress';
-
-  @override
-  String get triageOptNaoSemRelacaoAlimento =>
-      'No, started with no relation to food';
-
-  @override
-  String get triageOptSimCarregouPeso =>
-      'Lifted heavy weight or strained lower back';
-
-  @override
-  String get triageOptSimPosturaProlongada =>
-      'Prolonged sitting or poor sleeping posture';
-
-  @override
-  String get triageOptSimMauJeitoQueda =>
-      'Awkward sudden movement or impact/fall';
-
-  @override
-  String get triageOptSimMovimentoRepetitivo =>
-      'Repetitive motions (typing, phone, manual work)';
-
-  @override
-  String get triageOptSimTreinoSobrecarga =>
-      'Exercise or strain on arms/shoulders';
-
-  @override
-  String get triageOptSimTraumaPancada =>
-      'Impact, fall, or slept awkwardly on arm';
-
-  @override
-  String get triageOptSimCaminhadaCorrida => 'Long walk, run, or recent sports';
-
-  @override
-  String get triageOptSimTempoEmPeSentado =>
-      'Many hours standing or prolonged sitting';
-
-  @override
-  String get triageOptSimTorcaoTropeco =>
-      'Twisted ankle/knee, stumble, or fall';
-
-  @override
-  String get triageOptSimLevantarRapido =>
-      'Standing up quickly or changing posture';
-
-  @override
-  String get triageOptSimJejumDesidratacao =>
-      'Hours without eating or low water intake';
-
-  @override
-  String get triageOptSimAnsiedadeHiperventilacao =>
-      'During moments of tension or rapid breathing';
-
-  @override
-  String get triageOptSimCompressaoPostural =>
-      'Pressed limb or posture pinching a nerve';
-
-  @override
-  String get triageOptSimBaixaIngestaoUrina =>
-      'Low water intake or held urine for too long';
-
-  @override
-  String get triageOptSimCicloMenstrual => 'Premenstrual or menstrual phase';
-
-  @override
-  String get triageOptSimPosRelacaoIntima =>
-      'After sexual intercourse or new intimate products';
-
-  @override
-  String get triageOptSimRoupasUmidas => 'Wearing damp or very tight clothing';
-
-  @override
-  String get triageOptSimCansacoEsgotamento =>
-      'Extreme tiredness, burnout, or sleepless nights';
-
-  @override
-  String get triageOptSimSintomasGripeVirose =>
-      'Feverish feeling, chills, or viral illness';
-
-  @override
-  String get triageOptSimAtividadeGlobal =>
-      'Unusual whole-body activity (moving, heavy chores)';
-
-  @override
-  String get triageOptSimDesidratacaoCalor =>
-      'Low hydration or prolonged heat exposure';
-
-  @override
-  String get triageOptSimJejumAlimentacao =>
-      'Hours without eating or after sugary/heavy food';
-
-  @override
-  String get triageOptSimAjusteMedicamento =>
-      'Missed or adjusted regular medication dose';
-
-  @override
-  String get triageOptSimCalorDesidratacao =>
-      'Very hot environment or low fluid intake';
-
-  @override
-  String get triageOptSimEstresseSobrecarga =>
-      'Recent stress peak or disrupted routine';
-
-  @override
-  String get triagePreviewPhysical => 'Review your entry';
-
-  @override
-  String triageIntensityLabel(int value) {
-    return 'Intensity: $value';
-  }
-
-  @override
-  String get triageIntensityMin => 'Barely noticeable';
-
-  @override
-  String get triageIntensityMax => 'Unbearable';
 
   @override
   String get outcomeScreenTitle => 'Your entry summary';
@@ -717,41 +158,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get outcomeDoneButton => 'Finish and Return Home';
-
-  @override
-  String get antiburlaTitle => 'Has this come up before?';
-
-  @override
-  String antiburlaDialogPrompt(int days) {
-    return 'You recorded a similar symptom $days days ago. Is this the same sensation returning or something completely new?';
-  }
-
-  @override
-  String get antiburlaOptionRecurring => 'It\'s the same sensation returning';
-
-  @override
-  String get antiburlaOptionRecurringDesc =>
-      'We\'ll log this as something that came back, to keep your journal organized.';
-
-  @override
-  String get antiburlaOptionNew => 'It\'s a completely new feeling';
-
-  @override
-  String get antiburlaOptionNewDesc =>
-      'We will keep it recorded as an acute event starting today.';
-
-  @override
-  String get offTopicNarrativeTitle => 'Does this look like a symptom?';
-
-  @override
-  String get offTopicNarrativeDesc =>
-      'The text you wrote doesn\'t seem to describe a physical or emotional symptom. Would you like to review your description or continue anyway?';
-
-  @override
-  String get offTopicNarrativeEditButton => 'Edit Description';
-
-  @override
-  String get offTopicNarrativeContinueButton => 'Continue Anyway';
 
   @override
   String get offlineBannerText =>
@@ -1525,14 +931,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String safetyNoticeGeneral(String number) {
-    return 'If this is an emergency, don\'t use the app: call $number now.';
-  }
-
-  @override
-  String get safetyNoticeOpenResources => 'See help contacts';
-
-  @override
   String get urgentHelpButton => 'Urgent help';
 
   @override
@@ -1830,21 +1228,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyVeilUnlockManually => 'Unlock manually';
-
-  @override
-  String get wizardNarrativeLabel => 'Optional description (in your own words)';
-
-  @override
-  String get wizardNarrativeHint =>
-      'If you like, describe in your own words how you are.';
-
-  @override
-  String get wizardStepZeroFreeTextLabel =>
-      'Prefer to describe it in your own words?';
-
-  @override
-  String get wizardStepZeroFreeTextHint =>
-      'If you like, describe in your own words what you\'re feeling.';
 
   @override
   String deleteHistoryItemIntensity(int value) {
@@ -2331,33 +1714,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'You did not add a description to this entry.';
 
   @override
-  String get wizardIntroTitle => 'How are you feeling today?';
-
-  @override
-  String get wizardIntroOptionGoodLabel => 'Good / Normal';
-
-  @override
-  String get wizardIntroOptionGoodCaption => 'Ends today\'s entry';
-
-  @override
-  String get wizardIntroOptionSoSoLabel => 'So-so';
-
-  @override
-  String get wizardIntroOptionSoSoCaption =>
-      'We will help you describe it better';
-
-  @override
-  String get wizardIntroOptionBadLabel => 'Bad / Not well';
-
-  @override
-  String get wizardIntroOptionBadCaption =>
-      'We will go a bit more carefully on the next questions';
-
-  @override
-  String get wizardIntroFootnote =>
-      'This is the first question of every entry. It is quick and helps personalize your experience.';
-
-  @override
   String get checkInSummaryTitle => 'Entry saved';
 
   @override
@@ -2367,4 +1723,550 @@ class AppLocalizationsEn extends AppLocalizations {
   String checkInSummaryBackHomeCountdown(int seconds) {
     return 'Back to home ($seconds)';
   }
+
+  @override
+  String get jv2FlowTitle => 'Today\'s entry';
+
+  @override
+  String get jv2Back => 'Back';
+
+  @override
+  String get jv2Continue => 'Continue';
+
+  @override
+  String get jv2Skip => 'Skip';
+
+  @override
+  String get jv2Save => 'Save entry';
+
+  @override
+  String get jv2Yes => 'Yes';
+
+  @override
+  String get jv2No => 'No, continue';
+
+  @override
+  String get jv2Cancel => 'Cancel';
+
+  @override
+  String get jv2Remove => 'Remove';
+
+  @override
+  String jv2HelloName(String name) {
+    return 'Hi, $name!';
+  }
+
+  @override
+  String get jv2Hello => 'Hi!';
+
+  @override
+  String get jv2GoodMorning => 'Good morning.';
+
+  @override
+  String get jv2GoodAfternoon => 'Good afternoon.';
+
+  @override
+  String get jv2GoodEvening => 'Good evening.';
+
+  @override
+  String get jv2MoodQuestion => 'How are you feeling today?';
+
+  @override
+  String get jv2MoodBem => 'Good';
+
+  @override
+  String get jv2MoodNormal => 'Okay';
+
+  @override
+  String get jv2MoodNaoTaoBem => 'Not so good';
+
+  @override
+  String get jv2AreaQuestion => 'What would you like to record?';
+
+  @override
+  String get jv2AreaHint => 'You can pick more than one.';
+
+  @override
+  String get jv2AreaEmotional => 'How I feel';
+
+  @override
+  String get jv2AreaEmotionalHint => 'Emotions and mood';
+
+  @override
+  String get jv2AreaPhysical => 'My body';
+
+  @override
+  String get jv2AreaPhysicalHint => 'Where I feel discomfort';
+
+  @override
+  String get jv2AreaConditions => 'My conditions';
+
+  @override
+  String jv2ConditionCardQuestion(String label) {
+    return 'How are you doing with $label today?';
+  }
+
+  @override
+  String get jv2TimeQuestion => 'What you feel has more to do with…';
+
+  @override
+  String get jv2TimePassado => 'What already happened';
+
+  @override
+  String get jv2TimePresente => 'Right now';
+
+  @override
+  String get jv2TimeFuturo => 'What lies ahead';
+
+  @override
+  String get jv2BranchQuestion => 'What fits you best right now?';
+
+  @override
+  String get jv2OptionsQuestion => 'Pick what fits you.';
+
+  @override
+  String get jv2MultiSelectHint => 'You can pick more than one.';
+
+  @override
+  String get jv2WriteMine => 'Write my own';
+
+  @override
+  String get jv2WriteMineHint => 'In a few words';
+
+  @override
+  String get jv2WriteMineAdd => 'Add';
+
+  @override
+  String get jv2MoreQuestion => 'Would you like to record anything else?';
+
+  @override
+  String get jv2MoreBodyQuestion =>
+      'Would you like to mark another part of the body?';
+
+  @override
+  String get jv2BodyQuestion => 'Where do you feel discomfort right now?';
+
+  @override
+  String get jv2BodyHint => 'Tap one or more parts.';
+
+  @override
+  String get jv2BodyFront => 'Front';
+
+  @override
+  String get jv2BodyBack => 'Back';
+
+  @override
+  String jv2ItemLimit(int max) {
+    return 'You reached the limit of $max items in this entry.';
+  }
+
+  @override
+  String get jv2BranchPassadoTristeza => 'Sadness or missing something';
+
+  @override
+  String get jv2BranchPassadoMemoria => 'A memory that bothers me';
+
+  @override
+  String get jv2BranchPresenteEnergia => 'No energy';
+
+  @override
+  String get jv2BranchPresenteSobrecarga => 'Irritated or overloaded';
+
+  @override
+  String get jv2BranchFuturoMente => 'Racing mind';
+
+  @override
+  String get jv2BranchFuturoMedo => 'Afraid something will go wrong';
+
+  @override
+  String get jv2OptPassadoTristezaCulpa => 'Guilt or regret';
+
+  @override
+  String get jv2OptPassadoTristezaSaudade =>
+      'Missing someone or how things used to be';
+
+  @override
+  String get jv2OptPassadoMemoriaLembranca =>
+      'A bad memory that keeps coming back';
+
+  @override
+  String get jv2OptPassadoMemoriaMagoa => 'I keep going over old hurts';
+
+  @override
+  String get jv2OptPresenteEnergiaCorpo => 'Body feels heavy, tense or sore';
+
+  @override
+  String get jv2OptPresenteEnergiaDesligado =>
+      'On autopilot, a bit switched off';
+
+  @override
+  String get jv2OptPresenteSobrecargaPaciencia =>
+      'Short on patience, snapping over little things';
+
+  @override
+  String get jv2OptPresenteSobrecargaAperto =>
+      'Tight chest and moments of despair';
+
+  @override
+  String get jv2OptFuturoMenteAntecipar => 'I keep anticipating problems';
+
+  @override
+  String get jv2OptFuturoMenteCobranca => 'Pressure for perfection or control';
+
+  @override
+  String get jv2OptFuturoMedoJulgamento => 'Fear of failing or being judged';
+
+  @override
+  String get jv2OptFuturoMedoDesanimo =>
+      'Discouraged about where things are going';
+
+  @override
+  String get jv2RegionCabeca => 'Head and neck';
+
+  @override
+  String get jv2RegionPeito => 'Chest';
+
+  @override
+  String get jv2RegionBarriga => 'Belly';
+
+  @override
+  String get jv2RegionCostas => 'Back';
+
+  @override
+  String get jv2RegionMembros => 'Arms, legs and hands';
+
+  @override
+  String get jv2BranchCabecaPressao => 'Tightness, heaviness or pressure';
+
+  @override
+  String get jv2BranchCabecaSentidos => 'Eyes, mouth or throat';
+
+  @override
+  String get jv2BranchPeitoRespiracao => 'Breathing feels different';
+
+  @override
+  String get jv2BranchPeitoIncomodo => 'Discomfort in the chest or ribs';
+
+  @override
+  String get jv2BranchBarrigaQueimacao => 'Burning or nausea';
+
+  @override
+  String get jv2BranchBarrigaColica => 'Cramps or bloating';
+
+  @override
+  String get jv2BranchCostasRigidez => 'Stiffness or locking up';
+
+  @override
+  String get jv2BranchCostasFisgada => 'Sharp pain when moving';
+
+  @override
+  String get jv2BranchMembrosCansaco => 'Tiredness or pain';
+
+  @override
+  String get jv2BranchMembrosFormigamento => 'Tingling';
+
+  @override
+  String get jv2OptCabecaPressaoTemporas =>
+      'Pain or pressure in the temples or forehead';
+
+  @override
+  String get jv2OptCabecaPressaoLatejando =>
+      'Throbbing, bothered by light or noise';
+
+  @override
+  String get jv2OptCabecaSentidosGarganta => 'Scratchy or dry throat';
+
+  @override
+  String get jv2OptCabecaSentidosOlhos => 'Heavy or burning eyes';
+
+  @override
+  String get jv2OptPeitoRespiracaoCurta => 'Short breath';
+
+  @override
+  String get jv2OptPeitoRespiracaoTosse => 'Cough or heavy chest';
+
+  @override
+  String get jv2OptPeitoIncomodoBatedeira => 'Racing or pounding heart';
+
+  @override
+  String get jv2OptPeitoIncomodoCostelas =>
+      'Stitch in the ribs when breathing deeply';
+
+  @override
+  String get jv2OptBarrigaQueimacaoSubindo => 'Burning that rises';
+
+  @override
+  String get jv2OptBarrigaQueimacaoEnjoo => 'Nausea';
+
+  @override
+  String get jv2OptBarrigaColicaGases => 'Gas or bloated belly';
+
+  @override
+  String get jv2OptBarrigaColicaPontadas => 'Cramps or stabbing pains';
+
+  @override
+  String get jv2OptCostasRigidezOmbros => 'Stiff neck and shoulders';
+
+  @override
+  String get jv2OptCostasRigidezLombar => 'Heaviness in the lower back';
+
+  @override
+  String get jv2OptCostasFisgadaIrradia =>
+      'Stabbing pain running down an arm or leg';
+
+  @override
+  String get jv2OptCostasFisgadaAoMexer => 'Pain when moving';
+
+  @override
+  String get jv2OptMembrosCansacoJuntas => 'Sore joints';
+
+  @override
+  String get jv2OptMembrosCansacoPesados => 'Tired arms or legs';
+
+  @override
+  String get jv2OptMembrosFormigamentoDormentes =>
+      'Tingling or numb hands or feet';
+
+  @override
+  String get jv2OptMembrosFormigamentoChoque => 'Electric-shock feeling';
+
+  @override
+  String get jv2PersistenceQuestion => 'How long have you noticed this?';
+
+  @override
+  String get jv2PersistenceHoje => 'Started today';
+
+  @override
+  String get jv2PersistenceDiasSemanas => 'A few days or weeks';
+
+  @override
+  String get jv2PersistenceMesesAnos => 'Months or years';
+
+  @override
+  String get jv2PersistenceOptional => 'How long? (optional)';
+
+  @override
+  String get jv2IntensityQuestion =>
+      'Now, how much does this weigh on your day?';
+
+  @override
+  String get jv2IntensityCompactQuestion =>
+      'For each item, how much does it weigh on your day?';
+
+  @override
+  String jv2IntensityLevel(int level) {
+    return '$level of 5';
+  }
+
+  @override
+  String get jv2IntensityEmotional1 =>
+      'It passes quickly, I go on with my day as usual.';
+
+  @override
+  String get jv2IntensityEmotional2 => 'I notice it, but I can stay focused.';
+
+  @override
+  String get jv2IntensityEmotional3 => 'It is taking my energy or focus.';
+
+  @override
+  String get jv2IntensityEmotional4 =>
+      'It is changing my routine (sleep, tasks, time with others).';
+
+  @override
+  String get jv2IntensityEmotional5 =>
+      'It is holding me back almost completely today.';
+
+  @override
+  String get jv2IntensityPhysical1 =>
+      'I feel it, but it does not get in the way.';
+
+  @override
+  String get jv2IntensityPhysical2 =>
+      'It bothers me, but I keep up my activities.';
+
+  @override
+  String get jv2IntensityPhysical3 => 'It slowed me down or made me pause.';
+
+  @override
+  String get jv2IntensityPhysical4 => 'I cannot properly do what I need to.';
+
+  @override
+  String get jv2IntensityPhysical5 =>
+      'It is holding me back almost completely today.';
+
+  @override
+  String get jv2EmergencyLine =>
+      'If this is an emergency, use the Help button or call your local emergency number.';
+
+  @override
+  String get jv2TriggersQuestion =>
+      'Is there anything that may have contributed today?';
+
+  @override
+  String get jv2TriggerTrabalho => 'Work or studies';
+
+  @override
+  String get jv2TriggerFamilia => 'Family or relationships';
+
+  @override
+  String get jv2TriggerSono => 'Poor night of sleep';
+
+  @override
+  String get jv2TriggerAlimentacao => 'Food';
+
+  @override
+  String get jv2TriggerEsforco => 'Physical effort';
+
+  @override
+  String get jv2TriggerQueda => 'A fall or awkward movement';
+
+  @override
+  String get jv2TriggerMedicamento => 'New medicine';
+
+  @override
+  String get jv2TriggerClima => 'Weather or surroundings';
+
+  @override
+  String get jv2TriggerNaoSei => 'I am not sure';
+
+  @override
+  String get jv2TriggerOutro => 'Other';
+
+  @override
+  String get jv2TriggerNoteHint => 'Tell us in a few words';
+
+  @override
+  String get jv2NoteQuestion => 'Would you like to say more?';
+
+  @override
+  String get jv2NoteHint => 'Write in your own words (optional)';
+
+  @override
+  String get jv2SaveError => 'Could not save right now. Please try again.';
+
+  @override
+  String get jv2SavedOffline =>
+      'Entry saved on this device. It will be sent when you are online.';
+
+  @override
+  String get jv2ConditionsTitle => 'My conditions';
+
+  @override
+  String get jv2ConditionsSubtitle =>
+      'Added by you. Write them in your own words; each one shows up in your daily entry with the same 1 to 5 scale.';
+
+  @override
+  String get jv2ConditionsAdd => 'Add';
+
+  @override
+  String get jv2ConditionsFieldHint => 'E.g. Migraine';
+
+  @override
+  String get jv2ConditionsEmpty => 'You have not added any yet.';
+
+  @override
+  String get jv2ConditionsArchive => 'Archive';
+
+  @override
+  String jv2ConditionsArchiveConfirm(String label) {
+    return 'Archive \"$label\"? Your past entries keep this name.';
+  }
+
+  @override
+  String jv2ConditionsLimit(int max) {
+    return 'You can track up to $max.';
+  }
+
+  @override
+  String get jv2ConditionsOffline =>
+      'No connection. Try again when you are online.';
+
+  @override
+  String get jv2ConditionsError => 'Could not save. Please try again.';
+
+  @override
+  String get jv2ConditionsSettingsSubtitle =>
+      'Follow, in your own words, something you already know about';
+
+  @override
+  String get jv2PhraseTime1 => 'Got it. Let us note this down calmly.';
+
+  @override
+  String get jv2PhraseTime2 => 'Thanks for sharing. Let us write it down.';
+
+  @override
+  String get jv2PhraseTime3 => 'That is okay. One step at a time.';
+
+  @override
+  String get jv2PhraseTime4 => 'Okay. Let us record it your way.';
+
+  @override
+  String get jv2PhrasePassado1 =>
+      'The mind sometimes goes back in time. Let us note it down.';
+
+  @override
+  String get jv2PhrasePassado2 => 'Thanks for sharing. What is it about?';
+
+  @override
+  String get jv2PhrasePassado3 => 'Let us record this calmly.';
+
+  @override
+  String get jv2PhrasePresente1 => 'Let us note what feels heavy today.';
+
+  @override
+  String get jv2PhrasePresente2 => 'Got it. What fits best right now?';
+
+  @override
+  String get jv2PhrasePresente3 => 'Thanks for sharing. Let us record it.';
+
+  @override
+  String get jv2PhraseFuturo1 =>
+      'Thinking about what lies ahead is part of life. Let us note it.';
+
+  @override
+  String get jv2PhraseFuturo2 => 'Got it. What fits you best?';
+
+  @override
+  String get jv2PhraseFuturo3 => 'Thanks for sharing. Let us record it calmly.';
+
+  @override
+  String get jv2PhraseBody1 => 'Let us note what you feel in your body.';
+
+  @override
+  String get jv2PhraseBody2 => 'Tap where you feel discomfort.';
+
+  @override
+  String get jv2PhraseBody3 => 'Thanks for sharing. Where do you feel it?';
+
+  @override
+  String get jv2PhraseRegion1 => 'Let us note what you feel here.';
+
+  @override
+  String get jv2PhraseRegion2 => 'Got it. What is the feeling like?';
+
+  @override
+  String get jv2PhraseRegion3 => 'Thanks for sharing. What fits best?';
+
+  @override
+  String get jv2PhraseRegion4 => 'Recording helps you follow your day to day.';
+
+  @override
+  String get jv2PhraseIntensity1 => 'You pick the number. The scale is yours.';
+
+  @override
+  String get jv2PhraseIntensity2 =>
+      'There is no right answer. What you feel is what counts.';
+
+  @override
+  String get jv2PhraseIntensity3 => 'Almost there. Just a little more.';
+
+  @override
+  String get jv2PhraseTriggers1 =>
+      'If you like, mark what may have contributed.';
+
+  @override
+  String get jv2PhraseTriggers2 => 'It is optional. You can skip it.';
+
+  @override
+  String get jv2PhraseTriggers3 => 'Almost done. Did anything stand out today?';
 }
