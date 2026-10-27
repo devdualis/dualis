@@ -137,6 +137,30 @@ describe('HydrationService Unit Tests', () => {
     expect(result.totals['2026-09-25']).toBe(0);
   });
 
+  it('3b. groups by the device day with tzOffset: 22:00 in Brasília stays on that day', async () => {
+    const mockLogs = [
+      { id: 'a', amountMl: 300, recordedAt: new Date('2026-10-28T01:00:00Z') }, // 27th, 22:00 BRT
+      { id: 'b', amountMl: 200, recordedAt: new Date('2026-10-27T12:00:00Z') },
+      { id: 'c', amountMl: 100, recordedAt: new Date('2026-10-26T02:30:00Z') }, // 25th, 23:30 BRT
+    ];
+    const where = vi.fn().mockReturnValue({ orderBy: vi.fn().mockResolvedValue(mockLogs) });
+    mockDatabaseService.withRls.mockImplementation(async (_u: string, callback: any) =>
+      callback({ select: vi.fn().mockReturnValue({ from: vi.fn().mockReturnValue({ where }) }) }),
+    );
+
+    // Wall-clock reference (no zone) is the device's own day.
+    const result = await service.getHistory('usr-1', 'prof-usr-1', 3, '2026-10-27T23:00:00.000', -180);
+
+    expect(result.days).toEqual([
+      { date: '2026-10-25', totalMl: 100 },
+      { date: '2026-10-26', totalMl: 0 },
+      { date: '2026-10-27', totalMl: 500 },
+    ]);
+    // Same instant with a zone resolves to the same local day.
+    const zoned = await service.getHistory('usr-1', 'prof-usr-1', 3, '2026-10-28T02:00:00Z', -180);
+    expect(Object.keys(zoned.totals)).toEqual(['2026-10-25', '2026-10-26', '2026-10-27']);
+  });
+
   it('4. deletes log by id and userId safely', async () => {
     mockDatabaseService.withRls.mockImplementation(async (userId: string, callback: any) => {
       const tx = {

@@ -81,7 +81,7 @@ export class HydrationController {
     @Query() query: HydrationHistoryQueryDto,
   ): Promise<HydrationHistoryResponseDto> {
     const userId = req.user?.id || req.user?.userId || req.user?.sub;
-    return this.hydrationService.getHistory(userId, profile.profileId, query.days, query.referenceDate);
+    return this.hydrationService.getHistory(userId, profile.profileId, query.days, query.referenceDate, query.tzOffset ?? 0);
   }
 
   @Delete('log/:id')
