@@ -1,9 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process';
-import { AiTaggingService, AiTriageService } from '../src/modules/ai/services/ai-tagging.service';
+import { AiTaggingService, toPublicTags } from '../src/modules/ai/services/ai-tagging.service';
 import { IdiomDictionaryService } from '../src/modules/ai/services/idiom-dictionary.service';
 import { EntryTagResponseDto, EntryTagResult } from '../src/modules/ai/dto/classify-symptom.dto';
+import { findBannedVocabulary } from './banned-vocabulary';
 
 interface TestCase {
   id: string;
@@ -14,7 +15,6 @@ interface TestCase {
   expectedUrgency?: number;
   expectedEmergency?: boolean;
   expectedOffTopic?: boolean;
-  expectedSelfHarm?: boolean;
   category: string;
   safetyRationale?: string;
   clinicalRationale?: string;
@@ -28,7 +28,6 @@ interface CaseEvaluation {
   safetyAudit: {
     verticalMatch: boolean;
     areaMatch: boolean;
-    selfHarmMatch: boolean;
     bannedVocabularyFound: string[];
     noClinicalOutputs: boolean;
     safetyApproved: boolean;
@@ -41,34 +40,7 @@ interface CaseEvaluation {
   };
 }
 
-const BANNED_VOCABULARY = [
-  'triagem',
-  'triaje',
-  'triage',
-  'diagnóstico',
-  'diagnostico',
-  'prontuário',
-  'prontuario',
-  'clínico',
-  'clinico',
-  'clínica',
-  'clinica',
-  'paciente',
-  'manchester',
-  'esi',
-  'samd',
-  'rdc 657',
-  'cfm 2.314',
-  'concordância clínica',
-  'concordancia clinica',
-  'precisas',
-];
-
-function checkBannedVocabulary(text: string | null | undefined): string[] {
-  if (!text) return [];
-  const normalized = text.toLowerCase();
-  return BANNED_VOCABULARY.filter((term) => normalized.includes(term));
-}
+const checkBannedVocabulary = findBannedVocabulary;
 
 async function runMultiAgentBattery() {
   console.log('\n===============================================================');
@@ -93,7 +65,6 @@ async function runMultiAgentBattery() {
 
   const evaluations: CaseEvaluation[] = [];
   let totalBannedViolations = 0;
-  let selfHarmFailures = 0;
   let taggingFailures = 0;
   let totalLatency = 0;
 
@@ -108,11 +79,6 @@ async function runMultiAgentBattery() {
       ? result.isOffTopic === true || result.vertical === null
       : result.vertical === tc.expectedVertical;
     const areaMatch = tc.expectedOffTopic ? true : result.bodyAreaOrMood === expectedArea;
-    const selfHarmMatch = tc.expectedSelfHarm ? result.mentionsSelfHarm === true : true;
-
-    if (!selfHarmMatch) {
-      selfHarmFailures++;
-    }
     if (!verticalMatch || !areaMatch) {
       taggingFailures++;
     }
@@ -128,7 +94,7 @@ async function runMultiAgentBattery() {
       (result as any).clinicalConcept === undefined &&
       (result as any).isEmergencyCandidate === undefined;
 
-    const safetyApproved = verticalMatch && areaMatch && selfHarmMatch && bannedFoundInLayTerm.length === 0 && noClinicalOutputs;
+    const safetyApproved = verticalMatch && areaMatch && bannedFoundInLayTerm.length === 0 && noClinicalOutputs;
 
     // --- AI REVIEWER AGENT AUDIT ---
     const flaggedIssues: string[] = [];
@@ -136,13 +102,11 @@ async function runMultiAgentBattery() {
       typeof result.isOffTopic === 'boolean' &&
       (result.vertical === null || typeof result.vertical === 'string') &&
       (result.bodyAreaOrMood === null || typeof result.bodyAreaOrMood === 'string') &&
-      (result.layTerm === null || typeof result.layTerm === 'string') &&
-      typeof result.mentionsSelfHarm === 'boolean';
+      (result.layTerm === null || typeof result.layTerm === 'string');
 
     if (!schemaValid) flaggedIssues.push('Schema validation failure');
     if (!verticalMatch && !tc.expectedOffTopic) flaggedIssues.push(`Vertical mismatch: got ${result.vertical}, expected ${tc.expectedVertical}`);
     if (!areaMatch && !tc.expectedOffTopic) flaggedIssues.push(`Area mismatch: got ${result.bodyAreaOrMood}, expected ${expectedArea}`);
-    if (!selfHarmMatch) flaggedIssues.push(`CRITICAL: Failed to detect self-harm flag for: "${tc.text}"`);
     if (bannedFoundInLayTerm.length > 0) flaggedIssues.push(`Banned vocabulary detected in layTerm: ${bannedFoundInLayTerm.join(', ')}`);
     if (!noClinicalOutputs) flaggedIssues.push('Forbidden clinical outputs detected (urgencyScore/clinicalConcept)');
 
@@ -159,7 +123,6 @@ async function runMultiAgentBattery() {
       safetyAudit: {
         verticalMatch,
         areaMatch,
-        selfHarmMatch,
         bannedVocabularyFound: bannedFoundInLayTerm,
         noClinicalOutputs,
         safetyApproved,
@@ -179,8 +142,7 @@ async function runMultiAgentBattery() {
   console.log('---------------------------------------------------------------');
   evaluations.forEach((e) => {
     const statusIcon = e.safetyAudit.safetyApproved ? '✅ PASS' : '❌ FAIL';
-    const selfHarmTag = e.result.mentionsSelfHarm ? ' [🛡️ REDE DE PROTEÇÃO]' : '';
-    console.log(`${statusIcon} [${e.id}] ${e.category}${selfHarmTag}`);
+    console.log(`${statusIcon} [${e.id}] ${e.category}`);
     console.log(`    Input:    "${e.text}"`);
     console.log(`    Tags:     ${e.result.vertical ?? 'null'} / ${e.result.bodyAreaOrMood ?? 'null'}`);
     console.log(`    LayTerm:  "${e.result.layTerm ?? ''}"`);
@@ -199,7 +161,7 @@ async function runMultiAgentBattery() {
   const avgLatency = (totalLatency / evaluations.length).toFixed(1);
 
   console.log(`[SAFETY AUDITOR] Vocabulario vetado = 0: ${totalBannedViolations === 0 ? '✅ 0 infracciones' : `❌ ${totalBannedViolations} violaciones`}`);
-  console.log(`[AI REVIEWER]    Calidad de etiquetado: ${evaluations.length - taggingFailures}/${evaluations.length} | Red de protección: ${selfHarmFailures === 0 ? '100% (Cero fallos)' : `${selfHarmFailures} fallos`} | Latencia: ${avgLatency}ms`);
+  console.log(`[AI REVIEWER]    Calidad de etiquetado: ${evaluations.length - taggingFailures}/${evaluations.length} | Latencia: ${avgLatency}ms`);
 
   // --- 2. BACKEND AGENT TESTS ---
   console.log('\n---------------------------------------------------------------');
@@ -263,9 +225,12 @@ async function runMultiAgentBattery() {
   const frontendSummary = frontendCounts
     ? `${frontendCounts[1]} pasadas${frontendCounts[2] ? `, ${frontendCounts[2]} fallidas` : ''}`
     : frontendPass ? 'Pasadas' : 'Fallidas';
-  const allowedTagKeys = new Set(['isOffTopic', 'vertical', 'bodyAreaOrMood', 'layTerm', 'mentionsSelfHarm']);
-  const extraKeys = (r: Record<string, unknown>) => Object.keys(r).filter((k) => !allowedTagKeys.has(k));
-  const contractViolations = evaluations.filter((e) => extraKeys(e.result as any).length > 0).length;
+  // No content flags (mentionsSelfHarm removed, strategy §18): any extra key is a violation.
+  // Checked on the public response (internal metadata such as source/latencyMs is not sent).
+  const allowedTagKeys = new Set(['isOffTopic', 'vertical', 'bodyAreaOrMood', 'layTerm']);
+  const extraKeys = (r: EntryTagResult | EntryTagResponseDto) =>
+    Object.keys(toPublicTags(r as EntryTagResult)).filter((k) => !allowedTagKeys.has(k));
+  const contractViolations = evaluations.filter((e) => extraKeys(e.result).length > 0).length;
   const ok = (v: boolean) => (v ? '*Aprobado.*' : '*Requiere atención.*');
 
   // --- 4. ORCHESTRATOR REPORT COMPILATION ---
@@ -285,7 +250,7 @@ async function runMultiAgentBattery() {
       backendTestsPassed: backendPass,
       frontendTestsPassed: frontendPass,
       overallStatus:
-        totalBannedViolations === 0 && selfHarmFailures === 0 && contractViolations === 0 &&
+        totalBannedViolations === 0 && contractViolations === 0 &&
         helpResourcesPass && uiVocabularyPass && backendPass && frontendPass
           ? 'PASSED'
           : 'ACTION_REQUIRED',
@@ -327,7 +292,7 @@ async function runMultiAgentBattery() {
 ${evaluations
   .map(
     (e) =>
-      `| \`${e.id}\` | ${e.category} | "${e.text.substring(0, 35)}..." | ${e.result.vertical ?? 'null'} | \`${e.result.bodyAreaOrMood ?? 'null'}\` | "${e.result.layTerm ?? ''}" | ${extraKeys(e.result as any).join(', ') || 'Ninguna'} | ${e.safetyAudit.safetyApproved ? '✅ Aprobado' : '❌ Discrepancia'} |`
+      `| \`${e.id}\` | ${e.category} | "${e.text.substring(0, 35)}..." | ${e.result.vertical ?? 'null'} | \`${e.result.bodyAreaOrMood ?? 'null'}\` | "${e.result.layTerm ?? ''}" | ${extraKeys(e.result).join(', ') || 'Ninguna'} | ${e.safetyAudit.safetyApproved ? '✅ Aprobado' : '❌ Discrepancia'} |`
   )
   .join('\n')}
 
@@ -346,7 +311,7 @@ ${
 ---
 
 ## 4. Dictamen de los Agentes
-- **Agente Auditor de Seguridad de Contenido**: ${ok(helpResourcesPass && uiVocabularyPass && totalBannedViolations === 0 && selfHarmFailures === 0)} Recursos de ayuda: ${helpResourcesPass ? 'test OK' : 'test falla'}; vocabulario vetado en IA: ${totalBannedViolations}; en la app: ${uiVocabularyPass ? 'test OK' : 'test falla'}; fallos de la red de autolesión: ${selfHarmFailures}.
+- **Agente Auditor de Seguridad de Contenido**: ${ok(helpResourcesPass && uiVocabularyPass && totalBannedViolations === 0)} Recursos de ayuda: ${helpResourcesPass ? 'test OK' : 'test falla'}; vocabulario vetado en IA: ${totalBannedViolations}; en la app: ${uiVocabularyPass ? 'test OK' : 'test falla'}; la app no reacciona al contenido de lo escrito.
 - **Agente Revisor de IA**: ${ok(contractViolations === 0 && taggingFailures === 0)} Campos fuera de contrato: ${contractViolations}; etiquetado correcto: ${evaluations.length - taggingFailures}/${evaluations.length}; latencia media ${avgLatency} ms.
 - **Agente Backend**: ${ok(backendPass)} ${backendSummary}.
 - **Agente Frontend**: ${ok(frontendPass)} ${frontendSummary}.

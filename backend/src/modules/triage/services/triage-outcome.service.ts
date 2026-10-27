@@ -5,6 +5,7 @@ import { DRIZZLE_DB } from '../../../database/database.service';
 import * as schema from '../../../database/schema';
 import { symptomLogs } from '../../../database/schema';
 import { EncryptionService } from '../../../common/encryption/encryption.service';
+import { Lang, Localized, resolveLang } from '../../../common/i18n/lang';
 import { ArticlesCatalogService } from './articles-catalog.service';
 import { ArticlesVectorService } from './articles-vector.service';
 import { MEDICAL_ARTICLES_SEED } from '../data/medical-articles.seed';
@@ -20,8 +21,6 @@ import {
   DailyCheckInResponseDto,
 } from '../dto/daily-checkin.dto';
 
-type Lang = 'pt' | 'en' | 'es';
-type Localized = Record<Lang, string>;
 type Vertical = 'physical' | 'emotional';
 
 interface CategoryMapping {
@@ -32,7 +31,7 @@ interface CategoryMapping {
 
 // Plain-language names for each category code (plan R3: name the area or mood the
 // person picked, never a condition or "system"). Codes are stable identifiers.
-const PHYSICAL_LABELS: Record<string, Localized> = {
+export const PHYSICAL_LABELS: Record<string, Localized> = {
   normal: { pt: 'Sem desconforto registrado', en: 'No discomfort logged', es: 'Sin molestias registradas' },
   cabeca_pescoco: { pt: 'Cabeça e pescoço', en: 'Head and neck', es: 'Cabeza y cuello' },
   cardiovascular_torax: { pt: 'Peito', en: 'Chest', es: 'Pecho' },
@@ -48,7 +47,7 @@ const PHYSICAL_LABELS: Record<string, Localized> = {
   endocrino_metabolico: { pt: 'Energia e apetite', en: 'Energy and appetite', es: 'Energía y apetito' },
 };
 
-const EMOTIONAL_LABELS: Record<string, Localized> = {
+export const EMOTIONAL_LABELS: Record<string, Localized> = {
   normal: { pt: 'Bem emocionalmente', en: 'Feeling good emotionally', es: 'Bien emocionalmente' },
   ansiosa_agitacao: { pt: 'Ansiedade e agitação', en: 'Anxious and restless', es: 'Ansiedad e inquietud' },
   depressiva_desanimo: { pt: 'Pra baixo', en: 'Feeling down', es: 'Decaído(a)' },
@@ -169,13 +168,6 @@ const BODY_AND_EMOTIONS_NOTE: Localized = {
   en: 'You logged sensations in your body and in your emotions today. If any physical discomfort persists or gets worse, talk to a health professional.',
   es: 'Hoy registraste sensaciones en el cuerpo y en las emociones. Si alguna molestia física persiste o empeora, habla con un profesional de la salud.',
 };
-
-function resolveLang(language?: string): Lang {
-  const lang = (language || 'pt').toLowerCase();
-  if (lang.startsWith('es')) return 'es';
-  if (lang.startsWith('en')) return 'en';
-  return 'pt';
-}
 
 @Injectable()
 export class TriageOutcomeService {

@@ -23,7 +23,7 @@ describe('Journal route aliases E2E', () => {
   const entryId = '6a6a6a6a-0000-4000-8000-000000000001';
 
   const history = { getHistory: vi.fn(async () => ({ items: [], marker: 'history' })), deleteHistoryItem: vi.fn(async (_u: string, _p: string, id: string) => ({ success: true, id })) };
-  const tags = { isOffTopic: false, vertical: 'physical', bodyAreaOrMood: 'head_neck', layTerm: 'dor de cabeça', mentionsSelfHarm: false };
+  const tags = { isOffTopic: false, vertical: 'physical', bodyAreaOrMood: 'head_neck', layTerm: 'dor de cabeça' };
   const tagging = { tagEntry: vi.fn(async () => tags), classify: vi.fn(async () => tags) };
 
   beforeAll(async () => {

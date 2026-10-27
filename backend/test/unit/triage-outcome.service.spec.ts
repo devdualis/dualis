@@ -271,7 +271,6 @@ describe('TriageOutcomeService Unit Tests', () => {
       vertical: 'emotional',
       bodyAreaOrMood: 'stress_burnout',
       layTerm: 'estresse',
-      mentionsSelfHarm: false,
       confidence: 0.9,
       source: 'gemini',
       latencyMs: 120,
@@ -309,9 +308,9 @@ describe('TriageOutcomeService Unit Tests', () => {
       expect(outcome.secondaryIntensityScore).toBe(2);
     });
 
-    it('12. a self-harm mention in the narrative changes nothing in the summary: no urgency output', async () => {
+    it('12. what the narrative says changes nothing in the summary: no urgency output', async () => {
       vi.spyOn(aiTagging, 'tagWithMetadata').mockResolvedValue(
-        tags({ vertical: 'physical', bodyAreaOrMood: 'cardiovascular_chest', mentionsSelfHarm: true }),
+        tags({ vertical: 'physical', bodyAreaOrMood: 'cardiovascular_chest' }),
       );
 
       const outcome = await service.processOutcome('user-1', 'prof-user-1', {

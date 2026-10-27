@@ -1,11 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EntryTagResult } from '../dto/classify-symptom.dto';
 
-// Content-safety net (not an assessment): the text mentions wanting to hurt oneself
-// or die. Checked on every entry, independently of which idiom matched first.
-const SELF_HARM_PATTERN =
-  /(vontade\s+de\s+sumir|n[aã]o\s+quero\s+mais\s+viver|quero\s+morrer|pensando\s+em\s+suic[ií]dio|tirar\s+a\s+pr[oó]pria\s+vida|me\s+machucar|me\s+ferir|ganas\s+de\s+morir|quiero\s+morir|quitarme\s+la\s+vida|want\s+to\s+die|kill\s+myself|hurt\s+myself|self[-\s]harm|suicid)/i;
-
 interface IdiomEntry {
   pattern: RegExp;
   vertical: 'physical' | 'emotional';
@@ -162,10 +157,6 @@ export class IdiomDictionaryService {
     },
   ];
 
-  mentionsSelfHarm(text: string): boolean {
-    return SELF_HARM_PATTERN.test(text);
-  }
-
   match(text: string): EntryTagResult | null {
     const start = performance.now();
     const clean = text.trim();
@@ -177,7 +168,6 @@ export class IdiomDictionaryService {
           vertical: entry.vertical,
           bodyAreaOrMood: entry.systemOrDimension,
           layTerm: entry.mappedLayTerm,
-          mentionsSelfHarm: this.mentionsSelfHarm(clean),
           confidence: 0.95,
           source: 'dictionary_fallback',
           latencyMs: Math.round(performance.now() - start),

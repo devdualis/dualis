@@ -150,7 +150,7 @@ describe('Wellness API contract: outcome, check-in, history and tagging carry no
       const tagged = await ai.tagEntry({ text });
       expectNoAssessment(tagged);
       expect(Object.keys(tagged).sort()).toEqual(
-        ['bodyAreaOrMood', 'isOffTopic', 'layTerm', 'mentionsSelfHarm', 'vertical'].sort(),
+        ['bodyAreaOrMood', 'isOffTopic', 'layTerm', 'vertical'].sort(),
       );
       expectNoAssessment(await ai.classify({ text }));
     }
