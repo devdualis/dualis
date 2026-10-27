@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, smallint, timestamp, pgPolicy, index, check } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, smallint, timestamp, pgPolicy, index, check, unique } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { users } from './users.schema';
 import { profiles } from './profiles.schema';
@@ -61,11 +61,12 @@ export const journalEntries = pgTable(
     triggerNote: text('trigger_note'), // encrypted
     note: text('note'), // encrypted
     transitionVariantIds: text('transition_variant_ids').array().default(sql`'{}'::text[]`).notNull(), // UX analytics only
-    clientId: text('client_id').notNull().unique('journal_entries_client_id_unique'), // outbox idempotency
+    clientId: text('client_id').notNull(), // outbox idempotency, unique per profile
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
     index('idx_journal_entries_profile_recorded').on(table.profileId, table.recordedAt.desc()),
+    unique('journal_entries_profile_client_id_unique').on(table.profileId, table.clientId),
     check('journal_entries_mood_check', sql`${table.mood} IN ('bem', 'normal', 'nao_tao_bem')`),
     pgPolicy('journal_entries_profile_select', {
       for: 'select',
@@ -131,7 +132,10 @@ export const journalItems = pgTable(
     pgPolicy('journal_items_profile_update', {
       for: 'update',
       using: sql`EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = entry_id AND app_can_write_profile(e.profile_id))`,
-      withCheck: sql`EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = entry_id AND app_can_write_profile(e.profile_id))`,
+      withCheck: sql`EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = entry_id AND app_can_write_profile(e.profile_id))
+        AND (condition_id IS NULL OR EXISTS (
+          SELECT 1 FROM user_conditions c JOIN journal_entries e ON e.id = entry_id
+          WHERE c.id = condition_id AND c.profile_id = e.profile_id))`,
     }),
     pgPolicy('journal_items_profile_delete', {
       for: 'delete',

@@ -114,6 +114,11 @@ export function optionKeyRoot(optionKey: string): string {
   return optionKey.split('.')[0];
 }
 
+/** First two segments of an optionKey: `<time>.<branch>` or `<region>.<branch>`. */
+export function optionKeyBranch(optionKey: string): string {
+  return optionKey.split('.').slice(0, 2).join('.');
+}
+
 export function isCustomOptionKey(optionKey: string): boolean {
   return optionKey.split('.')[1] === CUSTOM_SUFFIX;
 }
