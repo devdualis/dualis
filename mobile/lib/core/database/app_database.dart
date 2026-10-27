@@ -38,12 +38,44 @@ class WaterIntakeLogs extends Table {
   TextColumn get profileId => text().nullable()();
 }
 
-@DriftDatabase(tables: [TriageOutbox, LocalSymptomDrafts, WaterIntakeLogs])
+/// Journal v2 entries saved on the device until they reach the server.
+/// [clientId] is the idempotency key sent with the entry.
+class JournalOutbox extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get clientId => text().unique()();
+  TextColumn get payloadJson => text()();
+  TextColumn get status => text().withDefault(const Constant('pending'))();
+  IntColumn get attempts => integer().withDefault(const Constant(0))();
+  TextColumn get lastError => text().nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get syncedAt => dateTime().nullable()();
+  TextColumn get profileId => text().nullable()();
+}
+
+/// Last known list of the user's own conditions, so the daily entry works
+/// offline.
+class LocalUserConditions extends Table {
+  TextColumn get id => text()();
+  TextColumn get label => text()();
+  TextColumn get profileId => text().withDefault(const Constant(''))();
+  DateTimeColumn get createdAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id, profileId};
+}
+
+@DriftDatabase(tables: [
+  TriageOutbox,
+  LocalSymptomDrafts,
+  WaterIntakeLogs,
+  JournalOutbox,
+  LocalUserConditions,
+])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -63,6 +95,10 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(localSymptomDrafts, localSymptomDrafts.profileId);
           await m.addColumn(waterIntakeLogs, waterIntakeLogs.profileId);
         }
+        if (from < 5) {
+          await m.createTable(journalOutbox);
+          await m.createTable(localUserConditions);
+        }
       },
     );
   }
@@ -71,6 +107,8 @@ class AppDatabase extends _$AppDatabase {
     await delete(triageOutbox).go();
     await delete(localSymptomDrafts).go();
     await delete(waterIntakeLogs).go();
+    await delete(journalOutbox).go();
+    await delete(localUserConditions).go();
   }
 
   static QueryExecutor _openConnection() {

@@ -4,12 +4,39 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/network/connectivity_service.dart';
 import '../../../../l10n/app_localizations.dart';
+import 'dart:async';
+
+import '../../../journal/data/journal_local_store.dart';
 import '../../data/triage_outbox_repository.dart';
 
+/// Items waiting to sync: legacy check-ins plus journal v2 entries.
 final pendingOutboxCountProvider = StreamProvider<int>((ref) {
-  final repo = ref.watch(triageOutboxRepositoryProvider);
-  return repo.getPendingCountStream();
+  final legacy = ref.watch(triageOutboxRepositoryProvider).getPendingCountStream();
+  final journal = ref.watch(journalLocalStoreProvider).pendingCountStream();
+  return _sumLatest(legacy, journal);
 });
+
+Stream<int> _sumLatest(Stream<int> a, Stream<int> b) {
+  var lastA = 0;
+  var lastB = 0;
+  final subs = <StreamSubscription<int>>[];
+  late final StreamController<int> controller;
+  controller = StreamController<int>(
+    onListen: () {
+      subs
+        ..add(a.listen((v) => controller.add((lastA = v) + lastB),
+            onError: controller.addError))
+        ..add(b.listen((v) => controller.add(lastA + (lastB = v)),
+            onError: controller.addError));
+    },
+    onCancel: () async {
+      for (final s in subs) {
+        await s.cancel();
+      }
+    },
+  );
+  return controller.stream;
+}
 
 class OfflineIndicatorBanner extends ConsumerWidget {
   const OfflineIndicatorBanner({super.key});
