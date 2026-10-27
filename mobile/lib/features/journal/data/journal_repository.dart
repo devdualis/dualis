@@ -90,9 +90,7 @@ class JournalRepository {
     }
     if (!await _isOnline()) throw const JournalOfflineException();
     final created = await _remote.createCondition(
-      clean.length > JournalKeys.conditionLabelMaxLength
-          ? clean.substring(0, JournalKeys.conditionLabelMaxLength)
-          : clean,
+      JournalKeys.limitChars(clean, JournalKeys.conditionLabelMaxLength),
     );
     await _local.replaceConditions(_activeProfileId(), [...current, created]);
     return created;
@@ -120,10 +118,12 @@ class JournalRepository {
         await _local.markSynced(row.id);
         synced++;
       } on DioException catch (e) {
-        // 409: the server already has this clientId.
-        if (e.response?.statusCode == 409) {
+        final status = e.response?.statusCode ?? 0;
+        if (status == 409 && _isIdempotentReplay(e)) {
           await _local.markSynced(row.id);
           synced++;
+        } else if (status == 400 || status == 422 || status == 409) {
+          await _local.markRejected(row.id, e.message ?? e.type.name);
         } else {
           await _local.markFailed(row.id, e.message ?? e.type.name);
         }
@@ -132,5 +132,13 @@ class JournalRepository {
       }
     }
     return synced;
+  }
+
+  /// 409 is success only when the server returns the existing entry
+  /// (idempotent replay of the same `clientId`).
+  bool _isIdempotentReplay(DioException e) {
+    final data = e.response?.data;
+    if (data is! Map) return false;
+    return data['id'] != null || data['clientId'] != null;
   }
 }

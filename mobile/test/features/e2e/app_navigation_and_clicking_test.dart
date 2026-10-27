@@ -233,6 +233,7 @@ Widget createFullAppWalkthrough({
     overrides: [
       isOnlineProvider.overrideWith((ref) => Stream.value(true)),
       pendingOutboxCountProvider.overrideWith((ref) => Stream.value(0)),
+      rejectedOutboxCountProvider.overrideWith((ref) => Stream.value(0)),
       appDatabaseProvider.overrideWithValue(db),
       secureStorageServiceProvider.overrideWithValue(storage),
       authRepositoryProvider.overrideWithValue(authRepo),

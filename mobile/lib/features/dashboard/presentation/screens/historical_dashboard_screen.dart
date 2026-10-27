@@ -8,7 +8,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../home/domain/home_greeting.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../journal_insights/domain/journal_insights_models.dart';
-import '../../../journal_insights/domain/journal_labels.dart';
+import '../../../journal/presentation/journal_labels.dart';
 import '../../../journal_insights/presentation/controllers/journal_insights_controller.dart';
 import '../../../journal_insights/presentation/widgets/journal_line_charts.dart';
 import '../../../journal_insights/presentation/widgets/journal_overview_widgets.dart';
@@ -265,6 +265,18 @@ class _EntriesList extends ConsumerWidget {
                           color: AppColors.textSecondaryLight,
                         ),
                       ),
+                      if (entry.pendingSync) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.jv2PendingSync,
+                          key: Key('journal_entry_pending_${entry.id}'),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 4),
                       if (entry.items.isEmpty && entry.mood != null)
                         _line(l10n.xv2DashMoodLine(
@@ -278,7 +290,7 @@ class _EntriesList extends ConsumerWidget {
                     ],
                   ),
                 ),
-                if (canDelete && !entry.legacy)
+                if (canDelete && !entry.legacy && !entry.pendingSync)
                   IconButton(
                     key: Key('journal_entry_delete_${entry.id}'),
                     tooltip: l10n.xv2DashDeleteTitle,

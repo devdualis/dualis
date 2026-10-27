@@ -16,6 +16,10 @@ final pendingOutboxCountProvider = StreamProvider<int>((ref) {
   return _sumLatest(legacy, journal);
 });
 
+final rejectedOutboxCountProvider = StreamProvider<int>((ref) {
+  return ref.watch(journalLocalStoreProvider).rejectedCountStream();
+});
+
 Stream<int> _sumLatest(Stream<int> a, Stream<int> b) {
   var lastA = 0;
   var lastB = 0;
@@ -45,24 +49,31 @@ class OfflineIndicatorBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isOnlineAsync = ref.watch(isOnlineProvider);
     final pendingCountAsync = ref.watch(pendingOutboxCountProvider);
+    final rejectedCountAsync = ref.watch(rejectedOutboxCountProvider);
 
     final isOnline = isOnlineAsync.value ?? true;
     final pendingCount = pendingCountAsync.value ?? 0;
+    final rejectedCount = rejectedCountAsync.value ?? 0;
 
-    if (isOnline && pendingCount == 0) {
+    if (isOnline && pendingCount == 0 && rejectedCount == 0) {
       return const SizedBox.shrink();
     }
 
     final l10n = AppLocalizations.of(context);
     final isOffline = !isOnline;
-    final backgroundColor =
-        isOffline ? const Color(0xFFD97706) : AppColors.clinicalTeal;
+    final backgroundColor = rejectedCount > 0
+        ? const Color(0xFFB45309)
+        : isOffline
+            ? const Color(0xFFD97706)
+            : AppColors.clinicalTeal;
 
-    final message = isOffline
-        ? (pendingCount > 0
-            ? '${l10n.offlineBannerText} (${l10n.offlineSyncPendingCount(pendingCount)})'
-            : l10n.offlineBannerText)
-        : l10n.offlineSyncPendingCount(pendingCount);
+    final message = rejectedCount > 0
+        ? l10n.jv2OutboxRejectedNotice
+        : isOffline
+            ? (pendingCount > 0
+                ? '${l10n.offlineBannerText} (${l10n.offlineSyncPendingCount(pendingCount)})'
+                : l10n.offlineBannerText)
+            : l10n.offlineSyncPendingCount(pendingCount);
 
     return Semantics(
       liveRegion: true,

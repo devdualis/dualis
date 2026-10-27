@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../journal/data/journal_local_store.dart';
+import '../../../journal/domain/journal_models.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../data/journal_insights_remote_data_source.dart';
 import '../../domain/journal_insights_models.dart';
@@ -39,12 +41,29 @@ class JournalInsightsController extends AsyncNotifier<JournalInsightsState> {
 
   Future<JournalInsightsState> _load() async {
     final dataSource = ref.read(journalInsightsDataSourceProvider);
+    final profileId = ref.read(
+      activeProfileControllerProvider.select((s) => s.activeProfile?.id),
+    );
     final results = await Future.wait([
       dataSource.fetchEntries(days: JournalInsightsState.windowDays),
       dataSource.fetchSummary(days: JournalInsightsState.windowDays),
     ]);
-    final entries = results[0] as List<JournalEntryView>;
+    final remoteEntries = results[0] as List<JournalEntryView>;
     final remote = results[1] as JournalSummary?;
+    List<JournalEntry> pending = const [];
+    try {
+      pending = await ref
+          .read(journalLocalStoreProvider)
+          .pendingEntries(profileId: profileId);
+    } catch (_) {}
+    final pendingViews = [
+      for (final entry in pending) JournalEntryView.fromEntry(entry),
+    ];
+    final remoteIds = remoteEntries.map((e) => e.id).toSet();
+    final entries = [
+      ...pendingViews.where((e) => !remoteIds.contains(e.id)),
+      ...remoteEntries,
+    ];
     return JournalInsightsState(
       entries: entries,
       summary: remote ?? JournalSummary.compute(entries),
