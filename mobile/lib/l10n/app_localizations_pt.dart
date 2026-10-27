@@ -2591,33 +2591,11 @@ class AppLocalizationsPt extends AppLocalizations {
       'Horários regulares e hábitos simples que favorecem noites mais tranquilas.';
 
   @override
-  String get xv2LibArtCostasTitle => 'Postura e cuidados com as costas';
-
-  @override
-  String get xv2LibArtCostasSummary =>
-      'Movimento e postura no dia a dia para quem passa muito tempo sentado.';
-
-  @override
   String get xv2LibArtBracosTitle => 'Braços e ombros: pausas e postura';
 
   @override
   String get xv2LibArtBracosSummary =>
       'Informações gerais sobre esforço repetitivo e pausas durante o dia.';
-
-  @override
-  String get xv2LibArtCabecaTitle =>
-      'Tensão na cabeça e no pescoço no dia a dia';
-
-  @override
-  String get xv2LibArtCabecaSummary =>
-      'Postura, pausas e hábitos gerais para dias de tensão.';
-
-  @override
-  String get xv2LibArtPeleTitle => 'Cuidados gerais com a pele';
-
-  @override
-  String get xv2LibArtPeleSummary =>
-      'Hidratação da pele e cuidados simples do dia a dia.';
 
   @override
   String get xv2LibArtMovimentoTitle => 'Movimente-se no dia a dia';

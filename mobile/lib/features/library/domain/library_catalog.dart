@@ -46,100 +46,74 @@ class LibraryArticle {
   });
 }
 
-const _drauzio = 'Portal Drauzio Varella';
+const _bvs = 'Biblioteca Virtual em Saúde do Ministério da Saúde (BVS)';
 const _opas = 'Organização Pan-Americana da Saúde (OPAS)';
 const _ms = 'Ministério da Saúde';
 
 /// The same list, in the same order, for every person. Nothing here reads
-/// or depends on what anyone recorded.
+/// or depends on what anyone recorded. Every link is a public institution's
+/// page about everyday habits, one distinct page per article.
 final List<LibraryArticle> kLibraryArticles = List.unmodifiable([
   LibraryArticle(
-    id: 'art-humor-01',
+    id: 'art-emocoes-01',
     category: LibraryCategory.emocoes,
     title: (l) => l.xv2LibArtDesanimoTitle,
     summary: (l) => l.xv2LibArtDesanimoSummary,
-    source: _opas,
-    url: 'https://www.paho.org/pt/topicos/depressao',
-    readTimeMinutes: 5,
+    source: _bvs,
+    url: 'https://bvsms.saude.gov.br/10-de-outubro-dia-mundial-da-saude-mental/',
+    readTimeMinutes: 4,
   ),
   LibraryArticle(
-    id: 'art-ansiedade-01',
+    id: 'art-emocoes-02',
     category: LibraryCategory.emocoes,
     title: (l) => l.xv2LibArtAgitacaoTitle,
     summary: (l) => l.xv2LibArtAgitacaoSummary,
-    source: _drauzio,
+    source: 'Ministério dos Direitos Humanos e da Cidadania',
     url:
-        'https://drauziovarella.uol.com.br/saude-mental/transtornos-de-ansiedade-nao-sao-todos-iguais-entenda-as-caracteristicas-de-cada-tipo/',
-    readTimeMinutes: 4,
+        'https://www.gov.br/mdh/pt-br/assuntos/acolha-a-vida/cartilhas-fbtc-conteudos/2-enfrentando-o-estresse-e-protegendo-a-familia-marilda-lipp-corrigida.pdf',
+    readTimeMinutes: 6,
   ),
   LibraryArticle(
-    id: 'art-burnout-01',
+    id: 'art-estresse-01',
     category: LibraryCategory.estresse,
     title: (l) => l.xv2LibArtTrabalhoTitle,
     summary: (l) => l.xv2LibArtTrabalhoSummary,
-    source: _drauzio,
-    url:
-        'https://drauziovarella.uol.com.br/psiquiatria/sindrome-de-burnout-esgotamento-profissional/',
-    readTimeMinutes: 5,
+    source: _bvs,
+    url: 'https://bvsms.saude.gov.br/estresse/',
+    readTimeMinutes: 4,
   ),
   LibraryArticle(
-    id: 'art-wellness-3',
+    id: 'art-estresse-02',
     category: LibraryCategory.estresse,
     title: (l) => l.xv2LibArtRespiracaoTitle,
     summary: (l) => l.xv2LibArtRespiracaoSummary,
-    source: _drauzio,
+    source: 'Secretaria da Saúde do Ceará',
     url:
-        'https://drauziovarella.uol.com.br/saude-mental/transtornos-de-ansiedade-nao-sao-todos-iguais-entenda-as-caracteristicas-de-cada-tipo/',
-    readTimeMinutes: 5,
+        'https://www.ce.gov.br/saude/2021/05/28/respirar-corretamente-melhora-a-capacidade-funcional-dos-pulmoes-e-traz-beneficios-a-saude-confira-dicas/',
+    readTimeMinutes: 4,
   ),
   LibraryArticle(
-    id: 'art-wellness-1',
+    id: 'art-sono-01',
     category: LibraryCategory.sono,
     title: (l) => l.xv2LibArtSonoTitle,
     summary: (l) => l.xv2LibArtSonoSummary,
-    source: _drauzio,
+    source: _bvs,
     url:
-        'https://drauziovarella.uol.com.br/neurologia/higiene-do-sono-conheca-11-dicas-para-dormir-melhor/',
+        'https://bvsms.saude.gov.br/durma-bem-viva-melhor-13-3-dia-mundial-do-sono-2026/',
     readTimeMinutes: 4,
   ),
   LibraryArticle(
-    id: 'art-coluna-01',
-    category: LibraryCategory.corpo,
-    title: (l) => l.xv2LibArtCostasTitle,
-    summary: (l) => l.xv2LibArtCostasSummary,
-    source: 'Sociedade Brasileira de Ortopedia e Traumatologia',
-    url: 'https://sbot.org.br/dor-lombar-quais-os-motivos/',
-    readTimeMinutes: 4,
-  ),
-  LibraryArticle(
-    id: 'art-membros-sup-01',
+    id: 'art-corpo-01',
     category: LibraryCategory.corpo,
     title: (l) => l.xv2LibArtBracosTitle,
     summary: (l) => l.xv2LibArtBracosSummary,
-    source: _drauzio,
-    url: 'https://drauziovarella.uol.com.br/podcasts/tendinite/',
-    readTimeMinutes: 4,
+    source: 'Secretaria Municipal de Saúde de Belo Horizonte',
+    url:
+        'https://prefeitura.pbh.gov.br/sites/default/files/estrutura-de-governo/saude/2024/12-06-24-smsa-folder-ergonomia-trabalho.pdf',
+    readTimeMinutes: 3,
   ),
   LibraryArticle(
-    id: 'art-cefaleia-01',
-    category: LibraryCategory.corpo,
-    title: (l) => l.xv2LibArtCabecaTitle,
-    summary: (l) => l.xv2LibArtCabecaSummary,
-    source: 'Sociedade Brasileira de Cefaleia',
-    url: 'https://sbcefaleia.com.br/noticias.php?id=350',
-    readTimeMinutes: 4,
-  ),
-  LibraryArticle(
-    id: 'art-dermato-01',
-    category: LibraryCategory.corpo,
-    title: (l) => l.xv2LibArtPeleTitle,
-    summary: (l) => l.xv2LibArtPeleSummary,
-    source: 'Sociedade Brasileira de Dermatologia',
-    url: 'https://www.sbd.org.br/doencas/urticaria/',
-    readTimeMinutes: 4,
-  ),
-  LibraryArticle(
-    id: 'art-movimento-01',
+    id: 'art-corpo-02',
     category: LibraryCategory.corpo,
     title: (l) => l.xv2LibArtMovimentoTitle,
     summary: (l) => l.xv2LibArtMovimentoSummary,
@@ -154,25 +128,27 @@ final List<LibraryArticle> kLibraryArticles = List.unmodifiable([
     summary: (l) => l.xv2LibArtAlimentacaoSummary,
     source: _ms,
     url:
-        'https://www.gov.br/saude/pt-br/assuntos/saude-brasil/publicacoes-para-promocao-a-saude/guia_alimentar_populacao_brasileira_2ed.pdf/view',
+        'https://bvsms.saude.gov.br/bvs/publicacoes/guia_alimentar_populacao_brasileira_2ed.pdf',
     readTimeMinutes: 10,
   ),
   LibraryArticle(
-    id: 'art-wellness-2',
+    id: 'art-hidratacao-01',
     category: LibraryCategory.hidratacao,
     title: (l) => l.xv2LibArtAguaTitle,
     summary: (l) => l.xv2LibArtAguaSummary,
-    source: _opas,
-    url: 'https://www.paho.org/pt/topicos/curso-vida-saudavel',
+    source: 'Secretaria da Saúde do Espírito Santo',
+    url:
+        'https://saude.es.gov.br/Noticia/no-dia-mundial-da-agua-saiba-a-importancia-da-ingestao-de-liquido-para-a-saude-2',
     readTimeMinutes: 3,
   ),
   LibraryArticle(
-    id: 'art-convivio-01',
+    id: 'art-relacoes-01',
     category: LibraryCategory.relacoes,
     title: (l) => l.xv2LibArtConvivioTitle,
     summary: (l) => l.xv2LibArtConvivioSummary,
-    source: _opas,
-    url: 'https://www.paho.org/pt/topicos/saude-mental',
+    source: _ms,
+    url:
+        'https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/s/saude-da-pessoa-idosa/saude-mental/saude-mental',
     readTimeMinutes: 4,
   ),
   LibraryArticle(
@@ -189,8 +165,9 @@ final List<LibraryArticle> kLibraryArticles = List.unmodifiable([
     category: LibraryCategory.ajuda,
     title: (l) => l.xv2LibArtCvvTitle,
     summary: (l) => l.xv2LibArtCvvSummary,
-    source: 'Centro de Valorização da Vida (CVV)',
-    url: 'https://cvv.org.br/',
+    source: _ms,
+    url:
+        'https://www.gov.br/saude/pt-br/assuntos/noticias/2017/marco/acordo-do-ministerio-da-saude-com-cvv-garantira-ligacoes-gratuitas-ao-servico',
     readTimeMinutes: 2,
   ),
 ]);

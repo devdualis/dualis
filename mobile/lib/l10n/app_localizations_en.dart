@@ -2582,32 +2582,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Regular times and simple habits that support calmer nights.';
 
   @override
-  String get xv2LibArtCostasTitle => 'Posture and caring for your back';
-
-  @override
-  String get xv2LibArtCostasSummary =>
-      'Everyday movement and posture for people who sit a lot.';
-
-  @override
   String get xv2LibArtBracosTitle => 'Arms and shoulders: breaks and posture';
 
   @override
   String get xv2LibArtBracosSummary =>
       'General information about repetitive effort and breaks during the day.';
-
-  @override
-  String get xv2LibArtCabecaTitle => 'Everyday tension in the head and neck';
-
-  @override
-  String get xv2LibArtCabecaSummary =>
-      'Posture, breaks and general habits for tense days.';
-
-  @override
-  String get xv2LibArtPeleTitle => 'General skin care';
-
-  @override
-  String get xv2LibArtPeleSummary =>
-      'Skin moisturising and simple everyday care.';
 
   @override
   String get xv2LibArtMovimentoTitle => 'Move more every day';

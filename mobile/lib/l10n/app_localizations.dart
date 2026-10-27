@@ -4666,18 +4666,6 @@ abstract class AppLocalizations {
   /// **'Horários regulares e hábitos simples que favorecem noites mais tranquilas.'**
   String get xv2LibArtSonoSummary;
 
-  /// No description provided for @xv2LibArtCostasTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Postura e cuidados com as costas'**
-  String get xv2LibArtCostasTitle;
-
-  /// No description provided for @xv2LibArtCostasSummary.
-  ///
-  /// In pt, this message translates to:
-  /// **'Movimento e postura no dia a dia para quem passa muito tempo sentado.'**
-  String get xv2LibArtCostasSummary;
-
   /// No description provided for @xv2LibArtBracosTitle.
   ///
   /// In pt, this message translates to:
@@ -4689,30 +4677,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Informações gerais sobre esforço repetitivo e pausas durante o dia.'**
   String get xv2LibArtBracosSummary;
-
-  /// No description provided for @xv2LibArtCabecaTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tensão na cabeça e no pescoço no dia a dia'**
-  String get xv2LibArtCabecaTitle;
-
-  /// No description provided for @xv2LibArtCabecaSummary.
-  ///
-  /// In pt, this message translates to:
-  /// **'Postura, pausas e hábitos gerais para dias de tensão.'**
-  String get xv2LibArtCabecaSummary;
-
-  /// No description provided for @xv2LibArtPeleTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cuidados gerais com a pele'**
-  String get xv2LibArtPeleTitle;
-
-  /// No description provided for @xv2LibArtPeleSummary.
-  ///
-  /// In pt, this message translates to:
-  /// **'Hidratação da pele e cuidados simples do dia a dia.'**
-  String get xv2LibArtPeleSummary;
 
   /// No description provided for @xv2LibArtMovimentoTitle.
   ///
