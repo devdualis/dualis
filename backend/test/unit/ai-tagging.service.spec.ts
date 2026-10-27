@@ -26,7 +26,7 @@ describe('AiTaggingService: journal tagging (plan F5, B-05..B-08)', () => {
 
   it('1. the Gemini response schema has only tagging fields', () => {
     expect(Object.keys(TAGGING_SCHEMA.properties).sort()).toEqual(
-      ['bodyAreaOrMood', 'isOffTopic', 'layTerm', 'mentionsSelfHarm', 'vertical'].sort(),
+      ['bodyAreaOrMood', 'isOffTopic', 'layTerm', 'vertical'].sort(),
     );
     expect(JSON.stringify(TAGGING_SCHEMA)).not.toMatch(ASSESSMENT_FIELDS);
   });
@@ -44,7 +44,6 @@ describe('AiTaggingService: journal tagging (plan F5, B-05..B-08)', () => {
       vertical: 'physical',
       bodyAreaOrMood: 'head_neck',
       layTerm: 'zumbido',
-      mentionsSelfHarm: false,
     });
 
     await service.tagEntry({ text });
@@ -62,7 +61,6 @@ describe('AiTaggingService: journal tagging (plan F5, B-05..B-08)', () => {
       vertical: 'physical',
       bodyAreaOrMood: 'head_neck',
       layTerm: 'zumbido',
-      mentionsSelfHarm: false,
       urgencyScore: 5,
       clinicalConcept: 'tinnitus',
     });
@@ -74,7 +72,6 @@ describe('AiTaggingService: journal tagging (plan F5, B-05..B-08)', () => {
       vertical: 'physical',
       bodyAreaOrMood: 'head_neck',
       layTerm: 'zumbido',
-      mentionsSelfHarm: false,
     });
   });
 
@@ -84,12 +81,11 @@ describe('AiTaggingService: journal tagging (plan F5, B-05..B-08)', () => {
       vertical: 'physical',
       bodyAreaOrMood: 'head_neck',
       layTerm: 'pizza',
-      mentionsSelfHarm: false,
     });
 
     const result = await service.tagEntry({ text: 'qual a melhor pizza da cidade?' });
 
-    expect(result).toEqual({ isOffTopic: true, vertical: null, bodyAreaOrMood: null, layTerm: null, mentionsSelfHarm: false });
+    expect(result).toEqual({ isOffTopic: true, vertical: null, bodyAreaOrMood: null, layTerm: null });
     expect(symptomVector.upsertFromTag).toHaveBeenCalledWith(expect.objectContaining({ isOffTopic: true }));
   });
 
@@ -99,7 +95,6 @@ describe('AiTaggingService: journal tagging (plan F5, B-05..B-08)', () => {
       vertical: 'physical',
       bodyAreaOrMood: 'acute_coronary_syndrome',
       layTerm: 'pontada',
-      mentionsSelfHarm: false,
     });
 
     const result = await service.tagEntry({ text: 'uma pontada esquisita' });
@@ -107,17 +102,18 @@ describe('AiTaggingService: journal tagging (plan F5, B-05..B-08)', () => {
     expect(result.layTerm).toBe('pontada');
   });
 
-  it('7. the deterministic self-harm net applies even if the model misses it', async () => {
+  it('7. never flags or reacts to what the text says: same contract, no content flag', async () => {
     gemini.generateJson.mockResolvedValue({
       isOffTopic: false,
       vertical: 'emotional',
       bodyAreaOrMood: 'depressive_hopelessness',
       layTerm: 'desânimo',
-      mentionsSelfHarm: false,
+      mentionsSelfHarm: true,
     });
 
     const result = await service.tagEntry({ text: 'ando sem energia, às vezes penso em tirar a própria vida' });
-    expect(result.mentionsSelfHarm).toBe(true);
+    expect(Object.keys(result).sort()).toEqual(['bodyAreaOrMood', 'isOffTopic', 'layTerm', 'vertical']);
+    expect(TAGGING_INSTRUCTION).not.toMatch(/mentionsSelfHarm|se ferir|morrer/);
   });
 
   it('8. AiTriageService remains an alias of AiTaggingService', () => {
@@ -134,7 +130,6 @@ describe('SymptomVectorService: data minimisation in the shared knowledge table'
     vertical: 'physical' as const,
     bodyAreaOrMood: 'head_neck',
     layTerm: 'zumbido',
-    mentionsSelfHarm: false,
     confidence: 0.9,
     source: 'gemini' as const,
     latencyMs: 10,
@@ -161,9 +156,8 @@ describe('SymptomVectorService: data minimisation in the shared knowledge table'
     expect(params).not.toMatch(/urgency_score|clinical_concept|is_emergency_candidate/);
   });
 
-  it('10. does not learn from off-topic, self-harm or untagged entries', async () => {
+  it('10. does not learn from off-topic or untagged entries', async () => {
     await vector.upsertFromTag({ ...baseTag, isOffTopic: true });
-    await vector.upsertFromTag({ ...baseTag, mentionsSelfHarm: true });
     await vector.upsertFromTag({ ...baseTag, layTerm: null });
     await vector.upsertFromTag({ ...baseTag, bodyAreaOrMood: null });
 

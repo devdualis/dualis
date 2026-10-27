@@ -29,17 +29,15 @@ describe('AI journal tagging engine (I18N-02 / RNF-002)', () => {
 
     it.each(cases)('1. tags "%s" with area/mood and lay term only', (text, vertical, area, layTerm) => {
       const match = idiomService.match(text);
-      expect(match).toMatchObject({ isOffTopic: false, vertical, bodyAreaOrMood: area, layTerm, mentionsSelfHarm: false });
+      expect(match).toMatchObject({ isOffTopic: false, vertical, bodyAreaOrMood: area, layTerm });
+      expect(match).not.toHaveProperty('mentionsSelfHarm');
       expect(match?.latencyMs).toBeLessThan(10);
     });
 
-    it('2. flags self-harm mentions as a content-safety signal', () => {
+    it('2. tags a mention of wanting to disappear like any other entry: no content flag', () => {
       const match = idiomService.match('Estou com vontade de sumir, não aguento mais viver');
-      expect(match).toMatchObject({ vertical: 'emotional', bodyAreaOrMood: 'depressive_hopelessness', mentionsSelfHarm: true });
-    });
-
-    it('3. detects self-harm even when another idiom matched first', () => {
-      expect(idiomService.match('dor no peito e quero morrer')?.mentionsSelfHarm).toBe(true);
+      expect(match).toMatchObject({ vertical: 'emotional', bodyAreaOrMood: 'depressive_hopelessness' });
+      expect(match).not.toHaveProperty('mentionsSelfHarm');
     });
 
     it('4. never names a condition in lay terms', () => {
@@ -80,7 +78,6 @@ describe('AI journal tagging engine (I18N-02 / RNF-002)', () => {
         vertical: null,
         bodyAreaOrMood: null,
         layTerm: null,
-        mentionsSelfHarm: false,
       });
     });
   });

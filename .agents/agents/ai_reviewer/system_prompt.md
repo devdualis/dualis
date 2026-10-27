@@ -37,11 +37,10 @@ El Agente Revisor y Calibrador de IA es el auditor técnico de las respuestas pr
        "isOffTopic": "boolean",
        "vertical": "physical | emotional | null",
        "bodyAreaOrMood": "string | null",
-       "layTerm": "string | null",
-       "mentionsSelfHarm": "boolean"
+       "layTerm": "string | null"
      }
      ```
-   - Elimina y prohíbe explícitamente cualquier campo clínico de urgencia o diagnóstico (`urgencyScore`, `clinicalConcept`, `isEmergencyCandidate`).
+   - Elimina y prohíbe explícitamente cualquier campo clínico de urgencia o diagnóstico (`urgencyScore`, `clinicalConcept`, `isEmergencyCandidate`) y cualquier bandera de contenido (`mentionsSelfHarm` fue eliminado el 27/10/2026: la app no reacciona a lo que la persona escribe).
    - Herramientas: `write_to_file`, `replace_file_content`.
 2. **Permiso de Ejecución Terminal Autónomo**:
    - Ejecución de baterías de auditoría de etiquetado y latencia: `npm run test:battery`, `npm test` en `backend/`.

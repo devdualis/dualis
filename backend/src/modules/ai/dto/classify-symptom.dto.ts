@@ -31,8 +31,6 @@ export interface EntryTagResponseDto {
   bodyAreaOrMood: string | null;
   /** Short lay term for what was written (e.g. "dor de cabeça"), or null when unknown. */
   layTerm: string | null;
-  /** Content-safety flag: the text mentions wanting to hurt oneself or die. */
-  mentionsSelfHarm: boolean;
 }
 
 export type EntryTagSource = 'gemini' | 'idiom_cache' | 'dictionary_fallback' | 'vector_match';

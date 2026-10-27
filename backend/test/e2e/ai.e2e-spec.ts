@@ -92,7 +92,7 @@ describe('AI journal tagging E2E (POST /v1/ai/tag-entry, legacy /v1/ai/classify-
     expect(response.statusCode).toBe(400);
   });
 
-  const TAG_KEYS = ['bodyAreaOrMood', 'isOffTopic', 'layTerm', 'mentionsSelfHarm', 'vertical'];
+  const TAG_KEYS = ['bodyAreaOrMood', 'isOffTopic', 'layTerm', 'vertical'];
 
   it('3. Tags a physical entry with area and lay term only (200 OK)', async () => {
     const response = await app.inject({
@@ -112,7 +112,7 @@ describe('AI journal tagging E2E (POST /v1/ai/tag-entry, legacy /v1/ai/classify-
     expect(Object.keys(body).sort()).toEqual(TAG_KEYS);
     expect(body.vertical).toBe('physical');
     expect(body.isOffTopic).toBe(false);
-    expect(body.mentionsSelfHarm).toBe(false);
+    expect(body).not.toHaveProperty('mentionsSelfHarm');
   });
 
   it('4. Legacy path tags an emotional entry with the same contract (200 OK)', async () => {
@@ -132,6 +132,6 @@ describe('AI journal tagging E2E (POST /v1/ai/tag-entry, legacy /v1/ai/classify-
     const body = JSON.parse(response.payload);
     expect(Object.keys(body).sort()).toEqual(TAG_KEYS);
     expect(body.vertical).toBe('emotional');
-    expect(body.mentionsSelfHarm).toBe(false);
+    expect(body).not.toHaveProperty('mentionsSelfHarm');
   });
 });

@@ -79,8 +79,6 @@ export class SymptomVectorService implements OnModuleInit {
         vertical: top.vertical === 'emotional' ? 'emotional' : 'physical',
         bodyAreaOrMood: top.systemOrDimension,
         layTerm: top.mappedLayTerm,
-        // Set by the caller from the user's own text; a neighbour entry says nothing about it.
-        mentionsSelfHarm: false,
         confidence: Number(similarity.toFixed(2)),
         source: 'vector_match',
         latencyMs: 0,
@@ -98,7 +96,7 @@ export class SymptomVectorService implements OnModuleInit {
    */
   async upsertFromTag(tag: EntryTagResult): Promise<void> {
     const layTerm = tag.layTerm?.trim();
-    if (!layTerm || !tag.vertical || !tag.bodyAreaOrMood || tag.isOffTopic || tag.mentionsSelfHarm) {
+    if (!layTerm || !tag.vertical || !tag.bodyAreaOrMood || tag.isOffTopic) {
       return;
     }
     try {
