@@ -82,6 +82,8 @@ class MockAuthService {
       ],
       safetyResourceEvents: [],
       waterIntakeLogs: [],
+      journalEntries: [],
+      userConditions: [],
       dependentProfiles: [
         {
           profile: {
@@ -97,6 +99,8 @@ class MockAuthService {
           waterIntakeLogs: [
             { id: 'water-e2e-1', amountMl: 200, source: 'manual', recordedAt: '2026-02-02T08:00:00.000Z' },
           ],
+          journalEntries: [],
+          userConditions: [],
         },
       ],
     };

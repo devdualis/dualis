@@ -234,6 +234,71 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       ]);
     });
 
+    it('exports journal entries, their items and the person\'s conditions, decrypted, per profile', async () => {
+      const entry = (id: string, profileId: string, recordedAt: string) => ({
+        id,
+        userId: mockUserId,
+        profileId,
+        clientId: `client-${id}`,
+        recordedAt: new Date(recordedAt),
+        mood: 'nao_tao_bem',
+        triggers: ['sono'],
+        triggerNote: 'v1:mudança',
+        note: 'v1:dia corrido',
+        transitionVariantIds: ['futuro.intro.1'],
+        createdAt: new Date(recordedAt),
+      });
+      mockSelectSequence([
+        [mockUser],
+        [consent],
+        ownedProfiles,
+        [],
+        [],
+        [],
+        [
+          entry('entry-old', primaryProfileId, '2026-10-01T10:00:00Z'),
+          entry('entry-new', primaryProfileId, '2026-10-20T10:00:00Z'),
+          entry('entry-lucas', dependentProfileId, '2026-10-21T10:00:00Z'),
+        ],
+        [
+          { id: 'item-1', entryId: 'entry-new', kind: 'physical', optionKey: 'costas.custom', customLabel: 'v1:nuca dura', conditionId: null, bodySide: 'back', persistence: 'hoje', intensity: 4 },
+          { id: 'item-2', entryId: 'entry-new', kind: 'condition', optionKey: null, customLabel: null, conditionId: 'cond-1', bodySide: null, persistence: null, intensity: 3 },
+          { id: 'item-3', entryId: 'entry-lucas', kind: 'emotional', optionKey: 'futuro.mente.antecipar', customLabel: null, conditionId: null, bodySide: null, persistence: 'hoje', intensity: 2 },
+        ],
+        [
+          { id: 'cond-1', userId: mockUserId, profileId: primaryProfileId, label: 'v1:Enxaqueca', createdAt: new Date('2026-09-01T10:00:00Z'), archivedAt: new Date('2026-10-25T10:00:00Z') },
+        ],
+      ]);
+
+      const result = await authService.exportUserData(mockUserId);
+
+      expect(result.metadata.formatVersion).toBe('1.3');
+      expect(result.journalEntries.map((e) => e.id)).toEqual(['entry-new', 'entry-old']);
+      expect(result.journalEntries[0]).toEqual({
+        id: 'entry-new',
+        clientId: 'client-entry-new',
+        recordedAt: '2026-10-20T10:00:00.000Z',
+        mood: 'nao_tao_bem',
+        triggers: ['sono'],
+        triggerNote: 'decrypted:v1:mudança',
+        note: 'decrypted:v1:dia corrido',
+        createdAt: '2026-10-20T10:00:00.000Z',
+        items: [
+          { id: 'item-1', kind: 'physical', optionKey: 'costas.custom', customLabel: 'decrypted:v1:nuca dura', conditionId: null, conditionLabel: null, bodySide: 'back', persistence: 'hoje', intensity: 4 },
+          { id: 'item-2', kind: 'condition', optionKey: null, customLabel: null, conditionId: 'cond-1', conditionLabel: 'decrypted:v1:Enxaqueca', bodySide: null, persistence: null, intensity: 3 },
+        ],
+      });
+      expect(result.journalEntries[1].items).toEqual([]);
+      expect(result.userConditions).toEqual([
+        { id: 'cond-1', label: 'decrypted:v1:Enxaqueca', createdAt: '2026-09-01T10:00:00.000Z', archivedAt: '2026-10-25T10:00:00.000Z' },
+      ]);
+      const lucas = result.dependentProfiles[0];
+      expect(lucas.journalEntries.map((e) => e.id)).toEqual(['entry-lucas']);
+      expect(lucas.journalEntries[0].items.map((i) => i.optionKey)).toEqual(['futuro.mente.antecipar']);
+      expect(lucas.userConditions).toEqual([]);
+      expect(JSON.stringify(result)).not.toMatch(/"v1:/);
+    });
+
     it('skips clinical queries when the account owns no profile yet', async () => {
       mockSelectSequence([[mockUser], [], []]);
 
@@ -243,6 +308,8 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       expect(result.symptomLogs).toEqual([]);
       expect(result.safetyResourceEvents).toEqual([]);
       expect(result.waterIntakeLogs).toEqual([]);
+      expect(result.journalEntries).toEqual([]);
+      expect(result.userConditions).toEqual([]);
       expect(result.dependentProfiles).toEqual([]);
     });
   });

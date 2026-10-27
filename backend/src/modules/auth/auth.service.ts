@@ -19,6 +19,9 @@ import {
   safetyResourceEvents,
   waterIntakeLogs,
   profiles,
+  journalEntries,
+  journalItems,
+  userConditions,
   emailVerifications,
   passwordResets,
 } from '../../database/schema';
@@ -33,7 +36,12 @@ import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { ExportedSymptomLogDto, UserDataExportResponseDto } from './dto/export-data.dto';
+import {
+  ExportedJournalEntryDto,
+  ExportedSymptomLogDto,
+  ExportedUserConditionDto,
+  UserDataExportResponseDto,
+} from './dto/export-data.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { StorageService } from '../../common/storage/storage.service';
@@ -511,6 +519,27 @@ export class AuthService {
             .where(inArray(waterIntakeLogs.profileId, ownedProfileIds))
         : [];
 
+      // Journal v2 (entries with their items) and "Minhas condições", archived ones included.
+      const journalEntryRecords = ownedProfileIds.length
+        ? await tx
+            .select()
+            .from(journalEntries)
+            .where(inArray(journalEntries.profileId, ownedProfileIds))
+        : [];
+      const journalItemRecords = journalEntryRecords.length
+        ? await tx
+            .select()
+            .from(journalItems)
+            .where(inArray(journalItems.entryId, journalEntryRecords.map((e) => e.id)))
+        : [];
+      const conditionRecords = ownedProfileIds.length
+        ? await tx
+            .select()
+            .from(userConditions)
+            .where(inArray(userConditions.profileId, ownedProfileIds))
+        : [];
+      const conditionLabels = new Map(conditionRecords.map((c) => [c.id, this.decryptForExport(c.label)]));
+
       const clinicalDataFor = (profileId: string | undefined) => ({
         symptomLogs: symptomRecords
           .filter((s) => s.profileId === profileId)
@@ -532,6 +561,21 @@ export class AuthService {
             source: w.source,
             recordedAt: w.recordedAt.toISOString(),
           })),
+        journalEntries: journalEntryRecords
+          .filter((e) => e.profileId === profileId)
+          .sort((a, b) => b.recordedAt.getTime() - a.recordedAt.getTime())
+          .map((e) => this.toExportedJournalEntry(e, journalItemRecords, conditionLabels)),
+        userConditions: conditionRecords
+          .filter((c) => c.profileId === profileId)
+          .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+          .map(
+            (c): ExportedUserConditionDto => ({
+              id: c.id,
+              label: conditionLabels.get(c.id) ?? null,
+              createdAt: c.createdAt.toISOString(),
+              archivedAt: c.archivedAt?.toISOString() ?? null,
+            }),
+          ),
       });
 
       const primaryProfile = ownedProfiles.find((p) => p.profileType === 'primary');
@@ -542,7 +586,7 @@ export class AuthService {
       return {
         metadata: {
           exportDate: new Date().toISOString(),
-          formatVersion: '1.2',
+          formatVersion: '1.3',
           legalBasis: 'LGPD Art. 18, V (Portabilidade de Dados)',
           dataController: 'DualisCheckUp Saúde Digital Ltda.',
           legacyFieldsNote:
@@ -579,6 +623,47 @@ export class AuthService {
         })),
       };
     });
+  }
+
+  private toExportedJournalEntry(
+    e: typeof journalEntries.$inferSelect,
+    items: Array<typeof journalItems.$inferSelect>,
+    conditionLabels: Map<string, string | null>,
+  ): ExportedJournalEntryDto {
+    return {
+      id: e.id,
+      clientId: e.clientId,
+      recordedAt: e.recordedAt.toISOString(),
+      mood: e.mood,
+      triggers: e.triggers,
+      triggerNote: this.decryptForExport(e.triggerNote),
+      note: this.decryptForExport(e.note),
+      createdAt: e.createdAt.toISOString(),
+      items: items
+        .filter((i) => i.entryId === e.id)
+        .map((i) => ({
+          id: i.id,
+          kind: i.kind,
+          optionKey: i.optionKey,
+          customLabel: this.decryptForExport(i.customLabel),
+          conditionId: i.conditionId,
+          conditionLabel: i.conditionId ? (conditionLabels.get(i.conditionId) ?? null) : null,
+          bodySide: i.bodySide,
+          persistence: i.persistence,
+          intensity: i.intensity,
+        })),
+    };
+  }
+
+  /** Plain text of an encrypted column; null when empty or unreadable (never ciphertext). */
+  private decryptForExport(value: string | null): string | null {
+    if (!value) return null;
+    if (!value.startsWith('v1:')) return value;
+    try {
+      return this.encryptionService.decrypt(value);
+    } catch {
+      return null;
+    }
   }
 
   private toExportedSymptomLog(s: typeof symptomLogs.$inferSelect): ExportedSymptomLogDto {

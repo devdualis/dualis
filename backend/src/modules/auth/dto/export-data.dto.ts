@@ -50,6 +50,40 @@ export interface ExportedWaterIntakeLogDto {
   recordedAt: string;
 }
 
+/** One journal item: what the person chose (`optionKey`) or wrote (`customLabel`). */
+export interface ExportedJournalItemDto {
+  id: string;
+  kind: string;
+  optionKey: string | null;
+  customLabel: string | null;
+  conditionId: string | null;
+  /** Name the person gave the condition, for `kind = condition`. */
+  conditionLabel: string | null;
+  bodySide: string | null;
+  persistence: string | null;
+  intensity: number | null;
+}
+
+export interface ExportedJournalEntryDto {
+  id: string;
+  clientId: string;
+  recordedAt: string;
+  mood: string;
+  triggers: string[];
+  triggerNote: string | null;
+  note: string | null;
+  createdAt: string;
+  items: ExportedJournalItemDto[];
+}
+
+/** "Minhas condições", named by the person; archived ones included. */
+export interface ExportedUserConditionDto {
+  id: string;
+  label: string | null;
+  createdAt: string;
+  archivedAt: string | null;
+}
+
 export interface ExportedDependentProfileDto {
   id: string;
   name: string;
@@ -65,6 +99,8 @@ export interface ExportedDependentDataDto {
   symptomLogs: ExportedSymptomLogDto[];
   safetyResourceEvents: ExportedSafetyResourceEventDto[];
   waterIntakeLogs: ExportedWaterIntakeLogDto[];
+  journalEntries: ExportedJournalEntryDto[];
+  userConditions: ExportedUserConditionDto[];
 }
 
 export interface UserDataExportResponseDto {
@@ -81,5 +117,7 @@ export interface UserDataExportResponseDto {
   symptomLogs: ExportedSymptomLogDto[];
   safetyResourceEvents: ExportedSafetyResourceEventDto[];
   waterIntakeLogs: ExportedWaterIntakeLogDto[];
+  journalEntries: ExportedJournalEntryDto[];
+  userConditions: ExportedUserConditionDto[];
   dependentProfiles: ExportedDependentDataDto[];
 }
