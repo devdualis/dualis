@@ -11,3 +11,4 @@ export * from './water-intake-logs.schema';
 export * from './profiles.schema';
 export * from './legal-guardianships.schema';
 export * from './shared-access-grants.schema';
+export * from './journal.schema';
