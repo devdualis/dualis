@@ -2441,4 +2441,551 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get xv2HydrationOfferNo => 'Ahora no';
+
+  @override
+  String get xv2OptPassadoTristezaCulpa => 'Culpa o arrepentimiento';
+
+  @override
+  String get xv2OptPassadoTristezaSaudade =>
+      'Extrañar a alguien o cómo eran las cosas';
+
+  @override
+  String get xv2OptPassadoMemoriaLembranca => 'Un mal recuerdo que vuelve';
+
+  @override
+  String get xv2OptPassadoMemoriaMagoa => 'Le doy vueltas a viejas heridas';
+
+  @override
+  String get xv2OptPresenteEnergiaCorpo => 'Cuerpo pesado, tenso o adolorido';
+
+  @override
+  String get xv2OptPresenteEnergiaDesligado =>
+      'En piloto automático, medio desconectado';
+
+  @override
+  String get xv2OptPresenteSobrecargaPaciencia =>
+      'Sin paciencia, estallando por poco';
+
+  @override
+  String get xv2OptPresenteSobrecargaAperto =>
+      'Opresión en el pecho y momentos de desesperación';
+
+  @override
+  String get xv2OptFuturoMenteAntecipar => 'Me adelanto a los problemas';
+
+  @override
+  String get xv2OptFuturoMenteCobranca => 'Exigencia de perfección o control';
+
+  @override
+  String get xv2OptFuturoMedoJulgamento => 'Miedo a fallar o a ser juzgado(a)';
+
+  @override
+  String get xv2OptFuturoMedoDesanimo => 'Desánimo por el rumbo de las cosas';
+
+  @override
+  String get xv2OptCabecaPressaoTemporas =>
+      'Dolor o presión en las sienes o la frente';
+
+  @override
+  String get xv2OptCabecaPressaoLatejando =>
+      'Palpitante, con molestia a la luz o al ruido';
+
+  @override
+  String get xv2OptCabecaSentidosGarganta => 'Garganta irritada o seca';
+
+  @override
+  String get xv2OptCabecaSentidosOlhos => 'Ojos pesados o con ardor';
+
+  @override
+  String get xv2OptPeitoRespiracaoCurta => 'Respiración corta';
+
+  @override
+  String get xv2OptPeitoRespiracaoTosse => 'Tos o pecho cargado';
+
+  @override
+  String get xv2OptPeitoIncomodoBatedeira =>
+      'Corazón acelerado o palpitaciones';
+
+  @override
+  String get xv2OptPeitoIncomodoCostelas =>
+      'Punzada en las costillas al respirar hondo';
+
+  @override
+  String get xv2OptBarrigaQueimacaoSubindo => 'Ardor que sube';
+
+  @override
+  String get xv2OptBarrigaQueimacaoEnjoo => 'Náuseas';
+
+  @override
+  String get xv2OptBarrigaColicaGases => 'Gases o barriga hinchada';
+
+  @override
+  String get xv2OptBarrigaColicaPontadas => 'Cólicos o punzadas';
+
+  @override
+  String get xv2OptCostasRigidezOmbros => 'Cuello y hombros rígidos';
+
+  @override
+  String get xv2OptCostasRigidezLombar => 'Peso en la zona lumbar';
+
+  @override
+  String get xv2OptCostasFisgadaIrradia =>
+      'Punzada que baja al brazo o la pierna';
+
+  @override
+  String get xv2OptCostasFisgadaAoMexer => 'Dolor al moverme';
+
+  @override
+  String get xv2OptMembrosCansacoJuntas => 'Articulaciones adoloridas';
+
+  @override
+  String get xv2OptMembrosCansacoPesados => 'Brazos o piernas cansados';
+
+  @override
+  String get xv2OptMembrosFormigamentoDormentes =>
+      'Manos o pies con hormigueo o adormecidos';
+
+  @override
+  String get xv2OptMembrosFormigamentoChoque => 'Sensación de calambre';
+
+  @override
+  String get xv2RegionCabeca => 'Cabeza y cuello';
+
+  @override
+  String get xv2RegionPeito => 'Pecho';
+
+  @override
+  String get xv2RegionBarriga => 'Barriga';
+
+  @override
+  String get xv2RegionCostas => 'Espalda';
+
+  @override
+  String get xv2RegionMembros => 'Brazos, piernas y manos';
+
+  @override
+  String get xv2TimePassado => 'Lo que ya pasó';
+
+  @override
+  String get xv2TimePresente => 'El momento actual';
+
+  @override
+  String get xv2TimeFuturo => 'Lo que viene';
+
+  @override
+  String get xv2TimeShortPassado => 'Pasado';
+
+  @override
+  String get xv2TimeShortPresente => 'Presente';
+
+  @override
+  String get xv2TimeShortFuturo => 'Futuro';
+
+  @override
+  String get xv2TriggerTrabalho => 'Trabajo o estudios';
+
+  @override
+  String get xv2TriggerFamilia => 'Familia o relaciones';
+
+  @override
+  String get xv2TriggerSono => 'Noche mal dormida';
+
+  @override
+  String get xv2TriggerAlimentacao => 'Alimentación';
+
+  @override
+  String get xv2TriggerEsforco => 'Esfuerzo físico';
+
+  @override
+  String get xv2TriggerQueda => 'Caída o mal movimiento';
+
+  @override
+  String get xv2TriggerMedicamento => 'Medicamento nuevo';
+
+  @override
+  String get xv2TriggerClima => 'Clima o ambiente';
+
+  @override
+  String get xv2TriggerNaoSei => 'No sé';
+
+  @override
+  String get xv2TriggerOutro => 'Otro';
+
+  @override
+  String get xv2MoodBem => 'Bien';
+
+  @override
+  String get xv2MoodNormal => 'Normal';
+
+  @override
+  String get xv2MoodNaoTaoBem => 'No tan bien';
+
+  @override
+  String get xv2LibTitle => 'Biblioteca';
+
+  @override
+  String get xv2LibIntro =>
+      'Textos generales de fuentes públicas sobre hábitos saludables. Son iguales para todas las personas y no son orientación para tu caso.';
+
+  @override
+  String xv2LibSource(String source) {
+    return 'Fuente: $source';
+  }
+
+  @override
+  String xv2LibReadTime(int minutes) {
+    return '$minutes min de lectura';
+  }
+
+  @override
+  String get xv2LibOpen => 'Abrir texto';
+
+  @override
+  String get xv2LibOpenError => 'No se pudo abrir el enlace ahora.';
+
+  @override
+  String get xv2LibCatEmocoes => 'Emociones y estado de ánimo';
+
+  @override
+  String get xv2LibCatEstresse => 'Estrés y descanso';
+
+  @override
+  String get xv2LibCatSono => 'Sueño';
+
+  @override
+  String get xv2LibCatCorpo => 'Cuerpo y movimiento';
+
+  @override
+  String get xv2LibCatAlimentacao => 'Alimentación y digestión';
+
+  @override
+  String get xv2LibCatHidratacao => 'Hidratación';
+
+  @override
+  String get xv2LibCatRelacoes => 'Relaciones y convivencia';
+
+  @override
+  String get xv2LibCatAjuda => 'Primeros cuidados y cuándo buscar ayuda';
+
+  @override
+  String get xv2LibArtDesanimoTitle => 'Días de desánimo y poca energía';
+
+  @override
+  String get xv2LibArtDesanimoSummary =>
+      'Pequeñas rutinas para días de desánimo y dónde encontrar apoyo.';
+
+  @override
+  String get xv2LibArtAgitacaoTitle =>
+      'Momentos de agitación: cómo bajar el ritmo';
+
+  @override
+  String get xv2LibArtAgitacaoSummary =>
+      'Información general sobre nerviosismo y pensamientos acelerados en el día a día.';
+
+  @override
+  String get xv2LibArtTrabalhoTitle =>
+      'Cansancio en el trabajo y límites saludables';
+
+  @override
+  String get xv2LibArtTrabalhoSummary =>
+      'Información general sobre el cansancio emocional en el trabajo y las pausas en la rutina.';
+
+  @override
+  String get xv2LibArtRespiracaoTitle => 'Respiración pausada para relajarte';
+
+  @override
+  String get xv2LibArtRespiracaoSummary =>
+      'Unos minutos de respiración tranquila pueden ayudarte a bajar el ritmo en días exigentes.';
+
+  @override
+  String get xv2LibArtSonoTitle => 'Hábitos para dormir mejor';
+
+  @override
+  String get xv2LibArtSonoSummary =>
+      'Horarios regulares y hábitos sencillos que favorecen noches más tranquilas.';
+
+  @override
+  String get xv2LibArtCostasTitle => 'Postura y cuidados de la espalda';
+
+  @override
+  String get xv2LibArtCostasSummary =>
+      'Movimiento y postura en el día a día para quien pasa mucho tiempo sentado.';
+
+  @override
+  String get xv2LibArtBracosTitle => 'Brazos y hombros: pausas y postura';
+
+  @override
+  String get xv2LibArtBracosSummary =>
+      'Información general sobre el esfuerzo repetitivo y las pausas durante el día.';
+
+  @override
+  String get xv2LibArtCabecaTitle =>
+      'Tensión en la cabeza y el cuello en el día a día';
+
+  @override
+  String get xv2LibArtCabecaSummary =>
+      'Postura, pausas y hábitos generales para días de tensión.';
+
+  @override
+  String get xv2LibArtPeleTitle => 'Cuidados generales de la piel';
+
+  @override
+  String get xv2LibArtPeleSummary =>
+      'Hidratación de la piel y cuidados sencillos del día a día.';
+
+  @override
+  String get xv2LibArtMovimentoTitle => 'Muévete en el día a día';
+
+  @override
+  String get xv2LibArtMovimentoSummary =>
+      'Orientaciones generales sobre actividad física en todas las edades.';
+
+  @override
+  String get xv2LibArtAlimentacaoTitle =>
+      'Guía Alimentaria para la Población Brasileña';
+
+  @override
+  String get xv2LibArtAlimentacaoSummary =>
+      'Principios generales para una alimentación equilibrada, con comida de verdad.';
+
+  @override
+  String get xv2LibArtAguaTitle => 'Agua a lo largo del día';
+
+  @override
+  String get xv2LibArtAguaSummary =>
+      'Beber agua a lo largo del día forma parte de hábitos de vida saludables.';
+
+  @override
+  String get xv2LibArtConvivioTitle => 'Bienestar emocional y convivencia';
+
+  @override
+  String get xv2LibArtConvivioSummary =>
+      'Información general sobre bienestar emocional, relaciones y apoyo de la comunidad.';
+
+  @override
+  String get xv2LibArtSamuTitle => 'SAMU 192: cómo funciona';
+
+  @override
+  String get xv2LibArtSamuSummary =>
+      'El servicio móvil gratuito del sistema público de Brasil, que atiende en el 192 en todo el país.';
+
+  @override
+  String get xv2LibArtCvvTitle => 'CVV 188: apoyo emocional';
+
+  @override
+  String get xv2LibArtCvvSummary =>
+      'Conversación gratuita y confidencial, las 24 horas, por teléfono, chat o correo.';
+
+  @override
+  String xv2ReportedIntensity(int intensity) {
+    return 'Intensidad que informaste: $intensity/5';
+  }
+
+  @override
+  String get xv2SummaryTitle => 'Tu registro de hoy';
+
+  @override
+  String get xv2SummarySaved => 'Tu registro se guardó.';
+
+  @override
+  String get xv2SummaryThanks =>
+      '¡Gracias por registrar tu día! 🌿 En la Biblioteca encontrarás textos de fuentes públicas, como el Ministerio de Salud de Brasil, sobre hábitos saludables.';
+
+  @override
+  String get xv2SummaryOpenLibrary => 'Abrir la Biblioteca';
+
+  @override
+  String get xv2AdLabel => 'Anuncio';
+
+  @override
+  String get xv2AdLearnMore => 'Más información';
+
+  @override
+  String get xv2AdPremiumTitle => 'Dualis Premium';
+
+  @override
+  String get xv2AdPremiumBody =>
+      'Ve hasta 12 meses de tus registros y elige tus fondos. Muy pronto.';
+
+  @override
+  String get xv2AdZocTitle => 'ZOC · Cuadernos y agendas';
+
+  @override
+  String get xv2AdZocBody =>
+      'Planifica la semana con calma, en papel. Anuncio de ejemplo.';
+
+  @override
+  String get xv2AdWgiTitle => 'WGI · Botellas reutilizables';
+
+  @override
+  String get xv2AdWgiBody => 'Lleva tu agua a donde vayas. Anuncio de ejemplo.';
+
+  @override
+  String get xv2AdUboTitle => 'UBO · Listas para relajarte';
+
+  @override
+  String get xv2AdUboBody =>
+      'Sonidos de la naturaleza para pausas en el día. Anuncio de ejemplo.';
+
+  @override
+  String get xv2DashTitle => 'Historial';
+
+  @override
+  String xv2DashWindow(int days) {
+    return 'Tus registros de los últimos $days días';
+  }
+
+  @override
+  String get xv2DashRetry => 'Intentar de nuevo';
+
+  @override
+  String get xv2DashTimeTitle => 'Pasado, presente y futuro';
+
+  @override
+  String xv2DashTimeCount(String time, int count) {
+    return '$time: $count';
+  }
+
+  @override
+  String get xv2DashNoEmotional => 'Ningún registro emocional en este periodo.';
+
+  @override
+  String get xv2DashBodyTitle => 'Partes del cuerpo que marcaste';
+
+  @override
+  String get xv2DashFront => 'Frente';
+
+  @override
+  String get xv2DashBack => 'Espalda';
+
+  @override
+  String xv2DashRegionDays(String region, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count días',
+      one: '1 día',
+      zero: 'ningún día',
+    );
+    return '$region: $_temp0';
+  }
+
+  @override
+  String get xv2DashLinesTitle => 'Intensidad por día';
+
+  @override
+  String get xv2DashLinesSubtitle =>
+      'La intensidad que informaste en cada registro (1 a 5).';
+
+  @override
+  String xv2DashDaysCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count días',
+      one: '1 día',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get xv2DashSeeMore => 'Ver más';
+
+  @override
+  String get xv2DashSeeLess => 'Ver menos';
+
+  @override
+  String get xv2DashNoItems => 'Ningún elemento registrado en este periodo.';
+
+  @override
+  String get xv2DashWaterTitle => 'Agua por día';
+
+  @override
+  String get xv2DashNoWater => 'Ningún registro de agua en este periodo.';
+
+  @override
+  String get xv2DashTogetherTitle => 'El mismo día';
+
+  @override
+  String xv2DashCooccurrence(int total, String a, String b, int both) {
+    return 'En los $total días en que marcaste \'$a\', también marcaste \'$b\' en $both.';
+  }
+
+  @override
+  String get xv2DashEntriesTitle => 'Tus registros';
+
+  @override
+  String get xv2DashNoEntries => 'Aún no tienes registros en este periodo.';
+
+  @override
+  String xv2DashMoodLine(String mood) {
+    return 'Cómo estabas: $mood';
+  }
+
+  @override
+  String get xv2DashDeleteTitle => 'Eliminar registro';
+
+  @override
+  String get xv2DashDeleteBody => 'Este registro se borrará de tu historial.';
+
+  @override
+  String get xv2DashDeleteConfirm => 'Eliminar';
+
+  @override
+  String get xv2WaterTitle => 'Hidratación 💧';
+
+  @override
+  String get xv2WaterTodayLogs => 'Registros de hoy';
+
+  @override
+  String get xv2WaterHistoryTitle => 'Últimos 30 días';
+
+  @override
+  String get xv2WaterRemindersTitle => 'Recordatorios de agua';
+
+  @override
+  String get xv2WaterOther => 'Otro';
+
+  @override
+  String xv2WaterStreak(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Racha: $count días',
+      one: 'Racha: 1 día',
+      zero: 'Racha: 0 días',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String xv2WaterGoalChip(int ml) {
+    return 'Tu meta: $ml ml';
+  }
+
+  @override
+  String get xv2WaterGoalDialogTitle => 'Tu meta diaria';
+
+  @override
+  String get xv2WaterGoalHint => 'Tú eliges tu meta, entre 250 y 10000 ml.';
+
+  @override
+  String get xv2WaterGoalSave => 'Guardar';
+
+  @override
+  String get xv2WaterNoLogsToday =>
+      'Todavía no registraste ningún vaso de agua hoy.';
+
+  @override
+  String xv2WaterLoggedAt(String time) {
+    return 'Registrado a las $time';
+  }
+
+  @override
+  String xv2WaterLoggedViaReminder(String time) {
+    return 'Registrado desde el recordatorio de las $time';
+  }
+
+  @override
+  String get xv2WaterDeleteLog => 'Eliminar registro';
 }

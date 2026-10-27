@@ -2417,4 +2417,548 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get xv2HydrationOfferNo => 'Not now';
+
+  @override
+  String get xv2OptPassadoTristezaCulpa => 'Guilt or regret';
+
+  @override
+  String get xv2OptPassadoTristezaSaudade =>
+      'Missing someone or how things used to be';
+
+  @override
+  String get xv2OptPassadoMemoriaLembranca =>
+      'A bad memory that keeps coming back';
+
+  @override
+  String get xv2OptPassadoMemoriaMagoa => 'I keep going over old hurts';
+
+  @override
+  String get xv2OptPresenteEnergiaCorpo => 'Body feels heavy, tense or sore';
+
+  @override
+  String get xv2OptPresenteEnergiaDesligado =>
+      'On autopilot, a bit switched off';
+
+  @override
+  String get xv2OptPresenteSobrecargaPaciencia =>
+      'Short on patience, snapping over little things';
+
+  @override
+  String get xv2OptPresenteSobrecargaAperto =>
+      'Tight chest and moments of despair';
+
+  @override
+  String get xv2OptFuturoMenteAntecipar => 'I keep anticipating problems';
+
+  @override
+  String get xv2OptFuturoMenteCobranca => 'Pressure for perfection or control';
+
+  @override
+  String get xv2OptFuturoMedoJulgamento => 'Fear of failing or being judged';
+
+  @override
+  String get xv2OptFuturoMedoDesanimo =>
+      'Discouraged about where things are going';
+
+  @override
+  String get xv2OptCabecaPressaoTemporas =>
+      'Pain or pressure in the temples or forehead';
+
+  @override
+  String get xv2OptCabecaPressaoLatejando =>
+      'Throbbing, bothered by light or noise';
+
+  @override
+  String get xv2OptCabecaSentidosGarganta => 'Scratchy or dry throat';
+
+  @override
+  String get xv2OptCabecaSentidosOlhos => 'Heavy or burning eyes';
+
+  @override
+  String get xv2OptPeitoRespiracaoCurta => 'Short breath';
+
+  @override
+  String get xv2OptPeitoRespiracaoTosse => 'Cough or heavy chest';
+
+  @override
+  String get xv2OptPeitoIncomodoBatedeira => 'Racing or pounding heart';
+
+  @override
+  String get xv2OptPeitoIncomodoCostelas =>
+      'Twinge in the ribs when breathing deeply';
+
+  @override
+  String get xv2OptBarrigaQueimacaoSubindo => 'Burning feeling rising up';
+
+  @override
+  String get xv2OptBarrigaQueimacaoEnjoo => 'Queasy';
+
+  @override
+  String get xv2OptBarrigaColicaGases => 'Gas or bloated belly';
+
+  @override
+  String get xv2OptBarrigaColicaPontadas => 'Cramps or twinges';
+
+  @override
+  String get xv2OptCostasRigidezOmbros => 'Stiff neck and shoulders';
+
+  @override
+  String get xv2OptCostasRigidezLombar => 'Heaviness in the lower back';
+
+  @override
+  String get xv2OptCostasFisgadaIrradia =>
+      'Twinge that runs down an arm or leg';
+
+  @override
+  String get xv2OptCostasFisgadaAoMexer => 'Hurts when moving';
+
+  @override
+  String get xv2OptMembrosCansacoJuntas => 'Sore joints';
+
+  @override
+  String get xv2OptMembrosCansacoPesados => 'Tired arms or legs';
+
+  @override
+  String get xv2OptMembrosFormigamentoDormentes =>
+      'Tingling or numb hands or feet';
+
+  @override
+  String get xv2OptMembrosFormigamentoChoque => 'Feeling of a jolt';
+
+  @override
+  String get xv2RegionCabeca => 'Head and neck';
+
+  @override
+  String get xv2RegionPeito => 'Chest';
+
+  @override
+  String get xv2RegionBarriga => 'Belly';
+
+  @override
+  String get xv2RegionCostas => 'Back';
+
+  @override
+  String get xv2RegionMembros => 'Arms, legs and hands';
+
+  @override
+  String get xv2TimePassado => 'What already happened';
+
+  @override
+  String get xv2TimePresente => 'The present moment';
+
+  @override
+  String get xv2TimeFuturo => 'What lies ahead';
+
+  @override
+  String get xv2TimeShortPassado => 'Past';
+
+  @override
+  String get xv2TimeShortPresente => 'Present';
+
+  @override
+  String get xv2TimeShortFuturo => 'Future';
+
+  @override
+  String get xv2TriggerTrabalho => 'Work or studies';
+
+  @override
+  String get xv2TriggerFamilia => 'Family or relationships';
+
+  @override
+  String get xv2TriggerSono => 'Poor night of sleep';
+
+  @override
+  String get xv2TriggerAlimentacao => 'Food';
+
+  @override
+  String get xv2TriggerEsforco => 'Physical effort';
+
+  @override
+  String get xv2TriggerQueda => 'Fall or awkward movement';
+
+  @override
+  String get xv2TriggerMedicamento => 'New medication';
+
+  @override
+  String get xv2TriggerClima => 'Weather or surroundings';
+
+  @override
+  String get xv2TriggerNaoSei => 'Not sure';
+
+  @override
+  String get xv2TriggerOutro => 'Other';
+
+  @override
+  String get xv2MoodBem => 'Good';
+
+  @override
+  String get xv2MoodNormal => 'Okay';
+
+  @override
+  String get xv2MoodNaoTaoBem => 'Not so good';
+
+  @override
+  String get xv2LibTitle => 'Library';
+
+  @override
+  String get xv2LibIntro =>
+      'General texts from public sources about healthy habits. They are the same for everyone and are not guidance for your situation.';
+
+  @override
+  String xv2LibSource(String source) {
+    return 'Source: $source';
+  }
+
+  @override
+  String xv2LibReadTime(int minutes) {
+    return '$minutes min read';
+  }
+
+  @override
+  String get xv2LibOpen => 'Open text';
+
+  @override
+  String get xv2LibOpenError => 'The link could not be opened right now.';
+
+  @override
+  String get xv2LibCatEmocoes => 'Emotions and mood';
+
+  @override
+  String get xv2LibCatEstresse => 'Stress and rest';
+
+  @override
+  String get xv2LibCatSono => 'Sleep';
+
+  @override
+  String get xv2LibCatCorpo => 'Body and movement';
+
+  @override
+  String get xv2LibCatAlimentacao => 'Food and digestion';
+
+  @override
+  String get xv2LibCatHidratacao => 'Hydration';
+
+  @override
+  String get xv2LibCatRelacoes => 'Relationships and social life';
+
+  @override
+  String get xv2LibCatAjuda => 'First care and when to seek help';
+
+  @override
+  String get xv2LibArtDesanimoTitle => 'Days of low mood and little energy';
+
+  @override
+  String get xv2LibArtDesanimoSummary =>
+      'Small routines for low days and where to find support.';
+
+  @override
+  String get xv2LibArtAgitacaoTitle => 'Restless moments: how to slow down';
+
+  @override
+  String get xv2LibArtAgitacaoSummary =>
+      'General information about nervousness and racing thoughts in daily life.';
+
+  @override
+  String get xv2LibArtTrabalhoTitle => 'Tiredness at work and healthy limits';
+
+  @override
+  String get xv2LibArtTrabalhoSummary =>
+      'General information about emotional tiredness at work and breaks in your routine.';
+
+  @override
+  String get xv2LibArtRespiracaoTitle => 'Paced breathing to relax';
+
+  @override
+  String get xv2LibArtRespiracaoSummary =>
+      'A few minutes of calm breathing can help you slow down on demanding days.';
+
+  @override
+  String get xv2LibArtSonoTitle => 'Habits for better sleep';
+
+  @override
+  String get xv2LibArtSonoSummary =>
+      'Regular times and simple habits that support calmer nights.';
+
+  @override
+  String get xv2LibArtCostasTitle => 'Posture and caring for your back';
+
+  @override
+  String get xv2LibArtCostasSummary =>
+      'Everyday movement and posture for people who sit a lot.';
+
+  @override
+  String get xv2LibArtBracosTitle => 'Arms and shoulders: breaks and posture';
+
+  @override
+  String get xv2LibArtBracosSummary =>
+      'General information about repetitive effort and breaks during the day.';
+
+  @override
+  String get xv2LibArtCabecaTitle => 'Everyday tension in the head and neck';
+
+  @override
+  String get xv2LibArtCabecaSummary =>
+      'Posture, breaks and general habits for tense days.';
+
+  @override
+  String get xv2LibArtPeleTitle => 'General skin care';
+
+  @override
+  String get xv2LibArtPeleSummary =>
+      'Skin moisturising and simple everyday care.';
+
+  @override
+  String get xv2LibArtMovimentoTitle => 'Move more every day';
+
+  @override
+  String get xv2LibArtMovimentoSummary =>
+      'General guidance on physical activity at every age.';
+
+  @override
+  String get xv2LibArtAlimentacaoTitle =>
+      'Dietary Guidelines for the Brazilian Population';
+
+  @override
+  String get xv2LibArtAlimentacaoSummary =>
+      'General principles for balanced eating based on real food.';
+
+  @override
+  String get xv2LibArtAguaTitle => 'Water throughout the day';
+
+  @override
+  String get xv2LibArtAguaSummary =>
+      'Drinking water throughout the day is part of healthy living habits.';
+
+  @override
+  String get xv2LibArtConvivioTitle => 'Emotional wellbeing and social life';
+
+  @override
+  String get xv2LibArtConvivioSummary =>
+      'General information about emotional wellbeing, relationships and community support.';
+
+  @override
+  String get xv2LibArtSamuTitle => 'SAMU 192: how it works';
+
+  @override
+  String get xv2LibArtSamuSummary =>
+      'The free mobile service of Brazil\'s public health system, reached by dialling 192 nationwide.';
+
+  @override
+  String get xv2LibArtCvvTitle => 'CVV 188: emotional support';
+
+  @override
+  String get xv2LibArtCvvSummary =>
+      'Free, confidential conversation, 24 hours a day, by phone, chat or e-mail.';
+
+  @override
+  String xv2ReportedIntensity(int intensity) {
+    return 'Intensity you reported: $intensity/5';
+  }
+
+  @override
+  String get xv2SummaryTitle => 'Your entry for today';
+
+  @override
+  String get xv2SummarySaved => 'Your entry was saved.';
+
+  @override
+  String get xv2SummaryThanks =>
+      'Thank you for logging your day! 🌿 In the Library you will find texts from public sources, such as the Brazilian Ministry of Health, about healthy habits.';
+
+  @override
+  String get xv2SummaryOpenLibrary => 'Open the Library';
+
+  @override
+  String get xv2AdLabel => 'Ad';
+
+  @override
+  String get xv2AdLearnMore => 'Learn more';
+
+  @override
+  String get xv2AdPremiumTitle => 'Dualis Premium';
+
+  @override
+  String get xv2AdPremiumBody =>
+      'See up to 12 months of your entries and choose your backgrounds. Coming soon.';
+
+  @override
+  String get xv2AdZocTitle => 'ZOC · Notebooks and planners';
+
+  @override
+  String get xv2AdZocBody => 'Plan your week calmly, on paper. Sample ad.';
+
+  @override
+  String get xv2AdWgiTitle => 'WGI · Reusable bottles';
+
+  @override
+  String get xv2AdWgiBody => 'Take your water wherever you go. Sample ad.';
+
+  @override
+  String get xv2AdUboTitle => 'UBO · Playlists to unwind';
+
+  @override
+  String get xv2AdUboBody => 'Nature sounds for breaks in your day. Sample ad.';
+
+  @override
+  String get xv2DashTitle => 'History';
+
+  @override
+  String xv2DashWindow(int days) {
+    return 'Your entries from the last $days days';
+  }
+
+  @override
+  String get xv2DashRetry => 'Try again';
+
+  @override
+  String get xv2DashTimeTitle => 'Past, present and future';
+
+  @override
+  String xv2DashTimeCount(String time, int count) {
+    return '$time: $count';
+  }
+
+  @override
+  String get xv2DashNoEmotional => 'No emotional entries in this period.';
+
+  @override
+  String get xv2DashBodyTitle => 'Body parts you marked';
+
+  @override
+  String get xv2DashFront => 'Front';
+
+  @override
+  String get xv2DashBack => 'Back';
+
+  @override
+  String xv2DashRegionDays(String region, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+      zero: 'no days',
+    );
+    return '$region: $_temp0';
+  }
+
+  @override
+  String get xv2DashLinesTitle => 'Intensity per day';
+
+  @override
+  String get xv2DashLinesSubtitle =>
+      'The intensity you reported in each entry (1 to 5).';
+
+  @override
+  String xv2DashDaysCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get xv2DashSeeMore => 'See more';
+
+  @override
+  String get xv2DashSeeLess => 'See less';
+
+  @override
+  String get xv2DashNoItems => 'No items recorded in this period.';
+
+  @override
+  String get xv2DashWaterTitle => 'Water per day';
+
+  @override
+  String get xv2DashNoWater => 'No water logged in this period.';
+
+  @override
+  String get xv2DashTogetherTitle => 'On the same day';
+
+  @override
+  String xv2DashCooccurrence(int total, String a, String b, int both) {
+    return 'On the $total days you marked \'$a\', you also marked \'$b\' on $both.';
+  }
+
+  @override
+  String get xv2DashEntriesTitle => 'Your entries';
+
+  @override
+  String get xv2DashNoEntries => 'You have no entries in this period yet.';
+
+  @override
+  String xv2DashMoodLine(String mood) {
+    return 'How you were: $mood';
+  }
+
+  @override
+  String get xv2DashDeleteTitle => 'Delete entry';
+
+  @override
+  String get xv2DashDeleteBody =>
+      'This entry will be removed from your history.';
+
+  @override
+  String get xv2DashDeleteConfirm => 'Delete';
+
+  @override
+  String get xv2WaterTitle => 'Hydration 💧';
+
+  @override
+  String get xv2WaterTodayLogs => 'Today\'s logs';
+
+  @override
+  String get xv2WaterHistoryTitle => 'Last 30 days';
+
+  @override
+  String get xv2WaterRemindersTitle => 'Water reminders';
+
+  @override
+  String get xv2WaterOther => 'Other';
+
+  @override
+  String xv2WaterStreak(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Streak: $count days',
+      one: 'Streak: 1 day',
+      zero: 'Streak: 0 days',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String xv2WaterGoalChip(int ml) {
+    return 'Your goal: $ml ml';
+  }
+
+  @override
+  String get xv2WaterGoalDialogTitle => 'Your daily goal';
+
+  @override
+  String get xv2WaterGoalHint =>
+      'You choose your own goal, between 250 and 10000 ml.';
+
+  @override
+  String get xv2WaterGoalSave => 'Save';
+
+  @override
+  String get xv2WaterNoLogsToday => 'No glass of water logged today yet.';
+
+  @override
+  String xv2WaterLoggedAt(String time) {
+    return 'Logged at $time';
+  }
+
+  @override
+  String xv2WaterLoggedViaReminder(String time) {
+    return 'Logged from the $time reminder';
+  }
+
+  @override
+  String get xv2WaterDeleteLog => 'Delete log';
 }
