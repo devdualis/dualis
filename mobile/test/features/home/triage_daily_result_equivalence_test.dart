@@ -785,7 +785,7 @@ void main() {
     // -------------------------------------------------------------
     // BLOCK 8: RECOMMENDED ARTICLES PARITY (Tests 28 to 30)
     // -------------------------------------------------------------
-    testWidgets('28. Article titles match exactly on both screens',
+    testWidgets('28. Both screens show the same general readings, not entry-based ones',
         (WidgetTester tester) async {
       const List<RecommendedArticle> testArticles = [
         RecommendedArticle(
@@ -808,14 +808,17 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Guia de Saúde da Coluna Lombar'), findsOneWidget);
+      // Readings never follow the entry: the general list is shown instead.
+      expect(find.text('Guia de Saúde da Coluna Lombar'), findsNothing);
+      expect(find.text('Higiene do Sono e Repouso Restaurador'), findsOneWidget);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Guia de Saúde da Coluna Lombar'), findsOneWidget);
+      expect(find.text('Guia de Saúde da Coluna Lombar'), findsNothing);
+      expect(find.text('Higiene do Sono e Repouso Restaurador'), findsOneWidget);
     });
 
     testWidgets('29. Multiple article counts match on both screens',
@@ -851,19 +854,19 @@ void main() {
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Artigo Um: Respiração Consciente'), findsOneWidget);
-      expect(find.text('Artigo Dois: Higiene do Sono'), findsOneWidget);
+      final todayCount = find.byType(ArticleCard).evaluate().length;
+      expect(find.text('Artigo Um: Respiração Consciente'), findsNothing);
 
       await tester.pumpWidget(createDualEquivalenceWrapper(
         child: TriageOutcomeScreen(outcome: outcome),
         outcome: outcome,
       ));
       await tester.pumpAndSettle();
-      expect(find.text('Artigo Um: Respiração Consciente'), findsOneWidget);
-      expect(find.text('Artigo Dois: Higiene do Sono'), findsOneWidget);
+      expect(find.text('Artigo Um: Respiração Consciente'), findsNothing);
+      expect(find.byType(ArticleCard).evaluate().length, todayCount);
     });
 
-    testWidgets('30. Empty article list: Today tab falls back to the general catalog, outcome screen shows the empty state',
+    testWidgets('30. Empty article list: both screens show the general catalog',
         (WidgetTester tester) async {
       final outcome = createBaseMockOutcome(
         primaryCategory: 'cabeca_pescoco',
@@ -884,7 +887,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
       expect(find.text(_pt.outcomeWellnessReadingsTitle), findsOneWidget);
-      expect(find.text(_pt.outcomeArticlesEmpty), findsOneWidget);
+      expect(find.byType(ArticleCard), findsWidgets);
     });
 
     // -------------------------------------------------------------

@@ -22,6 +22,7 @@ import '../../features/privacy/presentation/screens/privacy_policy_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/hydration/presentation/screens/hydration_dashboard_screen.dart';
 import '../../features/profile/presentation/screens/family_sharing_screen.dart';
+import '../../features/library/presentation/library_screen.dart';
 import '../presentation/screens/not_found_screen.dart';
 import 'route_paths.dart';
 
@@ -171,10 +172,7 @@ GoRouter createRouter({
         name: 'checkInSummary',
         builder: (context, state) => CheckInSummaryScreen(
           args: state.extra as CheckInSummaryArgs? ??
-              const CheckInSummaryArgs(
-                showBodyMap: true,
-                showEmotionalTrend: true,
-              ),
+              const CheckInSummaryArgs(),
         ),
       ),
       GoRoute(
@@ -201,6 +199,11 @@ GoRouter createRouter({
         path: RoutePaths.familySharing,
         name: 'familySharing',
         builder: (context, state) => const FamilySharingScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.library,
+        name: 'library',
+        builder: (context, state) => const LibraryScreen(),
       ),
       GoRoute(
         path: RoutePaths.termsOfService,

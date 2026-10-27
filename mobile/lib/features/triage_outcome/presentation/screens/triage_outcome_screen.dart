@@ -6,6 +6,7 @@ import '../../../../core/router/route_paths.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/triage_outcome_models.dart';
 import '../widgets/intensity_meter.dart';
+import '../../domain/curated_articles_catalog.dart';
 import '../widgets/article_card.dart';
 import '../widgets/wellness_guidance_block.dart';
 import '../widgets/dual_axis_static_note.dart';
@@ -192,15 +193,11 @@ class TriageOutcomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              if (outcome.recommendedArticles.isEmpty)
-                Text(
-                  l10n.outcomeArticlesEmpty,
-                  style: GoogleFonts.plusJakartaSans(color: Colors.black54),
-                )
-              else
-                ...outcome.recommendedArticles.map(
-                  (article) => ArticleCard(article: article),
-                ),
+              // Same general readings for everyone, never chosen from what
+              // was recorded (strategy §9.3).
+              ...CuratedArticlesCatalog.wellnessArticles.map(
+                (article) => ArticleCard(article: article),
+              ),
               const SizedBox(height: 24),
               FilledButton(
                 style: FilledButton.styleFrom(

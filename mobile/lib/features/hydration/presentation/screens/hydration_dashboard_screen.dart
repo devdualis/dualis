@@ -1,24 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../shared/widgets/dualis_primary_button.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../home/domain/home_greeting.dart';
+import '../../../house_ads/data/house_ads_repository.dart';
+import '../../../house_ads/presentation/house_ad_card.dart';
+import '../../../journal_insights/presentation/widgets/journal_line_charts.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../domain/models/hydration_settings.dart';
 import '../controllers/hydration_controller.dart';
-import '../widgets/water_consumption_chart.dart';
+import '../widgets/hydration_visuals.dart';
 import '../widgets/water_intake_modal.dart';
 
-class HydrationDashboardScreen extends ConsumerWidget {
+/// Interactive hydration screen (strategy §11): one action at a time, a glass
+/// that fills, quick buttons 200 ml / 500 ml / Outro, the person's own daily
+/// goal as a ring, a streak and 30 days of history. After logging water, the
+/// house ad card may appear at most once per day (strategy §14).
+class HydrationDashboardScreen extends ConsumerStatefulWidget {
+  static const int historyDays = 30;
+
   final bool isEmbedded;
   const HydrationDashboardScreen({super.key, this.isEmbedded = false});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HydrationDashboardScreen> createState() =>
+      _HydrationDashboardScreenState();
+}
+
+class _HydrationDashboardScreenState
+    extends ConsumerState<HydrationDashboardScreen> {
+  bool _showAd = false;
+
+  Future<void> _onWaterLogged() async {
+    if (_showAd) return;
+    final now = ref.read(homeClockProvider)();
+    final allowed =
+        await ref.read(houseAdsRepositoryProvider).takeWaterAdSlot(now);
+    if (allowed && mounted) setState(() => _showAd = true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final state = ref.watch(hydrationControllerProvider);
     final notifier = ref.read(hydrationControllerProvider.notifier);
     final viewOnly = activeProfileIsViewOnly(ref);
+
+    ref.listen<HydrationState>(hydrationControllerProvider, (prev, next) {
+      if (prev != null &&
+          !prev.isLoading &&
+          next.todayLogs.length > prev.todayLogs.length) {
+        _onWaterLogged();
+      }
+    });
 
     final content = state.isLoading
         ? const Center(child: CircularProgressIndicator())
@@ -28,70 +65,48 @@ class HydrationDashboardScreen extends ConsumerWidget {
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const ActiveProfileBanner(),
                   if (viewOnly) const ActiveProfileReadOnlyNote(),
                   const SizedBox(height: 8),
-                  // Resultado do Dia & Controle de Consumo
-                  _buildTodayHighlightCard(context, ref, state, viewOnly: viewOnly),
+                  _TodayCard(state: state, viewOnly: viewOnly),
+                  if (_showAd) ...[
+                    const SizedBox(height: 16),
+                    const HouseAdCard(),
+                  ],
                   const SizedBox(height: 24),
-
-                  // Histórico Diário (Registros de Hoje)
-                  Text(
-                    'Registros de Hoje',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimaryLight,
-                    ),
-                  ),
+                  _SectionTitle(l10n.xv2WaterTodayLogs),
                   const SizedBox(height: 12),
-                  _buildTodayLogsList(context, ref, state, viewOnly: viewOnly),
+                  _TodayLogs(state: state, viewOnly: viewOnly),
                   const SizedBox(height: 24),
-
-                  // Histórico & Tendências (Últimos 7 dias)
-                  Text(
-                    'Histórico Semanal',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimaryLight,
-                    ),
-                  ),
+                  _SectionTitle(l10n.xv2WaterHistoryTitle),
                   const SizedBox(height: 12),
-                  WaterConsumptionChart(
-                    last7DaysTotals: state.last7DaysTotals,
-                    dailyTargetMl: state.dailyTargetMl,
+                  _Panel(
+                    child: WaterLine(
+                      dailyTotals: state.last30DaysTotals,
+                      goalMl: state.dailyTargetMl,
+                      today: ref.read(homeClockProvider)(),
+                      windowDays: HydrationDashboardScreen.historyDays,
+                    ),
                   ),
                   const SizedBox(height: 28),
-
-                  // Ajustes e Notificações de Hidratação
-                  Text(
-                    'Ajustes & Lembretes de Hidratação',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimaryLight,
-                    ),
-                  ),
+                  _SectionTitle(l10n.xv2WaterRemindersTitle),
                   const SizedBox(height: 12),
-                  _buildHydrationSettingsCard(context, ref, state, viewOnly: viewOnly),
+                  _ReminderSettings(state: state, viewOnly: viewOnly),
                   const SizedBox(height: 36),
                 ],
               ),
             ),
           );
 
-    if (isEmbedded) {
-      return content;
-    }
+    if (widget.isEmbedded) return content;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text(
-          'Controle de Hidratação 💧',
+          l10n.xv2WaterTitle,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -101,244 +116,318 @@ class HydrationDashboardScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.textPrimaryLight),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: AppColors.textPrimaryLight,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: const [SizedBox(width: 56)],
       ),
       body: content,
     );
   }
+}
 
-  Widget _buildTodayHighlightCard(
-    BuildContext context,
-    WidgetRef ref,
-    HydrationState state, {
-    required bool viewOnly,
-  }) {
+class _SectionTitle extends StatelessWidget {
+  final String text;
+  const _SectionTitle(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: GoogleFonts.plusJakartaSans(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textPrimaryLight,
+      ),
+    );
+  }
+}
+
+class _Panel extends StatelessWidget {
+  final Widget child;
+  const _Panel({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.outlineLight),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _TodayCard extends ConsumerWidget {
+  final HydrationState state;
+  final bool viewOnly;
+
+  const _TodayCard({required this.state, required this.viewOnly});
+
+  Future<void> _editGoal(BuildContext context, WidgetRef ref) async {
+    final value = await showDialog<int>(
+      context: context,
+      builder: (_) => _GoalDialog(initialMl: state.dailyTargetMl),
+    );
+    if (value != null) {
+      await ref.read(hydrationControllerProvider.notifier).setDailyTarget(value);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final notifier = ref.read(hydrationControllerProvider.notifier);
+    final streak = state.streakDays(ref.read(homeClockProvider)());
 
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      color: AppColors.surfaceLight,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return _Panel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              AnimatedWaterGlass(fill: state.progressRatio),
+              HydrationGoalRing(
+                progress: state.progressRatio,
+                center: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${state.todayTotalMl} / ${state.dailyTargetMl} ml',
+                      key: const Key('hydration_today_total'),
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimaryLight,
+                      ),
+                    ),
+                    Text(
+                      '${state.progressPercent}%',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        color: AppColors.textSecondaryLight,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              Chip(
+                key: const Key('hydration_streak'),
+                avatar: const Icon(Icons.local_fire_department_outlined,
+                    size: 18, color: AppColors.clinicalTealDark),
+                label: Text(l10n.xv2WaterStreak(streak)),
+              ),
+              ActionChip(
+                key: const Key('hydration_goal_edit'),
+                avatar: const Icon(Icons.flag_outlined,
+                    size: 18, color: AppColors.clinicalTealDark),
+                label: Text(l10n.xv2WaterGoalChip(state.dailyTargetMl)),
+                onPressed: viewOnly ? null : () => _editGoal(context, ref),
+              ),
+            ],
+          ),
+          if (!viewOnly) ...[
+            const SizedBox(height: 16),
             Row(
               children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: AppColors.clinicalTeal.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.water_drop_rounded,
-                      color: AppColors.clinicalTealDark,
-                      size: 32,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Total de Hoje',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          color: AppColors.textSecondaryLight,
-                        ),
-                      ),
-                      Text(
-                        '${state.todayTotalMl} / ${state.dailyTargetMl} ml',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimaryLight,
-                        ),
-                      ),
-                    ],
+                  child: _QuickButton(
+                    key: const Key('hydration_quick_add_200'),
+                    emoji: '🥛',
+                    label: '200 ml',
+                    onTap: () =>
+                        notifier.logWater(amountMl: 200, source: 'quick_chip'),
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: state.isGoalReached
-                        ? AppColors.clinicalTealDark.withValues(alpha: 0.12)
-                        : AppColors.softIndigo.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _QuickButton(
+                    key: const Key('hydration_quick_add_500'),
+                    emoji: '🍶',
+                    label: '500 ml',
+                    onTap: () =>
+                        notifier.logWater(amountMl: 500, source: 'quick_chip'),
                   ),
-                  child: Text(
-                    '${state.progressPercent}%',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: state.isGoalReached
-                          ? AppColors.clinicalTealDark
-                          : AppColors.softIndigo,
-                    ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _QuickButton(
+                    key: const Key('dashboard_add_water_button'),
+                    emoji: '✏️',
+                    label: l10n.xv2WaterOther,
+                    onTap: () =>
+                        WaterIntakeModal.show(context, source: 'dashboard'),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: LinearProgressIndicator(
-                value: state.progressRatio.clamp(0.0, 1.0),
-                minHeight: 10,
-                backgroundColor: Colors.grey.shade200,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  state.isGoalReached
-                      ? AppColors.clinicalTealDark
-                      : AppColors.clinicalTeal,
-                ),
-              ),
-            ),
-            if (!viewOnly) ...[
-              const SizedBox(height: 20),
-              Text(
-                'Adição Rápida:',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondaryLight,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      key: const Key('hydration_quick_add_200'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        minimumSize: const Size(0, 48),
-                        side: const BorderSide(color: AppColors.clinicalTeal),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: () => notifier.logWater(amountMl: 200, source: 'quick_chip'),
-                      child: Text(
-                        '+200 ml',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.clinicalTealDark,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton(
-                      key: const Key('hydration_quick_add_300'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        minimumSize: const Size(0, 48),
-                        side: const BorderSide(color: AppColors.clinicalTeal),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: () => notifier.logWater(amountMl: 300, source: 'quick_chip'),
-                      child: Text(
-                        '+300 ml',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.clinicalTealDark,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton(
-                      key: const Key('hydration_quick_add_500'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        minimumSize: const Size(0, 48),
-                        side: const BorderSide(color: AppColors.clinicalTeal),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: () => notifier.logWater(amountMl: 500, source: 'quick_chip'),
-                      child: Text(
-                        '+500 ml',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.clinicalTealDark,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              DualisPrimaryButton(
-                key: const Key('dashboard_add_water_button'),
-                text: '+ Registrar Outro Volume',
-                onPressed: () => WaterIntakeModal.show(context, source: 'dashboard'),
-              ),
-            ],
           ],
-        ),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildTodayLogsList(
-    BuildContext context,
-    WidgetRef ref,
-    HydrationState state, {
-    required bool viewOnly,
-  }) {
+/// The person's own daily goal (strategy §11): no formula, no "você precisa".
+class _GoalDialog extends StatefulWidget {
+  final int initialMl;
+  const _GoalDialog({required this.initialMl});
+
+  @override
+  State<_GoalDialog> createState() => _GoalDialogState();
+}
+
+class _GoalDialogState extends State<_GoalDialog> {
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.initialMl.toString());
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final parsed = int.tryParse(_controller.text);
+    if (parsed != null && parsed >= 250 && parsed <= 10000) {
+      Navigator.of(context).pop(parsed);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.xv2WaterGoalDialogTitle),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            key: const Key('hydration_goal_field'),
+            controller: _controller,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: const InputDecoration(suffixText: 'ml'),
+            onSubmitted: (_) => _save(),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.xv2WaterGoalHint,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondaryLight,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          key: const Key('hydration_goal_save'),
+          onPressed: _save,
+          child: Text(l10n.xv2WaterGoalSave),
+        ),
+      ],
+    );
+  }
+}
+
+class _QuickButton extends StatelessWidget {
+  final String emoji;
+  final String label;
+  final VoidCallback onTap;
+
+  const _QuickButton({
+    super.key,
+    required this.emoji,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(0, 64),
+        side: const BorderSide(color: AppColors.clinicalTeal),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+      onPressed: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 20)),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.clinicalTealDark,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TodayLogs extends ConsumerWidget {
+  final HydrationState state;
+  final bool viewOnly;
+
+  const _TodayLogs({required this.state, required this.viewOnly});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     if (state.todayLogs.isEmpty) {
-      return Card(
-        elevation: 0.5,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        color: AppColors.surfaceLight,
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Center(
-            child: Text(
-              'Nenhum copo de água registrado hoje ainda.',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
-                color: AppColors.textSecondaryLight,
-              ),
+      return _Panel(
+        child: Center(
+          child: Text(
+            l10n.xv2WaterNoLogsToday,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              color: AppColors.textSecondaryLight,
             ),
           ),
         ),
       );
     }
-
-    final reversed = state.todayLogs.reversed.toList();
-
     return Column(
-      children: reversed.map((log) {
-        final timeStr = DateFormat('HH:mm').format(log.timestamp);
+      children: state.todayLogs.reversed.map((log) {
+        final time = DateFormat('HH:mm').format(log.timestamp);
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
           elevation: 0.5,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           color: AppColors.surfaceLight,
           child: ListTile(
-            leading: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.clinicalTeal.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.local_drink_rounded,
-                color: AppColors.clinicalTealDark,
-                size: 20,
-              ),
+            leading: const Icon(
+              Icons.local_drink_rounded,
+              color: AppColors.clinicalTealDark,
             ),
             title: Text(
               '${log.amountMl} ml',
@@ -350,8 +439,8 @@ class HydrationDashboardScreen extends ConsumerWidget {
             ),
             subtitle: Text(
               log.source == 'reminder_alarm'
-                  ? 'Registrado via lembrete das $timeStr'
-                  : 'Registrado às $timeStr',
+                  ? l10n.xv2WaterLoggedViaReminder(time)
+                  : l10n.xv2WaterLoggedAt(time),
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 color: AppColors.textSecondaryLight,
@@ -360,30 +449,63 @@ class HydrationDashboardScreen extends ConsumerWidget {
             trailing: viewOnly
                 ? null
                 : IconButton(
-                    key: Key('delete_water_log_${log.id ?? log.remoteId ?? log.timestamp.millisecondsSinceEpoch}'),
-                    constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-                    tooltip: 'Excluir registro',
-                    icon: const Icon(Icons.delete_outline, size: 20, color: Colors.grey),
-                    onPressed: () {
-                      ref
-                          .read(hydrationControllerProvider.notifier)
-                          .deleteLog(log);
-                    },
+                    key: Key(
+                        'delete_water_log_${log.id ?? log.remoteId ?? log.timestamp.millisecondsSinceEpoch}'),
+                    constraints:
+                        const BoxConstraints(minWidth: 48, minHeight: 48),
+                    tooltip: l10n.xv2WaterDeleteLog,
+                    icon: const Icon(Icons.delete_outline,
+                        size: 20, color: Colors.grey),
+                    onPressed: () => ref
+                        .read(hydrationControllerProvider.notifier)
+                        .deleteLog(log),
                   ),
           ),
         );
       }).toList(),
     );
   }
+}
 
-  Widget _buildHydrationSettingsCard(
-    BuildContext context,
-    WidgetRef ref,
-    HydrationState hydrationState, {
-    required bool viewOnly,
-  }) {
-    final hydrationNotifier = ref.read(hydrationControllerProvider.notifier);
-    final settings = hydrationState.settings;
+class _ReminderSettings extends ConsumerWidget {
+  final HydrationState state;
+  final bool viewOnly;
+
+  const _ReminderSettings({required this.state, required this.viewOnly});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final notifier = ref.read(hydrationControllerProvider.notifier);
+    final settings = state.settings;
+    final titleStyle = GoogleFonts.plusJakartaSans(
+      fontWeight: FontWeight.w600,
+      fontSize: 14,
+      color: AppColors.textPrimaryLight,
+    );
+    final subtitleStyle = GoogleFonts.plusJakartaSans(
+      fontSize: 12,
+      color: AppColors.textSecondaryLight,
+    );
+
+    Widget styleChip(ReminderSoundStyle style, String label, String key) {
+      final selected = settings.reminderSoundStyle == style;
+      return ChoiceChip(
+        key: Key(key),
+        label: Text(label),
+        selected: selected,
+        selectedColor: AppColors.clinicalTealDark,
+        labelStyle: GoogleFonts.plusJakartaSans(
+          fontSize: 11,
+          color: selected ? Colors.white : AppColors.textPrimaryLight,
+        ),
+        onSelected: viewOnly
+            ? null
+            : (val) {
+                if (val) notifier.setSoundStyle(style);
+              },
+      );
+    }
 
     return Material(
       color: AppColors.surfaceLight,
@@ -399,91 +521,37 @@ class HydrationDashboardScreen extends ConsumerWidget {
           children: [
             SwitchListTile(
               key: const Key('settings_water_reminder_switch'),
-              title: Text(
-                'Lembrete a cada 2h (8h, 10h...)',
-                style: GoogleFonts.plusJakartaSans(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: AppColors.textPrimaryLight,
-                ),
-              ),
+              title: Text(l10n.registerWaterReminderTitle, style: titleStyle),
               subtitle: Text(
-                'Alertas nos horários pares: 8h, 10h, 12h, 14h, 16h, 18h, 20h',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  color: AppColors.textSecondaryLight,
-                ),
+                l10n.registerWaterReminderSubtitle,
+                style: subtitleStyle,
               ),
               value: settings.reminderEnabled,
               activeThumbColor: AppColors.clinicalTeal,
-              onChanged: viewOnly ? null : (val) => hydrationNotifier.toggleReminders(val),
+              onChanged: viewOnly ? null : notifier.toggleReminders,
             ),
             if (settings.reminderEnabled) ...[
               const Divider(height: 1, color: AppColors.outlineLight),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Estilo do Lembrete:',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                        color: AppColors.textPrimaryLight,
-                      ),
-                    ),
+                    Text(l10n.registerReminderStyleLabel, style: titleStyle),
                     const SizedBox(height: 8),
-                    Row(
+                    Wrap(
+                      spacing: 8,
                       children: [
-                        Expanded(
-                          child: ChoiceChip(
-                            key: const Key('settings_sound_style_chime'),
-                            label: const Text('Aviso Suave (Mensagem)'),
-                            selected: settings.reminderSoundStyle ==
-                                ReminderSoundStyle.whatsappChime,
-                            selectedColor: AppColors.clinicalTealDark,
-                            labelStyle: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              color: settings.reminderSoundStyle ==
-                                      ReminderSoundStyle.whatsappChime
-                                  ? Colors.white
-                                  : AppColors.textPrimaryLight,
-                            ),
-                            onSelected: viewOnly
-                                ? null
-                                : (val) {
-                                    if (val) {
-                                      hydrationNotifier.setSoundStyle(
-                                          ReminderSoundStyle.whatsappChime);
-                                    }
-                                  },
-                          ),
+                        styleChip(
+                          ReminderSoundStyle.whatsappChime,
+                          l10n.registerReminderStyleChime,
+                          'settings_sound_style_chime',
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: ChoiceChip(
-                            key: const Key('settings_sound_style_alarm'),
-                            label: const Text('Alarme Telefônico'),
-                            selected: settings.reminderSoundStyle ==
-                                ReminderSoundStyle.phoneAlarm,
-                            selectedColor: AppColors.clinicalTealDark,
-                            labelStyle: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              color: settings.reminderSoundStyle ==
-                                      ReminderSoundStyle.phoneAlarm
-                                  ? Colors.white
-                                  : AppColors.textPrimaryLight,
-                            ),
-                            onSelected: viewOnly
-                                ? null
-                                : (val) {
-                                    if (val) {
-                                      hydrationNotifier.setSoundStyle(
-                                          ReminderSoundStyle.phoneAlarm);
-                                    }
-                                  },
-                          ),
+                        styleChip(
+                          ReminderSoundStyle.phoneAlarm,
+                          l10n.registerReminderStyleAlarm,
+                          'settings_sound_style_alarm',
                         ),
                       ],
                     ),
@@ -493,62 +561,16 @@ class HydrationDashboardScreen extends ConsumerWidget {
               const Divider(height: 1, color: AppColors.outlineLight),
               SwitchListTile(
                 key: const Key('settings_water_tracking_switch'),
-                title: Text(
-                  'Controle de quantidade consumida',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: AppColors.textPrimaryLight,
-                  ),
-                ),
+                title: Text(l10n.registerWaterTrackingTitle, style: titleStyle),
                 subtitle: Text(
                   settings.trackingEnabled
-                      ? 'Abre tela para registrar ml consumidos no alerta'
-                      : 'Apenas soa alarme no horário, sem registrar',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    color: AppColors.textSecondaryLight,
-                  ),
+                      ? l10n.registerWaterTrackingOnDesc
+                      : l10n.registerWaterTrackingOffDesc,
+                  style: subtitleStyle,
                 ),
                 value: settings.trackingEnabled,
                 activeThumbColor: AppColors.clinicalTeal,
-                onChanged: viewOnly ? null : (val) => hydrationNotifier.toggleTracking(val),
-              ),
-              const Divider(height: 1, color: AppColors.outlineLight),
-              ListTile(
-                leading: const Icon(Icons.flag_outlined, color: AppColors.clinicalTeal),
-                title: Text(
-                  'Meta Diária de Hidratação',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: AppColors.textPrimaryLight,
-                  ),
-                ),
-                subtitle: Text(
-                  '${settings.dailyTargetMl} ml por dia',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    color: AppColors.textSecondaryLight,
-                  ),
-                ),
-                trailing: DropdownButton<int>(
-                  value: settings.dailyTargetMl,
-                  underline: const SizedBox.shrink(),
-                  items: const [1500, 2000, 2500, 3000].map((val) {
-                    return DropdownMenuItem<int>(
-                      value: val,
-                      child: Text('$val ml'),
-                    );
-                  }).toList(),
-                  onChanged: viewOnly
-                      ? null
-                      : (val) {
-                          if (val != null) {
-                            hydrationNotifier.setDailyTarget(val);
-                          }
-                        },
-                ),
+                onChanged: viewOnly ? null : notifier.toggleTracking,
               ),
             ],
           ],

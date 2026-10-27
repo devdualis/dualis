@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dualis_mobile/features/hydration/domain/models/hydration_settings.dart';
 import 'package:dualis_mobile/features/hydration/domain/models/water_intake_log.dart';
 import 'package:dualis_mobile/features/hydration/presentation/controllers/hydration_controller.dart';
-import 'package:dualis_mobile/features/hydration/presentation/widgets/water_consumption_chart.dart';
+import 'package:dualis_mobile/l10n/app_localizations.dart';
 import 'package:dualis_mobile/features/hydration/presentation/widgets/water_intake_modal.dart';
 import 'package:dualis_mobile/features/home/presentation/widgets/home_hydration_card.dart';
 import 'package:dualis_mobile/core/notifications/hydration_notification_service.dart';
@@ -204,59 +204,6 @@ void main() {
     });
   });
 
-  group('WaterConsumptionChart Widget', () {
-    testWidgets('renders empty state when map is empty', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: WaterConsumptionChart(
-              last7DaysTotals: {},
-              dailyTargetMl: 2000,
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text('Nenhum registro de consumo de água ainda.'),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('renders 7-day bars and target benchmark', (tester) async {
-      final now = DateTime.now();
-      final last7Days = {
-        DateTime(now.year, now.month, now.day - 3): 1500,
-        DateTime(now.year, now.month, now.day - 2): 2100,
-        DateTime(now.year, now.month, now.day - 1): 1800,
-        DateTime(now.year, now.month, now.day): 2400,
-      };
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: WaterConsumptionChart(
-                last7DaysTotals: last7Days,
-                dailyTargetMl: 2000,
-              ),
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      expect(find.text('Consumo de Água (7 Dias)'), findsOneWidget);
-      expect(find.text('Meta diária: 2000 ml'), findsOneWidget);
-      expect(find.text('Hoje'), findsOneWidget);
-      expect(find.text('Média 7 dias'), findsOneWidget);
-      expect(find.text('Meta'), findsOneWidget);
-    });
-  });
-
   group('WaterIntakeModal Widget', () {
     testWidgets('displays intake chips and button', (tester) async {
       const testState = HydrationState(
@@ -409,7 +356,7 @@ void main() {
           isLoading: false,
           todayTotalMl: 300,
           settings: const HydrationSettings(dailyTargetMl: 2000),
-          last7DaysTotals: {},
+          last30DaysTotals: {},
           todayLogs: [remoteEntry],
         ),
       );
@@ -420,6 +367,9 @@ void main() {
             hydrationControllerProvider.overrideWith(() => fakeController),
           ],
           child: const MaterialApp(
+            locale: Locale('pt'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: HydrationDashboardScreen(),
           ),
         ),
@@ -453,7 +403,7 @@ void main() {
           isLoading: false,
           todayTotalMl: 250,
           settings: const HydrationSettings(dailyTargetMl: 2000),
-          last7DaysTotals: {},
+          last30DaysTotals: {},
           todayLogs: [localEntry],
         ),
       );
@@ -464,6 +414,9 @@ void main() {
             hydrationControllerProvider.overrideWith(() => fakeController),
           ],
           child: const MaterialApp(
+            locale: Locale('pt'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: HydrationDashboardScreen(),
           ),
         ),

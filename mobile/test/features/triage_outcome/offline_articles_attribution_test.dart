@@ -88,11 +88,6 @@ void main() {
     test('every curated article credits only the real source', () {
       final all = {
         ...CuratedArticlesCatalog.wellnessArticles,
-        ...CuratedArticlesCatalog.getArticlesForSymptoms(
-          queryText: 'coceira braço cabeça costas ansiedade triste burnout',
-          isEmotionalDistressed: true,
-          isPhysicalDistressed: true,
-        ),
         CuratedArticlesCatalog.skinPruritus,
         CuratedArticlesCatalog.upperLimbsOverload,
         CuratedArticlesCatalog.moodDepression,

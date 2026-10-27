@@ -118,7 +118,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Olá, Maria Silva'), findsOneWidget);
+    expect(find.textContaining('Olá, Maria!'), findsOneWidget);
     expect(find.text('maria@example.com'), findsOneWidget);
     expect(find.byKey(const Key('start_psicoemocional_triage_button')), findsOneWidget);
     expect(find.byKey(const Key('start_fisica_triage_button')), findsOneWidget);

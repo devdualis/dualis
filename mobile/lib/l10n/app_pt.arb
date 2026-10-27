@@ -1540,5 +1540,301 @@
   "jv2PhraseIntensity3": "Quase lá. Só mais um pouco.",
   "jv2PhraseTriggers1": "Se quiser, marque o que pode ter contribuído.",
   "jv2PhraseTriggers2": "É opcional. Você pode pular.",
-  "jv2PhraseTriggers3": "Quase pronto. Algo marcou o seu dia?"
+  "jv2PhraseTriggers3": "Quase pronto. Algo marcou o seu dia?",
+  "xv2CropTitle": "Ajustar foto",
+  "xv2CropHint": "Use dois dedos para aproximar e arraste para enquadrar.",
+  "xv2CropReset": "Recomeçar",
+  "xv2CropConfirm": "Usar foto",
+  "xv2GreetingMorning": "Olá, {name}! Bom dia",
+  "@xv2GreetingMorning": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "xv2GreetingAfternoon": "Olá, {name}! Boa tarde",
+  "@xv2GreetingAfternoon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "xv2GreetingEvening": "Olá, {name}! Boa noite",
+  "@xv2GreetingEvening": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "xv2GreetingMorningNoName": "Olá! Bom dia",
+  "xv2GreetingAfternoonNoName": "Olá! Boa tarde",
+  "xv2GreetingEveningNoName": "Olá! Boa noite",
+  "xv2HydrationOfferTitle": "Quer lembretes para beber água?",
+  "xv2HydrationOfferBody": "Você escolhe os horários e a sua meta nos ajustes de hidratação. Dá para mudar quando quiser.",
+  "xv2HydrationOfferYes": "Sim, configurar",
+  "xv2HydrationOfferNo": "Agora não",
+  "xv2OptPassadoTristezaCulpa": "Culpa ou arrependimento",
+  "xv2OptPassadoTristezaSaudade": "Falta de alguém ou de como as coisas eram",
+  "xv2OptPassadoMemoriaLembranca": "Uma lembrança ruim que volta",
+  "xv2OptPassadoMemoriaMagoa": "Fico remoendo mágoas antigas",
+  "xv2OptPresenteEnergiaCorpo": "Corpo pesado, tenso ou dolorido",
+  "xv2OptPresenteEnergiaDesligado": "No piloto automático, meio desligado",
+  "xv2OptPresenteSobrecargaPaciencia": "Sem paciência, explodindo por pouco",
+  "xv2OptPresenteSobrecargaAperto": "Aperto no peito e momentos de desespero",
+  "xv2OptFuturoMenteAntecipar": "Fico antecipando problemas",
+  "xv2OptFuturoMenteCobranca": "Cobrança por perfeição ou controle",
+  "xv2OptFuturoMedoJulgamento": "Medo de falhar ou ser julgado(a)",
+  "xv2OptFuturoMedoDesanimo": "Desânimo com o rumo das coisas",
+  "xv2OptCabecaPressaoTemporas": "Dor ou pressão nas têmporas ou testa",
+  "xv2OptCabecaPressaoLatejando": "Latejando, com incômodo à luz ou ao barulho",
+  "xv2OptCabecaSentidosGarganta": "Garganta arranhando ou seca",
+  "xv2OptCabecaSentidosOlhos": "Olhos pesados ou ardendo",
+  "xv2OptPeitoRespiracaoCurta": "Respiração curta",
+  "xv2OptPeitoRespiracaoTosse": "Tosse ou peito carregado",
+  "xv2OptPeitoIncomodoBatedeira": "Coração acelerado ou batedeira",
+  "xv2OptPeitoIncomodoCostelas": "Pontada nas costelas ao respirar fundo",
+  "xv2OptBarrigaQueimacaoSubindo": "Queimação subindo",
+  "xv2OptBarrigaQueimacaoEnjoo": "Enjoo",
+  "xv2OptBarrigaColicaGases": "Gases ou barriga estufada",
+  "xv2OptBarrigaColicaPontadas": "Cólica ou pontadas",
+  "xv2OptCostasRigidezOmbros": "Pescoço e ombros duros",
+  "xv2OptCostasRigidezLombar": "Peso na lombar",
+  "xv2OptCostasFisgadaIrradia": "Pontada que desce para braço ou perna",
+  "xv2OptCostasFisgadaAoMexer": "Dor ao mexer",
+  "xv2OptMembrosCansacoJuntas": "Juntas doloridas",
+  "xv2OptMembrosCansacoPesados": "Braços ou pernas cansados",
+  "xv2OptMembrosFormigamentoDormentes": "Mãos ou pés formigando ou dormentes",
+  "xv2OptMembrosFormigamentoChoque": "Sensação de choque",
+  "xv2RegionCabeca": "Cabeça e pescoço",
+  "xv2RegionPeito": "Peito",
+  "xv2RegionBarriga": "Barriga",
+  "xv2RegionCostas": "Costas",
+  "xv2RegionMembros": "Braços, pernas e mãos",
+  "xv2TimePassado": "O que já passou",
+  "xv2TimePresente": "O momento atual",
+  "xv2TimeFuturo": "O que vem pela frente",
+  "xv2TimeShortPassado": "Passado",
+  "xv2TimeShortPresente": "Presente",
+  "xv2TimeShortFuturo": "Futuro",
+  "xv2TriggerTrabalho": "Trabalho ou estudos",
+  "xv2TriggerFamilia": "Família ou relações",
+  "xv2TriggerSono": "Noite mal dormida",
+  "xv2TriggerAlimentacao": "Alimentação",
+  "xv2TriggerEsforco": "Esforço físico",
+  "xv2TriggerQueda": "Queda ou mau jeito",
+  "xv2TriggerMedicamento": "Medicamento novo",
+  "xv2TriggerClima": "Clima ou ambiente",
+  "xv2TriggerNaoSei": "Não sei",
+  "xv2TriggerOutro": "Outro",
+  "xv2MoodBem": "Bem",
+  "xv2MoodNormal": "Normal",
+  "xv2MoodNaoTaoBem": "Não tão bem",
+  "xv2LibTitle": "Biblioteca",
+  "xv2LibIntro": "Textos gerais de fontes públicas sobre hábitos saudáveis. São iguais para todas as pessoas e não são orientação para o seu caso.",
+  "xv2LibSource": "Fonte: {source}",
+  "@xv2LibSource": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "xv2LibReadTime": "{minutes} min de leitura",
+  "@xv2LibReadTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "xv2LibOpen": "Abrir texto",
+  "xv2LibOpenError": "Não foi possível abrir o link agora.",
+  "xv2LibCatEmocoes": "Emoções e humor",
+  "xv2LibCatEstresse": "Estresse e descanso",
+  "xv2LibCatSono": "Sono",
+  "xv2LibCatCorpo": "Corpo e movimento",
+  "xv2LibCatAlimentacao": "Alimentação e digestão",
+  "xv2LibCatHidratacao": "Hidratação",
+  "xv2LibCatRelacoes": "Relações e convívio",
+  "xv2LibCatAjuda": "Primeiros cuidados e quando procurar ajuda",
+  "xv2LibArtDesanimoTitle": "Dias de desânimo e pouca energia",
+  "xv2LibArtDesanimoSummary": "Pequenas rotinas para dias de desânimo e onde encontrar apoio.",
+  "xv2LibArtAgitacaoTitle": "Momentos de agitação: como desacelerar",
+  "xv2LibArtAgitacaoSummary": "Informações gerais sobre nervosismo e pensamentos acelerados no dia a dia.",
+  "xv2LibArtTrabalhoTitle": "Cansaço no trabalho e limites saudáveis",
+  "xv2LibArtTrabalhoSummary": "Informações gerais sobre cansaço emocional no trabalho e pausas na rotina.",
+  "xv2LibArtRespiracaoTitle": "Respiração compassada para relaxar",
+  "xv2LibArtRespiracaoSummary": "Alguns minutos de respiração tranquila podem ajudar a desacelerar em dias exigentes.",
+  "xv2LibArtSonoTitle": "Hábitos para dormir melhor",
+  "xv2LibArtSonoSummary": "Horários regulares e hábitos simples que favorecem noites mais tranquilas.",
+  "xv2LibArtCostasTitle": "Postura e cuidados com as costas",
+  "xv2LibArtCostasSummary": "Movimento e postura no dia a dia para quem passa muito tempo sentado.",
+  "xv2LibArtBracosTitle": "Braços e ombros: pausas e postura",
+  "xv2LibArtBracosSummary": "Informações gerais sobre esforço repetitivo e pausas durante o dia.",
+  "xv2LibArtCabecaTitle": "Tensão na cabeça e no pescoço no dia a dia",
+  "xv2LibArtCabecaSummary": "Postura, pausas e hábitos gerais para dias de tensão.",
+  "xv2LibArtPeleTitle": "Cuidados gerais com a pele",
+  "xv2LibArtPeleSummary": "Hidratação da pele e cuidados simples do dia a dia.",
+  "xv2LibArtMovimentoTitle": "Movimente-se no dia a dia",
+  "xv2LibArtMovimentoSummary": "Orientações gerais sobre atividade física em todas as idades.",
+  "xv2LibArtAlimentacaoTitle": "Guia Alimentar para a População Brasileira",
+  "xv2LibArtAlimentacaoSummary": "Princípios gerais para uma alimentação equilibrada, com comida de verdade.",
+  "xv2LibArtAguaTitle": "Água ao longo do dia",
+  "xv2LibArtAguaSummary": "Beber água ao longo do dia faz parte de hábitos de vida saudáveis.",
+  "xv2LibArtConvivioTitle": "Bem-estar emocional e convívio",
+  "xv2LibArtConvivioSummary": "Informações gerais sobre bem-estar emocional, relações e apoio da comunidade.",
+  "xv2LibArtSamuTitle": "SAMU 192: como funciona",
+  "xv2LibArtSamuSummary": "O serviço móvel gratuito do SUS que atende pelo telefone 192 em todo o país.",
+  "xv2LibArtCvvTitle": "CVV 188: apoio emocional",
+  "xv2LibArtCvvSummary": "Conversa gratuita e sigilosa, 24 horas, por telefone, chat ou e-mail.",
+  "xv2ReportedIntensity": "Intensidade que você informou: {intensity}/5",
+  "@xv2ReportedIntensity": {
+    "placeholders": {
+      "intensity": {
+        "type": "int"
+      }
+    }
+  },
+  "xv2SummaryTitle": "Seu registro de hoje",
+  "xv2SummarySaved": "Seu registro foi salvo.",
+  "xv2SummaryThanks": "Obrigado por registrar seu dia! 🌿 Na Biblioteca você encontra textos de fontes públicas, como o Ministério da Saúde, sobre hábitos saudáveis.",
+  "xv2SummaryOpenLibrary": "Abrir a Biblioteca",
+  "xv2AdLabel": "Anúncio",
+  "xv2AdLearnMore": "Saiba mais",
+  "xv2AdPremiumTitle": "Dualis Premium",
+  "xv2AdPremiumBody": "Veja seus registros de até 12 meses e escolha seus fundos. Em breve.",
+  "xv2AdZocTitle": "ZOC · Cadernos e agendas",
+  "xv2AdZocBody": "Planeje a semana com calma, no papel. Exemplo de anúncio.",
+  "xv2AdWgiTitle": "WGI · Garrafas reutilizáveis",
+  "xv2AdWgiBody": "Leve sua água para onde for. Exemplo de anúncio.",
+  "xv2AdUboTitle": "UBO · Playlists para relaxar",
+  "xv2AdUboBody": "Sons de natureza para pausas no dia. Exemplo de anúncio.",
+  "xv2DashTitle": "Histórico",
+  "xv2DashWindow": "Seus registros dos últimos {days} dias",
+  "@xv2DashWindow": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "xv2DashRetry": "Tentar novamente",
+  "xv2DashTimeTitle": "Passado, presente e futuro",
+  "xv2DashTimeCount": "{time}: {count}",
+  "@xv2DashTimeCount": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "xv2DashNoEmotional": "Nenhum registro emocional neste período.",
+  "xv2DashBodyTitle": "Partes do corpo que você marcou",
+  "xv2DashFront": "Frente",
+  "xv2DashBack": "Costas",
+  "xv2DashRegionDays": "{region}: {count, plural, =0{nenhum dia} =1{1 dia} other{{count} dias}}",
+  "@xv2DashRegionDays": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "xv2DashLinesTitle": "Intensidade por dia",
+  "xv2DashLinesSubtitle": "A intensidade que você informou em cada registro (1 a 5).",
+  "xv2DashDaysCount": "{count, plural, =1{1 dia} other{{count} dias}}",
+  "@xv2DashDaysCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "xv2DashSeeMore": "Ver mais",
+  "xv2DashSeeLess": "Ver menos",
+  "xv2DashNoItems": "Nenhum item registrado neste período.",
+  "xv2DashWaterTitle": "Água por dia",
+  "xv2DashNoWater": "Nenhum registro de água neste período.",
+  "xv2DashTogetherTitle": "No mesmo dia",
+  "xv2DashCooccurrence": "Nos {total} dias em que você marcou '{a}', também marcou '{b}' em {both}.",
+  "@xv2DashCooccurrence": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      },
+      "both": {
+        "type": "int"
+      }
+    }
+  },
+  "xv2DashEntriesTitle": "Seus registros",
+  "xv2DashNoEntries": "Você ainda não tem registros neste período.",
+  "xv2DashMoodLine": "Como você estava: {mood}",
+  "@xv2DashMoodLine": {
+    "placeholders": {
+      "mood": {
+        "type": "String"
+      }
+    }
+  },
+  "xv2DashDeleteTitle": "Excluir registro",
+  "xv2DashDeleteBody": "Este registro será apagado do seu histórico.",
+  "xv2DashDeleteConfirm": "Excluir",
+  "xv2WaterTitle": "Hidratação 💧",
+  "xv2WaterTodayLogs": "Registros de hoje",
+  "xv2WaterHistoryTitle": "Últimos 30 dias",
+  "xv2WaterRemindersTitle": "Lembretes de água",
+  "xv2WaterOther": "Outro",
+  "xv2WaterStreak": "{count, plural, =0{Sequência: 0 dias} =1{Sequência: 1 dia} other{Sequência: {count} dias}}",
+  "@xv2WaterStreak": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "xv2WaterGoalChip": "Sua meta: {ml} ml",
+  "@xv2WaterGoalChip": {
+    "placeholders": {
+      "ml": {
+        "type": "int"
+      }
+    }
+  },
+  "xv2WaterGoalDialogTitle": "Sua meta diária",
+  "xv2WaterGoalHint": "Você escolhe a sua meta, entre 250 e 10000 ml.",
+  "xv2WaterGoalSave": "Salvar",
+  "xv2WaterNoLogsToday": "Nenhum copo de água registrado hoje ainda.",
+  "xv2WaterLoggedAt": "Registrado às {time}",
+  "@xv2WaterLoggedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "xv2WaterLoggedViaReminder": "Registrado via lembrete das {time}",
+  "@xv2WaterLoggedViaReminder": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "xv2WaterDeleteLog": "Excluir registro"
 }

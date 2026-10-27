@@ -70,7 +70,7 @@ Widget createHydrationQATestApp({
           isLoading: false,
           todayTotalMl: 0,
           settings: HydrationSettings(dailyTargetMl: 2000),
-          last7DaysTotals: {},
+          last30DaysTotals: {},
           todayLogs: [],
         ),
       );
@@ -159,20 +159,6 @@ void main() {
       expect(find.text('Intervalo de Lembrete'), findsNothing);
     });
 
-    testWidgets('QA 2.3: HistoricalDashboardScreen does NOT render water consumption chart',
-        (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1200, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-
-      await tester.pumpWidget(createHydrationQATestApp(initialLocation: RoutePaths.history));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Consumo de Água'), findsNothing);
-      expect(find.text('Histórico de Hidratação'), findsNothing);
-    });
-
     testWidgets('QA 2.4: Water icon removed from top AppBar and included in bottom navigation bar',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1200, 2400);
@@ -211,7 +197,7 @@ void main() {
           isLoading: false,
           todayTotalMl: 0,
           settings: HydrationSettings(dailyTargetMl: 2000),
-          last7DaysTotals: {},
+          last30DaysTotals: {},
           todayLogs: [],
         ),
       );
@@ -223,21 +209,19 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('0 / 2000 ml'), findsOneWidget);
-      expect(find.text('+200 ml'), findsOneWidget);
-      expect(find.text('+300 ml'), findsOneWidget);
-      expect(find.text('+500 ml'), findsOneWidget);
+      expect(find.byKey(const Key('hydration_quick_add_200')), findsOneWidget);
+      expect(find.byKey(const Key('hydration_quick_add_500')), findsOneWidget);
+      expect(find.byKey(const Key('dashboard_add_water_button')), findsOneWidget);
 
-      // Tap +200 ml chip
-      await tester.tap(find.text('+200 ml'));
+      await tester.tap(find.byKey(const Key('hydration_quick_add_200')));
       await tester.pumpAndSettle();
 
       expect(find.text('200 / 2000 ml'), findsOneWidget);
 
-      // Tap +300 ml chip
-      await tester.tap(find.text('+300 ml'));
+      await tester.tap(find.byKey(const Key('hydration_quick_add_500')));
       await tester.pumpAndSettle();
 
-      expect(find.text('500 / 2000 ml'), findsOneWidget);
+      expect(find.text('700 / 2000 ml'), findsOneWidget);
     });
   });
 }

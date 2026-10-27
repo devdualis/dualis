@@ -13,6 +13,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../l10n/locale_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../widgets/avatar_selector_sheet.dart';
+import 'photo_crop_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -80,13 +81,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       final picker = ImagePicker();
       final XFile? image = await picker.pickImage(
         source: source,
-        imageQuality: 85,
-        maxWidth: 512,
-        maxHeight: 512,
+        imageQuality: 90,
+        maxWidth: 1600,
+        maxHeight: 1600,
       );
       if (image != null && mounted) {
-        final bytes = await image.readAsBytes();
-        final base64Image = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+        final picked = await image.readAsBytes();
+        if (!mounted) return;
+        // Circular crop with zoom and drag before saving (strategy §13).
+        final bytes = await PhotoCropScreen.open(context, picked);
+        if (bytes == null || !mounted) return;
+        final base64Image = 'data:image/png;base64,${base64Encode(bytes)}';
         setState(() {
           _localImageBytes = bytes;
           _selectedPicture = base64Image;

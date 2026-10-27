@@ -4101,6 +4101,1020 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Quase pronto. Algo marcou o seu dia?'**
   String get jv2PhraseTriggers3;
+
+  /// No description provided for @xv2CropTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ajustar foto'**
+  String get xv2CropTitle;
+
+  /// No description provided for @xv2CropHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Use dois dedos para aproximar e arraste para enquadrar.'**
+  String get xv2CropHint;
+
+  /// No description provided for @xv2CropReset.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recomeçar'**
+  String get xv2CropReset;
+
+  /// No description provided for @xv2CropConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar foto'**
+  String get xv2CropConfirm;
+
+  /// No description provided for @xv2GreetingMorning.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá, {name}! Bom dia'**
+  String xv2GreetingMorning(String name);
+
+  /// No description provided for @xv2GreetingAfternoon.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá, {name}! Boa tarde'**
+  String xv2GreetingAfternoon(String name);
+
+  /// No description provided for @xv2GreetingEvening.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá, {name}! Boa noite'**
+  String xv2GreetingEvening(String name);
+
+  /// No description provided for @xv2GreetingMorningNoName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá! Bom dia'**
+  String get xv2GreetingMorningNoName;
+
+  /// No description provided for @xv2GreetingAfternoonNoName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá! Boa tarde'**
+  String get xv2GreetingAfternoonNoName;
+
+  /// No description provided for @xv2GreetingEveningNoName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá! Boa noite'**
+  String get xv2GreetingEveningNoName;
+
+  /// No description provided for @xv2HydrationOfferTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quer lembretes para beber água?'**
+  String get xv2HydrationOfferTitle;
+
+  /// No description provided for @xv2HydrationOfferBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você escolhe os horários e a sua meta nos ajustes de hidratação. Dá para mudar quando quiser.'**
+  String get xv2HydrationOfferBody;
+
+  /// No description provided for @xv2HydrationOfferYes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim, configurar'**
+  String get xv2HydrationOfferYes;
+
+  /// No description provided for @xv2HydrationOfferNo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agora não'**
+  String get xv2HydrationOfferNo;
+
+  /// No description provided for @xv2OptPassadoTristezaCulpa.
+  ///
+  /// In pt, this message translates to:
+  /// **'Culpa ou arrependimento'**
+  String get xv2OptPassadoTristezaCulpa;
+
+  /// No description provided for @xv2OptPassadoTristezaSaudade.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falta de alguém ou de como as coisas eram'**
+  String get xv2OptPassadoTristezaSaudade;
+
+  /// No description provided for @xv2OptPassadoMemoriaLembranca.
+  ///
+  /// In pt, this message translates to:
+  /// **'Uma lembrança ruim que volta'**
+  String get xv2OptPassadoMemoriaLembranca;
+
+  /// No description provided for @xv2OptPassadoMemoriaMagoa.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fico remoendo mágoas antigas'**
+  String get xv2OptPassadoMemoriaMagoa;
+
+  /// No description provided for @xv2OptPresenteEnergiaCorpo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Corpo pesado, tenso ou dolorido'**
+  String get xv2OptPresenteEnergiaCorpo;
+
+  /// No description provided for @xv2OptPresenteEnergiaDesligado.
+  ///
+  /// In pt, this message translates to:
+  /// **'No piloto automático, meio desligado'**
+  String get xv2OptPresenteEnergiaDesligado;
+
+  /// No description provided for @xv2OptPresenteSobrecargaPaciencia.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem paciência, explodindo por pouco'**
+  String get xv2OptPresenteSobrecargaPaciencia;
+
+  /// No description provided for @xv2OptPresenteSobrecargaAperto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aperto no peito e momentos de desespero'**
+  String get xv2OptPresenteSobrecargaAperto;
+
+  /// No description provided for @xv2OptFuturoMenteAntecipar.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fico antecipando problemas'**
+  String get xv2OptFuturoMenteAntecipar;
+
+  /// No description provided for @xv2OptFuturoMenteCobranca.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cobrança por perfeição ou controle'**
+  String get xv2OptFuturoMenteCobranca;
+
+  /// No description provided for @xv2OptFuturoMedoJulgamento.
+  ///
+  /// In pt, this message translates to:
+  /// **'Medo de falhar ou ser julgado(a)'**
+  String get xv2OptFuturoMedoJulgamento;
+
+  /// No description provided for @xv2OptFuturoMedoDesanimo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desânimo com o rumo das coisas'**
+  String get xv2OptFuturoMedoDesanimo;
+
+  /// No description provided for @xv2OptCabecaPressaoTemporas.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dor ou pressão nas têmporas ou testa'**
+  String get xv2OptCabecaPressaoTemporas;
+
+  /// No description provided for @xv2OptCabecaPressaoLatejando.
+  ///
+  /// In pt, this message translates to:
+  /// **'Latejando, com incômodo à luz ou ao barulho'**
+  String get xv2OptCabecaPressaoLatejando;
+
+  /// No description provided for @xv2OptCabecaSentidosGarganta.
+  ///
+  /// In pt, this message translates to:
+  /// **'Garganta arranhando ou seca'**
+  String get xv2OptCabecaSentidosGarganta;
+
+  /// No description provided for @xv2OptCabecaSentidosOlhos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olhos pesados ou ardendo'**
+  String get xv2OptCabecaSentidosOlhos;
+
+  /// No description provided for @xv2OptPeitoRespiracaoCurta.
+  ///
+  /// In pt, this message translates to:
+  /// **'Respiração curta'**
+  String get xv2OptPeitoRespiracaoCurta;
+
+  /// No description provided for @xv2OptPeitoRespiracaoTosse.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tosse ou peito carregado'**
+  String get xv2OptPeitoRespiracaoTosse;
+
+  /// No description provided for @xv2OptPeitoIncomodoBatedeira.
+  ///
+  /// In pt, this message translates to:
+  /// **'Coração acelerado ou batedeira'**
+  String get xv2OptPeitoIncomodoBatedeira;
+
+  /// No description provided for @xv2OptPeitoIncomodoCostelas.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pontada nas costelas ao respirar fundo'**
+  String get xv2OptPeitoIncomodoCostelas;
+
+  /// No description provided for @xv2OptBarrigaQueimacaoSubindo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Queimação subindo'**
+  String get xv2OptBarrigaQueimacaoSubindo;
+
+  /// No description provided for @xv2OptBarrigaQueimacaoEnjoo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enjoo'**
+  String get xv2OptBarrigaQueimacaoEnjoo;
+
+  /// No description provided for @xv2OptBarrigaColicaGases.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gases ou barriga estufada'**
+  String get xv2OptBarrigaColicaGases;
+
+  /// No description provided for @xv2OptBarrigaColicaPontadas.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cólica ou pontadas'**
+  String get xv2OptBarrigaColicaPontadas;
+
+  /// No description provided for @xv2OptCostasRigidezOmbros.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pescoço e ombros duros'**
+  String get xv2OptCostasRigidezOmbros;
+
+  /// No description provided for @xv2OptCostasRigidezLombar.
+  ///
+  /// In pt, this message translates to:
+  /// **'Peso na lombar'**
+  String get xv2OptCostasRigidezLombar;
+
+  /// No description provided for @xv2OptCostasFisgadaIrradia.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pontada que desce para braço ou perna'**
+  String get xv2OptCostasFisgadaIrradia;
+
+  /// No description provided for @xv2OptCostasFisgadaAoMexer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dor ao mexer'**
+  String get xv2OptCostasFisgadaAoMexer;
+
+  /// No description provided for @xv2OptMembrosCansacoJuntas.
+  ///
+  /// In pt, this message translates to:
+  /// **'Juntas doloridas'**
+  String get xv2OptMembrosCansacoJuntas;
+
+  /// No description provided for @xv2OptMembrosCansacoPesados.
+  ///
+  /// In pt, this message translates to:
+  /// **'Braços ou pernas cansados'**
+  String get xv2OptMembrosCansacoPesados;
+
+  /// No description provided for @xv2OptMembrosFormigamentoDormentes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mãos ou pés formigando ou dormentes'**
+  String get xv2OptMembrosFormigamentoDormentes;
+
+  /// No description provided for @xv2OptMembrosFormigamentoChoque.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sensação de choque'**
+  String get xv2OptMembrosFormigamentoChoque;
+
+  /// No description provided for @xv2RegionCabeca.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cabeça e pescoço'**
+  String get xv2RegionCabeca;
+
+  /// No description provided for @xv2RegionPeito.
+  ///
+  /// In pt, this message translates to:
+  /// **'Peito'**
+  String get xv2RegionPeito;
+
+  /// No description provided for @xv2RegionBarriga.
+  ///
+  /// In pt, this message translates to:
+  /// **'Barriga'**
+  String get xv2RegionBarriga;
+
+  /// No description provided for @xv2RegionCostas.
+  ///
+  /// In pt, this message translates to:
+  /// **'Costas'**
+  String get xv2RegionCostas;
+
+  /// No description provided for @xv2RegionMembros.
+  ///
+  /// In pt, this message translates to:
+  /// **'Braços, pernas e mãos'**
+  String get xv2RegionMembros;
+
+  /// No description provided for @xv2TimePassado.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que já passou'**
+  String get xv2TimePassado;
+
+  /// No description provided for @xv2TimePresente.
+  ///
+  /// In pt, this message translates to:
+  /// **'O momento atual'**
+  String get xv2TimePresente;
+
+  /// No description provided for @xv2TimeFuturo.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que vem pela frente'**
+  String get xv2TimeFuturo;
+
+  /// No description provided for @xv2TimeShortPassado.
+  ///
+  /// In pt, this message translates to:
+  /// **'Passado'**
+  String get xv2TimeShortPassado;
+
+  /// No description provided for @xv2TimeShortPresente.
+  ///
+  /// In pt, this message translates to:
+  /// **'Presente'**
+  String get xv2TimeShortPresente;
+
+  /// No description provided for @xv2TimeShortFuturo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Futuro'**
+  String get xv2TimeShortFuturo;
+
+  /// No description provided for @xv2TriggerTrabalho.
+  ///
+  /// In pt, this message translates to:
+  /// **'Trabalho ou estudos'**
+  String get xv2TriggerTrabalho;
+
+  /// No description provided for @xv2TriggerFamilia.
+  ///
+  /// In pt, this message translates to:
+  /// **'Família ou relações'**
+  String get xv2TriggerFamilia;
+
+  /// No description provided for @xv2TriggerSono.
+  ///
+  /// In pt, this message translates to:
+  /// **'Noite mal dormida'**
+  String get xv2TriggerSono;
+
+  /// No description provided for @xv2TriggerAlimentacao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alimentação'**
+  String get xv2TriggerAlimentacao;
+
+  /// No description provided for @xv2TriggerEsforco.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esforço físico'**
+  String get xv2TriggerEsforco;
+
+  /// No description provided for @xv2TriggerQueda.
+  ///
+  /// In pt, this message translates to:
+  /// **'Queda ou mau jeito'**
+  String get xv2TriggerQueda;
+
+  /// No description provided for @xv2TriggerMedicamento.
+  ///
+  /// In pt, this message translates to:
+  /// **'Medicamento novo'**
+  String get xv2TriggerMedicamento;
+
+  /// No description provided for @xv2TriggerClima.
+  ///
+  /// In pt, this message translates to:
+  /// **'Clima ou ambiente'**
+  String get xv2TriggerClima;
+
+  /// No description provided for @xv2TriggerNaoSei.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não sei'**
+  String get xv2TriggerNaoSei;
+
+  /// No description provided for @xv2TriggerOutro.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outro'**
+  String get xv2TriggerOutro;
+
+  /// No description provided for @xv2MoodBem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bem'**
+  String get xv2MoodBem;
+
+  /// No description provided for @xv2MoodNormal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Normal'**
+  String get xv2MoodNormal;
+
+  /// No description provided for @xv2MoodNaoTaoBem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não tão bem'**
+  String get xv2MoodNaoTaoBem;
+
+  /// No description provided for @xv2LibTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Biblioteca'**
+  String get xv2LibTitle;
+
+  /// No description provided for @xv2LibIntro.
+  ///
+  /// In pt, this message translates to:
+  /// **'Textos gerais de fontes públicas sobre hábitos saudáveis. São iguais para todas as pessoas e não são orientação para o seu caso.'**
+  String get xv2LibIntro;
+
+  /// No description provided for @xv2LibSource.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fonte: {source}'**
+  String xv2LibSource(String source);
+
+  /// No description provided for @xv2LibReadTime.
+  ///
+  /// In pt, this message translates to:
+  /// **'{minutes} min de leitura'**
+  String xv2LibReadTime(int minutes);
+
+  /// No description provided for @xv2LibOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir texto'**
+  String get xv2LibOpen;
+
+  /// No description provided for @xv2LibOpenError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível abrir o link agora.'**
+  String get xv2LibOpenError;
+
+  /// No description provided for @xv2LibCatEmocoes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emoções e humor'**
+  String get xv2LibCatEmocoes;
+
+  /// No description provided for @xv2LibCatEstresse.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estresse e descanso'**
+  String get xv2LibCatEstresse;
+
+  /// No description provided for @xv2LibCatSono.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sono'**
+  String get xv2LibCatSono;
+
+  /// No description provided for @xv2LibCatCorpo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Corpo e movimento'**
+  String get xv2LibCatCorpo;
+
+  /// No description provided for @xv2LibCatAlimentacao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alimentação e digestão'**
+  String get xv2LibCatAlimentacao;
+
+  /// No description provided for @xv2LibCatHidratacao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hidratação'**
+  String get xv2LibCatHidratacao;
+
+  /// No description provided for @xv2LibCatRelacoes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Relações e convívio'**
+  String get xv2LibCatRelacoes;
+
+  /// No description provided for @xv2LibCatAjuda.
+  ///
+  /// In pt, this message translates to:
+  /// **'Primeiros cuidados e quando procurar ajuda'**
+  String get xv2LibCatAjuda;
+
+  /// No description provided for @xv2LibArtDesanimoTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dias de desânimo e pouca energia'**
+  String get xv2LibArtDesanimoTitle;
+
+  /// No description provided for @xv2LibArtDesanimoSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pequenas rotinas para dias de desânimo e onde encontrar apoio.'**
+  String get xv2LibArtDesanimoSummary;
+
+  /// No description provided for @xv2LibArtAgitacaoTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Momentos de agitação: como desacelerar'**
+  String get xv2LibArtAgitacaoTitle;
+
+  /// No description provided for @xv2LibArtAgitacaoSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informações gerais sobre nervosismo e pensamentos acelerados no dia a dia.'**
+  String get xv2LibArtAgitacaoSummary;
+
+  /// No description provided for @xv2LibArtTrabalhoTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cansaço no trabalho e limites saudáveis'**
+  String get xv2LibArtTrabalhoTitle;
+
+  /// No description provided for @xv2LibArtTrabalhoSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informações gerais sobre cansaço emocional no trabalho e pausas na rotina.'**
+  String get xv2LibArtTrabalhoSummary;
+
+  /// No description provided for @xv2LibArtRespiracaoTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Respiração compassada para relaxar'**
+  String get xv2LibArtRespiracaoTitle;
+
+  /// No description provided for @xv2LibArtRespiracaoSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alguns minutos de respiração tranquila podem ajudar a desacelerar em dias exigentes.'**
+  String get xv2LibArtRespiracaoSummary;
+
+  /// No description provided for @xv2LibArtSonoTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hábitos para dormir melhor'**
+  String get xv2LibArtSonoTitle;
+
+  /// No description provided for @xv2LibArtSonoSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Horários regulares e hábitos simples que favorecem noites mais tranquilas.'**
+  String get xv2LibArtSonoSummary;
+
+  /// No description provided for @xv2LibArtCostasTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Postura e cuidados com as costas'**
+  String get xv2LibArtCostasTitle;
+
+  /// No description provided for @xv2LibArtCostasSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Movimento e postura no dia a dia para quem passa muito tempo sentado.'**
+  String get xv2LibArtCostasSummary;
+
+  /// No description provided for @xv2LibArtBracosTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Braços e ombros: pausas e postura'**
+  String get xv2LibArtBracosTitle;
+
+  /// No description provided for @xv2LibArtBracosSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informações gerais sobre esforço repetitivo e pausas durante o dia.'**
+  String get xv2LibArtBracosSummary;
+
+  /// No description provided for @xv2LibArtCabecaTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tensão na cabeça e no pescoço no dia a dia'**
+  String get xv2LibArtCabecaTitle;
+
+  /// No description provided for @xv2LibArtCabecaSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Postura, pausas e hábitos gerais para dias de tensão.'**
+  String get xv2LibArtCabecaSummary;
+
+  /// No description provided for @xv2LibArtPeleTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cuidados gerais com a pele'**
+  String get xv2LibArtPeleTitle;
+
+  /// No description provided for @xv2LibArtPeleSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hidratação da pele e cuidados simples do dia a dia.'**
+  String get xv2LibArtPeleSummary;
+
+  /// No description provided for @xv2LibArtMovimentoTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Movimente-se no dia a dia'**
+  String get xv2LibArtMovimentoTitle;
+
+  /// No description provided for @xv2LibArtMovimentoSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Orientações gerais sobre atividade física em todas as idades.'**
+  String get xv2LibArtMovimentoSummary;
+
+  /// No description provided for @xv2LibArtAlimentacaoTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Guia Alimentar para a População Brasileira'**
+  String get xv2LibArtAlimentacaoTitle;
+
+  /// No description provided for @xv2LibArtAlimentacaoSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Princípios gerais para uma alimentação equilibrada, com comida de verdade.'**
+  String get xv2LibArtAlimentacaoSummary;
+
+  /// No description provided for @xv2LibArtAguaTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Água ao longo do dia'**
+  String get xv2LibArtAguaTitle;
+
+  /// No description provided for @xv2LibArtAguaSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Beber água ao longo do dia faz parte de hábitos de vida saudáveis.'**
+  String get xv2LibArtAguaSummary;
+
+  /// No description provided for @xv2LibArtConvivioTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bem-estar emocional e convívio'**
+  String get xv2LibArtConvivioTitle;
+
+  /// No description provided for @xv2LibArtConvivioSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informações gerais sobre bem-estar emocional, relações e apoio da comunidade.'**
+  String get xv2LibArtConvivioSummary;
+
+  /// No description provided for @xv2LibArtSamuTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'SAMU 192: como funciona'**
+  String get xv2LibArtSamuTitle;
+
+  /// No description provided for @xv2LibArtSamuSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'O serviço móvel gratuito do SUS que atende pelo telefone 192 em todo o país.'**
+  String get xv2LibArtSamuSummary;
+
+  /// No description provided for @xv2LibArtCvvTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'CVV 188: apoio emocional'**
+  String get xv2LibArtCvvTitle;
+
+  /// No description provided for @xv2LibArtCvvSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conversa gratuita e sigilosa, 24 horas, por telefone, chat ou e-mail.'**
+  String get xv2LibArtCvvSummary;
+
+  /// No description provided for @xv2ReportedIntensity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Intensidade que você informou: {intensity}/5'**
+  String xv2ReportedIntensity(int intensity);
+
+  /// No description provided for @xv2SummaryTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu registro de hoje'**
+  String get xv2SummaryTitle;
+
+  /// No description provided for @xv2SummarySaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu registro foi salvo.'**
+  String get xv2SummarySaved;
+
+  /// No description provided for @xv2SummaryThanks.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obrigado por registrar seu dia! 🌿 Na Biblioteca você encontra textos de fontes públicas, como o Ministério da Saúde, sobre hábitos saudáveis.'**
+  String get xv2SummaryThanks;
+
+  /// No description provided for @xv2SummaryOpenLibrary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir a Biblioteca'**
+  String get xv2SummaryOpenLibrary;
+
+  /// No description provided for @xv2AdLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anúncio'**
+  String get xv2AdLabel;
+
+  /// No description provided for @xv2AdLearnMore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Saiba mais'**
+  String get xv2AdLearnMore;
+
+  /// No description provided for @xv2AdPremiumTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dualis Premium'**
+  String get xv2AdPremiumTitle;
+
+  /// No description provided for @xv2AdPremiumBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Veja seus registros de até 12 meses e escolha seus fundos. Em breve.'**
+  String get xv2AdPremiumBody;
+
+  /// No description provided for @xv2AdZocTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'ZOC · Cadernos e agendas'**
+  String get xv2AdZocTitle;
+
+  /// No description provided for @xv2AdZocBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Planeje a semana com calma, no papel. Exemplo de anúncio.'**
+  String get xv2AdZocBody;
+
+  /// No description provided for @xv2AdWgiTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'WGI · Garrafas reutilizáveis'**
+  String get xv2AdWgiTitle;
+
+  /// No description provided for @xv2AdWgiBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Leve sua água para onde for. Exemplo de anúncio.'**
+  String get xv2AdWgiBody;
+
+  /// No description provided for @xv2AdUboTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'UBO · Playlists para relaxar'**
+  String get xv2AdUboTitle;
+
+  /// No description provided for @xv2AdUboBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sons de natureza para pausas no dia. Exemplo de anúncio.'**
+  String get xv2AdUboBody;
+
+  /// No description provided for @xv2DashTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Histórico'**
+  String get xv2DashTitle;
+
+  /// No description provided for @xv2DashWindow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seus registros dos últimos {days} dias'**
+  String xv2DashWindow(int days);
+
+  /// No description provided for @xv2DashRetry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tentar novamente'**
+  String get xv2DashRetry;
+
+  /// No description provided for @xv2DashTimeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Passado, presente e futuro'**
+  String get xv2DashTimeTitle;
+
+  /// No description provided for @xv2DashTimeCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{time}: {count}'**
+  String xv2DashTimeCount(String time, int count);
+
+  /// No description provided for @xv2DashNoEmotional.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum registro emocional neste período.'**
+  String get xv2DashNoEmotional;
+
+  /// No description provided for @xv2DashBodyTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Partes do corpo que você marcou'**
+  String get xv2DashBodyTitle;
+
+  /// No description provided for @xv2DashFront.
+  ///
+  /// In pt, this message translates to:
+  /// **'Frente'**
+  String get xv2DashFront;
+
+  /// No description provided for @xv2DashBack.
+  ///
+  /// In pt, this message translates to:
+  /// **'Costas'**
+  String get xv2DashBack;
+
+  /// No description provided for @xv2DashRegionDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{region}: {count, plural, =0{nenhum dia} =1{1 dia} other{{count} dias}}'**
+  String xv2DashRegionDays(String region, num count);
+
+  /// No description provided for @xv2DashLinesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Intensidade por dia'**
+  String get xv2DashLinesTitle;
+
+  /// No description provided for @xv2DashLinesSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'A intensidade que você informou em cada registro (1 a 5).'**
+  String get xv2DashLinesSubtitle;
+
+  /// No description provided for @xv2DashDaysCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 dia} other{{count} dias}}'**
+  String xv2DashDaysCount(num count);
+
+  /// No description provided for @xv2DashSeeMore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver mais'**
+  String get xv2DashSeeMore;
+
+  /// No description provided for @xv2DashSeeLess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver menos'**
+  String get xv2DashSeeLess;
+
+  /// No description provided for @xv2DashNoItems.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum item registrado neste período.'**
+  String get xv2DashNoItems;
+
+  /// No description provided for @xv2DashWaterTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Água por dia'**
+  String get xv2DashWaterTitle;
+
+  /// No description provided for @xv2DashNoWater.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum registro de água neste período.'**
+  String get xv2DashNoWater;
+
+  /// No description provided for @xv2DashTogetherTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'No mesmo dia'**
+  String get xv2DashTogetherTitle;
+
+  /// No description provided for @xv2DashCooccurrence.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nos {total} dias em que você marcou \'{a}\', também marcou \'{b}\' em {both}.'**
+  String xv2DashCooccurrence(int total, String a, String b, int both);
+
+  /// No description provided for @xv2DashEntriesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seus registros'**
+  String get xv2DashEntriesTitle;
+
+  /// No description provided for @xv2DashNoEntries.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você ainda não tem registros neste período.'**
+  String get xv2DashNoEntries;
+
+  /// No description provided for @xv2DashMoodLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como você estava: {mood}'**
+  String xv2DashMoodLine(String mood);
+
+  /// No description provided for @xv2DashDeleteTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir registro'**
+  String get xv2DashDeleteTitle;
+
+  /// No description provided for @xv2DashDeleteBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este registro será apagado do seu histórico.'**
+  String get xv2DashDeleteBody;
+
+  /// No description provided for @xv2DashDeleteConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir'**
+  String get xv2DashDeleteConfirm;
+
+  /// No description provided for @xv2WaterTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hidratação 💧'**
+  String get xv2WaterTitle;
+
+  /// No description provided for @xv2WaterTodayLogs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registros de hoje'**
+  String get xv2WaterTodayLogs;
+
+  /// No description provided for @xv2WaterHistoryTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Últimos 30 dias'**
+  String get xv2WaterHistoryTitle;
+
+  /// No description provided for @xv2WaterRemindersTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembretes de água'**
+  String get xv2WaterRemindersTitle;
+
+  /// No description provided for @xv2WaterOther.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outro'**
+  String get xv2WaterOther;
+
+  /// No description provided for @xv2WaterStreak.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =0{Sequência: 0 dias} =1{Sequência: 1 dia} other{Sequência: {count} dias}}'**
+  String xv2WaterStreak(num count);
+
+  /// No description provided for @xv2WaterGoalChip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sua meta: {ml} ml'**
+  String xv2WaterGoalChip(int ml);
+
+  /// No description provided for @xv2WaterGoalDialogTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sua meta diária'**
+  String get xv2WaterGoalDialogTitle;
+
+  /// No description provided for @xv2WaterGoalHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você escolhe a sua meta, entre 250 e 10000 ml.'**
+  String get xv2WaterGoalHint;
+
+  /// No description provided for @xv2WaterGoalSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar'**
+  String get xv2WaterGoalSave;
+
+  /// No description provided for @xv2WaterNoLogsToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum copo de água registrado hoje ainda.'**
+  String get xv2WaterNoLogsToday;
+
+  /// No description provided for @xv2WaterLoggedAt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrado às {time}'**
+  String xv2WaterLoggedAt(String time);
+
+  /// No description provided for @xv2WaterLoggedViaReminder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrado via lembrete das {time}'**
+  String xv2WaterLoggedViaReminder(String time);
+
+  /// No description provided for @xv2WaterDeleteLog.
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir registro'**
+  String get xv2WaterDeleteLog;
 }
 
 class _AppLocalizationsDelegate

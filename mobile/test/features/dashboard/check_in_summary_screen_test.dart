@@ -2,211 +2,206 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:dualis_mobile/core/network/api_client.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
-import 'package:dualis_mobile/features/dashboard/data/triage_history_remote_data_source.dart';
-import 'package:dualis_mobile/features/dashboard/domain/models/triage_history_models.dart';
-import 'package:dualis_mobile/features/dashboard/presentation/controllers/dashboard_controller.dart';
+import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/dashboard/presentation/screens/check_in_summary_screen.dart';
-import 'package:dualis_mobile/features/dashboard/presentation/widgets/anatomical_body_map.dart';
-import 'package:dualis_mobile/features/dashboard/presentation/widgets/emotional_trend_chart.dart';
+import 'package:dualis_mobile/features/home/domain/home_greeting.dart';
+import 'package:dualis_mobile/features/house_ads/data/house_ads_repository.dart';
+import 'package:dualis_mobile/features/house_ads/domain/house_ad.dart';
+import 'package:dualis_mobile/features/house_ads/presentation/house_ad_card.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
-class _FakeHistoryDataSource implements TriageHistoryRemoteDataSource {
+class FakeHouseAdsRepository extends HouseAdsRepository {
+  final List<HouseAd>? remote;
   int fetchCount = 0;
-  bool offline = false;
+
+  FakeHouseAdsRepository({this.remote})
+      : super(apiClient: ApiClient(), storage: SecureStorageService());
 
   @override
-  Future<TriageHistoryResponse> fetchHistory({int days = 14}) async {
+  Future<List<HouseAd>?> fetchAds() async {
     fetchCount++;
-    if (offline) throw Exception('offline');
-    return const TriageHistoryResponse(
-      logs: [],
-      physicalSummary: {'coluna_dorsal': 4},
-      emotionalSummary: [
-        EmotionalDayData(
-          date: '2026-10-18',
-          dimensions: {'estresse_burnout': 3},
-        ),
-      ],
-      journalPatterns: [],
-    );
+    return remote;
   }
-
-  @override
-  Future<bool> deleteHistoryItem(String id) async => true;
 }
 
+final DateTime fixedNow = DateTime(2026, 10, 27, 9);
+
 void main() {
-  late _FakeHistoryDataSource dataSource;
-
-  setUp(() => dataSource = _FakeHistoryDataSource());
-
   late GoRouter router;
 
-  Future<void> pumpSummary(
+  Future<FakeHouseAdsRepository> pumpSummary(
     WidgetTester tester,
     CheckInSummaryArgs args, {
-    ProviderContainer? container,
+    List<HouseAd>? remoteAds,
   }) async {
-    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.physicalSize = const Size(800, 1800);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
 
+    final ads = FakeHouseAdsRepository(remote: remoteAds);
     router = GoRouter(
       initialLocation: RoutePaths.checkInSummary,
       routes: [
         GoRoute(
           path: RoutePaths.home,
-          builder:
-              (context, state) =>
-                  const Scaffold(body: Text('Home Screen Destination')),
+          builder: (_, __) => const Scaffold(body: Text('Home Screen Destination')),
         ),
         GoRoute(
           path: RoutePaths.emergency,
-          builder:
-              (context, state) =>
-                  const Scaffold(body: Text('Emergency Screen')),
+          builder: (_, __) => const Scaffold(body: Text('Emergency Screen')),
+        ),
+        GoRoute(
+          path: RoutePaths.library,
+          builder: (_, __) => const Scaffold(body: Text('Library Screen')),
         ),
         GoRoute(
           path: RoutePaths.checkInSummary,
-          builder: (context, state) => CheckInSummaryScreen(args: args),
+          builder: (_, __) => CheckInSummaryScreen(args: args),
         ),
       ],
     );
-
-    final app = MaterialApp.router(
-      routerConfig: router,
-      locale: const Locale('pt'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-    );
     await tester.pumpWidget(
-      container != null
-          ? UncontrolledProviderScope(container: container, child: app)
-          : ProviderScope(
-            overrides: [
-              triageHistoryDataSourceProvider.overrideWithValue(dataSource),
-            ],
-            child: app,
-          ),
+      ProviderScope(
+        overrides: [
+          houseAdsRepositoryProvider.overrideWithValue(ads),
+          homeClockProvider.overrideWithValue(() => fixedNow),
+        ],
+        child: MaterialApp.router(
+          routerConfig: router,
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        ),
+      ),
     );
     await tester.pump();
     await tester.pump();
+    return ads;
   }
 
-  testWidgets('physical check-in shows only the body map', (tester) async {
-    await pumpSummary(tester, const CheckInSummaryArgs(showBodyMap: true));
+  const items = CheckInSummaryArgs(items: [
+    CheckInSummaryItem(label: 'Cabeça e pescoço · Enjoo', intensity: 3),
+    CheckInSummaryItem(label: 'Fico antecipando problemas', intensity: 5),
+  ]);
 
-    expect(find.text('Registro salvo'), findsOneWidget);
-    expect(find.byType(AnatomicalBodyMap), findsOneWidget);
-    expect(find.byType(EmotionalTrendChart), findsNothing);
-    expect(dataSource.fetchCount, 1);
+  testWidgets('lists the items in the person\'s words with reported intensity',
+      (tester) async {
+    await pumpSummary(tester, items);
+
+    expect(find.text('Seu registro de hoje'), findsOneWidget);
+    expect(find.text('Cabeça e pescoço · Enjoo'), findsOneWidget);
+    expect(find.text('Intensidade que você informou: 3/5'), findsOneWidget);
+    expect(find.text('Fico antecipando problemas'), findsOneWidget);
+    expect(find.text('Intensidade que você informou: 5/5'), findsOneWidget);
+    expect(
+      find.textContaining('Obrigado por registrar seu dia! 🌿'),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('emotional check-in shows only the emotional trend', (
-    tester,
-  ) async {
+  testWidgets('shows the bundled house ad labelled "Anúncio" when offline',
+      (tester) async {
+    await pumpSummary(tester, items);
+
+    expect(find.byType(HouseAdCard), findsOneWidget);
+    expect(find.text('Anúncio'), findsOneWidget);
+  });
+
+  testWidgets('the ad is the same whatever was recorded', (tester) async {
+    String adBrand() {
+      final view = tester.widget<HouseAdView>(find.byType(HouseAdView));
+      return view.ad.id;
+    }
+
+    await pumpSummary(tester, items);
+    final first = adBrand();
+
     await pumpSummary(
       tester,
-      const CheckInSummaryArgs(showEmotionalTrend: true),
+      const CheckInSummaryArgs(items: [
+        CheckInSummaryItem(label: 'Aperto no peito e momentos de desespero', intensity: 5),
+      ]),
     );
+    expect(adBrand(), first);
 
-    expect(find.byType(EmotionalTrendChart), findsOneWidget);
-    expect(find.byType(AnatomicalBodyMap), findsNothing);
+    await pumpSummary(tester, const CheckInSummaryArgs(moodLabel: 'Bem'));
+    expect(adBrand(), first);
   });
 
-  testWidgets('dual check-in shows both views', (tester) async {
-    await pumpSummary(
-      tester,
-      const CheckInSummaryArgs(showBodyMap: true, showEmotionalTrend: true),
-    );
-
-    expect(find.byType(AnatomicalBodyMap), findsOneWidget);
-    expect(find.byType(EmotionalTrendChart), findsOneWidget);
+  testWidgets('remote house ads are used when the API answers', (tester) async {
+    final ads = await pumpSummary(tester, items, remoteAds: const [
+      HouseAd(id: 'r1', brand: 'Dualis Premium', title: 'Remote title', body: 'Remote body'),
+    ]);
+    await tester.pumpAndSettle();
+    expect(ads.fetchCount, 1);
+    expect(find.text('Remote title'), findsOneWidget);
+    expect(find.text('Anúncio'), findsOneWidget);
   });
 
-  testWidgets('returns Home by itself after 5 seconds', (tester) async {
-    await pumpSummary(tester, const CheckInSummaryArgs(showBodyMap: true));
+  testWidgets('library link opens the general library', (tester) async {
+    await pumpSummary(tester, items);
+    await tester.tap(find.byKey(const Key('check_in_summary_library')));
+    await tester.pumpAndSettle();
+    expect(find.text('Library Screen'), findsOneWidget);
+  });
 
-    expect(find.text('Voltar ao início (5)'), findsOneWidget);
-    await tester.pump(const Duration(seconds: 4));
+  testWidgets('no items shows the mood the person chose', (tester) async {
+    await pumpSummary(tester, const CheckInSummaryArgs(moodLabel: 'Bem'));
+    expect(find.text('Bem'), findsOneWidget);
+  });
+
+  testWidgets('returns Home by itself after the countdown', (tester) async {
+    await pumpSummary(tester, items);
+    const total = CheckInSummaryScreen.autoReturnSeconds;
+    expect(find.text('Voltar ao início ($total)'), findsOneWidget);
+    await tester.pump(const Duration(seconds: total - 1));
     expect(find.text('Voltar ao início (1)'), findsOneWidget);
-    expect(find.text('Home Screen Destination'), findsNothing);
-
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
     expect(find.text('Home Screen Destination'), findsOneWidget);
   });
 
   testWidgets('touching the screen stops the automatic return', (tester) async {
-    await pumpSummary(tester, const CheckInSummaryArgs(showBodyMap: true));
-
-    await tester.tap(find.text('Registro salvo'));
-    await tester.pump(const Duration(seconds: 10));
-
+    await pumpSummary(tester, items);
+    await tester.tap(find.text('Seu registro de hoje'));
+    await tester.pump(const Duration(seconds: 20));
     expect(find.text('Home Screen Destination'), findsNothing);
     expect(find.text('Voltar ao início'), findsOneWidget);
-
     await tester.tap(find.byKey(const Key('check_in_summary_home_button')));
     await tester.pumpAndSettle();
     expect(find.text('Home Screen Destination'), findsOneWidget);
   });
 
-  testWidgets('system back goes Home instead of leaving the app', (
-    tester,
-  ) async {
-    await pumpSummary(
-      tester,
-      const CheckInSummaryArgs(showEmotionalTrend: true),
-    );
-
-    final popHandled = await tester.binding.handlePopRoute();
+  testWidgets('system back goes Home instead of leaving the app', (tester) async {
+    await pumpSummary(tester, items);
+    final handled = await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
-
-    expect(popHandled, isTrue);
+    expect(handled, isTrue);
     expect(find.text('Home Screen Destination'), findsOneWidget);
   });
 
-  testWidgets('urgent help opened on top is never closed by the countdown', (
-    tester,
-  ) async {
-    await pumpSummary(tester, const CheckInSummaryArgs(showBodyMap: true));
-
-    // Same navigation as the global urgent-help button.
+  testWidgets('help opened on top is never closed by the countdown',
+      (tester) async {
+    await pumpSummary(tester, items);
     router.push(RoutePaths.emergency);
     await tester.pumpAndSettle();
-    await tester.pump(const Duration(seconds: 10));
+    await tester.pump(const Duration(seconds: 20));
     await tester.pumpAndSettle();
-
     expect(find.text('Emergency Screen'), findsOneWidget);
     expect(find.text('Home Screen Destination'), findsNothing);
   });
 
-  testWidgets('cached history is refreshed, and kept when offline', (
-    tester,
-  ) async {
-    final container = ProviderContainer(
-      // No automatic retry timer after the offline failure.
-      retry: (_, __) => null,
-      overrides: [
-        triageHistoryDataSourceProvider.overrideWithValue(dataSource),
-      ],
-    );
-    addTearDown(container.dispose);
-    final sub = container.listen(dashboardControllerProvider, (_, __) {});
-    addTearDown(sub.close);
-    await container.read(dashboardControllerProvider.future);
-    expect(dataSource.fetchCount, 1);
-
-    dataSource.offline = true;
-    await pumpSummary(
-      tester,
-      const CheckInSummaryArgs(showBodyMap: true),
-      container: container,
-    );
-    await tester.pump();
-
-    expect(dataSource.fetchCount, 2);
-    expect(find.byType(AnatomicalBodyMap), findsOneWidget);
+  test('pickHouseAd depends only on the date', () {
+    final ads = [
+      for (final id in ['a', 'b', 'c', 'd'])
+        HouseAd(id: id, brand: id, title: id, body: id),
+    ];
+    final morning = pickHouseAd(ads, DateTime(2026, 10, 27, 8));
+    final night = pickHouseAd(ads, DateTime(2026, 10, 27, 23));
+    expect(morning!.id, night!.id);
+    expect(pickHouseAd(ads, DateTime(2026, 10, 28))!.id, isNot(morning.id));
   });
 }
