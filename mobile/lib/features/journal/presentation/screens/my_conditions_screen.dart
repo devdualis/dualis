@@ -131,6 +131,7 @@ class _MyConditionsScreenState extends ConsumerState<MyConditionsScreen> {
                   padding: const EdgeInsets.only(top: 6),
                   child: FilledButton.icon(
                     key: const Key('jv2_conditions_add'),
+                    style: FilledButton.styleFrom(minimumSize: const Size(0, 52)),
                     onPressed: atLimit || _busy ? null : _add,
                     icon: const Icon(Icons.add_rounded),
                     label: Text(l10n.jv2ConditionsAdd),

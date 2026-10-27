@@ -1,4 +1,5 @@
 import 'package:dualis_mobile/features/journal/domain/journal_keys.dart';
+import 'package:dualis_mobile/core/theme/app_theme.dart';
 import 'package:dualis_mobile/features/journal/domain/journal_models.dart';
 import 'package:dualis_mobile/features/journal/presentation/screens/my_conditions_screen.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
@@ -20,16 +21,17 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(ProviderScope(
       overrides: h.overrides,
-      child: const MaterialApp(
-        locale: Locale('pt'),
-        localizationsDelegates: [
+      child: MaterialApp(
+        theme: AppTheme.lightTheme,
+        locale: const Locale('pt'),
+        localizationsDelegates: const [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
-        home: MyConditionsScreen(),
+        home: const MyConditionsScreen(),
       ),
     ));
     await tester.pumpAndSettle();
