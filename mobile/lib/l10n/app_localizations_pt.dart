@@ -2385,4 +2385,54 @@ class AppLocalizationsPt extends AppLocalizations {
   String checkInSummaryBackHomeCountdown(int seconds) {
     return 'Voltar ao início ($seconds)';
   }
+
+  @override
+  String get xv2CropTitle => 'Ajustar foto';
+
+  @override
+  String get xv2CropHint =>
+      'Use dois dedos para aproximar e arraste para enquadrar.';
+
+  @override
+  String get xv2CropReset => 'Recomeçar';
+
+  @override
+  String get xv2CropConfirm => 'Usar foto';
+
+  @override
+  String xv2GreetingMorning(String name) {
+    return 'Olá, $name! Bom dia';
+  }
+
+  @override
+  String xv2GreetingAfternoon(String name) {
+    return 'Olá, $name! Boa tarde';
+  }
+
+  @override
+  String xv2GreetingEvening(String name) {
+    return 'Olá, $name! Boa noite';
+  }
+
+  @override
+  String get xv2GreetingMorningNoName => 'Olá! Bom dia';
+
+  @override
+  String get xv2GreetingAfternoonNoName => 'Olá! Boa tarde';
+
+  @override
+  String get xv2GreetingEveningNoName => 'Olá! Boa noite';
+
+  @override
+  String get xv2HydrationOfferTitle => 'Quer lembretes para beber água?';
+
+  @override
+  String get xv2HydrationOfferBody =>
+      'Você escolhe os horários e a sua meta nos ajustes de hidratação. Dá para mudar quando quiser.';
+
+  @override
+  String get xv2HydrationOfferYes => 'Sim, configurar';
+
+  @override
+  String get xv2HydrationOfferNo => 'Agora não';
 }

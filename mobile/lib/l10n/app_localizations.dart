@@ -4167,6 +4167,90 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Voltar ao início ({seconds})'**
   String checkInSummaryBackHomeCountdown(int seconds);
+
+  /// No description provided for @xv2CropTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ajustar foto'**
+  String get xv2CropTitle;
+
+  /// No description provided for @xv2CropHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Use dois dedos para aproximar e arraste para enquadrar.'**
+  String get xv2CropHint;
+
+  /// No description provided for @xv2CropReset.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recomeçar'**
+  String get xv2CropReset;
+
+  /// No description provided for @xv2CropConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar foto'**
+  String get xv2CropConfirm;
+
+  /// No description provided for @xv2GreetingMorning.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá, {name}! Bom dia'**
+  String xv2GreetingMorning(String name);
+
+  /// No description provided for @xv2GreetingAfternoon.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá, {name}! Boa tarde'**
+  String xv2GreetingAfternoon(String name);
+
+  /// No description provided for @xv2GreetingEvening.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá, {name}! Boa noite'**
+  String xv2GreetingEvening(String name);
+
+  /// No description provided for @xv2GreetingMorningNoName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá! Bom dia'**
+  String get xv2GreetingMorningNoName;
+
+  /// No description provided for @xv2GreetingAfternoonNoName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá! Boa tarde'**
+  String get xv2GreetingAfternoonNoName;
+
+  /// No description provided for @xv2GreetingEveningNoName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá! Boa noite'**
+  String get xv2GreetingEveningNoName;
+
+  /// No description provided for @xv2HydrationOfferTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quer lembretes para beber água?'**
+  String get xv2HydrationOfferTitle;
+
+  /// No description provided for @xv2HydrationOfferBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você escolhe os horários e a sua meta nos ajustes de hidratação. Dá para mudar quando quiser.'**
+  String get xv2HydrationOfferBody;
+
+  /// No description provided for @xv2HydrationOfferYes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim, configurar'**
+  String get xv2HydrationOfferYes;
+
+  /// No description provided for @xv2HydrationOfferNo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agora não'**
+  String get xv2HydrationOfferNo;
 }
 
 class _AppLocalizationsDelegate

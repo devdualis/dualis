@@ -677,5 +677,19 @@
   "wizardIntroFootnote": "Esta es la pregunta inicial de todos los registros. Es rápida y ayuda a personalizar tu experiencia.",
   "checkInSummaryTitle": "Registro guardado",
   "checkInSummaryBackHome": "Volver al inicio",
-  "checkInSummaryBackHomeCountdown": "Volver al inicio ({seconds})"
+  "checkInSummaryBackHomeCountdown": "Volver al inicio ({seconds})",
+  "xv2CropTitle": "Ajustar foto",
+  "xv2CropHint": "Usa dos dedos para acercar y arrastra para encuadrar.",
+  "xv2CropReset": "Reiniciar",
+  "xv2CropConfirm": "Usar foto",
+  "xv2GreetingMorning": "¡Hola, {name}! Buenos días",
+  "xv2GreetingAfternoon": "¡Hola, {name}! Buenas tardes",
+  "xv2GreetingEvening": "¡Hola, {name}! Buenas noches",
+  "xv2GreetingMorningNoName": "¡Hola! Buenos días",
+  "xv2GreetingAfternoonNoName": "¡Hola! Buenas tardes",
+  "xv2GreetingEveningNoName": "¡Hola! Buenas noches",
+  "xv2HydrationOfferTitle": "¿Quieres recordatorios para beber agua?",
+  "xv2HydrationOfferBody": "Tú eliges los horarios y tu meta en los ajustes de hidratación. Puedes cambiarlos cuando quieras.",
+  "xv2HydrationOfferYes": "Sí, configurar",
+  "xv2HydrationOfferNo": "Ahora no"
 }

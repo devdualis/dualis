@@ -2367,4 +2367,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String checkInSummaryBackHomeCountdown(int seconds) {
     return 'Back to home ($seconds)';
   }
+
+  @override
+  String get xv2CropTitle => 'Adjust photo';
+
+  @override
+  String get xv2CropHint => 'Pinch to zoom and drag to frame your photo.';
+
+  @override
+  String get xv2CropReset => 'Reset';
+
+  @override
+  String get xv2CropConfirm => 'Use photo';
+
+  @override
+  String xv2GreetingMorning(String name) {
+    return 'Hi, $name! Good morning';
+  }
+
+  @override
+  String xv2GreetingAfternoon(String name) {
+    return 'Hi, $name! Good afternoon';
+  }
+
+  @override
+  String xv2GreetingEvening(String name) {
+    return 'Hi, $name! Good evening';
+  }
+
+  @override
+  String get xv2GreetingMorningNoName => 'Hi! Good morning';
+
+  @override
+  String get xv2GreetingAfternoonNoName => 'Hi! Good afternoon';
+
+  @override
+  String get xv2GreetingEveningNoName => 'Hi! Good evening';
+
+  @override
+  String get xv2HydrationOfferTitle =>
+      'Would you like reminders to drink water?';
+
+  @override
+  String get xv2HydrationOfferBody =>
+      'You choose the times and your goal in the hydration settings. You can change them anytime.';
+
+  @override
+  String get xv2HydrationOfferYes => 'Yes, set up';
+
+  @override
+  String get xv2HydrationOfferNo => 'Not now';
 }

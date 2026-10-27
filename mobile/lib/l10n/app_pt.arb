@@ -2030,5 +2030,40 @@
         "type": "int"
       }
     }
-  }
+  },
+  "xv2CropTitle": "Ajustar foto",
+  "xv2CropHint": "Use dois dedos para aproximar e arraste para enquadrar.",
+  "xv2CropReset": "Recomeçar",
+  "xv2CropConfirm": "Usar foto",
+  "xv2GreetingMorning": "Olá, {name}! Bom dia",
+  "@xv2GreetingMorning": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "xv2GreetingAfternoon": "Olá, {name}! Boa tarde",
+  "@xv2GreetingAfternoon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "xv2GreetingEvening": "Olá, {name}! Boa noite",
+  "@xv2GreetingEvening": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "xv2GreetingMorningNoName": "Olá! Bom dia",
+  "xv2GreetingAfternoonNoName": "Olá! Boa tarde",
+  "xv2GreetingEveningNoName": "Olá! Boa noite",
+  "xv2HydrationOfferTitle": "Quer lembretes para beber água?",
+  "xv2HydrationOfferBody": "Você escolhe os horários e a sua meta nos ajustes de hidratação. Dá para mudar quando quiser.",
+  "xv2HydrationOfferYes": "Sim, configurar",
+  "xv2HydrationOfferNo": "Agora não"
 }

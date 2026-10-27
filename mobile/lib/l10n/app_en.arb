@@ -677,5 +677,19 @@
   "wizardIntroFootnote": "This is the first question of every entry. It is quick and helps personalize your experience.",
   "checkInSummaryTitle": "Entry saved",
   "checkInSummaryBackHome": "Back to home",
-  "checkInSummaryBackHomeCountdown": "Back to home ({seconds})"
+  "checkInSummaryBackHomeCountdown": "Back to home ({seconds})",
+  "xv2CropTitle": "Adjust photo",
+  "xv2CropHint": "Pinch to zoom and drag to frame your photo.",
+  "xv2CropReset": "Reset",
+  "xv2CropConfirm": "Use photo",
+  "xv2GreetingMorning": "Hi, {name}! Good morning",
+  "xv2GreetingAfternoon": "Hi, {name}! Good afternoon",
+  "xv2GreetingEvening": "Hi, {name}! Good evening",
+  "xv2GreetingMorningNoName": "Hi! Good morning",
+  "xv2GreetingAfternoonNoName": "Hi! Good afternoon",
+  "xv2GreetingEveningNoName": "Hi! Good evening",
+  "xv2HydrationOfferTitle": "Would you like reminders to drink water?",
+  "xv2HydrationOfferBody": "You choose the times and your goal in the hydration settings. You can change them anytime.",
+  "xv2HydrationOfferYes": "Yes, set up",
+  "xv2HydrationOfferNo": "Not now"
 }
