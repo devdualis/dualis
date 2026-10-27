@@ -12,8 +12,6 @@ import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/emergency/presentation/screens/emergency_screen.dart';
 import '../../features/journal/presentation/screens/journal_flow_screen.dart';
 import '../../features/journal/presentation/screens/my_conditions_screen.dart';
-import '../../features/triage_outcome/domain/triage_outcome_models.dart';
-import '../../features/triage_outcome/presentation/screens/triage_outcome_screen.dart';
 import '../../features/dashboard/presentation/screens/check_in_summary_screen.dart';
 import '../../features/dashboard/presentation/screens/historical_dashboard_screen.dart';
 import '../../features/privacy/presentation/screens/privacy_center_screen.dart';
@@ -148,24 +146,6 @@ GoRouter createRouter({
         path: RoutePaths.myConditions,
         name: 'myConditions',
         builder: (context, state) => const MyConditionsScreen(),
-      ),
-      GoRoute(
-        path: RoutePaths.triageOutcome,
-        name: 'triageOutcome',
-        builder: (context, state) {
-          final outcome = state.extra as TriageOutcome? ??
-              TriageOutcome(
-                id: 'default-outcome',
-                vertical: 'physical',
-                intensityScore: 0,
-                primaryCategory: 'geral',
-                categoryLabel: '',
-                somaticMapping: '',
-                recommendedArticles: const [],
-                recordedAt: DateTime.now(),
-              );
-          return TriageOutcomeScreen(outcome: outcome);
-        },
       ),
       GoRoute(
         path: RoutePaths.checkInSummary,

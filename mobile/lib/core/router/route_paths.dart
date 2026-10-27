@@ -9,7 +9,6 @@ class RoutePaths {
   static const String emergency = '/emergency';
   static const String journal = '/journal';
   static const String myConditions = '/my-conditions';
-  static const String triageOutcome = '/triage-outcome';
   static const String checkInSummary = '/check-in-summary';
   static const String history = '/history';
   static const String privacyCenter = '/privacy-center';
