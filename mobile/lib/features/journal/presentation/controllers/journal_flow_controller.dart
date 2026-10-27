@@ -145,11 +145,8 @@ class JournalFlowController extends Notifier<JournalFlowState> {
   /// Adds a label the user wrote ("Escrever o meu"), kept exactly as typed
   /// apart from surrounding spaces and the 40-character limit.
   void addCustomLabel(String label) {
-    var clean = label.trim();
+    var clean = JournalKeys.limitChars(label.trim(), JournalKeys.customLabelMaxLength);
     if (clean.isEmpty) return;
-    if (clean.length > JournalKeys.customLabelMaxLength) {
-      clean = clean.substring(0, JournalKeys.customLabelMaxLength);
-    }
     if (state.customLabels.contains(clean)) return;
     state = state.copyWith(customLabels: [...state.customLabels, clean]);
   }
@@ -297,9 +294,7 @@ class JournalFlowController extends Notifier<JournalFlowState> {
 
   void setTriggerNote(String note) {
     state = state.copyWith(
-      triggerNote: note.length > JournalKeys.triggerNoteMaxLength
-          ? note.substring(0, JournalKeys.triggerNoteMaxLength)
-          : note,
+      triggerNote: JournalKeys.limitChars(note, JournalKeys.triggerNoteMaxLength),
     );
   }
 

@@ -48,6 +48,13 @@ class ProfileHeaderInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    if (options.extra['skipProfileHeader'] == true) {
+      options.headers.removeWhere(
+        (k, _) => k.toLowerCase() == 'x-profile-id',
+      );
+      handler.next(options);
+      return;
+    }
     final hasProfileHeader = options.headers.keys.any(
       (k) => k.toLowerCase() == 'x-profile-id',
     );

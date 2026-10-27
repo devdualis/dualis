@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+
 /// Journal v2 keys, mirrored from `docs/bienestar/CONTRATO-JOURNAL-V2.md`.
 ///
 /// A key describes the path of the user's own choice in everyday words. It is
@@ -130,6 +132,12 @@ class JournalKeys {
   static const int customLabelMaxLength = 40;
   static const int conditionLabelMaxLength = 40;
   static const int triggerNoteMaxLength = 60;
+
+  /// Truncates by grapheme clusters so an emoji is never split.
+  static String limitChars(String value, int max) {
+    final chars = value.characters;
+    return chars.length <= max ? value : chars.take(max).toString();
+  }
   static const int maxItems = 12;
   static const int maxActiveConditions = 10;
   static const int intensityMin = 1;

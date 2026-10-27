@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/api_endpoints.dart';
 import '../../../core/network/api_client.dart';
@@ -31,7 +32,15 @@ class HouseAdsRepository {
 
   Future<List<HouseAd>?> fetchAds() async {
     try {
-      final response = await _apiClient.get(ApiEndpoints.houseAds);
+      final response = await _apiClient.get(
+        ApiEndpoints.houseAds,
+        options: Options(
+          extra: const {
+            'skipProfileHeader': true,
+            'skipAuthRefresh': true,
+          },
+        ),
+      );
       final data = response.data;
       final raw = data is Map ? data['ads'] : null;
       if (raw is! List) return null;
