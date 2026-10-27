@@ -17,5 +17,6 @@ class RoutePaths {
   static const String familySharing = '/family-sharing';
   static const String termsOfService = '/terms-of-service';
   static const String privacyPolicy = '/privacy-policy';
+  static const String library = '/library';
   static const String notFound = '/404';
 }

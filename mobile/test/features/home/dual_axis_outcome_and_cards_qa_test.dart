@@ -123,7 +123,7 @@ void main() {
       expect(physIcon.color, equals(AppColors.dualisSymbolBlue));
     });
 
-    testWidgets('TodayTriageResultTab reflects BOTH physical and emotional outcomes with articles for both domains',
+    testWidgets('TodayTriageResultTab reflects BOTH physical and emotional outcomes with the general readings',
         (WidgetTester tester) async {
       final physicalOutcome = TriageOutcome(
         id: 'qa-phys-1',
@@ -187,14 +187,10 @@ void main() {
       // 3. Articles section must contain both Physical and Emotional articles
       expect(find.text('Leituras sobre bem-estar'), findsOneWidget);
 
-      // Verify physical article
-      expect(find.text('Sobrecarga Musculoesquelética em Braços e Ombros'), findsOneWidget);
+      // General readings, the same for everyone (never based on the entry)
+      expect(find.text('Sobrecarga Musculoesquelética em Braços e Ombros'), findsNothing);
+      expect(find.text('Higiene do Sono e Repouso Restaurador'), findsOneWidget);
       expect(find.text('Portal Drauzio Varella • Fonte'), findsWidgets);
-      expect(find.text('Saúde Física'), findsWidgets);
-
-      // Verify emotional article (anxiety management or breathing technique)
-      expect(find.text('Manejo da Ansiedade Aguda e Agitação Psicomotora'), findsOneWidget);
-      expect(find.text('Saúde Emocional'), findsWidgets);
     });
 
     testWidgets('TodayTriageResultTab outcome axis cards match ClinicalIntensityTier for physical (2) and associated emotional (4)',

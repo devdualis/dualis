@@ -89,7 +89,7 @@ void main() {
       expect(calledGoToCheckIn, isTrue);
     });
 
-    testWidgets('Renders full triage outcome with category, intensity, and suggested articles',
+    testWidgets('Renders full triage outcome with category, intensity, and general readings',
         (WidgetTester tester) async {
       final mockOutcome = TriageOutcome(
         id: 'out-123',
@@ -127,8 +127,9 @@ void main() {
       expect(find.text('Coluna e Dor Dorsal'), findsOneWidget);
       expect(find.text('Dor paravertebral postural leve'), findsOneWidget);
       expect(find.text('Leituras sobre bem-estar'), findsOneWidget);
-      expect(find.text('Alongamento para Coluna Lombar'), findsOneWidget);
-      expect(find.text('Sociedade Brasileira de Ortopedia e Traumatologia • Fonte'), findsOneWidget);
+      // General readings only: the article sent with the entry is not shown.
+      expect(find.text('Alongamento para Coluna Lombar'), findsNothing);
+      expect(find.text('Higiene do Sono e Repouso Restaurador'), findsOneWidget);
       expect(find.text('Atualizar registro de hoje'), findsOneWidget);
       // The top "Estado Geral de Hoje" header (with its "Registro concluído"
       // badge) and the standalone "Intensidade que você informou" meter were
@@ -188,11 +189,11 @@ void main() {
       expect(find.text('2. Eixo Avaliação Física'), findsOneWidget);
       expect(find.text('Mais ou menos'), findsOneWidget);
       expect(find.text('Relato: "coceira no braco"'), findsOneWidget);
-      expect(find.text('Leituras relacionadas ao tema que você registrou'), findsOneWidget);
+      expect(find.text('Leituras relacionadas ao tema que você registrou'), findsNothing);
 
-      // General readings related to skin / upper limbs (topic, not a recommendation)
-      expect(find.text('Prurido Cutâneo, Alergias e Cuidados com a Pele'), findsOneWidget);
-      expect(find.text('Sobrecarga Musculoesquelética em Braços e Ombros'), findsOneWidget);
+      // General readings, never chosen from what was written
+      expect(find.text('Prurido Cutâneo, Alergias e Cuidados com a Pele'), findsNothing);
+      expect(find.text('Higiene do Sono e Repouso Restaurador'), findsOneWidget);
 
       // Verify CTA button
       expect(find.text('Fazer registro detalhado'), findsOneWidget);

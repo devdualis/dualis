@@ -71,8 +71,9 @@ void main() {
       expect(find.byType(IntensityMeter), findsOneWidget);
       expect(find.text('3 / 5'), findsOneWidget);
       expect(find.byType(WellnessGuidanceBlock), findsOneWidget);
-      expect(find.byType(ArticleCard), findsOneWidget);
-      expect(find.text('Ergonomia e postura'), findsOneWidget);
+      // General readings, the same for everyone: not the entry's article.
+      expect(find.byType(ArticleCard), findsNWidgets(3));
+      expect(find.text('Ergonomia e postura'), findsNothing);
     });
 
     testWidgets('shows dual-axis static note when both axes logged', (tester) async {
