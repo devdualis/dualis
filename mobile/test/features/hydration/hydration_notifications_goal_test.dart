@@ -111,8 +111,9 @@ class FakeHydrationRepository implements HydrationRepository {
       List.unmodifiable(logs);
 
   @override
-  Future<Map<DateTime, int>> getLast7DaysTotals({
+  Future<Map<DateTime, int>> getDailyTotals({
     required String userId,
+    int days = 30,
     DateTime? referenceDate,
   }) async =>
       {};

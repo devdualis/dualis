@@ -24,8 +24,11 @@ abstract class HydrationRepository {
 
   Future<int> getTodayTotalMl({required String userId});
 
-  Future<Map<DateTime, int>> getLast7DaysTotals({
+  /// Daily totals for the [days] days ending on [referenceDate] (Free shows
+  /// 30, strategy §11).
+  Future<Map<DateTime, int>> getDailyTotals({
     required String userId,
+    int days = 30,
     DateTime? referenceDate,
   });
 
@@ -254,8 +257,9 @@ class HydrationRepositoryImpl implements HydrationRepository {
   }
 
   @override
-  Future<Map<DateTime, int>> getLast7DaysTotals({
+  Future<Map<DateTime, int>> getDailyTotals({
     required String userId,
+    int days = 30,
     DateTime? referenceDate,
     String? profileId,
     bool? isPrimaryProfile,
@@ -268,7 +272,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
     if (_remoteDataSource != null && userId.isNotEmpty && userId != 'guest_user') {
       try {
         final remoteTotals = await _remoteDataSource.getHistoryTotals(
-          days: 7,
+          days: days,
           referenceDate: refDate,
           profileId: effectiveProfileId,
         );
@@ -281,7 +285,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
     // Fallback to local Drift DB calculation
     final totals = <DateTime, int>{};
 
-    for (int i = 6; i >= 0; i--) {
+    for (int i = days - 1; i >= 0; i--) {
       final targetDate = refDate.subtract(Duration(days: i));
       final normalizedDate =
           DateTime(targetDate.year, targetDate.month, targetDate.day);
