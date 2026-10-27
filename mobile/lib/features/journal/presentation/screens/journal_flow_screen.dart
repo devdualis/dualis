@@ -419,6 +419,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
               const SizedBox(width: 8),
               FilledButton(
                 key: const Key('jv2_custom_add'),
+                style: FilledButton.styleFrom(minimumSize: const Size(0, 52)),
                 onPressed: _addCustom,
                 child: Text(l10n.jv2WriteMineAdd),
               ),

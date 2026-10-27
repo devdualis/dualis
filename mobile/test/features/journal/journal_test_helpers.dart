@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:dualis_mobile/core/database/app_database.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
+import 'package:dualis_mobile/core/theme/app_theme.dart';
 import 'package:dualis_mobile/features/dashboard/presentation/screens/check_in_summary_screen.dart';
 import 'package:dualis_mobile/features/journal/data/journal_local_store.dart';
 import 'package:dualis_mobile/features/journal/data/journal_remote_data_source.dart';
@@ -142,6 +143,7 @@ Future<GoRouter> pumpJournalFlow(
     ProviderScope(
       overrides: harness.overrides,
       child: MaterialApp.router(
+        theme: AppTheme.lightTheme,
         routerConfig: router,
         locale: const Locale('pt'),
         localizationsDelegates: const [
