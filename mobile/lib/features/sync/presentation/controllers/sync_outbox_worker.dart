@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/connectivity_service.dart';
 import '../../../journal/data/journal_repository.dart';
@@ -39,7 +40,7 @@ class SyncOutboxWorker extends Notifier<SyncState> {
     _repository = ref.watch(triageOutboxRepositoryProvider);
     _dataSource = ref.watch(triageOutcomeDataSourceProvider);
 
-    // Automatically trigger sync when connectivity is restored to online
+    // Device wifi restored.
     ref.listen(isOnlineProvider, (previous, next) {
       next.whenData((online) {
         if (online) {
@@ -47,6 +48,14 @@ class SyncOutboxWorker extends Notifier<SyncState> {
         }
       });
     });
+
+    final observer = _ResumeSyncObserver(() {
+      if (ref.read(isOnlineProvider).value ?? true) {
+        syncPendingOutbox();
+      }
+    });
+    WidgetsBinding.instance.addObserver(observer);
+    ref.onDispose(() => WidgetsBinding.instance.removeObserver(observer));
 
     return const SyncState();
   }
@@ -116,3 +125,13 @@ class SyncOutboxWorker extends Notifier<SyncState> {
 
 final syncOutboxWorkerProvider =
     NotifierProvider<SyncOutboxWorker, SyncState>(SyncOutboxWorker.new);
+
+class _ResumeSyncObserver with WidgetsBindingObserver {
+  final VoidCallback onResume;
+  _ResumeSyncObserver(this.onResume);
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) onResume();
+  }
+}

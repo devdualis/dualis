@@ -81,6 +81,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (mounted && ref.read(authControllerProvider).isAuthenticated) {
         await ref.read(hydrationReminderOfferProvider).maybeShow(context);
       }
+      if (mounted) {
+        unawaited(
+          ref.read(syncOutboxWorkerProvider.notifier).syncPendingOutbox(),
+        );
+      }
     });
   }
 
@@ -97,6 +102,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if ((prev == null || !prev.isAuthenticated) && next.isAuthenticated) {
         ref.read(triggerCheckInProvider.notifier).loadTodayCheckIn();
         ref.read(hydrationControllerProvider.notifier).loadData();
+        unawaited(ref.read(hydrationReminderOfferProvider).maybeShow(context));
       }
     });
 

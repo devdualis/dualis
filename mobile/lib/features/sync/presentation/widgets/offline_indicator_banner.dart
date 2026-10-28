@@ -8,6 +8,7 @@ import 'dart:async';
 
 import '../../../journal/data/journal_local_store.dart';
 import '../../data/triage_outbox_repository.dart';
+import '../controllers/sync_outbox_worker.dart';
 
 /// Items waiting to sync: legacy check-ins plus journal v2 entries.
 final pendingOutboxCountProvider = StreamProvider<int>((ref) {
@@ -78,11 +79,19 @@ class OfflineIndicatorBanner extends ConsumerWidget {
     return Semantics(
       liveRegion: true,
       label: message,
-      child: Container(
+      button: !isOffline && pendingCount > 0,
+      child: Material(
+        color: backgroundColor,
+        child: InkWell(
+          onTap: !isOffline && pendingCount > 0
+              ? () => unawaited(
+                    ref.read(syncOutboxWorkerProvider.notifier).syncPendingOutbox(),
+                  )
+              : null,
+          child: Container(
         key: const Key('offline_indicator_banner'),
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-        color: backgroundColor,
         child: Row(
           children: [
             Icon(
@@ -116,6 +125,8 @@ class OfflineIndicatorBanner extends ConsumerWidget {
               ),
             ],
           ],
+        ),
+          ),
         ),
       ),
     );
