@@ -950,7 +950,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get termsIntro =>
-      'Contrato de prestación de servicios de software en la nube (SaaS) celebrado entre el Usuario y DualisCheckUp Saúde e Tecnologia Ltda., inscrita en el CNPJ con el nº 48.291.834/0001-92, con sede en São Paulo/SP, Brasil.';
+      'Contrato de prestación de servicios de software en la nube (SaaS) celebrado entre el Usuario y WGI (Brothers Baum Ltda.), inscrita en el CNPJ con el nº 30.889.282/0001-90, con sede en Arandu 57, Ed. Itaverá, 12º andar, Brooklin, São Paulo - SP, CEP 04562-031, Brasil.';
 
   @override
   String get termsSection1Title => '1. Aceptación y Capacidad Legal';
@@ -1002,7 +1002,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get termsSection4Body =>
-      'Todos los derechos de propiedad intelectual sobre el software, los contenidos, las marcas y las interfaces pertenecen exclusivamente a DualisCheckUp Saúde e Tecnologia Ltda. Queda estrictamente prohibida la reproducción, la ingeniería inversa o la extracción de datos.';
+      'Todos los derechos de propiedad intelectual sobre el software, los contenidos, las marcas y las interfaces pertenecen exclusivamente a WGI (Brothers Baum Ltda.) Queda estrictamente prohibida la reproducción, la ingeniería inversa o la extracción de datos.';
 
   @override
   String get termsSection5Title => '5. Suspensión por Violación de Seguridad';
@@ -1016,7 +1016,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get termsSection6Body =>
-      'Estos términos se rigen por las leyes brasileñas. Se elige el Foro de la Comarca de São Paulo/SP como único competente para resolver los litigios derivados de este contrato.\n\nPara dudas o notificaciones legales: legal@dualischeckup.com.';
+      'Estos términos se rigen por las leyes brasileñas. Se elige el Foro de la Comarca de São Paulo/SP como único competente para resolver los litigios derivados de este contrato.\n\nPara dudas o notificaciones legales: contato@dualischeckup.com.';
 
   @override
   String get privacyPolicyAppBarTitle => 'Política de Privacidad (LGPD)';
@@ -1035,7 +1035,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get privacyPolicyDpoLine =>
-      'Encargado de Protección de Datos (DPO): dpo@dualischeckup.com';
+      'Encargado de Protección de Datos (DPO): contato@dualischeckup.com';
 
   @override
   String get privacyPolicySection1Title =>
@@ -1271,7 +1271,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsOperatorInfo =>
-      'Operado por DualisCheckUp Saúde e Tecnologia Ltda.\nCNPJ 48.291.834/0001-92 • São Paulo - SP, Brasil\nDPO: dpo@dualischeckup.com';
+      'Operado por WGI (Brothers Baum Ltda.)\nCNPJ 30.889.282/0001-90 • São Paulo - SP, Brasil\nContato: contato@dualischeckup.com';
 
   @override
   String get avatarSelectorSubtitle =>

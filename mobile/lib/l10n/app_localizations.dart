@@ -1753,7 +1753,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsIntro.
   ///
   /// In pt, this message translates to:
-  /// **'Contrato de prestação de serviços de software em nuvem (SaaS) celebrado entre o Usuário e a DualisCheckUp Saúde e Tecnologia Ltda., inscrita no CNPJ sob o nº 48.291.834/0001-92, com sede em São Paulo/SP, Brasil.'**
+  /// **'Contrato de prestação de serviços de software em nuvem (SaaS) celebrado entre o Usuário e a WGI (Brothers Baum Ltda.), inscrita no CNPJ sob o nº 30.889.282/0001-90, com sede na Arandu 57, Ed. Itaverá, 12º andar, Brooklin, São Paulo - SP, CEP 04562-031, Brasil.'**
   String get termsIntro;
 
   /// No description provided for @termsSection1Title.
@@ -1837,7 +1837,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsSection4Body.
   ///
   /// In pt, this message translates to:
-  /// **'Todos os direitos de propriedade intelectual sobre software, conteúdos, marcas e interfaces pertencem com exclusividade à DualisCheckUp Saúde e Tecnologia Ltda. É estritamente vedada a reprodução, engenharia reversa ou mineração de dados.'**
+  /// **'Todos os direitos de propriedade intelectual sobre software, conteúdos, marcas e interfaces pertencem com exclusividade à WGI (Brothers Baum Ltda.) É estritamente vedada a reprodução, engenharia reversa ou mineração de dados.'**
   String get termsSection4Body;
 
   /// No description provided for @termsSection5Title.
@@ -1861,7 +1861,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsSection6Body.
   ///
   /// In pt, this message translates to:
-  /// **'Estes termos são regidos pelas leis brasileiras. Fica eleito o Foro da Comarca de São Paulo/SP como único competente para dirimir litígios decorrentes deste contrato.\n\nPara dúvidas ou notificações legais: legal@dualischeckup.com.'**
+  /// **'Estes termos são regidos pelas leis brasileiras. Fica eleito o Foro da Comarca de São Paulo/SP como único competente para dirimir litígios decorrentes deste contrato.\n\nPara dúvidas ou notificações legais: contato@dualischeckup.com.'**
   String get termsSection6Body;
 
   /// No description provided for @privacyPolicyAppBarTitle.
@@ -1891,7 +1891,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyPolicyDpoLine.
   ///
   /// In pt, this message translates to:
-  /// **'Encarregado de Dados (DPO): dpo@dualischeckup.com'**
+  /// **'Encarregado de Dados (DPO): contato@dualischeckup.com'**
   String get privacyPolicyDpoLine;
 
   /// No description provided for @privacyPolicySection1Title.
@@ -2269,7 +2269,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsOperatorInfo.
   ///
   /// In pt, this message translates to:
-  /// **'Operado por DualisCheckUp Saúde e Tecnologia Ltda.\nCNPJ 48.291.834/0001-92 • São Paulo - SP, Brasil\nDPO: dpo@dualischeckup.com'**
+  /// **'Operado por WGI (Brothers Baum Ltda.)\nCNPJ 30.889.282/0001-90 • São Paulo - SP, Brasil\nContato: contato@dualischeckup.com'**
   String get settingsOperatorInfo;
 
   /// No description provided for @avatarSelectorSubtitle.

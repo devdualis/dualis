@@ -43,14 +43,14 @@ export class LegalService {
 
   public getLegalEntityDetails(): LegalEntityDetailsDto {
     return {
-      companyName: 'DualisCheckUp Saúde e Tecnologia Ltda.',
+      companyName: 'WGI (Brothers Baum Ltda.)',
       tradingName: 'DualisCheckUp',
-      taxId: '48.291.834/0001-92',
+      taxId: '30.889.282/0001-90',
       country: 'Brasil',
-      registeredAddress: 'Av. Paulista, 1374 - Bela Vista, São Paulo - SP, CEP 01310-100',
-      legalEmail: 'legal@dualischeckup.com',
-      dpoEmail: 'dpo@dualischeckup.com',
-      supportEmail: 'suporte@dualischeckup.com',
+      registeredAddress: 'Arandu 57, Ed. Itaverá, 12º andar, Brooklin, São Paulo - SP, CEP 04562-031',
+      legalEmail: 'contato@dualischeckup.com',
+      dpoEmail: 'contato@dualischeckup.com',
+      supportEmail: 'contato@dualischeckup.com',
       operationalJurisdiction: 'Comarca de São Paulo, Estado de São Paulo, Brasil (Foro Eleito)',
     };
   }
@@ -107,7 +107,7 @@ export class LegalService {
             sectionId: '4-intellectual-property',
             title: '4. Propiedad Intelectual',
             content:
-              'El software, los contenidos, las marcas y las interfaces de la plataforma son propiedad exclusiva de DualisCheckUp Saúde e Tecnologia Ltda. Queda prohibida la ingeniería inversa, extracción de datos o uso no autorizado.',
+              'El software, los contenidos, las marcas y las interfaces de la plataforma son propiedad exclusiva de WGI (Brothers Baum Ltda.) Queda prohibida la ingeniería inversa, extracción de datos o uso no autorizado.',
           },
           {
             sectionId: '5-suspension-termination',
@@ -222,7 +222,7 @@ export class LegalService {
           sectionId: '4-propriedade-intelectual',
           title: '4. Propriedade Intelectual e Licença de Uso',
           content:
-            'A DualisCheckUp Saúde e Tecnologia Ltda. é titular exclusiva dos direitos sobre software, conteúdos, marcas e interfaces da plataforma. É vedada a engenharia reversa, cópia ou comercialização não autorizada.',
+            'A WGI (Brothers Baum Ltda.) é titular exclusiva dos direitos sobre software, conteúdos, marcas e interfaces da plataforma. É vedada a engenharia reversa, cópia ou comercialização não autorizada.',
         },
         {
           sectionId: '5-suspensao-e-rescisao',

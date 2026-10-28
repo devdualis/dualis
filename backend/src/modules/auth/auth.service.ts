@@ -588,7 +588,7 @@ export class AuthService {
           exportDate: new Date().toISOString(),
           formatVersion: '1.3',
           legalBasis: 'LGPD Art. 18, V (Portabilidade de Dados)',
-          dataController: 'DualisCheckUp Saúde Digital Ltda.',
+          dataController: 'WGI (Brothers Baum Ltda.)',
           legacyFieldsNote:
             'Os campos em "legacy" vêm de uma versão anterior do app e não são mais gravados. Estão incluídos apenas para que você tenha acesso ao seu histórico completo.',
         },

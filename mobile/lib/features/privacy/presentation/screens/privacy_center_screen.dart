@@ -501,7 +501,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                       '• Autenticação: Senhas protegidas com algoritmo Argon2id.\n'
                       '• Isolamento Multitenant: Row-Level Security (RLS) no PostgreSQL.\n'
                       '• Plano de Vazamento: Protocolo de notificação em até 72h à ANPD e aos titulares (LGPD Art. 48).\n'
-                      '• DPO / Contato: dpo@dualischeckup.com',
+                      '• Contato: contato@dualischeckup.com',
                       style: TextStyle(
                         fontSize: 13,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,

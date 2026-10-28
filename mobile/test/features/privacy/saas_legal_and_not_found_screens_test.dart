@@ -46,8 +46,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Termos de Uso do SaaS'), findsOneWidget);
-      expect(find.textContaining('DualisCheckUp Saúde e Tecnologia Ltda.'), findsWidgets);
-      expect(find.textContaining('48.291.834/0001-92'), findsOneWidget);
+      expect(find.textContaining('WGI (Brothers Baum Ltda.)'), findsWidgets);
+      expect(find.textContaining('30.889.282/0001-90'), findsOneWidget);
 
       // Verify refund policy (CDC Art. 49)
       expect(find.textContaining('Direito de Arrependimento (CDC Art. 49)'), findsOneWidget);
@@ -70,7 +70,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Política de Privacidade (LGPD)'), findsOneWidget);
-      expect(find.textContaining('dpo@dualischeckup.com'), findsWidgets);
+      expect(find.textContaining('contato@dualischeckup.com'), findsWidgets);
       expect(find.textContaining('Artigo 11 da LGPD'), findsOneWidget);
 
       expect(find.textContaining('diário de bem-estar'), findsWidgets);

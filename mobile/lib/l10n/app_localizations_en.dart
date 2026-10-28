@@ -939,7 +939,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsIntro =>
-      'Cloud software service (SaaS) agreement between the User and DualisCheckUp Saúde e Tecnologia Ltda., registered under CNPJ no. 48.291.834/0001-92, headquartered in São Paulo/SP, Brazil.';
+      'Cloud software service (SaaS) agreement between the User and WGI (Brothers Baum Ltda.), registered under CNPJ no. 30.889.282/0001-90, headquartered at Arandu 57, Ed. Itaverá, 12º andar, Brooklin, São Paulo - SP, CEP 04562-031, Brazil.';
 
   @override
   String get termsSection1Title => '1. Acceptance and Legal Capacity';
@@ -991,7 +991,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsSection4Body =>
-      'All intellectual property rights in the software, content, trademarks and interfaces belong exclusively to DualisCheckUp Saúde e Tecnologia Ltda. Copying, reverse engineering or data scraping is strictly prohibited.';
+      'All intellectual property rights in the software, content, trademarks and interfaces belong exclusively to WGI (Brothers Baum Ltda.) Copying, reverse engineering or data scraping is strictly prohibited.';
 
   @override
   String get termsSection5Title => '5. Suspension for Security Violations';
@@ -1005,7 +1005,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsSection6Body =>
-      'These terms are governed by Brazilian law. The courts of the Judicial District of São Paulo/SP are the sole forum for disputes arising from this agreement.\n\nFor questions or legal notices: legal@dualischeckup.com.';
+      'These terms are governed by Brazilian law. The courts of the Judicial District of São Paulo/SP are the sole forum for disputes arising from this agreement.\n\nFor questions or legal notices: contato@dualischeckup.com.';
 
   @override
   String get privacyPolicyAppBarTitle => 'Privacy Policy (LGPD)';
@@ -1023,7 +1023,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyPolicyDpoLine =>
-      'Data Protection Officer (DPO): dpo@dualischeckup.com';
+      'Data Protection Officer (DPO): contato@dualischeckup.com';
 
   @override
   String get privacyPolicySection1Title =>
@@ -1260,7 +1260,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsOperatorInfo =>
-      'Operated by DualisCheckUp Saúde e Tecnologia Ltda.\nCNPJ 48.291.834/0001-92 • São Paulo - SP, Brazil\nDPO: dpo@dualischeckup.com';
+      'Operated by WGI (Brothers Baum Ltda.)\nCNPJ 30.889.282/0001-90 • São Paulo - SP, Brazil\nContact: contato@dualischeckup.com';
 
   @override
   String get avatarSelectorSubtitle =>

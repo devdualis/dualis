@@ -37,11 +37,11 @@ describe('LegalService - SaaS Legal Foundations', () => {
 
   it('should return clear legal entity details (Video 2 - Requisito 1: Estructura Legal)', () => {
     const entity = service.getLegalEntityDetails();
-    expect(entity.companyName).toBe('DualisCheckUp Saúde e Tecnologia Ltda.');
-    expect(entity.taxId).toBe('48.291.834/0001-92');
-    expect(entity.legalEmail).toBe('legal@dualischeckup.com');
-    expect(entity.dpoEmail).toBe('dpo@dualischeckup.com');
-    expect(entity.supportEmail).toBe('suporte@dualischeckup.com');
+    expect(entity.companyName).toBe('WGI (Brothers Baum Ltda.)');
+    expect(entity.taxId).toBe('30.889.282/0001-90');
+    expect(entity.legalEmail).toBe('contato@dualischeckup.com');
+    expect(entity.dpoEmail).toBe('contato@dualischeckup.com');
+    expect(entity.supportEmail).toBe('contato@dualischeckup.com');
   });
 
   describe('Terms of Service (Video 2 - Requisito 2: Términos de Uso)', () => {
@@ -72,7 +72,7 @@ describe('LegalService - SaaS Legal Foundations', () => {
       const privacy = service.getPrivacyPolicy('pt-BR');
       expect(privacy.language).toBe('pt-BR');
       expect(privacy.lgpdCompliance.sensitiveDataArticle).toContain('Artigo 11');
-      expect(privacy.lgpdCompliance.dpoContact).toBe('dpo@dualischeckup.com');
+      expect(privacy.lgpdCompliance.dpoContact).toBe('contato@dualischeckup.com');
       expect(privacy.lgpdCompliance.rights.length).toBeGreaterThan(3);
 
       const paymentSec = privacy.sections.find((s) => s.sectionId === '4-pagamentos');

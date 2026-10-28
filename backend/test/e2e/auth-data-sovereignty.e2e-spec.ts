@@ -47,7 +47,7 @@ class MockAuthService {
         exportDate: new Date().toISOString(),
         formatVersion: '1.2',
         legalBasis: 'LGPD Art. 18, V (Portabilidade de Dados)',
-        dataController: 'DualisCheckUp Saúde Digital Ltda.',
+        dataController: 'WGI (Brothers Baum Ltda.)',
         legacyFieldsNote: 'Os campos em "legacy" vêm de uma versão anterior do app e não são mais gravados.',
       },
       profile: {
