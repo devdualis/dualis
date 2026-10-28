@@ -37,6 +37,19 @@ describe('EmailService (Resend)', () => {
     expect(body.html).toContain('123456');
   });
 
+  it('embeds the Dualis logo as an inline PNG attachment', async () => {
+    await new EmailService().sendVerificationEmail('maria@example.com', '123456');
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.attachments).toHaveLength(1);
+    const [logo] = body.attachments;
+    expect(logo).toMatchObject({ filename: 'dualis-logo.png', content_type: 'image/png', content_id: 'dualis-logo' });
+    const png = Buffer.from(logo.content, 'base64');
+    expect(png.subarray(0, 8)).toEqual(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+    expect(png.length).toBeLessThan(20_000);
+    expect(body.html).toContain('src="cid:dualis-logo"');
+  });
+
   it('sends the password reset email through the Resend API', async () => {
     await new EmailService().sendPasswordResetEmail('joao@example.com', '654321');
 

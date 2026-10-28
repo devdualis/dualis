@@ -1,15 +1,10 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
+import { EMAIL_LOGO_ATTACHMENT, renderCodeEmail } from './email-template';
 
 const RESEND_API_URL = 'https://api.resend.com/emails';
 const SEND_TIMEOUT_MS = 10_000;
-
-// The name is user input; escape it so nobody can inject links or markup into
-// an email sent from our domain.
-function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
-}
 
 @Injectable()
 export class EmailService {
@@ -51,7 +46,7 @@ export class EmailService {
       const res = await fetch(RESEND_API_URL, {
         method: 'POST',
         headers: { Authorization: `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: this.mailFrom, to: [to], subject, text, html }),
+        body: JSON.stringify({ from: this.mailFrom, to: [to], subject, text, html, attachments: [EMAIL_LOGO_ATTACHMENT] }),
         signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
       });
       if (!res.ok) {
@@ -86,44 +81,15 @@ export class EmailService {
     const firstName = name?.trim().split(' ')[0];
     this.logCodeForSimulation('verificação', normalizedEmail, code);
 
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html lang="pt-BR">
-      <head>
-        <meta charset="utf-8">
-        <style>
-          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #F8FAFC; color: #1E293B; margin: 0; padding: 20px; }
-          .container { max-width: 520px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #E2E8F0; }
-          .header { text-align: center; margin-bottom: 24px; }
-          .title { font-size: 24px; font-weight: bold; color: #00796B; margin: 0; }
-          .subtitle { font-size: 14px; color: #64748B; margin-top: 4px; }
-          .content { font-size: 16px; line-height: 1.6; color: #334155; margin-bottom: 24px; }
-          .code-box { background-color: #F0FDFA; border: 2px dashed #00796B; border-radius: 12px; padding: 18px; text-align: center; margin: 24px 0; }
-          .code { font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #00796B; font-family: monospace; }
-          .footer { font-size: 12px; color: #94A3B8; text-align: center; border-top: 1px solid #E2E8F0; padding-top: 16px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1 class="title">DualisCheckUp</h1>
-            <p class="subtitle">Seu diário de bem-estar</p>
-          </div>
-          <div class="content">
-            <p>Olá${firstName ? `, <strong>${escapeHtml(firstName)}</strong>` : ''},</p>
-            <p>Obrigado por criar sua conta no <strong>DualisCheckUp</strong>. Para confirmar que este endereço de e-mail é seu e ativar sua conta com segurança, utilize o código de verificação abaixo:</p>
-            <div class="code-box">
-              <span class="code">${code}</span>
-            </div>
-            <p>Este código expira em <strong>15 minutos</strong>. Se você não solicitou este cadastro, ignore esta mensagem com segurança.</p>
-          </div>
-          <div class="footer">
-            <p>&copy; 2026 DualisCheckUp. Em conformidade com a LGPD (Lei nº 13.709/2018).</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
+    const htmlContent = renderCodeEmail({
+      preheader: `Seu código de verificação é ${code}. Ele expira em 15 minutos.`,
+      title: 'Confirme seu e-mail',
+      firstName,
+      intro:
+        'Obrigado por criar sua conta no <strong>DualisCheckUp</strong>. Para confirmar que este endereço de e-mail é seu e ativar sua conta com segurança, use o código abaixo:',
+      code,
+      ignoreNote: 'Se você não solicitou este cadastro, ignore esta mensagem com segurança.',
+    });
 
     await this.deliver(
       normalizedEmail,
@@ -144,44 +110,16 @@ export class EmailService {
     const firstName = name?.trim().split(' ')[0];
     this.logCodeForSimulation('redefinição de senha', normalizedEmail, code);
 
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html lang="pt-BR">
-      <head>
-        <meta charset="utf-8">
-        <style>
-          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #F8FAFC; color: #1E293B; margin: 0; padding: 20px; }
-          .container { max-width: 520px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #E2E8F0; }
-          .header { text-align: center; margin-bottom: 24px; }
-          .title { font-size: 24px; font-weight: bold; color: #00796B; margin: 0; }
-          .subtitle { font-size: 14px; color: #64748B; margin-top: 4px; }
-          .content { font-size: 16px; line-height: 1.6; color: #334155; margin-bottom: 24px; }
-          .code-box { background-color: #F0FDFA; border: 2px dashed #00796B; border-radius: 12px; padding: 18px; text-align: center; margin: 24px 0; }
-          .code { font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #00796B; font-family: monospace; }
-          .footer { font-size: 12px; color: #94A3B8; text-align: center; border-top: 1px solid #E2E8F0; padding-top: 16px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1 class="title">DualisCheckUp</h1>
-            <p class="subtitle">Seu diário de bem-estar</p>
-          </div>
-          <div class="content">
-            <p>Olá${firstName ? `, <strong>${escapeHtml(firstName)}</strong>` : ''},</p>
-            <p>Recebemos uma solicitação para redefinir a senha da sua conta no <strong>DualisCheckUp</strong>. Utilize o código abaixo para criar uma nova senha:</p>
-            <div class="code-box">
-              <span class="code">${code}</span>
-            </div>
-            <p>Este código expira em <strong>15 minutos</strong>. Se você não solicitou a redefinição de senha, ignore esta mensagem com segurança; sua senha atual continuará válida.</p>
-          </div>
-          <div class="footer">
-            <p>&copy; 2026 DualisCheckUp. Em conformidade com a LGPD (Lei nº 13.709/2018).</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
+    const htmlContent = renderCodeEmail({
+      preheader: `Seu código de redefinição de senha é ${code}. Ele expira em 15 minutos.`,
+      title: 'Redefina sua senha',
+      firstName,
+      intro:
+        'Recebemos uma solicitação para redefinir a senha da sua conta no <strong>DualisCheckUp</strong>. Use o código abaixo para criar uma nova senha:',
+      code,
+      ignoreNote:
+        'Se você não solicitou a redefinição de senha, ignore esta mensagem com segurança; sua senha atual continuará válida.',
+    });
 
     await this.deliver(
       normalizedEmail,
