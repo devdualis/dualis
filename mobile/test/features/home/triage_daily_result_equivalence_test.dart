@@ -100,13 +100,13 @@ TriageOutcome createBaseMockOutcome({
         const [
           RecommendedArticle(
             id: 'art-1',
-            title: 'Prevenção de Cefaleias Tensionais',
+            title: 'Pausas para alongar o pescoço',
             category: 'cabeca_pescoco',
-            author: 'Sociedade Brasileira de Cefaleia',
+            author: 'Ministério da Saúde',
             authorRole: 'Fonte',
             readTimeMinutes: 4,
-            summary: 'Orientações para alívio de cefaleias',
-            url: 'https://sbcefaleia.com.br/noticias.php?id=350',
+            summary: 'Ideias simples de pausa e alongamento no dia a dia',
+            url: 'https://www.gov.br/saude/pt-br/assuntos/saude-brasil',
           ),
         ],
     recordedAt: recordedAt ?? DateTime(2026, 9, 17, 10, 30),

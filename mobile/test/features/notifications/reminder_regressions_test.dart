@@ -296,7 +296,7 @@ void main() {
                 intensityScore: 2,
                 primaryCategory: 'cabeca_pescoco',
                 categoryLabel: 'Cabeça e Pescoço',
-                somaticMapping: 'Cefaleia',
+                somaticMapping: 'Cabeça',
                 recommendedArticles: const [],
                 recordedAt: DateTime.now(),
               ),
