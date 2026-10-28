@@ -27,3 +27,7 @@ No se midió latencia de Gemini. Los 0,3 ms medios de la batería pertenecen al 
 Al retomar no estaban expuestas las herramientas MCP de Dart. Se accedió a `ext.flutter.driver` y a las extensiones de diagnóstico del servicio VM. Se observaron errores reales de layout en los botones de texto propio y condiciones. Se repitieron los recorridos después de corregirlos. Hubo también timeouts del driver al buscar controles fuera de pantalla. No se obtuvo un informe final limpio de `get_runtime_errors`; no se declara “cero errores de runtime”.
 
 Los datos de aislamiento y recuperación están en [aislamiento-api.json](aislamiento-api.json) y [offline-api.json](offline-api.json). Los conteos y métricas resumidos están en [resultados-pruebas.json](resultados-pruebas.json).
+
+## Revalidación 28/10/2026
+
+Los conteos sobre el HEAD `1266b4e` están en la sección «Revalidación del 28/10/2026» de [INFORME.md](INFORME.md): RLS 49/49, e2e 98/98, unitarias 196/196, Flutter 516/516 y batería `PASSED`.
