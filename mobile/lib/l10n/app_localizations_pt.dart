@@ -2616,7 +2616,8 @@ class AppLocalizationsPt extends AppLocalizations {
   String get histViewLinks => 'Conexões';
 
   @override
-  String get histMapCaption => 'Cor = quantos dias você marcou';
+  String get histMapCaption =>
+      'Cor = quantos dias você marcou. Toque numa parte do corpo para ver a linha do tempo.';
 
   @override
   String get histNoPhysical => 'Nenhuma parte do corpo marcada neste período.';
@@ -2647,4 +2648,44 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get histPhysicalTitleMonth => 'Este mês';
+
+  @override
+  String histRegionHeadline(int period, String region, num count, num days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count vezes',
+      one: '1 vez',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days dias',
+      one: '1 dia',
+    );
+    return 'Nos últimos $period dias você marcou $region $_temp0, em $_temp1.';
+  }
+
+  @override
+  String histRegionSensationTimes(String sensation, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count vezes',
+      one: '1 vez',
+    );
+    return '$sensation: $_temp0';
+  }
+
+  @override
+  String get histRegionMarksTitle => 'Cada vez que você marcou';
+
+  @override
+  String histRegionIntensity(int value) {
+    return 'Intensidade $value de 5';
+  }
+
+  @override
+  String get histRegionEmpty =>
+      'Você não marcou esta parte do corpo neste período.';
 }

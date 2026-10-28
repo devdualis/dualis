@@ -148,7 +148,10 @@ class TimeDistributionBar extends StatelessWidget {
 class JournalBodyMap extends StatelessWidget {
   final Map<String, int> byRegion;
 
-  const JournalBodyMap({super.key, required this.byRegion});
+  /// Called with the region tapped on a silhouette, when set.
+  final ValueChanged<String>? onRegionTap;
+
+  const JournalBodyMap({super.key, required this.byRegion, this.onRegionTap});
 
   @override
   Widget build(BuildContext context) {
@@ -167,6 +170,7 @@ class JournalBodyMap extends StatelessWidget {
                   side: _Side.front,
                   byRegion: byRegion,
                   maxCount: maxCount,
+                  onRegionTap: onRegionTap,
                   caption: l10n.xv2DashFront,
                 ),
               ),
@@ -175,6 +179,7 @@ class JournalBodyMap extends StatelessWidget {
                   side: _Side.back,
                   byRegion: byRegion,
                   maxCount: maxCount,
+                  onRegionTap: onRegionTap,
                   caption: l10n.xv2DashBack,
                 ),
               ),
@@ -200,24 +205,44 @@ class _Silhouette extends StatelessWidget {
   final Map<String, int> byRegion;
   final int maxCount;
   final String caption;
+  final ValueChanged<String>? onRegionTap;
 
   const _Silhouette({
     required this.side,
     required this.byRegion,
     required this.maxCount,
     required this.caption,
+    this.onRegionTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final onTap = onRegionTap;
     return Column(
       children: [
         Expanded(
-          child: CustomPaint(
-            size: Size.infinite,
-            painter: _SilhouettePainter(
-              side: side,
-              shade: (region) => regionShade(byRegion[region] ?? 0, maxCount),
+          child: LayoutBuilder(
+            builder: (context, constraints) => GestureDetector(
+              key: Key('journal_body_map_${side.name}'),
+              behavior: HitTestBehavior.opaque,
+              onTapUp: onTap == null
+                  ? null
+                  : (details) {
+                      final region = _SilhouettePainter.regionAt(
+                        side,
+                        details.localPosition,
+                        constraints.biggest,
+                      );
+                      if (region != null) onTap(region);
+                    },
+              child: CustomPaint(
+                size: Size.infinite,
+                painter: _SilhouettePainter(
+                  side: side,
+                  shade: (region) =>
+                      regionShade(byRegion[region] ?? 0, maxCount),
+                ),
+              ),
             ),
           ),
         ),
@@ -240,38 +265,52 @@ class _SilhouettePainter extends CustomPainter {
 
   _SilhouettePainter({required this.side, required this.shade});
 
-  @override
-  void paint(Canvas canvas, Size size) {
+  /// Region shapes for a silhouette of [size]; `null` region = neutral hips.
+  static List<(String?, RRect, bool oval)> shapes(_Side side, Size size) {
     final h = size.height;
     final w = h * 0.5;
     final left = (size.width - w) / 2;
     Rect r(double x, double y, double rw, double rh) =>
         Rect.fromLTWH(left + x * w, y * h, rw * w, rh * h);
-    void fill(String region, RRect shape) =>
-        canvas.drawRRect(shape, Paint()..color = shade(region));
-    const neutral = Color(0xFFE2E8F0);
     final radius = Radius.circular(w * 0.08);
+    RRect rr(Rect rect) => RRect.fromRectAndRadius(rect, radius);
+    return [
+      ('cabeca', RRect.fromRectAndRadius(r(0.36, 0.0, 0.28, 0.14), Radius.zero), true),
+      ('cabeca', rr(r(0.44, 0.13, 0.12, 0.05)), false),
+      if (side == _Side.front) ...[
+        ('peito', rr(r(0.25, 0.18, 0.5, 0.18)), false),
+        ('barriga', rr(r(0.27, 0.36, 0.46, 0.16)), false),
+      ] else
+        ('costas', rr(r(0.25, 0.18, 0.5, 0.34)), false),
+      // Hips stay neutral: no region there.
+      (null, rr(r(0.27, 0.52, 0.46, 0.06)), false),
+      // Arms, legs and hands.
+      ('membros', rr(r(0.08, 0.19, 0.14, 0.36)), false),
+      ('membros', rr(r(0.78, 0.19, 0.14, 0.36)), false),
+      ('membros', rr(r(0.28, 0.59, 0.19, 0.41)), false),
+      ('membros', rr(r(0.53, 0.59, 0.19, 0.41)), false),
+    ];
+  }
 
-    // Head and neck.
-    canvas.drawOval(r(0.36, 0.0, 0.28, 0.14), Paint()..color = shade('cabeca'));
-    fill('cabeca', RRect.fromRectAndRadius(r(0.44, 0.13, 0.12, 0.05), radius));
-
-    if (side == _Side.front) {
-      fill('peito', RRect.fromRectAndRadius(r(0.25, 0.18, 0.5, 0.18), radius));
-      fill('barriga', RRect.fromRectAndRadius(r(0.27, 0.36, 0.46, 0.16), radius));
-    } else {
-      fill('costas', RRect.fromRectAndRadius(r(0.25, 0.18, 0.5, 0.34), radius));
+  /// Region under [position], with a small margin so thin limbs are easy
+  /// to hit.
+  static String? regionAt(_Side side, Offset position, Size size) {
+    final margin = size.height * 0.02;
+    for (final (region, shape, _) in shapes(side, size)) {
+      if (region != null && shape.outerRect.inflate(margin).contains(position)) {
+        return region;
+      }
     }
-    // Hips stay neutral: no region there.
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(r(0.27, 0.52, 0.46, 0.06), radius),
-      Paint()..color = neutral,
-    );
-    // Arms, legs and hands.
-    fill('membros', RRect.fromRectAndRadius(r(0.08, 0.19, 0.14, 0.36), radius));
-    fill('membros', RRect.fromRectAndRadius(r(0.78, 0.19, 0.14, 0.36), radius));
-    fill('membros', RRect.fromRectAndRadius(r(0.28, 0.59, 0.19, 0.41), radius));
-    fill('membros', RRect.fromRectAndRadius(r(0.53, 0.59, 0.19, 0.41), radius));
+    return null;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const neutral = Color(0xFFE2E8F0);
+    for (final (region, shape, oval) in shapes(side, size)) {
+      final paint = Paint()..color = region == null ? neutral : shade(region);
+      oval ? canvas.drawOval(shape.outerRect, paint) : canvas.drawRRect(shape, paint);
+    }
   }
 
   @override

@@ -4645,7 +4645,7 @@ abstract class AppLocalizations {
   /// No description provided for @histMapCaption.
   ///
   /// In pt, this message translates to:
-  /// **'Cor = quantos dias você marcou'**
+  /// **'Cor = quantos dias você marcou. Toque numa parte do corpo para ver a linha do tempo.'**
   String get histMapCaption;
 
   /// No description provided for @histNoPhysical.
@@ -4689,6 +4689,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Este mês'**
   String get histPhysicalTitleMonth;
+
+  /// No description provided for @histRegionHeadline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nos últimos {period} dias você marcou {region} {count, plural, =1{1 vez} other{{count} vezes}}, em {days, plural, =1{1 dia} other{{days} dias}}.'**
+  String histRegionHeadline(int period, String region, num count, num days);
+
+  /// No description provided for @histRegionSensationTimes.
+  ///
+  /// In pt, this message translates to:
+  /// **'{sensation}: {count, plural, =1{1 vez} other{{count} vezes}}'**
+  String histRegionSensationTimes(String sensation, num count);
+
+  /// No description provided for @histRegionMarksTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cada vez que você marcou'**
+  String get histRegionMarksTitle;
+
+  /// No description provided for @histRegionIntensity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Intensidade {value} de 5'**
+  String histRegionIntensity(int value);
+
+  /// No description provided for @histRegionEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você não marcou esta parte do corpo neste período.'**
+  String get histRegionEmpty;
 }
 
 class _AppLocalizationsDelegate

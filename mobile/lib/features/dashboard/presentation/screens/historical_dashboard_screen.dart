@@ -11,6 +11,7 @@ import '../../../journal_insights/domain/journal_insights_models.dart';
 import '../../../journal/presentation/journal_labels.dart';
 import '../../../journal_insights/presentation/controllers/journal_insights_controller.dart';
 import '../../../journal_insights/presentation/widgets/history_widgets.dart';
+import '../../../journal_insights/presentation/widgets/region_timeline_sheet.dart';
 import '../../../journal_insights/presentation/widgets/journal_overview_widgets.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
@@ -265,7 +266,21 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
             ),
             const SizedBox(height: 12),
             if (_physicalView == _PhysicalView.map)
-              HistoryBodyMap(byRegion: summary.byRegion)
+              HistoryBodyMap(
+                byRegion: summary.byRegion,
+                onRegionTap: (region) => showRegionTimelineSheet(
+                  context,
+                  timeline: regionTimeline(
+                    l10n,
+                    entries,
+                    region,
+                    today: today,
+                    days: _days,
+                  ),
+                  days: _days,
+                  start: start,
+                ),
+              )
             else
               TimeRegionFlow(links: timeRegionDays(entries)),
           ],

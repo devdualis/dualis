@@ -771,12 +771,17 @@
   "histTimeBarTitle": "Pasado · Presente · Futuro",
   "histViewMap": "Mapa",
   "histViewLinks": "Conexiones",
-  "histMapCaption": "Color = cuántos días marcaste",
+  "histMapCaption": "Color = cuántos días lo marcaste. Toca una parte del cuerpo para ver su línea de tiempo.",
   "histNoPhysical": "Ninguna parte del cuerpo marcada en este período.",
   "histLinksTop": "Mismo día: {time} y {region} en {count, plural, =1{1 día} other{{count} días}}. Solo conteo.",
   "histLinksEmpty": "Aún no hay días con un tiempo emocional y una parte del cuerpo juntos en este período.",
   "histTimelineTitle": "Línea de tiempo",
   "histEmotionalTitleWeek": "Cómo fue tu semana",
   "histPhysicalTitleWeek": "Esta semana",
-  "histPhysicalTitleMonth": "Este mes"
+  "histPhysicalTitleMonth": "Este mes",
+  "histRegionHeadline": "En los últimos {period} días marcaste {region} {count, plural, =1{1 vez} other{{count} veces}}, en {days, plural, =1{1 día} other{{days} días}}.",
+  "histRegionSensationTimes": "{sensation}: {count, plural, =1{1 vez} other{{count} veces}}",
+  "histRegionMarksTitle": "Cada vez que lo marcaste",
+  "histRegionIntensity": "Intensidad {value} de 5",
+  "histRegionEmpty": "No marcaste esta parte del cuerpo en este período."
 }

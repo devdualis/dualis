@@ -1700,7 +1700,7 @@
   "histTimeBarTitle": "Passado · Presente · Futuro",
   "histViewMap": "Mapa",
   "histViewLinks": "Conexões",
-  "histMapCaption": "Cor = quantos dias você marcou",
+  "histMapCaption": "Cor = quantos dias você marcou. Toque numa parte do corpo para ver a linha do tempo.",
   "histNoPhysical": "Nenhuma parte do corpo marcada neste período.",
   "histLinksTop": "Mesmo dia: {time} e {region} em {count, plural, =1{1 dia} other{{count} dias}}. Só contagem.",
   "@histLinksTop": {
@@ -1720,5 +1720,43 @@
   "histTimelineTitle": "Linha do tempo",
   "histEmotionalTitleWeek": "Como foi sua semana",
   "histPhysicalTitleWeek": "Esta semana",
-  "histPhysicalTitleMonth": "Este mês"
+  "histPhysicalTitleMonth": "Este mês",
+  "histRegionHeadline": "Nos últimos {period} dias você marcou {region} {count, plural, =1{1 vez} other{{count} vezes}}, em {days, plural, =1{1 dia} other{{days} dias}}.",
+  "@histRegionHeadline": {
+    "placeholders": {
+      "period": {
+        "type": "int"
+      },
+      "region": {
+        "type": "String"
+      },
+      "count": {
+        "type": "num"
+      },
+      "days": {
+        "type": "num"
+      }
+    }
+  },
+  "histRegionSensationTimes": "{sensation}: {count, plural, =1{1 vez} other{{count} vezes}}",
+  "@histRegionSensationTimes": {
+    "placeholders": {
+      "sensation": {
+        "type": "String"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "histRegionMarksTitle": "Cada vez que você marcou",
+  "histRegionIntensity": "Intensidade {value} de 5",
+  "@histRegionIntensity": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "histRegionEmpty": "Você não marcou esta parte do corpo neste período."
 }

@@ -168,11 +168,15 @@ class HistoryLineChart extends StatelessWidget {
   final int days;
   final DateTime start;
 
+  /// Dots on every day with a value (always on for 7 days).
+  final bool showDots;
+
   const HistoryLineChart({
     super.key,
     required this.lines,
     required this.days,
     required this.start,
+    this.showDots = false,
   });
 
   @override
@@ -258,7 +262,9 @@ class HistoryLineChart extends StatelessWidget {
       barWidth: l.dashed ? 2 : 3,
       dashArray: l.dashed ? [6, 4] : null,
       isStrokeCapRound: true,
-      dotData: FlDotData(show: dayIndexes.length == 1 || days <= 7),
+      dotData: FlDotData(
+        show: showDots || dayIndexes.length == 1 || days <= 7,
+      ),
     );
   }
 }
@@ -477,7 +483,10 @@ class _ToggleableLinesState extends State<ToggleableLines> {
 class HistoryBodyMap extends StatelessWidget {
   final Map<String, int> byRegion;
 
-  const HistoryBodyMap({super.key, required this.byRegion});
+  /// Opens the timeline of a region, from the map or its count chip.
+  final ValueChanged<String>? onRegionTap;
+
+  const HistoryBodyMap({super.key, required this.byRegion, this.onRegionTap});
 
   @override
   Widget build(BuildContext context) {
@@ -490,7 +499,7 @@ class HistoryBodyMap extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        JournalBodyMap(byRegion: byRegion),
+        JournalBodyMap(byRegion: byRegion, onRegionTap: onRegionTap),
         const SizedBox(height: 12),
         if (marked.isEmpty)
           Text(
@@ -506,8 +515,17 @@ class HistoryBodyMap extends StatelessWidget {
             runSpacing: 8,
             children: [
               for (final region in marked)
-                Chip(
+                ActionChip(
                   key: Key('body_map_count_$region'),
+                  onPressed:
+                      onRegionTap == null ? null : () => onRegionTap!(region),
+                  avatar: onRegionTap == null
+                      ? null
+                      : const Icon(
+                          Icons.show_chart_rounded,
+                          size: 16,
+                          color: AppColors.softIndigo,
+                        ),
                   visualDensity: VisualDensity.compact,
                   backgroundColor:
                       regionShade(byRegion[region]!, maxCount)

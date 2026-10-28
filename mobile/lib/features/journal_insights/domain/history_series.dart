@@ -175,3 +175,92 @@ Map<(String, String), int> timeRegionDays(List<JournalEntryView> entries) {
   }
   return result;
 }
+
+/// One time the person marked a body region: day, sensation, what they
+/// chose and the intensity they gave.
+class RegionMark {
+  final DateTime day;
+  final String? sensation;
+  final String text;
+  final int? intensity;
+
+  const RegionMark({
+    required this.day,
+    required this.sensation,
+    required this.text,
+    required this.intensity,
+  });
+}
+
+/// Everything the person marked on one body region in the period, for the
+/// timeline opened from the body map. Counts only, never interpreted.
+class RegionTimeline {
+  final String region;
+  final String label;
+
+  /// Newest first.
+  final List<RegionMark> marks;
+
+  /// One line per sensation (or one line for items without sensation).
+  final List<HistoryLine> lines;
+
+  const RegionTimeline({
+    required this.region,
+    required this.label,
+    required this.marks,
+    required this.lines,
+  });
+
+  int get times => marks.length;
+  int get dayCount => {for (final m in marks) m.day}.length;
+
+  /// `dor` / `incomodo` (or null) to how many times it was marked.
+  Map<String?, int> get bySensation {
+    final counts = <String?, int>{};
+    for (final m in marks) {
+      counts[m.sensation] = (counts[m.sensation] ?? 0) + 1;
+    }
+    return counts;
+  }
+}
+
+RegionTimeline regionTimeline(
+  AppLocalizations l10n,
+  List<JournalEntryView> entries,
+  String region, {
+  required DateTime today,
+  required int days,
+}) {
+  final start = periodStart(today, days);
+  final regionText = historyRegionLabel(l10n, region) ?? region;
+  final marks = <RegionMark>[];
+  for (final entry in entries) {
+    final index = entry.day.difference(start).inDays;
+    if (index < 0 || index >= days) continue;
+    for (final item in entry.items) {
+      if (item.region != region) continue;
+      final key = item.optionKey;
+      final text = item.customLabel?.isNotEmpty == true
+          ? item.customLabel!
+          : (key == null || item.isCustom
+              ? regionText
+              : JournalLabels.option(l10n, key));
+      marks.add(RegionMark(
+        day: entry.day,
+        sensation: item.sensation,
+        text: text,
+        intensity: item.intensity,
+      ));
+    }
+  }
+  marks.sort((a, b) => b.day.compareTo(a.day));
+  final lines = physicalLines(l10n, entries, today: today, days: days)
+      .where((l) => l.key == region || l.key.startsWith('$region:'))
+      .toList();
+  return RegionTimeline(
+    region: region,
+    label: regionText,
+    marks: marks,
+    lines: lines,
+  );
+}

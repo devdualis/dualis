@@ -771,12 +771,17 @@
   "histTimeBarTitle": "Past · Present · Future",
   "histViewMap": "Map",
   "histViewLinks": "Connections",
-  "histMapCaption": "Color = how many days you marked",
+  "histMapCaption": "Colour = how many days you marked it. Tap a body part to see its timeline.",
   "histNoPhysical": "No body part marked in this period.",
   "histLinksTop": "Same day: {time} and {region} on {count, plural, =1{1 day} other{{count} days}}. Count only.",
   "histLinksEmpty": "No days yet with both an emotional time and a body part in this period.",
   "histTimelineTitle": "Timeline",
   "histEmotionalTitleWeek": "How your week went",
   "histPhysicalTitleWeek": "This week",
-  "histPhysicalTitleMonth": "This month"
+  "histPhysicalTitleMonth": "This month",
+  "histRegionHeadline": "In the last {period} days you marked {region} {count, plural, =1{once} other{{count} times}}, on {days, plural, =1{1 day} other{{days} days}}.",
+  "histRegionSensationTimes": "{sensation}: {count, plural, =1{once} other{{count} times}}",
+  "histRegionMarksTitle": "Each time you marked it",
+  "histRegionIntensity": "Intensity {value} of 5",
+  "histRegionEmpty": "You did not mark this body part in this period."
 }

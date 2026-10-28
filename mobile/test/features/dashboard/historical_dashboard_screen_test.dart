@@ -261,7 +261,7 @@ void main() {
       expect(find.text('Hormônios e metabolismo: 1 dia'), findsOneWidget);
       // Regions never marked are left out of the list.
       expect(find.byKey(const Key('body_map_count_peito')), findsNothing);
-      expect(find.text('Cor = quantos dias você marcou'), findsOneWidget);
+      expect(find.text('Cor = quantos dias você marcou. Toque numa parte do corpo para ver a linha do tempo.'), findsOneWidget);
     });
 
     testWidgets('physical tab: Conexões counts same-day time and region',
@@ -325,6 +325,57 @@ void main() {
       expect(visibleLineCount(tester), 3);
       final chart = tester.widget<LineChart>(find.byType(LineChart).first);
       expect(chart.data.lineBarsData.last.dashArray, isNotNull);
+    });
+
+    testWidgets('tapping a region opens its timeline with counts per sensation',
+        (tester) async {
+      const throbbing = JournalItemView(
+        kind: 'physical',
+        optionKey: 'cabeca.pressao.latejando',
+        bodySide: 'front',
+        sensation: 'dor',
+        intensity: 4,
+      );
+      await pumpDashboard(tester, [
+        entry('e1', 0, const [throbbing]),
+        entry('e2', 2, const [throbbing]),
+        entry('e3', 2, const [
+          JournalItemView(
+            kind: 'physical',
+            optionKey: 'cabeca.nuca.rigida',
+            bodySide: 'back',
+            sensation: 'incomodo',
+            intensity: 2,
+          ),
+        ]),
+      ]);
+      await openPhysicalTab(tester);
+
+      await tester.tap(find.byKey(const Key('body_map_count_cabeca')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('region_timeline_cabeca')), findsOneWidget);
+      expect(
+        find.text('Nos últimos 30 dias você marcou Cabeça e pescoço 3 vezes, em 2 dias.'),
+        findsOneWidget,
+      );
+      expect(find.text('Dor: 2 vezes'), findsOneWidget);
+      expect(find.text('Incômodo: 1 vez'), findsOneWidget);
+      expect(find.text('Intensidade 4 de 5'), findsNWidgets(2));
+    });
+
+    testWidgets('tapping the head on the silhouette opens the same timeline',
+        (tester) async {
+      await pumpDashboard(tester, [entry('e1', 0, [head])]);
+      await openPhysicalTab(tester);
+
+      final front = find.byKey(const Key('journal_body_map_front'));
+      final box = tester.getRect(front);
+      // The head sits at the top centre of the silhouette.
+      await tester.tapAt(Offset(box.center.dx, box.top + box.height * 0.06));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('region_timeline_cabeca')), findsOneWidget);
     });
 
     testWidgets('co-occurrence sentence on Físico counts days, without cause',

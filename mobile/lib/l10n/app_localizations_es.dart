@@ -2621,7 +2621,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get histViewLinks => 'Conexiones';
 
   @override
-  String get histMapCaption => 'Color = cuántos días marcaste';
+  String get histMapCaption =>
+      'Color = cuántos días lo marcaste. Toca una parte del cuerpo para ver su línea de tiempo.';
 
   @override
   String get histNoPhysical =>
@@ -2653,4 +2654,44 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get histPhysicalTitleMonth => 'Este mes';
+
+  @override
+  String histRegionHeadline(int period, String region, num count, num days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count veces',
+      one: '1 vez',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days días',
+      one: '1 día',
+    );
+    return 'En los últimos $period días marcaste $region $_temp0, en $_temp1.';
+  }
+
+  @override
+  String histRegionSensationTimes(String sensation, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count veces',
+      one: '1 vez',
+    );
+    return '$sensation: $_temp0';
+  }
+
+  @override
+  String get histRegionMarksTitle => 'Cada vez que lo marcaste';
+
+  @override
+  String histRegionIntensity(int value) {
+    return 'Intensidad $value de 5';
+  }
+
+  @override
+  String get histRegionEmpty =>
+      'No marcaste esta parte del cuerpo en este período.';
 }
