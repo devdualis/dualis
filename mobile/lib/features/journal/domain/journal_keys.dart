@@ -12,7 +12,21 @@ class JournalKeys {
   static const String moodBem = 'bem';
   static const String moodNormal = 'normal';
   static const String moodNaoTaoBem = 'nao_tao_bem';
+
+  /// Valid when reading (old entries may say `normal`).
   static const List<String> moods = [moodBem, moodNormal, moodNaoTaoBem];
+
+  /// Offered for new entries (journal v2.1).
+  static const List<String> newEntryMoods = [moodBem, moodNaoTaoBem];
+
+  // Entry axis (journal v2.1). Old entries have none.
+  static const String areaEmotional = 'emotional';
+  static const String areaPhysical = 'physical';
+
+  // What the user feels in a physical item (journal v2.1).
+  static const String sensationDor = 'dor';
+  static const String sensationIncomodo = 'incomodo';
+  static const List<String> sensations = [sensationDor, sensationIncomodo];
 
   // Item kinds.
   static const String kindEmotional = 'emotional';
@@ -54,6 +68,7 @@ class JournalKeys {
     'cabeca': {
       'pressao': ['temporas', 'latejando'],
       'sentidos': ['garganta', 'olhos'],
+      'nuca': ['rigida', 'pontada'],
     },
     'peito': {
       'respiracao': ['curta', 'tosse'],
@@ -71,10 +86,53 @@ class JournalKeys {
       'cansaco': ['juntas', 'pesados'],
       'formigamento': ['dormentes', 'choque'],
     },
+    // Whole body: no side.
+    'pele': {
+      'coceira': ['coceira', 'ardencia'],
+      'aparencia': ['vermelhidao', 'manchas'],
+    },
+    'musculos': {
+      'tensao': ['rigidez', 'caibra'],
+      'cansaco': ['fraqueza', 'dolorido'],
+    },
+    'hormonios': {
+      'temperatura': ['calorao', 'frio'],
+      'apetite': ['sede', 'fome'],
+    },
   };
+
+  /// Areas of the whole body, recorded without a side.
+  static const List<String> wholeBodyAreas = ['pele', 'musculos', 'hormonios'];
+
+  /// Branches shown on one side only; every other branch shows on both.
+  static const Map<String, Set<String>> frontOnlyBranches = {
+    'cabeca': {'sentidos'},
+  };
+  static const Map<String, Set<String>> backOnlyBranches = {
+    'cabeca': {'nuca'},
+  };
+
+  static bool isWholeBody(String region) => wholeBodyAreas.contains(region);
+
+  /// Branches of [region] for the side it was marked on (`null` = whole body).
+  static Map<String, List<String>> branchesFor(String region, String? side) {
+    final hidden = side == sideBack
+        ? frontOnlyBranches[region] ?? const <String>{}
+        : side == sideFront
+            ? backOnlyBranches[region] ?? const <String>{}
+            : const <String>{};
+    return {
+      for (final e in physicalTree[region]!.entries)
+        if (!hidden.contains(e.key)) e.key: e.value,
+    };
+  }
 
   static List<String> get times => emotionalTree.keys.toList();
   static List<String> get regions => physicalTree.keys.toList();
+
+  /// Regions marked on the body map (with a side).
+  static List<String> get bodyRegions =>
+      [for (final r in regions) if (!isWholeBody(r)) r];
 
   /// Custom item key segment: `<time>.custom` or `<region>.custom`.
   static const String customSegment = 'custom';

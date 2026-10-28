@@ -57,24 +57,25 @@ class JournalFlowController extends Notifier<JournalFlowState> {
 
   // ---- Mood -------------------------------------------------------------
 
-  /// Records the general mood. Returns true when the entry is ready to save
-  /// right away (Bem / Normal).
-  bool chooseMood(String mood) {
+  /// Records the general mood for the axis picked on Home ([area]). Returns
+  /// true when the entry is ready to save right away (Bem). "Não tão bem"
+  /// goes straight to the first question of that axis.
+  bool chooseMood(String mood, {JournalArea area = JournalArea.emotional}) {
     if (mood == JournalKeys.moodNaoTaoBem) {
-      _go(state.copyWith(mood: mood, step: JournalStep.areas));
+      _go(state.copyWith(
+        mood: mood,
+        area: area,
+        step: area == JournalArea.emotional ? JournalStep.time : JournalStep.body,
+        selectedRegions: const [],
+        regionIndex: 0,
+      ));
       return false;
     }
-    state = state.copyWith(mood: mood);
+    state = state.copyWith(mood: mood, area: area);
     return true;
   }
 
-  // ---- Areas ------------------------------------------------------------
-
-  void toggleArea(JournalArea area) {
-    final next = {...state.areas};
-    next.contains(area) ? next.remove(area) : next.add(area);
-    state = state.copyWith(areas: next);
-  }
+  // ---- Conditions (body screen) -----------------------------------------
 
   void toggleCondition(String conditionId) {
     final next = {...state.selectedConditionIds};
@@ -82,42 +83,20 @@ class JournalFlowController extends Notifier<JournalFlowState> {
     state = state.copyWith(selectedConditionIds: next);
   }
 
-  void confirmAreas({List<UserCondition>? conditions}) {
-    if (!state.hasAreaSelection) return;
-    final conditionItems = [
-      for (final c in conditions ?? state.conditions)
-        if (state.selectedConditionIds.contains(c.id))
-          JournalItem(
-            kind: JournalKeys.kindCondition,
-            conditionId: c.id,
-            conditionLabel: c.label,
-          ),
-    ];
-    final pending = [
-      for (final a in JournalArea.values)
-        if (state.areas.contains(a)) a,
-    ];
-    final base = state.copyWith(items: _capped(conditionItems), pendingAreas: pending);
-    _go(_nextArea(base));
-  }
+  List<JournalItem> _conditionItems(List<UserCondition>? conditions) => [
+    for (final c in conditions ?? state.conditions)
+      if (state.selectedConditionIds.contains(c.id))
+        JournalItem(
+          kind: JournalKeys.kindCondition,
+          conditionId: c.id,
+          conditionLabel: c.label,
+        ),
+  ];
 
-  JournalFlowState _nextArea(JournalFlowState s) {
-    if (s.pendingAreas.isEmpty) {
-      return s.copyWith(
-        step: s.items.isEmpty ? JournalStep.triggers : JournalStep.intensity,
-      );
-    }
-    final area = s.pendingAreas.first;
-    final rest = s.pendingAreas.sublist(1);
-    return area == JournalArea.emotional
-        ? s.copyWith(step: JournalStep.time, pendingAreas: rest)
-        : s.copyWith(
-            step: JournalStep.body,
-            pendingAreas: rest,
-            selectedRegions: const [],
-            regionIndex: 0,
-          );
-  }
+  /// After the last question of the axis: intensity of everything recorded.
+  JournalFlowState _finish(JournalFlowState s) => s.copyWith(
+    step: s.items.isEmpty ? JournalStep.triggers : JournalStep.intensity,
+  );
 
   // ---- Emotional --------------------------------------------------------
 
@@ -182,7 +161,7 @@ class JournalFlowController extends Notifier<JournalFlowState> {
     if (more && !state.itemLimitReached) {
       _go(state.copyWith(step: JournalStep.time, clearBranch: true));
     } else {
-      _go(_nextArea(state));
+      _go(_finish(state));
     }
   }
 
@@ -192,35 +171,54 @@ class JournalFlowController extends Notifier<JournalFlowState> {
     state = state.copyWith(bodySide: side);
   }
 
+  /// Body map region (on the side on screen) or whole-body area (no side).
   void toggleRegion(String region) {
     final current = [...state.selectedRegions];
     final index = current.indexWhere((r) => r.region == region);
     if (index >= 0) {
       current.removeAt(index);
     } else {
-      current.add(SelectedRegion(region, state.bodySide));
+      current.add(SelectedRegion(
+        region,
+        JournalKeys.isWholeBody(region) ? null : state.bodySide,
+      ));
     }
     state = state.copyWith(selectedRegions: current);
   }
 
-  void confirmRegions() {
-    if (state.selectedRegions.isEmpty) return;
+  /// Regions and conditions chosen on the body screen.
+  void confirmBody({List<UserCondition>? conditions}) {
+    if (!state.hasBodySelection) return;
+    final items = _merge(state.items, _conditionItems(conditions));
+    if (state.selectedRegions.isEmpty) {
+      _go(_finish(state.copyWith(items: items)));
+      return;
+    }
     _go(state.copyWith(
+      items: items,
       step: JournalStep.regionBranch,
       regionIndex: 0,
       clearBranch: true,
+      clearSensation: true,
     ));
+  }
+
+  /// "Dor" or "Incômodo" for the region on screen (required before a branch).
+  void chooseSensation(String sensation) {
+    state = state.copyWith(sensation: sensation);
   }
 
   void confirmPhysicalOptions() {
     final region = state.currentRegion;
-    if (!state.hasOptionSelection || region == null) return;
+    final sensation = state.sensation;
+    if (!state.hasOptionSelection || region == null || sensation == null) return;
     final added = [
       for (final key in state.selectedOptions)
         JournalItem(
           kind: JournalKeys.kindPhysical,
           optionKey: key,
           bodySide: region.side,
+          sensation: sensation,
         ),
       for (final label in state.customLabels)
         JournalItem(
@@ -228,6 +226,7 @@ class JournalFlowController extends Notifier<JournalFlowState> {
           optionKey: JournalKeys.customKey(region.region),
           customLabel: label,
           bodySide: region.side,
+          sensation: sensation,
         ),
     ];
     final items = _merge(state.items, added);
@@ -237,6 +236,7 @@ class JournalFlowController extends Notifier<JournalFlowState> {
       selectedOptions: const {},
       customLabels: const [],
       clearBranch: true,
+      clearSensation: true,
     );
     if (nextIndex < state.selectedRegions.length && !cleared.itemLimitReached) {
       _go(cleared.copyWith(step: JournalStep.regionBranch, regionIndex: nextIndex));
@@ -253,7 +253,7 @@ class JournalFlowController extends Notifier<JournalFlowState> {
         regionIndex: 0,
       ));
     } else {
-      _go(_nextArea(state));
+      _go(_finish(state));
     }
   }
 
@@ -325,6 +325,7 @@ class JournalFlowController extends Notifier<JournalFlowState> {
       clientId: _clientId,
       recordedAt: now ?? DateTime.now(),
       mood: state.mood ?? JournalKeys.moodNaoTaoBem,
+      area: state.area.key,
       triggers: triggers,
       triggerNote: triggers.contains(JournalKeys.triggerOutro) && triggerNote.isNotEmpty
           ? triggerNote

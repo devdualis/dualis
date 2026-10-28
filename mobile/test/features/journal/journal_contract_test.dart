@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// Mirrors `docs/bienestar/CONTRATO-JOURNAL-V2.md`.
 void main() {
   group('keys mirror the contract', () {
-    test('12 emotional and 20 physical options, plus one custom key per root', () {
+    test('12 emotional and 34 physical options, plus one custom key per root', () {
       final keys = JournalKeys.allOptionKeys;
       final emotional = keys.where(
         (k) => JournalKeys.times.contains(JournalKeys.rootOf(k)) && !JournalKeys.isCustomKey(k),
@@ -21,13 +21,36 @@ void main() {
         (k) => JournalKeys.regions.contains(JournalKeys.rootOf(k)) && !JournalKeys.isCustomKey(k),
       );
       expect(emotional, hasLength(12));
-      expect(physical, hasLength(20));
-      expect(keys.where(JournalKeys.isCustomKey), hasLength(8));
+      expect(physical, hasLength(34));
+      expect(keys.where(JournalKeys.isCustomKey), hasLength(11));
       expect(keys, containsAll(['passado.tristeza.culpa', 'futuro.medo.desanimo', 'costas.fisgada.ao_mexer', 'membros.custom']));
+      expect(keys, containsAll([
+        'cabeca.nuca.rigida', 'cabeca.nuca.pontada',
+        'pele.coceira.coceira', 'pele.coceira.ardencia', 'pele.aparencia.vermelhidao', 'pele.aparencia.manchas',
+        'musculos.tensao.rigidez', 'musculos.tensao.caibra', 'musculos.cansaco.fraqueza', 'musculos.cansaco.dolorido',
+        'hormonios.temperatura.calorao', 'hormonios.temperatura.frio', 'hormonios.apetite.sede', 'hormonios.apetite.fome',
+        'pele.custom', 'musculos.custom', 'hormonios.custom',
+      ]));
+    });
+
+    test('branches follow the side rules (v2.1)', () {
+      Set<String> b(String region, String? side) =>
+          JournalKeys.branchesFor(region, side).keys.toSet();
+      expect(b('cabeca', 'front'), {'pressao', 'sentidos'});
+      expect(b('cabeca', 'back'), {'pressao', 'nuca'});
+      expect(b('costas', 'back'), {'rigidez', 'fisgada'});
+      expect(b('membros', 'front'), {'cansaco', 'formigamento'});
+      expect(b('pele', null), {'coceira', 'aparencia'});
+      expect(b('musculos', null), {'tensao', 'cansaco'});
+      expect(b('hormonios', null), {'temperatura', 'apetite'});
+      expect(JournalKeys.wholeBodyAreas, ['pele', 'musculos', 'hormonios']);
+      expect(JournalKeys.bodyRegions, ['cabeca', 'peito', 'barriga', 'costas', 'membros']);
     });
 
     test('moods, persistence and triggers', () {
       expect(JournalKeys.moods, ['bem', 'normal', 'nao_tao_bem']);
+      expect(JournalKeys.newEntryMoods, ['bem', 'nao_tao_bem']);
+      expect(JournalKeys.sensations, ['dor', 'incomodo']);
       expect(JournalKeys.persistences, ['hoje', 'dias_semanas', 'meses_anos']);
       expect(JournalKeys.triggers, hasLength(10));
       expect(JournalKeys.physicalOnlyTriggers,
@@ -56,6 +79,12 @@ void main() {
         for (final p in JournalKeys.persistences) {
           expect(JournalLabels.persistence(l10n, p), isNot(p));
         }
+        for (final x in JournalKeys.sensations) {
+          expect(JournalLabels.sensation(l10n, x), isNot(x));
+        }
+        for (final a in ['emotional', 'physical']) {
+          expect(JournalLabels.axis(l10n, a), isNot(a));
+        }
       }
     });
 
@@ -64,21 +93,48 @@ void main() {
         clientId: 'abc',
         recordedAt: DateTime.utc(2026, 10, 27, 12),
         mood: 'nao_tao_bem',
+        area: 'physical',
         triggers: const ['outro'],
         triggerNote: 'x',
         transitionVariantIds: const ['time.1'],
         items: const [
           JournalItem(kind: 'condition', conditionId: 'c1', conditionLabel: 'Enxaqueca', intensity: 3),
-          JournalItem(kind: 'physical', optionKey: 'peito.respiracao.curta', bodySide: 'front', persistence: 'hoje', intensity: 2),
+          JournalItem(kind: 'physical', optionKey: 'peito.respiracao.curta', bodySide: 'front', sensation: 'dor', persistence: 'hoje', intensity: 2),
         ],
       );
       final body = entry.toRequestJson();
-      expect(body.keys.toSet(), {'clientId', 'recordedAt', 'mood', 'triggers', 'triggerNote', 'transitionVariantIds', 'items'});
+      expect(body.keys.toSet(), {'clientId', 'recordedAt', 'mood', 'area', 'triggers', 'triggerNote', 'transitionVariantIds', 'items'});
       expect(jsonEncode(body), isNot(contains('Enxaqueca')));
       final itemKeys = {
         for (final i in body['items'] as List) ...(i as Map).keys,
       };
-      expect(itemKeys.difference({'kind', 'optionKey', 'customLabel', 'conditionId', 'bodySide', 'persistence', 'intensity'}), isEmpty);
+      expect(itemKeys.difference({'kind', 'optionKey', 'customLabel', 'conditionId', 'bodySide', 'sensation', 'persistence', 'intensity'}), isEmpty);
+      expect((body['items'] as List).last['sensation'], 'dor');
+    });
+
+    test('old entries without area or sensation stay readable', () {
+      final old = JournalEntry.fromJson({
+        'clientId': 'old',
+        'recordedAt': '2026-10-01T12:00:00Z',
+        'mood': 'normal',
+        'items': [
+          {'kind': 'physical', 'optionKey': 'cabeca.pressao.temporas', 'bodySide': 'front', 'intensity': 2},
+        ],
+      });
+      expect(old.area, isNull);
+      expect(old.mood, 'normal');
+      expect(old.items.single.sensation, isNull);
+      expect(old.toRequestJson().containsKey('area'), isFalse);
+      expect((old.toRequestJson()['items'] as List).single.containsKey('sensation'), isFalse);
+      final round = JournalEntry.fromJson(
+        jsonDecode(jsonEncode(JournalEntry(
+          clientId: 'n',
+          recordedAt: DateTime.utc(2026, 10, 28),
+          mood: 'bem',
+          area: 'emotional',
+        ).toLocalJson())) as Map<String, dynamic>,
+      );
+      expect(round.area, 'emotional');
     });
   });
 

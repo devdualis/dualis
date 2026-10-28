@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -1586,24 +1587,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get jv2MoodNaoTaoBem => 'No tan bien';
 
   @override
-  String get jv2AreaQuestion => '¿Qué quieres registrar?';
-
-  @override
-  String get jv2AreaHint => 'Puedes marcar más de uno.';
-
-  @override
-  String get jv2AreaEmotional => 'Cómo me siento';
-
-  @override
-  String get jv2AreaEmotionalHint => 'Emociones y ánimo';
-
-  @override
-  String get jv2AreaPhysical => 'Mi cuerpo';
-
-  @override
-  String get jv2AreaPhysicalHint => 'Dónde siento molestia';
-
-  @override
   String get jv2AreaConditions => 'Mis condiciones';
 
   @override
@@ -1671,16 +1654,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get jv2MoreBodyQuestion => '¿Quieres marcar otra parte del cuerpo?';
 
   @override
-  String get jv2BodyQuestion => '¿Dónde sientes molestia ahora?';
+  String get jv2BodyQuestion => '¿Dónde sientes dolor o molestia?';
 
   @override
   String get jv2BodyHint => 'Toca una o más partes.';
 
   @override
-  String get jv2BodyFront => 'De frente';
+  String get jv2BodyFront => 'Frente';
 
   @override
-  String get jv2BodyBack => 'De espaldas';
+  String get jv2BodyBack => 'Espalda';
 
   @override
   String jv2ItemLimit(int max) {
@@ -1759,6 +1742,96 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get jv2RegionMembros => 'Brazos, piernas y manos';
+
+  @override
+  String get jv2AxisEmotional => 'Psicoemocional';
+
+  @override
+  String get jv2AxisPhysical => 'Físico';
+
+  @override
+  String get jv2WholeBody => 'En todo el cuerpo';
+
+  @override
+  String get jv2RegionPele => 'Piel';
+
+  @override
+  String get jv2RegionMusculos => 'Músculos';
+
+  @override
+  String get jv2RegionHormonios => 'Hormonas y metabolismo';
+
+  @override
+  String get jv2SensationQuestion => '¿Es dolor o molestia?';
+
+  @override
+  String get jv2SensationDor => 'Dolor';
+
+  @override
+  String get jv2SensationIncomodo => 'Molestia';
+
+  @override
+  String get jv2BranchCabecaNuca => 'Nuca';
+
+  @override
+  String get jv2BranchPeleCoceira => 'Picor o ardor';
+
+  @override
+  String get jv2BranchPeleAparencia => 'Aspecto de la piel';
+
+  @override
+  String get jv2BranchMusculosTensao => 'Tensión';
+
+  @override
+  String get jv2BranchMusculosCansaco => 'Cansancio muscular';
+
+  @override
+  String get jv2BranchHormoniosTemperatura => 'Temperatura';
+
+  @override
+  String get jv2BranchHormoniosApetite => 'Apetito y sed';
+
+  @override
+  String get jv2OptCabecaNucaRigida => 'Nuca rígida o pesada';
+
+  @override
+  String get jv2OptCabecaNucaPontada => 'Punzada en la parte de atrás';
+
+  @override
+  String get jv2OptPeleCoceiraCoceira => 'Picor';
+
+  @override
+  String get jv2OptPeleCoceiraArdencia => 'Ardor';
+
+  @override
+  String get jv2OptPeleAparenciaVermelhidao => 'Enrojecimiento';
+
+  @override
+  String get jv2OptPeleAparenciaManchas => 'Manchas';
+
+  @override
+  String get jv2OptMusculosTensaoRigidez => 'Rigidez';
+
+  @override
+  String get jv2OptMusculosTensaoCaibra => 'Calambre';
+
+  @override
+  String get jv2OptMusculosCansacoFraqueza => 'Debilidad';
+
+  @override
+  String get jv2OptMusculosCansacoDolorido => 'Adolorido';
+
+  @override
+  String get jv2OptHormoniosTemperaturaCalorao => 'Sofocos';
+
+  @override
+  String get jv2OptHormoniosTemperaturaFrio => 'Frío fuera de lo común';
+
+  @override
+  String get jv2OptHormoniosApetiteSede => 'Sed fuera de lo común';
+
+  @override
+  String get jv2OptHormoniosApetiteFome => 'Hambre fuera de lo común';
 
   @override
   String get jv2BranchCabecaPressao => 'Opresión, peso o presión';

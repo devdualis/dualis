@@ -1,3 +1,4 @@
+import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
 import 'package:dualis_mobile/features/journal/domain/journal_keys.dart';
 import 'package:dualis_mobile/features/journal/domain/journal_models.dart';
 import 'package:dualis_mobile/features/journal/presentation/controllers/journal_flow_state.dart';
@@ -6,6 +7,7 @@ import 'package:dualis_mobile/features/journal/presentation/screens/journal_flow
 import 'package:dualis_mobile/features/journal/presentation/widgets/body_region_map.dart';
 import 'package:dualis_mobile/l10n/app_localizations_pt.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'journal_test_helpers.dart';
@@ -17,6 +19,11 @@ void main() {
     await tapKey(tester, 'jv2_mood_nao_tao_bem');
   }
 
+  const physical = JournalFlowArgs(initialArea: JournalArea.physical);
+
+  ProviderContainer containerOf(WidgetTester tester) =>
+      ProviderScope.containerOf(tester.element(find.byType(MaterialApp)));
+
   /// Persistence "hoje" + intensity [level] for every row on the screen.
   Future<void> fillIntensity(WidgetTester tester, int count, int level) async {
     for (var i = 0; i < count; i++) {
@@ -25,16 +32,30 @@ void main() {
     }
   }
 
-  testWidgets('mood screen offers Bem, Normal and Não tão bem with emoji', (tester) async {
+  testWidgets('mood screen offers only Bem and Não tão bem, with icons and the axis', (tester) async {
     final h = JournalHarness();
     await pumpJournalFlow(tester, h);
 
     expect(find.text(pt.jv2MoodQuestion), findsOneWidget);
-    for (final mood in JournalKeys.moods) {
-      expect(find.byKey(Key('jv2_mood_$mood')), findsOneWidget);
-    }
-    expect(find.text('😊'), findsOneWidget);
-    expect(find.text('😕'), findsOneWidget);
+    expect(find.byKey(const Key('jv2_mood_bem')), findsOneWidget);
+    expect(find.byKey(const Key('jv2_mood_nao_tao_bem')), findsOneWidget);
+    expect(find.byKey(const Key('jv2_mood_normal')), findsNothing);
+    expect(find.text(pt.jv2MoodNormal), findsNothing);
+    // Icons, no emoji.
+    expect(find.text('😊'), findsNothing);
+    expect(find.text('😕'), findsNothing);
+    expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.sentiment_dissatisfied_rounded), findsOneWidget);
+    // Opened without an area: emotional axis.
+    expect(find.text(pt.jv2AxisEmotional), findsOneWidget);
+  });
+
+  testWidgets('physical card shows the Físico axis above the question', (tester) async {
+    final h = JournalHarness();
+    await pumpJournalFlow(tester, h, args: physical);
+
+    final axisLabel = tester.widget<Text>(find.byKey(const Key('jv2_axis_label')));
+    expect(axisLabel.data, pt.jv2AxisPhysical);
   });
 
   testWidgets('mood greeting uses the Home periods (00:48 is Boa noite)', (tester) async {
@@ -54,9 +75,26 @@ void main() {
     expect(find.textContaining('SUMMARY items=0 pending=false'), findsOneWidget);
     final body = h.remote.requestBodies.single;
     expect(body['mood'], 'bem');
+    expect(body['area'], 'emotional');
     expect(body['items'], isEmpty);
     expect(body['triggers'], isEmpty);
     expect(body['clientId'], isNotEmpty);
+    // Only the emotional axis is done on Home.
+    final home = containerOf(tester).read(triggerCheckInProvider);
+    expect(home.isEmotionalCompleted, isTrue);
+    expect(home.isPhysicalCompleted, isFalse);
+  });
+
+  testWidgets('Bem from the physical card completes only the physical axis', (tester) async {
+    final h = JournalHarness();
+    await pumpJournalFlow(tester, h, args: physical);
+
+    await tapKey(tester, 'jv2_mood_bem');
+
+    expect(h.remote.requestBodies.single['area'], 'physical');
+    final home = containerOf(tester).read(triggerCheckInProvider);
+    expect(home.isPhysicalCompleted, isTrue);
+    expect(home.isEmotionalCompleted, isFalse);
   });
 
   testWidgets('emotional path: time, branch, multi-select, custom, triggers, note', (tester) async {
@@ -64,9 +102,7 @@ void main() {
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
 
-    await tapKey(tester, 'jv2_area_emotional');
-    await tapKey(tester, 'jv2_continue');
-
+    // Straight to the time question: no "what to record" screen.
     expect(find.text(pt.jv2TimeQuestion), findsOneWidget);
     await tapKey(tester, 'jv2_time_futuro');
     expect(find.text(pt.jv2BranchFuturoMente), findsOneWidget);
@@ -110,6 +146,7 @@ void main() {
     expect(find.textContaining('SUMMARY items=3'), findsOneWidget);
     final body = h.remote.requestBodies.single;
     expect(body['mood'], 'nao_tao_bem');
+    expect(body['area'], 'emotional');
     expect(body['triggers'], ['trabalho', 'outro']);
     expect(body['triggerNote'], 'Reunião longa');
     expect(body['note'], 'Dia corrido');
@@ -121,6 +158,7 @@ void main() {
     ]);
     expect(items.last['customLabel'], 'Cansaço do trânsito');
     expect(items.every((i) => i['kind'] == 'emotional'), isTrue);
+    expect(items.every((i) => i['sensation'] == null), isTrue);
     expect(items.every((i) => i['intensity'] == 3 && i['persistence'] == 'hoje'), isTrue);
     // Variant ids of the phrases that were shown (UX analytics only).
     final variants = (body['transitionVariantIds'] as List).cast<String>();
@@ -134,8 +172,6 @@ void main() {
     final h = JournalHarness();
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
-    await tapKey(tester, 'jv2_area_emotional');
-    await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_time_passado');
     await tapKey(tester, 'jv2_branch_passado.tristeza');
     await tapKey(tester, 'jv2_option_passado.tristeza.saudade');
@@ -152,30 +188,36 @@ void main() {
     expect(find.byKey(const Key('jv2_item_row_1')), findsOneWidget);
   });
 
-  testWidgets('physical path: several regions on both sides, per-region options', (tester) async {
+  testWidgets('physical path: regions on both sides, sensation, per-region options', (tester) async {
     final h = JournalHarness();
-    await pumpJournalFlow(
-      tester,
-      h,
-      args: const JournalFlowArgs(initialArea: JournalArea.physical),
-    );
+    await pumpJournalFlow(tester, h, args: physical);
     await startNotSoGood(tester);
-    // The Home shortcut pre-selected "Meu corpo".
-    await tapKey(tester, 'jv2_continue');
 
+    // Straight to the body screen.
     expect(find.text(pt.jv2BodyQuestion), findsOneWidget);
+    expect(pt.jv2BodyQuestion, 'Onde você sente dor ou incômodo?');
     expect(find.byKey(const Key('jv2_region_costas')), findsNothing);
     await tapKey(tester, 'jv2_region_cabeca');
     await tapKey(tester, 'jv2_side_back');
     await tapKey(tester, 'jv2_region_costas');
     await tapKey(tester, 'jv2_continue');
 
-    // Region 1: cabeça (front).
-    expect(find.text(pt.jv2RegionCabeca), findsWidgets);
+    // Region 1: cabeça (front). Sensation first, branches wait for it.
+    expect(find.text(pt.jv2SensationQuestion), findsOneWidget);
+    expect(find.text('${pt.jv2RegionCabeca} · ${pt.jv2BodyFront}'), findsOneWidget);
+    expect(find.byKey(const Key('jv2_branch_cabeca.sentidos')), findsOneWidget);
+    expect(find.byKey(const Key('jv2_branch_cabeca.nuca')), findsNothing);
+    await tapKey(tester, 'jv2_branch_cabeca.pressao');
+    expect(find.text(pt.jv2SensationQuestion), findsOneWidget);
+    await tapKey(tester, 'jv2_sensation_dor');
     await tapKey(tester, 'jv2_branch_cabeca.pressao');
     await tapKey(tester, 'jv2_option_cabeca.pressao.temporas');
     await tapKey(tester, 'jv2_continue');
-    // Region 2: costas (back).
+    // Region 2: costas (back). Sensation is asked again.
+    final branch = find.byKey(const Key('jv2_branch_costas.rigidez'));
+    await tapKey(tester, 'jv2_branch_costas.rigidez');
+    expect(branch, findsOneWidget);
+    await tapKey(tester, 'jv2_sensation_incomodo');
     await tapKey(tester, 'jv2_branch_costas.rigidez');
     await tapKey(tester, 'jv2_option_costas.rigidez.lombar');
     await tapKey(tester, 'jv2_write_mine');
@@ -199,23 +241,84 @@ void main() {
     await tapKey(tester, 'jv2_save');
 
     final body = h.remote.requestBodies.single;
+    expect(body['area'], 'physical');
     expect(body['triggers'], isEmpty);
     final items = (body['items'] as List).cast<Map<String, dynamic>>();
-    expect(items.map((i) => [i['optionKey'], i['bodySide']]), [
-      ['cabeca.pressao.temporas', 'front'],
-      ['costas.rigidez.lombar', 'back'],
-      ['costas.custom', 'back'],
+    expect(items.map((i) => [i['optionKey'], i['bodySide'], i['sensation']]), [
+      ['cabeca.pressao.temporas', 'front', 'dor'],
+      ['costas.rigidez.lombar', 'back', 'incomodo'],
+      ['costas.custom', 'back', 'incomodo'],
     ]);
     expect(items.last['customLabel'], 'Peso no cóccix');
     expect(items.every((i) => i['kind'] == 'physical'), isTrue);
+    final home = containerOf(tester).read(triggerCheckInProvider);
+    expect(home.isPhysicalCompleted, isTrue);
+    expect(home.isEmotionalCompleted, isFalse);
+  });
+
+  testWidgets('head on the back side: pressão and nuca, never eyes/mouth/throat', (tester) async {
+    final h = JournalHarness();
+    await pumpJournalFlow(tester, h, args: physical);
+    await startNotSoGood(tester);
+    await tapKey(tester, 'jv2_side_back');
+    await tapKey(tester, 'jv2_region_cabeca');
+    await tapKey(tester, 'jv2_continue');
+
+    expect(find.text('${pt.jv2RegionCabeca} · ${pt.jv2BodyBack}'), findsOneWidget);
+    expect(find.byKey(const Key('jv2_branch_cabeca.pressao')), findsOneWidget);
+    expect(find.byKey(const Key('jv2_branch_cabeca.nuca')), findsOneWidget);
+    expect(find.byKey(const Key('jv2_branch_cabeca.sentidos')), findsNothing);
+    await tapKey(tester, 'jv2_sensation_dor');
+    await tapKey(tester, 'jv2_branch_cabeca.nuca');
+    expect(find.text(pt.jv2OptCabecaNucaRigida), findsOneWidget);
+    expect(find.text(pt.jv2OptCabecaNucaPontada), findsOneWidget);
+    await tapKey(tester, 'jv2_option_cabeca.nuca.rigida');
+    await tapKey(tester, 'jv2_continue');
+    await tapKey(tester, 'jv2_more_no');
+    await fillIntensity(tester, 1, 2);
+    await tapKey(tester, 'jv2_continue');
+    await tapKey(tester, 'jv2_skip');
+    await tapKey(tester, 'jv2_save');
+
+    final item = (h.remote.requestBodies.single['items'] as List).single as Map;
+    expect(item['optionKey'], 'cabeca.nuca.rigida');
+    expect(item['bodySide'], 'back');
+    expect(item['sensation'], 'dor');
+  });
+
+  testWidgets('whole-body areas are recorded without a side', (tester) async {
+    final h = JournalHarness();
+    await pumpJournalFlow(tester, h, args: physical);
+    await startNotSoGood(tester);
+
+    expect(find.text(pt.jv2WholeBody), findsOneWidget);
+    for (final area in JournalKeys.wholeBodyAreas) {
+      expect(find.byKey(Key('jv2_region_$area')), findsOneWidget);
+    }
+    await tapKey(tester, 'jv2_region_hormonios');
+    await tapKey(tester, 'jv2_continue');
+
+    expect(find.text(pt.jv2RegionHormonios), findsWidgets);
+    await tapKey(tester, 'jv2_sensation_incomodo');
+    await tapKey(tester, 'jv2_branch_hormonios.temperatura');
+    await tapKey(tester, 'jv2_option_hormonios.temperatura.calorao');
+    await tapKey(tester, 'jv2_continue');
+    await tapKey(tester, 'jv2_more_no');
+    await fillIntensity(tester, 1, 3);
+    await tapKey(tester, 'jv2_continue');
+    await tapKey(tester, 'jv2_skip');
+    await tapKey(tester, 'jv2_save');
+
+    final item = (h.remote.requestBodies.single['items'] as List).single as Map;
+    expect(item['optionKey'], 'hormonios.temperatura.calorao');
+    expect(item.containsKey('bodySide'), isFalse);
+    expect(item['sensation'], 'incomodo');
   });
 
   testWidgets('tapping the body map toggles the region', (tester) async {
     final h = JournalHarness();
-    await pumpJournalFlow(tester, h);
+    await pumpJournalFlow(tester, h, args: physical);
     await startNotSoGood(tester);
-    await tapKey(tester, 'jv2_area_physical');
-    await tapKey(tester, 'jv2_continue');
 
     final map = find.byKey(const Key('jv2_body_map_front'));
     final rect = tester.getRect(map);
@@ -230,14 +333,22 @@ void main() {
     expect(chip.selected, isTrue);
   });
 
-  testWidgets('a condition appears as a card and uses the full intensity screen', (tester) async {
+  testWidgets('a condition is a chip on the body screen and uses the full intensity screen',
+      (tester) async {
     final h = JournalHarness(
       conditions: const [UserCondition(id: 'c1', label: 'Enxaqueca')],
     );
-    await pumpJournalFlow(tester, h);
+    await pumpJournalFlow(tester, h, args: physical);
     await startNotSoGood(tester);
 
-    expect(find.text(pt.jv2ConditionCardQuestion('Enxaqueca')), findsOneWidget);
+    expect(find.text(pt.jv2AreaConditions), findsOneWidget);
+    expect(find.byKey(const Key('jv2_condition_add')), findsOneWidget);
+    expect(
+      tester.widget<FilterChip>(find.byKey(const Key('jv2_condition_c1'))).label,
+      isA<Text>().having((t) => t.data, 'data', 'Enxaqueca'),
+    );
+    final cont = find.byKey(const Key('jv2_continue'));
+    expect(tester.widget<FilledButton>(cont).onPressed, isNull);
     await tapKey(tester, 'jv2_condition_c1');
     await tapKey(tester, 'jv2_continue');
 
@@ -261,8 +372,6 @@ void main() {
     final h = JournalHarness(online: false);
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
-    await tapKey(tester, 'jv2_area_emotional');
-    await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_time_presente');
     await tapKey(tester, 'jv2_branch_presente.sobrecarga');
     await tapKey(tester, 'jv2_option_presente.sobrecarga.paciencia');
@@ -290,8 +399,6 @@ void main() {
     final h = JournalHarness();
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
-    await tapKey(tester, 'jv2_area_emotional');
-    await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_time_presente');
     await tapKey(tester, 'jv2_branch_presente.sobrecarga');
     await tapKey(tester, 'jv2_option_presente.sobrecarga.aperto');
@@ -330,8 +437,6 @@ void main() {
     h.remote.suggestedOptionKey = 'futuro.mente.antecipar';
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
-    await tapKey(tester, 'jv2_area_emotional');
-    await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_time_futuro');
     await tapKey(tester, 'jv2_branch_futuro.mente');
     await tapKey(tester, 'jv2_write_mine');
@@ -364,17 +469,16 @@ void main() {
 
   testWidgets('back returns to the previous screen with its answers', (tester) async {
     final h = JournalHarness();
-    await pumpJournalFlow(tester, h);
+    await pumpJournalFlow(tester, h, args: physical);
     await startNotSoGood(tester);
-    await tapKey(tester, 'jv2_area_emotional');
+    await tapKey(tester, 'jv2_region_cabeca');
     await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_back');
 
-    expect(find.text(pt.jv2AreaQuestion), findsOneWidget);
-    final tile = find.byKey(const Key('jv2_area_emotional'));
-    expect(
-      find.descendant(of: tile, matching: find.byIcon(Icons.check_circle_rounded)),
-      findsOneWidget,
-    );
+    expect(find.text(pt.jv2BodyQuestion), findsOneWidget);
+    final chip = tester.widget<FilterChip>(find.byKey(const Key('jv2_region_cabeca')));
+    expect(chip.selected, isTrue);
+    await tapKey(tester, 'jv2_back');
+    expect(find.text(pt.jv2MoodQuestion), findsOneWidget);
   });
 }
