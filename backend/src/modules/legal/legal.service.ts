@@ -307,13 +307,14 @@ export class LegalService {
             sectionId: '3-processors-international-transfer',
             title: '3. Encargados del Tratamiento y Transferencia Internacional',
             content:
-              'Para prestar el servicio compartimos datos únicamente con los siguientes encargados del tratamiento:',
+              'Compartimos datos únicamente con encargados del tratamiento contratados para prestar el servicio. Tratan los datos solo según nuestras instrucciones, con obligaciones de confidencialidad y seguridad:',
             bullets: [
-              'Google LLC (API Gemini): el texto de "escribir el mío" puede enviarse a Gemini solo para sugerir una opción ya existente del diario. La IA no evalúa su salud.',
-              'Google LLC (Cloud Vision): las fotos y PDF de exámenes y recetas que usted elige leer se envían a Cloud Vision para extraer el texto, que se procesa en servidores de Google en Estados Unidos o la Unión Europea. Después, Gemini (Vertex AI, región São Paulo) ordena ese texto, sin su nombre ni CPF. Google no usa estos datos para entrenar modelos.',
-              'Resend, Inc. (envío de correos): su correo electrónico, su nombre de pila y el código de verificación o de restablecimiento de contraseña se envían a Resend solo para entregar esos mensajes. No enviamos datos de salud por correo.',
-              'Transferencia internacional: la app puede usarse desde fuera de Brasil y parte del procesamiento ocurre fuera de su país. Se realiza con su consentimiento específico y con las garantías contractuales del proveedor (LGPD Art. 33; RGPD Art. 46, cláusulas contractuales tipo).',
-              'Proveedores de infraestructura en la nube (alojamiento y base de datos), sujetos a obligaciones de confidencialidad y seguridad.',
+              'Inteligencia artificial: el texto de "escribir el mío" puede enviarse a un proveedor de IA solo para sugerir una opción ya existente del diario. La IA no evalúa su salud.',
+              'Lectura de documentos: las fotos y PDF de exámenes y recetas que usted elige leer se envían a un proveedor de reconocimiento de texto, y un proveedor de IA ordena ese texto, sin su nombre ni CPF. Antes, la app le pide su consentimiento específico e indica el proveedor y el país donde se tratan los datos. Estos proveedores no pueden usar los datos para entrenar modelos.',
+              'Envío de correos: su correo electrónico, su nombre de pila y los códigos de verificación o de restablecimiento de contraseña se envían a un proveedor de correo solo para entregar esos mensajes. No enviamos datos de salud por correo.',
+              'Infraestructura en la nube: proveedores de alojamiento y base de datos.',
+              'Transferencia internacional: algunos encargados tratan datos fuera de Brasil, y la app puede usarse desde fuera de Brasil. Se realiza con su consentimiento específico y con las garantías contractuales del proveedor (LGPD Art. 33; RGPD Art. 46, cláusulas contractuales tipo).',
+              'Lista de encargados: puede pedir en cualquier momento la lista actualizada de encargados en contato@dualischeckup.com (LGPD Art. 18, VII).',
             ],
           },
           {
@@ -385,13 +386,15 @@ export class LegalService {
           {
             sectionId: '3-processors-international-transfer',
             title: '3. Processors & International Transfer',
-            content: 'We share data only with the following processors, to run the service:',
+            content:
+              'We share data only with processors hired to run the service. They handle data only on our instructions, under confidentiality and security obligations:',
             bullets: [
-              'Google LLC (Gemini API): text from "write my own" may be sent to Gemini only to suggest an existing diary option. The AI does not assess your health.',
-              'Google LLC (Cloud Vision): photos and PDFs of exams and prescriptions you choose to read are sent to Cloud Vision to extract the text, processed on Google servers in the United States or the European Union. Gemini (Vertex AI, São Paulo region) then organizes that text, without your name or CPF. Google does not use this data to train models.',
-              'Resend, Inc. (email delivery): your email address, first name and the verification or password-reset code are sent to Resend only to deliver those messages. We do not send health data by email.',
-              'International transfer: the app can be used outside Brazil and part of the processing happens outside your country. It is done with your specific consent and the provider\'s contractual safeguards (LGPD Art. 33; GDPR Art. 46, standard contractual clauses).',
-              'Cloud infrastructure providers (hosting and database), bound by confidentiality and security obligations.',
+              'Artificial intelligence: text from "write my own" may be sent to an AI provider only to suggest an existing diary option. The AI does not assess your health.',
+              'Document reading: photos and PDFs of exams and prescriptions you choose to read are sent to a text-recognition provider, and an AI provider organizes that text, without your name or CPF. Before that, the app asks for your specific consent and names the provider and the country where the data is processed. These providers may not use the data to train models.',
+              'Email delivery: your email address, first name and verification or password-reset codes are sent to an email provider only to deliver those messages. We do not send health data by email.',
+              'Cloud infrastructure: hosting and database providers.',
+              'International transfer: some processors handle data outside Brazil, and the app can be used outside Brazil. This is done with your specific consent and the provider\'s contractual safeguards (LGPD Art. 33; GDPR Art. 46, standard contractual clauses).',
+              'List of processors: you can ask for the current list of processors at any time at contato@dualischeckup.com (LGPD Art. 18, VII).',
             ],
           },
           {
@@ -465,13 +468,14 @@ export class LegalService {
           sectionId: '3-operadores-transferencia-internacional',
           title: '3. Operadores e Transferência Internacional',
           content:
-            'Compartilhamos dados apenas com os operadores abaixo, para a prestação do serviço:',
+            'Compartilhamos dados apenas com operadores contratados para prestar o serviço. Eles tratam os dados só conforme as nossas instruções, com obrigações de confidencialidade e segurança:',
           bullets: [
-            'Google LLC (API Gemini): o texto de "escrever o meu" pode ser enviado à Gemini só para sugerir uma opção já existente do diário. A IA não avalia a sua saúde.',
-            'Google LLC (Cloud Vision): as fotos e PDFs de exames e receitas que você escolhe ler são enviados ao Cloud Vision para extrair o texto, processado em servidores do Google nos Estados Unidos ou na União Europeia. Depois, a Gemini (Vertex AI, região São Paulo) organiza esse texto, sem o seu nome nem CPF. O Google não usa esses dados para treinar modelos.',
-            'Resend, Inc. (envio de e-mails): o seu e-mail, o seu primeiro nome e o código de verificação ou de redefinição de senha são enviados à Resend só para entregar essas mensagens. Não enviamos dados de saúde por e-mail.',
-            'Transferência internacional: o app pode ser usado fora do Brasil e parte do processamento ocorre fora do seu país. Isso é feito com o seu consentimento específico e com as garantias contratuais do fornecedor (LGPD Art. 33; RGPD Art. 46, cláusulas contratuais-padrão).',
-            'Provedores de infraestrutura em nuvem (hospedagem e banco de dados), sujeitos a obrigações de confidencialidade e segurança.',
+            'Inteligência artificial: o texto de "escrever o meu" pode ser enviado a um provedor de IA só para sugerir uma opção já existente do diário. A IA não avalia a sua saúde.',
+            'Leitura de documentos: as fotos e PDFs de exames e receitas que você escolhe ler são enviados a um provedor de reconhecimento de texto, e um provedor de IA organiza esse texto, sem o seu nome nem CPF. Antes, o app pede o seu consentimento específico e informa o provedor e o país onde os dados são tratados. Esses provedores não podem usar os dados para treinar modelos.',
+            'Envio de e-mails: o seu e-mail, o seu primeiro nome e os códigos de verificação ou de redefinição de senha são enviados a um provedor de e-mail só para entregar essas mensagens. Não enviamos dados de saúde por e-mail.',
+            'Infraestrutura em nuvem: provedores de hospedagem e banco de dados.',
+            'Transferência internacional: alguns operadores tratam dados fora do Brasil, e o app pode ser usado fora do Brasil. Isso é feito com o seu consentimento específico e com as garantias contratuais do fornecedor (LGPD Art. 33; RGPD Art. 46, cláusulas contratuais-padrão).',
+            'Lista de operadores: você pode pedir a qualquer momento a lista atualizada dos operadores pelo contato@dualischeckup.com (LGPD Art. 18, VII).',
           ],
         },
         {

@@ -1078,23 +1078,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyPolicySection3Body =>
-      'To provide the service, we share data only with:';
+      'We share data only with processors hired to run the service. They handle data only on our instructions, under confidentiality and security obligations:';
 
   @override
   String get privacyPolicySection3Bullet1 =>
-      'Google LLC (Gemini API): text from \"write my own\" may be sent to Gemini only to suggest an existing diary option. The AI does not assess your health.';
+      'Artificial intelligence: text from \"write my own\" may be sent to an AI provider only to suggest an existing diary option. The AI does not assess your health.';
 
   @override
   String get privacyPolicySection3Bullet2 =>
-      'International Transfer: This processing may take place on servers located outside Brazil (LGPD Art. 33).';
+      'Document reading: photos and PDFs of exams and prescriptions you choose to read are sent to a text-recognition provider, and an AI provider organizes that text, without your name or CPF. Before that, the app asks for your specific consent and names the provider and the country where the data is processed. These providers may not use the data to train models.';
 
   @override
   String get privacyPolicySection3Bullet3 =>
-      'Cloud Infrastructure: Hosting and database providers, bound by confidentiality and security obligations.';
+      'Email delivery: your email address, first name and verification or password-reset codes are sent to an email provider only to deliver those messages. We do not send health data by email.';
 
   @override
   String get privacyPolicySection3Bullet4 =>
-      'Resend, Inc. (email delivery): your email address, first name and the verification or password-reset code are sent to Resend only to deliver those messages. We do not send health data by email.';
+      'Cloud infrastructure: hosting and database providers.';
+
+  @override
+  String get privacyPolicySection3Bullet5 =>
+      'International transfer: some processors handle data outside Brazil, and the app can be used outside Brazil. This is done with your specific consent and the provider\'s contractual safeguards (LGPD Art. 33; GDPR Art. 46, standard contractual clauses).';
+
+  @override
+  String get privacyPolicySection3Bullet6 =>
+      'List of processors: you can ask for the current list of processors at any time at contato@dualischeckup.com (LGPD Art. 18, VII).';
 
   @override
   String get privacyPolicySection4Title => '4. Payments';

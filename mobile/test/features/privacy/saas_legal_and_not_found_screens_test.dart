@@ -64,7 +64,7 @@ void main() {
   });
 
   group('PrivacyPolicyScreen (SaaS Legal Requirement 3, 4, 5)', () {
-    testWidgets('renders LGPD Art. 11, DPO email, Gemini for diary chips, zero-card storage, and 72h breach plan',
+    testWidgets('renders LGPD Art. 11, DPO email, AI for diary chips, zero-card storage, and 72h breach plan',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestApp(const PrivacyPolicyScreen()));
       await tester.pumpAndSettle();
@@ -74,10 +74,15 @@ void main() {
       expect(find.textContaining('Artigo 11 da LGPD'), findsOneWidget);
 
       expect(find.textContaining('diário de bem-estar'), findsWidgets);
-      expect(find.textContaining('API Gemini'), findsOneWidget);
+      expect(find.textContaining('Inteligência artificial: '), findsOneWidget);
       expect(find.textContaining('opção já existente do diário'), findsWidgets);
       expect(find.textContaining('LGPD Art. 33'), findsOneWidget);
-      expect(find.textContaining('Resend, Inc. (envio de e-mails)'), findsOneWidget);
+      expect(find.textContaining('provedor de reconhecimento de texto'), findsOneWidget);
+      expect(find.textContaining('provedor de e-mail'), findsOneWidget);
+      expect(find.textContaining('LGPD Art. 18, VII'), findsOneWidget);
+      for (final provider in ['Google', 'Gemini', 'Vision', 'Resend']) {
+        expect(find.textContaining(provider), findsNothing, reason: provider);
+      }
 
       // Card data never stored; unverified PCI-DSS claim removed (L-07)
       expect(find.textContaining('Zero Armazenamento'), findsOneWidget);

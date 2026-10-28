@@ -1087,23 +1087,31 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get privacyPolicySection3Body =>
-      'Para prestar o serviço, compartilhamos dados apenas com:';
+      'Compartilhamos dados apenas com operadores contratados para prestar o serviço. Eles tratam os dados só conforme as nossas instruções, com obrigações de confidencialidade e segurança:';
 
   @override
   String get privacyPolicySection3Bullet1 =>
-      'Google LLC (API Gemini): o texto de \"escrever o meu\" pode ser enviado à Gemini só para sugerir uma opção já existente do diário. A IA não avalia a sua saúde.';
+      'Inteligência artificial: o texto de \"escrever o meu\" pode ser enviado a um provedor de IA só para sugerir uma opção já existente do diário. A IA não avalia a sua saúde.';
 
   @override
   String get privacyPolicySection3Bullet2 =>
-      'Transferência Internacional: Esse processamento pode ocorrer em servidores localizados fora do Brasil (LGPD Art. 33).';
+      'Leitura de documentos: as fotos e PDFs de exames e receitas que você escolhe ler são enviados a um provedor de reconhecimento de texto, e um provedor de IA organiza esse texto, sem o seu nome nem CPF. Antes, o app pede o seu consentimento específico e informa o provedor e o país onde os dados são tratados. Esses provedores não podem usar os dados para treinar modelos.';
 
   @override
   String get privacyPolicySection3Bullet3 =>
-      'Infraestrutura em Nuvem: Provedores de hospedagem e banco de dados, sujeitos a obrigações de confidencialidade e segurança.';
+      'Envio de e-mails: o seu e-mail, o seu primeiro nome e os códigos de verificação ou de redefinição de senha são enviados a um provedor de e-mail só para entregar essas mensagens. Não enviamos dados de saúde por e-mail.';
 
   @override
   String get privacyPolicySection3Bullet4 =>
-      'Resend, Inc. (envio de e-mails): o seu e-mail, o seu primeiro nome e o código de verificação ou de redefinição de senha são enviados à Resend só para entregar essas mensagens. Não enviamos dados de saúde por e-mail.';
+      'Infraestrutura em nuvem: provedores de hospedagem e banco de dados.';
+
+  @override
+  String get privacyPolicySection3Bullet5 =>
+      'Transferência internacional: alguns operadores tratam dados fora do Brasil, e o app pode ser usado fora do Brasil. Isso é feito com o seu consentimento específico e com as garantias contratuais do fornecedor (LGPD Art. 33; RGPD Art. 46, cláusulas contratuais-padrão).';
+
+  @override
+  String get privacyPolicySection3Bullet6 =>
+      'Lista de operadores: você pode pedir a qualquer momento a lista atualizada dos operadores pelo contato@dualischeckup.com (LGPD Art. 18, VII).';
 
   @override
   String get privacyPolicySection4Title => '4. Pagamentos';

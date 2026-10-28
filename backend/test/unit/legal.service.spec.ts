@@ -116,20 +116,23 @@ describe('LegalService - SaaS Legal Foundations', () => {
       expect(terms.sections[1].title).toBe('2. Natureza do Serviço');
     });
 
-    it.each(langs)('privacy policy uses LGPD Art. 11, I consent, discloses Gemini for diary chips, and Art. 33 (%s)', (lang) => {
+    it.each(langs)('privacy policy uses LGPD Art. 11, I consent, discloses AI for diary chips, and Art. 33 (%s)', (lang) => {
       const privacy = service.getPrivacyPolicy(lang);
       expect(privacy.lgpdCompliance.legalBases[0]).toContain('Art. 11, I');
       expect(privacy.lgpdCompliance.legalBases.join(' ')).not.toMatch(/VIII/);
       const serialized = JSON.stringify(privacy.sections);
-      expect(serialized).toContain('Gemini');
+      expect(serialized).toMatch(/provedor de IA|proveedor de IA|AI provider/);
       expect(serialized).not.toMatch(/organizarlas automáticamente por área|body area or mood/i);
       expect(serialized).toContain('Art. 33');
     });
 
-    it.each(langs)('privacy policy lists Resend as the email processor (%s)', (lang) => {
+    it.each(langs)('privacy policy describes processors by category, never by provider name (%s)', (lang) => {
       const privacy = service.getPrivacyPolicy(lang);
       const section3 = privacy.sections.find((s) => s.sectionId.startsWith('3-'));
-      expect(section3?.bullets?.some((b) => b.startsWith('Resend, Inc.'))).toBe(true);
+      expect(section3?.bullets).toHaveLength(6);
+      const serialized = JSON.stringify(privacy.sections);
+      expect(serialized).not.toMatch(/Google|Gemini|Vertex|Vision|Resend|Supabase/);
+      expect(serialized).toContain('Art. 18, VII');
     });
   });
 
