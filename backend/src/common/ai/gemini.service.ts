@@ -41,8 +41,8 @@ export class GeminiService {
     const project = read('VERTEX_PROJECT') || read('GOOGLE_CLOUD_PROJECT');
     const location = read('VERTEX_LOCATION') || read('GOOGLE_CLOUD_LOCATION') || DEFAULT_LOCATION;
     const clientEmail = read('VERTEX_CLIENT_EMAIL');
-    // Keys pasted into env files often carry literal "\n" instead of newlines.
-    const privateKey = read('VERTEX_PRIVATE_KEY')?.replace(/\\n/g, '\n');
+    // Pasted keys often carry wrapping quotes and literal "\n" instead of newlines.
+    const privateKey = read('VERTEX_PRIVATE_KEY')?.trim().replace(/^(["'])([\s\S]*)\1$/, '$2').replace(/\\n/g, '\n');
     const googleAuthOptions =
       clientEmail && privateKey
         ? { credentials: { client_email: clientEmail, private_key: privateKey } }
