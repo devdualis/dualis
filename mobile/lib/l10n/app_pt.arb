@@ -1718,11 +1718,6 @@
   },
   "histLinksEmpty": "Ainda não há dias com registro de tempo emocional e de corpo juntos neste período.",
   "histTimelineTitle": "Linha do tempo",
-  "histRegionPele": "Pele",
-  "histRegionMusculos": "Músculos",
-  "histRegionHormonios": "Hormônios e metabolismo",
-  "histSensationDor": "dor",
-  "histSensationIncomodo": "incômodo",
   "histEmotionalTitleWeek": "Como foi sua semana",
   "histPhysicalTitleWeek": "Esta semana",
   "histPhysicalTitleMonth": "Este mês"

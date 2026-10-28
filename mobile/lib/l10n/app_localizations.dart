@@ -4672,36 +4672,6 @@ abstract class AppLocalizations {
   /// **'Linha do tempo'**
   String get histTimelineTitle;
 
-  /// No description provided for @histRegionPele.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pele'**
-  String get histRegionPele;
-
-  /// No description provided for @histRegionMusculos.
-  ///
-  /// In pt, this message translates to:
-  /// **'Músculos'**
-  String get histRegionMusculos;
-
-  /// No description provided for @histRegionHormonios.
-  ///
-  /// In pt, this message translates to:
-  /// **'Hormônios e metabolismo'**
-  String get histRegionHormonios;
-
-  /// No description provided for @histSensationDor.
-  ///
-  /// In pt, this message translates to:
-  /// **'dor'**
-  String get histSensationDor;
-
-  /// No description provided for @histSensationIncomodo.
-  ///
-  /// In pt, this message translates to:
-  /// **'incômodo'**
-  String get histSensationIncomodo;
-
   /// No description provided for @histEmotionalTitleWeek.
   ///
   /// In pt, this message translates to:

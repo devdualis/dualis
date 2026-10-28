@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -2630,21 +2629,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get histTimelineTitle => 'Timeline';
-
-  @override
-  String get histRegionPele => 'Skin';
-
-  @override
-  String get histRegionMusculos => 'Muscles';
-
-  @override
-  String get histRegionHormonios => 'Hormones and metabolism';
-
-  @override
-  String get histSensationDor => 'pain';
-
-  @override
-  String get histSensationIncomodo => 'discomfort';
 
   @override
   String get histEmotionalTitleWeek => 'How your week went';

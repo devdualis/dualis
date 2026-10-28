@@ -776,11 +776,6 @@
   "histLinksTop": "Mismo día: {time} y {region} en {count, plural, =1{1 día} other{{count} días}}. Solo conteo.",
   "histLinksEmpty": "Aún no hay días con un tiempo emocional y una parte del cuerpo juntos en este período.",
   "histTimelineTitle": "Línea de tiempo",
-  "histRegionPele": "Piel",
-  "histRegionMusculos": "Músculos",
-  "histRegionHormonios": "Hormonas y metabolismo",
-  "histSensationDor": "dolor",
-  "histSensationIncomodo": "molestia",
   "histEmotionalTitleWeek": "Cómo fue tu semana",
   "histPhysicalTitleWeek": "Esta semana",
   "histPhysicalTitleMonth": "Este mes"

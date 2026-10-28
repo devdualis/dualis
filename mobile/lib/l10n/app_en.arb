@@ -776,11 +776,6 @@
   "histLinksTop": "Same day: {time} and {region} on {count, plural, =1{1 day} other{{count} days}}. Count only.",
   "histLinksEmpty": "No days yet with both an emotional time and a body part in this period.",
   "histTimelineTitle": "Timeline",
-  "histRegionPele": "Skin",
-  "histRegionMusculos": "Muscles",
-  "histRegionHormonios": "Hormones and metabolism",
-  "histSensationDor": "pain",
-  "histSensationIncomodo": "discomfort",
   "histEmotionalTitleWeek": "How your week went",
   "histPhysicalTitleWeek": "This week",
   "histPhysicalTitleMonth": "This month"

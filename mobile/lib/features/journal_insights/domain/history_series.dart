@@ -1,41 +1,27 @@
 import '../../../l10n/app_localizations.dart';
+import '../../journal/domain/journal_keys.dart';
 import '../../journal/presentation/journal_labels.dart';
 import 'journal_insights_models.dart';
 
 /// Periods offered on the history screen (chips 7 / 30 / 90 dias).
 const List<int> historyPeriods = [7, 30, 90];
 
-/// Areas without a side (journal v2.1): the whole body.
-const List<String> wholeBodyAreas = ['pele', 'musculos', 'hormonios'];
-
-/// Body regions and whole-body areas, in display order. Tolerates
-/// [JournalLabels.regions] already listing the whole-body areas.
-List<String> get historyRegions => [
-      ...JournalLabels.regions,
-      for (final area in wholeBodyAreas)
-        if (!JournalLabels.regions.contains(area)) area,
-    ];
+/// Body regions and whole-body areas, in display order.
+List<String> get historyRegions => JournalLabels.regions;
 
 /// Name of a body region or whole-body area, or null for unknown keys.
 String? historyRegionLabel(AppLocalizations l10n, String key) =>
-    JournalLabels.region(l10n, key) ??
-    switch (key) {
-      'pele' => l10n.histRegionPele,
-      'musculos' => l10n.histRegionMusculos,
-      'hormonios' => l10n.histRegionHormonios,
-      _ => null,
-    };
+    JournalLabels.region(l10n, key);
 
+/// Sensation in lower case, as it reads after the region ("· dor").
 String? historySensationLabel(AppLocalizations l10n, String? key) =>
-    switch (key) {
-      'dor' => l10n.histSensationDor,
-      'incomodo' => l10n.histSensationIncomodo,
-      _ => null,
-    };
+    JournalKeys.sensations.contains(key)
+        ? JournalLabels.sensation(l10n, key!).toLowerCase()
+        : null;
 
-/// Any marker, with the whole-body areas the shared labels may not know yet.
+/// Any marker: option, branch, region, area, time or trigger.
 String? historyMarkerLabel(AppLocalizations l10n, String key) =>
-    JournalLabels.marker(l10n, key) ?? historyRegionLabel(l10n, key);
+    JournalLabels.marker(l10n, key);
 
 /// First day (local midnight) of the [days]-day period ending on [today].
 DateTime periodStart(DateTime today, int days) =>
