@@ -1,0 +1,82 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"></head><body>
+<div class="board-title">Fase 14 · Exames, receitas e bulas</div>
+<div class="board-sub">A leitura automática só preenche. A pessoa confere cada valor. Sem cores de normal ou alterado, sem alertas e sem comentários da IA.</div>
+<div class="board">
+
+<!-- 1. Exames -->
+<div class="col"><div class="phone">
+  <div class="status"><span>9:41</span><div class="island"></div><div class="icons"><span class="ms">signal_cellular_alt</span><span class="ms">wifi</span><span class="ms">battery_full</span></div></div>
+  <div class="appbar"><span class="iconbtn ms">arrow_back</span><h1>Exames</h1><div class="help"><span class="ms fill">call</span></div></div>
+  <div class="content">
+    <div class="card shadow row" style="background:var(--navy-light);border-color:#C9DDF0"><div class="tile" style="background:#fff;color:var(--navy)"><span class="ms">sync</span></div><div class="grow"><div class="t1">Lendo seu documento…</div><div class="t2">Hemograma_out.pdf · leva até 1 minuto</div><div class="bar" style="margin-top:8px"><i style="width:60%"></i></div></div></div>
+    <div class="section">Guardados</div>
+    <div class="card"><div class="row"><div class="tile slate"><span class="ms">lab_profile</span></div><div class="grow"><div class="t1">Perfil lipídico</div><div class="t2">Laboratório Fleury · coleta 15/10/2026</div></div><span class="pill blue">Conferir 6</span></div></div>
+    <div class="card"><div class="row"><div class="tile slate"><span class="ms">lab_profile</span></div><div class="grow"><div class="t1">Glicemia em jejum</div><div class="t2">Lab. Delboni · coleta 02/05/2026</div></div><span class="pill done">Conferido</span></div></div>
+    <div class="card"><div class="row"><div class="tile slate"><span class="ms">image</span></div><div class="grow"><div class="t1">Raio-X tórax (só arquivo)</div><div class="t2">Guardado sem transcrição · 11/03/2026</div></div><span class="ms" style="color:#94A3B8">chevron_right</span></div></div>
+    <div class="section">Meus valores ao longo do tempo</div>
+    <div class="card row"><div class="tile blue"><span class="ms">table_rows</span></div><div class="grow"><div class="t1">Ver por item</div><div class="t2">Colesterol total, glicose, … em tabela</div></div><span class="ms" style="color:#94A3B8">chevron_right</span></div>
+  </div>
+  <div class="fab"><span class="ms">add_a_photo</span>Adicionar exame</div>
+  <div class="nav"><span class="sel"><span class="ms fill">home</span></span><span class="ms">assessment</span><span class="ms">insights</span><span class="ms">water_drop</span><span class="sos"><span class="ms">emergency</span></span></div>
+</div><div class="caption">Exames guardados<small>Foto ou PDF. A leitura roda em segundo plano. Também dá para só arquivar, sem transcrever.</small></div></div>
+
+<!-- 2. Conferir transcrição -->
+<div class="col"><div class="phone">
+  <div class="status"><span>9:41</span><div class="island"></div><div class="icons"><span class="ms">signal_cellular_alt</span><span class="ms">wifi</span><span class="ms">battery_full</span></div></div>
+  <div class="appbar"><span class="iconbtn ms">close</span><h1>Conferir valores</h1></div>
+  <div class="content" style="gap:10px">
+    <div class="row" style="gap:10px"><div style="width:70px;height:90px;border-radius:8px;background:repeating-linear-gradient(0deg,#fff 0 6px,#E2E8F0 6px 7px);border:1px solid var(--outline)"></div><div class="grow"><div class="t1">Perfil lipídico</div><div class="t2">Compare com o papel. Toque num valor para corrigir.</div><div class="t3" style="margin-top:6px;color:var(--blue-dark);font-weight:700">Ver documento original</div></div></div>
+    <div class="card" style="padding:8px 12px">
+      <table class="lab"><tr><th>Item</th><th>Valor</th><th>Referência impressa</th><th></th></tr>
+      <tr><td><b>Colesterol total</b></td><td>212 mg/dL</td><td class="t3">até 190</td><td><div class="check on"><span class="ms">check</span></div></td></tr>
+      <tr><td><b>HDL</b></td><td>48 mg/dL</td><td class="t3">acima de 40</td><td><div class="check on"><span class="ms">check</span></div></td></tr>
+      <tr><td><b>LDL</b></td><td><span class="field focus" style="padding:3px 6px;display:inline-block">138</span> mg/dL</td><td class="t3">até 130</td><td><div class="check"></div></td></tr>
+      <tr><td><b>Triglicerídeos</b></td><td>130 mg/dL</td><td class="t3">até 150</td><td><div class="check"></div></td></tr>
+      <tr><td><b>Não-HDL</b></td><td>164 mg/dL</td><td class="t3">até 160</td><td><div class="check"></div></td></tr>
+      <tr><td><b>VLDL</b></td><td>26 mg/dL</td><td class="t3">—</td><td><div class="check"></div></td></tr></table>
+    </div>
+    <div class="row" style="gap:10px"><div class="field grow"><label>Laboratório</label><div>Fleury</div></div><div class="field grow"><label>Data da coleta</label><div>15/10/2026</div></div></div>
+    <div class="note"><span class="ms">info</span><span>Os valores e as referências são os do laudo. O Dualis não diz se um resultado está bom ou ruim. Leve suas dúvidas a quem pediu o exame.</span></div>
+    <div class="btn" style="opacity:.45">Salvar (faltam 4 conferências)</div>
+  </div>
+</div><div class="caption">Conferência campo a campo<small>Cada linha precisa de um toque para confirmar. Sem cores, sem setas, sem alertas.</small></div></div>
+
+<!-- 3. Valores por item -->
+<div class="col"><div class="phone">
+  <div class="status"><span>9:41</span><div class="island"></div><div class="icons"><span class="ms">signal_cellular_alt</span><span class="ms">wifi</span><span class="ms">battery_full</span></div></div>
+  <div class="appbar"><span class="iconbtn ms">arrow_back</span><h1>Colesterol total</h1><div class="help"><span class="ms fill">call</span></div></div>
+  <div class="content">
+    <div class="t2">Valores que você conferiu, do mais recente ao mais antigo. A referência é a que cada laboratório imprimiu.</div>
+    <div class="card" style="padding:8px 12px">
+      <table class="lab"><tr><th>Data</th><th>Valor</th><th>Referência impressa</th><th>Laboratório</th></tr>
+      <tr><td>15/10/2026</td><td><b>212 mg/dL</b></td><td class="t3">até 190</td><td class="t3">Fleury</td></tr>
+      <tr><td>02/05/2026</td><td><b>198 mg/dL</b></td><td class="t3">até 190</td><td class="t3">Delboni</td></tr>
+      <tr><td>14/11/2025</td><td><b>205 mg/dL</b></td><td class="t3">&lt; 190</td><td class="t3">Fleury</td></tr>
+      <tr><td>09/03/2025</td><td><b>187 mg/dL</b></td><td class="t3">até 200</td><td class="t3">Lab. São Lucas</td></tr></table>
+    </div>
+    <div class="card row"><div class="tile slate"><span class="ms">edit_note</span></div><div class="grow"><div class="t1">Minha nota</div><div class="t2">"Dra. Paula pediu repetir em 6 meses"</div></div></div>
+    <div class="card row"><div class="tile blue"><span class="ms">picture_as_pdf</span></div><div class="grow"><div class="t1">Incluir no resumo em PDF</div><div class="t2">Sai na tabela, como está aqui</div></div></div>
+  </div>
+  <div class="nav"><span class="sel"><span class="ms fill">home</span></span><span class="ms">assessment</span><span class="ms">insights</span><span class="ms">water_drop</span><span class="sos"><span class="ms">emergency</span></span></div>
+</div><div class="caption">Valores ao longo do tempo<small>Tabela, não gráfico com faixas. Laboratórios diferentes usam referências diferentes, e a app não compara.</small></div></div>
+
+<!-- 4. Receita -->
+<div class="col"><div class="phone">
+  <div class="status"><span>9:41</span><div class="island"></div><div class="icons"><span class="ms">signal_cellular_alt</span><span class="ms">wifi</span><span class="ms">battery_full</span></div></div>
+  <div class="appbar"><span class="iconbtn ms">close</span><h1>Ler receita</h1></div>
+  <div class="content" style="gap:10px">
+    <div class="card row" style="background:var(--amber-bg);border-color:#FFE0A3"><span class="ms" style="color:var(--amber)">gavel</span><div class="t2" style="color:#5D4037"><b>Depende do consultor regulatório.</b> Fica desligado até a aprovação.</div></div>
+    <div class="t2">Encontramos isto na foto. Confira cada campo. Nada vira lembrete até você salvar.</div>
+    <div class="card">
+      <div class="row"><div class="grow"><div class="t3">Nome lido</div><div class="t1">Losartana potássica</div></div><div class="check on"><span class="ms">check</span></div></div><div class="divider"></div>
+      <div class="row"><div class="grow"><div class="t3">Concentração lida</div><div class="t1">50 mg</div></div><div class="check on"><span class="ms">check</span></div></div><div class="divider"></div>
+      <div class="row"><div class="grow"><div class="t3">Como tomar (texto da receita)</div><div class="t1">"1 comp. de 12/12h"</div></div><div class="check"></div></div><div class="divider"></div>
+      <div class="row"><div class="grow"><div class="t3">Horários (você escolhe)</div><div class="t1" style="color:var(--text2)">— toque para definir —</div></div><span class="ms" style="color:var(--blue)">edit</span></div>
+    </div>
+    <div class="note"><span class="ms">info</span><span>O Dualis copia o texto da receita. Ele não transforma "12/12h" em horários. Você define os horários.</span></div>
+    <div class="btn" style="opacity:.45">Criar lembrete (confira tudo)</div>
+    <div class="btn outline">Salvar só a foto da receita</div>
+  </div>
+</div><div class="caption">Leitor de receita (bloqueado)<small>Desenhado conforme o requisito, mas a proposta ao cliente pede o OK do consultor antes de ligar.</small></div></div>
+
+</div></body></html>
