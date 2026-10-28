@@ -143,19 +143,24 @@ class JournalEntryView {
   DateTime get day =>
       DateTime(recordedAt.year, recordedAt.month, recordedAt.day);
 
-  /// Markers counted in the summary: option, branch, bare time/region,
-  /// and `trigger:<key>`. Same set the server uses.
+  /// Markers counted in the summary. Same set as `dayMarkers` on the server:
+  /// physical → region (`cabeca`), emotional → branch (`futuro.mente`) or the
+  /// time (`futuro`) for a written item, plus `trigger:<key>`.
   Set<String> get markers {
     final result = <String>{};
     for (final item in items) {
       final key = item.optionKey;
       if (key == null || key.isEmpty) continue;
       final parts = key.split('.');
-      result.add(parts.first);
-      if (parts.length >= 2 && parts[1] != 'custom') {
-        result.add('${parts[0]}.${parts[1]}');
+      if (item.kind == 'physical') {
+        result.add(parts.first);
+      } else if (item.kind == 'emotional') {
+        result.add(
+          item.isCustom || parts.length < 2
+              ? parts.first
+              : '${parts[0]}.${parts[1]}',
+        );
       }
-      if (!item.isCustom) result.add(key);
     }
     for (final t in triggers) {
       result.add('trigger:$t');
@@ -226,21 +231,38 @@ class JournalSummary {
   /// not reachable. Each count is the number of days with that marker.
   factory JournalSummary.compute(List<JournalEntryView> entries) {
     final daysByMarker = markerDays(entries);
-    final byTime = <String, int>{};
-    final byRegion = <String, int>{};
-    final byOptionKey = <String, int>{};
-    final byTrigger = <String, int>{};
-    daysByMarker.forEach((marker, days) {
-      if (JournalLabels.times.contains(marker)) {
-        byTime[marker] = days.length;
-      } else if (JournalLabels.regions.contains(marker)) {
-        byRegion[marker] = days.length;
-      } else if (marker.startsWith('trigger:')) {
-        byTrigger[marker.substring(8)] = days.length;
-      } else {
-        byOptionKey[marker] = days.length;
+    final timeDays = <String, Set<DateTime>>{};
+    final regionDays = <String, Set<DateTime>>{};
+    final optionDays = <String, Set<DateTime>>{};
+    final triggerDays = <String, Set<DateTime>>{};
+    void mark(Map<String, Set<DateTime>> map, String key, DateTime day) {
+      map.putIfAbsent(key, () => <DateTime>{}).add(day);
+    }
+
+    for (final entry in entries) {
+      for (final item in entry.items) {
+        final key = item.optionKey;
+        if (key == null || key.isEmpty) continue;
+        final root = key.split('.').first;
+        if (item.kind == 'emotional') mark(timeDays, root, entry.day);
+        if (item.kind == 'physical') mark(regionDays, root, entry.day);
+        if (!item.isCustom) mark(optionDays, key, entry.day);
       }
-    });
+      for (final t in entry.triggers) {
+        mark(triggerDays, t, entry.day);
+      }
+    }
+
+    final byTime = {for (final e in timeDays.entries) e.key: e.value.length};
+    final byRegion = {
+      for (final e in regionDays.entries) e.key: e.value.length,
+    };
+    final byOptionKey = {
+      for (final e in optionDays.entries) e.key: e.value.length,
+    };
+    final byTrigger = {
+      for (final e in triggerDays.entries) e.key: e.value.length,
+    };
 
     // Pairs of markers recorded on the same day, counted in days.
     final pairs = <JournalCooccurrence>[];
@@ -321,6 +343,7 @@ List<String> cooccurrenceSentences(
 /// The summary endpoint may send triggers without the `trigger:` prefix.
 String _normalizeMarker(String key) {
   if (key.startsWith('trigger:')) return key;
+  if (key.startsWith('trigger.')) return 'trigger:${key.substring(8)}';
   if (JournalLabels.triggers.contains(key)) return 'trigger:$key';
   return key;
 }

@@ -217,7 +217,7 @@ void main() {
       ]);
       expect(
         find.text(
-            "Nos 3 dias em que você marcou 'Fico antecipando problemas', também marcou 'Cabeça e pescoço' em 2."),
+            "Nos 3 dias em que você marcou 'Mente acelerada', também marcou 'Cabeça e pescoço' em 2."),
         findsOneWidget,
       );
     });

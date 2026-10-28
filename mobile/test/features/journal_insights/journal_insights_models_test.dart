@@ -59,7 +59,7 @@ void main() {
     expect(summary.byRegion, {'cabeca': 2});
     expect(summary.byTrigger, {'sono': 1});
     final pair = summary.cooccurrence.firstWhere(
-        (c) => {c.a, c.b}.containsAll(['cabeca', 'futuro.mente.antecipar']));
+        (c) => {c.a, c.b}.containsAll(['cabeca', 'futuro.mente']));
     expect(pair.days, 2);
   });
 
@@ -73,8 +73,6 @@ void main() {
         l10n, JournalSummary.compute(entries), entries);
     expect(sentences, [
       "Nos 3 dias em que você marcou 'Mente acelerada', também marcou 'Cabeça e pescoço' em 2.",
-      "Nos 3 dias em que você marcou 'Fico antecipando problemas', também marcou 'Cabeça e pescoço' em 2.",
-      "Nos 3 dias em que você marcou 'Mente acelerada', também marcou 'Aperto, peso ou pressão' em 2.",
     ]);
     for (final s in sentences) {
       expect(s, isNot(matches(RegExp(r'porque|causa|indica|tend[eê]ncia'))));
@@ -103,23 +101,14 @@ void main() {
     expect(summary.byTrigger, {'sono': 1});
   });
 
-  test('local fallback emits option, branch, region, time and trigger: keys', () {
+  test('local fallback emits the same markers as the server', () {
     final entry = e(1, [head, mind], triggers: ['sono']);
-    expect(
-      entry.markers,
-      containsAll([
-        'cabeca',
-        'cabeca.pressao',
-        'cabeca.pressao.temporas',
-        'futuro',
-        'futuro.mente',
-        'futuro.mente.antecipar',
-        'trigger:sono',
-      ]),
-    );
-    final summary = JournalSummary.compute([entry]);
-    expect(summary.byOptionKey['cabeca.pressao'], 1);
-    expect(summary.byOptionKey['futuro.mente.antecipar'], 1);
+    expect(entry.markers, {'cabeca', 'futuro.mente', 'trigger:sono'});
+    final written = e(1, [
+      const JournalItemView(
+          kind: 'emotional', optionKey: 'futuro.custom', customLabel: 'X'),
+    ]);
+    expect(written.markers, {'futuro'});
   });
 
   test('client resolves branch, bare region/time and trigger: markers', () {
