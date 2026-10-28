@@ -14,6 +14,10 @@ class JournalItemView {
   final String? persistence;
   final int? intensity;
 
+  /// `dor` or `incomodo` for physical items of journal v2.1; null for old
+  /// items and for emotional or condition items.
+  final String? sensation;
+
   /// Text of an entry saved before journal v2 (`legacy: true`).
   final String? legacyLabel;
 
@@ -26,6 +30,7 @@ class JournalItemView {
     this.bodySide,
     this.persistence,
     this.intensity,
+    this.sensation,
     this.legacyLabel,
   });
 
@@ -52,6 +57,7 @@ class JournalItemView {
       bodySide: json['bodySide'] as String?,
       persistence: json['persistence'] as String?,
       intensity: (json['intensity'] as num?)?.toInt(),
+      sensation: json['sensation'] as String?,
       legacyLabel: json['legacyLabel'] as String?,
     );
   }
@@ -97,6 +103,9 @@ class JournalEntryView {
   final String id;
   final DateTime recordedAt;
   final String? mood;
+
+  /// `emotional`, `physical` or null (entries saved before journal v2.1).
+  final String? area;
   final List<String> triggers;
   final bool legacy;
   final List<JournalItemView> items;
@@ -106,6 +115,7 @@ class JournalEntryView {
     required this.id,
     required this.recordedAt,
     this.mood,
+    this.area,
     this.triggers = const [],
     this.legacy = false,
     this.items = const [],
@@ -129,6 +139,7 @@ class JournalEntryView {
           DateTime.tryParse(json['recordedAt'] as String? ?? '')?.toLocal() ??
               DateTime.now(),
       mood: json['mood'] as String?,
+      area: json['area'] as String?,
       triggers: (json['triggers'] as List<dynamic>? ?? const [])
           .map((e) => e.toString())
           .toList(),
@@ -315,6 +326,8 @@ List<String> cooccurrenceSentences(
   JournalSummary summary,
   List<JournalEntryView> entries, {
   int max = 3,
+  bool Function(String a, String b)? where,
+  String? Function(String marker)? labelOf,
 }) {
   final days = markerDays(entries);
   final sentences = <String>[];
@@ -322,6 +335,7 @@ List<String> cooccurrenceSentences(
     if (sentences.length >= max) break;
     var a = _normalizeMarker(pair.a);
     var b = _normalizeMarker(pair.b);
+    if (where != null && !where(a, b)) continue;
     final aDays = days[a]?.length ?? 0;
     final bDays = days[b]?.length ?? 0;
     // The marker seen on more days frames the sentence.
@@ -331,8 +345,9 @@ List<String> cooccurrenceSentences(
       b = swap;
     }
     final total = days[a]?.length ?? 0;
-    final labelA = JournalLabels.marker(l10n, a);
-    final labelB = JournalLabels.marker(l10n, b);
+    final label = labelOf ?? (String key) => JournalLabels.marker(l10n, key);
+    final labelA = label(a);
+    final labelB = label(b);
     if (labelA == null || labelB == null || total < pair.days) continue;
     if (pair.days <= 0) continue;
     sentences.add(l10n.xv2DashCooccurrence(total, labelA, labelB, pair.days));

@@ -22,16 +22,16 @@ import '../journal_labels.dart';
 import '../widgets/body_region_map.dart';
 import '../widgets/intensity_scale.dart';
 
-/// Optional starting point when the flow is opened from a Home shortcut.
+/// Starting point when the flow is opened from a Home card.
 class JournalFlowArgs {
-  /// Pre-selects this area after "Não tão bem".
+  /// Axis of the entry: the Home card that was tapped. Null = emotional.
   final JournalArea? initialArea;
 
   const JournalFlowArgs({this.initialArea});
 }
 
-/// Daily journal flow (strategy sections 5, 6, 8 and 18): few options per
-/// screen, emoji first, animated transitions. Saves what the user chose, in
+/// Daily journal flow (strategy sections 5, 6, 8 and 18): one axis per
+/// entry, few options per screen, animated transitions. Saves what the user chose, in
 /// their words. The universal help button is added by `UrgentHelpOverlay`.
 class JournalFlowScreen extends ConsumerStatefulWidget {
   final JournalFlowArgs args;
@@ -51,6 +51,8 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
 
   JournalFlowController get _controller =>
       ref.read(journalFlowControllerProvider.notifier);
+
+  JournalArea get _area => widget.args.initialArea ?? JournalArea.emotional;
 
   @override
   void dispose() {
@@ -96,11 +98,18 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
   }
 
   /// Marks today's check-in as done on Home, with the user's own words.
+  /// Only the axis of the entry is marked; entries without one (older
+  /// outbox items) keep marking both.
   void _updateHome(AppLocalizations l10n, JournalEntry entry) {
     final home = ref.read(triggerCheckInProvider.notifier);
+    final axes = switch (entry.area) {
+      JournalKeys.areaEmotional => const [TriageVertical.psicoEmocional],
+      JournalKeys.areaPhysical => const [TriageVertical.fisica],
+      _ => TriageVertical.values,
+    };
     if (entry.items.isEmpty) {
       final summary = JournalLabels.mood(l10n, entry.mood);
-      for (final v in TriageVertical.values) {
+      for (final v in axes) {
         home.completeStage(
           vertical: v,
           summary: summary,
@@ -111,7 +120,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       return;
     }
     void complete(TriageVertical vertical, Iterable<JournalItem> items) {
-      if (items.isEmpty) return;
+      if (items.isEmpty || !axes.contains(vertical)) return;
       home.completeStage(
         vertical: vertical,
         summary: items.map((i) => journalItemText(l10n, i)).join(' · '),
@@ -200,8 +209,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     switch (state.step) {
       case JournalStep.mood:
         return _moodStep(l10n, state);
-      case JournalStep.areas:
-        return _areasStep(l10n, state, conditions);
       case JournalStep.time:
         return _timeStep(l10n, state);
       case JournalStep.branch:
@@ -219,11 +226,9 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         return _moreStep(l10n, state, l10n.jv2MoreQuestion,
             _controller.answerMoreEmotional);
       case JournalStep.body:
-        return _bodyStep(l10n, state);
+        return _bodyStep(l10n, state, conditions);
       case JournalStep.regionBranch:
-        final region = state.currentRegion!.region;
-        return _branchStep(
-            l10n, state, JournalKeys.physicalTree[region]!, region);
+        return _regionBranchStep(l10n, state);
       case JournalStep.regionOptions:
         final region = state.currentRegion!.region;
         return _optionsStep(
@@ -257,24 +262,22 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       greeting.DayPeriod.evening => l10n.jv2GoodEvening,
     };
     final hello = firstName.isEmpty ? l10n.jv2Hello : l10n.jv2HelloName(firstName);
+    final emotional = _area == JournalArea.emotional;
     return _StepLayout(
       lead: '$hello $dayPart',
+      axisLabel: JournalLabels.axis(l10n, _area.key),
+      axisColor: emotional ? AppColors.dualisSymbolGreen : AppColors.dualisSymbolBlue,
       question: l10n.jv2MoodQuestion,
       children: [
-        for (final mood in JournalKeys.moods)
+        for (final mood in JournalKeys.newEntryMoods)
           _ChoiceTile(
             key: Key('jv2_mood_$mood'),
-            emoji: journalEmojis[mood],
+            leading: _MoodIcon(mood),
             label: JournalLabels.mood(l10n, mood),
             large: true,
             enabled: !state.isSaving,
             onTap: () {
-              if (_controller.chooseMood(mood)) {
-                _save();
-              } else if (widget.args.initialArea != null &&
-                  !state.areas.contains(widget.args.initialArea)) {
-                _controller.toggleArea(widget.args.initialArea!);
-              }
+              if (_controller.chooseMood(mood, area: _area)) _save();
             },
           ),
         if (state.isSaving)
@@ -282,56 +285,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             padding: EdgeInsets.all(16),
             child: Center(child: CircularProgressIndicator()),
           ),
-      ],
-    );
-  }
-
-  Widget _areasStep(
-    AppLocalizations l10n,
-    JournalFlowState state,
-    List<UserCondition> conditions,
-  ) {
-    return _StepLayout(
-      question: l10n.jv2AreaQuestion,
-      hint: l10n.jv2AreaHint,
-      bottom: _ContinueButton(
-        label: l10n.jv2Continue,
-        onPressed: state.hasAreaSelection
-            ? () => _controller.confirmAreas(conditions: conditions)
-            : null,
-      ),
-      children: [
-        _ChoiceTile(
-          key: const Key('jv2_area_emotional'),
-          emoji: journalEmojis['emotional'],
-          label: l10n.jv2AreaEmotional,
-          subtitle: l10n.jv2AreaEmotionalHint,
-          selected: state.areas.contains(JournalArea.emotional),
-          multi: true,
-          onTap: () => _controller.toggleArea(JournalArea.emotional),
-        ),
-        _ChoiceTile(
-          key: const Key('jv2_area_physical'),
-          emoji: journalEmojis['physical'],
-          label: l10n.jv2AreaPhysical,
-          subtitle: l10n.jv2AreaPhysicalHint,
-          selected: state.areas.contains(JournalArea.physical),
-          multi: true,
-          onTap: () => _controller.toggleArea(JournalArea.physical),
-        ),
-        if (conditions.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          _SectionLabel(l10n.jv2AreaConditions),
-          for (final c in conditions)
-            _ChoiceTile(
-              key: Key('jv2_condition_${c.id}'),
-              emoji: journalEmojis['condition'],
-              label: l10n.jv2ConditionCardQuestion(c.label),
-              selected: state.selectedConditionIds.contains(c.id),
-              multi: true,
-              onTap: () => _controller.toggleCondition(c.id),
-            ),
-        ],
       ],
     );
   }
@@ -368,6 +321,44 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             key: Key('jv2_branch_$root.$branch'),
             emoji: journalEmojis['$root.$branch'],
             label: JournalLabels.branch(l10n, '$root.$branch'),
+            onTap: () => _controller.chooseBranch(branch),
+          ),
+      ],
+    );
+  }
+
+  /// "É dor ou incômodo?" (required) and the branches of the region, for
+  /// the side it was marked on.
+  Widget _regionBranchStep(AppLocalizations l10n, JournalFlowState state) {
+    final current = state.currentRegion!;
+    final region = current.region;
+    final side = current.side;
+    final sideLabel = side == null
+        ? null
+        : (side == JournalKeys.sideBack ? l10n.jv2BodyBack : l10n.jv2BodyFront);
+    final rootLabel = JournalLabels.root(l10n, region);
+    final branches = JournalKeys.branchesFor(region, side);
+    final hasSensation = state.sensation != null;
+    return _StepLayout(
+      eyebrow: sideLabel == null ? rootLabel : '$rootLabel · $sideLabel',
+      lead: _phrase(l10n, state),
+      question: l10n.jv2SensationQuestion,
+      children: [
+        for (final sensation in JournalKeys.sensations)
+          _ChoiceTile(
+            key: Key('jv2_sensation_$sensation'),
+            label: JournalLabels.sensation(l10n, sensation),
+            selected: state.sensation == sensation,
+            onTap: () => _controller.chooseSensation(sensation),
+          ),
+        const SizedBox(height: 8),
+        _SectionLabel(l10n.jv2BranchQuestion, strong: true),
+        for (final branch in branches.keys)
+          _ChoiceTile(
+            key: Key('jv2_branch_$region.$branch'),
+            emoji: journalEmojis['$region.$branch'],
+            label: JournalLabels.branch(l10n, '$region.$branch'),
+            enabled: hasSensation,
             onTap: () => _controller.chooseBranch(branch),
           ),
       ],
@@ -541,7 +532,11 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     );
   }
 
-  Widget _bodyStep(AppLocalizations l10n, JournalFlowState state) {
+  Widget _bodyStep(
+    AppLocalizations l10n,
+    JournalFlowState state,
+    List<UserCondition> conditions,
+  ) {
     final selected = {for (final r in state.selectedRegions) r.region};
     final visible = BodyRegionMap.regionsFor(state.bodySide);
     return _StepLayout(
@@ -550,7 +545,9 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       hint: l10n.jv2BodyHint,
       bottom: _ContinueButton(
         label: l10n.jv2Continue,
-        onPressed: selected.isEmpty ? null : _controller.confirmRegions,
+        onPressed: state.hasBodySelection
+            ? () => _controller.confirmBody(conditions: conditions)
+            : null,
       ),
       children: [
         Center(
@@ -586,7 +583,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           runSpacing: 8,
           alignment: WrapAlignment.center,
           children: [
-            for (final region in JournalKeys.regions)
+            for (final region in JournalKeys.bodyRegions)
               if (visible.contains(region) || selected.contains(region))
                 FilterChip(
                   key: Key('jv2_region_$region'),
@@ -596,8 +593,51 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
                 ),
           ],
         ),
+        const SizedBox(height: 16),
+        _SectionLabel(l10n.jv2WholeBody),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final region in JournalKeys.wholeBodyAreas)
+              FilterChip(
+                key: Key('jv2_region_$region'),
+                label: Text(JournalLabels.root(l10n, region)),
+                selected: selected.contains(region),
+                onSelected: (_) => _controller.toggleRegion(region),
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _SectionLabel(l10n.jv2AreaConditions),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final c in conditions)
+              FilterChip(
+                key: Key('jv2_condition_${c.id}'),
+                label: Text(c.label),
+                selected: state.selectedConditionIds.contains(c.id),
+                onSelected: (_) => _controller.toggleCondition(c.id),
+              ),
+            ActionChip(
+              key: const Key('jv2_condition_add'),
+              avatar: const Icon(Icons.add_rounded, size: 18),
+              label: Text(l10n.jv2ConditionsAdd),
+              onPressed: _addCondition,
+            ),
+          ],
+        ),
       ],
     );
+  }
+
+  /// Opens "Minhas condições"; the list is read again on return.
+  Future<void> _addCondition() async {
+    await context.push(RoutePaths.myConditions);
+    if (!mounted) return;
+    ref.invalidate(userConditionsProvider);
   }
 
   Widget _intensityStep(AppLocalizations l10n, JournalFlowState state) {
@@ -811,6 +851,10 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
 class _StepLayout extends StatelessWidget {
   final String? eyebrow;
   final String? lead;
+
+  /// Short label between the lead and the question (the entry axis).
+  final String? axisLabel;
+  final Color? axisColor;
   final String? question;
   final String? hint;
   final List<Widget> children;
@@ -819,6 +863,8 @@ class _StepLayout extends StatelessWidget {
   const _StepLayout({
     this.eyebrow,
     this.lead,
+    this.axisLabel,
+    this.axisColor,
     this.question,
     this.hint,
     required this.children,
@@ -853,6 +899,18 @@ class _StepLayout extends StatelessWidget {
                   lead!,
                   key: const Key('jv2_phrase'),
                   style: GoogleFonts.plusJakartaSans(fontSize: 15, color: secondary),
+                ),
+              ],
+              if (axisLabel != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  axisLabel!,
+                  key: const Key('jv2_axis_label'),
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: axisColor ?? AppColors.dualisSymbolBlue,
+                  ),
                 ),
               ],
               if (question != null) ...[
@@ -911,8 +969,10 @@ class _SectionLabel extends StatelessWidget {
 
 class _ChoiceTile extends StatelessWidget {
   final String? emoji;
+
+  /// Drawn instead of [emoji] when set.
+  final Widget? leading;
   final String label;
-  final String? subtitle;
   final bool selected;
   final bool multi;
   final bool large;
@@ -922,8 +982,8 @@ class _ChoiceTile extends StatelessWidget {
   const _ChoiceTile({
     super.key,
     this.emoji,
+    this.leading,
     required this.label,
-    this.subtitle,
     this.selected = false,
     this.multi = false,
     this.large = false,
@@ -964,7 +1024,10 @@ class _ChoiceTile extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  if (emoji != null) ...[
+                  if (leading != null) ...[
+                    leading!,
+                    const SizedBox(width: 14),
+                  ] else if (emoji != null) ...[
                     Text(emoji!, style: TextStyle(fontSize: large ? 34 : 26)),
                     const SizedBox(width: 14),
                   ],
@@ -980,14 +1043,6 @@ class _ChoiceTile extends StatelessWidget {
                             color: enabled ? null : AppColors.textSecondaryLight,
                           ),
                         ),
-                        if (subtitle != null)
-                          Text(
-                            subtitle!,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
-                              color: AppColors.textSecondaryLight,
-                            ),
-                          ),
                       ],
                     ),
                   ),
@@ -1005,6 +1060,36 @@ class _ChoiceTile extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Mood icon: green check for "Bem", amber face for "Não tão bem". Same
+/// size and shape for both; nothing else on screen depends on the choice.
+class _MoodIcon extends StatelessWidget {
+  final String mood;
+
+  const _MoodIcon(this.mood);
+
+  static const Color _amber = Color(0xFFE0A100);
+
+  @override
+  Widget build(BuildContext context) {
+    final bem = mood == JournalKeys.moodBem;
+    final color = bem ? AppColors.dualisSymbolGreen : _amber;
+    return Container(
+      key: Key('jv2_mood_icon_$mood'),
+      width: 52,
+      height: 52,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(
+        bem ? Icons.check_circle_rounded : Icons.sentiment_dissatisfied_rounded,
+        color: color,
+        size: 32,
       ),
     );
   }

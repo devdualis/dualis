@@ -148,6 +148,13 @@
       "when": 1790275174095,
       "tag": "0019_journal_v2_profile_client_id",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1790275174096,
+      "tag": "0020_journal_v2_1_area_sensation",
+      "breakpoints": true
     }
   ]
 }

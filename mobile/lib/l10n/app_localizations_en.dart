@@ -481,9 +481,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navHome => 'Home';
 
   @override
-  String get navTodayOutcome => 'My Day';
-
-  @override
   String get navHistory => 'History & Map';
 
   @override
@@ -1573,24 +1570,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jv2MoodNaoTaoBem => 'Not so good';
 
   @override
-  String get jv2AreaQuestion => 'What would you like to record?';
-
-  @override
-  String get jv2AreaHint => 'You can pick more than one.';
-
-  @override
-  String get jv2AreaEmotional => 'How I feel';
-
-  @override
-  String get jv2AreaEmotionalHint => 'Emotions and mood';
-
-  @override
-  String get jv2AreaPhysical => 'My body';
-
-  @override
-  String get jv2AreaPhysicalHint => 'Where I feel discomfort';
-
-  @override
   String get jv2AreaConditions => 'My conditions';
 
   @override
@@ -1659,7 +1638,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Would you like to mark another part of the body?';
 
   @override
-  String get jv2BodyQuestion => 'Where do you feel discomfort right now?';
+  String get jv2BodyQuestion => 'Where do you feel pain or discomfort?';
 
   @override
   String get jv2BodyHint => 'Tap one or more parts.';
@@ -1749,6 +1728,96 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get jv2RegionMembros => 'Arms, legs and hands';
+
+  @override
+  String get jv2AxisEmotional => 'Emotional';
+
+  @override
+  String get jv2AxisPhysical => 'Physical';
+
+  @override
+  String get jv2WholeBody => 'All over the body';
+
+  @override
+  String get jv2RegionPele => 'Skin';
+
+  @override
+  String get jv2RegionMusculos => 'Muscles';
+
+  @override
+  String get jv2RegionHormonios => 'Hormones and metabolism';
+
+  @override
+  String get jv2SensationQuestion => 'Is it pain or discomfort?';
+
+  @override
+  String get jv2SensationDor => 'Pain';
+
+  @override
+  String get jv2SensationIncomodo => 'Discomfort';
+
+  @override
+  String get jv2BranchCabecaNuca => 'Back of the neck';
+
+  @override
+  String get jv2BranchPeleCoceira => 'Itching or burning';
+
+  @override
+  String get jv2BranchPeleAparencia => 'How the skin looks';
+
+  @override
+  String get jv2BranchMusculosTensao => 'Tension';
+
+  @override
+  String get jv2BranchMusculosCansaco => 'Tired muscles';
+
+  @override
+  String get jv2BranchHormoniosTemperatura => 'Temperature';
+
+  @override
+  String get jv2BranchHormoniosApetite => 'Appetite and thirst';
+
+  @override
+  String get jv2OptCabecaNucaRigida => 'Stiff or heavy neck';
+
+  @override
+  String get jv2OptCabecaNucaPontada => 'Sharp twinge at the back';
+
+  @override
+  String get jv2OptPeleCoceiraCoceira => 'Itching';
+
+  @override
+  String get jv2OptPeleCoceiraArdencia => 'Burning';
+
+  @override
+  String get jv2OptPeleAparenciaVermelhidao => 'Redness';
+
+  @override
+  String get jv2OptPeleAparenciaManchas => 'Spots';
+
+  @override
+  String get jv2OptMusculosTensaoRigidez => 'Stiffness';
+
+  @override
+  String get jv2OptMusculosTensaoCaibra => 'Cramp';
+
+  @override
+  String get jv2OptMusculosCansacoFraqueza => 'Weakness';
+
+  @override
+  String get jv2OptMusculosCansacoDolorido => 'Sore';
+
+  @override
+  String get jv2OptHormoniosTemperaturaCalorao => 'Hot flushes';
+
+  @override
+  String get jv2OptHormoniosTemperaturaFrio => 'Feeling colder than usual';
+
+  @override
+  String get jv2OptHormoniosApetiteSede => 'Thirstier than usual';
+
+  @override
+  String get jv2OptHormoniosApetiteFome => 'Hungrier than usual';
 
   @override
   String get jv2BranchCabecaPressao => 'Tightness, heaviness or pressure';
@@ -2485,4 +2554,88 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get jv2OutboxRejectedNotice =>
       'One entry could not be sent. Check it and try again.';
+
+  @override
+  String get histTabEmotional => 'Psycho-emotional';
+
+  @override
+  String get histTabPhysical => 'Physical';
+
+  @override
+  String histPeriodDays(int days) {
+    return '$days days';
+  }
+
+  @override
+  String histEmotionalTitle(int days) {
+    return 'Your last $days days';
+  }
+
+  @override
+  String histPhysicalTitle(int days) {
+    return 'Last $days days';
+  }
+
+  @override
+  String get histIntensitySubtitle => 'Intensity you marked, from 1 to 5';
+
+  @override
+  String get histChipHint => 'Tap a chip to show or hide its line.';
+
+  @override
+  String histLineShown(String label) {
+    return '$label, line shown';
+  }
+
+  @override
+  String histLineHidden(String label) {
+    return '$label, line hidden';
+  }
+
+  @override
+  String histOverlayChip(String label) {
+    return '+ $label';
+  }
+
+  @override
+  String get histTimeBarTitle => 'Past · Present · Future';
+
+  @override
+  String get histViewMap => 'Map';
+
+  @override
+  String get histViewLinks => 'Connections';
+
+  @override
+  String get histMapCaption => 'Color = how many days you marked';
+
+  @override
+  String get histNoPhysical => 'No body part marked in this period.';
+
+  @override
+  String histLinksTop(String time, String region, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return 'Same day: $time and $region on $_temp0. Count only.';
+  }
+
+  @override
+  String get histLinksEmpty =>
+      'No days yet with both an emotional time and a body part in this period.';
+
+  @override
+  String get histTimelineTitle => 'Timeline';
+
+  @override
+  String get histEmotionalTitleWeek => 'How your week went';
+
+  @override
+  String get histPhysicalTitleWeek => 'This week';
+
+  @override
+  String get histPhysicalTitleMonth => 'This month';
 }

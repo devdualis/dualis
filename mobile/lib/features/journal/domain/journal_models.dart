@@ -15,6 +15,9 @@ class JournalItem {
   /// the POST body and never sent to the AI.
   final String? conditionLabel;
   final String? bodySide;
+
+  /// `dor` or `incomodo` on physical items of new entries; null otherwise.
+  final String? sensation;
   final String? persistence;
   final int? intensity;
 
@@ -28,6 +31,7 @@ class JournalItem {
     this.conditionId,
     this.conditionLabel,
     this.bodySide,
+    this.sensation,
     this.persistence,
     this.intensity,
     this.legacyLabel,
@@ -52,6 +56,7 @@ class JournalItem {
     conditionId: conditionId,
     conditionLabel: conditionLabel,
     bodySide: bodySide,
+    sensation: sensation,
     persistence: clearPersistence ? null : (persistence ?? this.persistence),
     intensity: intensity ?? this.intensity,
     legacyLabel: legacyLabel,
@@ -64,6 +69,7 @@ class JournalItem {
     if (customLabel != null) 'customLabel': customLabel,
     if (conditionId != null) 'conditionId': conditionId,
     if (bodySide != null) 'bodySide': bodySide,
+    if (sensation != null) 'sensation': sensation,
     if (persistence != null) 'persistence': persistence,
     if (intensity != null) 'intensity': intensity,
   };
@@ -81,6 +87,7 @@ class JournalItem {
     conditionId: json['conditionId'] as String?,
     conditionLabel: (json['label'] ?? json['conditionLabel']) as String?,
     bodySide: json['bodySide'] as String?,
+    sensation: json['sensation'] as String?,
     persistence: json['persistence'] as String?,
     intensity: (json['intensity'] as num?)?.toInt(),
     legacyLabel: json['legacyLabel'] as String?,
@@ -94,6 +101,9 @@ class JournalEntry {
   final String clientId;
   final DateTime recordedAt;
   final String mood;
+
+  /// Axis this entry records (`emotional` / `physical`); null on old entries.
+  final String? area;
   final List<String> triggers;
   final String? triggerNote;
   final String? note;
@@ -109,6 +119,7 @@ class JournalEntry {
     required this.clientId,
     required this.recordedAt,
     required this.mood,
+    this.area,
     this.triggers = const [],
     this.triggerNote,
     this.note,
@@ -128,6 +139,7 @@ class JournalEntry {
     clientId: clientId,
     recordedAt: recordedAt,
     mood: mood,
+    area: area,
     triggers: triggers,
     triggerNote: triggerNote,
     note: note,
@@ -142,6 +154,7 @@ class JournalEntry {
     'clientId': clientId,
     'recordedAt': recordedAt.toUtc().toIso8601String(),
     'mood': mood,
+    if (area != null) 'area': area,
     'triggers': triggers,
     if (triggerNote != null && triggerNote!.isNotEmpty)
       'triggerNote': triggerNote,
@@ -162,6 +175,7 @@ class JournalEntry {
         DateTime.tryParse(json['recordedAt'] as String? ?? '')?.toLocal() ??
         DateTime.now(),
     mood: json['mood'] as String? ?? JournalKeys.moodNaoTaoBem,
+    area: json['area'] as String?,
     triggers: _stringList(json['triggers']),
     triggerNote: json['triggerNote'] as String?,
     note: json['note'] as String?,

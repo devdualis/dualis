@@ -45,6 +45,9 @@ export const BANNED_VOCABULARY: ReadonlyArray<string | RegExp> = [
   'isquemia',
   '☠️',
   '☠',
+  // Journal v2.1: never a user-facing label (the area is "Hormônios e metabolismo")
+  'endócrino',
+  'endócrina',
 ];
 
 export function findBannedVocabulary(text: string | null | undefined): string[] {

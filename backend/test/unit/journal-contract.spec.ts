@@ -20,6 +20,7 @@ const SRC = join(__dirname, '../../src');
 const CONTRACT_FILES = [
   'database/schema/journal.schema.ts',
   'database/migrations/0017_journal_v2.sql',
+  'database/migrations/0020_journal_v2_1_area_sensation.sql',
   'modules/journal/constants/journal-keys.constant.ts',
   'modules/journal/dto/journal.dto.ts',
   'modules/journal/journal-summary.ts',
@@ -51,10 +52,10 @@ describe('Journal v2 contract: no grouping, assessment or disorder names', () =>
   it('the three tables have only the contract columns', () => {
     const columns = (t: any) => getTableConfig(t).columns.map((c) => c.name).sort();
     expect(columns(journalEntries)).toEqual(
-      ['client_id', 'created_at', 'id', 'mood', 'note', 'profile_id', 'recorded_at', 'transition_variant_ids', 'trigger_note', 'triggers', 'user_id'].sort(),
+      ['area', 'client_id', 'created_at', 'id', 'mood', 'note', 'profile_id', 'recorded_at', 'transition_variant_ids', 'trigger_note', 'triggers', 'user_id'].sort(),
     );
     expect(columns(journalItems)).toEqual(
-      ['body_side', 'condition_id', 'custom_label', 'entry_id', 'id', 'intensity', 'kind', 'option_key', 'persistence'].sort(),
+      ['body_side', 'condition_id', 'custom_label', 'entry_id', 'id', 'intensity', 'kind', 'option_key', 'persistence', 'sensation'].sort(),
     );
     expect(columns(userConditions)).toEqual(['archived_at', 'created_at', 'id', 'label', 'profile_id', 'user_id'].sort());
   });
@@ -174,7 +175,7 @@ describe('Banned vocabulary list (strategy §15)', () => {
     for (const term of [
       'transtorno', 'TAG', 'TOC', 'TEPT', 'bipolar', 'ciclotimia', 'borderline', 'grupo clínico',
       'sintoma estruturado', 'esfera', 'vertical de tratamento', 'anedonia', 'radiculopatia',
-      'costocondrite', 'isquemia', '☠️',
+      'costocondrite', 'isquemia', '☠️', 'endócrino',
     ]) {
       expect(found(`texto com ${term} aqui`), term).toBe(true);
     }

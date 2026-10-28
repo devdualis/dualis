@@ -4,32 +4,28 @@ import '../../../../l10n/app_localizations.dart';
 
 enum DualisNavTab {
   home,
-  todayOutcome,
   history,
   hydration;
 }
 
 class DualisBottomNavBar extends StatelessWidget {
-  static const int emergencyIndex = 4;
+  static const int emergencyIndex = 3;
 
   final int currentIndex;
   final ValueChanged<int> onTap;
   final VoidCallback onEmergencyTap;
-  final bool hasCompletedToday;
 
   const DualisBottomNavBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
     required this.onEmergencyTap,
-    this.hasCompletedToday = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
     final homeLabel = l10n?.navHome ?? 'Início';
-    final todayOutcomeLabel = l10n?.navTodayOutcome ?? 'Resultado do Dia';
     final historyLabel = l10n?.navHistory ?? 'Histórico & Mapa';
     final hydrationLabel = l10n?.navHydration ?? 'Água';
     final emergencyLabel = l10n?.urgentHelpButton ?? 'Ajuda urgente';
@@ -66,23 +62,6 @@ class DualisBottomNavBar extends StatelessWidget {
             selectedIcon: const Icon(Icons.home_rounded, color: AppColors.clinicalTealDark),
             label: '',
             tooltip: homeLabel,
-          ),
-          NavigationDestination(
-            key: const Key('nav_destination_today_outcome'),
-            icon: Badge(
-              isLabelVisible: hasCompletedToday,
-              smallSize: 8,
-              backgroundColor: AppColors.clinicalTeal,
-              child: const Icon(Icons.assessment_outlined, color: AppColors.textSecondaryLight),
-            ),
-            selectedIcon: Badge(
-              isLabelVisible: hasCompletedToday,
-              smallSize: 8,
-              backgroundColor: AppColors.clinicalTeal,
-              child: const Icon(Icons.assessment_rounded, color: AppColors.clinicalTealDark),
-            ),
-            label: '',
-            tooltip: todayOutcomeLabel,
           ),
           NavigationDestination(
             key: const Key('nav_destination_history'),

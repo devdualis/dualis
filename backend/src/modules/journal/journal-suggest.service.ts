@@ -1,9 +1,12 @@
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { GeminiService } from '../../common/ai/gemini.service';
 import {
+  BodySide,
   EMOTIONAL_OPTION_KEYS,
   PHYSICAL_OPTION_KEYS,
   isCustomOptionKey,
+  isOptionKeyOnSide,
+  isWholeBodyOptionKey,
 } from './constants/journal-keys.constant';
 
 const NONE = 'none';
@@ -45,12 +48,34 @@ export const OPTION_TEXT_PT: Record<string, string> = {
   'membros.cansaco.pesados': 'Braços ou pernas cansados',
   'membros.formigamento.dormentes': 'Mãos ou pés formigando ou dormentes',
   'membros.formigamento.choque': 'Sensação de choque',
+  'cabeca.nuca.rigida': 'Nuca dura ou pesada',
+  'cabeca.nuca.pontada': 'Pontada na parte de trás',
+  'pele.coceira.coceira': 'Coceira',
+  'pele.coceira.ardencia': 'Ardência',
+  'pele.aparencia.vermelhidao': 'Vermelhidão',
+  'pele.aparencia.manchas': 'Manchas',
+  'musculos.tensao.rigidez': 'Rigidez',
+  'musculos.tensao.caibra': 'Cãibra',
+  'musculos.cansaco.fraqueza': 'Fraqueza',
+  'musculos.cansaco.dolorido': 'Dolorido',
+  'hormonios.temperatura.calorao': 'Calorões',
+  'hormonios.temperatura.frio': 'Frio fora do comum',
+  'hormonios.apetite.sede': 'Sede fora do comum',
+  'hormonios.apetite.fome': 'Fome fora do comum',
 };
 
-/** Catalog chips only (no `.custom` keys), optionally only those of one branch. */
-export function catalogKeys(kind: 'emotional' | 'physical', branch?: string): string[] {
+/**
+ * Catalog chips only (no `.custom` keys), optionally only those of one branch. With a
+ * side (physical), only chips the body map shows on that side, plus the whole-body ones.
+ */
+export function catalogKeys(kind: 'emotional' | 'physical', branch?: string, bodySide?: BodySide): string[] {
   const source = kind === 'physical' ? PHYSICAL_OPTION_KEYS : EMOTIONAL_OPTION_KEYS;
-  return source.filter((key) => !isCustomOptionKey(key) && (!branch || key.startsWith(`${branch}.`)));
+  return source.filter(
+    (key) =>
+      !isCustomOptionKey(key) &&
+      (!branch || key.startsWith(`${branch}.`)) &&
+      (kind !== 'physical' || !bodySide || isWholeBodyOptionKey(key) || isOptionKeyOnSide(key, bodySide)),
+  );
 }
 
 /**
@@ -112,7 +137,7 @@ function systemInstruction(kind: 'emotional' | 'physical', allowed: string[]): s
   const catalog = allowed.map((key) => `- ${key}: ${OPTION_TEXT_PT[key] ?? key}`).join('\n');
   const area =
     kind === 'physical'
-      ? 'how the body feels (head, chest, belly, back, arms and legs)'
+      ? 'how the body feels (head, chest, belly, back, arms and legs, skin, muscles, body temperature, thirst and appetite)'
       : 'how the person feels emotionally';
   return [
     `You file a short diary note about ${area} under one of the app's existing options.`,
@@ -145,8 +170,9 @@ export class JournalSuggestService {
     text: string,
     kind: 'emotional' | 'physical',
     branch?: string,
+    bodySide?: BodySide,
   ): Promise<{ optionKey: string | null }> {
-    const allowed = catalogKeys(kind, branch);
+    const allowed = catalogKeys(kind, branch, bodySide);
     const clean = deidentify(text);
     if (!clean || allowed.length === 0 || !this.gemini?.isAvailable) return { optionKey: null };
 

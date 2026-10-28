@@ -574,10 +574,6 @@
   "@navHome": {
     "description": "Bottom navigation Home label"
   },
-  "navTodayOutcome": "Meu Dia",
-  "@navTodayOutcome": {
-    "description": "Bottom navigation Today Outcome label"
-  },
   "navHistory": "Histórico & Mapa",
   "@navHistory": {
     "description": "Bottom navigation History label"
@@ -1190,12 +1186,6 @@
   "jv2MoodBem": "Bem",
   "jv2MoodNormal": "Normal",
   "jv2MoodNaoTaoBem": "Não tão bem",
-  "jv2AreaQuestion": "O que você quer registrar?",
-  "jv2AreaHint": "Você pode marcar mais de um.",
-  "jv2AreaEmotional": "Como me sinto",
-  "jv2AreaEmotionalHint": "Emoções e humor",
-  "jv2AreaPhysical": "Meu corpo",
-  "jv2AreaPhysicalHint": "Onde sinto desconforto",
   "jv2AreaConditions": "Minhas condições",
   "jv2ConditionCardQuestion": "Como você está com {label} hoje?",
   "@jv2ConditionCardQuestion": {
@@ -1222,17 +1212,19 @@
   "jv2SuggestBody": "Quer guardar como \"{option}\" em vez do texto escrito?",
   "@jv2SuggestBody": {
     "placeholders": {
-      "option": { "type": "String" }
+      "option": {
+        "type": "String"
+      }
     }
   },
   "jv2SuggestYes": "Usar essa opção",
   "jv2SuggestNo": "Manter o que escrevi",
   "jv2MoreQuestion": "Quer registrar mais alguma coisa?",
   "jv2MoreBodyQuestion": "Quer marcar outra parte do corpo?",
-  "jv2BodyQuestion": "Onde você sente desconforto agora?",
+  "jv2BodyQuestion": "Onde você sente dor ou incômodo?",
   "jv2BodyHint": "Toque em uma ou mais partes.",
-  "jv2BodyFront": "De frente",
-  "jv2BodyBack": "De costas",
+  "jv2BodyFront": "Frente",
+  "jv2BodyBack": "Costas",
   "jv2ItemLimit": "Você chegou ao limite de {max} itens neste registro.",
   "@jv2ItemLimit": {
     "placeholders": {
@@ -1264,6 +1256,36 @@
   "jv2RegionBarriga": "Barriga",
   "jv2RegionCostas": "Costas",
   "jv2RegionMembros": "Braços, pernas e mãos",
+  "jv2AxisEmotional": "Psicoemocional",
+  "jv2AxisPhysical": "Físico",
+  "jv2WholeBody": "No corpo todo",
+  "jv2RegionPele": "Pele",
+  "jv2RegionMusculos": "Músculos",
+  "jv2RegionHormonios": "Hormônios e metabolismo",
+  "jv2SensationQuestion": "É dor ou incômodo?",
+  "jv2SensationDor": "Dor",
+  "jv2SensationIncomodo": "Incômodo",
+  "jv2BranchCabecaNuca": "Nuca",
+  "jv2BranchPeleCoceira": "Coceira ou ardência",
+  "jv2BranchPeleAparencia": "Aparência da pele",
+  "jv2BranchMusculosTensao": "Tensão",
+  "jv2BranchMusculosCansaco": "Cansaço muscular",
+  "jv2BranchHormoniosTemperatura": "Temperatura",
+  "jv2BranchHormoniosApetite": "Apetite e sede",
+  "jv2OptCabecaNucaRigida": "Nuca dura ou pesada",
+  "jv2OptCabecaNucaPontada": "Pontada na parte de trás",
+  "jv2OptPeleCoceiraCoceira": "Coceira",
+  "jv2OptPeleCoceiraArdencia": "Ardência",
+  "jv2OptPeleAparenciaVermelhidao": "Vermelhidão",
+  "jv2OptPeleAparenciaManchas": "Manchas",
+  "jv2OptMusculosTensaoRigidez": "Rigidez",
+  "jv2OptMusculosTensaoCaibra": "Cãibra",
+  "jv2OptMusculosCansacoFraqueza": "Fraqueza",
+  "jv2OptMusculosCansacoDolorido": "Dolorido",
+  "jv2OptHormoniosTemperaturaCalorao": "Calorões",
+  "jv2OptHormoniosTemperaturaFrio": "Frio fora do comum",
+  "jv2OptHormoniosApetiteSede": "Sede fora do comum",
+  "jv2OptHormoniosApetiteFome": "Fome fora do comum",
   "jv2BranchCabecaPressao": "Aperto, peso ou pressão",
   "jv2BranchCabecaSentidos": "Olhos, boca ou garganta",
   "jv2BranchPeitoRespiracao": "Respiração diferente",
@@ -1622,5 +1644,81 @@
   },
   "xv2WaterDeleteLog": "Excluir registro",
   "jv2PendingSync": "Aguardando sincronizar",
-  "jv2OutboxRejectedNotice": "Um registro não pôde ser enviado. Revise e tente de novo."
+  "jv2OutboxRejectedNotice": "Um registro não pôde ser enviado. Revise e tente de novo.",
+  "histTabEmotional": "Psicoemocional",
+  "histTabPhysical": "Físico",
+  "histPeriodDays": "{days} dias",
+  "@histPeriodDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "histEmotionalTitle": "Seus últimos {days} dias",
+  "@histEmotionalTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "histPhysicalTitle": "Últimos {days} dias",
+  "@histPhysicalTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "histIntensitySubtitle": "Intensidade que você marcou, de 1 a 5",
+  "histChipHint": "Toque num chip para mostrar ou esconder a linha.",
+  "histLineShown": "{label}, linha visível",
+  "@histLineShown": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "histLineHidden": "{label}, linha escondida",
+  "@histLineHidden": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "histOverlayChip": "+ {label}",
+  "@histOverlayChip": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "histTimeBarTitle": "Passado · Presente · Futuro",
+  "histViewMap": "Mapa",
+  "histViewLinks": "Conexões",
+  "histMapCaption": "Cor = quantos dias você marcou",
+  "histNoPhysical": "Nenhuma parte do corpo marcada neste período.",
+  "histLinksTop": "Mesmo dia: {time} e {region} em {count, plural, =1{1 dia} other{{count} dias}}. Só contagem.",
+  "@histLinksTop": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "region": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "histLinksEmpty": "Ainda não há dias com registro de tempo emocional e de corpo juntos neste período.",
+  "histTimelineTitle": "Linha do tempo",
+  "histEmotionalTitleWeek": "Como foi sua semana",
+  "histPhysicalTitleWeek": "Esta semana",
+  "histPhysicalTitleMonth": "Este mês"
 }

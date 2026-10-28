@@ -6,20 +6,24 @@ import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../home/domain/home_greeting.dart';
+import '../../../journal_insights/domain/history_series.dart';
 import '../../../journal_insights/domain/journal_insights_models.dart';
 import '../../../journal/presentation/journal_labels.dart';
 import '../../../journal_insights/presentation/controllers/journal_insights_controller.dart';
-import '../../../journal_insights/presentation/widgets/journal_line_charts.dart';
+import '../../../journal_insights/presentation/widgets/history_widgets.dart';
 import '../../../journal_insights/presentation/widgets/journal_overview_widgets.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 
-/// Dashboard of the last 30 days (strategy §9): what the person recorded,
-/// counted and drawn, never interpreted.
+/// History of the last 7 / 30 / 90 days (strategy §9): what the person
+/// recorded, counted and drawn, never interpreted. Everything is computed on
+/// the device from the loaded entries.
 ///
-/// Top: Passado / Presente / Futuro bar and the body map with marked regions.
-/// Below: one intensity line per item (5 visible, then "ver mais"),
-/// count-only co-occurrence sentences (§9.2) and the entries list.
+/// Psicoemocional: one intensity line per emotional branch with chips that
+/// show or hide each line, then the Passado · Presente · Futuro bar.
+/// Físico: body map or time-to-region flow for the period, then one line per
+/// region (optional dashed emotional line) and count-only sentences (§9.2).
+/// Water lives on the Água tab only.
 class HistoricalDashboardScreen extends ConsumerWidget {
   final bool isEmbedded;
   const HistoricalDashboardScreen({super.key, this.isEmbedded = false});
@@ -97,24 +101,31 @@ class HistoricalDashboardScreen extends ConsumerWidget {
   }
 }
 
-class _DashboardBody extends ConsumerWidget {
+enum HistoryTab { emotional, physical }
+
+enum _PhysicalView { map, links }
+
+class _DashboardBody extends ConsumerStatefulWidget {
   final JournalInsightsState state;
 
   const _DashboardBody({required this.state});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_DashboardBody> createState() => _DashboardBodyState();
+}
+
+class _DashboardBodyState extends ConsumerState<_DashboardBody> {
+  HistoryTab _tab = HistoryTab.emotional;
+  int _days = 30;
+  _PhysicalView _physicalView = _PhysicalView.map;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final today = ref.read(homeClockProvider)();
-    const window = JournalInsightsState.windowDays;
-    final series = buildItemSeries(
-      l10n,
-      state.entries,
-      today: today,
-      windowDays: window,
-    );
-    final sentences =
-        cooccurrenceSentences(l10n, state.summary, state.entries);
+    final entries =
+        entriesInPeriod(widget.state.entries, today: today, days: _days);
+    final start = periodStart(today, _days);
 
     return ListView(
       key: const Key('journal_dashboard'),
@@ -122,10 +133,24 @@ class _DashboardBody extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       children: [
         const ActiveProfileBanner(),
+        HistorySegmented<HistoryTab>(
+          keyPrefix: 'history_tab',
+          options: [
+            (HistoryTab.emotional, l10n.histTabEmotional),
+            (HistoryTab.physical, l10n.histTabPhysical),
+          ],
+          selected: _tab,
+          onChanged: (tab) => setState(() => _tab = tab),
+        ),
+        const SizedBox(height: 12),
+        HistoryPeriodChips(
+          selected: _days,
+          onChanged: (days) => setState(() => _days = days),
+        ),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.only(top: 6, bottom: 10),
           child: Text(
-            l10n.xv2DashWindow(window),
+            l10n.xv2DashWindow(_days),
             key: const Key('dashboard_window_label'),
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
@@ -133,48 +158,192 @@ class _DashboardBody extends ConsumerWidget {
             ),
           ),
         ),
-        InsightsCard(
-          title: l10n.xv2DashTimeTitle,
-          child: TimeDistributionBar(byTime: state.summary.byTime),
-        ),
-        InsightsCard(
-          title: l10n.xv2DashBodyTitle,
-          child: JournalBodyMap(byRegion: state.summary.byRegion),
-        ),
-        InsightsCard(
-          title: l10n.xv2DashLinesTitle,
-          subtitle: l10n.xv2DashLinesSubtitle,
-          child: ItemIntensityLines(series: series, windowDays: window),
-        ),
-        if (sentences.isNotEmpty)
-          InsightsCard(
-            title: l10n.xv2DashTogetherTitle,
-            child: Column(
-              key: const Key('cooccurrence_sentences'),
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (final s in sentences)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      s,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        height: 1.4,
-                        color: AppColors.textPrimaryLight,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+        if (_tab == HistoryTab.emotional)
+          ..._emotionalTab(l10n, entries, today, start)
+        else
+          ..._physicalTab(l10n, entries, today, start),
         InsightsCard(
           title: l10n.xv2DashEntriesTitle,
-          child: _EntriesList(entries: state.entries),
+          child: _EntriesList(entries: entries),
         ),
       ],
     );
   }
+
+  List<Widget> _emotionalTab(
+    AppLocalizations l10n,
+    List<JournalEntryView> entries,
+    DateTime today,
+    DateTime start,
+  ) {
+    final lines = emotionalLines(l10n, entries, today: today, days: _days);
+    final summary = JournalSummary.compute(entries);
+    return [
+      InsightsCard(
+        title: _days == 7
+            ? l10n.histEmotionalTitleWeek
+            : l10n.histEmotionalTitle(_days),
+        subtitle: l10n.histIntensitySubtitle,
+        child: lines.isEmpty
+            ? _emptyText(l10n.xv2DashNoEmotional)
+            : ToggleableLines(
+                key: ValueKey('emotional_$_days'),
+                keyPrefix: 'emotional',
+                lines: lines,
+                palette: emotionalLineColors,
+                days: _days,
+                start: start,
+              ),
+      ),
+      InsightsCard(
+        title: l10n.histTimeBarTitle,
+        child: TimeDistributionBar(byTime: summary.byTime),
+      ),
+    ];
+  }
+
+  List<Widget> _physicalTab(
+    AppLocalizations l10n,
+    List<JournalEntryView> entries,
+    DateTime today,
+    DateTime start,
+  ) {
+    final lines = physicalLines(l10n, entries, today: today, days: _days);
+    final summary = JournalSummary.compute(entries);
+    final overlay = _overlayFor(
+      lines,
+      emotionalLines(l10n, entries, today: today, days: _days),
+    );
+    bool isRegion(String key) => historyRegions.contains(key);
+    final sentences = cooccurrenceSentences(
+      l10n,
+      summary,
+      entries,
+      where: (a, b) => isRegion(a) || isRegion(b),
+      labelOf: (key) => historyMarkerLabel(l10n, key),
+    );
+    final title = switch (_days) {
+      7 => l10n.histPhysicalTitleWeek,
+      30 => l10n.histPhysicalTitleMonth,
+      _ => l10n.histPhysicalTitle(_days),
+    };
+    return [
+      Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceLight,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.outlineLight),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimaryLight,
+                    ),
+                  ),
+                ),
+                HistorySegmented<_PhysicalView>(
+                  keyPrefix: 'physical_view',
+                  compact: true,
+                  options: [
+                    (_PhysicalView.map, l10n.histViewMap),
+                    (_PhysicalView.links, l10n.histViewLinks),
+                  ],
+                  selected: _physicalView,
+                  onChanged: (v) => setState(() => _physicalView = v),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (_physicalView == _PhysicalView.map)
+              HistoryBodyMap(byRegion: summary.byRegion)
+            else
+              TimeRegionFlow(links: timeRegionDays(entries)),
+          ],
+        ),
+      ),
+      InsightsCard(
+        title: l10n.histTimelineTitle,
+        subtitle: l10n.histIntensitySubtitle,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (lines.isEmpty)
+              _emptyText(l10n.histNoPhysical)
+            else
+              ToggleableLines(
+                key: ValueKey('physical_$_days'),
+                keyPrefix: 'physical',
+                lines: lines,
+                palette: physicalLineColors,
+                days: _days,
+                start: start,
+                overlay: overlay,
+              ),
+            if (sentences.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Column(
+                key: const Key('cooccurrence_sentences'),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final s in sentences)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        s,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          height: 1.4,
+                          color: AppColors.textPrimaryLight,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    ];
+  }
+
+  /// Emotional line offered as a dashed overlay: the one sharing the most
+  /// days with the first physical line, then the one with most days.
+  HistoryLine? _overlayFor(
+    List<HistoryLine> physical,
+    List<HistoryLine> emotional,
+  ) {
+    if (physical.isEmpty || emotional.isEmpty) return null;
+    final reference = physical.first.days;
+    HistoryLine? best;
+    var bestShared = -1;
+    for (final line in emotional) {
+      final shared = line.days.intersection(reference).length;
+      if (shared > bestShared ||
+          (shared == bestShared && line.days.length > best!.days.length)) {
+        best = line;
+        bestShared = shared;
+      }
+    }
+    return best;
+  }
+
+  Widget _emptyText(String text) => Text(
+        text,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 13,
+          color: AppColors.textSecondaryLight,
+        ),
+      );
 }
 
 class _EntriesList extends ConsumerWidget {

@@ -18,6 +18,20 @@ describe('JournalSuggestService', () => {
     );
   });
 
+  it('physical chips follow the side on screen; whole-body chips show on both sides', () => {
+    const front = catalogKeys('physical', undefined, 'front');
+    const back = catalogKeys('physical', undefined, 'back');
+    expect(front).toContain('cabeca.sentidos.olhos');
+    expect(front).not.toContain('cabeca.nuca.rigida');
+    expect(front).not.toContain('costas.rigidez.lombar');
+    expect(back).toContain('cabeca.nuca.pontada');
+    expect(back).not.toContain('cabeca.sentidos.garganta');
+    expect(back).not.toContain('peito.respiracao.curta');
+    for (const keys of [front, back]) expect(keys).toContain('hormonios.apetite.sede');
+    expect(catalogKeys('physical', 'cabeca.sentidos', 'back')).toEqual([]);
+    expect(catalogKeys('physical', 'pele.coceira', 'front')).toEqual(['pele.coceira.coceira', 'pele.coceira.ardencia']);
+  });
+
   it('returns null when Gemini is off', async () => {
     const service = new JournalSuggestService(undefined);
     expect(await service.suggest('estou muito chateado com a vida', 'emotional')).toEqual({

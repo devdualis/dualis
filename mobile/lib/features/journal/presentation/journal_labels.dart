@@ -13,6 +13,9 @@ class JournalLabels {
     'barriga',
     'costas',
     'membros',
+    'pele',
+    'musculos',
+    'hormonios',
   ];
   static const List<String> triggers = [
     'trabalho',
@@ -104,6 +107,34 @@ class JournalLabels {
         return l10n.jv2OptMembrosFormigamentoDormentes;
       case 'membros.formigamento.choque':
         return l10n.jv2OptMembrosFormigamentoChoque;
+      case 'cabeca.nuca.rigida':
+        return l10n.jv2OptCabecaNucaRigida;
+      case 'cabeca.nuca.pontada':
+        return l10n.jv2OptCabecaNucaPontada;
+      case 'pele.coceira.coceira':
+        return l10n.jv2OptPeleCoceiraCoceira;
+      case 'pele.coceira.ardencia':
+        return l10n.jv2OptPeleCoceiraArdencia;
+      case 'pele.aparencia.vermelhidao':
+        return l10n.jv2OptPeleAparenciaVermelhidao;
+      case 'pele.aparencia.manchas':
+        return l10n.jv2OptPeleAparenciaManchas;
+      case 'musculos.tensao.rigidez':
+        return l10n.jv2OptMusculosTensaoRigidez;
+      case 'musculos.tensao.caibra':
+        return l10n.jv2OptMusculosTensaoCaibra;
+      case 'musculos.cansaco.fraqueza':
+        return l10n.jv2OptMusculosCansacoFraqueza;
+      case 'musculos.cansaco.dolorido':
+        return l10n.jv2OptMusculosCansacoDolorido;
+      case 'hormonios.temperatura.calorao':
+        return l10n.jv2OptHormoniosTemperaturaCalorao;
+      case 'hormonios.temperatura.frio':
+        return l10n.jv2OptHormoniosTemperaturaFrio;
+      case 'hormonios.apetite.sede':
+        return l10n.jv2OptHormoniosApetiteSede;
+      case 'hormonios.apetite.fome':
+        return l10n.jv2OptHormoniosApetiteFome;
       default:
         return key;
     }
@@ -149,6 +180,20 @@ class JournalLabels {
         return l10n.jv2BranchMembrosCansaco;
       case 'membros.formigamento':
         return l10n.jv2BranchMembrosFormigamento;
+      case 'cabeca.nuca':
+        return l10n.jv2BranchCabecaNuca;
+      case 'pele.coceira':
+        return l10n.jv2BranchPeleCoceira;
+      case 'pele.aparencia':
+        return l10n.jv2BranchPeleAparencia;
+      case 'musculos.tensao':
+        return l10n.jv2BranchMusculosTensao;
+      case 'musculos.cansaco':
+        return l10n.jv2BranchMusculosCansaco;
+      case 'hormonios.temperatura':
+        return l10n.jv2BranchHormoniosTemperatura;
+      case 'hormonios.apetite':
+        return l10n.jv2BranchHormoniosApetite;
       default:
         return key;
     }
@@ -178,6 +223,12 @@ class JournalLabels {
         return l10n.jv2RegionCostas;
       case 'membros':
         return l10n.jv2RegionMembros;
+      case 'pele':
+        return l10n.jv2RegionPele;
+      case 'musculos':
+        return l10n.jv2RegionMusculos;
+      case 'hormonios':
+        return l10n.jv2RegionHormonios;
       default:
         return key;
     }
@@ -189,6 +240,9 @@ class JournalLabels {
         'barriga' => l10n.jv2RegionBarriga,
         'costas' => l10n.jv2RegionCostas,
         'membros' => l10n.jv2RegionMembros,
+        'pele' => l10n.jv2RegionPele,
+        'musculos' => l10n.jv2RegionMusculos,
+        'hormonios' => l10n.jv2RegionHormonios,
         _ => null,
       };
 
@@ -248,6 +302,30 @@ class JournalLabels {
         return l10n.jv2PersistenceDiasSemanas;
       case 'meses_anos':
         return l10n.jv2PersistenceMesesAnos;
+      default:
+        return key;
+    }
+  }
+
+  /// Text of a physical item's sensation (`dor` / `incomodo`).
+  static String sensation(AppLocalizations l10n, String key) {
+    switch (key) {
+      case 'dor':
+        return l10n.jv2SensationDor;
+      case 'incomodo':
+        return l10n.jv2SensationIncomodo;
+      default:
+        return key;
+    }
+  }
+
+  /// Name of an entry axis (`emotional` / `physical`).
+  static String axis(AppLocalizations l10n, String key) {
+    switch (key) {
+      case 'emotional':
+        return l10n.jv2AxisEmotional;
+      case 'physical':
+        return l10n.jv2AxisPhysical;
       default:
         return key;
     }

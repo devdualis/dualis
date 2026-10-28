@@ -1,11 +1,12 @@
 import 'package:flutter/foundation.dart';
 
+import '../../domain/journal_keys.dart';
 import '../../domain/journal_models.dart';
 
 /// Screens of the daily journal flow (strategy sections 5, 6, 8 and 18).
+/// The Home card picks the axis, so there is no "what to record" screen.
 enum JournalStep {
   mood,
-  areas,
   time,
   branch,
   options,
@@ -19,14 +20,23 @@ enum JournalStep {
   note,
 }
 
-/// Areas the user can choose to record after "Não tão bem".
-enum JournalArea { emotional, physical }
+/// Axis of one journal entry, picked on Home.
+enum JournalArea {
+  emotional,
+  physical;
 
-/// A region tapped on the body map and the side it was tapped on.
+  /// Contract value of the entry `area` field.
+  String get key => this == JournalArea.emotional
+      ? JournalKeys.areaEmotional
+      : JournalKeys.areaPhysical;
+}
+
+/// A region tapped on the body map and the side it was tapped on. Whole-body
+/// areas (skin, muscles, hormones) have no side.
 @immutable
 class SelectedRegion {
   final String region;
-  final String side;
+  final String? side;
   const SelectedRegion(this.region, this.side);
 
   @override
@@ -41,12 +51,11 @@ class SelectedRegion {
 class JournalFlowState {
   final JournalStep step;
   final String? mood;
-  final Set<JournalArea> areas;
+
+  /// Axis of this entry; set with the mood.
+  final JournalArea area;
   final Set<String> selectedConditionIds;
   final List<UserCondition> conditions;
-
-  /// Areas still to visit, in order.
-  final List<JournalArea> pendingAreas;
 
   // Emotional path.
   final String? time;
@@ -56,6 +65,9 @@ class JournalFlowState {
   final String bodySide;
   final List<SelectedRegion> selectedRegions;
   final int regionIndex;
+
+  /// "Dor" or "Incômodo" for the region on screen.
+  final String? sensation;
 
   /// Options and custom labels picked on the current options screen.
   final Set<String> selectedOptions;
@@ -78,15 +90,15 @@ class JournalFlowState {
   const JournalFlowState({
     this.step = JournalStep.mood,
     this.mood,
-    this.areas = const {},
+    this.area = JournalArea.emotional,
     this.selectedConditionIds = const {},
     this.conditions = const [],
-    this.pendingAreas = const [],
     this.time,
     this.branch,
     this.bodySide = 'front',
     this.selectedRegions = const [],
     this.regionIndex = 0,
+    this.sensation,
     this.selectedOptions = const {},
     this.customLabels = const [],
     this.items = const [],
@@ -112,8 +124,9 @@ class JournalFlowState {
             (i.kind == 'condition' || i.persistence != null),
       );
 
-  bool get hasAreaSelection =>
-      areas.isNotEmpty || selectedConditionIds.isNotEmpty;
+  /// Body screen: a region or a condition is enough to continue.
+  bool get hasBodySelection =>
+      selectedRegions.isNotEmpty || selectedConditionIds.isNotEmpty;
 
   bool get hasOptionSelection =>
       selectedOptions.isNotEmpty || customLabels.isNotEmpty;
@@ -121,16 +134,17 @@ class JournalFlowState {
   JournalFlowState copyWith({
     JournalStep? step,
     String? mood,
-    Set<JournalArea>? areas,
+    JournalArea? area,
     Set<String>? selectedConditionIds,
     List<UserCondition>? conditions,
-    List<JournalArea>? pendingAreas,
     String? time,
     String? branch,
     bool clearBranch = false,
     String? bodySide,
     List<SelectedRegion>? selectedRegions,
     int? regionIndex,
+    String? sensation,
+    bool clearSensation = false,
     Set<String>? selectedOptions,
     List<String>? customLabels,
     List<JournalItem>? items,
@@ -146,15 +160,15 @@ class JournalFlowState {
     return JournalFlowState(
       step: step ?? this.step,
       mood: mood ?? this.mood,
-      areas: areas ?? this.areas,
+      area: area ?? this.area,
       selectedConditionIds: selectedConditionIds ?? this.selectedConditionIds,
       conditions: conditions ?? this.conditions,
-      pendingAreas: pendingAreas ?? this.pendingAreas,
       time: time ?? this.time,
       branch: clearBranch ? null : (branch ?? this.branch),
       bodySide: bodySide ?? this.bodySide,
       selectedRegions: selectedRegions ?? this.selectedRegions,
       regionIndex: regionIndex ?? this.regionIndex,
+      sensation: clearSensation ? null : (sensation ?? this.sensation),
       selectedOptions: selectedOptions ?? this.selectedOptions,
       customLabels: customLabels ?? this.customLabels,
       items: items ?? this.items,
