@@ -102,11 +102,11 @@ describe('CreateJournalEntryDto validation', () => {
     expect(withItem({ kind: 'condition', conditionId: '11111111-1111-4111-8111-111111111111', optionKey: 'futuro.custom', intensity: 1 })).toContain('journalItemShape');
   });
 
-  it('limits: 12 items, customLabel 40, triggerNote 60', () => {
+  it('limits: 12 items, customLabel 80, triggerNote 60', () => {
     const item = baseEntry.items[0];
     expect(errorsOf({ ...baseEntry, items: Array(12).fill(item) })).toEqual([]);
     expect(errorsOf({ ...baseEntry, items: Array(13).fill(item) })).toContain('arrayMaxSize');
-    expect(withItem({ kind: 'emotional', optionKey: 'futuro.custom', customLabel: 'a'.repeat(41), persistence: 'hoje', intensity: 1 })).toContain('maxLength');
+    expect(withItem({ kind: 'emotional', optionKey: 'futuro.custom', customLabel: 'a'.repeat(81), persistence: 'hoje', intensity: 1 })).toContain('maxLength');
     expect(errorsOf({ ...baseEntry, triggerNote: 'a'.repeat(61) })).toContain('maxLength');
   });
 

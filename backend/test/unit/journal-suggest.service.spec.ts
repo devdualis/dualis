@@ -54,6 +54,9 @@ describe('JournalSuggestService', () => {
     expect(deidentify('liga 11 98765-4321 ou ana.b@mail.com')).toBe('liga [numero] ou [email]');
     expect(deidentify('cpf 123.456.789-00 www.site.com @ana_b')).toBe('cpf [numero] [link] [usuario]');
     expect(deidentify('Minha cabeça está pesada')).toBe('Minha cabeça está pesada');
+    expect(deidentify('Ana disse que estou cansada')).toBe('[nome] disse que estou cansada');
+    expect(deidentify('Hoje acordei mal. Sebastião brigou comigo')).toBe('Hoje acordei mal. [nome] brigou comigo');
+    expect(deidentify('Rosa é minha cor favorita')).toBe('Rosa é minha cor favorita');
   });
 
   it('sends only the de-identified text, as its own content, never inside the instructions', async () => {
@@ -67,5 +70,22 @@ describe('JournalSuggestService', () => {
     expect(call.systemInstruction).not.toContain('minha cabeça');
     expect(call.systemInstruction).toContain('cabeca.pressao.latejando: Latejando');
     expect(call.schema.properties.optionKey.enum).toEqual([...catalogKeys('physical'), 'none']);
+  });
+
+  it('only offers the options of the branch on screen', async () => {
+    expect(catalogKeys('emotional', 'futuro.mente')).toEqual(['futuro.mente.antecipar', 'futuro.mente.cobranca']);
+    const generateJson = vi.fn().mockResolvedValue({ optionKey: 'futuro.medo.desanimo' });
+    const service = new JournalSuggestService({ isAvailable: true, generateJson } as any);
+
+    expect(await service.suggest('desanimada', 'emotional', 'futuro.mente')).toEqual({ optionKey: null });
+    expect(generateJson.mock.calls[0][0].schema.properties.optionKey.enum).toEqual([
+      'futuro.mente.antecipar',
+      'futuro.mente.cobranca',
+      'none',
+    ]);
+
+    generateJson.mockClear();
+    expect(await service.suggest('dor', 'physical', 'nada.disso')).toEqual({ optionKey: null });
+    expect(generateJson).not.toHaveBeenCalled();
   });
 });

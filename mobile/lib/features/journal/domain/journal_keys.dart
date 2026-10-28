@@ -129,7 +129,7 @@ class JournalKeys {
   ];
 
   // Limits from the contract.
-  static const int customLabelMaxLength = 40;
+  static const int customLabelMaxLength = 80;
   static const int conditionLabelMaxLength = 40;
   static const int triggerNoteMaxLength = 60;
 

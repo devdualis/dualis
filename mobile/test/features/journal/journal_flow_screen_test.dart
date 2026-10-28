@@ -327,7 +327,7 @@ void main() {
 
   testWidgets('Gemini catalog suggestion can replace the written label', (tester) async {
     final h = JournalHarness();
-    h.remote.suggestedOptionKey = 'futuro.medo.desanimo';
+    h.remote.suggestedOptionKey = 'futuro.mente.antecipar';
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
     await tapKey(tester, 'jv2_area_emotional');
@@ -340,10 +340,16 @@ void main() {
       'estou muito chateado com a vida',
     );
     await tapKey(tester, 'jv2_custom_add');
+    expect(h.remote.suggestRequests.single,
+        {'text': 'estou muito chateado com a vida', 'kind': 'emotional', 'branch': 'futuro.mente'});
     expect(find.byKey(const Key('jv2_suggest_dialog')), findsOneWidget);
-    expect(find.textContaining(pt.jv2OptFuturoMedoDesanimo), findsOneWidget);
+    expect(find.textContaining(pt.jv2OptFuturoMenteAntecipar), findsWidgets);
     await tapKey(tester, 'jv2_suggest_yes');
     expect(find.byKey(const Key('jv2_custom_chip_estou muito chateado com a vida')), findsNothing);
+    // The accepted option belongs to the branch on screen, so it shows as selected here.
+    final dynamic chosen =
+        tester.widget(find.byKey(const Key('jv2_option_futuro.mente.antecipar')));
+    expect(chosen.selected, isTrue);
     await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_more_no');
     await fillIntensity(tester, 1, 2);
@@ -352,7 +358,7 @@ void main() {
     await tapKey(tester, 'jv2_save');
     final items = (h.remote.requestBodies.single['items'] as List)
         .cast<Map<String, dynamic>>();
-    expect(items.single['optionKey'], 'futuro.medo.desanimo');
+    expect(items.single['optionKey'], 'futuro.mente.antecipar');
     expect(items.single['customLabel'], isNull);
   });
 

@@ -97,7 +97,7 @@ export const journalItems = pgTable(
       .references(() => journalEntries.id, { onDelete: 'cascade' }),
     kind: text('kind').notNull(),
     optionKey: text('option_key'),
-    customLabel: text('custom_label'), // encrypted (max 40 chars before encryption)
+    customLabel: text('custom_label'), // encrypted (max 80 chars before encryption)
     conditionId: uuid('condition_id').references(() => userConditions.id, { onDelete: 'cascade' }),
     bodySide: text('body_side'),
     persistence: text('persistence'),

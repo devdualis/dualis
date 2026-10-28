@@ -266,6 +266,12 @@ export class SuggestJournalOptionDto {
 
   @IsIn(['emotional', 'physical'])
   kind!: 'emotional' | 'physical';
+
+  /** Branch on screen (`futuro.mente`, `cabeca.pressao`): only its options are suggested. */
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-z_]+\.[a-z_]+$/)
+  branch?: string;
 }
 
 export class SuggestJournalOptionResponseDto {

@@ -138,10 +138,11 @@ class JournalRepository {
   Future<String?> suggestOption({
     required String text,
     required String kind,
+    String? branch,
   }) async {
     if (!await _isOnline()) return null;
     try {
-      return await _remote.suggestOption(text: text, kind: kind);
+      return await _remote.suggestOption(text: text, kind: kind, branch: branch);
     } catch (_) {
       return null;
     }

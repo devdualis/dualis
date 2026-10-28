@@ -97,7 +97,7 @@ export class JournalController {
   suggestOption(
     @Body() dto: SuggestJournalOptionDto,
   ): Promise<SuggestJournalOptionResponseDto> {
-    return this.journalSuggest.suggest(dto.text, dto.kind);
+    return this.journalSuggest.suggest(dto.text, dto.kind, dto.branch);
   }
 
   @Get('summary')

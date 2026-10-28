@@ -47,11 +47,40 @@ export const OPTION_TEXT_PT: Record<string, string> = {
   'membros.formigamento.choque': 'Sensação de choque',
 };
 
-/** Catalog chips only (no `.custom` keys). */
-export function catalogKeys(kind: 'emotional' | 'physical'): string[] {
+/** Catalog chips only (no `.custom` keys), optionally only those of one branch. */
+export function catalogKeys(kind: 'emotional' | 'physical', branch?: string): string[] {
   const source = kind === 'physical' ? PHYSICAL_OPTION_KEYS : EMOTIONAL_OPTION_KEYS;
-  return source.filter((key) => !isCustomOptionKey(key));
+  return source.filter((key) => !isCustomOptionKey(key) && (!branch || key.startsWith(`${branch}.`)));
 }
+
+/**
+ * Common Brazilian first names. A capitalized one is replaced even when it opens the
+ * sentence ("Ana disse que..."), where the mid-sentence rule cannot tell it from a
+ * normal first word. Names that are also everyday words (Rosa, Clara, Luz) are left out.
+ */
+const fold = (word: string) => word.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+const COMMON_FIRST_NAMES = new Set(
+  (
+    'ana maria joao jose antonio francisco carlos paulo pedro lucas luiz luis marcos ' +
+    'gabriel rafael daniel marcelo bruno eduardo felipe rodrigo gustavo fernando fabio ' +
+    'andre leonardo mateus matheus thiago tiago diego vinicius ricardo alexandre sergio ' +
+    'roberto jorge marcio julio cesar renato leandro caio enzo arthur davi heitor bernardo ' +
+    'miguel samuel benjamin henrique guilherme igor otavio murilo joaquim raimundo ' +
+    'sebastiao manoel manuel geraldo adriano wellington washington wesley william ' +
+    'juliana mariana fernanda patricia aline camila amanda bruna jessica leticia julia ' +
+    'beatriz larissa gabriela vanessa adriana simone sandra marcia cristina luciana ' +
+    'tatiana carolina renata daniela debora raquel priscila natalia isabela isabel ' +
+    'helena valentina sophia sofia alice laura manuela giovanna heloisa lorena livia ' +
+    'yasmin rafaela eduarda vitoria antonia francisca lucia rita joana tereza teresa ' +
+    'sonia regina vera denise claudia fabiana elaine silvia rosana rosangela carla ' +
+    'paula luana thais tais bianca jaqueline michele monica viviane andreia andrea ' +
+    'cecilia lara milena kauane kaua emanuel gael noah theo cauã pietro nicolas lorenzo'
+  )
+    .split(/\s+/)
+    .map(fold),
+);
+
+const CAPITALIZED_WORD = /\p{Lu}[\p{Ll}'-]+/gu;
 
 const NAME_INTRO = /\b([Mm]eu nome é|[Mm]e chamo|[Ee]u sou o|[Ee]u sou a|[Ss]ou o|[Ss]ou a|[Aa]qui é o|[Aa]qui é a)\s+\p{Lu}[\p{L}'-]*(?:\s+\p{Lu}[\p{L}'-]*)*/gu;
 const EMAIL = /[\p{L}\p{N}._%+-]+@[\p{L}\p{N}.-]+\.\p{L}{2,}/gu;
@@ -74,6 +103,7 @@ export function deidentify(text: string): string {
     .replace(HANDLE, '$1[usuario]')
     .replace(LONG_NUMBER, '[numero]')
     .replace(MID_SENTENCE_CAPITAL, '[nome]')
+    .replace(CAPITALIZED_WORD, (word) => (COMMON_FIRST_NAMES.has(fold(word)) ? '[nome]' : word))
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -111,10 +141,14 @@ export class JournalSuggestService {
 
   constructor(@Optional() @Inject(GeminiService) private readonly gemini?: GeminiService) {}
 
-  async suggest(text: string, kind: 'emotional' | 'physical'): Promise<{ optionKey: string | null }> {
-    const allowed = catalogKeys(kind);
+  async suggest(
+    text: string,
+    kind: 'emotional' | 'physical',
+    branch?: string,
+  ): Promise<{ optionKey: string | null }> {
+    const allowed = catalogKeys(kind, branch);
     const clean = deidentify(text);
-    if (!clean || !this.gemini?.isAvailable) return { optionKey: null };
+    if (!clean || allowed.length === 0 || !this.gemini?.isAvailable) return { optionKey: null };
 
     try {
       const parsed = await this.gemini.generateJson<{ optionKey?: string }>({

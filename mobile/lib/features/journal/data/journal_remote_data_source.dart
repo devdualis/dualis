@@ -115,10 +115,11 @@ class JournalRemoteDataSource {
   Future<String?> suggestOption({
     required String text,
     required String kind,
+    String? branch,
   }) async {
     final response = await _apiClient.post(
       JournalEndpoints.suggestOption,
-      data: {'text': text, 'kind': kind},
+      data: {'text': text, 'kind': kind, if (branch != null) 'branch': branch},
       options: await _options(),
     );
     final key = _map(response.data)['optionKey'];

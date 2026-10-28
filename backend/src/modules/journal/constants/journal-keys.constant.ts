@@ -97,7 +97,7 @@ export const INTENSITY_MAX = 5;
 
 export const JOURNAL_LIMITS = {
   maxItems: 12,
-  customLabelMax: 40,
+  customLabelMax: 80,
   conditionLabelMax: 40,
   triggerNoteMax: 60,
   noteMax: 2000,

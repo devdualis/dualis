@@ -30,6 +30,7 @@ class FakeJournalRemote implements JournalRemoteDataSource {
   int? errorStatus;
   dynamic errorData;
   String? suggestedOptionKey;
+  final List<Map<String, String?>> suggestRequests = [];
 
   FakeJournalRemote({this.conditions = const []});
 
@@ -88,8 +89,10 @@ class FakeJournalRemote implements JournalRemoteDataSource {
   Future<String?> suggestOption({
     required String text,
     required String kind,
+    String? branch,
   }) async {
     if (fail) throw _offline();
+    suggestRequests.add({'text': text, 'kind': kind, 'branch': branch});
     return suggestedOptionKey;
   }
 }

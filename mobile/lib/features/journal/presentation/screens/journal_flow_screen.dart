@@ -455,17 +455,23 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       JournalKeys.customLabelMaxLength,
     );
     if (clean.isEmpty) return;
-    final kind = ref.read(journalFlowControllerProvider).step ==
-            JournalStep.regionOptions
-        ? JournalKeys.kindPhysical
-        : JournalKeys.kindEmotional;
+    final state = ref.read(journalFlowControllerProvider);
+    final physical = state.step == JournalStep.regionOptions;
+    final kind =
+        physical ? JournalKeys.kindPhysical : JournalKeys.kindEmotional;
+    // Only options of the branch on screen, so an accepted one shows up here.
+    final branch = physical
+        ? '${state.currentRegion!.region}.${state.branch}'
+        : '${state.time}.${state.branch}';
     setState(() => _suggestingCustom = true);
     String? key;
     try {
       key = await ref.read(journalRepositoryProvider).suggestOption(
             text: clean,
             kind: kind,
+            branch: branch,
           );
+      if (key != null && !key.startsWith('$branch.')) key = null;
     } catch (_) {
       key = null;
     }

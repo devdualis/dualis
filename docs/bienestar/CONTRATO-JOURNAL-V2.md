@@ -61,7 +61,7 @@ Custom: `optionKey = "<region>.custom"` + `customLabel`.
 
 `journal_entries`: `id uuid pk`, `profile_id`, `user_id`, `recorded_at timestamptz`, `mood text`, `triggers text[]`, `trigger_note text null`, `note text null` (encrypted like current free text), `transition_variant_ids text[]` (UX analytics only), `client_id text` (outbox idempotency, unique per `(profile_id, client_id)`), `created_at`.
 
-`journal_items`: `id uuid pk`, `entry_id fk cascade`, `kind text`, `option_key text null`, `custom_label text null` (max 40, encrypted), `condition_id uuid null fk`, `body_side text null`, `persistence text null`, `intensity smallint 1..5 null` (null only when mood is bem/normal and there are no items, so in practice items always have intensity).
+`journal_items`: `id uuid pk`, `entry_id fk cascade`, `kind text`, `option_key text null`, `custom_label text null` (max 80, encrypted), `condition_id uuid null fk`, `body_side text null`, `persistence text null`, `intensity smallint 1..5 null` (null only when mood is bem/normal and there are no items, so in practice items always have intensity).
 
 `user_conditions`: `id uuid pk`, `profile_id`, `user_id`, `label text` (max 40, encrypted), `created_at`, `archived_at null`.
 
@@ -84,7 +84,7 @@ Old `symptom_logs` rows stay as they are and are returned by history as `legacy:
 `JournalEntryDto` = the stored entry with decrypted `note`, items with decrypted `customLabel`, and for condition items the condition `label`.
 
 ## AI suggest (catalog chips only)
-`POST /v1/journal/suggest-option` `{ text, kind: emotional|physical }` → `{ optionKey }`. Gemini may map the phrase onto **one existing diary chip** from the journal v2 trees, or `null`. It never invents keys, never names disorders, never scores intensity. The app asks the person to confirm; a "no" keeps the written custom label. Before the call the server de-identifies the text (names, e-mails, links, @handles and long numbers such as phone or CPF become placeholders) and sends only that text and `kind` to Vertex AI (`southamerica-east1`), as its own content, separate from the instructions. No user, profile or entry identifiers are sent, and the text is never logged. Live quality check: `backend/scripts/journal-suggest-eval.ts`. The old `/v1/ai/tag-entry` routes and `symptom_knowledge` stay gone.
+`POST /v1/journal/suggest-option` `{ text, kind: emotional|physical, branch? }` → `{ optionKey }`. Gemini may map the phrase onto **one existing diary chip** from the journal v2 trees, or `null`. With `branch` (the branch on screen, e.g. `futuro.mente`) only that branch's options can be suggested, so an accepted option is visible where the person is. It never invents keys, never names disorders, never scores intensity. The app asks the person to confirm; a "no" keeps the written custom label. Before the call the server de-identifies the text (names, e-mails, links, @handles and long numbers such as phone or CPF become placeholders) and sends only that text and `kind` to Vertex AI (`southamerica-east1`), as its own content, separate from the instructions. No user, profile or entry identifiers are sent, and the text is never logged. Live quality check: `backend/scripts/journal-suggest-eval.ts`. The old `/v1/ai/tag-entry` routes and `symptom_knowledge` stay gone.
 
 ## Removed
 - Mobile: `RedFlagEvaluator`, `SafetyNoticeKind`, inline safety notice banner, any conditional emergency UI, `SymptomClassification*`, `ApiEndpoints.tagEntry`.
