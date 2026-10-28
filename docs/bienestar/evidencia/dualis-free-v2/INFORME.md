@@ -103,3 +103,13 @@ El detalle de cantidades, fallos y versiones está en [PRUEBAS.md](PRUEBAS.md). 
 Limpieza completada: app y backend detenidos, pestaña OPAS cerrada, contenedor `dualis-v2-qa-pg` eliminado, iPhone 17 apagado y archivo `.env` QA y tokens temporales borrados. No se detuvieron otros servicios.
 
 Resumen de escenarios: **9 OK, 3 PARCIAL, 1 FALLA**. Pruebas: backend 209 unitarias y 102 e2e aprobadas; RLS final 49 aprobadas; Flutter final 494 aprobadas y 13 fallidas, con errores de finalización.
+
+## Anexo: revalidación del árbol actual (28/10/2026)
+
+Se repitieron las pruebas automáticas sobre el checkout con los cambios concurrentes todavía sin confirmar. No se repitió el recorrido en vivo.
+
+- Flutter: **517 aprobadas, 0 fallidas**. Las 13 fallas anteriores ya no aparecen.
+- Backend: `tsc --noEmit` sin errores; **194 unitarias aprobadas** (bajan de 209 porque se eliminaron las pruebas del módulo de IA).
+- No se repitieron e2e, RLS ni la batería: necesitan una base temporal nueva.
+
+Los cambios concurrentes incluyen intentos de corregir dos incidencias abiertas: el recorte usa `BoxFit.contain` y la sincronización se reintenta al volver la app a primer plano. Ninguna de las dos se verificó en el simulador. Siguen abiertas hasta una nueva sesión en vivo.
