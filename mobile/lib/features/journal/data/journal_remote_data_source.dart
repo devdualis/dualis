@@ -13,6 +13,7 @@ class JournalEndpoints {
   static String entry(String id) => '/v1/journal/entries/$id';
   static const String conditions = '/v1/journal/conditions';
   static String condition(String id) => '/v1/journal/conditions/$id';
+  static const String suggestOption = '/v1/journal/suggest-option';
 }
 
 final journalRemoteDataSourceProvider = Provider<JournalRemoteDataSource>((
@@ -108,5 +109,20 @@ class JournalRemoteDataSource {
       JournalEndpoints.condition(id),
       options: await _options(),
     );
+  }
+
+  /// Maps free text onto one existing chip, or null. The person confirms.
+  Future<String?> suggestOption({
+    required String text,
+    required String kind,
+  }) async {
+    final response = await _apiClient.post(
+      JournalEndpoints.suggestOption,
+      data: {'text': text, 'kind': kind},
+      options: await _options(),
+    );
+    final key = _map(response.data)['optionKey'];
+    if (key is! String || key.isEmpty) return null;
+    return key;
   }
 }

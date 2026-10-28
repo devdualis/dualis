@@ -134,6 +134,19 @@ class JournalRepository {
     return synced;
   }
 
+  /// Existing diary chip for [text], or null if none / offline / error.
+  Future<String?> suggestOption({
+    required String text,
+    required String kind,
+  }) async {
+    if (!await _isOnline()) return null;
+    try {
+      return await _remote.suggestOption(text: text, kind: kind);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// 409 is success only when the server returns the existing entry
   /// (idempotent replay of the same `clientId`).
   bool _isIdempotentReplay(DioException e) {

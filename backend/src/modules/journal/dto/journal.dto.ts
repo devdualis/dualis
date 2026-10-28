@@ -257,3 +257,17 @@ export interface JournalSummaryDto {
   byTrigger: Record<string, number>;
   cooccurrence: Array<{ a: string; b: string; days: number }>;
 }
+
+export class SuggestJournalOptionDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(JOURNAL_LIMITS.customLabelMax)
+  text!: string;
+
+  @IsIn(['emotional', 'physical'])
+  kind!: 'emotional' | 'physical';
+}
+
+export class SuggestJournalOptionResponseDto {
+  optionKey: string | null;
+}

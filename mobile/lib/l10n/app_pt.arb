@@ -980,12 +980,12 @@
   "privacyPolicySection2Title": "2. Finalidades e Proibição de Venda de Dados",
   "privacyPolicySection2Body": "Seus dados de saúde são tratados somente para:",
   "privacyPolicySection2Bullet1": "Registro e visualização do seu diário de bem-estar.",
-  "privacyPolicySection2Bullet2": "Organização automática das suas anotações por área do corpo ou emoção (com auxílio de IA, sem avaliação de saúde).",
+  "privacyPolicySection2Bullet2": "Sugerir, com ajuda de IA, uma opção já existente do diário quando você escreve com as suas palavras (sem avaliação de saúde).",
   "privacyPolicySection2Bullet3": "Consistência do histórico.",
   "privacyPolicySection2Bullet4": "Compromisso Ético: É expressamente PROIBIDA a venda, comercialização ou cessão onerosa dos seus dados para corretoras de seguros, anunciantes ou terceiros.",
   "privacyPolicySection3Title": "3. Operadores e Transferência Internacional",
   "privacyPolicySection3Body": "Para prestar o serviço, compartilhamos dados apenas com:",
-  "privacyPolicySection3Bullet1": "Google LLC (API Gemini): O texto das suas anotações é enviado à API Gemini do Google para organizá-las automaticamente. A IA não avalia a sua saúde.",
+  "privacyPolicySection3Bullet1": "Google LLC (API Gemini): o texto de \"escrever o meu\" pode ser enviado à Gemini só para sugerir uma opção já existente do diário. A IA não avalia a sua saúde.",
   "privacyPolicySection3Bullet2": "Transferência Internacional: Esse processamento pode ocorrer em servidores localizados fora do Brasil (LGPD Art. 33).",
   "privacyPolicySection3Bullet3": "Infraestrutura em Nuvem: Provedores de hospedagem e banco de dados, sujeitos a obrigações de confidencialidade e segurança.",
   "privacyPolicySection4Title": "4. Pagamentos",
@@ -1218,6 +1218,15 @@
   "jv2WriteMine": "Escrever o meu",
   "jv2WriteMineHint": "Em poucas palavras",
   "jv2WriteMineAdd": "Adicionar",
+  "jv2SuggestTitle": "Isso se parece com uma opção que já existe",
+  "jv2SuggestBody": "Quer guardar como \"{option}\" em vez do texto escrito?",
+  "@jv2SuggestBody": {
+    "placeholders": {
+      "option": { "type": "String" }
+    }
+  },
+  "jv2SuggestYes": "Usar essa opção",
+  "jv2SuggestNo": "Manter o que escrevi",
   "jv2MoreQuestion": "Quer registrar mais alguma coisa?",
   "jv2MoreBodyQuestion": "Quer marcar outra parte do corpo?",
   "jv2BodyQuestion": "Onde você sente desconforto agora?",

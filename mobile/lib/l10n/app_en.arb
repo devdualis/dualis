@@ -309,12 +309,12 @@
   "privacyPolicySection2Title": "2. Purposes and Ban on Selling Data",
   "privacyPolicySection2Body": "Your health data is processed only for:",
   "privacyPolicySection2Bullet1": "Recording and viewing your wellness journal.",
-  "privacyPolicySection2Bullet2": "Automatically organizing your notes by body area or mood (AI-assisted, with no health assessment).",
+  "privacyPolicySection2Bullet2": "Suggesting, with AI help, an existing diary option when you write in your own words (no health assessment).",
   "privacyPolicySection2Bullet3": "Keeping your history consistent.",
   "privacyPolicySection2Bullet4": "Ethical Commitment: Selling, trading or transferring your data for payment to insurers, advertisers or third parties is expressly PROHIBITED.",
   "privacyPolicySection3Title": "3. Processors and International Transfer",
   "privacyPolicySection3Body": "To provide the service, we share data only with:",
-  "privacyPolicySection3Bullet1": "Google LLC (Gemini API): The text of your notes is sent to Google's Gemini API to organize them automatically. The AI does not assess your health.",
+  "privacyPolicySection3Bullet1": "Google LLC (Gemini API): text from \"write my own\" may be sent to Gemini only to suggest an existing diary option. The AI does not assess your health.",
   "privacyPolicySection3Bullet2": "International Transfer: This processing may take place on servers located outside Brazil (LGPD Art. 33).",
   "privacyPolicySection3Bullet3": "Cloud Infrastructure: Hosting and database providers, bound by confidentiality and security obligations.",
   "privacyPolicySection4Title": "4. Payments",
@@ -475,6 +475,15 @@
   "jv2WriteMine": "Write my own",
   "jv2WriteMineHint": "In a few words",
   "jv2WriteMineAdd": "Add",
+  "jv2SuggestTitle": "This looks like an option that already exists",
+  "jv2SuggestBody": "Save as \"{option}\" instead of the text you wrote?",
+  "@jv2SuggestBody": {
+    "placeholders": {
+      "option": { "type": "String" }
+    }
+  },
+  "jv2SuggestYes": "Use that option",
+  "jv2SuggestNo": "Keep what I wrote",
   "jv2MoreQuestion": "Would you like to record anything else?",
   "jv2MoreBodyQuestion": "Would you like to mark another part of the body?",
   "jv2BodyQuestion": "Where do you feel discomfort right now?",

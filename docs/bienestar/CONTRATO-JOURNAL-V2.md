@@ -83,8 +83,8 @@ Old `symptom_logs` rows stay as they are and are returned by history as `legacy:
 
 `JournalEntryDto` = the stored entry with decrypted `note`, items with decrypted `customLabel`, and for condition items the condition `label`.
 
-## AI tagging (removed)
-AI tagging is removed from the product (strategy §18 decision 1, review #1 and #9). The `/v1/ai/tag-entry` and `/v1/ai/classify-symptom` endpoints, tagging service, idiom dictionary, symptom vector learning and their seeds/tests, and the shared `symptom_knowledge` table are deleted (migration `0018_remove_ai_tagging.sql`). The product never groups user text into pre-assigned categories.
+## AI suggest (catalog chips only)
+`POST /v1/journal/suggest-option` `{ text, kind: emotional|physical }` → `{ optionKey }`. Gemini may map the phrase onto **one existing diary chip** from the journal v2 trees, or `null`. It never invents keys, never names disorders, never scores intensity. The app asks the person to confirm; a "no" keeps the written custom label. The old `/v1/ai/tag-entry` routes and `symptom_knowledge` stay gone.
 
 ## Removed
 - Mobile: `RedFlagEvaluator`, `SafetyNoticeKind`, inline safety notice banner, any conditional emergency UI, `SymptomClassification*`, `ApiEndpoints.tagEntry`.

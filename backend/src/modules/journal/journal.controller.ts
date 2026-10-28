@@ -31,11 +31,14 @@ import {
   JournalEntriesResponseDto,
   JournalEntryDto,
   JournalSummaryDto,
+  SuggestJournalOptionDto,
+  SuggestJournalOptionResponseDto,
   UserConditionDto,
   UserConditionsResponseDto,
 } from './dto/journal.dto';
 import { HouseAdsResponseDto, houseAdsFor } from './house-ads';
 import { JournalService } from './journal.service';
+import { JournalSuggestService } from './journal-suggest.service';
 
 const userIdOf = (req: any): string => req.user?.id || req.user?.userId || req.user?.sub;
 
@@ -47,7 +50,10 @@ const validate = (expectedType: new () => object) =>
 @Controller({ path: 'journal', version: '1' })
 @UseGuards(JwtAuthGuard, ProfileContextGuard)
 export class JournalController {
-  constructor(@Inject(JournalService) private readonly journalService: JournalService) {}
+  constructor(
+    @Inject(JournalService) private readonly journalService: JournalService,
+    @Inject(JournalSuggestService) private readonly journalSuggest: JournalSuggestService,
+  ) {}
 
   @Post('entries')
   @HttpCode(HttpStatus.CREATED)
@@ -82,6 +88,16 @@ export class JournalController {
     @Param('id', new ParseUUIDPipe()) id: string,
   ): Promise<void> {
     await this.journalService.deleteEntry(userIdOf(req), profile.profileId, id);
+  }
+
+  @Post('suggest-option')
+  @HttpCode(HttpStatus.OK)
+  @ProfileAccess('write')
+  @validate(SuggestJournalOptionDto)
+  suggestOption(
+    @Body() dto: SuggestJournalOptionDto,
+  ): Promise<SuggestJournalOptionResponseDto> {
+    return this.journalSuggest.suggest(dto.text, dto.kind);
   }
 
   @Get('summary')

@@ -11,6 +11,7 @@ import '../../../dashboard/presentation/screens/check_in_summary_screen.dart';
 import '../../../home/domain/trigger_checkin_state.dart';
 import '../../../home/presentation/controllers/trigger_checkin_controller.dart';
 import '../../../triage/domain/triage_vertical.dart';
+import '../../data/journal_repository.dart';
 import '../../domain/journal_keys.dart';
 import '../../domain/journal_models.dart';
 import '../controllers/journal_flow_controller.dart';
@@ -45,6 +46,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
   final _triggerNoteController = TextEditingController();
   final _noteController = TextEditingController();
   bool _writingCustom = false;
+  bool _suggestingCustom = false;
 
   JournalFlowController get _controller =>
       ref.read(journalFlowControllerProvider.notifier);
@@ -428,7 +430,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
               FilledButton(
                 key: const Key('jv2_custom_add'),
                 style: FilledButton.styleFrom(minimumSize: const Size(0, 52)),
-                onPressed: _addCustom,
+                onPressed: _suggestingCustom ? null : _addCustom,
                 child: Text(l10n.jv2WriteMineAdd),
               ),
             ],
@@ -444,8 +446,60 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     );
   }
 
-  void _addCustom() {
-    _controller.addCustomLabel(_customController.text);
+  Future<void> _addCustom() async {
+    final clean = JournalKeys.limitChars(
+      _customController.text.trim(),
+      JournalKeys.customLabelMaxLength,
+    );
+    if (clean.isEmpty) return;
+    final kind = ref.read(journalFlowControllerProvider).step ==
+            JournalStep.regionOptions
+        ? JournalKeys.kindPhysical
+        : JournalKeys.kindEmotional;
+    setState(() => _suggestingCustom = true);
+    String? key;
+    try {
+      key = await ref.read(journalRepositoryProvider).suggestOption(
+            text: clean,
+            kind: kind,
+          );
+    } catch (_) {
+      key = null;
+    }
+    if (!mounted) return;
+    setState(() => _suggestingCustom = false);
+    final l10n = AppLocalizations.of(context);
+    final optionLabel = key == null ? '' : JournalLabels.option(l10n, key);
+    if (key != null && optionLabel.isNotEmpty) {
+      final useChip = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          key: const Key('jv2_suggest_dialog'),
+          title: Text(l10n.jv2SuggestTitle),
+          content: Text(l10n.jv2SuggestBody(optionLabel)),
+          actions: [
+            TextButton(
+              key: const Key('jv2_suggest_no'),
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(l10n.jv2SuggestNo),
+            ),
+            FilledButton(
+              key: const Key('jv2_suggest_yes'),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(l10n.jv2SuggestYes),
+            ),
+          ],
+        ),
+      );
+      if (!mounted) return;
+      if (useChip == true) {
+        _controller.toggleOption(key);
+        _customController.clear();
+        setState(() => _writingCustom = false);
+        return;
+      }
+    }
+    _controller.addCustomLabel(clean);
     _customController.clear();
     setState(() => _writingCustom = false);
   }

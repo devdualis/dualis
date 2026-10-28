@@ -116,12 +116,13 @@ describe('LegalService - SaaS Legal Foundations', () => {
       expect(terms.sections[1].title).toBe('2. Natureza do Serviço');
     });
 
-    it.each(langs)('privacy policy uses LGPD Art. 11, I consent and discloses Google Gemini + international transfer (%s)', (lang) => {
+    it.each(langs)('privacy policy uses LGPD Art. 11, I consent, discloses Gemini for diary chips, and Art. 33 (%s)', (lang) => {
       const privacy = service.getPrivacyPolicy(lang);
       expect(privacy.lgpdCompliance.legalBases[0]).toContain('Art. 11, I');
       expect(privacy.lgpdCompliance.legalBases.join(' ')).not.toMatch(/VIII/);
       const serialized = JSON.stringify(privacy.sections);
       expect(serialized).toContain('Gemini');
+      expect(serialized).not.toMatch(/organizarlas automáticamente por área|body area or mood/i);
       expect(serialized).toContain('Art. 33');
     });
   });

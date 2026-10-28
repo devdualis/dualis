@@ -28,6 +28,7 @@ class FakeJournalRemote implements JournalRemoteDataSource {
   bool fail = false;
   int? errorStatus;
   dynamic errorData;
+  String? suggestedOptionKey;
 
   FakeJournalRemote({this.conditions = const []});
 
@@ -80,6 +81,15 @@ class FakeJournalRemote implements JournalRemoteDataSource {
   Future<void> archiveCondition(String id) async {
     if (fail) throw _offline();
     conditions = [for (final c in conditions) if (c.id != id) c];
+  }
+
+  @override
+  Future<String?> suggestOption({
+    required String text,
+    required String kind,
+  }) async {
+    if (fail) throw _offline();
+    return suggestedOptionKey;
   }
 }
 

@@ -1957,7 +1957,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyPolicySection2Bullet2.
   ///
   /// In pt, this message translates to:
-  /// **'Organização automática das suas anotações por área do corpo ou emoção (com auxílio de IA, sem avaliação de saúde).'**
+  /// **'Sugerir, com ajuda de IA, uma opção já existente do diário quando você escreve com as suas palavras (sem avaliação de saúde).'**
   String get privacyPolicySection2Bullet2;
 
   /// No description provided for @privacyPolicySection2Bullet3.
@@ -1987,7 +1987,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyPolicySection3Bullet1.
   ///
   /// In pt, this message translates to:
-  /// **'Google LLC (API Gemini): O texto das suas anotações é enviado à API Gemini do Google para organizá-las automaticamente. A IA não avalia a sua saúde.'**
+  /// **'Google LLC (API Gemini): o texto de \"escrever o meu\" pode ser enviado à Gemini só para sugerir uma opção já existente do diário. A IA não avalia a sua saúde.'**
   String get privacyPolicySection3Bullet1;
 
   /// No description provided for @privacyPolicySection3Bullet2.
@@ -2955,6 +2955,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Adicionar'**
   String get jv2WriteMineAdd;
+
+  /// No description provided for @jv2SuggestTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Isso se parece com uma opção que já existe'**
+  String get jv2SuggestTitle;
+
+  /// No description provided for @jv2SuggestBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quer guardar como \"{option}\" em vez do texto escrito?'**
+  String jv2SuggestBody(String option);
+
+  /// No description provided for @jv2SuggestYes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar essa opção'**
+  String get jv2SuggestYes;
+
+  /// No description provided for @jv2SuggestNo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Manter o que escrevi'**
+  String get jv2SuggestNo;
 
   /// No description provided for @jv2MoreQuestion.
   ///

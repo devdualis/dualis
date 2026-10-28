@@ -1075,7 +1075,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get privacyPolicySection2Bullet2 =>
-      'Organização automática das suas anotações por área do corpo ou emoção (com auxílio de IA, sem avaliação de saúde).';
+      'Sugerir, com ajuda de IA, uma opção já existente do diário quando você escreve com as suas palavras (sem avaliação de saúde).';
 
   @override
   String get privacyPolicySection2Bullet3 => 'Consistência do histórico.';
@@ -1094,7 +1094,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get privacyPolicySection3Bullet1 =>
-      'Google LLC (API Gemini): O texto das suas anotações é enviado à API Gemini do Google para organizá-las automaticamente. A IA não avalia a sua saúde.';
+      'Google LLC (API Gemini): o texto de \"escrever o meu\" pode ser enviado à Gemini só para sugerir uma opção já existente do diário. A IA não avalia a sua saúde.';
 
   @override
   String get privacyPolicySection3Bullet2 =>
@@ -1644,6 +1644,20 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get jv2WriteMineAdd => 'Adicionar';
+
+  @override
+  String get jv2SuggestTitle => 'Isso se parece com uma opção que já existe';
+
+  @override
+  String jv2SuggestBody(String option) {
+    return 'Quer guardar como \"$option\" em vez do texto escrito?';
+  }
+
+  @override
+  String get jv2SuggestYes => 'Usar essa opção';
+
+  @override
+  String get jv2SuggestNo => 'Manter o que escrevi';
 
   @override
   String get jv2MoreQuestion => 'Quer registrar mais alguma coisa?';

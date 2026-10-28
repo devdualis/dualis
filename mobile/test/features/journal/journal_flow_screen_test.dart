@@ -317,6 +317,37 @@ void main() {
     expect(find.byKey(const Key('summary_stub')), findsOneWidget);
   });
 
+  testWidgets('Gemini catalog suggestion can replace the written label', (tester) async {
+    final h = JournalHarness();
+    h.remote.suggestedOptionKey = 'futuro.medo.desanimo';
+    await pumpJournalFlow(tester, h);
+    await startNotSoGood(tester);
+    await tapKey(tester, 'jv2_area_emotional');
+    await tapKey(tester, 'jv2_continue');
+    await tapKey(tester, 'jv2_time_futuro');
+    await tapKey(tester, 'jv2_branch_futuro.mente');
+    await tapKey(tester, 'jv2_write_mine');
+    await tester.enterText(
+      find.byKey(const Key('jv2_custom_field')),
+      'estou muito chateado com a vida',
+    );
+    await tapKey(tester, 'jv2_custom_add');
+    expect(find.byKey(const Key('jv2_suggest_dialog')), findsOneWidget);
+    expect(find.textContaining(pt.jv2OptFuturoMedoDesanimo), findsOneWidget);
+    await tapKey(tester, 'jv2_suggest_yes');
+    expect(find.byKey(const Key('jv2_custom_chip_estou muito chateado com a vida')), findsNothing);
+    await tapKey(tester, 'jv2_continue');
+    await tapKey(tester, 'jv2_more_no');
+    await fillIntensity(tester, 1, 2);
+    await tapKey(tester, 'jv2_continue');
+    await tapKey(tester, 'jv2_skip');
+    await tapKey(tester, 'jv2_save');
+    final items = (h.remote.requestBodies.single['items'] as List)
+        .cast<Map<String, dynamic>>();
+    expect(items.single['optionKey'], 'futuro.medo.desanimo');
+    expect(items.single['customLabel'], isNull);
+  });
+
   testWidgets('back returns to the previous screen with its answers', (tester) async {
     final h = JournalHarness();
     await pumpJournalFlow(tester, h);

@@ -1066,7 +1066,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyPolicySection2Bullet2 =>
-      'Automatically organizing your notes by body area or mood (AI-assisted, with no health assessment).';
+      'Suggesting, with AI help, an existing diary option when you write in your own words (no health assessment).';
 
   @override
   String get privacyPolicySection2Bullet3 => 'Keeping your history consistent.';
@@ -1085,7 +1085,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyPolicySection3Bullet1 =>
-      'Google LLC (Gemini API): The text of your notes is sent to Google\'s Gemini API to organize them automatically. The AI does not assess your health.';
+      'Google LLC (Gemini API): text from \"write my own\" may be sent to Gemini only to suggest an existing diary option. The AI does not assess your health.';
 
   @override
   String get privacyPolicySection3Bullet2 =>
@@ -1636,6 +1636,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get jv2WriteMineAdd => 'Add';
+
+  @override
+  String get jv2SuggestTitle => 'This looks like an option that already exists';
+
+  @override
+  String jv2SuggestBody(String option) {
+    return 'Save as \"$option\" instead of the text you wrote?';
+  }
+
+  @override
+  String get jv2SuggestYes => 'Use that option';
+
+  @override
+  String get jv2SuggestNo => 'Keep what I wrote';
 
   @override
   String get jv2MoreQuestion => 'Would you like to record anything else?';
