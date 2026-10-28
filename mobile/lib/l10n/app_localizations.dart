@@ -316,18 +316,6 @@ abstract class AppLocalizations {
   /// **'Número copiado para a área de transferência.'**
   String get emergencyCopiedToast;
 
-  /// Outcome screen title (wellness)
-  ///
-  /// In pt, this message translates to:
-  /// **'Resumo do seu registro'**
-  String get outcomeScreenTitle;
-
-  /// Subtitle of Screen 6 Triage Outcome
-  ///
-  /// In pt, this message translates to:
-  /// **'Um retrato do que você registrou hoje'**
-  String get outcomeScreenSubtitle;
-
   /// Intensity title
   ///
   /// In pt, this message translates to:
@@ -351,12 +339,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Conteúdos educativos gerais. Não são orientação para o seu caso.'**
   String get outcomeArticlesSubtitle;
-
-  /// Button to finish triage and return home
-  ///
-  /// In pt, this message translates to:
-  /// **'Concluir e Voltar ao Início'**
-  String get outcomeDoneButton;
 
   /// Notice banner when device is offline
   ///

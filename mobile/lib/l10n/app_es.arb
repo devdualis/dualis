@@ -36,8 +36,6 @@
   "emergencyFallbackBody": "Este dispositivo no soporta llamadas directas. Marque manualmente el siguiente número en otro teléfono:",
   "emergencyCopyNumber": "Copiar Número",
   "emergencyCopiedToast": "Número copiado al portapapeles.",
-  "outcomeScreenTitle": "Resumen de tu registro",
-  "outcomeScreenSubtitle": "Una foto de lo que registraste hoy",
   "outcomeIntensityTitle": "Intensidad que informaste",
   "outcomeIntensityDescription": "Tu propia nota del 1 al 5 sobre cómo te sentiste",
   "outcomeArticlesTitle": "Lecturas sobre bienestar",
@@ -718,7 +716,6 @@
   "xv2WaterDeleteLog": "Eliminar registro",
   "jv2PendingSync": "Esperando sincronizar",
   "jv2OutboxRejectedNotice": "Un registro no se pudo enviar. Revísalo e inténtalo de nuevo.",
-  "outcomeDoneButton": "Concluir y Volver al Inicio",
   "historyIntensityInformed": "Intensidad informada: {n}/5",
   "@historyIntensityInformed": {
     "placeholders": {

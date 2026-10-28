@@ -126,12 +126,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get emergencyCopiedToast => 'Número copiado al portapapeles.';
 
   @override
-  String get outcomeScreenTitle => 'Resumen de tu registro';
-
-  @override
-  String get outcomeScreenSubtitle => 'Una foto de lo que registraste hoy';
-
-  @override
   String get outcomeIntensityTitle => 'Intensidad que informaste';
 
   @override
@@ -144,9 +138,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get outcomeArticlesSubtitle =>
       'Contenidos educativos generales. No son orientación para tu caso.';
-
-  @override
-  String get outcomeDoneButton => 'Concluir y Volver al Inicio';
 
   @override
   String get offlineBannerText =>

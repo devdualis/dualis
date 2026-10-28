@@ -36,8 +36,6 @@
   "emergencyFallbackBody": "Direct calling is not supported on this device. Please dial the following number from another phone:",
   "emergencyCopyNumber": "Copy Number",
   "emergencyCopiedToast": "Number copied to clipboard.",
-  "outcomeScreenTitle": "Your entry summary",
-  "outcomeScreenSubtitle": "A snapshot of what you logged today",
   "outcomeIntensityTitle": "Intensity you reported",
   "outcomeIntensityDescription": "Your own 1–5 rating for how you felt",
   "outcomeArticlesTitle": "Wellness reading",
@@ -718,7 +716,6 @@
   "xv2WaterDeleteLog": "Delete log",
   "jv2PendingSync": "Waiting to sync",
   "jv2OutboxRejectedNotice": "One entry could not be sent. Check it and try again.",
-  "outcomeDoneButton": "Finish and Return Home",
   "historyIntensityInformed": "Reported intensity: {n}/5",
   "@historyIntensityInformed": {
     "placeholders": {

@@ -126,12 +126,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emergencyCopiedToast => 'Number copied to clipboard.';
 
   @override
-  String get outcomeScreenTitle => 'Your entry summary';
-
-  @override
-  String get outcomeScreenSubtitle => 'A snapshot of what you logged today';
-
-  @override
   String get outcomeIntensityTitle => 'Intensity you reported';
 
   @override
@@ -144,9 +138,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get outcomeArticlesSubtitle =>
       'General educational content. Not guidance for your situation.';
-
-  @override
-  String get outcomeDoneButton => 'Finish and Return Home';
 
   @override
   String get offlineBannerText =>

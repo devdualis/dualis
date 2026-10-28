@@ -144,14 +144,6 @@
   "@emergencyCopiedToast": {
     "description": "Toast or snackbar message indicating emergency number was copied"
   },
-  "outcomeScreenTitle": "Resumo do seu registro",
-  "@outcomeScreenTitle": {
-    "description": "Outcome screen title (wellness)"
-  },
-  "outcomeScreenSubtitle": "Um retrato do que você registrou hoje",
-  "@outcomeScreenSubtitle": {
-    "description": "Subtitle of Screen 6 Triage Outcome"
-  },
   "outcomeIntensityTitle": "Intensidade que você informou",
   "@outcomeIntensityTitle": {
     "description": "Intensity title"
@@ -167,10 +159,6 @@
   "outcomeArticlesSubtitle": "Conteúdos educativos gerais. Não são orientação para o seu caso.",
   "@outcomeArticlesSubtitle": {
     "description": "Articles section subtitle"
-  },
-  "outcomeDoneButton": "Concluir e Voltar ao Início",
-  "@outcomeDoneButton": {
-    "description": "Button to finish triage and return home"
   },
   "offlineBannerText": "Modo Offline — Seus check-ins serão salvos localmente e sincronizados automaticamente.",
   "@offlineBannerText": {

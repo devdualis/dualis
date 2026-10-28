@@ -128,12 +128,6 @@ class AppLocalizationsPt extends AppLocalizations {
       'Número copiado para a área de transferência.';
 
   @override
-  String get outcomeScreenTitle => 'Resumo do seu registro';
-
-  @override
-  String get outcomeScreenSubtitle => 'Um retrato do que você registrou hoje';
-
-  @override
   String get outcomeIntensityTitle => 'Intensidade que você informou';
 
   @override
@@ -146,9 +140,6 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get outcomeArticlesSubtitle =>
       'Conteúdos educativos gerais. Não são orientação para o seu caso.';
-
-  @override
-  String get outcomeDoneButton => 'Concluir e Voltar ao Início';
 
   @override
   String get offlineBannerText =>
