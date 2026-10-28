@@ -25,6 +25,7 @@ RUN npm ci
 COPY tsconfig*.json ./
 COPY src/ ./src/
 COPY test/ ./test/
+COPY scripts/ ./scripts/
 
 # Build production bundle (outputs to dist/src/main.js)
 RUN npm run build
