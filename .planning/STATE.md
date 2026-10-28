@@ -94,6 +94,7 @@ None yet.
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
+| 261028-hc1 | Histórico em abas Psicoemocional/Físico (7/30/90 dias, mapa, conexões, linha do tempo) e menu sem Meu Dia | 2026-10-28 | 25a0ec2 | [261028-hc1-historico-duas-abas-e-menu](./quick/261028-hc1-historico-duas-abas-e-menu/) |
 | 260926-en3 | Configure API_BASE_URL default in mobile-release workflow (APK builds now target production Cloud Run backend instead of emulator-only 10.0.2.2) | 2026-09-26 | 05a39f4 | [260926-en3-configure-api-base-url-default-in-mobile](./quick/260926-en3-configure-api-base-url-default-in-mobile/) |
 | 260925-np5 | Fix psycho-emotional intensity badge showing Intensa (4-5) for level 3 records on Today result and Home check-in cards | 2026-09-25 | uncommitted | [260925-np5-fix-psycho-emotional-intensity-badge-sho](./quick/260925-np5-fix-psycho-emotional-intensity-badge-sho/) |
 | 2 | Fix Home check-in card showing stale/AI-derived description; only show text typed in that axis's triage (b5c32a0) | 2026-09-25 | b5c32a0 | — |
