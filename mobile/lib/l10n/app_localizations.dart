@@ -2830,42 +2830,6 @@ abstract class AppLocalizations {
   /// **'Não tão bem'**
   String get jv2MoodNaoTaoBem;
 
-  /// No description provided for @jv2AreaQuestion.
-  ///
-  /// In pt, this message translates to:
-  /// **'O que você quer registrar?'**
-  String get jv2AreaQuestion;
-
-  /// No description provided for @jv2AreaHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Você pode marcar mais de um.'**
-  String get jv2AreaHint;
-
-  /// No description provided for @jv2AreaEmotional.
-  ///
-  /// In pt, this message translates to:
-  /// **'Como me sinto'**
-  String get jv2AreaEmotional;
-
-  /// No description provided for @jv2AreaEmotionalHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Emoções e humor'**
-  String get jv2AreaEmotionalHint;
-
-  /// No description provided for @jv2AreaPhysical.
-  ///
-  /// In pt, this message translates to:
-  /// **'Meu corpo'**
-  String get jv2AreaPhysical;
-
-  /// No description provided for @jv2AreaPhysicalHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Onde sinto desconforto'**
-  String get jv2AreaPhysicalHint;
-
   /// No description provided for @jv2AreaConditions.
   ///
   /// In pt, this message translates to:
@@ -2995,7 +2959,7 @@ abstract class AppLocalizations {
   /// No description provided for @jv2BodyQuestion.
   ///
   /// In pt, this message translates to:
-  /// **'Onde você sente desconforto agora?'**
+  /// **'Onde você sente dor ou incômodo?'**
   String get jv2BodyQuestion;
 
   /// No description provided for @jv2BodyHint.
@@ -3007,13 +2971,13 @@ abstract class AppLocalizations {
   /// No description provided for @jv2BodyFront.
   ///
   /// In pt, this message translates to:
-  /// **'De frente'**
+  /// **'Frente'**
   String get jv2BodyFront;
 
   /// No description provided for @jv2BodyBack.
   ///
   /// In pt, this message translates to:
-  /// **'De costas'**
+  /// **'Costas'**
   String get jv2BodyBack;
 
   /// No description provided for @jv2ItemLimit.
@@ -3159,6 +3123,186 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Braços, pernas e mãos'**
   String get jv2RegionMembros;
+
+  /// No description provided for @jv2AxisEmotional.
+  ///
+  /// In pt, this message translates to:
+  /// **'Psicoemocional'**
+  String get jv2AxisEmotional;
+
+  /// No description provided for @jv2AxisPhysical.
+  ///
+  /// In pt, this message translates to:
+  /// **'Físico'**
+  String get jv2AxisPhysical;
+
+  /// No description provided for @jv2WholeBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'No corpo todo'**
+  String get jv2WholeBody;
+
+  /// No description provided for @jv2RegionPele.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pele'**
+  String get jv2RegionPele;
+
+  /// No description provided for @jv2RegionMusculos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Músculos'**
+  String get jv2RegionMusculos;
+
+  /// No description provided for @jv2RegionHormonios.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hormônios e metabolismo'**
+  String get jv2RegionHormonios;
+
+  /// No description provided for @jv2SensationQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'É dor ou incômodo?'**
+  String get jv2SensationQuestion;
+
+  /// No description provided for @jv2SensationDor.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dor'**
+  String get jv2SensationDor;
+
+  /// No description provided for @jv2SensationIncomodo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Incômodo'**
+  String get jv2SensationIncomodo;
+
+  /// No description provided for @jv2BranchCabecaNuca.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nuca'**
+  String get jv2BranchCabecaNuca;
+
+  /// No description provided for @jv2BranchPeleCoceira.
+  ///
+  /// In pt, this message translates to:
+  /// **'Coceira ou ardência'**
+  String get jv2BranchPeleCoceira;
+
+  /// No description provided for @jv2BranchPeleAparencia.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aparência da pele'**
+  String get jv2BranchPeleAparencia;
+
+  /// No description provided for @jv2BranchMusculosTensao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tensão'**
+  String get jv2BranchMusculosTensao;
+
+  /// No description provided for @jv2BranchMusculosCansaco.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cansaço muscular'**
+  String get jv2BranchMusculosCansaco;
+
+  /// No description provided for @jv2BranchHormoniosTemperatura.
+  ///
+  /// In pt, this message translates to:
+  /// **'Temperatura'**
+  String get jv2BranchHormoniosTemperatura;
+
+  /// No description provided for @jv2BranchHormoniosApetite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apetite e sede'**
+  String get jv2BranchHormoniosApetite;
+
+  /// No description provided for @jv2OptCabecaNucaRigida.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nuca dura ou pesada'**
+  String get jv2OptCabecaNucaRigida;
+
+  /// No description provided for @jv2OptCabecaNucaPontada.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pontada na parte de trás'**
+  String get jv2OptCabecaNucaPontada;
+
+  /// No description provided for @jv2OptPeleCoceiraCoceira.
+  ///
+  /// In pt, this message translates to:
+  /// **'Coceira'**
+  String get jv2OptPeleCoceiraCoceira;
+
+  /// No description provided for @jv2OptPeleCoceiraArdencia.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ardência'**
+  String get jv2OptPeleCoceiraArdencia;
+
+  /// No description provided for @jv2OptPeleAparenciaVermelhidao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vermelhidão'**
+  String get jv2OptPeleAparenciaVermelhidao;
+
+  /// No description provided for @jv2OptPeleAparenciaManchas.
+  ///
+  /// In pt, this message translates to:
+  /// **'Manchas'**
+  String get jv2OptPeleAparenciaManchas;
+
+  /// No description provided for @jv2OptMusculosTensaoRigidez.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rigidez'**
+  String get jv2OptMusculosTensaoRigidez;
+
+  /// No description provided for @jv2OptMusculosTensaoCaibra.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cãibra'**
+  String get jv2OptMusculosTensaoCaibra;
+
+  /// No description provided for @jv2OptMusculosCansacoFraqueza.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fraqueza'**
+  String get jv2OptMusculosCansacoFraqueza;
+
+  /// No description provided for @jv2OptMusculosCansacoDolorido.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dolorido'**
+  String get jv2OptMusculosCansacoDolorido;
+
+  /// No description provided for @jv2OptHormoniosTemperaturaCalorao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Calorões'**
+  String get jv2OptHormoniosTemperaturaCalorao;
+
+  /// No description provided for @jv2OptHormoniosTemperaturaFrio.
+  ///
+  /// In pt, this message translates to:
+  /// **'Frio fora do comum'**
+  String get jv2OptHormoniosTemperaturaFrio;
+
+  /// No description provided for @jv2OptHormoniosApetiteSede.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sede fora do comum'**
+  String get jv2OptHormoniosApetiteSede;
+
+  /// No description provided for @jv2OptHormoniosApetiteFome.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fome fora do comum'**
+  String get jv2OptHormoniosApetiteFome;
 
   /// No description provided for @jv2BranchCabecaPressao.
   ///

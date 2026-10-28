@@ -58,12 +58,16 @@ String journalItemText(AppLocalizations l10n, JournalItem item) {
 }
 
 /// Row title: physical items are prefixed with the body region
-/// ("Cabeça e pescoço · Dor ou pressão nas têmporas ou testa").
+/// and, on new entries, what the user felt
+/// ("Cabeça e pescoço · Dor · Dor ou pressão nas têmporas ou testa").
 String journalItemTitle(AppLocalizations l10n, JournalItem item) {
   final text = journalItemText(l10n, item);
   if (item.kind == JournalKeys.kindPhysical && item.optionKey != null) {
     final region = JournalLabels.root(l10n, JournalKeys.rootOf(item.optionKey!));
-    return '$region · $text';
+    final sensation = item.sensation;
+    return sensation == null
+        ? '$region · $text'
+        : '$region · ${JournalLabels.sensation(l10n, sensation)} · $text';
   }
   return text;
 }
