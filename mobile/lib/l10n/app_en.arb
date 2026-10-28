@@ -989,6 +989,8 @@
   "careExamCompareHint": "Compare with the paper. Tap a row to fix it.",
   "careExamArchivedHint": "Stored without reading.",
   "careExamFailedHint": "We could not read this file. You can type the values or try another photo, in good light with the whole page.",
+  "careReadAgain": "Read the file again",
+  "careReadingAgain": "Reading the file again. This can take a few seconds.",
   "careExamTitleField": "Exam name",
   "careExamLab": "Laboratory",
   "careExamCollected": "Collection date",

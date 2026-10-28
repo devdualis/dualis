@@ -87,6 +87,14 @@ class FakeCareApi implements CareApi {
     return docs.firstWhere((d) => d.id == id);
   }
 
+  final List<String> reprocessed = [];
+
+  @override
+  Future<CareDocument> reprocess(String id) async {
+    reprocessed.add(id);
+    return docs.firstWhere((d) => d.id == id);
+  }
+
   @override
   Future<void> deleteDocument(String id) async {}
 }
@@ -234,6 +242,21 @@ void main() {
     final values = api.reviews.single['values'] as List;
     expect(values.every((v) => v['confirmed'] == true), isTrue);
     expect(values.first, {'item': 'LDL', 'value': '138', 'unit': 'mg/dL', 'reference': 'até 130', 'confirmed': true});
+  });
+
+  testWidgets('a failed exam can be read again; a confirmed one cannot', (tester) async {
+    final api = FakeCareApi();
+    api.docs.add(CareDocument(id: 'd1', kind: DocumentKind.lab, mime: 'application/pdf', status: DocumentStatus.failed, createdAt: DateTime(2026, 10, 28), data: const {}));
+    await pump(tester, const ExamReviewScreen(documentId: 'd1'), api: api);
+    await tester.tap(find.byKey(const Key('document_reprocess')));
+    await tester.pumpAndSettle();
+    expect(api.reprocessed, ['d1']);
+
+    api.docs
+      ..clear()
+      ..add(CareDocument(id: 'd2', kind: DocumentKind.lab, mime: 'application/pdf', status: DocumentStatus.ready, createdAt: DateTime(2026, 10, 28), data: const {}));
+    await pump(tester, const ExamReviewScreen(documentId: 'd2'), api: api);
+    expect(find.byKey(const Key('document_reprocess')), findsNothing);
   });
 
   testWidgets('premium nav bar adds the care tab before the help button', (tester) async {

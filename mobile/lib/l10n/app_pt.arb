@@ -2195,6 +2195,8 @@
   "careExamCompareHint": "Compare com o papel. Toque numa linha para corrigir.",
   "careExamArchivedHint": "Guardado sem leitura.",
   "careExamFailedHint": "Não conseguimos ler este arquivo. Você pode digitar os valores ou tentar outra foto, com boa luz e o papel inteiro.",
+  "careReadAgain": "Ler o arquivo de novo",
+  "careReadingAgain": "Lendo o arquivo de novo. Isso pode levar alguns segundos.",
   "careExamTitleField": "Nome do exame",
   "careExamLab": "Laboratório",
   "careExamCollected": "Data da coleta",

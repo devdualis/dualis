@@ -128,6 +128,13 @@ export class CareController {
     return this.care.reviewDocument(userIdOf(req), profile.profileId, id, dto);
   }
 
+  @Post('documents/:id/reprocess')
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ProfileAccess('write')
+  reprocess(@Request() req: any, @ActiveProfile() profile: ProfileContext, @Param('id', new ParseUUIDPipe()) id: string) {
+    return this.care.reprocessDocument(userIdOf(req), profile.profileId, id);
+  }
+
   @Delete('documents/:id')
   @ProfileAccess('write')
   removeDocument(@Request() req: any, @ActiveProfile() profile: ProfileContext, @Param('id', new ParseUUIDPipe()) id: string) {

@@ -115,6 +115,10 @@ class _PrescriptionReviewScreenState extends ConsumerState<PrescriptionReviewScr
               ),
               const SizedBox(height: 10),
               if (doc.status == DocumentStatus.failed) CareNote(l10n.careExamFailedHint),
+              if (doc.status == DocumentStatus.failed || doc.status == DocumentStatus.review) ...[
+                const SizedBox(height: 10),
+                ReprocessDocumentButton(documentId: doc.id),
+              ],
               if (items.isEmpty && doc.status != DocumentStatus.failed) CareEmpty(l10n.careRxNothingRead, icon: Icons.receipt_long_outlined),
               for (var i = 0; i < items.length; i++) ...[
                 const SizedBox(height: 10),

@@ -989,6 +989,8 @@
   "careExamCompareHint": "Compare con el papel. Toque una fila para corregirla.",
   "careExamArchivedHint": "Guardado sin lectura.",
   "careExamFailedHint": "No pudimos leer este archivo. Puede escribir los valores o probar otra foto, con buena luz y la hoja completa.",
+  "careReadAgain": "Leer el archivo de nuevo",
+  "careReadingAgain": "Leyendo el archivo de nuevo. Puede tardar unos segundos.",
   "careExamTitleField": "Nombre del examen",
   "careExamLab": "Laboratorio",
   "careExamCollected": "Fecha de toma",

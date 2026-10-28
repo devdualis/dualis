@@ -3434,6 +3434,13 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não conseguimos ler este arquivo. Você pode digitar os valores ou tentar outra foto, com boa luz e o papel inteiro.';
 
   @override
+  String get careReadAgain => 'Ler o arquivo de novo';
+
+  @override
+  String get careReadingAgain =>
+      'Lendo o arquivo de novo. Isso pode levar alguns segundos.';
+
+  @override
   String get careExamTitleField => 'Nome do exame';
 
   @override

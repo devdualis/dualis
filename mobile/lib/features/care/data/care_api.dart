@@ -20,6 +20,7 @@ class CareEndpoints {
   static String document(String id) => '/v1/care/documents/$id';
   static String documentFile(String id) => '/v1/care/documents/$id/file';
   static String review(String id) => '/v1/care/documents/$id/review';
+  static String reprocess(String id) => '/v1/care/documents/$id/reprocess';
 }
 
 final careApiProvider = Provider<CareApi>((ref) {
@@ -141,6 +142,11 @@ class CareApi {
 
   Future<CareDocument> review(String id, Map<String, dynamic> body) async {
     final response = await _apiClient.put(CareEndpoints.review(id), data: body, options: await _options());
+    return CareDocument.fromJson(_map(response.data));
+  }
+
+  Future<CareDocument> reprocess(String id) async {
+    final response = await _apiClient.post(CareEndpoints.reprocess(id), options: await _options());
     return CareDocument.fromJson(_map(response.data));
   }
 

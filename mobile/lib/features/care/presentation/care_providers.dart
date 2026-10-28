@@ -82,6 +82,13 @@ class CareActions {
     return doc;
   }
 
+  Future<CareDocument> reprocess(String id) async {
+    final doc = await _api.reprocess(id);
+    _ref.invalidate(careDocumentsProvider);
+    _ref.invalidate(careDocumentProvider(id));
+    return doc;
+  }
+
   Future<void> deleteDocument(String id) async {
     await _api.deleteDocument(id);
     _ref.invalidate(careDocumentsProvider);

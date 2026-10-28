@@ -269,6 +269,27 @@ export class CareService {
     });
   }
 
+  /** Reads the stored file again. Confirmed (ready) documents are never overwritten. */
+  async reprocessDocument(userId: string, profileId: string, id: string): Promise<CareDocumentResponse> {
+    const { row, file, base } = await this.databaseService.withRls(userId, async (tx) => {
+      const existing = await this.findDocument(tx, profileId, id);
+      if (existing.kind === 'other' || !['failed', 'review'].includes(existing.status)) {
+        throw new BadRequestException('Only unread or unconfirmed exams and prescriptions can be read again.');
+      }
+      const current = this.decryptDocumentData(existing);
+      const [stored] = await tx.select({ file: careDocuments.file }).from(careDocuments).where(eq(careDocuments.id, id));
+      const [updated] = await tx
+        .update(careDocuments)
+        .set({ status: 'processing', error: null, updatedAt: new Date() })
+        .where(eq(careDocuments.id, id))
+        .returning(documentMeta);
+      const base: DocumentData = current.title ? { title: current.title } : {};
+      return { row: updated, file: this.encryption.decryptBuffer(stored.file), base };
+    });
+    setImmediate(() => void this.readDocument(userId, id, row.kind as 'lab' | 'prescription', row.mime, file, base));
+    return this.toDocument(row);
+  }
+
   async deleteDocument(userId: string, profileId: string, id: string): Promise<{ success: true; id: string }> {
     return this.databaseService.withRls(userId, async (tx) => {
       await this.findDocument(tx, profileId, id);

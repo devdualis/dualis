@@ -5950,6 +5950,18 @@ abstract class AppLocalizations {
   /// **'Não conseguimos ler este arquivo. Você pode digitar os valores ou tentar outra foto, com boa luz e o papel inteiro.'**
   String get careExamFailedHint;
 
+  /// No description provided for @careReadAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ler o arquivo de novo'**
+  String get careReadAgain;
+
+  /// No description provided for @careReadingAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lendo o arquivo de novo. Isso pode levar alguns segundos.'**
+  String get careReadingAgain;
+
   /// No description provided for @careExamTitleField.
   ///
   /// In pt, this message translates to:

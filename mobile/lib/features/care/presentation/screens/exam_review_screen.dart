@@ -36,6 +36,48 @@ Future<void> openOriginalDocument(BuildContext context, WidgetRef ref, CareDocum
   }
 }
 
+/// Sends the stored file through the reader again, then returns to the list,
+/// which shows it as "reading" until it finishes.
+class ReprocessDocumentButton extends ConsumerStatefulWidget {
+  const ReprocessDocumentButton({super.key, required this.documentId});
+  final String documentId;
+
+  @override
+  ConsumerState<ReprocessDocumentButton> createState() => _ReprocessDocumentButtonState();
+}
+
+class _ReprocessDocumentButtonState extends ConsumerState<ReprocessDocumentButton> {
+  bool _busy = false;
+
+  Future<void> _reprocess() async {
+    final l10n = AppLocalizations.of(context);
+    setState(() => _busy = true);
+    try {
+      await ref.read(careActionsProvider).reprocess(widget.documentId);
+      if (!mounted) return;
+      careSnack(context, l10n.careReadingAgain);
+      await Navigator.of(context).maybePop();
+    } catch (_) {
+      if (mounted) careSnack(context, l10n.careSaveError);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      key: const Key('document_reprocess'),
+      style: OutlinedButton.styleFrom(foregroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(46)),
+      onPressed: _busy ? null : _reprocess,
+      icon: _busy
+          ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+          : const Icon(Icons.refresh),
+      label: Text(AppLocalizations.of(context).careReadAgain),
+    );
+  }
+}
+
 /// Row-by-row check of a transcribed lab report. Values and references are the
 /// lab's; there are no colours, arrows or judgments, and saving needs every
 /// row confirmed.
@@ -186,6 +228,10 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                 onTap: () => openOriginalDocument(context, ref, doc),
               ),
               if (doc.status == DocumentStatus.failed) ...[const SizedBox(height: 10), CareNote(l10n.careExamFailedHint)],
+              if (canEdit && (doc.status == DocumentStatus.failed || doc.status == DocumentStatus.review)) ...[
+                const SizedBox(height: 10),
+                ReprocessDocumentButton(documentId: doc.id),
+              ],
               if (!archiveOnly) ...[
                 const SizedBox(height: 12),
                 CareField(controller: _title, label: l10n.careExamTitleField, maxLength: 120),

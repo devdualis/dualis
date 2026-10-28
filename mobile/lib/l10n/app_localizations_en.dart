@@ -3425,6 +3425,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'We could not read this file. You can type the values or try another photo, in good light with the whole page.';
 
   @override
+  String get careReadAgain => 'Read the file again';
+
+  @override
+  String get careReadingAgain =>
+      'Reading the file again. This can take a few seconds.';
+
+  @override
   String get careExamTitleField => 'Exam name';
 
   @override
