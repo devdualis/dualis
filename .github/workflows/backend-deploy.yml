@@ -142,10 +142,7 @@ jobs:
           VERTEX_CLIENT_EMAIL: ${{ secrets.VERTEX_CLIENT_EMAIL }}
           VERTEX_PRIVATE_KEY: ${{ secrets.VERTEX_PRIVATE_KEY }}
           DISCLAIMER_VERSION: ${{ vars.DISCLAIMER_VERSION }}
-          SMTP_HOST: ${{ secrets.SMTP_HOST }}
-          SMTP_PORT: ${{ secrets.SMTP_PORT }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           MAIL_FROM: ${{ secrets.MAIL_FROM }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
@@ -178,8 +175,7 @@ jobs:
             // 2. Individual secrets override or supplement
             const individualKeys = [
               'DATABASE_URL', 'ENCRYPTION_MASTER_KEY', 'VERTEX_CLIENT_EMAIL', 'VERTEX_PRIVATE_KEY',
-              'DISCLAIMER_VERSION', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER',
-              'SMTP_PASS', 'MAIL_FROM', 'SUPABASE_URL', 'SUPABASE_ANON_KEY',
+              'DISCLAIMER_VERSION', 'RESEND_API_KEY', 'MAIL_FROM', 'SUPABASE_URL', 'SUPABASE_ANON_KEY',
               'SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_AVATAR_BUCKET',
               'GOOGLE_VISION_API_KEY'
             ];

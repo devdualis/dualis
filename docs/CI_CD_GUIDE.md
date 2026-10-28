@@ -39,7 +39,7 @@ Both the backend on Google Cloud Run and the mobile Flutter client require speci
 │  - DATABASE_URL               │ │  - ANDROID_KEYSTORE_*     │
 │  - ENCRYPTION_MASTER_KEY      │ └───────────────────────────┘
 │  - VERTEX_* (Vertex AI)       │
-│  - SUPABASE_* / SMTP_*        │
+│  - SUPABASE_* / RESEND_*      │
 └───────────────────────────────┘
 ```
 
@@ -64,11 +64,8 @@ Both the backend on Google Cloud Run and the mobile Flutter client require speci
 | `GEMINI_MODEL` | Optional | Gemini model override (defaults to `gemini-2.5-flash`) | `gemini-2.5-flash` |
 | `DISCLAIMER_VERSION` | Optional | Current clinical disclaimer version | `2026.1` |
 | `JWT_SECRET` | Optional | Secret for signing auth tokens (defaults to master key) | `your-jwt-secret` |
-| `SMTP_HOST` | Optional | SMTP host for verification / transactional emails | `smtp-pulse.com` |
-| `SMTP_PORT` | Optional | SMTP port | `587` |
-| `SMTP_USER` | Optional | SMTP username | `dev@example.com` |
-| `SMTP_PASS` | Optional | SMTP password | `password` |
-| `MAIL_FROM` | Optional | From email header | `"DualisCheckUp <no-reply@dualis.health>"` |
+| `RESEND_API_KEY` | **Yes** | Resend API key for verification and password-reset emails. Without it no email is sent and nobody can verify an account | `re_...` |
+| `MAIL_FROM` | Optional | From header. The domain must be verified in Resend | `"DualisCheckUp <nao-responda@dualischeckup.com>"` |
 | `SUPABASE_URL` | **Yes** | Supabase project URL for storage & services | `https://xxxx.supabase.co` |
 | `SUPABASE_ANON_KEY` | **Yes** | Supabase anonymous public key | `eyJhbGciOi...` |
 | `SUPABASE_SERVICE_ROLE_KEY` | **Yes** | Supabase service role key (for backend admin operations) | `eyJhbGciOi...` |
@@ -91,10 +88,13 @@ Create individual secrets under **Repository Secrets** in GitHub:
 - `SUPABASE_URL`
 - `SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
-- `SMTP_USER`, `SMTP_PASS`, etc.
+- `RESEND_API_KEY`, `MAIL_FROM`, etc.
 
 #### Vertex AI access (no API key)
 Gemini is called through Vertex AI. Either add the `VERTEX_CLIENT_EMAIL` and `VERTEX_PRIVATE_KEY` secrets (service-account key), or leave them out and grant the Cloud Run service account `roles/aiplatform.user` (set `GCP_RUN_SERVICE_ACCOUNT` to pick a dedicated one). Enable the Vertex AI API (`aiplatform.googleapis.com`) in the project. Live check: `cd backend && npx tsx scripts/vertex-smoke.ts`.
+
+#### Email (Resend)
+Verification and password-reset codes are sent with the Resend HTTP API. Add the `dualischeckup.com` domain in Resend (region São Paulo, `sa-east-1`), publish its DNS records until it shows Verified, then add the `RESEND_API_KEY` secret (and `MAIL_FROM` if not the default). Without the key production sends no email, so nobody can verify an account. Live check: `cd backend && npx tsx scripts/email-smoke.ts you@example.com`.
 
 #### Approach C: Configure Once in Google Cloud Run (Recommended for Enterprise)
 If you configure environment variables directly in the Google Cloud Console or bind them to **Google Secret Manager**, the CI/CD deployment will **preserve and maintain all existing environment variables** across every new container image revision!

@@ -1,47 +1,69 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
-import * as nodemailer from 'nodemailer';
+
+const RESEND_API_URL = 'https://api.resend.com/emails';
+const SEND_TIMEOUT_MS = 10_000;
+
+// The name is user input; escape it so nobody can inject links or markup into
+// an email sent from our domain.
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+}
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private transporter: nodemailer.Transporter | null = null;
+  private readonly apiKey: string | undefined;
+  private readonly mailFrom: string;
   private readonly sentCodesMemory = new Map<string, { code: string; sentAt: Date }>();
 
   constructor(@Optional() private readonly configService?: ConfigService) {
-    this.initTransporter();
-  }
+    this.apiKey = this.configService?.get<string>('RESEND_API_KEY') || process.env.RESEND_API_KEY;
+    // The sender domain must be verified in Resend.
+    this.mailFrom =
+      this.configService?.get<string>('MAIL_FROM') ||
+      process.env.MAIL_FROM ||
+      'DualisCheckUp <nao-responda@dualischeckup.com>';
 
-  private initTransporter() {
-    const host = this.configService?.get<string>('SMTP_HOST') || process.env.SMTP_HOST;
-    const port = parseInt(this.configService?.get<string>('SMTP_PORT') || process.env.SMTP_PORT || '587', 10);
-    const user = this.configService?.get<string>('SMTP_USER') || process.env.SMTP_USER;
-    const pass = this.configService?.get<string>('SMTP_PASS') || process.env.SMTP_PASS;
-
-    if (host && user && pass) {
-      this.transporter = nodemailer.createTransport({
-        host,
-        port,
-        secure: port === 465,
-        auth: {
-          user,
-          pass,
-        },
-      });
-      this.logger.log(`[EmailService] Transporter SMTP configurado para ${host}:${port}`);
+    if (this.apiKey) {
+      this.logger.log('[EmailService] Envio de e-mails via Resend');
+    } else if (process.env.NODE_ENV === 'production') {
+      this.logger.error('[EmailService] RESEND_API_KEY ausente em produção: nenhum e-mail será enviado.');
     } else {
-      this.logger.warn(
-        '[EmailService] Credenciais SMTP incompletas. Operando em modo de simulação (memória e console).',
-      );
+      this.logger.warn('[EmailService] RESEND_API_KEY ausente. Operando em modo de simulação (memória e console).');
     }
   }
 
-  // Codes and addresses only reach the logs in simulation mode (no SMTP, not
+  // Codes and addresses only reach the logs in simulation mode (no API key, not
   // production); otherwise anyone with log access could take over an account.
   private logCodeForSimulation(kind: string, email: string, code: string) {
-    if (this.transporter || process.env.NODE_ENV === 'production') return;
+    if (this.apiKey || process.env.NODE_ENV === 'production') return;
     this.logger.log(`[EmailService] Simulação: código de ${kind} para ${email}: [${code}]`);
+  }
+
+  // Failures are logged, never thrown: the code hash is already stored and the
+  // user can ask for a new code. Logs never include the code.
+  private async deliver(to: string, subject: string, text: string, html: string): Promise<void> {
+    if (!this.apiKey || process.env.NODE_ENV === 'test') return;
+
+    try {
+      const res = await fetch(RESEND_API_URL, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: this.mailFrom, to: [to], subject, text, html }),
+        signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
+      });
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        this.logger.error(`[EmailService] Resend recusou o envio (${res.status}): ${body.slice(0, 300)}`);
+        return;
+      }
+      const { id } = (await res.json().catch(() => ({}))) as { id?: string };
+      this.logger.log(`[EmailService] E-mail enviado via Resend (id ${id ?? 'desconhecido'})`);
+    } catch (err: any) {
+      this.logger.error(`[EmailService] Falha ao enviar via Resend: ${err.message}`, err.stack);
+    }
   }
 
   generateVerificationCode(): string {
@@ -61,12 +83,7 @@ export class EmailService {
     const normalizedEmail = to.toLowerCase().trim();
     this.sentCodesMemory.set(normalizedEmail, { code, sentAt: new Date() });
 
-    const recipientName = name ? name.split(' ')[0] : 'Paciente';
-    const mailFrom =
-      this.configService?.get<string>('MAIL_FROM') ||
-      process.env.MAIL_FROM ||
-      'DualisCheckUp <dev@wgi.one>';
-
+    const firstName = name?.trim().split(' ')[0];
     this.logCodeForSimulation('verificação', normalizedEmail, code);
 
     const htmlContent = `
@@ -90,10 +107,10 @@ export class EmailService {
         <div class="container">
           <div class="header">
             <h1 class="title">DualisCheckUp</h1>
-            <p class="subtitle">Triagem Preventiva e Histórico Clínico Unificado</p>
+            <p class="subtitle">Seu diário de bem-estar</p>
           </div>
           <div class="content">
-            <p>Olá, <strong>${recipientName}</strong>,</p>
+            <p>Olá${firstName ? `, <strong>${escapeHtml(firstName)}</strong>` : ''},</p>
             <p>Obrigado por criar sua conta no <strong>DualisCheckUp</strong>. Para confirmar que este endereço de e-mail é seu e ativar sua conta com segurança, utilize o código de verificação abaixo:</p>
             <div class="code-box">
               <span class="code">${code}</span>
@@ -108,21 +125,12 @@ export class EmailService {
       </html>
     `;
 
-    if (this.transporter && process.env.NODE_ENV !== 'test') {
-      try {
-        await this.transporter.sendMail({
-          from: mailFrom,
-          to: normalizedEmail,
-          subject: `${code} é seu código de verificação DualisCheckUp`,
-          text: `Olá ${recipientName}, seu código de verificação do DualisCheckUp é: ${code}. Ele expira em 15 minutos.`,
-          html: htmlContent,
-        });
-        this.logger.log('[EmailService] E-mail de verificação enviado via SMTP');
-      } catch (err: any) {
-        this.logger.error(`[EmailService] Falha ao enviar via SMTP: ${err.message}`, err.stack);
-        // Fallback: don't crash app if SMTP fails, code is logged for emergency access
-      }
-    }
+    await this.deliver(
+      normalizedEmail,
+      `${code} é seu código de verificação DualisCheckUp`,
+      `Olá${firstName ? ` ${firstName}` : ''}, seu código de verificação do DualisCheckUp é: ${code}. Ele expira em 15 minutos.`,
+      htmlContent,
+    );
   }
 
   getLastSentCode(email: string): string | undefined {
@@ -133,12 +141,7 @@ export class EmailService {
     const normalizedEmail = to.toLowerCase().trim();
     this.sentCodesMemory.set(normalizedEmail, { code, sentAt: new Date() });
 
-    const recipientName = name ? name.split(' ')[0] : 'Paciente';
-    const mailFrom =
-      this.configService?.get<string>('MAIL_FROM') ||
-      process.env.MAIL_FROM ||
-      'DualisCheckUp <dev@wgi.one>';
-
+    const firstName = name?.trim().split(' ')[0];
     this.logCodeForSimulation('redefinição de senha', normalizedEmail, code);
 
     const htmlContent = `
@@ -162,10 +165,10 @@ export class EmailService {
         <div class="container">
           <div class="header">
             <h1 class="title">DualisCheckUp</h1>
-            <p class="subtitle">Triagem Preventiva e Histórico Clínico Unificado</p>
+            <p class="subtitle">Seu diário de bem-estar</p>
           </div>
           <div class="content">
-            <p>Olá, <strong>${recipientName}</strong>,</p>
+            <p>Olá${firstName ? `, <strong>${escapeHtml(firstName)}</strong>` : ''},</p>
             <p>Recebemos uma solicitação para redefinir a senha da sua conta no <strong>DualisCheckUp</strong>. Utilize o código abaixo para criar uma nova senha:</p>
             <div class="code-box">
               <span class="code">${code}</span>
@@ -180,19 +183,11 @@ export class EmailService {
       </html>
     `;
 
-    if (this.transporter && process.env.NODE_ENV !== 'test') {
-      try {
-        await this.transporter.sendMail({
-          from: mailFrom,
-          to: normalizedEmail,
-          subject: `${code} é seu código de redefinição de senha DualisCheckUp`,
-          text: `Olá ${recipientName}, seu código de redefinição de senha do DualisCheckUp é: ${code}. Ele expira em 15 minutos. Se você não solicitou, ignore esta mensagem.`,
-          html: htmlContent,
-        });
-        this.logger.log('[EmailService] E-mail de redefinição de senha enviado via SMTP');
-      } catch (err: any) {
-        this.logger.error(`[EmailService] Falha ao enviar via SMTP: ${err.message}`, err.stack);
-      }
-    }
+    await this.deliver(
+      normalizedEmail,
+      `${code} é seu código de redefinição de senha DualisCheckUp`,
+      `Olá${firstName ? ` ${firstName}` : ''}, seu código de redefinição de senha do DualisCheckUp é: ${code}. Ele expira em 15 minutos. Se você não solicitou, ignore esta mensagem.`,
+      htmlContent,
+    );
   }
 }
