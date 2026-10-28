@@ -17,10 +17,12 @@ export type SupportedLanguage = 'pt-BR' | 'es' | 'en';
 /**
  * Current version of the legal documents (terms, privacy policy, disclaimer).
  * 2026.2 = wellness repositioning: the app is no longer described as a triage
- * tool. Bumping it forces every user to accept the new texts again.
+ * tool. 2026.3 = premium "Meus cuidados" (vaccines, allergies, medications,
+ * appointments, exam and prescription reading with Google Cloud Vision) and
+ * users outside Brazil. Bumping it forces every user to accept the new texts again.
  * Env overrides (TERMS_VERSION, PRIVACY_VERSION, DISCLAIMER_VERSION) still win.
  */
-export const LEGAL_DOCUMENTS_VERSION = '2026.2';
+export const LEGAL_DOCUMENTS_VERSION = '2026.3';
 
 const LEGAL_DOCUMENTS_EFFECTIVE_DATE = '2026-10-16';
 const LEGAL_DOCUMENTS_LAST_UPDATED = '2026-10-16';
@@ -285,6 +287,7 @@ export class LegalService {
             bullets: [
               'Datos de registro: Nombre, correo electrónico, fecha de nacimiento, sexo biológico.',
               'Datos sensibles de salud: Anotaciones diarias sobre cómo se siente física y emocionalmente, la intensidad que usted informa, consumo de agua y otros hábitos.',
+              'Si usa "Meus cuidados" (Premium): vacunas, alergias, medicamentos y recordatorios, consultas, y los documentos de exámenes y recetas que usted sube, con los valores que usted confirma.',
               'Datos técnicos de seguridad: Dirección IP anonimizada, registros de auditoría de acceso, versión del dispositivo.',
             ],
           },
@@ -296,6 +299,7 @@ export class LegalService {
             bullets: [
               'Registro y visualización de su diario de bienestar.',
               'Sugerir, con ayuda de IA, una opción ya existente del diario cuando usted escribe con sus palabras (sin evaluación de salud).',
+              'Leer los documentos de exámenes y recetas que usted sube para llenar un formulario que usted confirma campo por campo. La app copia lo impreso: no interpreta resultados ni crea dosis.',
               'Consistencia del historial.',
             ],
           },
@@ -306,7 +310,8 @@ export class LegalService {
               'Para prestar el servicio compartimos datos únicamente con los siguientes encargados del tratamiento:',
             bullets: [
               'Google LLC (API Gemini): el texto de "escribir el mío" puede enviarse a Gemini solo para sugerir una opción ya existente del diario. La IA no evalúa su salud.',
-              'Transferencia internacional: ese procesamiento puede realizarse fuera de Brasil (LGPD Art. 33).',
+              'Google LLC (Cloud Vision): las fotos y PDF de exámenes y recetas que usted elige leer se envían a Cloud Vision para extraer el texto, que se procesa en servidores de Google en Estados Unidos o la Unión Europea. Después, Gemini (Vertex AI, región São Paulo) ordena ese texto, sin su nombre ni CPF. Google no usa estos datos para entrenar modelos.',
+              'Transferencia internacional: la app puede usarse desde fuera de Brasil y parte del procesamiento ocurre fuera de su país. Se realiza con su consentimiento específico y con las garantías contractuales del proveedor (LGPD Art. 33; RGPD Art. 46, cláusulas contractuales tipo).',
               'Proveedores de infraestructura en la nube (alojamiento y base de datos), sujetos a obligaciones de confidencialidad y seguridad.',
             ],
           },
@@ -360,6 +365,7 @@ export class LegalService {
             bullets: [
               'Account info: Name, email address, date of birth, biological sex.',
               'Sensitive health data: Daily notes on how you feel physically and emotionally, the intensity you report, water intake and other habits.',
+              'If you use "Meus cuidados" (Premium): vaccines, allergies, medications and reminders, appointments, and the exam and prescription documents you upload, with the values you confirm.',
               'Security logs: Anonymized IP addresses, session telemetry, audit hashes.',
             ],
           },
@@ -371,6 +377,7 @@ export class LegalService {
             bullets: [
               'Recording and viewing your wellness journal.',
               'Suggesting, with AI help, an existing diary option when you write in your own words (no health assessment).',
+              'Reading the exam and prescription documents you upload to fill a form you confirm field by field. The app copies what is printed: it does not interpret results or create doses.',
               'Keeping your history consistent.',
             ],
           },
@@ -380,7 +387,8 @@ export class LegalService {
             content: 'We share data only with the following processors, to run the service:',
             bullets: [
               'Google LLC (Gemini API): text from "write my own" may be sent to Gemini only to suggest an existing diary option. The AI does not assess your health.',
-              'International transfer: that processing may take place outside Brazil (LGPD Art. 33).',
+              'Google LLC (Cloud Vision): photos and PDFs of exams and prescriptions you choose to read are sent to Cloud Vision to extract the text, processed on Google servers in the United States or the European Union. Gemini (Vertex AI, São Paulo region) then organizes that text, without your name or CPF. Google does not use this data to train models.',
+              'International transfer: the app can be used outside Brazil and part of the processing happens outside your country. It is done with your specific consent and the provider\'s contractual safeguards (LGPD Art. 33; GDPR Art. 46, standard contractual clauses).',
               'Cloud infrastructure providers (hosting and database), bound by confidentiality and security obligations.',
             ],
           },
@@ -435,6 +443,7 @@ export class LegalService {
           bullets: [
             'Dados Cadastrais: Nome completo, endereço de e-mail autenticado, data de nascimento e sexo biológico.',
             'Dados Sensíveis de Saúde: Anotações diárias sobre como você se sente física e emocionalmente, intensidade informada por você, registros de hidratação e de outros hábitos.',
+            'Se você usar "Meus cuidados" (Premium): vacinas, alergias, medicamentos e lembretes, consultas, e os documentos de exames e receitas que você enviar, com os valores que você confirmar.',
             'Dados de Acesso e Metadados: Endereço IP mascarado, registros cronológicos de login, hashes de integridade do histórico.',
           ],
         },
@@ -446,6 +455,7 @@ export class LegalService {
           bullets: [
             'Registro e visualização do seu diário de bem-estar.',
             'Sugerir, com ajuda de IA, uma opção já existente do diário quando você escreve com as suas palavras (sem avaliação de saúde).',
+            'Ler os documentos de exames e receitas que você envia para preencher um formulário que você confere campo a campo. O app copia o que está impresso: não interpreta resultados nem cria doses.',
             'Consistência do histórico.',
           ],
         },
@@ -456,7 +466,8 @@ export class LegalService {
             'Compartilhamos dados apenas com os operadores abaixo, para a prestação do serviço:',
           bullets: [
             'Google LLC (API Gemini): o texto de "escrever o meu" pode ser enviado à Gemini só para sugerir uma opção já existente do diário. A IA não avalia a sua saúde.',
-            'Transferência internacional: esse processamento pode ocorrer fora do Brasil (LGPD Art. 33).',
+            'Google LLC (Cloud Vision): as fotos e PDFs de exames e receitas que você escolhe ler são enviados ao Cloud Vision para extrair o texto, processado em servidores do Google nos Estados Unidos ou na União Europeia. Depois, a Gemini (Vertex AI, região São Paulo) organiza esse texto, sem o seu nome nem CPF. O Google não usa esses dados para treinar modelos.',
+            'Transferência internacional: o app pode ser usado fora do Brasil e parte do processamento ocorre fora do seu país. Isso é feito com o seu consentimento específico e com as garantias contratuais do fornecedor (LGPD Art. 33; RGPD Art. 46, cláusulas contratuais-padrão).',
             'Provedores de infraestrutura em nuvem (hospedagem e banco de dados), sujeitos a obrigações de confidencialidade e segurança.',
           ],
         },
@@ -584,6 +595,13 @@ export class LegalService {
           'Garante os direitos do consumidor na contratação do serviço, incluindo o direito de arrependimento em 7 dias (Art. 49).',
         url: 'https://www.planalto.gov.br/ccivil_03/leis/l8078compilado.htm',
       },
+      {
+        regulatoryBody: 'União Europeia',
+        normativeAct: 'Regulamento (UE) 2016/679 (RGPD)',
+        summary:
+          'Aplica-se quando você usa o app na União Europeia. Os seus dados de saúde são tratados com o seu consentimento explícito (Art. 9) e transferências internacionais usam cláusulas contratuais-padrão (Art. 46).',
+        url: 'https://eur-lex.europa.eu/eli/reg/2016/679/oj',
+      },
     ];
 
     const emergencyContacts: EmergencyContactDto[] = [
@@ -631,6 +649,13 @@ export class LegalService {
           'Garantiza los derechos del consumidor al contratar el servicio, incluido el derecho de retracto en 7 días (Art. 49).',
         url: 'https://www.planalto.gov.br/ccivil_03/leis/l8078compilado.htm',
       },
+      {
+        regulatoryBody: 'Unión Europea',
+        normativeAct: 'Reglamento (UE) 2016/679 (RGPD)',
+        summary:
+          'Se aplica cuando usa la app en la Unión Europea. Sus datos de salud se tratan con su consentimiento explícito (Art. 9) y las transferencias internacionales usan cláusulas contractuales tipo (Art. 46).',
+        url: 'https://eur-lex.europa.eu/eli/reg/2016/679/oj',
+      },
     ];
 
     const emergencyContacts: EmergencyContactDto[] = [
@@ -677,6 +702,13 @@ export class LegalService {
         summary:
           'Protects your consumer rights when subscribing, including the 7-day right of withdrawal (Art. 49).',
         url: 'https://www.planalto.gov.br/ccivil_03/leis/l8078compilado.htm',
+      },
+      {
+        regulatoryBody: 'European Union',
+        normativeAct: 'Regulation (EU) 2016/679 (GDPR)',
+        summary:
+          'Applies when you use the app in the European Union. Your health data is processed with your explicit consent (Art. 9) and international transfers use standard contractual clauses (Art. 46).',
+        url: 'https://eur-lex.europa.eu/eli/reg/2016/679/oj',
       },
     ];
 

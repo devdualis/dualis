@@ -11,3 +11,4 @@ export * from './profiles.schema';
 export * from './legal-guardianships.schema';
 export * from './shared-access-grants.schema';
 export * from './journal.schema';
+export * from './care.schema';

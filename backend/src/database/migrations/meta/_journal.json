@@ -155,6 +155,13 @@
       "when": 1790275174096,
       "tag": "0020_journal_v2_1_area_sensation",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1790275174097,
+      "tag": "0021_premium_care",
+      "breakpoints": true
     }
   ]
 }

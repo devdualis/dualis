@@ -13,7 +13,7 @@ async function bootstrap() {
   const fastifyAdapter = new FastifyAdapter({
     logger: false, // Pino handles structured logging via nestjs-pino
     trustProxy: true, // Necessary for reverse proxies / GCP Cloud Run
-    bodyLimit: 5242880, // 5MB payload limit for profile pictures
+    bodyLimit: 15728640, // 15MB: base64 of a 10MB exam document (profile pictures need 5MB)
   });
 
   // Fastify by default rejects empty bodies with Content-Type: application/json with HTTP 400.

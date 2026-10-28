@@ -12,6 +12,7 @@ import { TriageModule } from './modules/triage/triage.module';
 import { HydrationModule } from './modules/hydration/hydration.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
 import { JournalModule } from './modules/journal/journal.module';
+import { CareModule } from './modules/care/care.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { JournalModule } from './modules/journal/journal.module';
     HydrationModule,
     ProfilesModule,
     JournalModule,
+    CareModule,
   ],
 })
 export class AppModule {}

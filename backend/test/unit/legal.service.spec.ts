@@ -137,9 +137,9 @@ describe('LegalService - SaaS Legal Foundations', () => {
       expect(disclaimer.emergencyContacts.some((c) => c.phone === '188')).toBe(true);
     });
 
-    it('defaults the disclaimer version to the bumped 2026.2 so every user re-consents', () => {
-      expect(LEGAL_DOCUMENTS_VERSION).toBe('2026.2');
-      expect(service.getMedicalDisclaimer('pt-BR').version).toBe('2026.2');
+    it('defaults the disclaimer version to the bumped 2026.3 so every user re-consents', () => {
+      expect(LEGAL_DOCUMENTS_VERSION).toBe('2026.3');
+      expect(service.getMedicalDisclaimer('pt-BR').version).toBe('2026.3');
     });
   });
 });

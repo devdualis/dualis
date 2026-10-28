@@ -79,4 +79,19 @@ export class EncryptionService {
 
     return decrypted;
   }
+
+  /** Encrypts binary data (uploaded files). Output: iv (12) | authTag (16) | ciphertext. */
+  encryptBuffer(plain: Buffer): Buffer {
+    const iv = randomBytes(12);
+    const cipher = createCipheriv(this.algorithm, this.key, iv);
+    const ciphertext = Buffer.concat([cipher.update(plain), cipher.final()]);
+    return Buffer.concat([iv, cipher.getAuthTag(), ciphertext]);
+  }
+
+  decryptBuffer(payload: Buffer): Buffer {
+    if (payload.length < 28) throw new Error('Invalid encrypted buffer.');
+    const decipher = createDecipheriv(this.algorithm, this.key, payload.subarray(0, 12));
+    decipher.setAuthTag(payload.subarray(12, 28));
+    return Buffer.concat([decipher.update(payload.subarray(28)), decipher.final()]);
+  }
 }

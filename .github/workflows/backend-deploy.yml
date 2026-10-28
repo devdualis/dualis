@@ -152,6 +152,7 @@ jobs:
           SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_AVATAR_BUCKET: ${{ vars.SUPABASE_AVATAR_BUCKET }}
+          GOOGLE_VISION_API_KEY: ${{ secrets.GOOGLE_VISION_API_KEY }}
         run: |
           node -e "
             const fs = require('fs');
@@ -179,7 +180,8 @@ jobs:
               'DATABASE_URL', 'ENCRYPTION_MASTER_KEY', 'VERTEX_CLIENT_EMAIL', 'VERTEX_PRIVATE_KEY',
               'DISCLAIMER_VERSION', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER',
               'SMTP_PASS', 'MAIL_FROM', 'SUPABASE_URL', 'SUPABASE_ANON_KEY',
-              'SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_AVATAR_BUCKET'
+              'SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_AVATAR_BUCKET',
+              'GOOGLE_VISION_API_KEY'
             ];
             for (const key of individualKeys) {
               if (process.env[key] && process.env[key].trim() !== '') {
@@ -222,8 +224,10 @@ jobs:
             "--region=${{ env.GCP_REGION }}"
             "--project=${{ env.GCP_PROJECT_ID }}"
             "--allow-unauthenticated"
-            "--memory=512Mi"
+            "--memory=1Gi"
             "--cpu=1"
+            # Exam reading runs after the upload response returns, so CPU must stay allocated.
+            "--no-cpu-throttling"
             "--min-instances=0"
             "--max-instances=10"
             "--port=8080"
