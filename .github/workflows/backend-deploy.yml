@@ -139,6 +139,8 @@ jobs:
           RAW_ENV: ${{ secrets.BACKEND_ENV }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           ENCRYPTION_MASTER_KEY: ${{ secrets.ENCRYPTION_MASTER_KEY }}
+          VERTEX_CLIENT_EMAIL: ${{ secrets.VERTEX_CLIENT_EMAIL }}
+          VERTEX_PRIVATE_KEY: ${{ secrets.VERTEX_PRIVATE_KEY }}
           DISCLAIMER_VERSION: ${{ vars.DISCLAIMER_VERSION }}
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
@@ -174,7 +176,7 @@ jobs:
 
             // 2. Individual secrets override or supplement
             const individualKeys = [
-              'DATABASE_URL', 'ENCRYPTION_MASTER_KEY',
+              'DATABASE_URL', 'ENCRYPTION_MASTER_KEY', 'VERTEX_CLIENT_EMAIL', 'VERTEX_PRIVATE_KEY',
               'DISCLAIMER_VERSION', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER',
               'SMTP_PASS', 'MAIL_FROM', 'SUPABASE_URL', 'SUPABASE_ANON_KEY',
               'SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_AVATAR_BUCKET'
@@ -186,6 +188,8 @@ jobs:
             }
 
             // Vertex AI settings are added by the deploy step; drop any copies to avoid duplicate keys.
+            delete envMap['VERTEX_PROJECT'];
+            delete envMap['VERTEX_LOCATION'];
             delete envMap['GOOGLE_CLOUD_PROJECT'];
             delete envMap['GOOGLE_CLOUD_LOCATION'];
             delete envMap['GEMINI_API_KEY'];
@@ -225,19 +229,20 @@ jobs:
             "--port=8080"
           )
 
-          # Gemini runs on Vertex AI with the service account's credentials (no API key).
-          # The Cloud Run service account needs roles/aiplatform.user.
+          # Gemini runs on Vertex AI (no API key). Credentials: VERTEX_CLIENT_EMAIL +
+          # VERTEX_PRIVATE_KEY secrets if given, else the Cloud Run service account
+          # (needs roles/aiplatform.user).
           VERTEX_PROJECT="${{ env.GCP_PROJECT_ID }}"
-          VERTEX_LOCATION="${{ vars.GOOGLE_CLOUD_LOCATION || env.GCP_REGION }}"
+          VERTEX_LOCATION="${{ vars.VERTEX_LOCATION || env.GCP_REGION }}"
           if [ "$HAS_ENV_FILE" = "true" ]; then
             echo "Applying environment variables from cloudrun-env.yaml..."
             {
-              echo "GOOGLE_CLOUD_PROJECT: \"$VERTEX_PROJECT\""
-              echo "GOOGLE_CLOUD_LOCATION: \"$VERTEX_LOCATION\""
+              echo "VERTEX_PROJECT: \"$VERTEX_PROJECT\""
+              echo "VERTEX_LOCATION: \"$VERTEX_LOCATION\""
             } >> cloudrun-env.yaml
             DEPLOY_CMD+=("--env-vars-file=cloudrun-env.yaml")
           else
-            DEPLOY_CMD+=("--update-env-vars=GOOGLE_CLOUD_PROJECT=$VERTEX_PROJECT,GOOGLE_CLOUD_LOCATION=$VERTEX_LOCATION")
+            DEPLOY_CMD+=("--update-env-vars=VERTEX_PROJECT=$VERTEX_PROJECT,VERTEX_LOCATION=$VERTEX_LOCATION")
           fi
           if [ -n "${{ vars.GCP_RUN_SERVICE_ACCOUNT }}" ]; then
             DEPLOY_CMD+=("--service-account=${{ vars.GCP_RUN_SERVICE_ACCOUNT }}")

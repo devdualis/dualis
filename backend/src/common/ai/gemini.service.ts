@@ -22,8 +22,9 @@ export interface GenerateJsonOptions {
  * future lab-exam parsing) must go through this service so key handling, model
  * selection and error behavior live in one place.
  *
- * Auth is Application Default Credentials (Cloud Run service account, or
- * `gcloud auth application-default login` locally). No API keys.
+ * Auth: a service-account key from `VERTEX_CLIENT_EMAIL` + `VERTEX_PRIVATE_KEY`
+ * when set, otherwise Application Default Credentials (Cloud Run service account,
+ * or `gcloud auth application-default login` locally). No API keys.
  */
 @Injectable()
 export class GeminiService {
@@ -34,20 +35,27 @@ export class GeminiService {
 
   constructor(@Optional() @Inject(ConfigService) private readonly configService?: ConfigService) {
     const read = (key: string) => this.configService?.get<string>(key) || process.env[key];
-    const project = read('GOOGLE_CLOUD_PROJECT');
-    const location = read('GOOGLE_CLOUD_LOCATION') || DEFAULT_LOCATION;
+    const project = read('VERTEX_PROJECT') || read('GOOGLE_CLOUD_PROJECT');
+    const location = read('VERTEX_LOCATION') || read('GOOGLE_CLOUD_LOCATION') || DEFAULT_LOCATION;
+    const clientEmail = read('VERTEX_CLIENT_EMAIL');
+    // Keys pasted into env files often carry literal "\n" instead of newlines.
+    const privateKey = read('VERTEX_PRIVATE_KEY')?.replace(/\\n/g, '\n');
+    const googleAuthOptions =
+      clientEmail && privateKey
+        ? { credentials: { client_email: clientEmail, private_key: privateKey } }
+        : undefined;
     this.generationModel = read('GEMINI_MODEL') || DEFAULT_GENERATION_MODEL;
     this.embeddingModel = read('GEMINI_EMBEDDING_MODEL') || DEFAULT_EMBEDDING_MODEL;
 
     if (project && !project.startsWith('mock-') && !project.startsWith('your-')) {
       try {
-        this.client = new GoogleGenAI({ vertexai: true, project, location });
+        this.client = new GoogleGenAI({ vertexai: true, project, location, googleAuthOptions });
         this.logger.log(`Vertex AI client initialized (model: ${this.generationModel}, location: ${location})`);
       } catch (err) {
         this.logger.warn(`Failed to initialize Vertex AI client: ${(err as Error).message}`);
       }
     } else {
-      this.logger.log('GOOGLE_CLOUD_PROJECT not provided or mock; AI calls disabled, deterministic fallbacks active');
+      this.logger.log('VERTEX_PROJECT not provided or mock; AI calls disabled, deterministic fallbacks active');
     }
   }
 

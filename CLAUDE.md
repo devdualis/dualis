@@ -156,7 +156,7 @@ DualisCheckUp is a wellness and self-awareness mobile app. It helps users keep a
 - **Cache & Queue:** Google Cloud Memorystore for Redis.
 - **Storage:** Google Cloud Storage (GCS) with CMEK (Customer-Managed Encryption Keys).
 - **OCR:** Google Cloud Vision API native VPC integration.
-- **AI:** Gemini (`gemini-2.5-flash`) on Vertex AI in `southamerica-east1`, called with the Cloud Run service account (`roles/aiplatform.user`) through `GOOGLE_CLOUD_PROJECT` / `GOOGLE_CLOUD_LOCATION`. No API keys. Confirm the Google Cloud DPA (no training on customer data) and re-check the privacy policy's international-transfer clause (LGPD Art. 33).
+- **AI:** Gemini (`gemini-2.5-flash`) on Vertex AI in `southamerica-east1`, called with the Cloud Run service account (`roles/aiplatform.user`) configured with `VERTEX_PROJECT` / `VERTEX_LOCATION` (optional service-account key in `VERTEX_CLIENT_EMAIL` / `VERTEX_PRIVATE_KEY`). No API keys. Confirm the Google Cloud DPA (no training on customer data) and re-check the privacy policy's international-transfer clause (LGPD Art. 33).
 - **Rationale:** Minimizes network hops and egress costs between NestJS, Cloud Vision, and Gemini, and keeps data in Brazil (São Paulo region).
 - **Hosting:** AWS ECS Fargate or AWS App Runner in São Paulo (`sa-east-1`).
 - **Database:** Amazon RDS for PostgreSQL (Multi-AZ, `sa-east-1`).
