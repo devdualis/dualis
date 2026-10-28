@@ -1,5 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
-import { catalogKeys, JournalSuggestService } from '../../src/modules/journal/journal-suggest.service';
+import {
+  OPTION_TEXT_PT,
+  catalogKeys,
+  deidentify,
+  JournalSuggestService,
+} from '../../src/modules/journal/journal-suggest.service';
 
 describe('JournalSuggestService', () => {
   it('catalog keys are only everyday diary chips, never .custom', () => {
@@ -35,5 +40,32 @@ describe('JournalSuggestService', () => {
 
     generateJson.mockResolvedValueOnce({ optionKey: 'none' });
     expect(await service.suggest('xyz', 'emotional')).toEqual({ optionKey: null });
+  });
+
+  it('every catalog chip has the text shown in the app', () => {
+    for (const key of [...catalogKeys('emotional'), ...catalogKeys('physical')]) {
+      expect(OPTION_TEXT_PT[key], key).toBeTruthy();
+    }
+  });
+
+  it('removes names, e-mails, links, handles and long numbers', () => {
+    expect(deidentify('meu nome é Ana Souza e estou exausta')).toBe('meu nome é [nome] e estou exausta');
+    expect(deidentify('Falei com Pedro ontem e fiquei triste')).toBe('Falei com [nome] ontem e fiquei triste');
+    expect(deidentify('liga 11 98765-4321 ou ana.b@mail.com')).toBe('liga [numero] ou [email]');
+    expect(deidentify('cpf 123.456.789-00 www.site.com @ana_b')).toBe('cpf [numero] [link] [usuario]');
+    expect(deidentify('Minha cabeça está pesada')).toBe('Minha cabeça está pesada');
+  });
+
+  it('sends only the de-identified text, as its own content, never inside the instructions', async () => {
+    const generateJson = vi.fn().mockResolvedValue({ optionKey: 'none' });
+    const service = new JournalSuggestService({ isAvailable: true, generateJson } as any);
+    await service.suggest('Sou a Maria, cpf 123.456.789-00, minha cabeça lateja', 'physical');
+
+    const call = generateJson.mock.calls[0][0];
+    expect(call.prompt).toBe('Sou a [nome], cpf [numero], minha cabeça lateja');
+    expect(call.systemInstruction).not.toContain('Maria');
+    expect(call.systemInstruction).not.toContain('minha cabeça');
+    expect(call.systemInstruction).toContain('cabeca.pressao.latejando: Latejando');
+    expect(call.schema.properties.optionKey.enum).toEqual([...catalogKeys('physical'), 'none']);
   });
 });

@@ -84,7 +84,7 @@ Old `symptom_logs` rows stay as they are and are returned by history as `legacy:
 `JournalEntryDto` = the stored entry with decrypted `note`, items with decrypted `customLabel`, and for condition items the condition `label`.
 
 ## AI suggest (catalog chips only)
-`POST /v1/journal/suggest-option` `{ text, kind: emotional|physical }` → `{ optionKey }`. Gemini may map the phrase onto **one existing diary chip** from the journal v2 trees, or `null`. It never invents keys, never names disorders, never scores intensity. The app asks the person to confirm; a "no" keeps the written custom label. The old `/v1/ai/tag-entry` routes and `symptom_knowledge` stay gone.
+`POST /v1/journal/suggest-option` `{ text, kind: emotional|physical }` → `{ optionKey }`. Gemini may map the phrase onto **one existing diary chip** from the journal v2 trees, or `null`. It never invents keys, never names disorders, never scores intensity. The app asks the person to confirm; a "no" keeps the written custom label. Before the call the server de-identifies the text (names, e-mails, links, @handles and long numbers such as phone or CPF become placeholders) and sends only that text and `kind` to Vertex AI (`southamerica-east1`), as its own content, separate from the instructions. No user, profile or entry identifiers are sent, and the text is never logged. Live quality check: `backend/scripts/journal-suggest-eval.ts`. The old `/v1/ai/tag-entry` routes and `symptom_knowledge` stay gone.
 
 ## Removed
 - Mobile: `RedFlagEvaluator`, `SafetyNoticeKind`, inline safety notice banner, any conditional emergency UI, `SymptomClassification*`, `ApiEndpoints.tagEntry`.
