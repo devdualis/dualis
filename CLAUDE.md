@@ -11,7 +11,7 @@ DualisCheckUp is a wellness and self-awareness mobile app. It helps users keep a
 ### Constraints
 
 - **Tech Stack**: Flutter + Riverpod (Mobile), NestJS + PostgreSQL (Supabase dev / Google Cloud SQL prod) + Redis (Backend) — Cross-platform efficiency and robust relational data management.
-- **Performance**: Sub-2-second latency on AI tag-entry classification across all supported languages.
+- **Performance**: Help resources reachable in ≤1 tap; journal save and history stay usable offline.
 - **Safety**: Help resources always reachable in ≤1 tap from every screen and login, with static official warning signs and regional emergency numbers.
 - **Regulatory**: Full LGPD compliance for Brazilian users (Art. 11, I explicit consent, regional data residency, strict RLS, encryption at rest and in transit). Intended as a wellness app; regulatory confirmation pending.
 
