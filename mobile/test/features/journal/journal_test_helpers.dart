@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:dio/dio.dart';
+import 'package:dualis_mobile/features/home/domain/home_greeting.dart';
 import 'package:dualis_mobile/core/database/app_database.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/core/theme/app_theme.dart';
@@ -98,6 +99,7 @@ class JournalHarness {
   final FakeJournalRemote remote;
   final JournalLocalStore local;
   bool online;
+  DateTime Function()? clock;
   late final JournalRepository repository;
 
   JournalHarness({List<UserCondition> conditions = const [], bool online = true})
@@ -118,6 +120,7 @@ class JournalHarness {
   List<Override> get overrides => [
         journalRepositoryProvider.overrideWithValue(repository),
         journalRandomProvider.overrideWithValue(Random(7)),
+        if (clock != null) homeClockProvider.overrideWithValue(clock!),
       ];
 }
 

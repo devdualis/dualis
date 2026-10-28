@@ -8,6 +8,7 @@ import '../../../../core/router/route_paths.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../dashboard/presentation/screens/check_in_summary_screen.dart';
+import '../../../home/domain/home_greeting.dart' as greeting;
 import '../../../home/domain/trigger_checkin_state.dart';
 import '../../../home/presentation/controllers/trigger_checkin_controller.dart';
 import '../../../triage/domain/triage_vertical.dart';
@@ -249,10 +250,12 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
   Widget _moodStep(AppLocalizations l10n, JournalFlowState state) {
     final name = ref.watch(authControllerProvider).user?.name.trim() ?? '';
     final firstName = name.isEmpty ? '' : name.split(RegExp(r'\s+')).first;
-    final hour = DateTime.now().hour;
-    final dayPart = hour < 12
-        ? l10n.jv2GoodMorning
-        : (hour < 18 ? l10n.jv2GoodAfternoon : l10n.jv2GoodEvening);
+    // Same periods as the Home greeting, so both screens agree after midnight.
+    final dayPart = switch (greeting.dayPeriodFor(ref.watch(greeting.homeClockProvider)())) {
+      greeting.DayPeriod.morning => l10n.jv2GoodMorning,
+      greeting.DayPeriod.afternoon => l10n.jv2GoodAfternoon,
+      greeting.DayPeriod.evening => l10n.jv2GoodEvening,
+    };
     final hello = firstName.isEmpty ? l10n.jv2Hello : l10n.jv2HelloName(firstName);
     return _StepLayout(
       lead: '$hello $dayPart',

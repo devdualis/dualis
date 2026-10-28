@@ -37,6 +37,14 @@ void main() {
     expect(find.text('😕'), findsOneWidget);
   });
 
+  testWidgets('mood greeting uses the Home periods (00:48 is Boa noite)', (tester) async {
+    final h = JournalHarness()..clock = () => DateTime(2026, 10, 28, 0, 48);
+    await pumpJournalFlow(tester, h);
+
+    expect(find.textContaining(pt.jv2GoodEvening), findsOneWidget);
+    expect(find.textContaining(pt.jv2GoodMorning), findsNothing);
+  });
+
   testWidgets('Bem saves right away and opens the summary', (tester) async {
     final h = JournalHarness();
     await pumpJournalFlow(tester, h);
