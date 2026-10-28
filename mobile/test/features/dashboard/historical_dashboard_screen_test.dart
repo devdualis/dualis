@@ -276,7 +276,7 @@ void main() {
       expect(find.byKey(const Key('journal_entry_e1')), findsNothing);
     });
 
-    testWidgets('water line uses the 30-day hydration totals', (tester) async {
+    testWidgets('water history lives only in the water tab', (tester) async {
       await pumpDashboard(
         tester,
         const [],
@@ -285,7 +285,7 @@ void main() {
           DateTime(2026, 10, 1): 900,
         },
       );
-      expect(find.byKey(const Key('water_line_chart')), findsOneWidget);
+      expect(find.byKey(const Key('water_line_chart')), findsNothing);
     });
 
     testWidgets('shows pending offline entries marked as aguardando sincronizar',

@@ -6,7 +6,6 @@ import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../home/domain/home_greeting.dart';
-import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../journal_insights/domain/journal_insights_models.dart';
 import '../../../journal/presentation/journal_labels.dart';
 import '../../../journal_insights/presentation/controllers/journal_insights_controller.dart';
@@ -19,8 +18,8 @@ import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 /// counted and drawn, never interpreted.
 ///
 /// Top: Passado / Presente / Futuro bar and the body map with marked regions.
-/// Below: one intensity line per item (5 visible, then "ver mais"), the water
-/// line, count-only co-occurrence sentences (§9.2) and the entries list.
+/// Below: one intensity line per item (5 visible, then "ver mais"),
+/// count-only co-occurrence sentences (§9.2) and the entries list.
 class HistoricalDashboardScreen extends ConsumerWidget {
   final bool isEmbedded;
   const HistoricalDashboardScreen({super.key, this.isEmbedded = false});
@@ -108,7 +107,6 @@ class _DashboardBody extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final today = ref.read(homeClockProvider)();
     const window = JournalInsightsState.windowDays;
-    final hydration = ref.watch(hydrationControllerProvider);
     final series = buildItemSeries(
       l10n,
       state.entries,
@@ -147,15 +145,6 @@ class _DashboardBody extends ConsumerWidget {
           title: l10n.xv2DashLinesTitle,
           subtitle: l10n.xv2DashLinesSubtitle,
           child: ItemIntensityLines(series: series, windowDays: window),
-        ),
-        InsightsCard(
-          title: l10n.xv2DashWaterTitle,
-          child: WaterLine(
-            dailyTotals: hydration.last30DaysTotals,
-            goalMl: hydration.dailyTargetMl,
-            today: today,
-            windowDays: window,
-          ),
         ),
         if (sentences.isNotEmpty)
           InsightsCard(

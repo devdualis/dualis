@@ -10,7 +10,6 @@ import '../../../house_ads/data/house_ads_repository.dart';
 import '../../../house_ads/presentation/house_ad_card.dart';
 import '../../../journal_insights/presentation/widgets/journal_line_charts.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
-import '../../domain/models/hydration_settings.dart';
 import '../controllers/hydration_controller.dart';
 import '../widgets/hydration_visuals.dart';
 import '../widgets/water_intake_modal.dart';
@@ -488,25 +487,6 @@ class _ReminderSettings extends ConsumerWidget {
       color: AppColors.textSecondaryLight,
     );
 
-    Widget styleChip(ReminderSoundStyle style, String label, String key) {
-      final selected = settings.reminderSoundStyle == style;
-      return ChoiceChip(
-        key: Key(key),
-        label: Text(label),
-        selected: selected,
-        selectedColor: AppColors.clinicalTealDark,
-        labelStyle: GoogleFonts.plusJakartaSans(
-          fontSize: 11,
-          color: selected ? Colors.white : AppColors.textPrimaryLight,
-        ),
-        onSelected: viewOnly
-            ? null
-            : (val) {
-                if (val) notifier.setSoundStyle(style);
-              },
-      );
-    }
-
     return Material(
       color: AppColors.surfaceLight,
       borderRadius: BorderRadius.circular(16),
@@ -530,49 +510,6 @@ class _ReminderSettings extends ConsumerWidget {
               activeThumbColor: AppColors.clinicalTeal,
               onChanged: viewOnly ? null : notifier.toggleReminders,
             ),
-            if (settings.reminderEnabled) ...[
-              const Divider(height: 1, color: AppColors.outlineLight),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l10n.registerReminderStyleLabel, style: titleStyle),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      children: [
-                        styleChip(
-                          ReminderSoundStyle.whatsappChime,
-                          l10n.registerReminderStyleChime,
-                          'settings_sound_style_chime',
-                        ),
-                        styleChip(
-                          ReminderSoundStyle.phoneAlarm,
-                          l10n.registerReminderStyleAlarm,
-                          'settings_sound_style_alarm',
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(height: 1, color: AppColors.outlineLight),
-              SwitchListTile(
-                key: const Key('settings_water_tracking_switch'),
-                title: Text(l10n.registerWaterTrackingTitle, style: titleStyle),
-                subtitle: Text(
-                  settings.trackingEnabled
-                      ? l10n.registerWaterTrackingOnDesc
-                      : l10n.registerWaterTrackingOffDesc,
-                  style: subtitleStyle,
-                ),
-                value: settings.trackingEnabled,
-                activeThumbColor: AppColors.clinicalTeal,
-                onChanged: viewOnly ? null : notifier.toggleTracking,
-              ),
-            ],
           ],
         ),
       ),
