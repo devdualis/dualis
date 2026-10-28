@@ -8,6 +8,7 @@ import 'package:dualis_mobile/features/care/domain/pni_calendar.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/allergies_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/care_hub_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/exam_review_screen.dart';
+import 'package:dualis_mobile/features/care/presentation/screens/exams_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/medications_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/vaccines_screen.dart';
 import 'package:dualis_mobile/features/home/presentation/widgets/dualis_bottom_nav_bar.dart';
@@ -96,7 +97,7 @@ class FakeCareApi implements CareApi {
   }
 
   @override
-  Future<void> deleteDocument(String id) async {}
+  Future<void> deleteDocument(String id) async => docs.removeWhere((d) => d.id == id);
 }
 
 class _NoopNotifications implements CareNotificationService {
@@ -257,6 +258,24 @@ void main() {
       ..add(CareDocument(id: 'd2', kind: DocumentKind.lab, mime: 'application/pdf', status: DocumentStatus.ready, createdAt: DateTime(2026, 10, 28), data: const {}));
     await pump(tester, const ExamReviewScreen(documentId: 'd2'), api: api);
     expect(find.byKey(const Key('document_reprocess')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('document_delete')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(pt.careDelete).last);
+    await tester.pumpAndSettle();
+    expect(api.docs, isEmpty);
+  });
+
+  testWidgets('a file stuck while being read can be swiped away', (tester) async {
+    final api = FakeCareApi();
+    api.docs.add(CareDocument(id: 'd1', kind: DocumentKind.lab, mime: 'application/pdf', status: DocumentStatus.processing, createdAt: DateTime(2026, 10, 28), data: const {}));
+    await pump(tester, const ExamsScreen(), api: api);
+    await tester.drag(find.byKey(const Key('doc_swipe_d1')), const Offset(-600, 0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(pt.careDelete).last);
+    await tester.pumpAndSettle();
+    expect(api.docs, isEmpty);
+    expect(find.text(pt.careExamReading), findsNothing);
   });
 
   testWidgets('premium nav bar adds the care tab before the help button', (tester) async {

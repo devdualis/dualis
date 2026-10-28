@@ -78,6 +78,42 @@ class _ReprocessDocumentButtonState extends ConsumerState<ReprocessDocumentButto
   }
 }
 
+/// Asks first, deletes the document and returns to the list.
+class DeleteDocumentButton extends ConsumerWidget {
+  const DeleteDocumentButton({super.key, required this.documentId});
+  final String documentId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return OutlinedButton.icon(
+      key: const Key('document_delete'),
+      style: OutlinedButton.styleFrom(foregroundColor: CareColors.slate, minimumSize: const Size.fromHeight(46)),
+      onPressed: () async {
+        if (!await confirmCareDelete(context)) return;
+        await ref.read(careActionsProvider).deleteDocument(documentId);
+        if (context.mounted) await Navigator.of(context).maybePop();
+      },
+      icon: const Icon(Icons.delete_outline),
+      label: Text(AppLocalizations.of(context).careDelete),
+    );
+  }
+}
+
+/// "Read again" (when the reading can still change) and "Delete", side by side.
+class DocumentActions extends StatelessWidget {
+  const DocumentActions({super.key, required this.doc});
+  final CareDocument doc;
+
+  @override
+  Widget build(BuildContext context) {
+    final canReread = doc.status == DocumentStatus.failed || doc.status == DocumentStatus.review;
+    return Row(children: [
+      if (canReread) ...[Expanded(flex: 3, child: ReprocessDocumentButton(documentId: doc.id)), const SizedBox(width: 10)],
+      Expanded(flex: 2, child: DeleteDocumentButton(documentId: doc.id)),
+    ]);
+  }
+}
+
 /// Row-by-row check of a transcribed lab report. Values and references are the
 /// lab's; there are no colours, arrows or judgments, and saving needs every
 /// row confirmed.
@@ -228,10 +264,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                 onTap: () => openOriginalDocument(context, ref, doc),
               ),
               if (doc.status == DocumentStatus.failed) ...[const SizedBox(height: 10), CareNote(l10n.careExamFailedHint)],
-              if (canEdit && (doc.status == DocumentStatus.failed || doc.status == DocumentStatus.review)) ...[
-                const SizedBox(height: 10),
-                ReprocessDocumentButton(documentId: doc.id),
-              ],
+              if (canEdit) ...[const SizedBox(height: 10), DocumentActions(doc: doc)],
               if (!archiveOnly) ...[
                 const SizedBox(height: 12),
                 CareField(controller: _title, label: l10n.careExamTitleField, maxLength: 120),

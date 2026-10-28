@@ -32,6 +32,8 @@ class ExamsScreen extends ConsumerStatefulWidget {
 class _ExamsScreenState extends ConsumerState<ExamsScreen> {
   Timer? _poll;
   bool _uploading = false;
+  /// Swiped away; hidden until the list reloads (a dismissed row must leave the tree).
+  final Set<String> _removed = {};
 
   @override
   void dispose() {
@@ -160,6 +162,33 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
     }
   }
 
+  /// Swipe left to delete (asks first). Also reaches files stuck while being read.
+  Widget _swipeToDelete(CareDocument d, bool canEdit, Widget child) {
+    if (!canEdit) return child;
+    return Dismissible(
+      key: Key('doc_swipe_${d.id}'),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        decoration: BoxDecoration(color: CareColors.slateBg, borderRadius: BorderRadius.circular(18)),
+        child: const Icon(Icons.delete_outline, color: CareColors.slate),
+      ),
+      confirmDismiss: (_) => confirmCareDelete(context),
+      onDismissed: (_) async {
+        setState(() => _removed.add(d.id));
+        try {
+          await ref.read(careActionsProvider).deleteDocument(d.id);
+        } catch (_) {
+          if (!mounted) return;
+          setState(() => _removed.remove(d.id));
+          careSnack(context, AppLocalizations.of(context).careSaveError);
+        }
+      },
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -187,7 +216,8 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
       body: CareAsync<List<CareDocument>>(
         value: async,
         onRetry: () => ref.invalidate(careDocumentsProvider),
-        data: (docs) {
+        data: (all) {
+          final docs = all.where((d) => !_removed.contains(d.id)).toList();
           final processing = docs.where((d) => d.status == DocumentStatus.processing).toList();
           final labs = docs.where((d) => d.kind == DocumentKind.lab && d.status != DocumentStatus.processing).toList();
           final rx = docs.where((d) => d.kind == DocumentKind.prescription && d.status != DocumentStatus.processing).toList();
@@ -200,23 +230,27 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
             children: [
-              for (final _ in processing) ...[
-                CareRow(
-                  color: AppColors.softIndigoLight,
-                  borderColor: const Color(0xFFC9DDF0),
-                  leading: const CareIconTile(Icons.sync, background: Colors.white, foreground: AppColors.dualisNavy),
-                  title: l10n.careExamReading,
-                  subtitle: l10n.careExamReadingHint,
+              for (final d in processing) ...[
+                _swipeToDelete(
+                  d,
+                  canEdit,
+                  CareRow(
+                    color: AppColors.softIndigoLight,
+                    borderColor: const Color(0xFFC9DDF0),
+                    leading: const CareIconTile(Icons.sync, background: Colors.white, foreground: AppColors.dualisNavy),
+                    title: l10n.careExamReading,
+                    subtitle: l10n.careExamReadingHint,
+                  ),
                 ),
                 const SizedBox(height: 10),
               ],
               if (docs.isEmpty) CareEmpty(l10n.careExamEmpty, icon: Icons.science_outlined),
               if (labs.isNotEmpty) CareSection(l10n.careExamSectionLabs),
-              for (final d in labs) ...[const SizedBox(height: 8), _DocRow(d, onTap: () => _open(d))],
+              for (final d in labs) ...[const SizedBox(height: 8), _swipeToDelete(d, canEdit, _DocRow(d, onTap: () => _open(d)))],
               if (rx.isNotEmpty) CareSection(l10n.careExamSectionPrescriptions),
-              for (final d in rx) ...[const SizedBox(height: 8), _DocRow(d, onTap: () => _open(d))],
+              for (final d in rx) ...[const SizedBox(height: 8), _swipeToDelete(d, canEdit, _DocRow(d, onTap: () => _open(d)))],
               if (other.isNotEmpty) CareSection(l10n.careExamSectionOther),
-              for (final d in other) ...[const SizedBox(height: 8), _DocRow(d, onTap: () => _open(d))],
+              for (final d in other) ...[const SizedBox(height: 8), _swipeToDelete(d, canEdit, _DocRow(d, onTap: () => _open(d)))],
               if (items.isNotEmpty) ...[
                 CareSection(l10n.careExamValuesOverTime),
                 const SizedBox(height: 8),
