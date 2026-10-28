@@ -17,6 +17,7 @@ const MIGRATIONS_DIR = join(__dirname, '../../src/database/migrations');
 const JOURNAL_MIGRATION = '0017_journal_v2.sql';
 const AI_REMOVAL_MIGRATION = '0018_remove_ai_tagging.sql';
 const CLIENT_ID_MIGRATION = '0019_journal_v2_profile_client_id.sql';
+const AREA_SENSATION_MIGRATION = '0020_journal_v2_1_area_sensation.sql';
 const APP_ROLE = 'dualis_journal_app';
 const APP_PASSWORD = 'dualis_journal_app';
 
@@ -102,12 +103,12 @@ describe('Security Regression: 0017 journal v2 (journal_entries, journal_items, 
     `);
 
     const migrations = readdirSync(MIGRATIONS_DIR).filter((f) => /^\d{4}_.*\.sql$/.test(f)).sort();
-    expect(migrations).toEqual(expect.arrayContaining([JOURNAL_MIGRATION, AI_REMOVAL_MIGRATION, CLIENT_ID_MIGRATION]));
+    expect(migrations).toEqual(expect.arrayContaining([JOURNAL_MIGRATION, AI_REMOVAL_MIGRATION, CLIENT_ID_MIGRATION, AREA_SENSATION_MIGRATION]));
     for (const file of migrations) {
       await adminPool.query(readFileSync(join(MIGRATIONS_DIR, file), 'utf8'));
     }
     // Idempotent: a second run must not fail.
-    for (const file of [JOURNAL_MIGRATION, AI_REMOVAL_MIGRATION, CLIENT_ID_MIGRATION]) {
+    for (const file of [JOURNAL_MIGRATION, AI_REMOVAL_MIGRATION, CLIENT_ID_MIGRATION, AREA_SENSATION_MIGRATION]) {
       await adminPool.query(readFileSync(join(MIGRATIONS_DIR, file), 'utf8'));
     }
 
@@ -204,6 +205,30 @@ describe('Security Regression: 0017 journal v2 (journal_entries, journal_items, 
     expect(raw.rows[0].trigger_note).toMatch(/^v1:/);
     const rawItem = await adminPool.query(`SELECT custom_label FROM journal_items WHERE entry_id = $1 AND custom_label IS NOT NULL`, [created.id]);
     expect(rawItem.rows[0].custom_label).toMatch(/^v1:/);
+  });
+
+  it('v2.1 entry stores area and sensation; whole-body items have no side', async (ctx) => {
+    if (!isDbAvailable) return ctx.skip();
+    const created = await service.createEntry(
+      ownerA,
+      primaryA,
+      entryDto({
+        area: 'physical',
+        triggers: ['clima'],
+        items: [
+          { kind: 'physical', optionKey: 'cabeca.nuca.rigida', bodySide: 'back', sensation: 'dor', persistence: 'hoje', intensity: 3 },
+          { kind: 'physical', optionKey: 'pele.coceira.coceira', sensation: 'incomodo', persistence: 'hoje', intensity: 2 },
+        ],
+      }),
+    );
+    expect(created.area).toBe('physical');
+    expect(created.items.map((i) => [i.optionKey, i.bodySide, i.sensation])).toEqual([
+      ['cabeca.nuca.rigida', 'back', 'dor'],
+      ['pele.coceira.coceira', null, 'incomodo'],
+    ]);
+    const old = await service.createEntry(ownerA, primaryA, entryDto());
+    expect(old.area).toBeNull();
+    expect(old.items.every((i) => i.sensation === null)).toBe(true);
   });
 
   it('replaying a clientId on the same profile returns the stored entry; other profiles never collide', async (ctx) => {
@@ -385,6 +410,13 @@ describe('Security Regression: 0017 journal v2 (journal_entries, journal_items, 
     await expect(insertItem(`INSERT INTO journal_items (entry_id, kind, option_key, intensity) VALUES ($1, 'mental', 'x', 2)`)).rejects.toThrow(/journal_items_kind_check/);
     await expect(insertItem(`INSERT INTO journal_items (entry_id, kind, intensity) VALUES ($1, 'emotional', 2)`)).rejects.toThrow(/journal_items_shape_check/);
     await expect(insertItem(`INSERT INTO journal_items (entry_id, kind, option_key, body_side) VALUES ($1, 'physical', 'x', 'left')`)).rejects.toThrow(/journal_items_body_side_check/);
+    await expect(insertItem(`INSERT INTO journal_items (entry_id, kind, option_key, sensation) VALUES ($1, 'physical', 'x', 'forte')`)).rejects.toThrow(/journal_items_sensation_check/);
+    await expect(insertItem(`INSERT INTO journal_items (entry_id, kind, option_key, sensation) VALUES ($1, 'emotional', 'x', 'dor')`)).rejects.toThrow(/journal_items_sensation_check/);
+    await expect(
+      asUser(ownerA, (c) =>
+        c.query(`INSERT INTO journal_entries (user_id, profile_id, recorded_at, mood, area, client_id) VALUES ($1, $2, now(), 'bem', 'ambos', $3)`, [ownerA, primaryA, randomUUID()]),
+      ),
+    ).rejects.toThrow(/journal_entries_area_check/);
     await expect(
       asUser(ownerA, (c) =>
         c.query(`INSERT INTO journal_entries (user_id, profile_id, recorded_at, mood, client_id) VALUES ($1, $2, now(), 'otimo', $3)`, [ownerA, primaryA, randomUUID()]),

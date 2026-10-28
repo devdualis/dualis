@@ -21,7 +21,11 @@ import {
 } from 'class-validator';
 import {
   BODY_SIDES,
+  BodySide,
   EMOTIONAL_OPTION_KEYS,
+  ENTRY_AREAS,
+  ENTRY_MOOD_KEYS,
+  EntryArea,
   INTENSITY_MAX,
   INTENSITY_MIN,
   ITEM_KINDS,
@@ -31,8 +35,12 @@ import {
   PERSISTENCE_KEYS,
   PHYSICAL_ONLY_TRIGGER_KEYS,
   PHYSICAL_OPTION_KEYS,
+  SENSATION_KEYS,
+  SensationKey,
   TRIGGER_KEYS,
   isCustomOptionKey,
+  isOptionKeyOnSide,
+  isWholeBodyOptionKey,
 } from '../constants/journal-keys.constant';
 
 const ALL_OPTION_KEYS = [...EMOTIONAL_OPTION_KEYS, ...PHYSICAL_OPTION_KEYS];
@@ -43,8 +51,8 @@ export function journalItemShapeError(item: Partial<JournalItemInputDto>): strin
   switch (item.kind) {
     case 'condition':
       if (!item.conditionId) return 'conditionId é obrigatório para itens de condição.';
-      if (item.optionKey || item.customLabel !== undefined || item.bodySide) {
-        return 'Itens de condição não aceitam optionKey, customLabel nem bodySide.';
+      if (item.optionKey || item.customLabel !== undefined || item.bodySide || item.sensation) {
+        return 'Itens de condição não aceitam optionKey, customLabel, bodySide nem sensation.';
       }
       return null;
     case 'emotional':
@@ -56,12 +64,55 @@ export function journalItemShapeError(item: Partial<JournalItemInputDto>): strin
       if (isCustomOptionKey(item.optionKey) !== hasText) {
         return 'customLabel é obrigatório com a chave custom e só é aceito com ela.';
       }
-      if (item.kind === 'physical' && !item.bodySide) return 'bodySide é obrigatório para itens físicos.';
-      if (item.kind === 'emotional' && item.bodySide) return 'bodySide só é aceito em itens físicos.';
+      if (item.kind === 'emotional') {
+        if (item.bodySide) return 'bodySide só é aceito em itens físicos.';
+        if (item.sensation) return 'sensation só é aceito em itens físicos.';
+        return null;
+      }
+      if (isWholeBodyOptionKey(item.optionKey)) {
+        if (item.bodySide) return 'Opções do corpo todo não aceitam bodySide.';
+      } else if (!item.bodySide) {
+        return 'bodySide é obrigatório para itens físicos.';
+      }
       return null;
     }
     default:
       return null; // reported by @IsIn on kind
+  }
+}
+
+/**
+ * Entry-level rules of journal v2.1. Entries with `area` come from v2.1 apps: one axis per
+ * entry, mood `bem` or `nao_tao_bem`, a sensation on every physical item and each sided
+ * option on a side where the map shows it. Entries without `area` (older apps, queued
+ * outbox records) keep the v2 rules.
+ */
+export function journalEntryShapeError(entry: Partial<CreateJournalEntryDto>): string | null {
+  const items = Array.isArray(entry.items) ? entry.items : [];
+  if (!entry.area) return null;
+  if (!(ENTRY_MOOD_KEYS as readonly string[]).includes(entry.mood ?? '')) {
+    return `mood deve ser ${ENTRY_MOOD_KEYS.join(' ou ')} quando o registro tem area.`;
+  }
+  for (const item of items) {
+    if (!item) continue;
+    const otherAxis = entry.area === 'emotional' ? 'physical' : 'emotional';
+    if (item.kind === otherAxis) return `Um registro com area ${entry.area} não aceita itens ${otherAxis}.`;
+    if (item.kind !== 'physical' || !item.optionKey) continue;
+    if (!item.sensation) return 'sensation é obrigatório para itens físicos quando o registro tem area.';
+    if (item.bodySide && !isOptionKeyOnSide(item.optionKey, item.bodySide)) {
+      return `${item.optionKey} não fica no lado ${item.bodySide} do corpo.`;
+    }
+  }
+  return null;
+}
+
+@ValidatorConstraint({ name: 'journalEntryShape', async: false })
+class JournalEntryShapeConstraint implements ValidatorConstraintInterface {
+  validate(_value: unknown, args: ValidationArguments): boolean {
+    return journalEntryShapeError(args.object as CreateJournalEntryDto) === null;
+  }
+  defaultMessage(args: ValidationArguments): string {
+    return journalEntryShapeError(args.object as CreateJournalEntryDto) ?? 'Registro inválido.';
   }
 }
 
@@ -109,7 +160,11 @@ export class JournalItemInputDto {
 
   @IsOptional()
   @IsIn(BODY_SIDES)
-  bodySide?: (typeof BODY_SIDES)[number];
+  bodySide?: BodySide;
+
+  @IsOptional()
+  @IsIn(SENSATION_KEYS)
+  sensation?: SensationKey;
 
   @IsOptional()
   @IsIn(PERSISTENCE_KEYS)
@@ -132,6 +187,11 @@ export class CreateJournalEntryDto {
 
   @IsIn(MOOD_KEYS)
   mood!: (typeof MOOD_KEYS)[number];
+
+  /** Axis of this entry (v2.1 apps). Absent on entries from older apps. */
+  @IsOptional()
+  @IsIn(ENTRY_AREAS)
+  area?: EntryArea;
 
   @IsArray()
   @ArrayMaxSize(TRIGGER_KEYS.length)
@@ -160,6 +220,7 @@ export class CreateJournalEntryDto {
   @ArrayMaxSize(JOURNAL_LIMITS.maxItems)
   @ValidateNested({ each: true })
   @Type(() => JournalItemInputDto)
+  @Validate(JournalEntryShapeConstraint)
   items!: JournalItemInputDto[];
 }
 
@@ -196,6 +257,8 @@ export interface JournalItemDto {
   /** Condition name as the person wrote it (condition items only). */
   label: string | null;
   bodySide: string | null;
+  /** `dor` | `incomodo` on physical items of v2.1 entries; null otherwise. */
+  sensation: string | null;
   persistence: string | null;
   intensity: number | null;
 }
@@ -212,6 +275,8 @@ export interface JournalEntryDto {
   clientId: string;
   recordedAt: string;
   mood: string;
+  /** `emotional` | `physical`; null on entries saved before v2.1. */
+  area: string | null;
   triggers: string[];
   triggerNote: string | null;
   note: string | null;
@@ -272,6 +337,11 @@ export class SuggestJournalOptionDto {
   @IsString()
   @Matches(/^[a-z_]+\.[a-z_]+$/)
   branch?: string;
+
+  /** Side on screen (physical only). Whole-body options are offered on both sides. */
+  @IsOptional()
+  @IsIn(BODY_SIDES)
+  bodySide?: BodySide;
 }
 
 export class SuggestJournalOptionResponseDto {

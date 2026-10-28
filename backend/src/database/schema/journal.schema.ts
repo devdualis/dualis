@@ -57,6 +57,7 @@ export const journalEntries = pgTable(
       .references(() => profiles.id, { onDelete: 'cascade' }), // subject
     recordedAt: timestamp('recorded_at', { withTimezone: true }).notNull(),
     mood: text('mood').notNull(),
+    area: text('area'), // 'emotional' | 'physical'; null on entries saved before v2.1
     triggers: text('triggers').array().default(sql`'{}'::text[]`).notNull(),
     triggerNote: text('trigger_note'), // encrypted
     note: text('note'), // encrypted
@@ -68,6 +69,7 @@ export const journalEntries = pgTable(
     index('idx_journal_entries_profile_recorded').on(table.profileId, table.recordedAt.desc()),
     unique('journal_entries_profile_client_id_unique').on(table.profileId, table.clientId),
     check('journal_entries_mood_check', sql`${table.mood} IN ('bem', 'normal', 'nao_tao_bem')`),
+    check('journal_entries_area_check', sql`${table.area} IS NULL OR ${table.area} IN ('emotional', 'physical')`),
     pgPolicy('journal_entries_profile_select', {
       for: 'select',
       using: sql`app_can_read_profile(profile_id)`,
@@ -100,6 +102,7 @@ export const journalItems = pgTable(
     customLabel: text('custom_label'), // encrypted (max 80 chars before encryption)
     conditionId: uuid('condition_id').references(() => userConditions.id, { onDelete: 'cascade' }),
     bodySide: text('body_side'),
+    sensation: text('sensation'), // 'dor' | 'incomodo', physical items only
     persistence: text('persistence'),
     intensity: smallint('intensity'),
   },
@@ -113,6 +116,10 @@ export const journalItems = pgTable(
         OR (${table.kind} IN ('emotional', 'physical') AND ${table.optionKey} IS NOT NULL AND ${table.conditionId} IS NULL)`,
     ),
     check('journal_items_body_side_check', sql`${table.bodySide} IS NULL OR ${table.bodySide} IN ('front', 'back')`),
+    check(
+      'journal_items_sensation_check',
+      sql`${table.sensation} IS NULL OR (${table.sensation} IN ('dor', 'incomodo') AND ${table.kind} = 'physical')`,
+    ),
     check(
       'journal_items_persistence_check',
       sql`${table.persistence} IS NULL OR ${table.persistence} IN ('hoje', 'dias_semanas', 'meses_anos')`,

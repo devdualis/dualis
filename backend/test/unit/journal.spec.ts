@@ -9,7 +9,11 @@ import {
 } from '../../src/modules/journal/dto/journal.dto';
 import {
   EMOTIONAL_OPTION_KEYS,
+  ENTRY_AREAS,
   PHYSICAL_OPTION_KEYS,
+  SENSATION_KEYS,
+  isOptionKeyOnSide,
+  isWholeBodyOptionKey,
 } from '../../src/modules/journal/constants/journal-keys.constant';
 import { buildJournalSummary, dayMarkers, localDay } from '../../src/modules/journal/journal-summary';
 import { houseAdsFor } from '../../src/modules/journal/house-ads';
@@ -34,13 +38,100 @@ const withItem = (item: Record<string, unknown>, extra: Record<string, unknown> 
   errorsOf({ ...baseEntry, ...extra, items: [item] });
 
 describe('Journal v2 keys', () => {
-  it('match the contract tables: 12 emotional + 3 custom, 20 physical + 5 custom', () => {
+  it('match the contract tables: 12 emotional + 3 custom, 34 physical + 8 custom', () => {
     expect(EMOTIONAL_OPTION_KEYS).toHaveLength(15);
-    expect(PHYSICAL_OPTION_KEYS).toHaveLength(25);
+    expect(PHYSICAL_OPTION_KEYS).toHaveLength(42);
     expect(EMOTIONAL_OPTION_KEYS).toContain('passado.memoria.magoa');
     expect(EMOTIONAL_OPTION_KEYS).toContain('presente.custom');
     expect(PHYSICAL_OPTION_KEYS).toContain('costas.fisgada.ao_mexer');
     expect(PHYSICAL_OPTION_KEYS).toContain('membros.custom');
+    for (const key of [
+      'cabeca.nuca.rigida', 'cabeca.nuca.pontada',
+      'pele.coceira.coceira', 'pele.coceira.ardencia', 'pele.aparencia.vermelhidao', 'pele.aparencia.manchas',
+      'musculos.tensao.rigidez', 'musculos.tensao.caibra', 'musculos.cansaco.fraqueza', 'musculos.cansaco.dolorido',
+      'hormonios.temperatura.calorao', 'hormonios.temperatura.frio', 'hormonios.apetite.sede', 'hormonios.apetite.fome',
+      'pele.custom', 'musculos.custom', 'hormonios.custom',
+    ]) {
+      expect(PHYSICAL_OPTION_KEYS, key).toContain(key);
+    }
+    expect(SENSATION_KEYS).toEqual(['dor', 'incomodo']);
+    expect(ENTRY_AREAS).toEqual(['emotional', 'physical']);
+  });
+
+  it('branch side rules: front, back and whole body', () => {
+    expect(isOptionKeyOnSide('cabeca.sentidos.olhos', 'front')).toBe(true);
+    expect(isOptionKeyOnSide('cabeca.sentidos.olhos', 'back')).toBe(false);
+    expect(isOptionKeyOnSide('cabeca.nuca.rigida', 'back')).toBe(true);
+    expect(isOptionKeyOnSide('cabeca.nuca.rigida', 'front')).toBe(false);
+    expect(isOptionKeyOnSide('cabeca.pressao.temporas', 'back')).toBe(true);
+    expect(isOptionKeyOnSide('costas.rigidez.lombar', 'front')).toBe(false);
+    expect(isOptionKeyOnSide('peito.custom', 'back')).toBe(false);
+    expect(isOptionKeyOnSide('membros.custom', 'back')).toBe(true);
+    expect(isWholeBodyOptionKey('hormonios.apetite.sede')).toBe(true);
+    expect(isWholeBodyOptionKey('cabeca.custom')).toBe(false);
+  });
+});
+
+describe('CreateJournalEntryDto v2.1: area, sensation and sides', () => {
+  const physical = (item: Record<string, unknown>) => ({ kind: 'physical', persistence: 'hoje', intensity: 3, ...item });
+  const v21 = (items: Record<string, unknown>[], extra: Record<string, unknown> = {}) =>
+    errorsOf({ ...baseEntry, area: 'physical', items, ...extra });
+
+  it('accepts a v2.1 physical entry with sided and whole-body items', () => {
+    expect(
+      v21([
+        physical({ optionKey: 'cabeca.nuca.pontada', bodySide: 'back', sensation: 'dor' }),
+        physical({ optionKey: 'cabeca.sentidos.olhos', bodySide: 'front', sensation: 'incomodo' }),
+        physical({ optionKey: 'musculos.tensao.caibra', sensation: 'dor' }),
+        physical({ optionKey: 'hormonios.custom', customLabel: 'calor à noite', sensation: 'incomodo' }),
+        { kind: 'condition', conditionId: '11111111-1111-4111-8111-111111111111', intensity: 2 },
+      ]),
+    ).toEqual([]);
+    expect(errorsOf({ ...baseEntry, area: 'emotional', mood: 'bem', items: [] })).toEqual([]);
+  });
+
+  it('area is emotional or physical; one axis per entry', () => {
+    expect(errorsOf({ ...baseEntry, area: 'both' })).toContain('isIn');
+    expect(errorsOf({ ...baseEntry, area: 'emotional' })).toEqual([]);
+    expect(
+      errorsOf({ ...baseEntry, area: 'emotional', items: [...baseEntry.items, physical({ optionKey: 'peito.respiracao.curta', bodySide: 'front', sensation: 'dor' })] }),
+    ).toContain('journalEntryShape');
+    expect(v21([baseEntry.items[0]])).toContain('journalEntryShape');
+  });
+
+  it('new entries use bem or nao_tao_bem; normal stays valid only without area', () => {
+    expect(errorsOf({ ...baseEntry, mood: 'normal', items: [] })).toEqual([]);
+    expect(errorsOf({ ...baseEntry, area: 'emotional', mood: 'normal', items: [] })).toContain('journalEntryShape');
+  });
+
+  it('sensation is required on physical items of v2.1 entries and only accepted on physical items', () => {
+    expect(v21([physical({ optionKey: 'peito.respiracao.curta', bodySide: 'front' })])).toContain('journalEntryShape');
+    expect(v21([physical({ optionKey: 'peito.respiracao.curta', bodySide: 'front', sensation: 'forte' })])).toContain('isIn');
+    expect(
+      withItem({ kind: 'emotional', optionKey: 'futuro.mente.antecipar', sensation: 'dor', persistence: 'hoje', intensity: 1 }),
+    ).toContain('journalItemShape');
+    expect(
+      withItem({ kind: 'condition', conditionId: '11111111-1111-4111-8111-111111111111', sensation: 'dor', intensity: 1 }),
+    ).toContain('journalItemShape');
+  });
+
+  it('old clients without area keep working (no sensation, any side for old keys)', () => {
+    expect(withItem(physical({ optionKey: 'costas.rigidez.ombros', bodySide: 'front' }))).toEqual([]);
+    expect(withItem(physical({ optionKey: 'cabeca.sentidos.garganta', bodySide: 'back' }))).toEqual([]);
+  });
+
+  it('v2.1 entries put each sided option on a side where the map shows it', () => {
+    expect(v21([physical({ optionKey: 'cabeca.nuca.rigida', bodySide: 'front', sensation: 'dor' })])).toContain('journalEntryShape');
+    expect(v21([physical({ optionKey: 'cabeca.sentidos.garganta', bodySide: 'back', sensation: 'dor' })])).toContain('journalEntryShape');
+    expect(v21([physical({ optionKey: 'costas.custom', customLabel: 'x', bodySide: 'front', sensation: 'dor' })])).toContain('journalEntryShape');
+    expect(v21([physical({ optionKey: 'peito.incomodo.batedeira', bodySide: 'back', sensation: 'dor' })])).toContain('journalEntryShape');
+    expect(v21([physical({ optionKey: 'membros.cansaco.juntas', bodySide: 'back', sensation: 'dor' })])).toEqual([]);
+  });
+
+  it('whole-body options have no side; sided options still need one', () => {
+    expect(v21([physical({ optionKey: 'pele.aparencia.manchas', bodySide: 'front', sensation: 'incomodo' })])).toContain('journalItemShape');
+    expect(withItem(physical({ optionKey: 'pele.aparencia.manchas', bodySide: 'back' }))).toContain('journalItemShape');
+    expect(v21([physical({ optionKey: 'cabeca.pressao.temporas', sensation: 'dor' })])).toContain('journalItemShape');
   });
 });
 
@@ -166,7 +257,9 @@ describe('buildJournalSummary', () => {
     expect(summary.totalEntries).toBe(2);
     expect(summary.daysWithEntries).toBe(2);
     expect(summary.byTime).toEqual({ passado: 0, presente: 0, futuro: 2 });
-    expect(summary.byRegion).toEqual({ cabeca: 1, peito: 0, barriga: 0, costas: 0, membros: 0 });
+    expect(summary.byRegion).toEqual({
+      cabeca: 1, peito: 0, barriga: 0, costas: 0, membros: 0, pele: 0, musculos: 0, hormonios: 0,
+    });
     expect(summary.byOptionKey).toEqual({
       'cabeca.pressao.temporas': 1,
       'cabeca.sentidos.olhos': 1,
