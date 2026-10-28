@@ -5,10 +5,10 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-10-28T17:00:41.135Z"
-last_activity: 2026-10-21
+last_updated: "2026-10-28T17:17:19.181Z"
+last_activity: 2026-10-28
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: 3fc4b9d3607578d91d43de781c367fe482cb2703
+state_head: b8067146063df1e98079043ad5fb79477167e4db
 progress:
   total_phases: 15
   completed_phases: 10
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-10-28 - Completed quick task 261028-jd6: Switch backend email to Resend HTTP API
+Last activity: 2026-10-28 - Completed quick task 261028-jss: Add Resend as email processor in privacy policy
 
 Progress: [██████████] 100%
 
@@ -114,6 +114,7 @@ None yet.
 | 261021-fx4 | Mostrar siempre la verificación de email mientras no esté validado | 2026-10-21 | ee74c87 | [261021-fx4-mostrar-siempre-la-verificaci-n-de-email](./quick/261021-fx4-mostrar-siempre-la-verificaci-n-de-email/) |
 | 19 | Link forgot password from login; keep reset codes out of logs | 2026-10-28 | 9530275 | — |
 | 261028-jd6 | Switch backend email to Resend HTTP API | 2026-10-28 | 3fc4b9d | [261028-jd6-switch-backend-email-to-resend-http-api](./quick/261028-jd6-switch-backend-email-to-resend-http-api/) |
+| 261028-jss | Add Resend as email processor in privacy policy | 2026-10-28 | b806714 | [261028-jss-add-resend-as-email-processor-in-privacy](./quick/261028-jss-add-resend-as-email-processor-in-privacy/) |
 
 ## Deferred Items
 
