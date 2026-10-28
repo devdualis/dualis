@@ -48,7 +48,9 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
     SummarySection.allergies,
     SummarySection.notes,
   };
-  Future<List<SummaryBlock>>? _blocks;
+  List<SummaryBlock>? _blocks;
+  bool _failed = false;
+  int _loadId = 0;
   bool _sharing = false;
 
   @override
@@ -57,7 +59,20 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _reload());
   }
 
-  void _reload() => setState(() => _blocks = _load());
+  Future<void> _reload() async {
+    final id = ++_loadId;
+    setState(() {
+      _blocks = null;
+      _failed = false;
+    });
+    try {
+      final blocks = await _load();
+      if (mounted && id == _loadId) setState(() => _blocks = blocks);
+    } catch (e) {
+      debugPrint('Summary load failed: $e');
+      if (mounted && id == _loadId) setState(() => _failed = true);
+    }
+  }
 
   Future<List<SummaryBlock>> _load() async {
     final l10n = AppLocalizations.of(context);
@@ -124,7 +139,7 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
           [
             d.str('customName') ?? pniVaccineByKey(d.str('vaccineKey'))?.name ?? '',
             d.str('doseLabel'),
-            if (d.occursAt != null) df.format(d.occursAt!.toLocal()),
+            if (careDay(d.str('appliedOn')) != null) df.format(careDay(d.str('appliedOn'))!),
             if (d.str('batch') != null) l10n.careVaccineBatch(d.str('batch')!),
           ].whereType<String>().join(' · '),
       ]),
@@ -218,10 +233,9 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: careAppBar(context, l10n.careSummaryTitle),
-      body: FutureBuilder<List<SummaryBlock>>(
-        future: _blocks,
-        builder: (context, snap) {
-          final blocks = snap.data;
+      body: Builder(
+        builder: (context) {
+          final blocks = _blocks;
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
             children: [
@@ -256,7 +270,9 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
               const SizedBox(height: 14),
               CareCard(
                 key: const Key('summary_preview'),
-                child: blocks == null
+                child: _failed
+                    ? CareAsync<void>(value: const AsyncValue.error('load', StackTrace.empty), data: (_) => const SizedBox(), onRetry: _reload)
+                    : blocks == null
                     ? const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()))
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

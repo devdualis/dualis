@@ -2059,9 +2059,9 @@
   "careMedEveryDay": "Todos os dias",
   "careMedUntil": "Até quando (opcional)",
   "careMedStockSection": "Estoque (opcional)",
-  "careMedStockHave": "Tenho em casa",
-  "careMedStockPerIntake": "Usa por vez",
-  "careMedStockWarn": "Avisar com",
+  "careMedStockHave": "Em casa",
+  "careMedStockPerIntake": "Por vez",
+  "careMedStockWarn": "Aviso com",
   "careMedBula": "Bula oficial",
   "careMedBulaHint": "Abre o Bulário Eletrônico da ANVISA",
   "careMedBulaNeedsName": "Escreva o nome do medicamento primeiro.",
@@ -2263,5 +2263,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "careMedicationNew": "Novo medicamento"
 }

@@ -3176,13 +3176,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get careMedStockSection => 'Estoque (opcional)';
 
   @override
-  String get careMedStockHave => 'Tenho em casa';
+  String get careMedStockHave => 'Em casa';
 
   @override
-  String get careMedStockPerIntake => 'Usa por vez';
+  String get careMedStockPerIntake => 'Por vez';
 
   @override
-  String get careMedStockWarn => 'Avisar com';
+  String get careMedStockWarn => 'Aviso com';
 
   @override
   String get careMedBula => 'Bula oficial';
@@ -3569,4 +3569,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String careNotifBoosterBody(String name) {
     return 'Data que você escolheu para o reforço: $name';
   }
+
+  @override
+  String get careMedicationNew => 'Novo medicamento';
 }

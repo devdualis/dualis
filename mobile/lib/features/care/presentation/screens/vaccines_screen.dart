@@ -103,7 +103,7 @@ class _VaccinesScreenState extends ConsumerState<VaccinesScreen> {
 
   Widget _calendarCard(BuildContext context, AppLocalizations l10n, PniVaccine v, List<CareRecord> mine, PniStage stage, bool canEdit) {
     final count = mine.length;
-    final last = mine.isEmpty ? null : mine.first.occursAt;
+    final last = mine.isEmpty ? null : careDay(mine.first.str('appliedOn'));
     final lines = <String>[
       v.doses == null ? l10n.careVaccineByCampaign : l10n.careVaccineDosesInCalendar(v.doses!),
       if (v.boosterYears != null) l10n.careVaccineBoosterEvery(v.boosterYears!),
@@ -154,7 +154,7 @@ class _VaccinesScreenState extends ConsumerState<VaccinesScreen> {
         CareRow(
           title: d.str('customName') ?? pniVaccineByKey(d.str('vaccineKey'))?.name ?? '',
           subtitle: [
-            [d.str('doseLabel'), if (d.occursAt != null) careDate(context, d.occursAt!)].whereType<String>().join(' · '),
+            [d.str('doseLabel'), if (careDay(d.str('appliedOn')) != null) careDate(context, careDay(d.str('appliedOn'))!)].whereType<String>().join(' · '),
             if (d.str('batch') != null) l10n.careVaccineBatch(d.str('batch')!),
             if (d.str('place') != null) d.str('place')!,
             if (d.str('boosterOn') != null) l10n.careVaccineBoosterReminder(careDate(context, DateTime.parse(d.str('boosterOn')!))),
@@ -204,7 +204,7 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
     final e = widget.existing;
     _vaccine = e?.str('vaccineKey') ?? (e != null ? _custom : widget.vaccineKey ?? pniCalendar[widget.stage]!.first.key);
     _dose = e?.str('doseLabel');
-    _applied = e?.occursAt ?? DateTime.now();
+    _applied = careDay(e?.str('appliedOn')) ?? DateTime.now();
     _booster = DateTime.tryParse(e?.str('boosterOn') ?? '');
     _remind = _booster != null;
     _receiptId = e?.str('receiptDocumentId');

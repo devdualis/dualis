@@ -45,7 +45,7 @@ class ExamItemScreen extends ConsumerWidget {
                     ]),
                     for (final (date, v, lab) in rows)
                       TableRow(children: [
-                        _cell(careDate(context, DateTime.parse(date))),
+                        _cell(careDate(context, careDay(date)!)),
                         _cell([v.value, v.unit].whereType<String>().join(' '), bold: true),
                         _cell(v.reference ?? '—'),
                         _cell(lab ?? '—'),

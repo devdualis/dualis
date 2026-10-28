@@ -5485,19 +5485,19 @@ abstract class AppLocalizations {
   /// No description provided for @careMedStockHave.
   ///
   /// In pt, this message translates to:
-  /// **'Tenho em casa'**
+  /// **'Em casa'**
   String get careMedStockHave;
 
   /// No description provided for @careMedStockPerIntake.
   ///
   /// In pt, this message translates to:
-  /// **'Usa por vez'**
+  /// **'Por vez'**
   String get careMedStockPerIntake;
 
   /// No description provided for @careMedStockWarn.
   ///
   /// In pt, this message translates to:
-  /// **'Avisar com'**
+  /// **'Aviso com'**
   String get careMedStockWarn;
 
   /// No description provided for @careMedBula.
@@ -6177,6 +6177,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Data que você escolheu para o reforço: {name}'**
   String careNotifBoosterBody(String name);
+
+  /// No description provided for @careMedicationNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo medicamento'**
+  String get careMedicationNew;
 }
 
 class _AppLocalizationsDelegate

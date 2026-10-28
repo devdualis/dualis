@@ -112,7 +112,7 @@ class _MedicationFormScreenState extends ConsumerState<MedicationFormScreen> {
     final weekdayLabels = [l10n.careMon, l10n.careTue, l10n.careWed, l10n.careThu, l10n.careFri, l10n.careSat, l10n.careSun];
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
-      appBar: careAppBar(context, _med == null ? l10n.careMedicationAdd : l10n.careMedicationEdit, actions: [
+      appBar: careAppBar(context, _med == null ? l10n.careMedicationNew : l10n.careMedicationEdit, actions: [
         if (_med != null) IconButton(onPressed: _delete, icon: const Icon(Icons.delete_outline)),
       ]),
       body: Form(

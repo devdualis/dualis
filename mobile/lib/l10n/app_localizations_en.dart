@@ -3166,13 +3166,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get careMedStockSection => 'Stock (optional)';
 
   @override
-  String get careMedStockHave => 'I have';
+  String get careMedStockHave => 'In stock';
 
   @override
-  String get careMedStockPerIntake => 'Used each time';
+  String get careMedStockPerIntake => 'Each time';
 
   @override
-  String get careMedStockWarn => 'Warn me at';
+  String get careMedStockWarn => 'Warn at';
 
   @override
   String get careMedBula => 'Official leaflet';
@@ -3558,4 +3558,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String careNotifBoosterBody(String name) {
     return 'The date you picked for the booster: $name';
   }
+
+  @override
+  String get careMedicationNew => 'New medication';
 }

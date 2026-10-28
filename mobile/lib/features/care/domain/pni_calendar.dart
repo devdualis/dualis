@@ -27,7 +27,7 @@ class PniVaccine {
 const Map<PniStage, List<PniVaccine>> pniCalendar = {
   PniStage.child: [
     PniVaccine('bcg', 'BCG', doses: 1),
-    PniVaccine('hepatite_b', 'Hepatite B (ao nascer)', doses: 1),
+    PniVaccine('hepatite_b', 'Hepatite B', doses: 1),
     PniVaccine('penta', 'Pentavalente (DTP/Hib/Hep B)', doses: 3),
     PniVaccine('vip', 'Poliomielite inativada (VIP)', doses: 4),
     PniVaccine('pneumo10', 'Pneumocócica 10-valente', doses: 3),

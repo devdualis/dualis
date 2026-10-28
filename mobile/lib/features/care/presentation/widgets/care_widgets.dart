@@ -25,6 +25,9 @@ TextStyle careBody([double size = 13]) =>
 String careDate(BuildContext context, DateTime date) =>
     DateFormat.yMd(Localizations.localeOf(context).toLanguageTag()).format(date.toLocal());
 
+/// A date-only field ("2026-10-21") as the calendar day it names, never shifted by time zone.
+DateTime? careDay(String? iso) => iso == null ? null : DateTime.tryParse(iso.length >= 10 ? iso.substring(0, 10) : iso);
+
 String careTime(DateTime date) => DateFormat.Hm().format(date.toLocal());
 
 String isoDay(DateTime d) =>

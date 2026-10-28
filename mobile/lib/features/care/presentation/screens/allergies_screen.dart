@@ -56,7 +56,7 @@ class AllergiesScreen extends ConsumerWidget {
                     title: a.str('name') ?? '',
                     subtitle: [
                       if (a.str('reaction') != null) l10n.careAllergyReactionShown(a.str('reaction')!),
-                      if (a.occursAt != null) l10n.careAllergyInformedOn(careDate(context, a.occursAt!)),
+                      if (careDay(a.str('informedOn')) != null) l10n.careAllergyInformedOn(careDate(context, careDay(a.str('informedOn'))!)),
                       if (a.data['showOnProfile'] == true) l10n.careAllergyOnProfile,
                     ].join('\n'),
                     onTap: canEdit ? () => showCareSheet(context, (_) => _AllergyForm(existing: a)) : null,
@@ -82,7 +82,7 @@ class _AllergyFormState extends ConsumerState<_AllergyForm> {
   late String _type = widget.existing?.str('type') ?? 'medication';
   late final _name = TextEditingController(text: widget.existing?.str('name'));
   late final _reaction = TextEditingController(text: widget.existing?.str('reaction'));
-  late DateTime? _informed = widget.existing?.occursAt;
+  late DateTime? _informed = careDay(widget.existing?.str('informedOn'));
   late bool _onProfile = widget.existing?.data['showOnProfile'] != false;
   bool _busy = false;
 

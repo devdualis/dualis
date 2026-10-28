@@ -911,9 +911,9 @@
   "careMedEveryDay": "Every day",
   "careMedUntil": "Until (optional)",
   "careMedStockSection": "Stock (optional)",
-  "careMedStockHave": "I have",
-  "careMedStockPerIntake": "Used each time",
-  "careMedStockWarn": "Warn me at",
+  "careMedStockHave": "In stock",
+  "careMedStockPerIntake": "Each time",
+  "careMedStockWarn": "Warn at",
   "careMedBula": "Official leaflet",
   "careMedBulaHint": "Opens ANVISA's official leaflet search (Brazil)",
   "careMedBulaNeedsName": "Type the medicine name first.",
@@ -1026,5 +1026,6 @@
   "careNotifAppointmentTitle": "Appointment reminder",
   "careNotifAppointmentBody": "{who} at {time}",
   "careNotifBoosterTitle": "Vaccine reminder",
-  "careNotifBoosterBody": "The date you picked for the booster: {name}"
+  "careNotifBoosterBody": "The date you picked for the booster: {name}",
+  "careMedicationNew": "New medication"
 }

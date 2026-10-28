@@ -911,9 +911,9 @@
   "careMedEveryDay": "Todos los días",
   "careMedUntil": "Hasta cuándo (opcional)",
   "careMedStockSection": "Stock (opcional)",
-  "careMedStockHave": "Tengo en casa",
-  "careMedStockPerIntake": "Usa cada vez",
-  "careMedStockWarn": "Avisarme con",
+  "careMedStockHave": "En casa",
+  "careMedStockPerIntake": "Por vez",
+  "careMedStockWarn": "Aviso con",
   "careMedBula": "Prospecto oficial",
   "careMedBulaHint": "Abre el buscador oficial de ANVISA (Brasil)",
   "careMedBulaNeedsName": "Escriba primero el nombre del medicamento.",
@@ -1026,5 +1026,6 @@
   "careNotifAppointmentTitle": "Recordatorio de consulta",
   "careNotifAppointmentBody": "{who} a las {time}",
   "careNotifBoosterTitle": "Recordatorio de vacuna",
-  "careNotifBoosterBody": "Fecha que usted eligió para el refuerzo: {name}"
+  "careNotifBoosterBody": "Fecha que usted eligió para el refuerzo: {name}",
+  "careMedicationNew": "Nuevo medicamento"
 }

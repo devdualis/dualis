@@ -270,7 +270,7 @@ class _DocRow extends StatelessWidget {
         foreground: CareColors.slate,
       ),
       title: title,
-      subtitle: [d.labName, d.collectedOn ?? careDate(context, d.createdAt)].whereType<String>().join(' · '),
+      subtitle: [d.labName, careDate(context, careDay(d.collectedOn) ?? d.createdAt)].whereType<String>().join(' · '),
       trailing: pill,
       onTap: onTap,
     );
