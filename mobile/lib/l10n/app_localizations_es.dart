@@ -1105,6 +1105,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Infraestructura en la Nube: Proveedores de alojamiento y base de datos, sujetos a obligaciones de confidencialidad y seguridad.';
 
   @override
+  String get privacyPolicySection3Bullet4 =>
+      'Resend, Inc. (envío de correos): tu correo electrónico, tu nombre de pila y el código de verificación o de restablecimiento de contraseña se envían a Resend solo para entregar esos mensajes. No enviamos datos de salud por correo.';
+
+  @override
   String get privacyPolicySection4Title => '4. Pagos';
 
   @override

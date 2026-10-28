@@ -1996,6 +1996,12 @@ abstract class AppLocalizations {
   /// **'Infraestrutura em Nuvem: Provedores de hospedagem e banco de dados, sujeitos a obrigações de confidencialidade e segurança.'**
   String get privacyPolicySection3Bullet3;
 
+  /// No description provided for @privacyPolicySection3Bullet4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resend, Inc. (envio de e-mails): o seu e-mail, o seu primeiro nome e o código de verificação ou de redefinição de senha são enviados à Resend só para entregar essas mensagens. Não enviamos dados de saúde por e-mail.'**
+  String get privacyPolicySection3Bullet4;
+
   /// No description provided for @privacyPolicySection4Title.
   ///
   /// In pt, this message translates to:

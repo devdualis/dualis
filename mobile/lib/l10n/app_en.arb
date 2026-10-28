@@ -316,6 +316,7 @@
   "privacyPolicySection3Bullet1": "Google LLC (Gemini API): text from \"write my own\" may be sent to Gemini only to suggest an existing diary option. The AI does not assess your health.",
   "privacyPolicySection3Bullet2": "International Transfer: This processing may take place on servers located outside Brazil (LGPD Art. 33).",
   "privacyPolicySection3Bullet3": "Cloud Infrastructure: Hosting and database providers, bound by confidentiality and security obligations.",
+  "privacyPolicySection3Bullet4": "Resend, Inc. (email delivery): your email address, first name and the verification or password-reset code are sent to Resend only to deliver those messages. We do not send health data by email.",
   "privacyPolicySection4Title": "4. Payments",
   "privacyPolicySection4Body": "When paid plans are available, card data stays isolated from our servers:",
   "privacyPolicySection4Bullet1": "Third-Party Processing: Payments are handled by specialized payment gateways.",

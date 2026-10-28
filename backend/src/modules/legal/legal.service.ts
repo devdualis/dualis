@@ -25,7 +25,7 @@ export type SupportedLanguage = 'pt-BR' | 'es' | 'en';
 export const LEGAL_DOCUMENTS_VERSION = '2026.3';
 
 const LEGAL_DOCUMENTS_EFFECTIVE_DATE = '2026-10-16';
-const LEGAL_DOCUMENTS_LAST_UPDATED = '2026-10-16';
+const LEGAL_DOCUMENTS_LAST_UPDATED = '2026-10-28';
 
 /** Canonical intended-use statement (plan §1.1). Must stay identical everywhere. */
 export const INTENDED_USE_STATEMENT: Record<SupportedLanguage, string> = {
@@ -311,6 +311,7 @@ export class LegalService {
             bullets: [
               'Google LLC (API Gemini): el texto de "escribir el mío" puede enviarse a Gemini solo para sugerir una opción ya existente del diario. La IA no evalúa su salud.',
               'Google LLC (Cloud Vision): las fotos y PDF de exámenes y recetas que usted elige leer se envían a Cloud Vision para extraer el texto, que se procesa en servidores de Google en Estados Unidos o la Unión Europea. Después, Gemini (Vertex AI, región São Paulo) ordena ese texto, sin su nombre ni CPF. Google no usa estos datos para entrenar modelos.',
+              'Resend, Inc. (envío de correos): su correo electrónico, su nombre de pila y el código de verificación o de restablecimiento de contraseña se envían a Resend solo para entregar esos mensajes. No enviamos datos de salud por correo.',
               'Transferencia internacional: la app puede usarse desde fuera de Brasil y parte del procesamiento ocurre fuera de su país. Se realiza con su consentimiento específico y con las garantías contractuales del proveedor (LGPD Art. 33; RGPD Art. 46, cláusulas contractuales tipo).',
               'Proveedores de infraestructura en la nube (alojamiento y base de datos), sujetos a obligaciones de confidencialidad y seguridad.',
             ],
@@ -388,6 +389,7 @@ export class LegalService {
             bullets: [
               'Google LLC (Gemini API): text from "write my own" may be sent to Gemini only to suggest an existing diary option. The AI does not assess your health.',
               'Google LLC (Cloud Vision): photos and PDFs of exams and prescriptions you choose to read are sent to Cloud Vision to extract the text, processed on Google servers in the United States or the European Union. Gemini (Vertex AI, São Paulo region) then organizes that text, without your name or CPF. Google does not use this data to train models.',
+              'Resend, Inc. (email delivery): your email address, first name and the verification or password-reset code are sent to Resend only to deliver those messages. We do not send health data by email.',
               'International transfer: the app can be used outside Brazil and part of the processing happens outside your country. It is done with your specific consent and the provider\'s contractual safeguards (LGPD Art. 33; GDPR Art. 46, standard contractual clauses).',
               'Cloud infrastructure providers (hosting and database), bound by confidentiality and security obligations.',
             ],
@@ -467,6 +469,7 @@ export class LegalService {
           bullets: [
             'Google LLC (API Gemini): o texto de "escrever o meu" pode ser enviado à Gemini só para sugerir uma opção já existente do diário. A IA não avalia a sua saúde.',
             'Google LLC (Cloud Vision): as fotos e PDFs de exames e receitas que você escolhe ler são enviados ao Cloud Vision para extrair o texto, processado em servidores do Google nos Estados Unidos ou na União Europeia. Depois, a Gemini (Vertex AI, região São Paulo) organiza esse texto, sem o seu nome nem CPF. O Google não usa esses dados para treinar modelos.',
+            'Resend, Inc. (envio de e-mails): o seu e-mail, o seu primeiro nome e o código de verificação ou de redefinição de senha são enviados à Resend só para entregar essas mensagens. Não enviamos dados de saúde por e-mail.',
             'Transferência internacional: o app pode ser usado fora do Brasil e parte do processamento ocorre fora do seu país. Isso é feito com o seu consentimento específico e com as garantias contratuais do fornecedor (LGPD Art. 33; RGPD Art. 46, cláusulas contratuais-padrão).',
             'Provedores de infraestrutura em nuvem (hospedagem e banco de dados), sujeitos a obrigações de confidencialidade e segurança.',
           ],

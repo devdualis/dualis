@@ -1093,6 +1093,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Cloud Infrastructure: Hosting and database providers, bound by confidentiality and security obligations.';
 
   @override
+  String get privacyPolicySection3Bullet4 =>
+      'Resend, Inc. (email delivery): your email address, first name and the verification or password-reset code are sent to Resend only to deliver those messages. We do not send health data by email.';
+
+  @override
   String get privacyPolicySection4Title => '4. Payments';
 
   @override

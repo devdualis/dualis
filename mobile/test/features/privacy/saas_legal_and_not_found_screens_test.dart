@@ -77,6 +77,7 @@ void main() {
       expect(find.textContaining('API Gemini'), findsOneWidget);
       expect(find.textContaining('opção já existente do diário'), findsWidgets);
       expect(find.textContaining('LGPD Art. 33'), findsOneWidget);
+      expect(find.textContaining('Resend, Inc. (envio de e-mails)'), findsOneWidget);
 
       // Card data never stored; unverified PCI-DSS claim removed (L-07)
       expect(find.textContaining('Zero Armazenamento'), findsOneWidget);

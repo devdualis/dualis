@@ -125,6 +125,12 @@ describe('LegalService - SaaS Legal Foundations', () => {
       expect(serialized).not.toMatch(/organizarlas automáticamente por área|body area or mood/i);
       expect(serialized).toContain('Art. 33');
     });
+
+    it.each(langs)('privacy policy lists Resend as the email processor (%s)', (lang) => {
+      const privacy = service.getPrivacyPolicy(lang);
+      const section3 = privacy.sections.find((s) => s.sectionId.startsWith('3-'));
+      expect(section3?.bullets?.some((b) => b.startsWith('Resend, Inc.'))).toBe(true);
+    });
   });
 
   describe('Disclaimer & Emergency Contacts', () => {
