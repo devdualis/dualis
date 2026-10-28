@@ -574,10 +574,6 @@
   "@navHome": {
     "description": "Bottom navigation Home label"
   },
-  "navTodayOutcome": "Meu Dia",
-  "@navTodayOutcome": {
-    "description": "Bottom navigation Today Outcome label"
-  },
   "navHistory": "Histórico & Mapa",
   "@navHistory": {
     "description": "Bottom navigation History label"
@@ -1216,7 +1212,9 @@
   "jv2SuggestBody": "Quer guardar como \"{option}\" em vez do texto escrito?",
   "@jv2SuggestBody": {
     "placeholders": {
-      "option": { "type": "String" }
+      "option": {
+        "type": "String"
+      }
     }
   },
   "jv2SuggestYes": "Usar essa opção",
@@ -1646,5 +1644,86 @@
   },
   "xv2WaterDeleteLog": "Excluir registro",
   "jv2PendingSync": "Aguardando sincronizar",
-  "jv2OutboxRejectedNotice": "Um registro não pôde ser enviado. Revise e tente de novo."
+  "jv2OutboxRejectedNotice": "Um registro não pôde ser enviado. Revise e tente de novo.",
+  "histTabEmotional": "Psicoemocional",
+  "histTabPhysical": "Físico",
+  "histPeriodDays": "{days} dias",
+  "@histPeriodDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "histEmotionalTitle": "Seus últimos {days} dias",
+  "@histEmotionalTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "histPhysicalTitle": "Últimos {days} dias",
+  "@histPhysicalTitle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "histIntensitySubtitle": "Intensidade que você marcou, de 1 a 5",
+  "histChipHint": "Toque num chip para mostrar ou esconder a linha.",
+  "histLineShown": "{label}, linha visível",
+  "@histLineShown": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "histLineHidden": "{label}, linha escondida",
+  "@histLineHidden": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "histOverlayChip": "+ {label}",
+  "@histOverlayChip": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "histTimeBarTitle": "Passado · Presente · Futuro",
+  "histViewMap": "Mapa",
+  "histViewLinks": "Conexões",
+  "histMapCaption": "Cor = quantos dias você marcou",
+  "histNoPhysical": "Nenhuma parte do corpo marcada neste período.",
+  "histLinksTop": "Mesmo dia: {time} e {region} em {count, plural, =1{1 dia} other{{count} dias}}. Só contagem.",
+  "@histLinksTop": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "region": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "histLinksEmpty": "Ainda não há dias com registro de tempo emocional e de corpo juntos neste período.",
+  "histTimelineTitle": "Linha do tempo",
+  "histRegionPele": "Pele",
+  "histRegionMusculos": "Músculos",
+  "histRegionHormonios": "Hormônios e metabolismo",
+  "histSensationDor": "dor",
+  "histSensationIncomodo": "incômodo",
+  "histEmotionalTitleWeek": "Como foi sua semana",
+  "histPhysicalTitleWeek": "Esta semana",
+  "histPhysicalTitleMonth": "Este mês"
 }

@@ -17,7 +17,6 @@ import '../../../sync/presentation/widgets/offline_indicator_banner.dart';
 import '../../../sync/presentation/controllers/sync_outbox_worker.dart';
 import '../../../settings/presentation/widgets/avatar_selector_sheet.dart';
 import '../widgets/dualis_bottom_nav_bar.dart';
-import '../widgets/today_triage_result_tab.dart';
 import 'dart:async';
 import '../../../dashboard/presentation/screens/historical_dashboard_screen.dart';
 import '../../../journal_insights/presentation/controllers/journal_insights_controller.dart';
@@ -168,37 +167,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ];
     } else if (_currentTabIndex == 1) {
       appBarTitle = Text(
-        AppLocalizations.of(context).navTodayOutcome,
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: AppColors.textPrimaryLight,
-        ),
-      );
-      appBarActions = [
-        if (ref.watch(premiumProfilesEnabledProvider)) ...[
-          const ProfileAppBarPill(),
-          const SizedBox(width: 8),
-        ],
-        _AppBarIconButton(
-          key: const Key('home_library_button'),
-          icon: Icons.menu_book_outlined,
-          color: AppColors.clinicalTealDark,
-          tooltip: l10n.xv2LibTitle,
-          onTap: () => context.push(RoutePaths.library),
-        ),
-        const SizedBox(width: 8),
-        _AppBarIconButton(
-          key: const Key('home_settings_button'),
-          icon: Icons.settings_outlined,
-          color: AppColors.clinicalTealDark,
-          tooltip: 'Configurações',
-          onTap: () => context.push(RoutePaths.settings),
-        ),
-        const SizedBox(width: 8),
-      ];
-    } else if (_currentTabIndex == 2) {
-      appBarTitle = Text(
         l10n.xv2DashTitle,
         style: GoogleFonts.plusJakartaSans(
           fontSize: 18,
@@ -300,7 +268,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       bottomNavigationBar: DualisBottomNavBar(
         currentIndex: _currentTabIndex,
-        hasCompletedToday: triggerState.isCompletedToday,
         onTap: (index) {
           setState(() => _currentTabIndex = index);
         },
@@ -330,15 +297,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           triggerState,
         );
       case 1:
-        return TodayTriageResultTab(
-          onGoToCheckIn: () {
-            ref.read(triggerCheckInProvider.notifier).prepareForUpdate();
-            setState(() => _currentTabIndex = 0);
-          },
-        );
-      case 2:
         return const HistoricalDashboardScreen(isEmbedded: true);
-      case 3:
+      case 2:
         return const HydrationDashboardScreen(isEmbedded: true);
       default:
         return _buildHomeTab(

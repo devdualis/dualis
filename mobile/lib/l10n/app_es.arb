@@ -141,7 +141,6 @@
   "errorServerInternal": "Nuestros servicios experimentan una inestabilidad temporal. Intenta nuevamente en unos instantes.",
   "errorUnexpected": "Ocurrió una inestabilidad inesperada. Por favor, intenta de nuevo.",
   "navHome": "Inicio",
-  "navTodayOutcome": "Mi Día",
   "navHistory": "Historial y Mapa",
   "navHydration": "Agua",
   "notifWaterTitle": "💧 Hora de beber agua",
@@ -473,7 +472,9 @@
   "jv2SuggestBody": "¿Guardar como \"{option}\" en vez del texto escrito?",
   "@jv2SuggestBody": {
     "placeholders": {
-      "option": { "type": "String" }
+      "option": {
+        "type": "String"
+      }
     }
   },
   "jv2SuggestYes": "Usar esa opción",
@@ -756,5 +757,31 @@
         "type": "int"
       }
     }
-  }
+  },
+  "histTabEmotional": "Psicoemocional",
+  "histTabPhysical": "Físico",
+  "histPeriodDays": "{days} días",
+  "histEmotionalTitle": "Tus últimos {days} días",
+  "histPhysicalTitle": "Últimos {days} días",
+  "histIntensitySubtitle": "Intensidad que marcaste, de 1 a 5",
+  "histChipHint": "Toca un chip para mostrar u ocultar la línea.",
+  "histLineShown": "{label}, línea visible",
+  "histLineHidden": "{label}, línea oculta",
+  "histOverlayChip": "+ {label}",
+  "histTimeBarTitle": "Pasado · Presente · Futuro",
+  "histViewMap": "Mapa",
+  "histViewLinks": "Conexiones",
+  "histMapCaption": "Color = cuántos días marcaste",
+  "histNoPhysical": "Ninguna parte del cuerpo marcada en este período.",
+  "histLinksTop": "Mismo día: {time} y {region} en {count, plural, =1{1 día} other{{count} días}}. Solo conteo.",
+  "histLinksEmpty": "Aún no hay días con un tiempo emocional y una parte del cuerpo juntos en este período.",
+  "histTimelineTitle": "Línea de tiempo",
+  "histRegionPele": "Piel",
+  "histRegionMusculos": "Músculos",
+  "histRegionHormonios": "Hormonas y metabolismo",
+  "histSensationDor": "dolor",
+  "histSensationIncomodo": "molestia",
+  "histEmotionalTitleWeek": "Cómo fue tu semana",
+  "histPhysicalTitleWeek": "Esta semana",
+  "histPhysicalTitleMonth": "Este mes"
 }

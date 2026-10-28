@@ -365,13 +365,10 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      // Click Bottom Navigation Tab 2: "Resultado do Dia"
-      final tabResultado = find.byKey(const Key('nav_destination_today_outcome'));
-      expect(tabResultado, findsOneWidget);
-      await tester.tap(tabResultado);
-      await tester.pumpAndSettle();
+      // "Meu Dia" is no longer in the bottom navigation.
+      expect(find.byKey(const Key('nav_destination_today_outcome')), findsNothing);
 
-      // Click Bottom Navigation Tab 3: "Histórico & Mapa"
+      // Click Bottom Navigation Tab 2: "Histórico"
       final tabHistorico = find.byKey(const Key('nav_destination_history'));
       expect(tabHistorico, findsOneWidget);
       await tester.tap(tabHistorico);

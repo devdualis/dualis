@@ -6,8 +6,9 @@ import '../../data/journal_insights_remote_data_source.dart';
 import '../../domain/journal_insights_models.dart';
 
 class JournalInsightsState {
-  /// Free shows 30 days (strategy §9.1); data is kept per retention policy.
-  static const int windowDays = 30;
+  /// Longest period on the history screen (chips 7 / 30 / 90 dias). Shorter
+  /// periods are filtered on the device from these entries.
+  static const int fetchDays = 90;
 
   final List<JournalEntryView> entries;
   final JournalSummary summary;
@@ -44,12 +45,8 @@ class JournalInsightsController extends AsyncNotifier<JournalInsightsState> {
     final profileId = ref.read(
       activeProfileControllerProvider.select((s) => s.activeProfile?.id),
     );
-    final results = await Future.wait([
-      dataSource.fetchEntries(days: JournalInsightsState.windowDays),
-      dataSource.fetchSummary(days: JournalInsightsState.windowDays),
-    ]);
-    final remoteEntries = results[0] as List<JournalEntryView>;
-    final remote = results[1] as JournalSummary?;
+    final remoteEntries =
+        await dataSource.fetchEntries(days: JournalInsightsState.fetchDays);
     List<JournalEntry> pending = const [];
     try {
       pending = await ref
@@ -66,7 +63,8 @@ class JournalInsightsController extends AsyncNotifier<JournalInsightsState> {
     ];
     return JournalInsightsState(
       entries: entries,
-      summary: remote ?? JournalSummary.compute(entries),
+      // Counted on the device: each period chip needs its own counts.
+      summary: JournalSummary.compute(entries),
     );
   }
 

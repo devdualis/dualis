@@ -486,9 +486,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get navHome => 'Início';
 
   @override
-  String get navTodayOutcome => 'Meu Dia';
-
-  @override
   String get navHistory => 'Histórico & Mapa';
 
   @override
@@ -2567,4 +2564,103 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get jv2OutboxRejectedNotice =>
       'Um registro não pôde ser enviado. Revise e tente de novo.';
+
+  @override
+  String get histTabEmotional => 'Psicoemocional';
+
+  @override
+  String get histTabPhysical => 'Físico';
+
+  @override
+  String histPeriodDays(int days) {
+    return '$days dias';
+  }
+
+  @override
+  String histEmotionalTitle(int days) {
+    return 'Seus últimos $days dias';
+  }
+
+  @override
+  String histPhysicalTitle(int days) {
+    return 'Últimos $days dias';
+  }
+
+  @override
+  String get histIntensitySubtitle => 'Intensidade que você marcou, de 1 a 5';
+
+  @override
+  String get histChipHint => 'Toque num chip para mostrar ou esconder a linha.';
+
+  @override
+  String histLineShown(String label) {
+    return '$label, linha visível';
+  }
+
+  @override
+  String histLineHidden(String label) {
+    return '$label, linha escondida';
+  }
+
+  @override
+  String histOverlayChip(String label) {
+    return '+ $label';
+  }
+
+  @override
+  String get histTimeBarTitle => 'Passado · Presente · Futuro';
+
+  @override
+  String get histViewMap => 'Mapa';
+
+  @override
+  String get histViewLinks => 'Conexões';
+
+  @override
+  String get histMapCaption => 'Cor = quantos dias você marcou';
+
+  @override
+  String get histNoPhysical => 'Nenhuma parte do corpo marcada neste período.';
+
+  @override
+  String histLinksTop(String time, String region, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dias',
+      one: '1 dia',
+    );
+    return 'Mesmo dia: $time e $region em $_temp0. Só contagem.';
+  }
+
+  @override
+  String get histLinksEmpty =>
+      'Ainda não há dias com registro de tempo emocional e de corpo juntos neste período.';
+
+  @override
+  String get histTimelineTitle => 'Linha do tempo';
+
+  @override
+  String get histRegionPele => 'Pele';
+
+  @override
+  String get histRegionMusculos => 'Músculos';
+
+  @override
+  String get histRegionHormonios => 'Hormônios e metabolismo';
+
+  @override
+  String get histSensationDor => 'dor';
+
+  @override
+  String get histSensationIncomodo => 'incômodo';
+
+  @override
+  String get histEmotionalTitleWeek => 'Como foi sua semana';
+
+  @override
+  String get histPhysicalTitleWeek => 'Esta semana';
+
+  @override
+  String get histPhysicalTitleMonth => 'Este mês';
 }
