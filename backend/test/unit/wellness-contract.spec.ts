@@ -2,8 +2,6 @@ import { describe, it, expect, vi } from 'vitest';
 import { TriageOutcomeService } from '../../src/modules/triage/services/triage-outcome.service';
 import { TriageHistoryService } from '../../src/modules/triage/services/triage-history.service';
 import { ArticlesCatalogService } from '../../src/modules/triage/services/articles-catalog.service';
-import { AiTaggingService } from '../../src/modules/ai/services/ai-tagging.service';
-import { IdiomDictionaryService } from '../../src/modules/ai/services/idiom-dictionary.service';
 
 // Plan §5 "Contrato de la API": no journal response may carry an assessment.
 const BANNED_KEYS = [
@@ -87,7 +85,6 @@ describe('Wellness API contract: outcome, check-in, history and tagging carry no
       encryption as any,
       catalog,
       catalog,
-      new AiTaggingService(undefined, new IdiomDictionaryService()),
     );
   };
 
@@ -142,17 +139,5 @@ describe('Wellness API contract: outcome, check-in, history and tagging carry no
       { category: 'estresse_burnout', vertical: 'emotional', count: 2, windowDays: 10 },
       { category: 'cardiovascular_torax', vertical: 'physical', count: 2, windowDays: 10 },
     ]);
-  });
-
-  it('AI tagging (idiom, fallback and legacy classify alias)', async () => {
-    const ai = new AiTaggingService(undefined, new IdiomDictionaryService());
-    for (const text of ['dor no peito forte', 'quero morrer', 'xyz sem padrão']) {
-      const tagged = await ai.tagEntry({ text });
-      expectNoAssessment(tagged);
-      expect(Object.keys(tagged).sort()).toEqual(
-        ['bodyAreaOrMood', 'isOffTopic', 'layTerm', 'vertical'].sort(),
-      );
-      expectNoAssessment(await ai.classify({ text }));
-    }
   });
 });

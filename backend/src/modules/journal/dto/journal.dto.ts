@@ -175,7 +175,7 @@ export class JournalDaysQueryDto {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  @Min(-840)
+  @Min(-720)
   @Max(840)
   tzOffset?: number;
 }
@@ -243,7 +243,10 @@ export interface UserConditionsResponseDto {
   conditions: UserConditionDto[];
 }
 
-/** Counts only: no labels, no text, no interpretation. */
+/**
+ * Counts only: no labels, no text, no interpretation. Every `by*` count and every
+ * `cooccurrence.days` is a number of distinct local days (device day from `tzOffset`).
+ */
 export interface JournalSummaryDto {
   days: number;
   totalEntries: number;

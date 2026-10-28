@@ -2,8 +2,11 @@ import {
   EMOTIONAL_TIMES,
   PHYSICAL_REGIONS,
   TRIGGER_KEYS,
+  isCustomOptionKey,
+  optionKeyBranch,
   optionKeyRoot,
 } from './constants/journal-keys.constant';
+import { localDay } from '../../common/time/local-day';
 import { JournalSummaryDto } from './dto/journal.dto';
 
 export interface SummaryEntryInput {
@@ -18,63 +21,78 @@ export const COOCCURRENCE_MAX_PAIRS = 20;
 
 const zeroed = (keys: readonly string[]) => Object.fromEntries(keys.map((k) => [k, 0])) as Record<string, number>;
 
-/** Local calendar day (YYYY-MM-DD) for a device offset in minutes east of UTC. */
-export function localDay(date: Date, tzOffsetMinutes = 0): string {
-  return new Date(date.getTime() + tzOffsetMinutes * 60_000).toISOString().slice(0, 10);
-}
+export { localDay };
+
+/** Marker of a trigger in `cooccurrence` (`trigger:sono`). */
+export const TRIGGER_MARKER_PREFIX = 'trigger:';
 
 /**
- * Markers compared for "seen on the same day": the region (physical), the time and
- * branch (emotional, e.g. `futuro.mente`) and each trigger (`trigger.sono`).
+ * Markers compared for "seen on the same day" (contract, "Summary markers"):
+ * a physical item gives its region (`cabeca`), an emotional item its time and branch
+ * (`futuro.mente`, or the bare time `futuro` for a written item) and each trigger
+ * `trigger:<key>`. The app resolves every marker to the person's own wording.
  */
-function dayMarkers(entry: SummaryEntryInput): string[] {
+export function dayMarkers(entry: SummaryEntryInput): string[] {
   const markers = new Set<string>();
   for (const item of entry.items) {
     if (!item.optionKey) continue;
     if (item.kind === 'physical') markers.add(optionKeyRoot(item.optionKey));
-    if (item.kind === 'emotional') markers.add(item.optionKey.split('.').slice(0, 2).join('.'));
+    if (item.kind === 'emotional') {
+      markers.add(isCustomOptionKey(item.optionKey) ? optionKeyRoot(item.optionKey) : optionKeyBranch(item.optionKey));
+    }
   }
-  for (const trigger of entry.triggers) markers.add(`trigger.${trigger}`);
+  for (const trigger of entry.triggers) markers.add(`${TRIGGER_MARKER_PREFIX}${trigger}`);
   return [...markers];
 }
 
 /**
- * Counts over the person's own entries. Each count is the number of entries that
- * contain the key (an entry with two head items counts once for `cabeca`).
- * Descriptive only: no labels, no text, no interpretation.
+ * Counts over the person's own entries. Every count is the number of distinct local
+ * days (device day from `tzOffsetMinutes`) on which the key was marked: two entries
+ * with "Cabeça" on the same day count as 1 day. Descriptive only: no labels, no text,
+ * no interpretation.
  */
 export function buildJournalSummary(
   entries: SummaryEntryInput[],
   days: number,
   tzOffsetMinutes = 0,
 ): JournalSummaryDto {
-  const byTime = zeroed(EMOTIONAL_TIMES);
-  const byRegion = zeroed(PHYSICAL_REGIONS);
-  const byTrigger = zeroed(TRIGGER_KEYS);
-  const byOptionKey: Record<string, number> = {};
+  const daysByKey = {
+    time: new Map<string, Set<string>>(),
+    region: new Map<string, Set<string>>(),
+    option: new Map<string, Set<string>>(),
+    trigger: new Map<string, Set<string>>(),
+  };
   const markersByDay = new Map<string, Set<string>>();
+  const mark = (map: Map<string, Set<string>>, key: string, day: string) => {
+    const set = map.get(key) ?? new Set<string>();
+    set.add(day);
+    map.set(key, set);
+  };
 
   for (const entry of entries) {
-    const times = new Set<string>();
-    const regions = new Set<string>();
-    const optionKeys = new Set<string>();
+    const day = localDay(entry.recordedAt, tzOffsetMinutes);
     for (const item of entry.items) {
       if (!item.optionKey) continue;
-      optionKeys.add(item.optionKey);
-      if (item.kind === 'emotional') times.add(optionKeyRoot(item.optionKey));
-      if (item.kind === 'physical') regions.add(optionKeyRoot(item.optionKey));
+      mark(daysByKey.option, item.optionKey, day);
+      if (item.kind === 'emotional') mark(daysByKey.time, optionKeyRoot(item.optionKey), day);
+      if (item.kind === 'physical') mark(daysByKey.region, optionKeyRoot(item.optionKey), day);
     }
-    for (const t of times) if (t in byTime) byTime[t] += 1;
-    for (const r of regions) if (r in byRegion) byRegion[r] += 1;
-    for (const k of optionKeys) byOptionKey[k] = (byOptionKey[k] ?? 0) + 1;
-    for (const t of new Set(entry.triggers)) if (t in byTrigger) byTrigger[t] += 1;
+    for (const t of entry.triggers) mark(daysByKey.trigger, t, day);
 
-    const day = localDay(entry.recordedAt, tzOffsetMinutes);
     const dayMarkerSet = markersByDay.get(day) ?? new Set<string>();
     for (const m of dayMarkers(entry)) dayMarkerSet.add(m);
     markersByDay.set(day, dayMarkerSet);
   }
 
+  const counted = (map: Map<string, Set<string>>, keys?: readonly string[]) => {
+    const out: Record<string, number> = keys ? zeroed(keys) : {};
+    for (const [key, daySet] of map) if (!keys || key in out) out[key] = daySet.size;
+    return out;
+  };
+  const byTime = counted(daysByKey.time, EMOTIONAL_TIMES);
+  const byRegion = counted(daysByKey.region, PHYSICAL_REGIONS);
+  const byTrigger = counted(daysByKey.trigger, TRIGGER_KEYS);
+  const byOptionKey = counted(daysByKey.option);
   const pairDays = new Map<string, number>();
   for (const markers of markersByDay.values()) {
     const sorted = [...markers].sort();

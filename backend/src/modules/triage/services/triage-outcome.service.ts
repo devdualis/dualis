@@ -9,8 +9,6 @@ import { Lang, Localized, resolveLang } from '../../../common/i18n/lang';
 import { ArticlesCatalogService } from './articles-catalog.service';
 import { ArticlesVectorService } from './articles-vector.service';
 import { MEDICAL_ARTICLES_SEED } from '../data/medical-articles.seed';
-import { AiTaggingService } from '../../ai/services/ai-tagging.service';
-import { EntryTagResult } from '../../ai/dto/classify-symptom.dto';
 import {
   RecommendedArticleDto,
   SubmitTriageDto,
@@ -161,14 +159,6 @@ const FEELING_WELL: Localized = {
 
 const LOGGED_PREFIX: Localized = { pt: 'Você registrou', en: 'You logged', es: 'Registraste' };
 
-// Plan B-09: one static note, the same for everyone, when an entry touches both body
-// and emotions. No differential reasoning.
-const BODY_AND_EMOTIONS_NOTE: Localized = {
-  pt: 'Você registrou sensações no corpo e nas emoções hoje. Se algum desconforto físico persistir ou piorar, converse com um profissional de saúde.',
-  en: 'You logged sensations in your body and in your emotions today. If any physical discomfort persists or gets worse, talk to a health professional.',
-  es: 'Hoy registraste sensaciones en el cuerpo y en las emociones. Si alguna molestia física persiste o empeora, habla con un profesional de la salud.',
-};
-
 @Injectable()
 export class TriageOutcomeService {
   private readonly logger = new Logger(TriageOutcomeService.name);
@@ -182,8 +172,6 @@ export class TriageOutcomeService {
     articlesVector?: ArticlesVectorService | ArticlesCatalogService,
     @Optional() @Inject(ArticlesCatalogService)
     articlesCatalog?: ArticlesCatalogService,
-    @Optional() @Inject(AiTaggingService)
-    private readonly aiTagging?: AiTaggingService,
   ) {
     if (articlesVector && 'searchArticles' in articlesVector) {
       this.articlesVector = articlesVector as ArticlesVectorService;
@@ -343,43 +331,6 @@ export class TriageOutcomeService {
       }
     }
 
-    let tags: EntryTagResult | undefined;
-    if (this.aiTagging && narrative && narrative.trim().length >= 2 && !isFeelingWell) {
-      try {
-        const result = await this.aiTagging.tagWithMetadata({ text: narrative, language: lang });
-        tags = result.isOffTopic ? undefined : result;
-      } catch (err) {
-        this.logger.warn(`AI tagging of narrative failed: ${(err as Error).message}`);
-      }
-    }
-
-    // The narrative may mention the other vertical (e.g. a headache in an emotional
-    // entry). Record it as a second tag and show the same static note to everyone.
-    let secondaryCategoryLabel: string | undefined;
-    let secondarySomaticMapping: string | undefined;
-    let secondaryIntensityScore: number | undefined;
-    let secondaryCode: string | null = null;
-    let crossVerticalContextNote: string | undefined;
-    const otherVertical: Vertical = vertical === 'physical' ? 'emotional' : 'physical';
-    const isCrossVerticalSomatic = !!tags && tags.vertical === otherVertical;
-
-    if (isCrossVerticalSomatic && tags) {
-      secondaryCode = (tags.bodyAreaOrMood && this.resolveCode(tags.bodyAreaOrMood, otherVertical)) || null;
-      const secondary = secondaryCode
-        ? this.describe(secondaryCode, otherVertical, lang)
-        : { label: GENERIC_VERTICAL_LABELS[otherVertical][lang], somaticNormalized: `${LOGGED_PREFIX[lang]}: ${GENERIC_VERTICAL_LABELS[otherVertical][lang]}.` };
-      secondaryCategoryLabel = secondary.label;
-      secondarySomaticMapping = secondary.somaticNormalized;
-      secondaryIntensityScore = intensityScore;
-      crossVerticalContextNote = BODY_AND_EMOTIONS_NOTE[lang];
-    }
-
-    const aiFields = {
-      aiMappedLayTerm: tags?.layTerm ?? undefined,
-      aiSource: tags?.source,
-      aiConfidence: tags?.confidence,
-    };
-
     let recommendedArticles: RecommendedArticleDto[] = [];
     if (this.articlesVector) {
       recommendedArticles = await this.articlesVector.searchArticles({
@@ -401,12 +352,6 @@ export class TriageOutcomeService {
       somaticMapping: mapping.somaticNormalized,
       recommendedArticles,
       recordedAt: recordedAt.toISOString(),
-      secondaryCategoryLabel,
-      secondarySomaticMapping,
-      secondaryIntensityScore,
-      isCrossVerticalSomatic,
-      crossVerticalContextNote,
-      ...aiFields,
     });
 
     if (dto.clientSessionId) {
@@ -442,8 +387,8 @@ export class TriageOutcomeService {
           profileId,
           encryptedNarrative,
           intensity: intensityScore,
-          anatomicalSystem: vertical === 'physical' ? mapping.code : secondaryCode,
-          emotionalDimension: vertical === 'emotional' ? mapping.code : secondaryCode,
+          anatomicalSystem: vertical === 'physical' ? mapping.code : null,
+          emotionalDimension: vertical === 'emotional' ? mapping.code : null,
           stepAnswers: encryptedStepAnswers,
           clientSessionId: dto.clientSessionId || null,
           recordedAt: new Date(),

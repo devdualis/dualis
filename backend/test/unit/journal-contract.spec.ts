@@ -2,9 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { getTableConfig } from 'drizzle-orm/pg-core';
+import { AppModule } from '../../src/app.module';
 import { journalEntries, journalItems, userConditions } from '../../src/database/schema';
 import { JournalService } from '../../src/modules/journal/journal.service';
-import { buildJournalSummary } from '../../src/modules/journal/journal-summary';
+import { buildJournalSummary, dayMarkers } from '../../src/modules/journal/journal-summary';
 import { houseAdsFor } from '../../src/modules/journal/house-ads';
 import { BANNED_VOCABULARY, findBannedVocabulary } from '../../scripts/banned-vocabulary';
 
@@ -96,7 +97,7 @@ describe('Journal v2 contract: no grouping, assessment or disorder names', () =>
       note: null,
       items: [
         { kind: 'emotional', legacyLabel: 'Estressado(a) ou esgotado(a)', intensity: 4 },
-        { kind: 'physical', legacyLabel: 'Peito', intensity: 4 },
+        { kind: 'physical', legacyLabel: 'Peito', intensity: null },
       ],
     });
     expectCleanResponse(legacy);
@@ -111,6 +112,59 @@ describe('Journal v2 contract: no grouping, assessment or disorder names', () =>
     const ads = houseAdsFor(lang);
     expectCleanResponse(ads);
     expect(JSON.stringify(ads)).not.toMatch(/cura|trata|melhora sua sa[uú]de|cure|heal|treat|recomendado para voc[eê]/i);
+  });
+});
+
+describe('Journal v2 contract: AI tagging removed and summary semantics', () => {
+  it('no AI tagging routes or modules exist', () => {
+    const appModuleSource = readFileSync(join(SRC, 'app.module.ts'), 'utf8');
+    expect(appModuleSource).not.toMatch(/AiModule/);
+    const controllers = Reflect.getMetadata('controllers', AppModule) || [];
+    const names = controllers.map((c: any) => c.name);
+    expect(names).not.toContain('AiController');
+  });
+
+  it('summary markers follow contract: region bare, time bare, branch <root>.<branch>, trigger:<key>', () => {
+    const entry = {
+      recordedAt: new Date('2026-10-20T12:00:00Z'),
+      triggers: ['sono', 'outro'],
+      items: [
+        { kind: 'physical' as const, optionKey: 'cabeca.pressao.temporas' },
+        { kind: 'physical' as const, optionKey: 'cabeca.custom' },
+        { kind: 'emotional' as const, optionKey: 'futuro.mente.antecipar' },
+        { kind: 'emotional' as const, optionKey: 'futuro.custom' },
+        { kind: 'condition' as const, optionKey: null },
+      ],
+    };
+    const markers = dayMarkers(entry).sort();
+    expect(markers).toEqual(['cabeca', 'futuro', 'futuro.mente', 'trigger:outro', 'trigger:sono']);
+  });
+
+  it('summary counts are distinct local days, not entries', () => {
+    const entries = [
+      {
+        recordedAt: new Date('2026-10-20T09:00:00Z'),
+        triggers: ['sono'],
+        items: [{ kind: 'physical' as const, optionKey: 'cabeca.pressao.temporas' }],
+      },
+      {
+        recordedAt: new Date('2026-10-20T18:00:00Z'),
+        triggers: ['sono'],
+        items: [{ kind: 'physical' as const, optionKey: 'cabeca.pressao.temporas' }],
+      },
+      {
+        recordedAt: new Date('2026-10-21T12:00:00Z'),
+        triggers: ['sono'],
+        items: [{ kind: 'physical' as const, optionKey: 'cabeca.pressao.temporas' }],
+      },
+    ];
+    // 3 entries over 2 days. Both entries on 2026-10-20 count as 1 day.
+    const summary = buildJournalSummary(entries, 30, 0);
+    expect(summary.totalEntries).toBe(3);
+    expect(summary.daysWithEntries).toBe(2);
+    expect(summary.byRegion.cabeca).toBe(2);
+    expect(summary.byOptionKey['cabeca.pressao.temporas']).toBe(2);
+    expect(summary.byTrigger.sono).toBe(2);
   });
 });
 

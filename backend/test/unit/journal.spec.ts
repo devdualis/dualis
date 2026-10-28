@@ -11,7 +11,7 @@ import {
   EMOTIONAL_OPTION_KEYS,
   PHYSICAL_OPTION_KEYS,
 } from '../../src/modules/journal/constants/journal-keys.constant';
-import { buildJournalSummary, localDay } from '../../src/modules/journal/journal-summary';
+import { buildJournalSummary, dayMarkers, localDay } from '../../src/modules/journal/journal-summary';
 import { houseAdsFor } from '../../src/modules/journal/house-ads';
 
 const baseEntry = {
@@ -122,12 +122,15 @@ describe('CreateJournalEntryDto validation', () => {
     expect(errorsOf({ ...baseEntry, triggers: ['trabalho', 'nao_sei'] })).toEqual([]);
   });
 
-  it('days query is 1..365; condition label is non-empty and at most 40 chars', () => {
+  it('days query is 1..365, tzOffset -720..840; condition label is non-empty and at most 40 chars', () => {
     const q = (days: unknown) => validateSync(plainToInstance(JournalDaysQueryDto, { days }));
     expect(q('30')).toEqual([]);
     expect(q('365')).toEqual([]);
     expect(q('366')).not.toEqual([]);
     expect(q('0')).not.toEqual([]);
+    const tz = (tzOffset: unknown) => validateSync(plainToInstance(JournalDaysQueryDto, { tzOffset }));
+    for (const ok of ['-720', '-180', '0', '840']) expect(tz(ok), ok).toEqual([]);
+    for (const bad of ['-721', '841', '1.5', 'abc']) expect(tz(bad), bad).not.toEqual([]);
     const c = (label: string) => validateSync(plainToInstance(CreateConditionDto, { label }));
     expect(c('Depressão')).toEqual([]);
     expect(c('   ')).not.toEqual([]);
@@ -138,7 +141,7 @@ describe('CreateJournalEntryDto validation', () => {
 describe('buildJournalSummary', () => {
   const at = (iso: string) => new Date(iso);
 
-  it('counts entries per time, region, option key and trigger (an entry counts once per key)', () => {
+  it('counts days per time, region, option key and trigger (a day counts once per key)', () => {
     const summary = buildJournalSummary(
       [
         {
@@ -195,9 +198,54 @@ describe('buildJournalSummary', () => {
 
     expect(summary.cooccurrence).toEqual([
       { a: 'cabeca', b: 'futuro.mente', days: 2 },
-      { a: 'cabeca', b: 'trigger.sono', days: 2 },
-      { a: 'futuro.mente', b: 'trigger.sono', days: 2 },
+      { a: 'cabeca', b: 'trigger:sono', days: 2 },
+      { a: 'futuro.mente', b: 'trigger:sono', days: 2 },
     ]);
+  });
+
+  it('counts distinct local days, not entries: two entries with "Cabeça" on one day = 1 day', () => {
+    const head = { kind: 'physical', optionKey: 'cabeca.pressao.temporas' };
+    const mind = { kind: 'emotional', optionKey: 'futuro.mente.cobranca' };
+    const summary = buildJournalSummary(
+      [
+        { recordedAt: at('2026-10-20T09:00:00Z'), triggers: ['sono'], items: [head, mind] },
+        { recordedAt: at('2026-10-20T18:00:00Z'), triggers: ['sono'], items: [head, mind] },
+        { recordedAt: at('2026-10-21T12:00:00Z'), triggers: ['sono'], items: [head] },
+      ],
+      30,
+    );
+    expect(summary.totalEntries).toBe(3);
+    expect(summary.daysWithEntries).toBe(2);
+    expect(summary.byRegion.cabeca).toBe(2);
+    expect(summary.byTime.futuro).toBe(1);
+    expect(summary.byOptionKey).toEqual({ 'cabeca.pressao.temporas': 2, 'futuro.mente.cobranca': 1 });
+    expect(summary.byTrigger.sono).toBe(2);
+  });
+
+  it('local day: 22:00 in Brasília (01:00Z next day) counts on the Brasília day', () => {
+    const head = { kind: 'physical', optionKey: 'cabeca.pressao.temporas' };
+    const entries = [
+      { recordedAt: at('2026-10-20T15:00:00Z'), triggers: [], items: [head] },
+      { recordedAt: at('2026-10-21T01:00:00Z'), triggers: [], items: [head] }, // 22:00 on the 20th in BRT
+    ];
+    expect(buildJournalSummary(entries, 30, -180).byRegion.cabeca).toBe(1);
+    expect(buildJournalSummary(entries, 30).byRegion.cabeca).toBe(2);
+  });
+
+  it('markers: region bare, emotional `<time>.<branch>` (bare time for written items), `trigger:<key>`', () => {
+    expect(
+      dayMarkers({
+        recordedAt: at('2026-10-20T12:00:00Z'),
+        triggers: ['sono', 'outro'],
+        items: [
+          { kind: 'physical', optionKey: 'cabeca.pressao.temporas' },
+          { kind: 'physical', optionKey: 'costas.custom' },
+          { kind: 'emotional', optionKey: 'futuro.mente.antecipar' },
+          { kind: 'emotional', optionKey: 'passado.custom' },
+          { kind: 'condition', optionKey: null },
+        ],
+      }).sort(),
+    ).toEqual(['cabeca', 'costas', 'futuro.mente', 'passado', 'trigger:outro', 'trigger:sono']);
   });
 
   it('groups by the device day when tzOffset is given', () => {

@@ -1,16 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TriageOutcomeService } from '../../src/modules/triage/services/triage-outcome.service';
 import { ArticlesCatalogService } from '../../src/modules/triage/services/articles-catalog.service';
-import { AiTaggingService } from '../../src/modules/ai/services/ai-tagging.service';
-import { IdiomDictionaryService } from '../../src/modules/ai/services/idiom-dictionary.service';
-import type { EntryTagResult } from '../../src/modules/ai/dto/classify-symptom.dto';
 
 describe('TriageOutcomeService Unit Tests', () => {
   let service: TriageOutcomeService;
   let mockDb: any;
   let mockEncryptionService: any;
   let articlesCatalog: ArticlesCatalogService;
-  let aiTagging: AiTaggingService;
 
   beforeEach(() => {
     mockDb = {
@@ -40,14 +36,12 @@ describe('TriageOutcomeService Unit Tests', () => {
     };
 
     articlesCatalog = new ArticlesCatalogService();
-    aiTagging = new AiTaggingService(undefined, new IdiomDictionaryService());
 
     service = new TriageOutcomeService(
       mockDb,
       mockEncryptionService,
       articlesCatalog,
       articlesCatalog,
-      aiTagging,
     );
   });
 
@@ -242,77 +236,22 @@ describe('TriageOutcomeService Unit Tests', () => {
     }
   });
 
-  it('9. tags a body mention in an emotional entry and shows the same static note to everyone', async () => {
+  it('9. a body mention in an emotional entry adds nothing: no second tag, no note', async () => {
     const outcome = await service.processOutcome('user-1', 'prof-user-1', {
       vertical: 'emotional',
-      answers: {
-        1: 'ansiedade',
-        2: 'comecou_hoje',
-        3: 'moderada',
-      },
+      answers: { 1: 'ansiedade', 2: 'comecou_hoje', 3: 'moderada' },
       narrative: 'dor de cabeça',
     });
 
     expect(outcome.vertical).toBe('emotional');
-    expect(outcome.primaryCategory).toBe('ansiosa_agitacao');
     expect(outcome.categoryLabel).toBe('Ansiedade e agitação');
-    expect(outcome.secondaryCategoryLabel).toBe('Cabeça e pescoço');
-    expect(outcome.secondarySomaticMapping).toBe('Você registrou: Cabeça e pescoço.');
-    expect(outcome.isCrossVerticalSomatic).toBe(true);
-    expect(outcome.crossVerticalContextNote).toBe(
-      'Você registrou sensações no corpo e nas emoções hoje. Se algum desconforto físico persistir ou piorar, converse com um profissional de saúde.',
+    expect(Object.keys(outcome).sort()).toEqual(
+      ['categoryLabel', 'id', 'intensityScore', 'primaryCategory', 'recommendedArticles', 'recordedAt', 'somaticMapping', 'vertical'],
     );
-    expect(outcome.aiMappedLayTerm).toBe('dor de cabeça');
   });
 
   describe('D-01: user-reported intensity is the only intensity source', () => {
-    const tags = (overrides: Partial<EntryTagResult>): EntryTagResult => ({
-      isOffTopic: false,
-      vertical: 'emotional',
-      bodyAreaOrMood: 'stress_burnout',
-      layTerm: 'estresse',
-      confidence: 0.9,
-      source: 'gemini',
-      latencyMs: 120,
-      ...overrides,
-    });
-
-    it('10. physical vertical: cross-vertical secondaryIntensityScore equals the user intensity, not the AI score', async () => {
-      vi.spyOn(aiTagging, 'tagWithMetadata').mockResolvedValue(
-        tags({ vertical: 'emotional', bodyAreaOrMood: 'stress_burnout' }),
-      );
-
-      const outcome = await service.processOutcome('user-1', 'prof-user-1', {
-        vertical: 'physical',
-        answers: { 1: 'cabeca', 2: 'comecou_hoje', 3: '2' },
-        narrative: 'muito estresse no trabalho',
-      });
-
-      expect(outcome.intensityScore).toBe(2);
-      expect(outcome.secondaryIntensityScore).toBe(2);
-      expect(outcome.isCrossVerticalSomatic).toBe(true);
-    });
-
-    it('11. emotional vertical: cross-vertical secondaryIntensityScore equals the user intensity, not the AI score', async () => {
-      vi.spyOn(aiTagging, 'tagWithMetadata').mockResolvedValue(
-        tags({ vertical: 'physical', bodyAreaOrMood: 'head_neck' }),
-      );
-
-      const outcome = await service.processOutcome('user-1', 'prof-user-1', {
-        vertical: 'emotional',
-        answers: { 1: 'ansiedade', 2: 'comecou_hoje', 3: 'leve_controlavel' },
-        narrative: 'dor de cabeça',
-      });
-
-      expect(outcome.intensityScore).toBe(2);
-      expect(outcome.secondaryIntensityScore).toBe(2);
-    });
-
     it('12. what the narrative says changes nothing in the summary: no urgency output', async () => {
-      vi.spyOn(aiTagging, 'tagWithMetadata').mockResolvedValue(
-        tags({ vertical: 'physical', bodyAreaOrMood: 'cardiovascular_chest' }),
-      );
-
       const outcome = await service.processOutcome('user-1', 'prof-user-1', {
         vertical: 'physical',
         answers: { 1: 'peito', 2: 'comecou_hoje', 3: '2' },

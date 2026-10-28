@@ -9,8 +9,7 @@ import { and, asc, desc, eq, gte, inArray, isNull, sql } from 'drizzle-orm';
 import { DatabaseService, DrizzleTransaction } from '../../database/database.service';
 import { journalEntries, journalItems, symptomLogs, userConditions } from '../../database/schema';
 import { EncryptionService } from '../../common/encryption/encryption.service';
-import { Lang, resolveLang } from '../../common/i18n/lang';
-import { EMOTIONAL_LABELS, PHYSICAL_LABELS } from '../triage/services/triage-outcome.service';
+import { Lang, Localized, resolveLang } from '../../common/i18n/lang';
 import { JOURNAL_LIMITS } from './constants/journal-keys.constant';
 import {
   CreateJournalEntryDto,
@@ -32,6 +31,35 @@ type LegacyRow = typeof symptomLogs.$inferSelect;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * Plain-language names for the values old app versions stored in symptom_logs, keyed
+ * by those stored values. Only used to show old rows as "registro anterior".
+ */
+const OLD_BODY_LABELS: Record<string, Localized> = {
+  cabeca_pescoco: { pt: 'Cabeça e pescoço', en: 'Head and neck', es: 'Cabeza y cuello' },
+  cardiovascular_torax: { pt: 'Peito', en: 'Chest', es: 'Pecho' },
+  respiratorio: { pt: 'Respiração', en: 'Breathing', es: 'Respiración' },
+  gastrointestinal_abdomen: { pt: 'Barriga e estômago', en: 'Stomach and belly', es: 'Estómago y vientre' },
+  coluna_dor_dorsal: { pt: 'Costas', en: 'Back', es: 'Espalda' },
+  membros_superiores: { pt: 'Braços e mãos', en: 'Arms and hands', es: 'Brazos y manos' },
+  membros_inferiores: { pt: 'Pernas e pés', en: 'Legs and feet', es: 'Piernas y pies' },
+  neurologico: { pt: 'Tontura e equilíbrio', en: 'Dizziness and balance', es: 'Mareo y equilibrio' },
+  geniturinario_pelvico: { pt: 'Baixo ventre e urina', en: 'Lower belly and urination', es: 'Bajo vientre y orina' },
+  dermatologico: { pt: 'Pele', en: 'Skin', es: 'Piel' },
+  muscular_geral_sistemico: { pt: 'Corpo todo', en: 'Whole body', es: 'Todo el cuerpo' },
+  endocrino_metabolico: { pt: 'Energia e apetite', en: 'Energy and appetite', es: 'Energía y apetito' },
+};
+
+const OLD_MOOD_LABELS: Record<string, Localized> = {
+  ansiosa_agitacao: { pt: 'Ansiedade e agitação', en: 'Anxious and restless', es: 'Ansiedad e inquietud' },
+  depressiva_desanimo: { pt: 'Pra baixo', en: 'Feeling down', es: 'Decaído(a)' },
+  estresse_burnout: { pt: 'Estressado(a) ou esgotado(a)', en: 'Stressed or worn out', es: 'Estresado(a) o agotado(a)' },
+  somatica: { pt: 'Emoções sentidas no corpo', en: 'Emotions felt in the body', es: 'Emociones sentidas en el cuerpo' },
+  sono: { pt: 'Sono ruim', en: 'Poor sleep', es: 'Dormir mal' },
+  cognitiva_foco: { pt: 'Cansaço mental e foco', en: 'Mental tiredness and focus', es: 'Cansancio mental y concentración' },
+  autoestima: { pt: 'Autoestima', en: 'Self-esteem', es: 'Autoestima' },
+};
+
 @Injectable()
 export class JournalService {
   constructor(
@@ -47,7 +75,7 @@ export class JournalService {
     if (isNaN(recordedAt.getTime())) throw new BadRequestException('recordedAt inválido.');
 
     return this.databaseService.withRls(userId, async (tx) => {
-      const existing = await this.findByClientId(tx, dto.clientId);
+      const existing = await this.findByClientId(tx, profileId, dto.clientId);
       if (existing) return this.replay(tx, existing, profileId);
 
       const conditionIds = [...new Set(dto.items.filter((i) => i.kind === 'condition').map((i) => i.conditionId!))];
@@ -69,14 +97,15 @@ export class JournalService {
           transitionVariantIds: dto.transitionVariantIds,
           clientId: dto.clientId,
         })
-        .onConflictDoNothing({ target: journalEntries.clientId })
+        .onConflictDoNothing({ target: [journalEntries.profileId, journalEntries.clientId] })
         .returning();
 
       if (!entry) {
-        // Concurrent retry of the same outbox record, or a clientId used by someone else.
-        const raced = await this.findByClientId(tx, dto.clientId);
+        // Concurrent retry of the same outbox record on this profile: replay it. The
+        // clientId is unique per profile, so another profile's entry never collides.
+        const raced = await this.findByClientId(tx, profileId, dto.clientId);
         if (raced) return this.replay(tx, raced, profileId);
-        throw new ConflictException('clientId já utilizado.');
+        throw new ConflictException('clientId em conflito.');
       }
 
       const items = dto.items.length
@@ -233,14 +262,21 @@ export class JournalService {
 
   // Helpers
 
-  private async findByClientId(tx: DrizzleTransaction, clientId: string): Promise<EntryRow | undefined> {
-    const [row] = await tx.select().from(journalEntries).where(eq(journalEntries.clientId, clientId)).limit(1);
+  private async findByClientId(
+    tx: DrizzleTransaction,
+    profileId: string,
+    clientId: string,
+  ): Promise<EntryRow | undefined> {
+    const [row] = await tx
+      .select()
+      .from(journalEntries)
+      .where(and(eq(journalEntries.profileId, profileId), eq(journalEntries.clientId, clientId)))
+      .limit(1);
     return row;
   }
 
-  /** Idempotent replay of an outbox record already stored. */
+  /** Idempotent replay of an outbox record already stored on this profile. */
   private async replay(tx: DrizzleTransaction, entry: EntryRow, profileId: string): Promise<JournalEntryDto> {
-    if (entry.profileId !== profileId) throw new ConflictException('clientId já utilizado.');
     const items = await tx.select().from(journalItems).where(eq(journalItems.entryId, entry.id));
     const conditionIds = items.map((i) => i.conditionId).filter((id): id is string => !!id);
     return this.toEntryDto(entry, items, await this.conditionLabels(tx, profileId, conditionIds));
@@ -310,22 +346,30 @@ export class JournalService {
     };
   }
 
-  /** Old entries keep their stored area or mood, shown with its plain-language name. */
+  /**
+   * Old entries keep their stored area or mood, shown with its plain-language name. The
+   * reported intensity belongs to the side the person filled in; a second side the old
+   * app added from the free text gets no intensity (null).
+   */
   private toLegacyDto(row: LegacyRow, lang: Lang): LegacyJournalEntryDto {
     const intensity = row.intensity >= 1 && row.intensity <= 5 ? row.intensity : null;
+    const mood = row.emotionalDimension && row.emotionalDimension !== 'normal' ? row.emotionalDimension : null;
+    const body = row.anatomicalSystem && row.anatomicalSystem !== 'normal' ? row.anatomicalSystem : null;
+    const main = this.legacyMainKind(row, !!mood, !!body);
+
     const items: LegacyJournalItemDto[] = [];
-    if (row.emotionalDimension && row.emotionalDimension !== 'normal') {
+    if (mood) {
       items.push({
         kind: 'emotional',
-        legacyLabel: EMOTIONAL_LABELS[row.emotionalDimension]?.[lang] ?? row.emotionalDimension,
-        intensity,
+        legacyLabel: OLD_MOOD_LABELS[mood]?.[lang] ?? mood,
+        intensity: main === 'emotional' ? intensity : null,
       });
     }
-    if (row.anatomicalSystem && row.anatomicalSystem !== 'normal') {
+    if (body) {
       items.push({
         kind: 'physical',
-        legacyLabel: PHYSICAL_LABELS[row.anatomicalSystem]?.[lang] ?? row.anatomicalSystem,
-        intensity,
+        legacyLabel: OLD_BODY_LABELS[body]?.[lang] ?? body,
+        intensity: main === 'physical' ? intensity : null,
       });
     }
     return {
@@ -335,6 +379,23 @@ export class JournalService {
       note: this.decryptOptional(row.encryptedNarrative),
       items,
     };
+  }
+
+  /** Side the person filled in on an old row: stored `_entryVertical`, else the only side present. */
+  private legacyMainKind(row: LegacyRow, hasMood: boolean, hasBody: boolean): 'emotional' | 'physical' | null {
+    if (hasMood !== hasBody) return hasMood ? 'emotional' : 'physical';
+    if (!hasMood) return null;
+    const answers = this.decryptOptional(row.stepAnswers ?? null);
+    if (answers) {
+      try {
+        const kind = JSON.parse(answers)?._entryVertical;
+        if (kind === 'emotional' || kind === 'physical') return kind;
+      } catch {
+        // unreadable answers: fall through
+      }
+    }
+    // Rows older than `_entryVertical`: the old app only added a second side to emotional entries.
+    return row.organicPrimacyApplied ? 'emotional' : 'physical';
   }
 
   private toConditionDto(row: typeof userConditions.$inferSelect): UserConditionDto {

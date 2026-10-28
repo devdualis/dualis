@@ -15,6 +15,8 @@ dotenv.config();
 
 const MIGRATIONS_DIR = join(__dirname, '../../src/database/migrations');
 const JOURNAL_MIGRATION = '0017_journal_v2.sql';
+const AI_REMOVAL_MIGRATION = '0018_remove_ai_tagging.sql';
+const CLIENT_ID_MIGRATION = '0019_journal_v2_profile_client_id.sql';
 const APP_ROLE = 'dualis_journal_app';
 const APP_PASSWORD = 'dualis_journal_app';
 
@@ -100,12 +102,14 @@ describe('Security Regression: 0017 journal v2 (journal_entries, journal_items, 
     `);
 
     const migrations = readdirSync(MIGRATIONS_DIR).filter((f) => /^\d{4}_.*\.sql$/.test(f)).sort();
-    expect(migrations).toContain(JOURNAL_MIGRATION);
+    expect(migrations).toEqual(expect.arrayContaining([JOURNAL_MIGRATION, AI_REMOVAL_MIGRATION, CLIENT_ID_MIGRATION]));
     for (const file of migrations) {
       await adminPool.query(readFileSync(join(MIGRATIONS_DIR, file), 'utf8'));
     }
     // Idempotent: a second run must not fail.
-    await adminPool.query(readFileSync(join(MIGRATIONS_DIR, JOURNAL_MIGRATION), 'utf8'));
+    for (const file of [JOURNAL_MIGRATION, AI_REMOVAL_MIGRATION, CLIENT_ID_MIGRATION]) {
+      await adminPool.query(readFileSync(join(MIGRATIONS_DIR, file), 'utf8'));
+    }
 
     await adminPool.query(`
       GRANT USAGE ON SCHEMA public TO ${APP_ROLE}, authenticated;
@@ -202,18 +206,46 @@ describe('Security Regression: 0017 journal v2 (journal_entries, journal_items, 
     expect(rawItem.rows[0].custom_label).toMatch(/^v1:/);
   });
 
-  it('replaying a clientId returns the stored entry; the same clientId on another profile is 409', async (ctx) => {
+  it('replaying a clientId on the same profile returns the stored entry; other profiles never collide', async (ctx) => {
     if (!isDbAvailable) return ctx.skip();
     const dto = entryDto();
     const first = await service.createEntry(ownerA, primaryA, dto);
     const again = await service.createEntry(ownerA, primaryA, dto);
     expect(again.id).toBe(first.id);
-    const count = await adminPool.query(`SELECT count(*)::int AS n FROM journal_entries WHERE client_id = $1`, [dto.clientId]);
+    expect(again).toEqual(first);
+    const count = await adminPool.query(
+      `SELECT count(*)::int AS n FROM journal_entries WHERE client_id = $1 AND profile_id = $2`,
+      [dto.clientId, primaryA],
+    );
     expect(count.rows[0].n).toBe(1);
 
-    await expect(service.createEntry(ownerA, dependentId, dto)).rejects.toMatchObject({ status: 409 });
-    // Someone who cannot see the row gets a conflict, never the entry.
-    await expect(service.createEntry(strangerD, primaryD, dto)).rejects.toMatchObject({ status: 409 });
+    // clientId is unique per profile: the same id elsewhere is a new entry, never a conflict
+    // and never someone else's entry.
+    const onDependent = await service.createEntry(ownerA, dependentId, dto);
+    expect(onDependent.id).not.toBe(first.id);
+    const byStranger = await service.createEntry(strangerD, primaryD, dto);
+    expect(byStranger.id).not.toBe(first.id);
+    expect(byStranger.id).not.toBe(onDependent.id);
+    const total = await adminPool.query(`SELECT count(*)::int AS n FROM journal_entries WHERE client_id = $1`, [dto.clientId]);
+    expect(total.rows[0].n).toBe(3);
+
+    // Concurrent retries of the same outbox record store one entry.
+    const racing = entryDto();
+    const results = await Promise.all([1, 2, 3].map(() => service.createEntry(ownerA, primaryA, racing)));
+    expect(new Set(results.map((r) => r.id)).size).toBe(1);
+  });
+
+  it('symptom_knowledge is gone (0018) and client_id is unique per profile (0019)', async (ctx) => {
+    if (!isDbAvailable) return ctx.skip();
+    const table = await adminPool.query(`SELECT to_regclass('public.symptom_knowledge') AS t`);
+    expect(table.rows[0].t).toBeNull();
+    const constraints = await adminPool.query(
+      `SELECT conname, pg_get_constraintdef(oid) AS def FROM pg_constraint
+       WHERE conrelid = 'public.journal_entries'::regclass AND contype = 'u'`,
+    );
+    expect(constraints.rows).toEqual([
+      { conname: 'journal_entries_profile_client_id_unique', def: 'UNIQUE (profile_id, client_id)' },
+    ]);
   });
 
   it('history: owner sees new and legacy entries, newest first; stranger sees nothing', async (ctx) => {
@@ -293,6 +325,17 @@ describe('Security Regression: 0017 journal v2 (journal_entries, journal_items, 
         c.query(`INSERT INTO journal_items (entry_id, kind, condition_id, intensity) VALUES ($1, 'condition', $2, 2)`, [dependentEntry.id, condition.id]),
       ),
     ).rejects.toThrow(RLS_VIOLATION);
+    // UPDATE re-checks it too: a condition item can't be moved to another profile's condition.
+    const dependentCondition = await service.createCondition(ownerA, dependentId, 'Rinite');
+    await expect(
+      asUser(ownerA, (c) =>
+        c.query(`UPDATE journal_items SET condition_id = $2 WHERE entry_id = $1`, [entry.id, dependentCondition.id]),
+      ),
+    ).rejects.toThrow(RLS_VIOLATION);
+    await asUser(ownerA, async (c) => {
+      expect((await c.query(`UPDATE journal_items SET intensity = 4 WHERE entry_id = $1`, [entry.id])).rowCount).toBe(1);
+    });
+    await service.archiveCondition(ownerA, dependentId, dependentCondition.id);
 
     await service.archiveCondition(ownerA, primaryA, condition.id);
     expect((await service.listConditions(ownerA, primaryA)).conditions.map((c) => c.id)).not.toContain(condition.id);

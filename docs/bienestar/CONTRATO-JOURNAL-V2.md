@@ -8,7 +8,7 @@ Shared contract between backend and mobile for the new daily journal. Source of 
 - The app stores what the user chose (`optionKey`) or wrote (`customLabel`), never a translation of it.
 - No content, ad or notice depends on what the user recorded.
 - Intensity is always self-reported, integer 1..5.
-- Condition names (`userConditions.label`) are never sent to the AI.
+- Condition names (`userConditions.label`) and journal notes are never sent to an AI: AI tagging is removed from the product.
 
 ## Keys
 
@@ -59,7 +59,7 @@ Custom: `optionKey = "<region>.custom"` + `customLabel`.
 
 ## Data model (PostgreSQL, RLS by profile like `symptom_logs`)
 
-`journal_entries`: `id uuid pk`, `profile_id`, `user_id`, `recorded_at timestamptz`, `mood text`, `triggers text[]`, `trigger_note text null`, `note text null` (encrypted like current free text), `transition_variant_ids text[]` (UX analytics only), `client_id text unique` (outbox idempotency), `created_at`.
+`journal_entries`: `id uuid pk`, `profile_id`, `user_id`, `recorded_at timestamptz`, `mood text`, `triggers text[]`, `trigger_note text null`, `note text null` (encrypted like current free text), `transition_variant_ids text[]` (UX analytics only), `client_id text` (outbox idempotency, unique per `(profile_id, client_id)`), `created_at`.
 
 `journal_items`: `id uuid pk`, `entry_id fk cascade`, `kind text`, `option_key text null`, `custom_label text null` (max 40, encrypted), `condition_id uuid null fk`, `body_side text null`, `persistence text null`, `intensity smallint 1..5 null` (null only when mood is bem/normal and there are no items, so in practice items always have intensity).
 
@@ -75,14 +75,17 @@ Old `symptom_logs` rows stay as they are and are returned by history as `legacy:
 - `GET /v1/journal/conditions` → `{ conditions: [{ id, label, createdAt }] }`.
 - `POST /v1/journal/conditions` `{ label }` → 201. Max 10 active per profile.
 - `DELETE /v1/journal/conditions/:id` → 204 (soft archive; past items keep the label).
-- `GET /v1/journal/summary?days=30` → counts only: `{ byTime: {passado,presente,futuro}, byRegion: {cabeca,…}, byOptionKey: {…}, byTrigger: {…}, cooccurrence: [{ a, b, days }] }`. No labels, no text, no interpretation.
+- `GET /v1/journal/summary?days=30&tzOffset=0` → counts only: `{ byTime: {passado,presente,futuro}, byRegion: {cabeca,…}, byOptionKey: {…}, byTrigger: {…}, cooccurrence: [{ a, b, days }] }`. No labels, no text, no interpretation.
+  - **Summary markers**: option `<root>.<branch>.<option>`, branch `<root>.<branch>`, region bare (`cabeca`), time bare (`futuro`), trigger `trigger:<key>`. The client resolves all of these to labels, branches included.
+  - **Counts in `/summary`** (`byTime`, `byRegion`, `byOptionKey`, `byTrigger`, `cooccurrence`): DISTINCT LOCAL DAYS, not entries.
+  - **Local day**: client sends `tzOffset` (minutes east of UTC, e.g. -180 for Brasília, validated range -720..840) as a query parameter to `GET /v1/journal/summary` and `GET /v1/hydration/history`; the server groups by that local day (default 0).
 - `GET /v1/house-ads` → `{ ads: [{ id, brand, title, body, imageUrl?, assetKey?, url }] }`. Static list, identical for every user, never receives entry data. Demo brands: Dualis Premium, ZOC, WGI, UBO (fictional, internal examples).
 
 `JournalEntryDto` = the stored entry with decrypted `note`, items with decrypted `customLabel`, and for condition items the condition `label`.
 
-## AI tagging
-`/v1/ai/tag-entry` stays for optional free text. Remove `mentionsSelfHarm` from the response schema. Never send condition labels.
+## AI tagging (removed)
+AI tagging is removed from the product (strategy §18 decision 1, review #1 and #9). The `/v1/ai/tag-entry` and `/v1/ai/classify-symptom` endpoints, tagging service, idiom dictionary, symptom vector learning and their seeds/tests, and the shared `symptom_knowledge` table are deleted (migration `0018_remove_ai_tagging.sql`). The product never groups user text into pre-assigned categories.
 
 ## Removed
-- Mobile: `RedFlagEvaluator`, `SafetyNoticeKind`, inline safety notice banner, any conditional emergency UI.
-- Backend: any self-harm / warning-sign detection used to change output.
+- Mobile: `RedFlagEvaluator`, `SafetyNoticeKind`, inline safety notice banner, any conditional emergency UI, `SymptomClassification*`, `ApiEndpoints.tagEntry`.
+- Backend: any self-harm / warning-sign detection used to change output, AI tagging endpoints (`/v1/ai/tag-entry`, `/v1/ai/classify-symptom`), `AiTaggingService`, `IdiomDictionaryService`, `symptom_knowledge` table.
