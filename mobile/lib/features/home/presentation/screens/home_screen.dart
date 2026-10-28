@@ -17,6 +17,7 @@ import '../../../sync/presentation/widgets/offline_indicator_banner.dart';
 import '../../../sync/presentation/controllers/sync_outbox_worker.dart';
 import '../../../settings/presentation/widgets/avatar_selector_sheet.dart';
 import '../widgets/dualis_bottom_nav_bar.dart';
+import '../../../care/presentation/screens/care_hub_screen.dart';
 import 'dart:async';
 import '../../../dashboard/presentation/screens/historical_dashboard_screen.dart';
 import '../../../journal_insights/presentation/controllers/journal_insights_controller.dart';
@@ -126,6 +127,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.watch(hydrationControllerProvider);
 
     final triggerState = ref.watch(triggerCheckInProvider);
+    final showCare = ref.watch(premiumProfilesEnabledProvider);
+    if (!showCare && _currentTabIndex == 3) _currentTabIndex = 0;
 
     Widget appBarTitle;
     List<Widget> appBarActions = [];
@@ -204,6 +207,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         const SizedBox(width: 8),
       ];
+    } else if (_currentTabIndex == 3) {
+      appBarTitle = Text(
+        l10n.careHubTitle,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimaryLight,
+        ),
+      );
+      appBarActions = [
+        const ProfileAppBarPill(),
+        const SizedBox(width: 8),
+        _AppBarIconButton(
+          key: const Key('home_settings_button'),
+          icon: Icons.settings_outlined,
+          color: AppColors.clinicalTealDark,
+          tooltip: 'Configurações',
+          onTap: () => context.push(RoutePaths.settings),
+        ),
+        const SizedBox(width: 8),
+      ];
     } else {
       appBarTitle = Text(
         'Controle de Hidratação 💧',
@@ -267,6 +291,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
       bottomNavigationBar: DualisBottomNavBar(
+        showCare: showCare,
         currentIndex: _currentTabIndex,
         onTap: (index) {
           setState(() => _currentTabIndex = index);
@@ -300,6 +325,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return const HistoricalDashboardScreen(isEmbedded: true);
       case 2:
         return const HydrationDashboardScreen(isEmbedded: true);
+      case 3:
+        return const CareHubScreen();
       default:
         return _buildHomeTab(
           context,

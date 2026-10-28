@@ -5,22 +5,28 @@ import '../../../../l10n/app_localizations.dart';
 enum DualisNavTab {
   home,
   history,
-  hydration;
+  hydration,
+  care;
 }
 
 class DualisBottomNavBar extends StatelessWidget {
-  static const int emergencyIndex = 3;
-
   final int currentIndex;
   final ValueChanged<int> onTap;
   final VoidCallback onEmergencyTap;
+
+  /// Premium: adds the "Meus cuidados" tab before the help button.
+  final bool showCare;
 
   const DualisBottomNavBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
     required this.onEmergencyTap,
+    this.showCare = false,
   });
+
+  /// Index of the help button, always the last destination.
+  int get emergencyIndex => showCare ? 4 : 3;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +35,7 @@ class DualisBottomNavBar extends StatelessWidget {
     final historyLabel = l10n?.navHistory ?? 'Histórico & Mapa';
     final hydrationLabel = l10n?.navHydration ?? 'Água';
     final emergencyLabel = l10n?.urgentHelpButton ?? 'Ajuda urgente';
+    final careLabel = l10n?.careHubTitle ?? 'Meus cuidados';
 
     return Container(
       decoration: BoxDecoration(
@@ -42,9 +49,9 @@ class DualisBottomNavBar extends StatelessWidget {
         ],
       ),
       child: NavigationBar(
-        selectedIndex: currentIndex.clamp(0, DualisNavTab.values.length - 1),
+        selectedIndex: currentIndex.clamp(0, emergencyIndex - 1),
         onDestinationSelected: (index) {
-          if (index == DualisBottomNavBar.emergencyIndex) {
+          if (index == emergencyIndex) {
             onEmergencyTap();
             return;
           }
@@ -77,6 +84,14 @@ class DualisBottomNavBar extends StatelessWidget {
             label: '',
             tooltip: hydrationLabel,
           ),
+          if (showCare)
+            NavigationDestination(
+              key: const Key('nav_destination_care'),
+              icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textSecondaryLight),
+              selectedIcon: const Icon(Icons.favorite_rounded, color: AppColors.clinicalTealDark),
+              label: '',
+              tooltip: careLabel,
+            ),
           NavigationDestination(
             key: const Key('nav_destination_emergency'),
             icon: _emergencyGlyph(Icons.emergency_outlined),

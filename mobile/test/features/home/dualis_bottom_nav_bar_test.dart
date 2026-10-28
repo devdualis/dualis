@@ -68,8 +68,11 @@ void main() {
       expect(tappedIndex, equals(0));
     });
 
-    test('Help is the last index, right after the three tabs', () {
-      expect(DualisBottomNavBar.emergencyIndex, DualisNavTab.values.length);
+    test('Help is the last index: after three tabs, or four with the premium care tab', () {
+      DualisBottomNavBar bar({bool care = false}) =>
+          DualisBottomNavBar(currentIndex: 0, onTap: (_) {}, onEmergencyTap: () {}, showCare: care);
+      expect(bar().emergencyIndex, 3);
+      expect(bar(care: true).emergencyIndex, DualisNavTab.values.length);
     });
 
     testWidgets('Emergency destination is crimson and does not change tab index',

@@ -21,6 +21,7 @@ import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/hydration/presentation/screens/hydration_dashboard_screen.dart';
 import '../../features/profile/presentation/screens/family_sharing_screen.dart';
 import '../../features/library/presentation/library_screen.dart';
+import '../../features/care/presentation/care_routes.dart';
 import '../presentation/screens/not_found_screen.dart';
 import 'route_paths.dart';
 
@@ -195,6 +196,7 @@ GoRouter createRouter({
         name: 'privacyPolicy',
         builder: (context, state) => const PrivacyPolicyScreen(),
       ),
+      ...careRoutes,
       GoRoute(
         path: RoutePaths.notFound,
         name: 'notFound',

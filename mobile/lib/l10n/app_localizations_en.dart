@@ -2679,4 +2679,883 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get histRegionEmpty =>
       'You did not mark this body part in this period.';
+
+  @override
+  String get careHubTitle => 'My care';
+
+  @override
+  String get careHubToday => 'Today';
+
+  @override
+  String get careHubNoRemindersToday => 'No reminders today';
+
+  @override
+  String careHubRemindersToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reminders today',
+      one: '1 reminder today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String careHubNext(String name, String time) {
+    return 'Next: $name · $time';
+  }
+
+  @override
+  String careHubVaccinesSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count doses recorded',
+      one: '1 dose recorded',
+      zero: 'No doses recorded',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get careHubNone => 'None added';
+
+  @override
+  String careHubMedsActive(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count active',
+      one: '1 active',
+      zero: 'None active',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String careHubLowStock(int count) {
+    return 'low stock on $count';
+  }
+
+  @override
+  String get careHubNoUpcoming => 'No upcoming appointments';
+
+  @override
+  String careHubNextAppointment(String date, String who) {
+    return 'Next: $date · $who';
+  }
+
+  @override
+  String careHubDocuments(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count documents saved',
+      one: '1 document saved',
+      zero: 'No documents',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get careHubSummarySubtitle =>
+      'A PDF to take to your appointment, if you want';
+
+  @override
+  String get careVaccinesTitle => 'Vaccines';
+
+  @override
+  String get careAllergiesTitle => 'Allergies you informed';
+
+  @override
+  String get careMedicationsTitle => 'Medications & reminders';
+
+  @override
+  String get careAppointmentsTitle => 'Appointments';
+
+  @override
+  String get careExamsTitle => 'Exams';
+
+  @override
+  String get careSummaryTitle => 'Summary of my records';
+
+  @override
+  String get careLoadError => 'Could not load. Check your connection.';
+
+  @override
+  String get careRetry => 'Try again';
+
+  @override
+  String get careSave => 'Save';
+
+  @override
+  String get careSaveError => 'Could not save. Please try again.';
+
+  @override
+  String get careFillRequired => 'Fill in the required fields.';
+
+  @override
+  String get careCancel => 'Cancel';
+
+  @override
+  String get careDelete => 'Delete';
+
+  @override
+  String get careDeleteTitle => 'Delete this record?';
+
+  @override
+  String get careDeleteBody => 'It will be removed from this profile.';
+
+  @override
+  String careDays(int count) {
+    return '$count days';
+  }
+
+  @override
+  String get careMon => 'Mon';
+
+  @override
+  String get careTue => 'Tue';
+
+  @override
+  String get careWed => 'Wed';
+
+  @override
+  String get careThu => 'Thu';
+
+  @override
+  String get careFri => 'Fri';
+
+  @override
+  String get careSat => 'Sat';
+
+  @override
+  String get careSun => 'Sun';
+
+  @override
+  String get careVaccineRegister => 'Record dose';
+
+  @override
+  String get careVaccineEdit => 'Edit dose';
+
+  @override
+  String get careVaccineTabCalendar => 'Official calendar';
+
+  @override
+  String get careVaccineTabMine => 'My doses';
+
+  @override
+  String careVaccineCalendarNote(String source) {
+    return '$source (Brazil), shown as published. Ask your health unit or vaccination provider about it.';
+  }
+
+  @override
+  String get carePniChild => 'Child';
+
+  @override
+  String get carePniTeen => 'Teen';
+
+  @override
+  String get carePniAdult => 'Adult';
+
+  @override
+  String get carePniElderly => '60+';
+
+  @override
+  String get carePniPregnant => 'Pregnancy';
+
+  @override
+  String get careVaccineByCampaign => 'Per current campaign';
+
+  @override
+  String careVaccineDosesInCalendar(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count doses in the calendar',
+      one: 'Single dose in the calendar',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String careVaccineBoosterEvery(int years) {
+    String _temp0 = intl.Intl.pluralLogic(
+      years,
+      locale: localeName,
+      other: '$years years',
+      one: 'year',
+    );
+    return 'Booster every $_temp0 in the calendar';
+  }
+
+  @override
+  String careVaccineLastDose(String date) {
+    return 'Your last recorded dose: $date';
+  }
+
+  @override
+  String get careVaccineNoRecord => 'No record';
+
+  @override
+  String careVaccineCount(int count, int total) {
+    return '$count of $total';
+  }
+
+  @override
+  String careVaccineCountOnly(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count doses',
+      one: '1 dose',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get careVaccineOfficialLink => 'See the full calendar (gov.br)';
+
+  @override
+  String get careVaccineEmpty => 'No doses recorded yet.';
+
+  @override
+  String careVaccineBatch(String batch) {
+    return 'Batch $batch';
+  }
+
+  @override
+  String careVaccineBoosterReminder(String date) {
+    return 'Booster reminder: $date';
+  }
+
+  @override
+  String get careDose1 => '1st dose';
+
+  @override
+  String get careDose2 => '2nd dose';
+
+  @override
+  String get careDose3 => '3rd dose';
+
+  @override
+  String get careDoseBooster => 'Booster';
+
+  @override
+  String get careDoseSingle => 'Single dose';
+
+  @override
+  String get careDoseYearly => 'Yearly';
+
+  @override
+  String get careVaccineField => 'Vaccine';
+
+  @override
+  String get careVaccineCustom => 'Other (private)';
+
+  @override
+  String get careVaccineCustomName => 'Vaccine name';
+
+  @override
+  String get careVaccineAppliedOn => 'Date given';
+
+  @override
+  String get careVaccineBatchField => 'Batch (optional)';
+
+  @override
+  String get careVaccinePlace => 'Where (optional)';
+
+  @override
+  String get careVaccineReceipt => 'Vaccination receipt';
+
+  @override
+  String get careVaccineReceiptAdd => 'Photo of the receipt';
+
+  @override
+  String get careVaccineReceiptSaved => 'Receipt saved';
+
+  @override
+  String get careVaccineReceiptHint => 'Kept only in your records';
+
+  @override
+  String get careVaccineRemindBooster => 'Remind me of the next booster';
+
+  @override
+  String get careVaccineBoosterDate => 'Reminder date';
+
+  @override
+  String careVaccineBoosterHint(int years) {
+    String _temp0 = intl.Intl.pluralLogic(
+      years,
+      locale: localeName,
+      other: '$years years',
+      one: '1 year',
+    );
+    return 'The date comes from the interval published in the official calendar ($_temp0). You can change it.';
+  }
+
+  @override
+  String get careVaccineBoosterHintNone =>
+      'The calendar has no interval for this vaccine. Pick any date you like.';
+
+  @override
+  String get careAllergiesIntro =>
+      'What you already know causes a reaction for you. Shown on your profile and in the PDF summary.';
+
+  @override
+  String get careAllergiesNoCrossCheck =>
+      'Dualis stores what you write. It does not check whether a medicine matches your allergies. Always confirm with your prescriber or pharmacy.';
+
+  @override
+  String get careAllergiesEmpty => 'No allergies added.';
+
+  @override
+  String get careAllergyAdd => 'Add allergy';
+
+  @override
+  String get careAllergyEdit => 'Edit allergy';
+
+  @override
+  String get careAllergyMedication => 'Medicines';
+
+  @override
+  String get careAllergyFood => 'Foods';
+
+  @override
+  String get careAllergyOther => 'Other';
+
+  @override
+  String get careAllergyName => 'Name (as you know it)';
+
+  @override
+  String get careAllergyReaction => 'Reaction, in your own words (optional)';
+
+  @override
+  String careAllergyReactionShown(String reaction) {
+    return 'Reaction you informed: \"$reaction\"';
+  }
+
+  @override
+  String careAllergyInformedOn(String date) {
+    return 'Informed on $date';
+  }
+
+  @override
+  String get careAllergyInformedField => 'Since when (optional)';
+
+  @override
+  String get careAllergyOnProfile => 'Shown on the profile card';
+
+  @override
+  String get careAllergyShowOnProfile => 'Show on the profile card';
+
+  @override
+  String get careAllergyShowOnProfileHint =>
+      'Visible to people you share the profile with';
+
+  @override
+  String get careMedicationAdd => 'Medication';
+
+  @override
+  String get careMedicationEdit => 'Edit medication';
+
+  @override
+  String get careMedTabToday => 'Today';
+
+  @override
+  String get careMedTabAll => 'All';
+
+  @override
+  String get careMedEmpty => 'No medications added.';
+
+  @override
+  String get careMedNoneToday => 'Nothing scheduled for today.';
+
+  @override
+  String get careMedMorning => 'Morning';
+
+  @override
+  String get careMedAfternoon => 'Afternoon';
+
+  @override
+  String get careMedNight => 'Night';
+
+  @override
+  String get careMedNote =>
+      'Times and amounts are the ones you set, from your prescription. Dualis never suggests or changes doses.';
+
+  @override
+  String careMedStockTitle(String name) {
+    return 'Stock: $name';
+  }
+
+  @override
+  String careMedStockBody(int count, int warnAt) {
+    return '$count left. You asked to be told at $warnAt.';
+  }
+
+  @override
+  String careMedStockLeft(int count) {
+    return 'Stock: $count';
+  }
+
+  @override
+  String get careMedNoTimes => 'No times';
+
+  @override
+  String get careMedPaused => 'Paused';
+
+  @override
+  String get careMedTaken => 'Taken';
+
+  @override
+  String get careMedSnooze => 'Snooze 15 min';
+
+  @override
+  String get careMedSkip => 'Skipped';
+
+  @override
+  String careMedTakenAt(String time) {
+    return 'taken $time';
+  }
+
+  @override
+  String get careMedSkipped => 'not taken';
+
+  @override
+  String get careMedSnoozed => 'snoozed';
+
+  @override
+  String get careMedFromPrescriptionNote =>
+      'Filled in with what was read from the prescription. Check everything and pick the times.';
+
+  @override
+  String get careMedName => 'Name (as on the prescription or box)';
+
+  @override
+  String get careMedStrength => 'Strength';
+
+  @override
+  String get careMedForm => 'Form';
+
+  @override
+  String get careMedAmount => 'Amount each time (from your prescription)';
+
+  @override
+  String get careMedInstructions => 'As written on the prescription (optional)';
+
+  @override
+  String get careMedTimes => 'Times';
+
+  @override
+  String get careMedAddTime => 'Time';
+
+  @override
+  String get careMedTimesRequired => 'Pick at least one time.';
+
+  @override
+  String get careMedDays => 'Days';
+
+  @override
+  String get careMedEveryDay => 'Every day';
+
+  @override
+  String get careMedUntil => 'Until (optional)';
+
+  @override
+  String get careMedStockSection => 'Stock (optional)';
+
+  @override
+  String get careMedStockHave => 'I have';
+
+  @override
+  String get careMedStockPerIntake => 'Used each time';
+
+  @override
+  String get careMedStockWarn => 'Warn me at';
+
+  @override
+  String get careMedBula => 'Official leaflet';
+
+  @override
+  String get careMedBulaHint =>
+      'Opens ANVISA\'s official leaflet search (Brazil)';
+
+  @override
+  String get careMedBulaNeedsName => 'Type the medicine name first.';
+
+  @override
+  String get careMedActive => 'Reminders on';
+
+  @override
+  String get careMedSave => 'Save reminders';
+
+  @override
+  String get careAppointmentAdd => 'Appointment';
+
+  @override
+  String get careAppointmentEdit => 'Edit appointment';
+
+  @override
+  String get careAppointmentEmpty => 'No appointments yet.';
+
+  @override
+  String get careAppointmentUpcoming => 'Upcoming';
+
+  @override
+  String get careAppointmentPast => 'Past';
+
+  @override
+  String get careAppointmentTitleFallback => 'Appointment';
+
+  @override
+  String get careAppointmentQuestions => 'Questions I want to ask';
+
+  @override
+  String get careAppointmentNotes => 'My notes';
+
+  @override
+  String get careAppointmentDate => 'Date';
+
+  @override
+  String get careAppointmentTime => 'Time';
+
+  @override
+  String get careAppointmentProfessional => 'Professional (optional)';
+
+  @override
+  String get careAppointmentSpecialty => 'Specialty';
+
+  @override
+  String get careAppointmentPlace => 'Place';
+
+  @override
+  String get careAppointmentReminderNone => 'No reminder';
+
+  @override
+  String get careAppointmentReminder1d => '1 day before';
+
+  @override
+  String get careAppointmentReminder2h => '2 hours before';
+
+  @override
+  String get careSectionJournal => 'Journal';
+
+  @override
+  String get careSectionConditions => 'Conditions';
+
+  @override
+  String get careSectionMedications => 'Medications';
+
+  @override
+  String get careSectionAllergies => 'Allergies';
+
+  @override
+  String get careSectionVaccines => 'Vaccines';
+
+  @override
+  String get careSectionExams => 'Exams';
+
+  @override
+  String get careSectionNotes => 'Notes';
+
+  @override
+  String get careSummaryInclude => 'Include';
+
+  @override
+  String careSummaryJournal(int count) {
+    return 'Journal entries ($count)';
+  }
+
+  @override
+  String get careSummaryConditions => 'My conditions (as you informed)';
+
+  @override
+  String get careSummaryMedications => 'Medications and times';
+
+  @override
+  String get careSummaryNotes => 'My notes';
+
+  @override
+  String careSummaryIntensity(int value) {
+    return 'reported intensity $value/5';
+  }
+
+  @override
+  String careSummaryTaken(int taken, int marked) {
+    return '$taken of $marked marked as taken';
+  }
+
+  @override
+  String careSummaryReference(String text) {
+    return 'printed reference: $text';
+  }
+
+  @override
+  String get careSummaryNothing => 'Nothing recorded in this period.';
+
+  @override
+  String careSummaryMore(int count) {
+    return '+ $count in the PDF';
+  }
+
+  @override
+  String careSummaryHeader(String name, String from, String to) {
+    return '$name · $from to $to · generated by the person';
+  }
+
+  @override
+  String get careSummaryFooter =>
+      'This document only gathers what the person recorded. It contains no assessment or recommendation.';
+
+  @override
+  String get careSummaryShare => 'Share PDF';
+
+  @override
+  String get careSummaryPrivacy =>
+      'The PDF is created on your phone. You decide who to share it with.';
+
+  @override
+  String get careExamAdd => 'Add exam';
+
+  @override
+  String get careExamFromCamera => 'Take a photo';
+
+  @override
+  String get careExamFromGallery => 'Choose from gallery';
+
+  @override
+  String get careExamFromPdf => 'Choose a PDF';
+
+  @override
+  String get careExamWhatIsIt => 'What is this document?';
+
+  @override
+  String get careExamKindLab => 'Lab report';
+
+  @override
+  String get careExamKindLabHint => 'We read the values for you to check';
+
+  @override
+  String get careExamKindPrescription => 'Prescription';
+
+  @override
+  String get careExamKindPrescriptionHint =>
+      'We read names and instructions for you to check';
+
+  @override
+  String get careExamKindArchive => 'Just store it';
+
+  @override
+  String get careExamKindArchiveHint => 'Stores the file without reading';
+
+  @override
+  String get careExamTooLarge => 'The file is larger than 10 MB.';
+
+  @override
+  String get careExamReading => 'Reading your document…';
+
+  @override
+  String get careExamReadingHint =>
+      'Takes up to a minute. You can leave this screen.';
+
+  @override
+  String get careExamEmpty => 'No documents saved.';
+
+  @override
+  String get careExamSectionLabs => 'Lab reports';
+
+  @override
+  String get careExamSectionPrescriptions => 'Prescriptions';
+
+  @override
+  String get careExamSectionOther => 'Other files';
+
+  @override
+  String get careExamValuesOverTime => 'My values over time';
+
+  @override
+  String get careExamNote =>
+      'Values and references are the lab\'s. Dualis never says whether a result is good or bad. Take your questions to whoever ordered the test.';
+
+  @override
+  String careExamToCheck(int count) {
+    return 'Check $count';
+  }
+
+  @override
+  String get careExamCheck => 'Check';
+
+  @override
+  String get careExamChecked => 'Checked';
+
+  @override
+  String get careExamReadFailed => 'Not read';
+
+  @override
+  String get careExamArchived => 'Stored';
+
+  @override
+  String get careExamReviewTitle => 'Check values';
+
+  @override
+  String get careExamSeeOriginal => 'See original document';
+
+  @override
+  String get careExamCompareHint =>
+      'Compare with the paper. Tap a row to fix it.';
+
+  @override
+  String get careExamArchivedHint => 'Stored without reading.';
+
+  @override
+  String get careExamFailedHint =>
+      'We could not read this file. You can type the values or try another photo, in good light with the whole page.';
+
+  @override
+  String get careExamTitleField => 'Exam name';
+
+  @override
+  String get careExamLab => 'Laboratory';
+
+  @override
+  String get careExamCollected => 'Collection date';
+
+  @override
+  String get careExamItem => 'Item';
+
+  @override
+  String get careExamValue => 'Value';
+
+  @override
+  String get careExamUnit => 'Unit';
+
+  @override
+  String get careExamDate => 'Date';
+
+  @override
+  String get careExamReference => 'Reference printed on the report';
+
+  @override
+  String get careExamReferencePrinted => 'Printed reference';
+
+  @override
+  String get careExamNoRows => 'No values read. Add the rows you want to keep.';
+
+  @override
+  String get careExamAddRow => 'Add row';
+
+  @override
+  String get careExamEditRow => 'Fix row';
+
+  @override
+  String get careExamRowSave => 'Confirm row';
+
+  @override
+  String get careExamRowRemove => 'Remove row';
+
+  @override
+  String careExamSavePending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count checks left',
+      one: '1 check left',
+    );
+    return 'Save ($_temp0)';
+  }
+
+  @override
+  String get careExamSaved => 'Values saved.';
+
+  @override
+  String get careExamItemIntro =>
+      'Values you checked, newest first. The reference is the one each lab printed.';
+
+  @override
+  String get careReadConsentTitle => 'Read documents with Google';
+
+  @override
+  String get careReadConsentBody =>
+      'To read the photo or PDF, the file is sent to Google Cloud Vision, which extracts the text on servers in the United States or the European Union. Gemini (São Paulo region) then organizes that text, without your name or CPF. Google does not use this data to train models.\n\nThis is an international transfer of health data (LGPD Art. 33; GDPR Art. 46). You can decline and use \"Just store it\" or type the values. You can withdraw this consent in the Privacy Center.';
+
+  @override
+  String get careReadConsentAccept => 'I agree';
+
+  @override
+  String get careReadConsentDecline => 'Not now';
+
+  @override
+  String get careRxTitle => 'Check prescription';
+
+  @override
+  String get careRxCompareHint =>
+      'Compare with the prescription. Tap a field to fix it.';
+
+  @override
+  String get careRxNothingRead => 'No medicines read.';
+
+  @override
+  String get careRxName => 'Name read';
+
+  @override
+  String get careRxStrength => 'Strength read';
+
+  @override
+  String get careRxInstructions => 'How to take (prescription text)';
+
+  @override
+  String get careRxEditField => 'Fix field';
+
+  @override
+  String careRxFieldLabel(String field) {
+    String _temp0 = intl.Intl.selectLogic(field, {
+      'name': 'Name',
+      'strength': 'Strength',
+      'other': 'How to take',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get careRxTimesYouChoose => 'You pick the times in the next step.';
+
+  @override
+  String get careRxCheckFirst => 'Check every field';
+
+  @override
+  String get careRxCreateReminder => 'Create reminder';
+
+  @override
+  String get careRxReminderCreated => 'Reminder created';
+
+  @override
+  String get careRxNote =>
+      'Dualis copies the prescription text. It never turns \"every 12h\" into times or creates reminders by itself.';
+
+  @override
+  String get careNotifChannelName => 'Care reminders';
+
+  @override
+  String get careNotifChannelDescription =>
+      'Medication times, appointments and vaccine boosters you set.';
+
+  @override
+  String get careNotifMedTitle => 'Time for your reminder';
+
+  @override
+  String get careNotifAppointmentTitle => 'Appointment reminder';
+
+  @override
+  String careNotifAppointmentBody(String who, String time) {
+    return '$who at $time';
+  }
+
+  @override
+  String get careNotifBoosterTitle => 'Vaccine reminder';
+
+  @override
+  String careNotifBoosterBody(String name) {
+    return 'The date you picked for the booster: $name';
+  }
 }

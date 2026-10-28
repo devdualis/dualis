@@ -4719,6 +4719,1464 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Você não marcou esta parte do corpo neste período.'**
   String get histRegionEmpty;
+
+  /// No description provided for @careHubTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Meus cuidados'**
+  String get careHubTitle;
+
+  /// No description provided for @careHubToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hoje'**
+  String get careHubToday;
+
+  /// No description provided for @careHubNoRemindersToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum lembrete hoje'**
+  String get careHubNoRemindersToday;
+
+  /// No description provided for @careHubRemindersToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 lembrete hoje} other{{count} lembretes hoje}}'**
+  String careHubRemindersToday(int count);
+
+  /// No description provided for @careHubNext.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próximo: {name} · {time}'**
+  String careHubNext(String name, String time);
+
+  /// No description provided for @careHubVaccinesSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =0{Nenhuma dose registrada} =1{1 dose registrada} other{{count} doses registradas}}'**
+  String careHubVaccinesSubtitle(int count);
+
+  /// No description provided for @careHubNone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma informada'**
+  String get careHubNone;
+
+  /// No description provided for @careHubMedsActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =0{Nenhum ativo} =1{1 ativo} other{{count} ativos}}'**
+  String careHubMedsActive(int count);
+
+  /// No description provided for @careHubLowStock.
+  ///
+  /// In pt, this message translates to:
+  /// **'estoque baixo em {count}'**
+  String careHubLowStock(int count);
+
+  /// No description provided for @careHubNoUpcoming.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma consulta marcada'**
+  String get careHubNoUpcoming;
+
+  /// No description provided for @careHubNextAppointment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próxima: {date} · {who}'**
+  String careHubNextAppointment(String date, String who);
+
+  /// No description provided for @careHubDocuments.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =0{Nenhum documento} =1{1 documento guardado} other{{count} documentos guardados}}'**
+  String careHubDocuments(int count);
+
+  /// No description provided for @careHubSummarySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'PDF para levar à consulta, se você quiser'**
+  String get careHubSummarySubtitle;
+
+  /// No description provided for @careVaccinesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vacinas'**
+  String get careVaccinesTitle;
+
+  /// No description provided for @careAllergiesTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alergias informadas'**
+  String get careAllergiesTitle;
+
+  /// No description provided for @careMedicationsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Medicamentos e lembretes'**
+  String get careMedicationsTitle;
+
+  /// No description provided for @careAppointmentsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Consultas'**
+  String get careAppointmentsTitle;
+
+  /// No description provided for @careExamsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exames'**
+  String get careExamsTitle;
+
+  /// No description provided for @careSummaryTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resumo dos meus registros'**
+  String get careSummaryTitle;
+
+  /// No description provided for @careLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar. Verifique sua conexão.'**
+  String get careLoadError;
+
+  /// No description provided for @careRetry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tentar de novo'**
+  String get careRetry;
+
+  /// No description provided for @careSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar'**
+  String get careSave;
+
+  /// No description provided for @careSaveError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível salvar. Tente de novo.'**
+  String get careSaveError;
+
+  /// No description provided for @careFillRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preencha os campos obrigatórios.'**
+  String get careFillRequired;
+
+  /// No description provided for @careCancel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar'**
+  String get careCancel;
+
+  /// No description provided for @careDelete.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar'**
+  String get careDelete;
+
+  /// No description provided for @careDeleteTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apagar este registro?'**
+  String get careDeleteTitle;
+
+  /// No description provided for @careDeleteBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ele será removido deste perfil.'**
+  String get careDeleteBody;
+
+  /// No description provided for @careDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} dias'**
+  String careDays(int count);
+
+  /// No description provided for @careMon.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seg'**
+  String get careMon;
+
+  /// No description provided for @careTue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ter'**
+  String get careTue;
+
+  /// No description provided for @careWed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qua'**
+  String get careWed;
+
+  /// No description provided for @careThu.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qui'**
+  String get careThu;
+
+  /// No description provided for @careFri.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sex'**
+  String get careFri;
+
+  /// No description provided for @careSat.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sáb'**
+  String get careSat;
+
+  /// No description provided for @careSun.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dom'**
+  String get careSun;
+
+  /// No description provided for @careVaccineRegister.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar dose'**
+  String get careVaccineRegister;
+
+  /// No description provided for @careVaccineEdit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar dose'**
+  String get careVaccineEdit;
+
+  /// No description provided for @careVaccineTabCalendar.
+  ///
+  /// In pt, this message translates to:
+  /// **'Calendário oficial'**
+  String get careVaccineTabCalendar;
+
+  /// No description provided for @careVaccineTabMine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Minhas doses'**
+  String get careVaccineTabMine;
+
+  /// No description provided for @careVaccineCalendarNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'{source} (Brasil), mostrado como publicado. Tire dúvidas na sua UBS ou com quem vacina você.'**
+  String careVaccineCalendarNote(String source);
+
+  /// No description provided for @carePniChild.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criança'**
+  String get carePniChild;
+
+  /// No description provided for @carePniTeen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adolescente'**
+  String get carePniTeen;
+
+  /// No description provided for @carePniAdult.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adulto'**
+  String get carePniAdult;
+
+  /// No description provided for @carePniElderly.
+  ///
+  /// In pt, this message translates to:
+  /// **'60+'**
+  String get carePniElderly;
+
+  /// No description provided for @carePniPregnant.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gestante'**
+  String get carePniPregnant;
+
+  /// No description provided for @careVaccineByCampaign.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conforme campanha vigente'**
+  String get careVaccineByCampaign;
+
+  /// No description provided for @careVaccineDosesInCalendar.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Dose única no calendário} other{{count} doses no calendário}}'**
+  String careVaccineDosesInCalendar(int count);
+
+  /// No description provided for @careVaccineBoosterEvery.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reforço a cada {years, plural, =1{ano} other{{years} anos}} no calendário'**
+  String careVaccineBoosterEvery(int years);
+
+  /// No description provided for @careVaccineLastDose.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sua última dose registrada: {date}'**
+  String careVaccineLastDose(String date);
+
+  /// No description provided for @careVaccineNoRecord.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem registro'**
+  String get careVaccineNoRecord;
+
+  /// No description provided for @careVaccineCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} de {total}'**
+  String careVaccineCount(int count, int total);
+
+  /// No description provided for @careVaccineCountOnly.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 dose} other{{count} doses}}'**
+  String careVaccineCountOnly(int count);
+
+  /// No description provided for @careVaccineOfficialLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver o calendário completo (gov.br)'**
+  String get careVaccineOfficialLink;
+
+  /// No description provided for @careVaccineEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma dose registrada ainda.'**
+  String get careVaccineEmpty;
+
+  /// No description provided for @careVaccineBatch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lote {batch}'**
+  String careVaccineBatch(String batch);
+
+  /// No description provided for @careVaccineBoosterReminder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrete de reforço: {date}'**
+  String careVaccineBoosterReminder(String date);
+
+  /// No description provided for @careDose1.
+  ///
+  /// In pt, this message translates to:
+  /// **'1ª dose'**
+  String get careDose1;
+
+  /// No description provided for @careDose2.
+  ///
+  /// In pt, this message translates to:
+  /// **'2ª dose'**
+  String get careDose2;
+
+  /// No description provided for @careDose3.
+  ///
+  /// In pt, this message translates to:
+  /// **'3ª dose'**
+  String get careDose3;
+
+  /// No description provided for @careDoseBooster.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reforço'**
+  String get careDoseBooster;
+
+  /// No description provided for @careDoseSingle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dose única'**
+  String get careDoseSingle;
+
+  /// No description provided for @careDoseYearly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anual'**
+  String get careDoseYearly;
+
+  /// No description provided for @careVaccineField.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vacina'**
+  String get careVaccineField;
+
+  /// No description provided for @careVaccineCustom.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outra (particular)'**
+  String get careVaccineCustom;
+
+  /// No description provided for @careVaccineCustomName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome da vacina'**
+  String get careVaccineCustomName;
+
+  /// No description provided for @careVaccineAppliedOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Data da aplicação'**
+  String get careVaccineAppliedOn;
+
+  /// No description provided for @careVaccineBatchField.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lote (opcional)'**
+  String get careVaccineBatchField;
+
+  /// No description provided for @careVaccinePlace.
+  ///
+  /// In pt, this message translates to:
+  /// **'Onde (opcional)'**
+  String get careVaccinePlace;
+
+  /// No description provided for @careVaccineReceipt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comprovante de vacina'**
+  String get careVaccineReceipt;
+
+  /// No description provided for @careVaccineReceiptAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto do comprovante'**
+  String get careVaccineReceiptAdd;
+
+  /// No description provided for @careVaccineReceiptSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comprovante guardado'**
+  String get careVaccineReceiptSaved;
+
+  /// No description provided for @careVaccineReceiptHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fica guardada só no seu registro'**
+  String get careVaccineReceiptHint;
+
+  /// No description provided for @careVaccineRemindBooster.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrar do próximo reforço'**
+  String get careVaccineRemindBooster;
+
+  /// No description provided for @careVaccineBoosterDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Data do lembrete'**
+  String get careVaccineBoosterDate;
+
+  /// No description provided for @careVaccineBoosterHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'A data vem do intervalo publicado no calendário oficial ({years, plural, =1{1 ano} other{{years} anos}}). Você pode mudar.'**
+  String careVaccineBoosterHint(int years);
+
+  /// No description provided for @careVaccineBoosterHintNone.
+  ///
+  /// In pt, this message translates to:
+  /// **'O calendário não traz intervalo para esta vacina. Escolha a data que quiser.'**
+  String get careVaccineBoosterHintNone;
+
+  /// No description provided for @careAllergiesIntro.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que você já sabe que causa reação em você. Aparece no seu perfil e no resumo em PDF.'**
+  String get careAllergiesIntro;
+
+  /// No description provided for @careAllergiesNoCrossCheck.
+  ///
+  /// In pt, this message translates to:
+  /// **'O Dualis guarda o que você escreve. Ele não verifica se um medicamento combina com suas alergias. Confirme sempre com quem receita ou com a farmácia.'**
+  String get careAllergiesNoCrossCheck;
+
+  /// No description provided for @careAllergiesEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma alergia informada.'**
+  String get careAllergiesEmpty;
+
+  /// No description provided for @careAllergyAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar alergia'**
+  String get careAllergyAdd;
+
+  /// No description provided for @careAllergyEdit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar alergia'**
+  String get careAllergyEdit;
+
+  /// No description provided for @careAllergyMedication.
+  ///
+  /// In pt, this message translates to:
+  /// **'Medicamentos'**
+  String get careAllergyMedication;
+
+  /// No description provided for @careAllergyFood.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alimentos'**
+  String get careAllergyFood;
+
+  /// No description provided for @careAllergyOther.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outros'**
+  String get careAllergyOther;
+
+  /// No description provided for @careAllergyName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome (como você conhece)'**
+  String get careAllergyName;
+
+  /// No description provided for @careAllergyReaction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reação, com suas palavras (opcional)'**
+  String get careAllergyReaction;
+
+  /// No description provided for @careAllergyReactionShown.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reação que você informou: \"{reaction}\"'**
+  String careAllergyReactionShown(String reaction);
+
+  /// No description provided for @careAllergyInformedOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informado em {date}'**
+  String careAllergyInformedOn(String date);
+
+  /// No description provided for @careAllergyInformedField.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desde quando (opcional)'**
+  String get careAllergyInformedField;
+
+  /// No description provided for @careAllergyOnProfile.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mostrada no cartão de perfil'**
+  String get careAllergyOnProfile;
+
+  /// No description provided for @careAllergyShowOnProfile.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mostrar no cartão de perfil'**
+  String get careAllergyShowOnProfile;
+
+  /// No description provided for @careAllergyShowOnProfileHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Visível para quem você compartilhar o perfil'**
+  String get careAllergyShowOnProfileHint;
+
+  /// No description provided for @careMedicationAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Medicamento'**
+  String get careMedicationAdd;
+
+  /// No description provided for @careMedicationEdit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar medicamento'**
+  String get careMedicationEdit;
+
+  /// No description provided for @careMedTabToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hoje'**
+  String get careMedTabToday;
+
+  /// No description provided for @careMedTabAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos'**
+  String get careMedTabAll;
+
+  /// No description provided for @careMedEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum medicamento cadastrado.'**
+  String get careMedEmpty;
+
+  /// No description provided for @careMedNoneToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum horário para hoje.'**
+  String get careMedNoneToday;
+
+  /// No description provided for @careMedMorning.
+  ///
+  /// In pt, this message translates to:
+  /// **'Manhã'**
+  String get careMedMorning;
+
+  /// No description provided for @careMedAfternoon.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tarde'**
+  String get careMedAfternoon;
+
+  /// No description provided for @careMedNight.
+  ///
+  /// In pt, this message translates to:
+  /// **'Noite'**
+  String get careMedNight;
+
+  /// No description provided for @careMedNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Horários e quantidades são os que você configurou, conforme sua receita. O Dualis não sugere nem altera doses.'**
+  String get careMedNote;
+
+  /// No description provided for @careMedStockTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estoque: {name}'**
+  String careMedStockTitle(String name);
+
+  /// No description provided for @careMedStockBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Restam {count}. Você pediu aviso com {warnAt}.'**
+  String careMedStockBody(int count, int warnAt);
+
+  /// No description provided for @careMedStockLeft.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estoque: {count}'**
+  String careMedStockLeft(int count);
+
+  /// No description provided for @careMedNoTimes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem horários'**
+  String get careMedNoTimes;
+
+  /// No description provided for @careMedPaused.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pausado'**
+  String get careMedPaused;
+
+  /// No description provided for @careMedTaken.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tomei'**
+  String get careMedTaken;
+
+  /// No description provided for @careMedSnooze.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adiar 15 min'**
+  String get careMedSnooze;
+
+  /// No description provided for @careMedSkip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pulei'**
+  String get careMedSkip;
+
+  /// No description provided for @careMedTakenAt.
+  ///
+  /// In pt, this message translates to:
+  /// **'tomado {time}'**
+  String careMedTakenAt(String time);
+
+  /// No description provided for @careMedSkipped.
+  ///
+  /// In pt, this message translates to:
+  /// **'não tomado'**
+  String get careMedSkipped;
+
+  /// No description provided for @careMedSnoozed.
+  ///
+  /// In pt, this message translates to:
+  /// **'adiado'**
+  String get careMedSnoozed;
+
+  /// No description provided for @careMedFromPrescriptionNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preenchido com o que foi lido na receita. Confira tudo e escolha os horários.'**
+  String get careMedFromPrescriptionNote;
+
+  /// No description provided for @careMedName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome (como está na receita ou na caixa)'**
+  String get careMedName;
+
+  /// No description provided for @careMedStrength.
+  ///
+  /// In pt, this message translates to:
+  /// **'Concentração'**
+  String get careMedStrength;
+
+  /// No description provided for @careMedForm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Forma'**
+  String get careMedForm;
+
+  /// No description provided for @careMedAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quanto tomar por vez (da sua receita)'**
+  String get careMedAmount;
+
+  /// No description provided for @careMedInstructions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como está escrito na receita (opcional)'**
+  String get careMedInstructions;
+
+  /// No description provided for @careMedTimes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Horários'**
+  String get careMedTimes;
+
+  /// No description provided for @careMedAddTime.
+  ///
+  /// In pt, this message translates to:
+  /// **'Horário'**
+  String get careMedAddTime;
+
+  /// No description provided for @careMedTimesRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha pelo menos um horário.'**
+  String get careMedTimesRequired;
+
+  /// No description provided for @careMedDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dias'**
+  String get careMedDays;
+
+  /// No description provided for @careMedEveryDay.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos os dias'**
+  String get careMedEveryDay;
+
+  /// No description provided for @careMedUntil.
+  ///
+  /// In pt, this message translates to:
+  /// **'Até quando (opcional)'**
+  String get careMedUntil;
+
+  /// No description provided for @careMedStockSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estoque (opcional)'**
+  String get careMedStockSection;
+
+  /// No description provided for @careMedStockHave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tenho em casa'**
+  String get careMedStockHave;
+
+  /// No description provided for @careMedStockPerIntake.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usa por vez'**
+  String get careMedStockPerIntake;
+
+  /// No description provided for @careMedStockWarn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avisar com'**
+  String get careMedStockWarn;
+
+  /// No description provided for @careMedBula.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bula oficial'**
+  String get careMedBula;
+
+  /// No description provided for @careMedBulaHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abre o Bulário Eletrônico da ANVISA'**
+  String get careMedBulaHint;
+
+  /// No description provided for @careMedBulaNeedsName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva o nome do medicamento primeiro.'**
+  String get careMedBulaNeedsName;
+
+  /// No description provided for @careMedActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembretes ativos'**
+  String get careMedActive;
+
+  /// No description provided for @careMedSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar lembretes'**
+  String get careMedSave;
+
+  /// No description provided for @careAppointmentAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Consulta'**
+  String get careAppointmentAdd;
+
+  /// No description provided for @careAppointmentEdit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar consulta'**
+  String get careAppointmentEdit;
+
+  /// No description provided for @careAppointmentEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma consulta registrada.'**
+  String get careAppointmentEmpty;
+
+  /// No description provided for @careAppointmentUpcoming.
+  ///
+  /// In pt, this message translates to:
+  /// **'Próximas'**
+  String get careAppointmentUpcoming;
+
+  /// No description provided for @careAppointmentPast.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anteriores'**
+  String get careAppointmentPast;
+
+  /// No description provided for @careAppointmentTitleFallback.
+  ///
+  /// In pt, this message translates to:
+  /// **'Consulta'**
+  String get careAppointmentTitleFallback;
+
+  /// No description provided for @careAppointmentQuestions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Perguntas que quero fazer'**
+  String get careAppointmentQuestions;
+
+  /// No description provided for @careAppointmentNotes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Minhas anotações'**
+  String get careAppointmentNotes;
+
+  /// No description provided for @careAppointmentDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Data'**
+  String get careAppointmentDate;
+
+  /// No description provided for @careAppointmentTime.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hora'**
+  String get careAppointmentTime;
+
+  /// No description provided for @careAppointmentProfessional.
+  ///
+  /// In pt, this message translates to:
+  /// **'Profissional (opcional)'**
+  String get careAppointmentProfessional;
+
+  /// No description provided for @careAppointmentSpecialty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Especialidade'**
+  String get careAppointmentSpecialty;
+
+  /// No description provided for @careAppointmentPlace.
+  ///
+  /// In pt, this message translates to:
+  /// **'Local'**
+  String get careAppointmentPlace;
+
+  /// No description provided for @careAppointmentReminderNone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem lembrete'**
+  String get careAppointmentReminderNone;
+
+  /// No description provided for @careAppointmentReminder1d.
+  ///
+  /// In pt, this message translates to:
+  /// **'1 dia antes'**
+  String get careAppointmentReminder1d;
+
+  /// No description provided for @careAppointmentReminder2h.
+  ///
+  /// In pt, this message translates to:
+  /// **'2 horas antes'**
+  String get careAppointmentReminder2h;
+
+  /// No description provided for @careSectionJournal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Diário'**
+  String get careSectionJournal;
+
+  /// No description provided for @careSectionConditions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Condições'**
+  String get careSectionConditions;
+
+  /// No description provided for @careSectionMedications.
+  ///
+  /// In pt, this message translates to:
+  /// **'Medicamentos'**
+  String get careSectionMedications;
+
+  /// No description provided for @careSectionAllergies.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alergias'**
+  String get careSectionAllergies;
+
+  /// No description provided for @careSectionVaccines.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vacinas'**
+  String get careSectionVaccines;
+
+  /// No description provided for @careSectionExams.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exames'**
+  String get careSectionExams;
+
+  /// No description provided for @careSectionNotes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notas'**
+  String get careSectionNotes;
+
+  /// No description provided for @careSummaryInclude.
+  ///
+  /// In pt, this message translates to:
+  /// **'Incluir'**
+  String get careSummaryInclude;
+
+  /// No description provided for @careSummaryJournal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registros do diário ({count})'**
+  String careSummaryJournal(int count);
+
+  /// No description provided for @careSummaryConditions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Minhas condições (informadas por você)'**
+  String get careSummaryConditions;
+
+  /// No description provided for @careSummaryMedications.
+  ///
+  /// In pt, this message translates to:
+  /// **'Medicamentos e horários'**
+  String get careSummaryMedications;
+
+  /// No description provided for @careSummaryNotes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Minhas notas'**
+  String get careSummaryNotes;
+
+  /// No description provided for @careSummaryIntensity.
+  ///
+  /// In pt, this message translates to:
+  /// **'intensidade informada {value}/5'**
+  String careSummaryIntensity(int value);
+
+  /// No description provided for @careSummaryTaken.
+  ///
+  /// In pt, this message translates to:
+  /// **'{taken} de {marked} marcados como tomados'**
+  String careSummaryTaken(int taken, int marked);
+
+  /// No description provided for @careSummaryReference.
+  ///
+  /// In pt, this message translates to:
+  /// **'referência impressa: {text}'**
+  String careSummaryReference(String text);
+
+  /// No description provided for @careSummaryNothing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nada registrado no período.'**
+  String get careSummaryNothing;
+
+  /// No description provided for @careSummaryMore.
+  ///
+  /// In pt, this message translates to:
+  /// **'+ {count} no PDF'**
+  String careSummaryMore(int count);
+
+  /// No description provided for @careSummaryHeader.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} · {from} a {to} · gerado pela própria pessoa'**
+  String careSummaryHeader(String name, String from, String to);
+
+  /// No description provided for @careSummaryFooter.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este documento reúne apenas o que a pessoa registrou. Não contém avaliação nem recomendação.'**
+  String get careSummaryFooter;
+
+  /// No description provided for @careSummaryShare.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhar PDF'**
+  String get careSummaryShare;
+
+  /// No description provided for @careSummaryPrivacy.
+  ///
+  /// In pt, this message translates to:
+  /// **'O PDF é criado no seu celular. Você decide com quem compartilhar.'**
+  String get careSummaryPrivacy;
+
+  /// No description provided for @careExamAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar exame'**
+  String get careExamAdd;
+
+  /// No description provided for @careExamFromCamera.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar foto'**
+  String get careExamFromCamera;
+
+  /// No description provided for @careExamFromGallery.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher da galeria'**
+  String get careExamFromGallery;
+
+  /// No description provided for @careExamFromPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher PDF'**
+  String get careExamFromPdf;
+
+  /// No description provided for @careExamWhatIsIt.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que é este documento?'**
+  String get careExamWhatIsIt;
+
+  /// No description provided for @careExamKindLab.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exame de laboratório'**
+  String get careExamKindLab;
+
+  /// No description provided for @careExamKindLabHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lemos os valores para você conferir'**
+  String get careExamKindLabHint;
+
+  /// No description provided for @careExamKindPrescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receita'**
+  String get careExamKindPrescription;
+
+  /// No description provided for @careExamKindPrescriptionHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lemos nome e instruções para você conferir'**
+  String get careExamKindPrescriptionHint;
+
+  /// No description provided for @careExamKindArchive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só arquivar'**
+  String get careExamKindArchive;
+
+  /// No description provided for @careExamKindArchiveHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Guarda o arquivo sem ler'**
+  String get careExamKindArchiveHint;
+
+  /// No description provided for @careExamTooLarge.
+  ///
+  /// In pt, this message translates to:
+  /// **'O arquivo passa de 10 MB.'**
+  String get careExamTooLarge;
+
+  /// No description provided for @careExamReading.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lendo seu documento…'**
+  String get careExamReading;
+
+  /// No description provided for @careExamReadingHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Leva até 1 minuto. Você pode sair desta tela.'**
+  String get careExamReadingHint;
+
+  /// No description provided for @careExamEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum documento guardado.'**
+  String get careExamEmpty;
+
+  /// No description provided for @careExamSectionLabs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exames'**
+  String get careExamSectionLabs;
+
+  /// No description provided for @careExamSectionPrescriptions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receitas'**
+  String get careExamSectionPrescriptions;
+
+  /// No description provided for @careExamSectionOther.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outros arquivos'**
+  String get careExamSectionOther;
+
+  /// No description provided for @careExamValuesOverTime.
+  ///
+  /// In pt, this message translates to:
+  /// **'Meus valores ao longo do tempo'**
+  String get careExamValuesOverTime;
+
+  /// No description provided for @careExamNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Os valores e as referências são os do laudo. O Dualis não diz se um resultado está bom ou ruim. Leve suas dúvidas a quem pediu o exame.'**
+  String get careExamNote;
+
+  /// No description provided for @careExamToCheck.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conferir {count}'**
+  String careExamToCheck(int count);
+
+  /// No description provided for @careExamCheck.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conferir'**
+  String get careExamCheck;
+
+  /// No description provided for @careExamChecked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conferido'**
+  String get careExamChecked;
+
+  /// No description provided for @careExamReadFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não lido'**
+  String get careExamReadFailed;
+
+  /// No description provided for @careExamArchived.
+  ///
+  /// In pt, this message translates to:
+  /// **'Arquivado'**
+  String get careExamArchived;
+
+  /// No description provided for @careExamReviewTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conferir valores'**
+  String get careExamReviewTitle;
+
+  /// No description provided for @careExamSeeOriginal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver documento original'**
+  String get careExamSeeOriginal;
+
+  /// No description provided for @careExamCompareHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compare com o papel. Toque numa linha para corrigir.'**
+  String get careExamCompareHint;
+
+  /// No description provided for @careExamArchivedHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Guardado sem leitura.'**
+  String get careExamArchivedHint;
+
+  /// No description provided for @careExamFailedHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não conseguimos ler este arquivo. Você pode digitar os valores ou tentar outra foto, com boa luz e o papel inteiro.'**
+  String get careExamFailedHint;
+
+  /// No description provided for @careExamTitleField.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome do exame'**
+  String get careExamTitleField;
+
+  /// No description provided for @careExamLab.
+  ///
+  /// In pt, this message translates to:
+  /// **'Laboratório'**
+  String get careExamLab;
+
+  /// No description provided for @careExamCollected.
+  ///
+  /// In pt, this message translates to:
+  /// **'Data da coleta'**
+  String get careExamCollected;
+
+  /// No description provided for @careExamItem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Item'**
+  String get careExamItem;
+
+  /// No description provided for @careExamValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor'**
+  String get careExamValue;
+
+  /// No description provided for @careExamUnit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Unidade'**
+  String get careExamUnit;
+
+  /// No description provided for @careExamDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Data'**
+  String get careExamDate;
+
+  /// No description provided for @careExamReference.
+  ///
+  /// In pt, this message translates to:
+  /// **'Referência impressa no laudo'**
+  String get careExamReference;
+
+  /// No description provided for @careExamReferencePrinted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Referência impressa'**
+  String get careExamReferencePrinted;
+
+  /// No description provided for @careExamNoRows.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum valor lido. Adicione as linhas que quiser guardar.'**
+  String get careExamNoRows;
+
+  /// No description provided for @careExamAddRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar linha'**
+  String get careExamAddRow;
+
+  /// No description provided for @careExamEditRow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Corrigir linha'**
+  String get careExamEditRow;
+
+  /// No description provided for @careExamRowSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar linha'**
+  String get careExamRowSave;
+
+  /// No description provided for @careExamRowRemove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover linha'**
+  String get careExamRowRemove;
+
+  /// No description provided for @careExamSavePending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar (faltam {count, plural, =1{1 conferência} other{{count} conferências}})'**
+  String careExamSavePending(int count);
+
+  /// No description provided for @careExamSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valores guardados.'**
+  String get careExamSaved;
+
+  /// No description provided for @careExamItemIntro.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valores que você conferiu, do mais recente ao mais antigo. A referência é a que cada laboratório imprimiu.'**
+  String get careExamItemIntro;
+
+  /// No description provided for @careReadConsentTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ler documentos com o Google'**
+  String get careReadConsentTitle;
+
+  /// No description provided for @careReadConsentBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para ler a foto ou o PDF, o arquivo é enviado ao Google Cloud Vision, que extrai o texto em servidores nos Estados Unidos ou na União Europeia. Depois, a Gemini (região São Paulo) organiza esse texto, sem seu nome nem CPF. O Google não usa esses dados para treinar modelos.\n\nIsso é uma transferência internacional de dados de saúde (LGPD Art. 33; RGPD Art. 46). Você pode recusar e usar \"Só arquivar\" ou digitar os valores. Pode retirar este consentimento na Central de Privacidade.'**
+  String get careReadConsentBody;
+
+  /// No description provided for @careReadConsentAccept.
+  ///
+  /// In pt, this message translates to:
+  /// **'Concordo'**
+  String get careReadConsentAccept;
+
+  /// No description provided for @careReadConsentDecline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agora não'**
+  String get careReadConsentDecline;
+
+  /// No description provided for @careRxTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conferir receita'**
+  String get careRxTitle;
+
+  /// No description provided for @careRxCompareHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compare com a receita. Toque num campo para corrigir.'**
+  String get careRxCompareHint;
+
+  /// No description provided for @careRxNothingRead.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum medicamento lido.'**
+  String get careRxNothingRead;
+
+  /// No description provided for @careRxName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome lido'**
+  String get careRxName;
+
+  /// No description provided for @careRxStrength.
+  ///
+  /// In pt, this message translates to:
+  /// **'Concentração lida'**
+  String get careRxStrength;
+
+  /// No description provided for @careRxInstructions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como tomar (texto da receita)'**
+  String get careRxInstructions;
+
+  /// No description provided for @careRxEditField.
+  ///
+  /// In pt, this message translates to:
+  /// **'Corrigir campo'**
+  String get careRxEditField;
+
+  /// No description provided for @careRxFieldLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'{field, select, name{Nome} strength{Concentração} other{Como tomar}}'**
+  String careRxFieldLabel(String field);
+
+  /// No description provided for @careRxTimesYouChoose.
+  ///
+  /// In pt, this message translates to:
+  /// **'Os horários você escolhe no próximo passo.'**
+  String get careRxTimesYouChoose;
+
+  /// No description provided for @careRxCheckFirst.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confira todos os campos'**
+  String get careRxCheckFirst;
+
+  /// No description provided for @careRxCreateReminder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar lembrete'**
+  String get careRxCreateReminder;
+
+  /// No description provided for @careRxReminderCreated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrete criado'**
+  String get careRxReminderCreated;
+
+  /// No description provided for @careRxNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'O Dualis copia o texto da receita. Ele não transforma \"12/12h\" em horários nem cria lembretes sozinho.'**
+  String get careRxNote;
+
+  /// No description provided for @careNotifChannelName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembretes de cuidados'**
+  String get careNotifChannelName;
+
+  /// No description provided for @careNotifChannelDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Horários de medicamentos, consultas e reforços de vacina que você configurou.'**
+  String get careNotifChannelDescription;
+
+  /// No description provided for @careNotifMedTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hora do seu lembrete'**
+  String get careNotifMedTitle;
+
+  /// No description provided for @careNotifAppointmentTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrete de consulta'**
+  String get careNotifAppointmentTitle;
+
+  /// No description provided for @careNotifAppointmentBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'{who} às {time}'**
+  String careNotifAppointmentBody(String who, String time);
+
+  /// No description provided for @careNotifBoosterTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrete de vacina'**
+  String get careNotifBoosterTitle;
+
+  /// No description provided for @careNotifBoosterBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Data que você escolheu para o reforço: {name}'**
+  String careNotifBoosterBody(String name);
 }
 
 class _AppLocalizationsDelegate

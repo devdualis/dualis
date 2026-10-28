@@ -1758,5 +1758,510 @@
       }
     }
   },
-  "histRegionEmpty": "Você não marcou esta parte do corpo neste período."
+  "histRegionEmpty": "Você não marcou esta parte do corpo neste período.",
+  "careHubTitle": "Meus cuidados",
+  "careHubToday": "Hoje",
+  "careHubNoRemindersToday": "Nenhum lembrete hoje",
+  "careHubRemindersToday": "{count, plural, =1{1 lembrete hoje} other{{count} lembretes hoje}}",
+  "@careHubRemindersToday": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careHubNext": "Próximo: {name} · {time}",
+  "@careHubNext": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "careHubVaccinesSubtitle": "{count, plural, =0{Nenhuma dose registrada} =1{1 dose registrada} other{{count} doses registradas}}",
+  "@careHubVaccinesSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careHubNone": "Nenhuma informada",
+  "careHubMedsActive": "{count, plural, =0{Nenhum ativo} =1{1 ativo} other{{count} ativos}}",
+  "@careHubMedsActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careHubLowStock": "estoque baixo em {count}",
+  "@careHubLowStock": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careHubNoUpcoming": "Nenhuma consulta marcada",
+  "careHubNextAppointment": "Próxima: {date} · {who}",
+  "@careHubNextAppointment": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "careHubDocuments": "{count, plural, =0{Nenhum documento} =1{1 documento guardado} other{{count} documentos guardados}}",
+  "@careHubDocuments": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careHubSummarySubtitle": "PDF para levar à consulta, se você quiser",
+  "careVaccinesTitle": "Vacinas",
+  "careAllergiesTitle": "Alergias informadas",
+  "careMedicationsTitle": "Medicamentos e lembretes",
+  "careAppointmentsTitle": "Consultas",
+  "careExamsTitle": "Exames",
+  "careSummaryTitle": "Resumo dos meus registros",
+  "careLoadError": "Não foi possível carregar. Verifique sua conexão.",
+  "careRetry": "Tentar de novo",
+  "careSave": "Salvar",
+  "careSaveError": "Não foi possível salvar. Tente de novo.",
+  "careFillRequired": "Preencha os campos obrigatórios.",
+  "careCancel": "Cancelar",
+  "careDelete": "Apagar",
+  "careDeleteTitle": "Apagar este registro?",
+  "careDeleteBody": "Ele será removido deste perfil.",
+  "careDays": "{count} dias",
+  "@careDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careMon": "Seg",
+  "careTue": "Ter",
+  "careWed": "Qua",
+  "careThu": "Qui",
+  "careFri": "Sex",
+  "careSat": "Sáb",
+  "careSun": "Dom",
+  "careVaccineRegister": "Registrar dose",
+  "careVaccineEdit": "Editar dose",
+  "careVaccineTabCalendar": "Calendário oficial",
+  "careVaccineTabMine": "Minhas doses",
+  "careVaccineCalendarNote": "{source} (Brasil), mostrado como publicado. Tire dúvidas na sua UBS ou com quem vacina você.",
+  "@careVaccineCalendarNote": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "carePniChild": "Criança",
+  "carePniTeen": "Adolescente",
+  "carePniAdult": "Adulto",
+  "carePniElderly": "60+",
+  "carePniPregnant": "Gestante",
+  "careVaccineByCampaign": "Conforme campanha vigente",
+  "careVaccineDosesInCalendar": "{count, plural, =1{Dose única no calendário} other{{count} doses no calendário}}",
+  "@careVaccineDosesInCalendar": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careVaccineBoosterEvery": "Reforço a cada {years, plural, =1{ano} other{{years} anos}} no calendário",
+  "@careVaccineBoosterEvery": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "careVaccineLastDose": "Sua última dose registrada: {date}",
+  "@careVaccineLastDose": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "careVaccineNoRecord": "Sem registro",
+  "careVaccineCount": "{count} de {total}",
+  "@careVaccineCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "careVaccineCountOnly": "{count, plural, =1{1 dose} other{{count} doses}}",
+  "@careVaccineCountOnly": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careVaccineOfficialLink": "Ver o calendário completo (gov.br)",
+  "careVaccineEmpty": "Nenhuma dose registrada ainda.",
+  "careVaccineBatch": "Lote {batch}",
+  "@careVaccineBatch": {
+    "placeholders": {
+      "batch": {
+        "type": "String"
+      }
+    }
+  },
+  "careVaccineBoosterReminder": "Lembrete de reforço: {date}",
+  "@careVaccineBoosterReminder": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "careDose1": "1ª dose",
+  "careDose2": "2ª dose",
+  "careDose3": "3ª dose",
+  "careDoseBooster": "Reforço",
+  "careDoseSingle": "Dose única",
+  "careDoseYearly": "Anual",
+  "careVaccineField": "Vacina",
+  "careVaccineCustom": "Outra (particular)",
+  "careVaccineCustomName": "Nome da vacina",
+  "careVaccineAppliedOn": "Data da aplicação",
+  "careVaccineBatchField": "Lote (opcional)",
+  "careVaccinePlace": "Onde (opcional)",
+  "careVaccineReceipt": "Comprovante de vacina",
+  "careVaccineReceiptAdd": "Foto do comprovante",
+  "careVaccineReceiptSaved": "Comprovante guardado",
+  "careVaccineReceiptHint": "Fica guardada só no seu registro",
+  "careVaccineRemindBooster": "Lembrar do próximo reforço",
+  "careVaccineBoosterDate": "Data do lembrete",
+  "careVaccineBoosterHint": "A data vem do intervalo publicado no calendário oficial ({years, plural, =1{1 ano} other{{years} anos}}). Você pode mudar.",
+  "@careVaccineBoosterHint": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "careVaccineBoosterHintNone": "O calendário não traz intervalo para esta vacina. Escolha a data que quiser.",
+  "careAllergiesIntro": "O que você já sabe que causa reação em você. Aparece no seu perfil e no resumo em PDF.",
+  "careAllergiesNoCrossCheck": "O Dualis guarda o que você escreve. Ele não verifica se um medicamento combina com suas alergias. Confirme sempre com quem receita ou com a farmácia.",
+  "careAllergiesEmpty": "Nenhuma alergia informada.",
+  "careAllergyAdd": "Adicionar alergia",
+  "careAllergyEdit": "Editar alergia",
+  "careAllergyMedication": "Medicamentos",
+  "careAllergyFood": "Alimentos",
+  "careAllergyOther": "Outros",
+  "careAllergyName": "Nome (como você conhece)",
+  "careAllergyReaction": "Reação, com suas palavras (opcional)",
+  "careAllergyReactionShown": "Reação que você informou: \"{reaction}\"",
+  "@careAllergyReactionShown": {
+    "placeholders": {
+      "reaction": {
+        "type": "String"
+      }
+    }
+  },
+  "careAllergyInformedOn": "Informado em {date}",
+  "@careAllergyInformedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "careAllergyInformedField": "Desde quando (opcional)",
+  "careAllergyOnProfile": "Mostrada no cartão de perfil",
+  "careAllergyShowOnProfile": "Mostrar no cartão de perfil",
+  "careAllergyShowOnProfileHint": "Visível para quem você compartilhar o perfil",
+  "careMedicationAdd": "Medicamento",
+  "careMedicationEdit": "Editar medicamento",
+  "careMedTabToday": "Hoje",
+  "careMedTabAll": "Todos",
+  "careMedEmpty": "Nenhum medicamento cadastrado.",
+  "careMedNoneToday": "Nenhum horário para hoje.",
+  "careMedMorning": "Manhã",
+  "careMedAfternoon": "Tarde",
+  "careMedNight": "Noite",
+  "careMedNote": "Horários e quantidades são os que você configurou, conforme sua receita. O Dualis não sugere nem altera doses.",
+  "careMedStockTitle": "Estoque: {name}",
+  "@careMedStockTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "careMedStockBody": "Restam {count}. Você pediu aviso com {warnAt}.",
+  "@careMedStockBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "warnAt": {
+        "type": "int"
+      }
+    }
+  },
+  "careMedStockLeft": "Estoque: {count}",
+  "@careMedStockLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careMedNoTimes": "Sem horários",
+  "careMedPaused": "Pausado",
+  "careMedTaken": "Tomei",
+  "careMedSnooze": "Adiar 15 min",
+  "careMedSkip": "Pulei",
+  "careMedTakenAt": "tomado {time}",
+  "@careMedTakenAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "careMedSkipped": "não tomado",
+  "careMedSnoozed": "adiado",
+  "careMedFromPrescriptionNote": "Preenchido com o que foi lido na receita. Confira tudo e escolha os horários.",
+  "careMedName": "Nome (como está na receita ou na caixa)",
+  "careMedStrength": "Concentração",
+  "careMedForm": "Forma",
+  "careMedAmount": "Quanto tomar por vez (da sua receita)",
+  "careMedInstructions": "Como está escrito na receita (opcional)",
+  "careMedTimes": "Horários",
+  "careMedAddTime": "Horário",
+  "careMedTimesRequired": "Escolha pelo menos um horário.",
+  "careMedDays": "Dias",
+  "careMedEveryDay": "Todos os dias",
+  "careMedUntil": "Até quando (opcional)",
+  "careMedStockSection": "Estoque (opcional)",
+  "careMedStockHave": "Tenho em casa",
+  "careMedStockPerIntake": "Usa por vez",
+  "careMedStockWarn": "Avisar com",
+  "careMedBula": "Bula oficial",
+  "careMedBulaHint": "Abre o Bulário Eletrônico da ANVISA",
+  "careMedBulaNeedsName": "Escreva o nome do medicamento primeiro.",
+  "careMedActive": "Lembretes ativos",
+  "careMedSave": "Salvar lembretes",
+  "careAppointmentAdd": "Consulta",
+  "careAppointmentEdit": "Editar consulta",
+  "careAppointmentEmpty": "Nenhuma consulta registrada.",
+  "careAppointmentUpcoming": "Próximas",
+  "careAppointmentPast": "Anteriores",
+  "careAppointmentTitleFallback": "Consulta",
+  "careAppointmentQuestions": "Perguntas que quero fazer",
+  "careAppointmentNotes": "Minhas anotações",
+  "careAppointmentDate": "Data",
+  "careAppointmentTime": "Hora",
+  "careAppointmentProfessional": "Profissional (opcional)",
+  "careAppointmentSpecialty": "Especialidade",
+  "careAppointmentPlace": "Local",
+  "careAppointmentReminderNone": "Sem lembrete",
+  "careAppointmentReminder1d": "1 dia antes",
+  "careAppointmentReminder2h": "2 horas antes",
+  "careSectionJournal": "Diário",
+  "careSectionConditions": "Condições",
+  "careSectionMedications": "Medicamentos",
+  "careSectionAllergies": "Alergias",
+  "careSectionVaccines": "Vacinas",
+  "careSectionExams": "Exames",
+  "careSectionNotes": "Notas",
+  "careSummaryInclude": "Incluir",
+  "careSummaryJournal": "Registros do diário ({count})",
+  "@careSummaryJournal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careSummaryConditions": "Minhas condições (informadas por você)",
+  "careSummaryMedications": "Medicamentos e horários",
+  "careSummaryNotes": "Minhas notas",
+  "careSummaryIntensity": "intensidade informada {value}/5",
+  "@careSummaryIntensity": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "careSummaryTaken": "{taken} de {marked} marcados como tomados",
+  "@careSummaryTaken": {
+    "placeholders": {
+      "taken": {
+        "type": "int"
+      },
+      "marked": {
+        "type": "int"
+      }
+    }
+  },
+  "careSummaryReference": "referência impressa: {text}",
+  "@careSummaryReference": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "careSummaryNothing": "Nada registrado no período.",
+  "careSummaryMore": "+ {count} no PDF",
+  "@careSummaryMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careSummaryHeader": "{name} · {from} a {to} · gerado pela própria pessoa",
+  "@careSummaryHeader": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "careSummaryFooter": "Este documento reúne apenas o que a pessoa registrou. Não contém avaliação nem recomendação.",
+  "careSummaryShare": "Compartilhar PDF",
+  "careSummaryPrivacy": "O PDF é criado no seu celular. Você decide com quem compartilhar.",
+  "careExamAdd": "Adicionar exame",
+  "careExamFromCamera": "Tirar foto",
+  "careExamFromGallery": "Escolher da galeria",
+  "careExamFromPdf": "Escolher PDF",
+  "careExamWhatIsIt": "O que é este documento?",
+  "careExamKindLab": "Exame de laboratório",
+  "careExamKindLabHint": "Lemos os valores para você conferir",
+  "careExamKindPrescription": "Receita",
+  "careExamKindPrescriptionHint": "Lemos nome e instruções para você conferir",
+  "careExamKindArchive": "Só arquivar",
+  "careExamKindArchiveHint": "Guarda o arquivo sem ler",
+  "careExamTooLarge": "O arquivo passa de 10 MB.",
+  "careExamReading": "Lendo seu documento…",
+  "careExamReadingHint": "Leva até 1 minuto. Você pode sair desta tela.",
+  "careExamEmpty": "Nenhum documento guardado.",
+  "careExamSectionLabs": "Exames",
+  "careExamSectionPrescriptions": "Receitas",
+  "careExamSectionOther": "Outros arquivos",
+  "careExamValuesOverTime": "Meus valores ao longo do tempo",
+  "careExamNote": "Os valores e as referências são os do laudo. O Dualis não diz se um resultado está bom ou ruim. Leve suas dúvidas a quem pediu o exame.",
+  "careExamToCheck": "Conferir {count}",
+  "@careExamToCheck": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careExamCheck": "Conferir",
+  "careExamChecked": "Conferido",
+  "careExamReadFailed": "Não lido",
+  "careExamArchived": "Arquivado",
+  "careExamReviewTitle": "Conferir valores",
+  "careExamSeeOriginal": "Ver documento original",
+  "careExamCompareHint": "Compare com o papel. Toque numa linha para corrigir.",
+  "careExamArchivedHint": "Guardado sem leitura.",
+  "careExamFailedHint": "Não conseguimos ler este arquivo. Você pode digitar os valores ou tentar outra foto, com boa luz e o papel inteiro.",
+  "careExamTitleField": "Nome do exame",
+  "careExamLab": "Laboratório",
+  "careExamCollected": "Data da coleta",
+  "careExamItem": "Item",
+  "careExamValue": "Valor",
+  "careExamUnit": "Unidade",
+  "careExamDate": "Data",
+  "careExamReference": "Referência impressa no laudo",
+  "careExamReferencePrinted": "Referência impressa",
+  "careExamNoRows": "Nenhum valor lido. Adicione as linhas que quiser guardar.",
+  "careExamAddRow": "Adicionar linha",
+  "careExamEditRow": "Corrigir linha",
+  "careExamRowSave": "Confirmar linha",
+  "careExamRowRemove": "Remover linha",
+  "careExamSavePending": "Salvar (faltam {count, plural, =1{1 conferência} other{{count} conferências}})",
+  "@careExamSavePending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careExamSaved": "Valores guardados.",
+  "careExamItemIntro": "Valores que você conferiu, do mais recente ao mais antigo. A referência é a que cada laboratório imprimiu.",
+  "careReadConsentTitle": "Ler documentos com o Google",
+  "careReadConsentBody": "Para ler a foto ou o PDF, o arquivo é enviado ao Google Cloud Vision, que extrai o texto em servidores nos Estados Unidos ou na União Europeia. Depois, a Gemini (região São Paulo) organiza esse texto, sem seu nome nem CPF. O Google não usa esses dados para treinar modelos.\n\nIsso é uma transferência internacional de dados de saúde (LGPD Art. 33; RGPD Art. 46). Você pode recusar e usar \"Só arquivar\" ou digitar os valores. Pode retirar este consentimento na Central de Privacidade.",
+  "careReadConsentAccept": "Concordo",
+  "careReadConsentDecline": "Agora não",
+  "careRxTitle": "Conferir receita",
+  "careRxCompareHint": "Compare com a receita. Toque num campo para corrigir.",
+  "careRxNothingRead": "Nenhum medicamento lido.",
+  "careRxName": "Nome lido",
+  "careRxStrength": "Concentração lida",
+  "careRxInstructions": "Como tomar (texto da receita)",
+  "careRxEditField": "Corrigir campo",
+  "careRxFieldLabel": "{field, select, name{Nome} strength{Concentração} other{Como tomar}}",
+  "@careRxFieldLabel": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "careRxTimesYouChoose": "Os horários você escolhe no próximo passo.",
+  "careRxCheckFirst": "Confira todos os campos",
+  "careRxCreateReminder": "Criar lembrete",
+  "careRxReminderCreated": "Lembrete criado",
+  "careRxNote": "O Dualis copia o texto da receita. Ele não transforma \"12/12h\" em horários nem cria lembretes sozinho.",
+  "careNotifChannelName": "Lembretes de cuidados",
+  "careNotifChannelDescription": "Horários de medicamentos, consultas e reforços de vacina que você configurou.",
+  "careNotifMedTitle": "Hora do seu lembrete",
+  "careNotifAppointmentTitle": "Lembrete de consulta",
+  "careNotifAppointmentBody": "{who} às {time}",
+  "@careNotifAppointmentBody": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "careNotifBoosterTitle": "Lembrete de vacina",
+  "careNotifBoosterBody": "Data que você escolheu para o reforço: {name}",
+  "@careNotifBoosterBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }
