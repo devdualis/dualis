@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-10-28 - Completed quick task 261028-jwx: Provider-neutral processors section in privacy policy
+Last activity: 2026-10-28 - Completed quick task 261028-jxy: Branded verification and reset emails with the Dualis logo
 
 Progress: [██████████] 100%
 
@@ -116,6 +116,7 @@ None yet.
 | 261028-jd6 | Switch backend email to Resend HTTP API | 2026-10-28 | 3fc4b9d | [261028-jd6-switch-backend-email-to-resend-http-api](./quick/261028-jd6-switch-backend-email-to-resend-http-api/) |
 | 261028-jss | Add Resend as email processor in privacy policy | 2026-10-28 | b806714 | [261028-jss-add-resend-as-email-processor-in-privacy](./quick/261028-jss-add-resend-as-email-processor-in-privacy/) |
 | 261028-jwx | Provider-neutral processors section in privacy policy | 2026-10-28 | 00e01ef | [261028-jwx-provider-neutral-processors-section-in-p](./quick/261028-jwx-provider-neutral-processors-section-in-p/) |
+| 261028-jxy | Branded verification and reset emails with the Dualis logo | 2026-10-28 | 5bde0a6 | [261028-jxy-branded-email-templates-with-the-dualis-](./quick/261028-jxy-branded-email-templates-with-the-dualis-/) |
 
 ## Deferred Items
 
