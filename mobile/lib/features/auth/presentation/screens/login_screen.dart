@@ -148,7 +148,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                   ),
                 ),
-                const SizedBox(height: 28),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    key: const Key('goToForgotPasswordButton'),
+                    onPressed: () => context.push(RoutePaths.forgotPassword),
+                    child: Text(
+                      l10n.forgotPasswordTitle,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.softIndigo,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 DualisPrimaryButton(
                   key: const Key('loginSubmitButton'),
                   text: l10n.screen1SecondaryCta,

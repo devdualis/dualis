@@ -37,6 +37,13 @@ export class EmailService {
     }
   }
 
+  // Codes and addresses only reach the logs in simulation mode (no SMTP, not
+  // production); otherwise anyone with log access could take over an account.
+  private logCodeForSimulation(kind: string, email: string, code: string) {
+    if (this.transporter || process.env.NODE_ENV === 'production') return;
+    this.logger.log(`[EmailService] Simulação: código de ${kind} para ${email}: [${code}]`);
+  }
+
   generateVerificationCode(): string {
     return crypto.randomInt(100000, 1000000).toString();
   }
@@ -60,9 +67,7 @@ export class EmailService {
       process.env.MAIL_FROM ||
       'DualisCheckUp <dev@wgi.one>';
 
-    this.logger.log(
-      `[EmailService] Preparando envio de verificação para ${normalizedEmail}: [${code}] (Destinatário: ${recipientName})`,
-    );
+    this.logCodeForSimulation('verificação', normalizedEmail, code);
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -112,7 +117,7 @@ export class EmailService {
           text: `Olá ${recipientName}, seu código de verificação do DualisCheckUp é: ${code}. Ele expira em 15 minutos.`,
           html: htmlContent,
         });
-        this.logger.log(`[EmailService] E-mail SMTP enviado com sucesso para ${normalizedEmail}`);
+        this.logger.log('[EmailService] E-mail de verificação enviado via SMTP');
       } catch (err: any) {
         this.logger.error(`[EmailService] Falha ao enviar via SMTP: ${err.message}`, err.stack);
         // Fallback: don't crash app if SMTP fails, code is logged for emergency access
@@ -134,9 +139,7 @@ export class EmailService {
       process.env.MAIL_FROM ||
       'DualisCheckUp <dev@wgi.one>';
 
-    this.logger.log(
-      `[EmailService] Preparando envio de redefinição de senha para ${normalizedEmail}: [${code}] (Destinatário: ${recipientName})`,
-    );
+    this.logCodeForSimulation('redefinição de senha', normalizedEmail, code);
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -186,7 +189,7 @@ export class EmailService {
           text: `Olá ${recipientName}, seu código de redefinição de senha do DualisCheckUp é: ${code}. Ele expira em 15 minutos. Se você não solicitou, ignore esta mensagem.`,
           html: htmlContent,
         });
-        this.logger.log(`[EmailService] E-mail de redefinição de senha enviado com sucesso para ${normalizedEmail}`);
+        this.logger.log('[EmailService] E-mail de redefinição de senha enviado via SMTP');
       } catch (err: any) {
         this.logger.error(`[EmailService] Falha ao enviar via SMTP: ${err.message}`, err.stack);
       }

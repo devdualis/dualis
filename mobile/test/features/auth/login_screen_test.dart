@@ -183,6 +183,12 @@ Widget createLoginTestApp({
           body: Center(child: Text('Verify Screen ${state.extra}')),
         ),
       ),
+      GoRoute(
+        path: RoutePaths.forgotPassword,
+        builder: (context, state) => const Scaffold(
+          body: Center(child: Text('Forgot Password Screen')),
+        ),
+      ),
     ],
   );
 
@@ -223,6 +229,19 @@ void main() {
       expect(find.byKey(const Key('loginEmailField')), findsOneWidget);
       expect(find.byKey(const Key('loginPasswordField')), findsOneWidget);
       expect(find.byKey(const Key('loginSubmitButton')), findsOneWidget);
+    });
+
+    testWidgets('1b. Forgot password link opens the recovery screen', (tester) async {
+      await tester.pumpWidget(createLoginTestApp(repository: mockRepo));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Esqueceu sua senha?'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('goToForgotPasswordButton')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Forgot Password Screen'), findsOneWidget);
+      expect(mockRepo.loginCalled, isFalse);
     });
 
     testWidgets('2. Empty submit shows validation errors', (tester) async {
