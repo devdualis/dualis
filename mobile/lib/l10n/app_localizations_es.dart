@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -483,9 +484,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get navHome => 'Inicio';
-
-  @override
-  String get navTodayOutcome => 'Mi Día';
 
   @override
   String get navHistory => 'Historial y Mapa';
@@ -2499,4 +2497,104 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get jv2OutboxRejectedNotice =>
       'Un registro no se pudo enviar. Revísalo e inténtalo de nuevo.';
+
+  @override
+  String get histTabEmotional => 'Psicoemocional';
+
+  @override
+  String get histTabPhysical => 'Físico';
+
+  @override
+  String histPeriodDays(int days) {
+    return '$days días';
+  }
+
+  @override
+  String histEmotionalTitle(int days) {
+    return 'Tus últimos $days días';
+  }
+
+  @override
+  String histPhysicalTitle(int days) {
+    return 'Últimos $days días';
+  }
+
+  @override
+  String get histIntensitySubtitle => 'Intensidad que marcaste, de 1 a 5';
+
+  @override
+  String get histChipHint => 'Toca un chip para mostrar u ocultar la línea.';
+
+  @override
+  String histLineShown(String label) {
+    return '$label, línea visible';
+  }
+
+  @override
+  String histLineHidden(String label) {
+    return '$label, línea oculta';
+  }
+
+  @override
+  String histOverlayChip(String label) {
+    return '+ $label';
+  }
+
+  @override
+  String get histTimeBarTitle => 'Pasado · Presente · Futuro';
+
+  @override
+  String get histViewMap => 'Mapa';
+
+  @override
+  String get histViewLinks => 'Conexiones';
+
+  @override
+  String get histMapCaption => 'Color = cuántos días marcaste';
+
+  @override
+  String get histNoPhysical =>
+      'Ninguna parte del cuerpo marcada en este período.';
+
+  @override
+  String histLinksTop(String time, String region, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count días',
+      one: '1 día',
+    );
+    return 'Mismo día: $time y $region en $_temp0. Solo conteo.';
+  }
+
+  @override
+  String get histLinksEmpty =>
+      'Aún no hay días con un tiempo emocional y una parte del cuerpo juntos en este período.';
+
+  @override
+  String get histTimelineTitle => 'Línea de tiempo';
+
+  @override
+  String get histRegionPele => 'Piel';
+
+  @override
+  String get histRegionMusculos => 'Músculos';
+
+  @override
+  String get histRegionHormonios => 'Hormonas y metabolismo';
+
+  @override
+  String get histSensationDor => 'dolor';
+
+  @override
+  String get histSensationIncomodo => 'molestia';
+
+  @override
+  String get histEmotionalTitleWeek => 'Cómo fue tu semana';
+
+  @override
+  String get histPhysicalTitleWeek => 'Esta semana';
+
+  @override
+  String get histPhysicalTitleMonth => 'Este mes';
 }

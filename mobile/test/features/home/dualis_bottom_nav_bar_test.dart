@@ -5,7 +5,7 @@ import 'package:dualis_mobile/features/home/presentation/widgets/dualis_bottom_n
 
 void main() {
   group('DualisBottomNavBar Widget Tests', () {
-    testWidgets('Renders all 5 navigation destinations correctly',
+    testWidgets('Renders the 4 destinations (no Meu Dia)',
         (WidgetTester tester) async {
       int selectedIndex = 0;
 
@@ -14,7 +14,6 @@ void main() {
           home: Scaffold(
             bottomNavigationBar: DualisBottomNavBar(
               currentIndex: selectedIndex,
-              hasCompletedToday: false,
               onTap: (index) => selectedIndex = index,
               onEmergencyTap: () {},
             ),
@@ -24,7 +23,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('nav_destination_home')), findsOneWidget);
-      expect(find.byKey(const Key('nav_destination_today_outcome')), findsOneWidget);
+      expect(find.byKey(const Key('nav_destination_today_outcome')), findsNothing);
       expect(find.byKey(const Key('nav_destination_history')), findsOneWidget);
       expect(find.byKey(const Key('nav_destination_hydration')), findsOneWidget);
       expect(find.byKey(const Key('nav_destination_emergency')), findsOneWidget);
@@ -45,7 +44,6 @@ void main() {
           home: Scaffold(
             bottomNavigationBar: DualisBottomNavBar(
               currentIndex: 0,
-              hasCompletedToday: true,
               onTap: (index) => tappedIndex = index,
               onEmergencyTap: () {},
             ),
@@ -54,20 +52,15 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Tap 'Resultado do Dia'
-      await tester.tap(find.byKey(const Key('nav_destination_today_outcome')));
-      await tester.pumpAndSettle();
-      expect(tappedIndex, equals(1));
-
-      // Tap 'Histórico & Mapa'
+      // Tap 'Histórico'
       await tester.tap(find.byKey(const Key('nav_destination_history')));
       await tester.pumpAndSettle();
-      expect(tappedIndex, equals(2));
+      expect(tappedIndex, equals(1));
 
       // Tap 'Água'
       await tester.tap(find.byKey(const Key('nav_destination_hydration')));
       await tester.pumpAndSettle();
-      expect(tappedIndex, equals(3));
+      expect(tappedIndex, equals(2));
 
       // Tap 'Início'
       await tester.tap(find.byKey(const Key('nav_destination_home')));
@@ -75,27 +68,8 @@ void main() {
       expect(tappedIndex, equals(0));
     });
 
-    testWidgets('Shows badge indicator when hasCompletedToday is true',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            bottomNavigationBar: DualisBottomNavBar(
-              currentIndex: 0,
-              hasCompletedToday: true,
-              onTap: (_) {},
-              onEmergencyTap: () {},
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      final badgeFinder = find.descendant(
-        of: find.byKey(const Key('nav_destination_today_outcome')),
-        matching: find.byType(Badge),
-      );
-      expect(badgeFinder, findsOneWidget);
+    test('Help is the last index, right after the three tabs', () {
+      expect(DualisBottomNavBar.emergencyIndex, DualisNavTab.values.length);
     });
 
     testWidgets('Emergency destination is crimson and does not change tab index',

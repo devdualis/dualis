@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -479,9 +480,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navHome => 'Home';
-
-  @override
-  String get navTodayOutcome => 'My Day';
 
   @override
   String get navHistory => 'History & Map';
@@ -2485,4 +2483,103 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get jv2OutboxRejectedNotice =>
       'One entry could not be sent. Check it and try again.';
+
+  @override
+  String get histTabEmotional => 'Psycho-emotional';
+
+  @override
+  String get histTabPhysical => 'Physical';
+
+  @override
+  String histPeriodDays(int days) {
+    return '$days days';
+  }
+
+  @override
+  String histEmotionalTitle(int days) {
+    return 'Your last $days days';
+  }
+
+  @override
+  String histPhysicalTitle(int days) {
+    return 'Last $days days';
+  }
+
+  @override
+  String get histIntensitySubtitle => 'Intensity you marked, from 1 to 5';
+
+  @override
+  String get histChipHint => 'Tap a chip to show or hide its line.';
+
+  @override
+  String histLineShown(String label) {
+    return '$label, line shown';
+  }
+
+  @override
+  String histLineHidden(String label) {
+    return '$label, line hidden';
+  }
+
+  @override
+  String histOverlayChip(String label) {
+    return '+ $label';
+  }
+
+  @override
+  String get histTimeBarTitle => 'Past · Present · Future';
+
+  @override
+  String get histViewMap => 'Map';
+
+  @override
+  String get histViewLinks => 'Connections';
+
+  @override
+  String get histMapCaption => 'Color = how many days you marked';
+
+  @override
+  String get histNoPhysical => 'No body part marked in this period.';
+
+  @override
+  String histLinksTop(String time, String region, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return 'Same day: $time and $region on $_temp0. Count only.';
+  }
+
+  @override
+  String get histLinksEmpty =>
+      'No days yet with both an emotional time and a body part in this period.';
+
+  @override
+  String get histTimelineTitle => 'Timeline';
+
+  @override
+  String get histRegionPele => 'Skin';
+
+  @override
+  String get histRegionMusculos => 'Muscles';
+
+  @override
+  String get histRegionHormonios => 'Hormones and metabolism';
+
+  @override
+  String get histSensationDor => 'pain';
+
+  @override
+  String get histSensationIncomodo => 'discomfort';
+
+  @override
+  String get histEmotionalTitleWeek => 'How your week went';
+
+  @override
+  String get histPhysicalTitleWeek => 'This week';
+
+  @override
+  String get histPhysicalTitleMonth => 'This month';
 }

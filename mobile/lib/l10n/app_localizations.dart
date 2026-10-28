@@ -946,12 +946,6 @@ abstract class AppLocalizations {
   /// **'Início'**
   String get navHome;
 
-  /// Bottom navigation Today Outcome label
-  ///
-  /// In pt, this message translates to:
-  /// **'Meu Dia'**
-  String get navTodayOutcome;
-
   /// Bottom navigation History label
   ///
   /// In pt, this message translates to:
@@ -4425,6 +4419,162 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Um registro não pôde ser enviado. Revise e tente de novo.'**
   String get jv2OutboxRejectedNotice;
+
+  /// No description provided for @histTabEmotional.
+  ///
+  /// In pt, this message translates to:
+  /// **'Psicoemocional'**
+  String get histTabEmotional;
+
+  /// No description provided for @histTabPhysical.
+  ///
+  /// In pt, this message translates to:
+  /// **'Físico'**
+  String get histTabPhysical;
+
+  /// No description provided for @histPeriodDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{days} dias'**
+  String histPeriodDays(int days);
+
+  /// No description provided for @histEmotionalTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seus últimos {days} dias'**
+  String histEmotionalTitle(int days);
+
+  /// No description provided for @histPhysicalTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Últimos {days} dias'**
+  String histPhysicalTitle(int days);
+
+  /// No description provided for @histIntensitySubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Intensidade que você marcou, de 1 a 5'**
+  String get histIntensitySubtitle;
+
+  /// No description provided for @histChipHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque num chip para mostrar ou esconder a linha.'**
+  String get histChipHint;
+
+  /// No description provided for @histLineShown.
+  ///
+  /// In pt, this message translates to:
+  /// **'{label}, linha visível'**
+  String histLineShown(String label);
+
+  /// No description provided for @histLineHidden.
+  ///
+  /// In pt, this message translates to:
+  /// **'{label}, linha escondida'**
+  String histLineHidden(String label);
+
+  /// No description provided for @histOverlayChip.
+  ///
+  /// In pt, this message translates to:
+  /// **'+ {label}'**
+  String histOverlayChip(String label);
+
+  /// No description provided for @histTimeBarTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Passado · Presente · Futuro'**
+  String get histTimeBarTitle;
+
+  /// No description provided for @histViewMap.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mapa'**
+  String get histViewMap;
+
+  /// No description provided for @histViewLinks.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conexões'**
+  String get histViewLinks;
+
+  /// No description provided for @histMapCaption.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cor = quantos dias você marcou'**
+  String get histMapCaption;
+
+  /// No description provided for @histNoPhysical.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma parte do corpo marcada neste período.'**
+  String get histNoPhysical;
+
+  /// No description provided for @histLinksTop.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mesmo dia: {time} e {region} em {count, plural, =1{1 dia} other{{count} dias}}. Só contagem.'**
+  String histLinksTop(String time, String region, int count);
+
+  /// No description provided for @histLinksEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ainda não há dias com registro de tempo emocional e de corpo juntos neste período.'**
+  String get histLinksEmpty;
+
+  /// No description provided for @histTimelineTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Linha do tempo'**
+  String get histTimelineTitle;
+
+  /// No description provided for @histRegionPele.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pele'**
+  String get histRegionPele;
+
+  /// No description provided for @histRegionMusculos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Músculos'**
+  String get histRegionMusculos;
+
+  /// No description provided for @histRegionHormonios.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hormônios e metabolismo'**
+  String get histRegionHormonios;
+
+  /// No description provided for @histSensationDor.
+  ///
+  /// In pt, this message translates to:
+  /// **'dor'**
+  String get histSensationDor;
+
+  /// No description provided for @histSensationIncomodo.
+  ///
+  /// In pt, this message translates to:
+  /// **'incômodo'**
+  String get histSensationIncomodo;
+
+  /// No description provided for @histEmotionalTitleWeek.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como foi sua semana'**
+  String get histEmotionalTitleWeek;
+
+  /// No description provided for @histPhysicalTitleWeek.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta semana'**
+  String get histPhysicalTitleWeek;
+
+  /// No description provided for @histPhysicalTitleMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este mês'**
+  String get histPhysicalTitleMonth;
 }
 
 class _AppLocalizationsDelegate

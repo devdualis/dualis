@@ -141,7 +141,6 @@
   "errorServerInternal": "Our services are experiencing temporary instability. Please try again shortly.",
   "errorUnexpected": "An unexpected error occurred. Please try again.",
   "navHome": "Home",
-  "navTodayOutcome": "My Day",
   "navHistory": "History & Map",
   "navHydration": "Water",
   "notifWaterTitle": "💧 Time to Drink Water",
@@ -479,7 +478,9 @@
   "jv2SuggestBody": "Save as \"{option}\" instead of the text you wrote?",
   "@jv2SuggestBody": {
     "placeholders": {
-      "option": { "type": "String" }
+      "option": {
+        "type": "String"
+      }
     }
   },
   "jv2SuggestYes": "Use that option",
@@ -732,5 +733,31 @@
         "type": "int"
       }
     }
-  }
+  },
+  "histTabEmotional": "Psycho-emotional",
+  "histTabPhysical": "Physical",
+  "histPeriodDays": "{days} days",
+  "histEmotionalTitle": "Your last {days} days",
+  "histPhysicalTitle": "Last {days} days",
+  "histIntensitySubtitle": "Intensity you marked, from 1 to 5",
+  "histChipHint": "Tap a chip to show or hide its line.",
+  "histLineShown": "{label}, line shown",
+  "histLineHidden": "{label}, line hidden",
+  "histOverlayChip": "+ {label}",
+  "histTimeBarTitle": "Past · Present · Future",
+  "histViewMap": "Map",
+  "histViewLinks": "Connections",
+  "histMapCaption": "Color = how many days you marked",
+  "histNoPhysical": "No body part marked in this period.",
+  "histLinksTop": "Same day: {time} and {region} on {count, plural, =1{1 day} other{{count} days}}. Count only.",
+  "histLinksEmpty": "No days yet with both an emotional time and a body part in this period.",
+  "histTimelineTitle": "Timeline",
+  "histRegionPele": "Skin",
+  "histRegionMusculos": "Muscles",
+  "histRegionHormonios": "Hormones and metabolism",
+  "histSensationDor": "pain",
+  "histSensationIncomodo": "discomfort",
+  "histEmotionalTitleWeek": "How your week went",
+  "histPhysicalTitleWeek": "This week",
+  "histPhysicalTitleMonth": "This month"
 }

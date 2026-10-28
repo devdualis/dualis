@@ -207,7 +207,7 @@ void main() {
       expect(find.text('Settings Screen'), findsOneWidget);
     });
 
-    testWidgets('Shows the completed stage card on the main home tab and the full result on Meu Dia tab',
+    testWidgets('Shows the completed stage card on the main home tab; Meu Dia is not in the nav',
         (WidgetTester tester) async {
       final mockOutcome = TriageOutcome(
         id: 'checkin-chest-1',
@@ -228,13 +228,8 @@ void main() {
       expect(find.byKey(const Key('fisica_completed_card')), findsOneWidget);
       expect(find.byKey(const Key('start_fisica_triage_button')), findsNothing);
 
-      // Tapping the "Meu Dia" nav destination switches to Tab 1
-      await tester.tap(find.byKey(const Key('nav_destination_today_outcome')));
-      await tester.pumpAndSettle();
-
-      // Verify Tab 1 "Meu Dia" is now active
-      expect(find.byKey(const Key('today_triage_result_scroll_view')), findsOneWidget);
-      expect(find.text('Meu Dia'), findsOneWidget);
+      // "Meu Dia" is no longer a bottom-nav destination.
+      expect(find.byKey(const Key('nav_destination_today_outcome')), findsNothing);
     });
     const greetUser = UserProfile(
       id: 'usr-1',

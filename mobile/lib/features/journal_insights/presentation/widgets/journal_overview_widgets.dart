@@ -93,6 +93,7 @@ class TimeDistributionBar extends StatelessWidget {
           child: SizedBox(
             height: 18,
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 for (var i = 0; i < counts.length; i++)
                   if (counts[i] > 0)
@@ -143,6 +144,7 @@ class TimeDistributionBar extends StatelessWidget {
 
 /// Front and back silhouettes with the five regions the person can mark
 /// (strategy §6), shaded by how many days each one was marked. Single hue.
+/// The counts list lives in `HistoryBodyMap`.
 class JournalBodyMap extends StatelessWidget {
   final Map<String, int> byRegion;
 
@@ -178,31 +180,6 @@ class JournalBodyMap extends StatelessWidget {
               ),
             ],
           ),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final region in JournalLabels.regions)
-              Chip(
-                key: Key('body_map_count_$region'),
-                visualDensity: VisualDensity.compact,
-                backgroundColor: regionShade(byRegion[region] ?? 0, maxCount)
-                    .withValues(alpha: 0.25),
-                side: BorderSide.none,
-                label: Text(
-                  l10n.xv2DashRegionDays(
-                    JournalLabels.region(l10n, region)!,
-                    byRegion[region] ?? 0,
-                  ),
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    color: AppColors.textPrimaryLight,
-                  ),
-                ),
-              ),
-          ],
         ),
       ],
     );
