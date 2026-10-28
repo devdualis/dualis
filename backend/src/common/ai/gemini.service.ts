@@ -4,6 +4,8 @@ import { GoogleGenAI } from '@google/genai';
 
 const DEFAULT_GENERATION_MODEL = 'gemini-2.5-flash';
 const DEFAULT_EMBEDDING_MODEL = 'gemini-embedding-001';
+/** São Paulo: keeps Gemini processing in Brazil (LGPD data residency). */
+const DEFAULT_LOCATION = 'southamerica-east1';
 export const EMBEDDING_DIMENSIONS = 768;
 
 export interface GenerateJsonOptions {
@@ -15,10 +17,13 @@ export interface GenerateJsonOptions {
 }
 
 /**
- * Single entry point to the AI server (Google Gemini). Every feature that needs
+ * Single entry point to the AI server (Gemini on Vertex AI). Every feature that needs
  * generation or embeddings (triage classification, article/symptom vectors, seeds,
  * future lab-exam parsing) must go through this service so key handling, model
  * selection and error behavior live in one place.
+ *
+ * Auth is Application Default Credentials (Cloud Run service account, or
+ * `gcloud auth application-default login` locally). No API keys.
  */
 @Injectable()
 export class GeminiService {
@@ -29,19 +34,20 @@ export class GeminiService {
 
   constructor(@Optional() @Inject(ConfigService) private readonly configService?: ConfigService) {
     const read = (key: string) => this.configService?.get<string>(key) || process.env[key];
-    const apiKey = read('GEMINI_API_KEY');
+    const project = read('GOOGLE_CLOUD_PROJECT');
+    const location = read('GOOGLE_CLOUD_LOCATION') || DEFAULT_LOCATION;
     this.generationModel = read('GEMINI_MODEL') || DEFAULT_GENERATION_MODEL;
     this.embeddingModel = read('GEMINI_EMBEDDING_MODEL') || DEFAULT_EMBEDDING_MODEL;
 
-    if (apiKey && !apiKey.startsWith('mock-') && !apiKey.startsWith('your-')) {
+    if (project && !project.startsWith('mock-') && !project.startsWith('your-')) {
       try {
-        this.client = new GoogleGenAI({ apiKey });
-        this.logger.log(`Gemini client initialized (model: ${this.generationModel})`);
+        this.client = new GoogleGenAI({ vertexai: true, project, location });
+        this.logger.log(`Vertex AI client initialized (model: ${this.generationModel}, location: ${location})`);
       } catch (err) {
-        this.logger.warn(`Failed to initialize Gemini client: ${(err as Error).message}`);
+        this.logger.warn(`Failed to initialize Vertex AI client: ${(err as Error).message}`);
       }
     } else {
-      this.logger.log('GEMINI_API_KEY not provided or mock; AI calls disabled, deterministic fallbacks active');
+      this.logger.log('GOOGLE_CLOUD_PROJECT not provided or mock; AI calls disabled, deterministic fallbacks active');
     }
   }
 

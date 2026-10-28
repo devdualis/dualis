@@ -44,7 +44,7 @@ DualisCheckUp is a wellness and self-awareness mobile app. It helps users keep a
 | **Drizzle ORM** | `0.45.2` | TypeScript-first SQL query builder & ORM | Operates as a thin type-safe abstraction over `pg`. Unlike heavy ORMs, Drizzle allows frictionless execution of PostgreSQL session variables (`SET LOCAL app.current_user_id = $1`), raw temporal operators, and GiST indexes without pinning pooled connections or incurring interactive transaction penalties. |
 | **Redis** | `7.2.x` / Valkey `8.x` | Distributed cache, rate limiter & message broker | In-memory key-value store providing sub-millisecond retrieval for semantic query caching, user check-in rate limiting, and the Redis-backed BullMQ job queue. |
 | **BullMQ** | `6.3.4` (`@nestjs/bullmq: 12.0.0`) | Distributed background job queue | Robust job queuing mechanism for decoupled lab document OCR and LLM value parsing. Provides exponential backoff, job deduplication, rate limiting, and progress tracking without locking HTTP worker threads. |
-| **Google Gemini 2.5 Flash** | Model `gemini-2.5-flash` via Gemini Developer API, API key (`@google/genai: 2.22.0`) | AI journal-entry tagging (organises free text by body area or mood; never assesses severity) | Low-latency inference at a fraction of the cost of frontier models, within the sub-2s budget. Native JSON Schema output enforcement guarantees adherence to the tagging schema (`isOffTopic`, `vertical`, `bodyAreaOrMood`, `layTerm`, `mentionsSelfHarm`) with no evaluation fields. Currently not Vertex AI; migration to Vertex AI in a Brazil/EU region is pending (plan F9). |
+| **Google Gemini 2.5 Flash** | Model `gemini-2.5-flash` via Vertex AI in `southamerica-east1`, service-account credentials, no API key (`@google/genai: 2.22.0`) | AI journal-entry tagging (organises free text by body area or mood; never assesses severity) | Low-latency inference at a fraction of the cost of frontier models, within the sub-2s budget. Native JSON Schema output enforcement guarantees adherence to the tagging schema (`isOffTopic`, `vertical`, `bodyAreaOrMood`, `layTerm`, `mentionsSelfHarm`) with no evaluation fields. Currently not Vertex AI; migration to Vertex AI in a Brazil/EU region is pending (plan F9). |
 | **Google Cloud Vision / AWS Textract** | Cloud Vision `6.1.0` / Textract `3.750.x` | Decoupled OCR engine for uploaded lab documents | High-fidelity optical character recognition specialized in document layouts and tabular data. Isolates OCR from LLM reasoning, slashing token costs by 85% and preventing hallucinated numbers. |
 
 ### Supporting Libraries
@@ -76,7 +76,7 @@ DualisCheckUp is a wellness and self-awareness mobile app. It helps users keep a
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
 | **@nestjs/platform-fastify** | `12.0.1` | High-throughput Fastify HTTP adapter | HTTP routing engine replacing Express. Reduces internal framework latency to <10ms, preserving critical headroom for the sub-2s AI tagging SLA. |
-| **@google/genai** | `2.22.0` | Official unified Google Gen AI SDK | Primary AI SDK for invoking Gemini 2.5 Flash (`gemini-2.5-flash`, Gemini Developer API with API key today; Vertex AI pending, plan F9) with strict `responseSchema` (JSON Schema) structured outputs for journal-entry tagging. |
+| **@google/genai** | `2.22.0` | Official unified Google Gen AI SDK | Primary AI SDK for invoking Gemini 2.5 Flash (`gemini-2.5-flash`, Vertex AI in `southamerica-east1` via Application Default Credentials) with strict `responseSchema` (JSON Schema) structured outputs for journal-entry tagging. |
 | **@google-cloud/vision** | `6.1.0` | Google Cloud Vision API Node.js client | High-accuracy OCR pipeline. Extracts raw text, coordinate blocks, and tabular data from uploaded lab document photos/PDFs. |
 | **@aws-sdk/client-s3** | `3.750.x` | AWS S3 / Cloud Storage SDK | Managing private object storage buckets holding encrypted lab document files and user avatars. |
 | **@aws-sdk/s3-request-presigner** | `3.750.x` | S3 Presigned URL generation | Generating short-lived (15-minute) presigned PUT/GET URLs so mobile clients upload documents directly to S3 without piping large binary files through the NestJS server. |
@@ -156,8 +156,8 @@ DualisCheckUp is a wellness and self-awareness mobile app. It helps users keep a
 - **Cache & Queue:** Google Cloud Memorystore for Redis.
 - **Storage:** Google Cloud Storage (GCS) with CMEK (Customer-Managed Encryption Keys).
 - **OCR:** Google Cloud Vision API native VPC integration.
-- **AI:** Target: Google Vertex AI Gemini endpoint in a Brazil/EU region (migration pending, plan F9). Current: `gemini-2.5-flash` through the Gemini Developer API (API key), which does not give São Paulo residency; until migrated, the international transfer must be declared (LGPD Art. 33) and a DPA with no training on user data confirmed.
-- **Rationale:** Minimizes network hops and egress costs between NestJS, Cloud Vision, and Gemini. Aims at Brazilian data residency; the AI tier does not meet it until the Vertex AI migration.
+- **AI:** Gemini (`gemini-2.5-flash`) on Vertex AI in `southamerica-east1`, called with the Cloud Run service account (`roles/aiplatform.user`) through `GOOGLE_CLOUD_PROJECT` / `GOOGLE_CLOUD_LOCATION`. No API keys. Confirm the Google Cloud DPA (no training on customer data) and re-check the privacy policy's international-transfer clause (LGPD Art. 33).
+- **Rationale:** Minimizes network hops and egress costs between NestJS, Cloud Vision, and Gemini, and keeps data in Brazil (São Paulo region).
 - **Hosting:** AWS ECS Fargate or AWS App Runner in São Paulo (`sa-east-1`).
 - **Database:** Amazon RDS for PostgreSQL (Multi-AZ, `sa-east-1`).
 - **Cache & Queue:** Amazon ElastiCache for Redis (Valkey).
@@ -185,7 +185,7 @@ DualisCheckUp is a wellness and self-awareness mobile app. It helps users keep a
 | **@nestjs/core** | `12.0.1` | TypeScript `^5.7.0`, Fastify `^5.0.0` | Fastify 5 adapter requires `@nestjs/platform-fastify: 12.0.1`. |
 | **drizzle-orm** | `0.45.2` | `drizzle-kit: 0.30.5`, `pg: ^8.13.0` | Full support for PostgreSQL 16/17 range types (`tstzrange`) and GiST index definitions. |
 | **bullmq** | `6.3.4` | `@nestjs/bullmq: 12.0.0`, `ioredis: ^6.0.0` | BullMQ 6 requires Redis 6.2+ (Redis 7 recommended). Uses Redis Streams and atomic Lua scripts. |
-| **@google/genai** | `2.22.0` | Node `>=20.0.0` | The official unified Google Gen AI SDK replacing legacy `@google/generative-ai`. Supports Gemini 2.5 Flash (`gemini-2.5-flash`) via the Gemini Developer API and Vertex AI. |
+| **@google/genai** | `2.22.0` | Node `>=20.0.0` | The official unified Google Gen AI SDK replacing legacy `@google/generative-ai`. Supports Gemini 2.5 Flash (`gemini-2.5-flash`) via Vertex AI (used here) and the Gemini Developer API (not used). |
 | **@google-cloud/vision**| `6.1.0` | Node `>=22.0.0` | Strict Node 22 engine requirement. Provides optimized gRPC bindings for document OCR. |
 
 ## Quality Gate & Verification Evidence
