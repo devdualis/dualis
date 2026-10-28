@@ -64,7 +64,7 @@ void main() {
   });
 
   group('PrivacyPolicyScreen (SaaS Legal Requirement 3, 4, 5)', () {
-    testWidgets('renders LGPD Art. 11, DPO email, Gemini processor, zero-card storage, and 72h breach plan',
+    testWidgets('renders LGPD Art. 11, DPO email, Gemini for diary chips, zero-card storage, and 72h breach plan',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestApp(const PrivacyPolicyScreen()));
       await tester.pumpAndSettle();
@@ -73,9 +73,9 @@ void main() {
       expect(find.textContaining('dpo@dualischeckup.com'), findsWidgets);
       expect(find.textContaining('Artigo 11 da LGPD'), findsOneWidget);
 
-      // Verify wellness purposes and Google Gemini processor + international transfer (L-04)
       expect(find.textContaining('diário de bem-estar'), findsWidgets);
       expect(find.textContaining('API Gemini'), findsOneWidget);
+      expect(find.textContaining('opção já existente do diário'), findsWidgets);
       expect(find.textContaining('LGPD Art. 33'), findsOneWidget);
 
       // Card data never stored; unverified PCI-DSS claim removed (L-07)

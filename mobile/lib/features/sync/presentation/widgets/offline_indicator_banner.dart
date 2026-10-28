@@ -4,12 +4,44 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/network/connectivity_service.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../data/triage_outbox_repository.dart';
+import 'dart:async';
 
+import '../../../journal/data/journal_local_store.dart';
+import '../../data/triage_outbox_repository.dart';
+import '../controllers/sync_outbox_worker.dart';
+
+/// Items waiting to sync: legacy check-ins plus journal v2 entries.
 final pendingOutboxCountProvider = StreamProvider<int>((ref) {
-  final repo = ref.watch(triageOutboxRepositoryProvider);
-  return repo.getPendingCountStream();
+  final legacy = ref.watch(triageOutboxRepositoryProvider).getPendingCountStream();
+  final journal = ref.watch(journalLocalStoreProvider).pendingCountStream();
+  return _sumLatest(legacy, journal);
 });
+
+final rejectedOutboxCountProvider = StreamProvider<int>((ref) {
+  return ref.watch(journalLocalStoreProvider).rejectedCountStream();
+});
+
+Stream<int> _sumLatest(Stream<int> a, Stream<int> b) {
+  var lastA = 0;
+  var lastB = 0;
+  final subs = <StreamSubscription<int>>[];
+  late final StreamController<int> controller;
+  controller = StreamController<int>(
+    onListen: () {
+      subs
+        ..add(a.listen((v) => controller.add((lastA = v) + lastB),
+            onError: controller.addError))
+        ..add(b.listen((v) => controller.add(lastA + (lastB = v)),
+            onError: controller.addError));
+    },
+    onCancel: () async {
+      for (final s in subs) {
+        await s.cancel();
+      }
+    },
+  );
+  return controller.stream;
+}
 
 class OfflineIndicatorBanner extends ConsumerWidget {
   const OfflineIndicatorBanner({super.key});
@@ -18,33 +50,48 @@ class OfflineIndicatorBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isOnlineAsync = ref.watch(isOnlineProvider);
     final pendingCountAsync = ref.watch(pendingOutboxCountProvider);
+    final rejectedCountAsync = ref.watch(rejectedOutboxCountProvider);
 
     final isOnline = isOnlineAsync.value ?? true;
     final pendingCount = pendingCountAsync.value ?? 0;
+    final rejectedCount = rejectedCountAsync.value ?? 0;
 
-    if (isOnline && pendingCount == 0) {
+    if (isOnline && pendingCount == 0 && rejectedCount == 0) {
       return const SizedBox.shrink();
     }
 
     final l10n = AppLocalizations.of(context);
     final isOffline = !isOnline;
-    final backgroundColor =
-        isOffline ? const Color(0xFFD97706) : AppColors.clinicalTeal;
+    final backgroundColor = rejectedCount > 0
+        ? const Color(0xFFB45309)
+        : isOffline
+            ? const Color(0xFFD97706)
+            : AppColors.clinicalTeal;
 
-    final message = isOffline
-        ? (pendingCount > 0
-            ? '${l10n.offlineBannerText} (${l10n.offlineSyncPendingCount(pendingCount)})'
-            : l10n.offlineBannerText)
-        : l10n.offlineSyncPendingCount(pendingCount);
+    final message = rejectedCount > 0
+        ? l10n.jv2OutboxRejectedNotice
+        : isOffline
+            ? (pendingCount > 0
+                ? '${l10n.offlineBannerText} (${l10n.offlineSyncPendingCount(pendingCount)})'
+                : l10n.offlineBannerText)
+            : l10n.offlineSyncPendingCount(pendingCount);
 
     return Semantics(
       liveRegion: true,
       label: message,
-      child: Container(
+      button: !isOffline && pendingCount > 0,
+      child: Material(
+        color: backgroundColor,
+        child: InkWell(
+          onTap: !isOffline && pendingCount > 0
+              ? () => unawaited(
+                    ref.read(syncOutboxWorkerProvider.notifier).syncPendingOutbox(),
+                  )
+              : null,
+          child: Container(
         key: const Key('offline_indicator_banner'),
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-        color: backgroundColor,
         child: Row(
           children: [
             Icon(
@@ -78,6 +125,8 @@ class OfflineIndicatorBanner extends ConsumerWidget {
               ),
             ],
           ],
+        ),
+          ),
         ),
       ),
     );

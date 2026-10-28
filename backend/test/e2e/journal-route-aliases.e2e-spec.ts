@@ -8,13 +8,12 @@ import { AuthService } from '../../src/modules/auth/auth.service';
 import { TriageOutcomeService } from '../../src/modules/triage/services/triage-outcome.service';
 import { AntiburlaService } from '../../src/modules/triage/services/antiburla.service';
 import { TriageHistoryService } from '../../src/modules/triage/services/triage-history.service';
-import { AiTaggingService } from '../../src/modules/ai/services/ai-tagging.service';
 import { defaultPrimaryProfileId, stubProfileAccess } from './support/profile-access.stub';
 
 /**
  * Contract 4: every /v1/triage/* handler is also served under /v1/journal/*, the
- * antiburla check also as /v1/journal/recurrence-check, and /v1/ai/classify-symptom as
- * /v1/ai/tag-entry. Old and new paths must reach the same handler with the same rules.
+ * antiburla check also as /v1/journal/recurrence-check. Old and new paths must reach the
+ * same handler with the same rules. AI tagging was removed: its routes no longer exist.
  */
 describe('Journal route aliases E2E', () => {
   let app: NestFastifyApplication;
@@ -23,8 +22,6 @@ describe('Journal route aliases E2E', () => {
   const entryId = '6a6a6a6a-0000-4000-8000-000000000001';
 
   const history = { getHistory: vi.fn(async () => ({ items: [], marker: 'history' })), deleteHistoryItem: vi.fn(async (_u: string, _p: string, id: string) => ({ success: true, id })) };
-  const tags = { isOffTopic: false, vertical: 'physical', bodyAreaOrMood: 'head_neck', layTerm: 'dor de cabeça', mentionsSelfHarm: false };
-  const tagging = { tagEntry: vi.fn(async () => tags), classify: vi.fn(async () => tags) };
 
   beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({ imports: [AppModule] })
@@ -34,8 +31,6 @@ describe('Journal route aliases E2E', () => {
       .useValue({ checkHistoricalConsistency: vi.fn() })
       .overrideProvider(TriageHistoryService)
       .useValue(history)
-      .overrideProvider(AiTaggingService)
-      .useValue(tagging)
       .compile();
 
     stubProfileAccess(moduleRef);
@@ -89,13 +84,9 @@ describe('Journal route aliases E2E', () => {
     }
   });
 
-  it('POST /v1/ai/tag-entry and legacy /v1/ai/classify-symptom return the same tags', async () => {
+  it('AI tagging routes are gone: /v1/ai/tag-entry and /v1/ai/classify-symptom answer 404', async () => {
     for (const url of ['/v1/ai/tag-entry', '/v1/ai/classify-symptom']) {
-      expect((await inject('POST', url, { text: 'dor de cabeça' }, false)).statusCode, url).toBe(401);
-      const res = await inject('POST', url, { text: 'dor de cabeça' });
-      expect(res.statusCode, url).toBe(200);
-      expect(JSON.parse(res.payload)).toEqual(tags);
+      expect((await inject('POST', url, { text: 'dor de cabeça' })).statusCode, url).toBe(404);
     }
-    expect(tagging.tagEntry).toHaveBeenCalledTimes(2);
   });
 });

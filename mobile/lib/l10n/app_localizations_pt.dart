@@ -128,582 +128,6 @@ class AppLocalizationsPt extends AppLocalizations {
       'Número copiado para a área de transferência.';
 
   @override
-  String get triageBannerEmotional => 'Registro emocional de hoje';
-
-  @override
-  String get triageBannerPhysical => 'Registro físico de hoje';
-
-  @override
-  String triageStep(int step, int total) {
-    return 'Passo $step de $total';
-  }
-
-  @override
-  String get triageNext => 'Próximo';
-
-  @override
-  String get triageBack => 'Voltar';
-
-  @override
-  String get triageConfirm => 'Confirmar';
-
-  @override
-  String get triagePreviewTitle => 'Revise seu registro';
-
-  @override
-  String get triagePreviewSubmit => 'Confirmar e Finalizar';
-
-  @override
-  String get triageQ1Emotional =>
-      'Olhando para o seu lado emocional e mental, qual palavra descreve melhor o que você está sentindo agora?';
-
-  @override
-  String get triageOptNormal => 'Normal / Me sinto bem';
-
-  @override
-  String get triageSaveNormal => 'Concluir como Normal / Bem';
-
-  @override
-  String get triageOptAnsiedade => 'Ansiedade / Agitação';
-
-  @override
-  String get triageOptTristeza => 'Tristeza / Desânimo';
-
-  @override
-  String get triageOptEstresse => 'Estresse / Irritabilidade';
-
-  @override
-  String get triageOptCansaco => 'Cansaço Mental';
-
-  @override
-  String get triageOptAnsiosaAgitacao => 'Inquieto(a) / Agitado(a)';
-
-  @override
-  String get triageOptDepressivaDesanimo => 'Pra baixo / Desanimado(a)';
-
-  @override
-  String get triageOptEstresseBurnout => 'Estressado(a) / Esgotado(a)';
-
-  @override
-  String get triageOptSomatica => 'Tensão no corpo';
-
-  @override
-  String get triageOptSono => 'Sono ruim ou sono demais';
-
-  @override
-  String get triageOptCognitivaFoco => 'Dificuldade de foco';
-
-  @override
-  String get triageOptAutoestima => 'Autoestima / Autoimagem';
-
-  @override
-  String get triageQ2Emotional =>
-      'Você tem se sentido assim frequentemente nos últimos dias ou é algo muito específico de hoje?';
-
-  @override
-  String get triageOptComecouHoje => 'Começou hoje';
-
-  @override
-  String get triageOptJaFazDias => 'Já faz alguns dias';
-
-  @override
-  String get triageOptConstanteSemanas => 'É algo constante há semanas';
-
-  @override
-  String get triageQ3Emotional =>
-      'Essa sensação está parecendo um leve incômodo de fundo ou algo forte que está acelerando seus pensamentos?';
-
-  @override
-  String get triageOptLeveControlavel => 'Leve e controlável';
-
-  @override
-  String get triageOptModerada => 'Moderada';
-
-  @override
-  String get triageOptMuitoForte => 'Muito forte e difícil de segurar';
-
-  @override
-  String get triageQ4Emotional =>
-      'Você consegue identificar se existe um motivo principal para isso estar acontecendo hoje?';
-
-  @override
-  String get triageQ4Ansiedade =>
-      'O que parece estar disparando essa sensação de ansiedade, agitação ou aperto?';
-
-  @override
-  String get triageQ4Depressao =>
-      'Você consegue identificar se algum acontecimento recente ou sentimento pesou mais no seu desânimo?';
-
-  @override
-  String get triageQ4EstresseBurnout =>
-      'De onde vem a maior parte da pressão ou esgotamento que você está sentindo?';
-
-  @override
-  String get triageQ4Somatica =>
-      'Essa tensão no corpo ou aperto físico costuma piorar em quais situações?';
-
-  @override
-  String get triageQ4Sono =>
-      'Qual tem sido a principal dificuldade que atrapalha suas noites de sono?';
-
-  @override
-  String get triageQ4CognitivaFoco =>
-      'O que mais parece estar prejudicando sua concentração ou clareza mental?';
-
-  @override
-  String get triageQ4Autoestima =>
-      'O que tem despertado com mais intensidade essa sensação de insegurança ou autocrítica?';
-
-  @override
-  String get triageOptTrabalho => 'Trabalho / Estudos';
-
-  @override
-  String get triageOptFamilia => 'Família / Relacionamentos';
-
-  @override
-  String get triageOptNoiteRuim => 'Noite ruim de sono';
-
-  @override
-  String get triageOptNaoSei => 'Não sei dizer';
-
-  @override
-  String get triageOptSimCobrancaPrazos =>
-      'Sobrecarga de tarefas, prazos ou expectativas';
-
-  @override
-  String get triageOptSimConflitoRelacionamento =>
-      'Conflito ou discussão com pessoa próxima';
-
-  @override
-  String get triageOptSimIncertezaFuturo =>
-      'Medo de mudanças, notícias ou incerteza futura';
-
-  @override
-  String get triageOptSimExcessoEstimulantes =>
-      'Excesso de café, energéticos ou ambiente agitado';
-
-  @override
-  String get triageOptNaoSeiDizerEmocional =>
-      'Não sei identificar, surgiu de repente';
-
-  @override
-  String get triageOptSimPerdaLuto =>
-      'Perda, término de relacionamento ou luto';
-
-  @override
-  String get triageOptSimSolidaoIsolamento =>
-      'Sensação de solidão, isolamento ou incompreensão';
-
-  @override
-  String get triageOptSimFrustracaoDesilusao =>
-      'Frustração com algo que não saiu como esperado';
-
-  @override
-  String get triageOptSimCansacoAcumulado =>
-      'Cansaço prolongado sem pausas para recuperação';
-
-  @override
-  String get triageOptSimPressaoTrabalho =>
-      'Excesso de carga horária, cobranças ou prazos no trabalho';
-
-  @override
-  String get triageOptSimResponsabilidadesCasa =>
-      'Cuidados familiares, finanças ou tarefas domésticas';
-
-  @override
-  String get triageOptSimFaltaDescanso =>
-      'Sem tempo livre para lazer, repouso ou desconectar';
-
-  @override
-  String get triageOptSimAmbienteToxico =>
-      'Relações difíceis ou ambiente diário desgastante';
-
-  @override
-  String get triageOptSimDuranteTrabalho =>
-      'Durante a jornada de trabalho ou momentos de pressão';
-
-  @override
-  String get triageOptSimDiscussaoConflito =>
-      'Logo após discussões, desentendimentos ou sustos';
-
-  @override
-  String get triageOptSimFinalDoDia =>
-      'No fim do dia, ao tentar relaxar ou deitar';
-
-  @override
-  String get triageOptSimPreocupacaoConstante =>
-      'Em qualquer momento ao pensar nos problemas';
-
-  @override
-  String get triageOptSimDificuldadePegarSono =>
-      'Cabeça acelerada / pensamentos na hora de dormir';
-
-  @override
-  String get triageOptSimAcordaMadrugada =>
-      'Acordar no meio da noite e não conseguir voltar a dormir';
-
-  @override
-  String get triageOptSimSonoAgitadoPesadelos =>
-      'Sono leve, agitado, com pesadelos ou despertares';
-
-  @override
-  String get triageOptSimHorarioIrregularTelas =>
-      'Uso de celular/telas até tarde ou horários irregulares';
-
-  @override
-  String get triageOptSimSobrecargaMultitarefas =>
-      'Muitas coisas para fazer ao mesmo tempo / excesso de estímulos';
-
-  @override
-  String get triageOptSimPreocupacaoIntrusiva =>
-      'Pensamentos de preocupação que interrompem o raciocínio';
-
-  @override
-  String get triageOptSimExaustaoMental =>
-      'Cansaço mental acumulado após muitas horas de esforço';
-
-  @override
-  String get triageOptSimFaltaMotivacao =>
-      'Desinteresse, falta de energia ou apatia com as tarefas';
-
-  @override
-  String get triageOptSimComparacaoRedes =>
-      'Comparação com outras pessoas (redes sociais ou colegas)';
-
-  @override
-  String get triageOptSimMedoFalharJulgamento =>
-      'Medo de errar, não corresponder ou ser julgado';
-
-  @override
-  String get triageOptSimCriticaRejeicao =>
-      'Crítica recente recebida ou sensação de rejeição';
-
-  @override
-  String get triageOptSimDesvalorizacaoPropria =>
-      'Dificuldade em reconhecer suas próprias conquistas';
-
-  @override
-  String get triagePreviewEmotional => 'Revise seu registro';
-
-  @override
-  String get triageQ1Physical =>
-      'Vamos falar sobre a parte física. Onde você está sentindo esse desconforto ou dor principal?';
-
-  @override
-  String get triageOptCabeca => 'Cabeça';
-
-  @override
-  String get triageOptCostas => 'Costas / Coluna';
-
-  @override
-  String get triageOptArticulacoes => 'Articulações (Joelho, Ombro, etc.)';
-
-  @override
-  String get triageOptAbdomen => 'Abdômen / Estômago';
-
-  @override
-  String get triageOptCabecaPescoco => 'Cabeça e pescoço';
-
-  @override
-  String get triageOptCardiovascularTorax => 'Peito';
-
-  @override
-  String get triageOptRespiratorio => 'Respiração';
-
-  @override
-  String get triageOptGastrointestinalAbdomen => 'Barriga';
-
-  @override
-  String get triageOptColunaDorDorsal => 'Costas';
-
-  @override
-  String get triageOptMembrosSuperiores => 'Braços';
-
-  @override
-  String get triageOptMembrosInferiores => 'Pernas';
-
-  @override
-  String get triageOptNeurologico => 'Tontura / formigamento';
-
-  @override
-  String get triageOptGeniturinarioPelvico => 'Região íntima / urinária';
-
-  @override
-  String get triageOptDermatologico => 'Pele';
-
-  @override
-  String get triageOptMuscularGeralSistemico => 'Corpo todo / cansaço';
-
-  @override
-  String get triageOptEndocrinoMetabolico => 'Sede, fome ou energia';
-
-  @override
-  String get triageQ2Physical => 'Há quanto tempo você sente esse desconforto?';
-
-  @override
-  String get triageOptComecouAgora => 'Começou agora';
-
-  @override
-  String get triageOptHaAlgunsDias => 'Há alguns dias';
-
-  @override
-  String get triageOptCronica => 'Já faz bastante tempo';
-
-  @override
-  String get triageQ3Physical =>
-      'Em uma escala de 1 a 5 (onde 1 é quase imperceptível e 5 é insuportável), como está agora?';
-
-  @override
-  String get triageQ4Physical =>
-      'Você lembra de ter feito algum esforço atípico, exercício pesado ou sofrido alguma batida/queda recentemente?';
-
-  @override
-  String get triageQ4CabecaPescoco =>
-      'Você notou algum fator associado, como estresse intenso, muitas horas em telas, noite mal dormida ou sinusite/resfriado?';
-
-  @override
-  String get triageQ4CardiovascularTorax =>
-      'O desconforto no peito ou palpitação começou após esforço físico, estresse emocional ou consumo de estimulantes?';
-
-  @override
-  String get triageQ4Respiratorio =>
-      'Você teve contato com poeira, fumaça, ar frio ou está com sintomas de gripe/resfriado?';
-
-  @override
-  String get triageQ4Gastrointestinal =>
-      'Você ingeriu algum alimento diferente ou pesado, tomou remédios recentes ou ficou muito tempo em jejum?';
-
-  @override
-  String get triageQ4ColunaDorDorsal =>
-      'Você carregou peso excessivo, permaneceu muito tempo em má postura ou sofreu algum impacto/queda?';
-
-  @override
-  String get triageQ4MembrosSuperiores =>
-      'Você realizou movimentos repetitivos (digitação, esforço manual), treino de braço/ombro ou sofreu impacto/queda?';
-
-  @override
-  String get triageQ4MembrosInferiores =>
-      'Você fez caminhada longa, corrida, ficou muito tempo em pé/sentado ou sofreu torção/tropeço?';
-
-  @override
-  String get triageQ4Neurologico =>
-      'O sintoma surgiu após levantar-se rápido, ficar sem comer/beber água, crise de ansiedade ou posição desconfortável?';
-
-  @override
-  String get triageQ4Geniturinario =>
-      'Você percebeu relação com pouca água/reter urina, ciclo menstrual, relação íntima ou uso de roupas úmidas?';
-
-  @override
-  String get triageQ4Dermatological =>
-      'Você notou algo que possa ter causado isso, como um produto novo, exposição ao sol/calor ou contato com algo (planta, inseto, substância)?';
-
-  @override
-  String get triageQ4MuscularGeral =>
-      'Você sente isso associado a cansaço extremo, início de gripe/virose, falta de descanso ou desidratação?';
-
-  @override
-  String get triageQ4EndocrinoMetabolico =>
-      'Você notou relação com jejum prolongado, refeição açucarada, alteração de medicamento ou calor excessivo?';
-
-  @override
-  String get triageOptSimExercicio => 'Sim, exercício intenso';
-
-  @override
-  String get triageOptSimQueda => 'Sim, sofri uma queda';
-
-  @override
-  String get triageOptNaoComecouNada => 'Não, começou do nada';
-
-  @override
-  String get triageOptSimProdutoNovo =>
-      'Sim, usei um produto novo (cosmético, sabonete, etc.)';
-
-  @override
-  String get triageOptSimExposicaoSolCalor =>
-      'Sim, houve exposição ao sol, calor ou suor intenso';
-
-  @override
-  String get triageOptSimPicadaContato =>
-      'Sim, tive contato com planta, inseto ou substância';
-
-  @override
-  String get triageOptSimEstresseSono => 'Estresse ou sono irregular';
-
-  @override
-  String get triageOptSimTelasEsforcoVisual =>
-      'Muitas horas em telas / esforço visual';
-
-  @override
-  String get triageOptSimPosturaPescoco =>
-      'Tensão muscular ou má postura no pescoço';
-
-  @override
-  String get triageOptSimResfriadoSinusite =>
-      'Sintomas de resfriado ou sinusite';
-
-  @override
-  String get triageOptSimEsforcoFisico =>
-      'Logo após esforço físico ou caminhada';
-
-  @override
-  String get triageOptSimEstresseAnsiedade =>
-      'Momento de forte ansiedade ou estresse';
-
-  @override
-  String get triageOptSimCafeinaEstimulante =>
-      'Consumo de café, energético ou estimulante';
-
-  @override
-  String get triageOptNaoSurgiuEmRepouso =>
-      'Não, surgiu espontaneamente ou em repouso';
-
-  @override
-  String get triageOptSimAlergiaAmbiente =>
-      'Exposição a poeira, mofo, fumaça ou ar-condicionado';
-
-  @override
-  String get triageOptSimGripeInfeccao =>
-      'Sintomas de gripe, resfriado ou dor de garganta';
-
-  @override
-  String get triageOptSimMudancaClima =>
-      'Mudança brusca de temperatura ou ar frio';
-
-  @override
-  String get triageOptSimAlimentacaoDiferente =>
-      'Alimento diferente, pesado ou suspeito';
-
-  @override
-  String get triageOptSimMedicamentoRecente =>
-      'Uso recente de medicamento ou anti-inflamatório';
-
-  @override
-  String get triageOptSimJejumEstresse =>
-      'Longo período de jejum ou estresse intenso';
-
-  @override
-  String get triageOptNaoSemRelacaoAlimento =>
-      'Não, começou sem relação com alimentação';
-
-  @override
-  String get triageOptSimCarregouPeso => 'Pegou peso ou fez esforço lombar';
-
-  @override
-  String get triageOptSimPosturaProlongada =>
-      'Muito tempo sentado ou má postura ao dormir';
-
-  @override
-  String get triageOptSimMauJeitoQueda =>
-      'Movimento brusco (\'mau jeito\') ou impacto/queda';
-
-  @override
-  String get triageOptSimMovimentoRepetitivo =>
-      'Movimentos repetitivos (digitação, celular, trabalho manual)';
-
-  @override
-  String get triageOptSimTreinoSobrecarga =>
-      'Exercício físico ou sobrecarga nos braços/ombros';
-
-  @override
-  String get triageOptSimTraumaPancada =>
-      'Pancada, queda ou dormiu de mau jeito sobre o braço';
-
-  @override
-  String get triageOptSimCaminhadaCorrida =>
-      'Caminhada longa, corrida ou esporte recente';
-
-  @override
-  String get triageOptSimTempoEmPeSentado =>
-      'Muitas horas em pé ou muito tempo sentado';
-
-  @override
-  String get triageOptSimTorcaoTropeco =>
-      'Torção no tornozelo/joelho, tropeço ou queda';
-
-  @override
-  String get triageOptSimLevantarRapido =>
-      'Ao levantar-se rapidamente ou mudar de posição';
-
-  @override
-  String get triageOptSimJejumDesidratacao =>
-      'Horas sem se alimentar ou pouca ingestão de água';
-
-  @override
-  String get triageOptSimAnsiedadeHiperventilacao =>
-      'Durante momento de tensão ou respiração acelerada';
-
-  @override
-  String get triageOptSimCompressaoPostural =>
-      'Membro pressionado ou postura comprimindo nervo';
-
-  @override
-  String get triageOptSimBaixaIngestaoUrina =>
-      'Pouca ingestão de água ou segurou urina por muito tempo';
-
-  @override
-  String get triageOptSimCicloMenstrual => 'Período pré-menstrual ou menstrual';
-
-  @override
-  String get triageOptSimPosRelacaoIntima =>
-      'Após relação íntima ou troca de produtos íntimos';
-
-  @override
-  String get triageOptSimRoupasUmidas =>
-      'Uso de roupas úmidas ou muito apertadas';
-
-  @override
-  String get triageOptSimCansacoEsgotamento =>
-      'Cansaço extremo, sobrecarga ou noites sem dormir';
-
-  @override
-  String get triageOptSimSintomasGripeVirose =>
-      'Sensação de febre, calafrio ou início de virose';
-
-  @override
-  String get triageOptSimAtividadeGlobal =>
-      'Atividade física atípica (mudança, faxina pesada)';
-
-  @override
-  String get triageOptSimDesidratacaoCalor =>
-      'Pouca hidratação ou exposição prolongada ao calor';
-
-  @override
-  String get triageOptSimJejumAlimentacao =>
-      'Horas sem comer ou após refeição pesada/açucarada';
-
-  @override
-  String get triageOptSimAjusteMedicamento =>
-      'Esqueceu ou alterou dose de medicamento habitual';
-
-  @override
-  String get triageOptSimCalorDesidratacao =>
-      'Ambiente muito quente ou baixa ingestão de líquidos';
-
-  @override
-  String get triageOptSimEstresseSobrecarga =>
-      'Pico recente de estresse ou quebra de rotina';
-
-  @override
-  String get triagePreviewPhysical => 'Revise seu registro';
-
-  @override
-  String triageIntensityLabel(int value) {
-    return 'Intensidade: $value';
-  }
-
-  @override
-  String get triageIntensityMin => 'Quase imperceptível';
-
-  @override
-  String get triageIntensityMax => 'Insuportável';
-
-  @override
-  String get outcomeScreenTitle => 'Resumo do seu registro';
-
-  @override
-  String get outcomeScreenSubtitle => 'Um retrato do que você registrou hoje';
-
-  @override
   String get outcomeIntensityTitle => 'Intensidade que você informou';
 
   @override
@@ -716,49 +140,6 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get outcomeArticlesSubtitle =>
       'Conteúdos educativos gerais. Não são orientação para o seu caso.';
-
-  @override
-  String outcomeReadTime(int minutes) {
-    return '$minutes min de leitura';
-  }
-
-  @override
-  String get outcomeDoneButton => 'Concluir e Voltar ao Início';
-
-  @override
-  String get antiburlaTitle => 'Isso já apareceu antes?';
-
-  @override
-  String antiburlaDialogPrompt(int days) {
-    return 'Você registrou um sintoma similar há $days dias. É a mesma sensação que voltou ou algo totalmente novo?';
-  }
-
-  @override
-  String get antiburlaOptionRecurring => 'É a mesma sensação que voltou';
-
-  @override
-  String get antiburlaOptionRecurringDesc =>
-      'Vamos registrar como algo que voltou, para seu diário ficar organizado.';
-
-  @override
-  String get antiburlaOptionNew => 'É um sentimento completamente novo';
-
-  @override
-  String get antiburlaOptionNewDesc =>
-      'Manteremos registrado como um evento agudo que começou hoje.';
-
-  @override
-  String get offTopicNarrativeTitle => 'Isso parece um sintoma?';
-
-  @override
-  String get offTopicNarrativeDesc =>
-      'O texto que você escreveu não parece descrever um sintoma físico ou emocional. Deseja revisar sua descrição ou continuar mesmo assim?';
-
-  @override
-  String get offTopicNarrativeEditButton => 'Editar Descrição';
-
-  @override
-  String get offTopicNarrativeContinueButton => 'Continuar Mesmo Assim';
 
   @override
   String get offlineBannerText =>
@@ -792,12 +173,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get tabPhysical => 'Física';
 
   @override
-  String get bodyMapTitle => 'Mapa Corporal 2D (14 Dias)';
-
-  @override
-  String get bodyMapHint => 'Toque em uma região para ver detalhes';
-
-  @override
   String get heatLegendNone => 'Sem registro';
 
   @override
@@ -811,9 +186,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get emotionalChartTitle => 'Evolução Emocional (7 Dias)';
-
-  @override
-  String get criticalRecurrenceTitle => 'Foco de Atenção';
 
   @override
   String get retrospectiveFeedTitle => 'Registros Anteriores';
@@ -1019,19 +391,6 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get settingsDataHistorySubtitle =>
       'Visualize seu histórico de registros';
-
-  @override
-  String get deleteHistoryItemTitle => 'Descartar registro do histórico';
-
-  @override
-  String get deleteHistoryItemConfirm =>
-      'Tem certeza de que deseja descartar este registro do seu histórico? Esta ação é irreversível.';
-
-  @override
-  String get deleteHistoryItemSuccess => 'Registro removido com sucesso.';
-
-  @override
-  String get deleteHistoryItemError => 'Não foi possível remover o registro.';
 
   @override
   String get deleteAction => 'Descartar';
@@ -1538,14 +897,6 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String safetyNoticeGeneral(String number) {
-    return 'Se isso for uma emergência, não use o app: ligue $number agora.';
-  }
-
-  @override
-  String get safetyNoticeOpenResources => 'Ver contatos de ajuda';
-
-  @override
   String get urgentHelpButton => 'Ajuda urgente';
 
   @override
@@ -1724,7 +1075,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get privacyPolicySection2Bullet2 =>
-      'Organização automática das suas anotações por área do corpo ou emoção (com auxílio de IA, sem avaliação de saúde).';
+      'Sugerir, com ajuda de IA, uma opção já existente do diário quando você escreve com as suas palavras (sem avaliação de saúde).';
 
   @override
   String get privacyPolicySection2Bullet3 => 'Consistência do histórico.';
@@ -1743,7 +1094,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get privacyPolicySection3Bullet1 =>
-      'Google LLC (API Gemini): O texto das suas anotações é enviado à API Gemini do Google para organizá-las automaticamente. A IA não avalia a sua saúde.';
+      'Google LLC (API Gemini): o texto de \"escrever o meu\" pode ser enviado à Gemini só para sugerir uma opção já existente do diário. A IA não avalia a sua saúde.';
 
   @override
   String get privacyPolicySection3Bullet2 =>
@@ -1844,163 +1195,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get privacyVeilUnlockManually => 'Desbloquear manualmente';
-
-  @override
-  String get wizardNarrativeLabel => 'Descrição opcional (em suas palavras)';
-
-  @override
-  String get wizardNarrativeHint =>
-      'Se quiser, escreva com suas palavras como você está.';
-
-  @override
-  String get wizardStepZeroFreeTextLabel =>
-      'Prefere descrever com suas próprias palavras?';
-
-  @override
-  String get wizardStepZeroFreeTextHint =>
-      'Se quiser, escreva com suas palavras o que está sentindo.';
-
-  @override
-  String deleteHistoryItemIntensity(int value) {
-    return 'Intensidade informada: $value/5';
-  }
-
-  @override
-  String get bodyMapRegionHeadNeck => 'Cabeça e pescoço';
-
-  @override
-  String get bodyMapRegionHeadNeckHint =>
-      'Dor de cabeça, dor ou rigidez no pescoço';
-
-  @override
-  String get bodyMapRegionDizziness => 'Tontura / formigamento';
-
-  @override
-  String get bodyMapRegionDizzinessHint =>
-      'Tontura, sensação de desequilíbrio, formigamento';
-
-  @override
-  String get bodyMapRegionBack => 'Costas';
-
-  @override
-  String get bodyMapRegionBackHint => 'Dor nas costas, na coluna ou na lombar';
-
-  @override
-  String get bodyMapRegionBreathing => 'Respiração';
-
-  @override
-  String get bodyMapRegionBreathingHint => 'Falta de ar, tosse';
-
-  @override
-  String get bodyMapRegionChest => 'Peito';
-
-  @override
-  String get bodyMapRegionChestHint =>
-      'Aperto ou desconforto no peito, coração acelerado';
-
-  @override
-  String get bodyMapRegionBelly => 'Barriga';
-
-  @override
-  String get bodyMapRegionBellyHint => 'Desconforto na barriga, cólica, azia';
-
-  @override
-  String get bodyMapRegionPelvic => 'Região íntima / urinária';
-
-  @override
-  String get bodyMapRegionPelvicHint =>
-      'Desconforto na região pélvica ou ao urinar';
-
-  @override
-  String get bodyMapRegionRightArm => 'Braço direito';
-
-  @override
-  String get bodyMapRegionRightArmHint =>
-      'Braço, ombro, cotovelo ou punho direito';
-
-  @override
-  String get bodyMapRegionLeftArm => 'Braço esquerdo';
-
-  @override
-  String get bodyMapRegionLeftArmHint =>
-      'Braço, ombro, cotovelo ou punho esquerdo';
-
-  @override
-  String get bodyMapRegionRightLeg => 'Perna direita';
-
-  @override
-  String get bodyMapRegionRightLegHint =>
-      'Quadril, coxa, joelho ou tornozelo direito';
-
-  @override
-  String get bodyMapRegionLeftLeg => 'Perna esquerda';
-
-  @override
-  String get bodyMapRegionLeftLegHint =>
-      'Quadril, coxa, joelho ou tornozelo esquerdo';
-
-  @override
-  String get bodyMapRegionSkin => 'Pele';
-
-  @override
-  String get bodyMapRegionSkinHint => 'Coceira, manchas';
-
-  @override
-  String get bodyMapRegionWholeBody => 'Corpo todo / cansaço';
-
-  @override
-  String get bodyMapRegionWholeBodyHint => 'Dor no corpo todo, cansaço';
-
-  @override
-  String get bodyMapRegionEnergy => 'Sede, fome ou energia';
-
-  @override
-  String get bodyMapRegionEnergyHint => 'Mudanças de energia, sede ou fome';
-
-  @override
-  String get bodyMapGroupHead => 'Cabeça';
-
-  @override
-  String get bodyMapGroupTrunk => 'Tronco';
-
-  @override
-  String get bodyMapGroupLimbs => 'Braços e pernas';
-
-  @override
-  String get bodyMapGroupWholeBody => 'Corpo todo e pele';
-
-  @override
-  String get bodyMapViewMap => 'Mapa do corpo';
-
-  @override
-  String get bodyMapViewAll => 'Todas as áreas';
-
-  @override
-  String get bodyMapShortSkin => 'Pele';
-
-  @override
-  String get bodyMapShortWholeBody => 'Corpo todo';
-
-  @override
-  String get bodyMapShortEnergy => 'Energia';
-
-  @override
-  String bodyMapMaxIntensity(int value) {
-    return 'Maior intensidade informada nos últimos 14 dias: $value/5';
-  }
-
-  @override
-  String bodyMapNoEntriesThisSide(String otherArea, int value) {
-    return 'Sem registros deste lado nos últimos 14 dias.\n($otherArea: intensidade informada $value/5)';
-  }
-
-  @override
-  String bodyMapViewOtherSide(String area) {
-    return 'Ver $area';
-  }
-
-  @override
-  String get bodyMapNoEntries14Days => 'Nenhum registro nos últimos 14 dias';
 
   @override
   String get settingsChangePhotoSubtitle =>
@@ -2273,24 +1467,12 @@ class AppLocalizationsPt extends AppLocalizations {
       'Conteúdos educativos gerais. Não são orientação para o seu caso.';
 
   @override
-  String get outcomeWellnessReadingsRelatedTitle =>
-      'Leituras relacionadas ao tema que você registrou';
-
-  @override
   String outcomeWellnessReadingsCount(int count) {
     return '$count leituras';
   }
 
   @override
-  String get outcomeArticlesEmpty => 'Nenhuma leitura disponível no momento.';
-
-  @override
   String get journalPatternTitle => 'Padrões nos seus registros';
-
-  @override
-  String journalPatternDescription(String category, int count, int windowDays) {
-    return 'Você registrou $category com intensidade alta $count vezes nos últimos $windowDays dias. Se isso está atrapalhando seu dia a dia, pode ser útil conversar com um profissional de saúde.';
-  }
 
   @override
   String historyIntensityInformed(int n) {
@@ -2318,16 +1500,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get appUpdateButton => 'Abrir loja de aplicativos';
 
   @override
-  String outcomeSummaryIntensity(int value) {
-    return 'Intensidade informada: $value/5';
-  }
-
-  @override
-  String outcomeSummaryRecordedAt(String time) {
-    return 'Registrado às $time';
-  }
-
-  @override
   String outcomeTodayYouLogged(String option) {
     return 'Você registrou: $option';
   }
@@ -2342,40 +1514,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get outcomeTodayStatusBad => 'Mal';
 
   @override
-  String get outcomeHistoryDetailTitle => 'Detalhes do registro';
-
-  @override
-  String get outcomeHistoryNoNarrative =>
-      'Você não adicionou uma descrição neste registro.';
-
-  @override
-  String get wizardIntroTitle => 'Como você está se sentindo hoje?';
-
-  @override
-  String get wizardIntroOptionGoodLabel => 'Bem / Normal';
-
-  @override
-  String get wizardIntroOptionGoodCaption => 'Encerra o registro de hoje';
-
-  @override
-  String get wizardIntroOptionSoSoLabel => 'Mais ou menos';
-
-  @override
-  String get wizardIntroOptionSoSoCaption =>
-      'Vamos te ajudar a descrever melhor';
-
-  @override
-  String get wizardIntroOptionBadLabel => 'Mal / Ruim';
-
-  @override
-  String get wizardIntroOptionBadCaption =>
-      'Vamos com mais cuidado nas próximas perguntas';
-
-  @override
-  String get wizardIntroFootnote =>
-      'Esta é a pergunta inicial de todos os registros. É rápida e ajuda a personalizar sua experiência.';
-
-  @override
   String get checkInSummaryTitle => 'Registro salvo';
 
   @override
@@ -2385,4 +1523,975 @@ class AppLocalizationsPt extends AppLocalizations {
   String checkInSummaryBackHomeCountdown(int seconds) {
     return 'Voltar ao início ($seconds)';
   }
+
+  @override
+  String get jv2FlowTitle => 'Registro do dia';
+
+  @override
+  String get jv2Back => 'Voltar';
+
+  @override
+  String get jv2Continue => 'Continuar';
+
+  @override
+  String get jv2Skip => 'Pular';
+
+  @override
+  String get jv2Save => 'Salvar registro';
+
+  @override
+  String get jv2Yes => 'Sim';
+
+  @override
+  String get jv2No => 'Não, continuar';
+
+  @override
+  String get jv2Cancel => 'Cancelar';
+
+  @override
+  String get jv2Remove => 'Remover';
+
+  @override
+  String jv2HelloName(String name) {
+    return 'Olá, $name!';
+  }
+
+  @override
+  String get jv2Hello => 'Olá!';
+
+  @override
+  String get jv2GoodMorning => 'Bom dia.';
+
+  @override
+  String get jv2GoodAfternoon => 'Boa tarde.';
+
+  @override
+  String get jv2GoodEvening => 'Boa noite.';
+
+  @override
+  String get jv2MoodQuestion => 'Como você está se sentindo hoje?';
+
+  @override
+  String get jv2MoodBem => 'Bem';
+
+  @override
+  String get jv2MoodNormal => 'Normal';
+
+  @override
+  String get jv2MoodNaoTaoBem => 'Não tão bem';
+
+  @override
+  String get jv2AreaQuestion => 'O que você quer registrar?';
+
+  @override
+  String get jv2AreaHint => 'Você pode marcar mais de um.';
+
+  @override
+  String get jv2AreaEmotional => 'Como me sinto';
+
+  @override
+  String get jv2AreaEmotionalHint => 'Emoções e humor';
+
+  @override
+  String get jv2AreaPhysical => 'Meu corpo';
+
+  @override
+  String get jv2AreaPhysicalHint => 'Onde sinto desconforto';
+
+  @override
+  String get jv2AreaConditions => 'Minhas condições';
+
+  @override
+  String jv2ConditionCardQuestion(String label) {
+    return 'Como você está com $label hoje?';
+  }
+
+  @override
+  String get jv2TimeQuestion => 'Isso que você sente tem mais a ver com…';
+
+  @override
+  String get jv2TimePassado => 'O que já passou';
+
+  @override
+  String get jv2TimePresente => 'O momento atual';
+
+  @override
+  String get jv2TimeFuturo => 'O que vem pela frente';
+
+  @override
+  String get jv2TimeShortPassado => 'Passado';
+
+  @override
+  String get jv2TimeShortPresente => 'Presente';
+
+  @override
+  String get jv2TimeShortFuturo => 'Futuro';
+
+  @override
+  String get jv2BranchQuestion => 'O que combina mais com você agora?';
+
+  @override
+  String get jv2OptionsQuestion => 'Marque o que combina com você.';
+
+  @override
+  String get jv2MultiSelectHint => 'Você pode marcar mais de um.';
+
+  @override
+  String get jv2WriteMine => 'Escrever o meu';
+
+  @override
+  String get jv2WriteMineHint => 'Em poucas palavras';
+
+  @override
+  String get jv2WriteMineAdd => 'Adicionar';
+
+  @override
+  String get jv2SuggestTitle => 'Isso se parece com uma opção que já existe';
+
+  @override
+  String jv2SuggestBody(String option) {
+    return 'Quer guardar como \"$option\" em vez do texto escrito?';
+  }
+
+  @override
+  String get jv2SuggestYes => 'Usar essa opção';
+
+  @override
+  String get jv2SuggestNo => 'Manter o que escrevi';
+
+  @override
+  String get jv2MoreQuestion => 'Quer registrar mais alguma coisa?';
+
+  @override
+  String get jv2MoreBodyQuestion => 'Quer marcar outra parte do corpo?';
+
+  @override
+  String get jv2BodyQuestion => 'Onde você sente desconforto agora?';
+
+  @override
+  String get jv2BodyHint => 'Toque em uma ou mais partes.';
+
+  @override
+  String get jv2BodyFront => 'De frente';
+
+  @override
+  String get jv2BodyBack => 'De costas';
+
+  @override
+  String jv2ItemLimit(int max) {
+    return 'Você chegou ao limite de $max itens neste registro.';
+  }
+
+  @override
+  String get jv2BranchPassadoTristeza => 'Tristeza ou saudade';
+
+  @override
+  String get jv2BranchPassadoMemoria => 'Uma memória que incomoda';
+
+  @override
+  String get jv2BranchPresenteEnergia => 'Sem energia';
+
+  @override
+  String get jv2BranchPresenteSobrecarga => 'Irritado(a) ou sobrecarregado(a)';
+
+  @override
+  String get jv2BranchFuturoMente => 'Mente acelerada';
+
+  @override
+  String get jv2BranchFuturoMedo => 'Medo de algo dar errado';
+
+  @override
+  String get jv2OptPassadoTristezaCulpa => 'Culpa ou arrependimento';
+
+  @override
+  String get jv2OptPassadoTristezaSaudade =>
+      'Falta de alguém ou de como as coisas eram';
+
+  @override
+  String get jv2OptPassadoMemoriaLembranca => 'Uma lembrança ruim que volta';
+
+  @override
+  String get jv2OptPassadoMemoriaMagoa => 'Fico remoendo mágoas antigas';
+
+  @override
+  String get jv2OptPresenteEnergiaCorpo => 'Corpo pesado, tenso ou dolorido';
+
+  @override
+  String get jv2OptPresenteEnergiaDesligado =>
+      'No piloto automático, meio desligado';
+
+  @override
+  String get jv2OptPresenteSobrecargaPaciencia =>
+      'Sem paciência, explodindo por pouco';
+
+  @override
+  String get jv2OptPresenteSobrecargaAperto =>
+      'Aperto no peito e momentos de desespero';
+
+  @override
+  String get jv2OptFuturoMenteAntecipar => 'Fico antecipando problemas';
+
+  @override
+  String get jv2OptFuturoMenteCobranca => 'Cobrança por perfeição ou controle';
+
+  @override
+  String get jv2OptFuturoMedoJulgamento => 'Medo de falhar ou ser julgado(a)';
+
+  @override
+  String get jv2OptFuturoMedoDesanimo => 'Desânimo com o rumo das coisas';
+
+  @override
+  String get jv2RegionCabeca => 'Cabeça e pescoço';
+
+  @override
+  String get jv2RegionPeito => 'Peito';
+
+  @override
+  String get jv2RegionBarriga => 'Barriga';
+
+  @override
+  String get jv2RegionCostas => 'Costas';
+
+  @override
+  String get jv2RegionMembros => 'Braços, pernas e mãos';
+
+  @override
+  String get jv2BranchCabecaPressao => 'Aperto, peso ou pressão';
+
+  @override
+  String get jv2BranchCabecaSentidos => 'Olhos, boca ou garganta';
+
+  @override
+  String get jv2BranchPeitoRespiracao => 'Respiração diferente';
+
+  @override
+  String get jv2BranchPeitoIncomodo => 'Incômodo no peito ou costelas';
+
+  @override
+  String get jv2BranchBarrigaQueimacao => 'Queimação ou enjoo';
+
+  @override
+  String get jv2BranchBarrigaColica => 'Cólica ou estufamento';
+
+  @override
+  String get jv2BranchCostasRigidez => 'Rigidez ou travamento';
+
+  @override
+  String get jv2BranchCostasFisgada => 'Dor que fisga ao mexer';
+
+  @override
+  String get jv2BranchMembrosCansaco => 'Cansaço ou dor';
+
+  @override
+  String get jv2BranchMembrosFormigamento => 'Formigamento';
+
+  @override
+  String get jv2OptCabecaPressaoTemporas =>
+      'Dor ou pressão nas têmporas ou testa';
+
+  @override
+  String get jv2OptCabecaPressaoLatejando =>
+      'Latejando, com incômodo à luz ou ao barulho';
+
+  @override
+  String get jv2OptCabecaSentidosGarganta => 'Garganta arranhando ou seca';
+
+  @override
+  String get jv2OptCabecaSentidosOlhos => 'Olhos pesados ou ardendo';
+
+  @override
+  String get jv2OptPeitoRespiracaoCurta => 'Respiração curta';
+
+  @override
+  String get jv2OptPeitoRespiracaoTosse => 'Tosse ou peito carregado';
+
+  @override
+  String get jv2OptPeitoIncomodoBatedeira => 'Coração acelerado ou batedeira';
+
+  @override
+  String get jv2OptPeitoIncomodoCostelas =>
+      'Pontada nas costelas ao respirar fundo';
+
+  @override
+  String get jv2OptBarrigaQueimacaoSubindo => 'Queimação subindo';
+
+  @override
+  String get jv2OptBarrigaQueimacaoEnjoo => 'Enjoo';
+
+  @override
+  String get jv2OptBarrigaColicaGases => 'Gases ou barriga estufada';
+
+  @override
+  String get jv2OptBarrigaColicaPontadas => 'Cólica ou pontadas';
+
+  @override
+  String get jv2OptCostasRigidezOmbros => 'Pescoço e ombros duros';
+
+  @override
+  String get jv2OptCostasRigidezLombar => 'Peso na lombar';
+
+  @override
+  String get jv2OptCostasFisgadaIrradia =>
+      'Pontada que desce para braço ou perna';
+
+  @override
+  String get jv2OptCostasFisgadaAoMexer => 'Dor ao mexer';
+
+  @override
+  String get jv2OptMembrosCansacoJuntas => 'Juntas doloridas';
+
+  @override
+  String get jv2OptMembrosCansacoPesados => 'Braços ou pernas cansados';
+
+  @override
+  String get jv2OptMembrosFormigamentoDormentes =>
+      'Mãos ou pés formigando ou dormentes';
+
+  @override
+  String get jv2OptMembrosFormigamentoChoque => 'Sensação de choque';
+
+  @override
+  String get jv2PersistenceQuestion => 'Há quanto tempo você percebe isso?';
+
+  @override
+  String get jv2PersistenceHoje => 'Começou hoje';
+
+  @override
+  String get jv2PersistenceDiasSemanas => 'Alguns dias ou semanas';
+
+  @override
+  String get jv2PersistenceMesesAnos => 'Meses ou anos';
+
+  @override
+  String get jv2PersistenceOptional => 'Há quanto tempo? (opcional)';
+
+  @override
+  String get jv2IntensityQuestion => 'Agora, quanto isso pesa no seu dia?';
+
+  @override
+  String get jv2IntensityCompactQuestion =>
+      'Para cada item, quanto pesa no seu dia?';
+
+  @override
+  String jv2IntensityLevel(int level) {
+    return '$level de 5';
+  }
+
+  @override
+  String get jv2IntensityEmotional1 =>
+      'Passa rápido, sigo meu dia normalmente.';
+
+  @override
+  String get jv2IntensityEmotional2 => 'Percebo, mas consigo manter o foco.';
+
+  @override
+  String get jv2IntensityEmotional3 => 'Está tirando minha energia ou foco.';
+
+  @override
+  String get jv2IntensityEmotional4 =>
+      'Está mudando minha rotina (sono, tarefas, convívio).';
+
+  @override
+  String get jv2IntensityEmotional5 =>
+      'Está me travando quase por completo hoje.';
+
+  @override
+  String get jv2IntensityPhysical1 => 'Sinto, mas não atrapalha nada.';
+
+  @override
+  String get jv2IntensityPhysical2 =>
+      'Incomoda, mas mantenho minhas atividades.';
+
+  @override
+  String get jv2IntensityPhysical3 => 'Diminuiu meu ritmo ou me fez pausar.';
+
+  @override
+  String get jv2IntensityPhysical4 =>
+      'Não consigo fazer direito o que preciso.';
+
+  @override
+  String get jv2IntensityPhysical5 =>
+      'Está me travando quase por completo hoje.';
+
+  @override
+  String get jv2EmergencyLine =>
+      'Se for uma emergência, use o botão Ajuda ou ligue 192.';
+
+  @override
+  String get jv2TriggersQuestion => 'Tem algo que pode ter contribuído hoje?';
+
+  @override
+  String get jv2TriggerTrabalho => 'Trabalho ou estudos';
+
+  @override
+  String get jv2TriggerFamilia => 'Família ou relações';
+
+  @override
+  String get jv2TriggerSono => 'Noite mal dormida';
+
+  @override
+  String get jv2TriggerAlimentacao => 'Alimentação';
+
+  @override
+  String get jv2TriggerEsforco => 'Esforço físico';
+
+  @override
+  String get jv2TriggerQueda => 'Queda ou mau jeito';
+
+  @override
+  String get jv2TriggerMedicamento => 'Medicamento novo';
+
+  @override
+  String get jv2TriggerClima => 'Clima ou ambiente';
+
+  @override
+  String get jv2TriggerNaoSei => 'Não sei';
+
+  @override
+  String get jv2TriggerOutro => 'Outro';
+
+  @override
+  String get jv2TriggerNoteHint => 'Conte em poucas palavras';
+
+  @override
+  String get jv2NoteQuestion => 'Quer contar mais?';
+
+  @override
+  String get jv2NoteHint => 'Escreva com suas palavras (opcional)';
+
+  @override
+  String get jv2SaveError => 'Não foi possível salvar agora. Tente de novo.';
+
+  @override
+  String get jv2SavedOffline =>
+      'Registro salvo no aparelho. Ele será enviado quando houver conexão.';
+
+  @override
+  String get jv2ConditionsTitle => 'Minhas condições';
+
+  @override
+  String get jv2ConditionsSubtitle =>
+      'Informadas por você. Escreva com suas palavras; cada uma aparece no seu registro diário com a mesma escala de 1 a 5.';
+
+  @override
+  String get jv2ConditionsAdd => 'Adicionar';
+
+  @override
+  String get jv2ConditionsFieldHint => 'Ex.: Enxaqueca';
+
+  @override
+  String get jv2ConditionsEmpty => 'Você ainda não adicionou nenhuma.';
+
+  @override
+  String get jv2ConditionsArchive => 'Arquivar';
+
+  @override
+  String jv2ConditionsArchiveConfirm(String label) {
+    return 'Arquivar \"$label\"? Seus registros antigos continuam com esse nome.';
+  }
+
+  @override
+  String jv2ConditionsLimit(int max) {
+    return 'Você pode acompanhar até $max.';
+  }
+
+  @override
+  String get jv2ConditionsOffline =>
+      'Sem conexão. Tente de novo quando estiver online.';
+
+  @override
+  String get jv2ConditionsError => 'Não foi possível salvar. Tente de novo.';
+
+  @override
+  String get jv2ConditionsSettingsSubtitle =>
+      'Acompanhe, com suas palavras, algo que você já conhece';
+
+  @override
+  String get jv2PhraseTime1 => 'Entendi. Vamos registrar isso com calma.';
+
+  @override
+  String get jv2PhraseTime2 => 'Obrigado por contar. Vamos anotar isso.';
+
+  @override
+  String get jv2PhraseTime3 => 'Tudo bem. Um passo de cada vez.';
+
+  @override
+  String get jv2PhraseTime4 => 'Certo. Vamos registrar do seu jeito.';
+
+  @override
+  String get jv2PhrasePassado1 =>
+      'A mente às vezes volta no tempo. Vamos anotar isso.';
+
+  @override
+  String get jv2PhrasePassado2 => 'Obrigado por contar. Tem a ver com o quê?';
+
+  @override
+  String get jv2PhrasePassado3 => 'Vamos registrar isso com calma.';
+
+  @override
+  String get jv2PhrasePresente1 => 'Vamos anotar o que está pesando hoje.';
+
+  @override
+  String get jv2PhrasePresente2 => 'Entendi. O que combina mais com agora?';
+
+  @override
+  String get jv2PhrasePresente3 => 'Obrigado por contar. Vamos registrar isso.';
+
+  @override
+  String get jv2PhraseFuturo1 =>
+      'Pensar no que vem pela frente faz parte. Vamos anotar.';
+
+  @override
+  String get jv2PhraseFuturo2 => 'Entendi. O que combina mais com você?';
+
+  @override
+  String get jv2PhraseFuturo3 =>
+      'Obrigado por contar. Vamos registrar isso com calma.';
+
+  @override
+  String get jv2PhraseBody1 => 'Vamos anotar o que você sente no corpo.';
+
+  @override
+  String get jv2PhraseBody2 => 'Toque onde você sente desconforto.';
+
+  @override
+  String get jv2PhraseBody3 => 'Obrigado por contar. Onde você sente isso?';
+
+  @override
+  String get jv2PhraseRegion1 => 'Vamos anotar o que você sente aqui.';
+
+  @override
+  String get jv2PhraseRegion2 => 'Entendi. Como é essa sensação?';
+
+  @override
+  String get jv2PhraseRegion3 => 'Obrigado por contar. O que combina mais?';
+
+  @override
+  String get jv2PhraseRegion4 =>
+      'Registrar ajuda você a acompanhar seu dia a dia.';
+
+  @override
+  String get jv2PhraseIntensity1 => 'Você escolhe o número. A escala é sua.';
+
+  @override
+  String get jv2PhraseIntensity2 =>
+      'Não existe resposta certa. Vale o que você sente.';
+
+  @override
+  String get jv2PhraseIntensity3 => 'Quase lá. Só mais um pouco.';
+
+  @override
+  String get jv2PhraseTriggers1 =>
+      'Se quiser, marque o que pode ter contribuído.';
+
+  @override
+  String get jv2PhraseTriggers2 => 'É opcional. Você pode pular.';
+
+  @override
+  String get jv2PhraseTriggers3 => 'Quase pronto. Algo marcou o seu dia?';
+
+  @override
+  String get xv2CropTitle => 'Ajustar foto';
+
+  @override
+  String get xv2CropHint =>
+      'Use dois dedos para aproximar e arraste para enquadrar.';
+
+  @override
+  String get xv2CropReset => 'Recomeçar';
+
+  @override
+  String get xv2CropConfirm => 'Usar foto';
+
+  @override
+  String xv2GreetingMorning(String name) {
+    return 'Olá, $name! Bom dia';
+  }
+
+  @override
+  String xv2GreetingAfternoon(String name) {
+    return 'Olá, $name! Boa tarde';
+  }
+
+  @override
+  String xv2GreetingEvening(String name) {
+    return 'Olá, $name! Boa noite';
+  }
+
+  @override
+  String get xv2GreetingMorningNoName => 'Olá! Bom dia';
+
+  @override
+  String get xv2GreetingAfternoonNoName => 'Olá! Boa tarde';
+
+  @override
+  String get xv2GreetingEveningNoName => 'Olá! Boa noite';
+
+  @override
+  String get xv2HydrationOfferTitle => 'Quer lembretes para beber água?';
+
+  @override
+  String get xv2HydrationOfferBody =>
+      'Você escolhe os horários e a sua meta nos ajustes de hidratação. Dá para mudar quando quiser.';
+
+  @override
+  String get xv2HydrationOfferYes => 'Sim, configurar';
+
+  @override
+  String get xv2HydrationOfferNo => 'Agora não';
+
+  @override
+  String get xv2LibTitle => 'Biblioteca';
+
+  @override
+  String get xv2LibIntro =>
+      'Textos gerais de fontes públicas sobre hábitos saudáveis. São iguais para todas as pessoas e não são orientação para o seu caso.';
+
+  @override
+  String xv2LibSource(String source) {
+    return 'Fonte: $source';
+  }
+
+  @override
+  String xv2LibReadTime(int minutes) {
+    return '$minutes min de leitura';
+  }
+
+  @override
+  String get xv2LibOpen => 'Abrir texto';
+
+  @override
+  String get xv2LibOpenError => 'Não foi possível abrir o link agora.';
+
+  @override
+  String get xv2LibCatEmocoes => 'Emoções e humor';
+
+  @override
+  String get xv2LibCatEstresse => 'Estresse e descanso';
+
+  @override
+  String get xv2LibCatSono => 'Sono';
+
+  @override
+  String get xv2LibCatCorpo => 'Corpo e movimento';
+
+  @override
+  String get xv2LibCatAlimentacao => 'Alimentação e digestão';
+
+  @override
+  String get xv2LibCatHidratacao => 'Hidratação';
+
+  @override
+  String get xv2LibCatRelacoes => 'Relações e convívio';
+
+  @override
+  String get xv2LibCatAjuda => 'Primeiros cuidados e quando procurar ajuda';
+
+  @override
+  String get xv2LibArtDesanimoTitle => 'Dias de desânimo e pouca energia';
+
+  @override
+  String get xv2LibArtDesanimoSummary =>
+      'Pequenas rotinas para dias de desânimo e onde encontrar apoio.';
+
+  @override
+  String get xv2LibArtAgitacaoTitle => 'Momentos de agitação: como desacelerar';
+
+  @override
+  String get xv2LibArtAgitacaoSummary =>
+      'Informações gerais sobre nervosismo e pensamentos acelerados no dia a dia.';
+
+  @override
+  String get xv2LibArtTrabalhoTitle =>
+      'Cansaço no trabalho e limites saudáveis';
+
+  @override
+  String get xv2LibArtTrabalhoSummary =>
+      'Informações gerais sobre cansaço emocional no trabalho e pausas na rotina.';
+
+  @override
+  String get xv2LibArtRespiracaoTitle => 'Respiração compassada para relaxar';
+
+  @override
+  String get xv2LibArtRespiracaoSummary =>
+      'Alguns minutos de respiração tranquila podem ajudar a desacelerar em dias exigentes.';
+
+  @override
+  String get xv2LibArtSonoTitle => 'Hábitos para dormir melhor';
+
+  @override
+  String get xv2LibArtSonoSummary =>
+      'Horários regulares e hábitos simples que favorecem noites mais tranquilas.';
+
+  @override
+  String get xv2LibArtBracosTitle => 'Braços e ombros: pausas e postura';
+
+  @override
+  String get xv2LibArtBracosSummary =>
+      'Informações gerais sobre esforço repetitivo e pausas durante o dia.';
+
+  @override
+  String get xv2LibArtMovimentoTitle => 'Movimente-se no dia a dia';
+
+  @override
+  String get xv2LibArtMovimentoSummary =>
+      'Orientações gerais sobre atividade física em todas as idades.';
+
+  @override
+  String get xv2LibArtAlimentacaoTitle =>
+      'Guia Alimentar para a População Brasileira';
+
+  @override
+  String get xv2LibArtAlimentacaoSummary =>
+      'Princípios gerais para uma alimentação equilibrada, com comida de verdade.';
+
+  @override
+  String get xv2LibArtAguaTitle => 'Água ao longo do dia';
+
+  @override
+  String get xv2LibArtAguaSummary =>
+      'Beber água ao longo do dia faz parte de hábitos de vida saudáveis.';
+
+  @override
+  String get xv2LibArtConvivioTitle => 'Bem-estar emocional e convívio';
+
+  @override
+  String get xv2LibArtConvivioSummary =>
+      'Informações gerais sobre bem-estar emocional, relações e apoio da comunidade.';
+
+  @override
+  String get xv2LibArtSamuTitle => 'SAMU 192: como funciona';
+
+  @override
+  String get xv2LibArtSamuSummary =>
+      'O serviço móvel gratuito do SUS que atende pelo telefone 192 em todo o país.';
+
+  @override
+  String get xv2LibArtCvvTitle => 'CVV 188: apoio emocional';
+
+  @override
+  String get xv2LibArtCvvSummary =>
+      'Conversa gratuita e sigilosa, 24 horas, por telefone, chat ou e-mail.';
+
+  @override
+  String xv2ReportedIntensity(int intensity) {
+    return 'Intensidade que você informou: $intensity/5';
+  }
+
+  @override
+  String get xv2SummaryTitle => 'Seu registro de hoje';
+
+  @override
+  String get xv2SummarySaved => 'Seu registro foi salvo.';
+
+  @override
+  String get xv2SummaryThanks =>
+      'Obrigado por registrar seu dia! 🌿 Na Biblioteca você encontra textos de fontes públicas, como o Ministério da Saúde, sobre hábitos saudáveis.';
+
+  @override
+  String get xv2SummaryOpenLibrary => 'Abrir a Biblioteca';
+
+  @override
+  String get xv2AdLabel => 'Anúncio';
+
+  @override
+  String get xv2AdLearnMore => 'Saiba mais';
+
+  @override
+  String get xv2AdPremiumTitle => 'Dualis Premium';
+
+  @override
+  String get xv2AdPremiumBody =>
+      'Veja seus registros de até 12 meses e escolha seus fundos. Em breve.';
+
+  @override
+  String get xv2AdZocTitle => 'ZOC · Cadernos e agendas';
+
+  @override
+  String get xv2AdZocBody =>
+      'Planeje a semana com calma, no papel. Exemplo de anúncio.';
+
+  @override
+  String get xv2AdWgiTitle => 'WGI · Garrafas reutilizáveis';
+
+  @override
+  String get xv2AdWgiBody => 'Leve sua água para onde for. Exemplo de anúncio.';
+
+  @override
+  String get xv2AdUboTitle => 'UBO · Playlists para relaxar';
+
+  @override
+  String get xv2AdUboBody =>
+      'Sons de natureza para pausas no dia. Exemplo de anúncio.';
+
+  @override
+  String get xv2DashTitle => 'Histórico';
+
+  @override
+  String xv2DashWindow(int days) {
+    return 'Seus registros dos últimos $days dias';
+  }
+
+  @override
+  String get xv2DashRetry => 'Tentar novamente';
+
+  @override
+  String get xv2DashTimeTitle => 'Passado, presente e futuro';
+
+  @override
+  String xv2DashTimeCount(String time, int count) {
+    return '$time: $count';
+  }
+
+  @override
+  String get xv2DashNoEmotional => 'Nenhum registro emocional neste período.';
+
+  @override
+  String get xv2DashBodyTitle => 'Partes do corpo que você marcou';
+
+  @override
+  String get xv2DashFront => 'Frente';
+
+  @override
+  String get xv2DashBack => 'Costas';
+
+  @override
+  String xv2DashRegionDays(String region, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dias',
+      one: '1 dia',
+      zero: 'nenhum dia',
+    );
+    return '$region: $_temp0';
+  }
+
+  @override
+  String get xv2DashLinesTitle => 'Intensidade por dia';
+
+  @override
+  String get xv2DashLinesSubtitle =>
+      'A intensidade que você informou em cada registro (1 a 5).';
+
+  @override
+  String xv2DashDaysCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dias',
+      one: '1 dia',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get xv2DashSeeMore => 'Ver mais';
+
+  @override
+  String get xv2DashSeeLess => 'Ver menos';
+
+  @override
+  String get xv2DashNoItems => 'Nenhum item registrado neste período.';
+
+  @override
+  String get xv2DashWaterTitle => 'Água por dia';
+
+  @override
+  String get xv2DashNoWater => 'Nenhum registro de água neste período.';
+
+  @override
+  String get xv2DashTogetherTitle => 'No mesmo dia';
+
+  @override
+  String xv2DashCooccurrence(int total, String a, String b, int both) {
+    return 'Nos $total dias em que você marcou \'$a\', também marcou \'$b\' em $both.';
+  }
+
+  @override
+  String get xv2DashEntriesTitle => 'Seus registros';
+
+  @override
+  String get xv2DashNoEntries => 'Você ainda não tem registros neste período.';
+
+  @override
+  String xv2DashMoodLine(String mood) {
+    return 'Como você estava: $mood';
+  }
+
+  @override
+  String get xv2DashDeleteTitle => 'Excluir registro';
+
+  @override
+  String get xv2DashDeleteBody =>
+      'Este registro será apagado do seu histórico.';
+
+  @override
+  String get xv2DashDeleteConfirm => 'Excluir';
+
+  @override
+  String get xv2WaterTitle => 'Hidratação 💧';
+
+  @override
+  String get xv2WaterTodayLogs => 'Registros de hoje';
+
+  @override
+  String get xv2WaterHistoryTitle => 'Últimos 30 dias';
+
+  @override
+  String get xv2WaterRemindersTitle => 'Lembretes de água';
+
+  @override
+  String get xv2WaterOther => 'Outro';
+
+  @override
+  String xv2WaterStreak(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Sequência: $count dias',
+      one: 'Sequência: 1 dia',
+      zero: 'Sequência: 0 dias',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String xv2WaterGoalChip(int ml) {
+    return 'Sua meta: $ml ml';
+  }
+
+  @override
+  String get xv2WaterGoalDialogTitle => 'Sua meta diária';
+
+  @override
+  String get xv2WaterGoalHint =>
+      'Você escolhe a sua meta, entre 250 e 10000 ml.';
+
+  @override
+  String get xv2WaterGoalSave => 'Salvar';
+
+  @override
+  String get xv2WaterNoLogsToday =>
+      'Nenhum copo de água registrado hoje ainda.';
+
+  @override
+  String xv2WaterLoggedAt(String time) {
+    return 'Registrado às $time';
+  }
+
+  @override
+  String xv2WaterLoggedViaReminder(String time) {
+    return 'Registrado via lembrete das $time';
+  }
+
+  @override
+  String get xv2WaterDeleteLog => 'Excluir registro';
+
+  @override
+  String get jv2PendingSync => 'Aguardando sincronizar';
+
+  @override
+  String get jv2OutboxRejectedNotice =>
+      'Um registro não pôde ser enviado. Revise e tente de novo.';
 }

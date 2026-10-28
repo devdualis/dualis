@@ -12,7 +12,7 @@ class HydrationState {
   final bool isLoading;
   final int todayTotalMl;
   final List<WaterIntakeEntry> todayLogs;
-  final Map<DateTime, int> last7DaysTotals;
+  final Map<DateTime, int> last30DaysTotals;
   final HydrationSettings settings;
   final String? errorMessage;
 
@@ -20,7 +20,7 @@ class HydrationState {
     this.isLoading = false,
     this.todayTotalMl = 0,
     this.todayLogs = const [],
-    this.last7DaysTotals = const {},
+    this.last30DaysTotals = const {},
     this.settings = const HydrationSettings(),
     this.errorMessage,
   });
@@ -35,11 +35,37 @@ class HydrationState {
 
   bool get isGoalReached => todayTotalMl >= dailyTargetMl && dailyTargetMl > 0;
 
+  /// Days in a row the person reached their own goal, ending today, or
+  /// yesterday while today's goal is still open (strategy §11).
+  int streakDays([DateTime? now]) {
+    if (dailyTargetMl <= 0) return 0;
+    final ref = now ?? DateTime.now();
+    final today = DateTime(ref.year, ref.month, ref.day);
+    int totalFor(DateTime day) {
+      if (day == today) return todayTotalMl;
+      for (final e in last30DaysTotals.entries) {
+        final k = DateTime(e.key.year, e.key.month, e.key.day);
+        if (k == day) return e.value;
+      }
+      return 0;
+    }
+
+    var day = totalFor(today) >= dailyTargetMl
+        ? today
+        : DateTime(today.year, today.month, today.day - 1);
+    var streak = 0;
+    while (totalFor(day) >= dailyTargetMl) {
+      streak++;
+      day = DateTime(day.year, day.month, day.day - 1);
+    }
+    return streak;
+  }
+
   HydrationState copyWith({
     bool? isLoading,
     int? todayTotalMl,
     List<WaterIntakeEntry>? todayLogs,
-    Map<DateTime, int>? last7DaysTotals,
+    Map<DateTime, int>? last30DaysTotals,
     HydrationSettings? settings,
     String? errorMessage,
   }) {
@@ -47,7 +73,7 @@ class HydrationState {
       isLoading: isLoading ?? this.isLoading,
       todayTotalMl: todayTotalMl ?? this.todayTotalMl,
       todayLogs: todayLogs ?? this.todayLogs,
-      last7DaysTotals: last7DaysTotals ?? this.last7DaysTotals,
+      last30DaysTotals: last30DaysTotals ?? this.last30DaysTotals,
       settings: settings ?? this.settings,
       errorMessage: errorMessage,
     );
@@ -95,7 +121,7 @@ class HydrationController extends Notifier<HydrationState> {
         day: DateTime.now(),
       );
       final todayTotal = todayLogs.fold<int>(0, (int sum, WaterIntakeEntry l) => sum + l.amountMl);
-      final last7Days = await _repository.getLast7DaysTotals(
+      final last30Days = await _repository.getDailyTotals(
         userId: _currentUserId,
       );
 
@@ -111,7 +137,7 @@ class HydrationController extends Notifier<HydrationState> {
         settings: settings,
         todayLogs: todayLogs,
         todayTotalMl: todayTotal,
-        last7DaysTotals: last7Days,
+        last30DaysTotals: last30Days,
       );
 
       final isGoalReached =
@@ -152,16 +178,16 @@ class HydrationController extends Notifier<HydrationState> {
       final updatedLogs = [...state.todayLogs, newLog];
       final updatedTotal = state.todayTotalMl + amountMl;
 
-      // Atualiza também o mapa dos últimos 7 dias para refletir imediatamente no gráfico
+      // Atualiza também o mapa dos últimos 30 dias para refletir imediatamente no gráfico
       final today = DateTime.now();
       final todayKey = DateTime(today.year, today.month, today.day);
-      final updatedLast7 = Map<DateTime, int>.from(state.last7DaysTotals);
-      updatedLast7[todayKey] = (updatedLast7[todayKey] ?? 0) + amountMl;
+      final updatedLast30 = Map<DateTime, int>.from(state.last30DaysTotals);
+      updatedLast30[todayKey] = (updatedLast30[todayKey] ?? 0) + amountMl;
 
       state = state.copyWith(
         todayLogs: updatedLogs,
         todayTotalMl: updatedTotal,
-        last7DaysTotals: updatedLast7,
+        last30DaysTotals: updatedLast30,
       );
 
       if (state.settings.reminderEnabled && _isSignedIn) {

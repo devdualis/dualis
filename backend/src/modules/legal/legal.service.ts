@@ -295,7 +295,7 @@ export class LegalService {
               'Los datos sensibles de salud se tratan exclusivamente para las siguientes finalidades. Nunca vendemos datos de salud a terceros, anunciantes o aseguradoras.',
             bullets: [
               'Registro y visualización de su diario de bienestar.',
-              'Organización automática de sus anotaciones por área del cuerpo o emoción (con ayuda de IA, sin evaluación de salud).',
+              'Sugerir, con ayuda de IA, una opción ya existente del diario cuando usted escribe con sus palabras (sin evaluación de salud).',
               'Consistencia del historial.',
             ],
           },
@@ -305,8 +305,8 @@ export class LegalService {
             content:
               'Para prestar el servicio compartimos datos únicamente con los siguientes encargados del tratamiento:',
             bullets: [
-              'Google LLC (API Gemini): el texto de sus anotaciones se envía a la API Gemini de Google para organizarlas automáticamente. La IA no evalúa su salud.',
-              'Transferencia internacional: este procesamiento puede realizarse en servidores ubicados fuera de Brasil (LGPD Art. 33).',
+              'Google LLC (API Gemini): el texto de "escribir el mío" puede enviarse a Gemini solo para sugerir una opción ya existente del diario. La IA no evalúa su salud.',
+              'Transferencia internacional: ese procesamiento puede realizarse fuera de Brasil (LGPD Art. 33).',
               'Proveedores de infraestructura en la nube (alojamiento y base de datos), sujetos a obligaciones de confidencialidad y seguridad.',
             ],
           },
@@ -370,7 +370,7 @@ export class LegalService {
               'Sensitive health data is processed solely for the purposes below. We strictly forbid the sale or sharing of health data with advertising networks or insurance brokers.',
             bullets: [
               'Recording and viewing your wellness journal.',
-              'Automatically organizing your notes by body area or mood (AI-assisted, with no health assessment).',
+              'Suggesting, with AI help, an existing diary option when you write in your own words (no health assessment).',
               'Keeping your history consistent.',
             ],
           },
@@ -379,8 +379,8 @@ export class LegalService {
             title: '3. Processors & International Transfer',
             content: 'We share data only with the following processors, to run the service:',
             bullets: [
-              'Google LLC (Gemini API): the text of your notes is sent to Google\'s Gemini API to organize them automatically. The AI does not assess your health.',
-              'International transfer: this processing may take place on servers located outside Brazil (LGPD Art. 33).',
+              'Google LLC (Gemini API): text from "write my own" may be sent to Gemini only to suggest an existing diary option. The AI does not assess your health.',
+              'International transfer: that processing may take place outside Brazil (LGPD Art. 33).',
               'Cloud infrastructure providers (hosting and database), bound by confidentiality and security obligations.',
             ],
           },
@@ -445,7 +445,7 @@ export class LegalService {
             'Os dados sensíveis de saúde são tratados exclusivamente para as finalidades abaixo. É expressamente PROIBIDA a venda, comercialização ou compartilhamento de dados de saúde com seguradoras, anunciantes ou terceiros não autorizados.',
           bullets: [
             'Registro e visualização do seu diário de bem-estar.',
-            'Organização automática das suas anotações por área do corpo ou emoção (com auxílio de IA, sem avaliação de saúde).',
+            'Sugerir, com ajuda de IA, uma opção já existente do diário quando você escreve com as suas palavras (sem avaliação de saúde).',
             'Consistência do histórico.',
           ],
         },
@@ -455,8 +455,8 @@ export class LegalService {
           content:
             'Compartilhamos dados apenas com os operadores abaixo, para a prestação do serviço:',
           bullets: [
-            'Google LLC (API Gemini): o texto das suas anotações é enviado à API Gemini do Google para organizá-las automaticamente. A IA não avalia a sua saúde.',
-            'Transferência internacional: esse processamento pode ocorrer em servidores localizados fora do Brasil (LGPD Art. 33).',
+            'Google LLC (API Gemini): o texto de "escrever o meu" pode ser enviado à Gemini só para sugerir uma opção já existente do diário. A IA não avalia a sua saúde.',
+            'Transferência internacional: esse processamento pode ocorrer fora do Brasil (LGPD Art. 33).',
             'Provedores de infraestrutura em nuvem (hospedagem e banco de dados), sujeitos a obrigações de confidencialidade e segurança.',
           ],
         },

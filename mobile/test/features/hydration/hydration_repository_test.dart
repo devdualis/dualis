@@ -117,7 +117,7 @@ void main() {
       expect(logsB.first.amountMl, equals(500));
     });
 
-    test('getLast7DaysTotals includes all 7 days with correct sums', () async {
+    test('getDailyTotals includes all 30 days with correct sums', () async {
       const userId = 'user-123';
       final now = DateTime.now();
 
@@ -127,7 +127,7 @@ void main() {
             timestamp: any(named: 'timestamp'),
           )).thenAnswer((_) async => null);
       when(() => remoteDataSource.getHistoryTotals(
-            days: 7,
+            days: 30,
             referenceDate: any(named: 'referenceDate'),
           )).thenAnswer((_) async => null);
       when(() => remoteDataSource.getTodayLogs(date: any(named: 'date')))
@@ -144,8 +144,8 @@ void main() {
         timestamp: now,
       );
 
-      final totals = await repository.getLast7DaysTotals(userId: userId, referenceDate: now);
-      expect(totals.length, equals(7));
+      final totals = await repository.getDailyTotals(userId: userId, referenceDate: now);
+      expect(totals.length, equals(30));
 
       final todayKey = DateTime(now.year, now.month, now.day);
       expect(totals[todayKey], equals(750));

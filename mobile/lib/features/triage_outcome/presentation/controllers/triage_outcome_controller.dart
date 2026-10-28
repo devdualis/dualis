@@ -137,13 +137,8 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
         'geral';
     final narrative = log.narrative ?? log.stepAnswers?['naturalLanguageText'] as String? ?? '';
 
-    final articles = CuratedArticlesCatalog.getArticlesForSymptoms(
-      queryText: narrative,
-      anatomicalSystem: log.anatomicalSystem,
-      emotionalDimension: log.emotionalDimension,
-      isEmotionalDistressed: log.emotionalDimension != null,
-      isPhysicalDistressed: log.anatomicalSystem != null,
-    );
+    // General readings, the same for everyone (strategy §9.3).
+    final articles = CuratedArticlesCatalog.wellnessArticles;
 
     return TriageOutcome(
       id: log.id,
@@ -207,15 +202,8 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
       secondaryCode = emotionalStatus == 'badSick' ? 'depressiva_desanimo' : 'ansiosa_agitacao';
     }
 
-    final resolvedArticles = (articles != null && articles.isNotEmpty)
-        ? articles
-        : CuratedArticlesCatalog.getArticlesForSymptoms(
-            queryText: naturalLanguageText,
-            anatomicalSystem: primaryCode,
-            emotionalDimension: secondaryCode,
-            isEmotionalDistressed: isEmotional,
-            isPhysicalDistressed: isPhysical,
-          );
+    // General readings, the same for everyone (strategy §9.3).
+    final resolvedArticles = CuratedArticlesCatalog.wellnessArticles;
 
     final outcome = TriageOutcome(
       id: id,

@@ -44,7 +44,6 @@ class ApiEndpoints {
 
   static const String triageHistory = '/v1/triage/history';
   static String triageHistoryItem(String id) => '/v1/triage/history/$id';
-  static const String classifySymptom = '/v1/ai/classify-symptom';
   static const String exportData = '/v1/auth/export-data';
   static const String deleteAccount = '/v1/auth/account';
 
@@ -52,4 +51,10 @@ class ApiEndpoints {
   static const String hydrationToday = '/v1/hydration/today';
   static const String hydrationHistory = '/v1/hydration/history';
   static String hydrationLogItem(String id) => '/v1/hydration/log/$id';
+
+  // Journal v2 read side and house ads (docs/bienestar/CONTRATO-JOURNAL-V2.md).
+  static const String journalEntries = '/v1/journal/entries';
+  static String journalEntry(String id) => '/v1/journal/entries/$id';
+  static const String journalSummary = '/v1/journal/summary';
+  static const String houseAds = '/v1/house-ads';
 }

@@ -6,12 +6,13 @@ import 'package:go_router/go_router.dart';
 
 import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/features/home/presentation/screens/home_screen.dart';
-import 'package:dualis_mobile/features/home/presentation/widgets/admob_banner_container.dart';
 import 'package:dualis_mobile/features/home/domain/trigger_checkin_state.dart';
 import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
 import 'package:dualis_mobile/features/dashboard/data/triage_history_remote_data_source.dart';
 import 'package:dualis_mobile/features/dashboard/domain/models/triage_history_models.dart';
 import 'package:dualis_mobile/features/home/presentation/widgets/dual_axis_trigger_card.dart';
+import 'package:dualis_mobile/features/journal/presentation/controllers/journal_flow_state.dart';
+import 'package:dualis_mobile/features/journal/presentation/screens/journal_flow_screen.dart';
 import 'package:dualis_mobile/features/triage/domain/triage_vertical.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
@@ -27,16 +28,12 @@ Widget createTriggerCheckInTestApp({
         builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
-        path: RoutePaths.triage,
+        path: RoutePaths.journal,
         builder: (context, state) {
-          final TriageVertical vertical;
-          if (state.extra is TriageNavigationArgs) {
-            vertical = (state.extra as TriageNavigationArgs).initialVertical;
-          } else if (state.extra is TriageVertical) {
-            vertical = state.extra as TriageVertical;
-          } else {
-            vertical = TriageVertical.psicoEmocional;
-          }
+          final args = state.extra as JournalFlowArgs?;
+          final vertical = args?.initialArea == JournalArea.physical
+              ? TriageVertical.fisica
+              : TriageVertical.psicoEmocional;
           if (onTriageNavigated != null) {
             onTriageNavigated(vertical);
           }
@@ -221,21 +218,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('“Sensação de paz e clareza mental”'), findsOneWidget);
-    });
-
-    testWidgets('7. Renders privacy-safe local AdMob banner container (AD-01)',
-        (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1200, 3000);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-
-      await tester.pumpWidget(createTriggerCheckInTestApp());
-      await tester.pumpAndSettle();
-
-      expect(find.byType(AdMobBannerContainer), findsOneWidget);
-      expect(find.text('Parceiro local • Anúncio não usa seus dados de saúde'), findsOneWidget);
-      expect(find.text('AD'), findsOneWidget);
     });
 
     testWidgets('8. Both stages completed shows both summaries without the redundant banner',

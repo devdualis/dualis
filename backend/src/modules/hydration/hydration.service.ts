@@ -1,13 +1,28 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { and, desc, eq, gte, lte } from 'drizzle-orm';
+import { and, desc, eq, gte, lt, lte } from 'drizzle-orm';
 import { DatabaseService } from '../../database/database.service';
 import { waterIntakeLogs } from '../../database/schema/water-intake-logs.schema';
+import { localDay } from '../../common/time/local-day';
 import { LogWaterDto } from './dto/log-water.dto';
 import {
   HydrationHistoryResponseDto,
   HydrationTodayResponseDto,
   WaterIntakeLogItemDto,
 } from './dto/hydration-response.dto';
+
+/**
+ * Last local day of the history window. A wall-clock value without a zone
+ * (`2026-10-27` or `2026-10-27T22:00:00`) already is the device's local time; a value
+ * with `Z` or an offset is converted with `tzOffsetMinutes`.
+ */
+function referenceLocalDay(value: string | undefined, tzOffsetMinutes: number): string {
+  if (value) {
+    if (/^\d{4}-\d{2}-\d{2}(T[^Zz+-]*)?$/.test(value)) return value.slice(0, 10);
+    const parsed = new Date(value);
+    if (!isNaN(parsed.getTime())) return localDay(parsed, tzOffsetMinutes);
+  }
+  return localDay(new Date(), tzOffsetMinutes);
+}
 
 @Injectable()
 export class HydrationService {
@@ -103,29 +118,26 @@ export class HydrationService {
     });
   }
 
+  /**
+   * Daily totals for the [days] local days ending on the reference day. Days are the
+   * device's calendar days (`tzOffsetMinutes` east of UTC, default 0), so water logged
+   * at 22:00 in Brasília counts on that Brasília day.
+   */
   async getHistory(
     userId: string,
     profileId: string,
     days = 7,
     referenceDateStr?: string,
+    tzOffsetMinutes = 0,
   ): Promise<HydrationHistoryResponseDto> {
     this.assertIds(userId, profileId);
 
-    let refDate = new Date();
-    if (referenceDateStr) {
-      const parsed = new Date(referenceDateStr);
-      if (!isNaN(parsed.getTime())) {
-        refDate = parsed;
-      }
-    }
-
-    // Calculate start date: (days - 1) days ago at 00:00:00
-    const startDate = new Date(refDate);
-    startDate.setDate(startDate.getDate() - (days - 1));
-    startDate.setHours(0, 0, 0, 0);
-
-    const endDate = new Date(refDate);
-    endDate.setHours(23, 59, 59, 999);
+    const lastDay = referenceLocalDay(referenceDateStr, tzOffsetMinutes);
+    const [y, m, d] = lastDay.split('-').map(Number);
+    const offsetMs = tzOffsetMinutes * 60_000;
+    // Instants where the first local day starts and the day after the last one starts.
+    const start = new Date(Date.UTC(y, m - 1, d - (days - 1)) - offsetMs);
+    const end = new Date(Date.UTC(y, m - 1, d + 1) - offsetMs);
 
     return this.databaseService.withRls(userId, async (tx) => {
       const records = await tx
@@ -134,45 +146,24 @@ export class HydrationService {
         .where(
           and(
             eq(waterIntakeLogs.profileId, profileId),
-            gte(waterIntakeLogs.recordedAt, startDate),
-            lte(waterIntakeLogs.recordedAt, endDate),
+            gte(waterIntakeLogs.recordedAt, start),
+            lt(waterIntakeLogs.recordedAt, end),
           ),
         )
         .orderBy(desc(waterIntakeLogs.recordedAt));
 
-      // Build daily map for all requested days
       const totals: Record<string, number> = {};
-      const dayList: { date: string; totalMl: number }[] = [];
-
       for (let i = days - 1; i >= 0; i--) {
-        const d = new Date(refDate);
-        d.setDate(d.getDate() - i);
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        const dateKey = `${yyyy}-${mm}-${dd}`;
-        totals[dateKey] = 0;
+        totals[new Date(Date.UTC(y, m - 1, d - i)).toISOString().slice(0, 10)] = 0;
       }
-
       for (const rec of records) {
-        const d = new Date(rec.recordedAt);
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        const dateKey = `${yyyy}-${mm}-${dd}`;
-
-        if (totals[dateKey] !== undefined) {
-          totals[dateKey] += rec.amountMl;
-        }
-      }
-
-      for (const [date, totalMl] of Object.entries(totals)) {
-        dayList.push({ date, totalMl });
+        const key = localDay(new Date(rec.recordedAt), tzOffsetMinutes);
+        if (totals[key] !== undefined) totals[key] += rec.amountMl;
       }
 
       return {
         totals,
-        days: dayList,
+        days: Object.entries(totals).map(([date, totalMl]) => ({ date, totalMl })),
       };
     });
   }

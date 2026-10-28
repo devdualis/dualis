@@ -121,99 +121,9 @@ class TodayTriageResultTab extends ConsumerWidget {
             ? triggerStatusFromIntensity(outcome.intensityScore)
             : (triggerState.emotionalStatus ?? TriggerStatus.goodNormal);
 
-    final isPhysicalDistressed = physicalStatus != TriggerStatus.goodNormal;
-    final isEmotionalDistressed = emotionalStatus != TriggerStatus.goodNormal;
-
-    // Collect physical articles
-    List<RecommendedArticle> physicalArticles = [];
-    if (isPhysical && outcome.recommendedArticles.isNotEmpty) {
-      physicalArticles =
-          outcome.recommendedArticles
-              .where(
-                (a) =>
-                    a.category != 'depressiva_desanimo' &&
-                    a.category != 'ansiosa_agitacao' &&
-                    a.category != 'estresse_burnout' &&
-                    a.category != 'sono' &&
-                    a.category != 'respiracao',
-              )
-              .toList();
-    }
-    if (physicalArticles.isEmpty) {
-      physicalArticles = CuratedArticlesCatalog.getArticlesForSymptoms(
-        queryText:
-            isPhysical
-                ? outcome.aiMappedLayTerm
-                : triggerState.physicalNarrative,
-        anatomicalSystem:
-            isPhysical ? outcome.primaryCategory : 'membros_superiores',
-        isPhysicalDistressed: true,
-      );
-    }
-
-    // Collect emotional articles
-    List<RecommendedArticle> emotionalArticles = [];
-    if (!isPhysical && outcome.recommendedArticles.isNotEmpty) {
-      emotionalArticles =
-          outcome.recommendedArticles
-              .where(
-                (a) =>
-                    a.category == 'depressiva_desanimo' ||
-                    a.category == 'ansiosa_agitacao' ||
-                    a.category == 'estresse_burnout' ||
-                    a.category == 'sono' ||
-                    a.category == 'respiracao',
-              )
-              .toList();
-    }
-    if (emotionalArticles.isEmpty) {
-      final emoSummary = emotionalTitle.toLowerCase();
-      String emoDimension = 'ansiosa_agitacao';
-      if (emoSummary.contains('depress') || emoSummary.contains('desanimo')) {
-        emoDimension = 'depressiva_desanimo';
-      } else if (emoSummary.contains('estresse') ||
-          emoSummary.contains('burnout')) {
-        emoDimension = 'estresse_burnout';
-      }
-      emotionalArticles = CuratedArticlesCatalog.getArticlesForSymptoms(
-        queryText: triggerState.emotionalNarrative ?? emotionalTitle,
-        emotionalDimension: emoDimension,
-        isEmotionalDistressed: true,
-      );
-    }
-
-    final List<RecommendedArticle> articles = [];
-    if (isEmotionalDistressed && isPhysicalDistressed) {
-      // Both axes have symptoms: combine physical and emotional articles
-      for (final p in physicalArticles.take(2)) {
-        if (!articles.any((a) => a.id == p.id)) articles.add(p);
-      }
-      for (final e in emotionalArticles.take(2)) {
-        if (!articles.any((a) => a.id == e.id)) articles.add(e);
-      }
-    } else if (isEmotionalDistressed) {
-      articles.addAll(emotionalArticles.take(2));
-      for (final p in physicalArticles.take(1)) {
-        if (!articles.any((a) => a.id == p.id)) articles.add(p);
-      }
-    } else if (isPhysicalDistressed) {
-      if (outcome.recommendedArticles.isNotEmpty) {
-        articles.addAll(outcome.recommendedArticles);
-      } else {
-        articles.addAll(physicalArticles.take(2));
-      }
-      if (hasEmotionalOutcome) {
-        for (final e in emotionalArticles.take(1)) {
-          if (!articles.any((a) => a.id == e.id)) articles.add(e);
-        }
-      }
-    } else {
-      articles.addAll(
-        outcome.recommendedArticles.isNotEmpty
-            ? outcome.recommendedArticles
-            : CuratedArticlesCatalog.wellnessArticles,
-      );
-    }
+    // Same general readings for everyone: never chosen from what was
+    // recorded (strategy §9.3).
+    final articles = CuratedArticlesCatalog.wellnessArticles;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -474,13 +384,7 @@ class TodayTriageResultTab extends ConsumerWidget {
     final calculatedScore = hasBadSick ? 4 : (hasSoSo ? 3 : 1);
     final l10n = AppLocalizations.of(context);
 
-    final articles = CuratedArticlesCatalog.getArticlesForSymptoms(
-      queryText: triggerState.naturalLanguageText,
-      isEmotionalDistressed:
-          triggerState.emotionalStatus != TriggerStatus.goodNormal,
-      isPhysicalDistressed:
-          triggerState.physicalStatus != TriggerStatus.goodNormal,
-    );
+    final articles = CuratedArticlesCatalog.wellnessArticles;
 
     final completedTimeStr =
         triggerState.completedAt != null
@@ -618,7 +522,7 @@ class TodayTriageResultTab extends ConsumerWidget {
           children: [
             Expanded(
               child: Text(
-                l10n.outcomeWellnessReadingsRelatedTitle,
+                l10n.outcomeWellnessReadingsTitle,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

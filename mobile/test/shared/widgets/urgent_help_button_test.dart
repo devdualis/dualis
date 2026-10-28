@@ -68,6 +68,7 @@ Widget buildApp(AppDatabase db, String initialLocation) {
     overrides: [
       isOnlineProvider.overrideWith((ref) => Stream.value(true)),
       pendingOutboxCountProvider.overrideWith((ref) => Stream.value(0)),
+      rejectedOutboxCountProvider.overrideWith((ref) => Stream.value(0)),
       appDatabaseProvider.overrideWithValue(db),
       secureStorageServiceProvider.overrideWithValue(_Storage()),
       triageHistoryDataSourceProvider.overrideWithValue(_NoHistory()),

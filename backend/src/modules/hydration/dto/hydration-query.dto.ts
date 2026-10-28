@@ -18,4 +18,12 @@ export class HydrationHistoryQueryDto {
   @IsOptional()
   @IsDateString()
   referenceDate?: string;
+
+  /** Minutes east of UTC on the device (e.g. -180 for Brasília), used to group by local day. */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(-720)
+  @Max(840)
+  tzOffset?: number;
 }

@@ -57,7 +57,7 @@ void main() {
         intensityScore: 3,
         primaryCategory: 'cabeca',
         categoryLabel: 'Cabeça',
-        somaticMapping: 'Cefaleia',
+        somaticMapping: 'Cabeça',
         recommendedArticles: [],
         recordedAt: DateTime.now(),
       );
@@ -149,7 +149,7 @@ void main() {
         intensityScore: 3,
         primaryCategory: 'cabeca',
         categoryLabel: 'Cabeça',
-        somaticMapping: 'Cefaleia',
+        somaticMapping: 'Cabeça',
         recommendedArticles: [],
         recordedAt: DateTime.now(),
       );
@@ -196,6 +196,7 @@ void main() {
           overrides: [
             isOnlineProvider.overrideWith((ref) => Stream.value(false)),
             pendingOutboxCountProvider.overrideWith((ref) => Stream.value(1)),
+            rejectedOutboxCountProvider.overrideWith((ref) => Stream.value(0)),
           ],
           child: const MaterialApp(
             localizationsDelegates: [

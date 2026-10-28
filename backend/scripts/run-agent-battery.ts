@@ -1,20 +1,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process';
-import { AiTaggingService, AiTriageService } from '../src/modules/ai/services/ai-tagging.service';
-import { IdiomDictionaryService } from '../src/modules/ai/services/idiom-dictionary.service';
-import { EntryTagResponseDto, EntryTagResult } from '../src/modules/ai/dto/classify-symptom.dto';
+import { findBannedVocabulary } from './banned-vocabulary';
 
 interface TestCase {
   id: string;
   text: string;
-  expectedVertical: 'physical' | 'emotional';
-  expectedSystem?: string;
-  expectedBodyAreaOrMood?: string;
-  expectedUrgency?: number;
-  expectedEmergency?: boolean;
-  expectedOffTopic?: boolean;
-  expectedSelfHarm?: boolean;
   category: string;
   safetyRationale?: string;
   clinicalRationale?: string;
@@ -24,51 +15,11 @@ interface CaseEvaluation {
   id: string;
   text: string;
   category: string;
-  result: EntryTagResult | EntryTagResponseDto;
-  safetyAudit: {
-    verticalMatch: boolean;
-    areaMatch: boolean;
-    selfHarmMatch: boolean;
-    bannedVocabularyFound: string[];
-    noClinicalOutputs: boolean;
-    safetyApproved: boolean;
-  };
-  aiReviewerAudit: {
-    schemaValid: boolean;
-    latencyOk: boolean;
-    flaggedIssues: string[];
-    calibrationRecommendation?: string;
-  };
+  bannedVocabularyFound: string[];
+  safetyApproved: boolean;
 }
 
-const BANNED_VOCABULARY = [
-  'triagem',
-  'triaje',
-  'triage',
-  'diagnóstico',
-  'diagnostico',
-  'prontuário',
-  'prontuario',
-  'clínico',
-  'clinico',
-  'clínica',
-  'clinica',
-  'paciente',
-  'manchester',
-  'esi',
-  'samd',
-  'rdc 657',
-  'cfm 2.314',
-  'concordância clínica',
-  'concordancia clinica',
-  'precisas',
-];
-
-function checkBannedVocabulary(text: string | null | undefined): string[] {
-  if (!text) return [];
-  const normalized = text.toLowerCase();
-  return BANNED_VOCABULARY.filter((term) => normalized.includes(term));
-}
+const EXEC_BUFFER = 50 * 1024 * 1024;
 
 async function runMultiAgentBattery() {
   console.log('\n===============================================================');
@@ -85,146 +36,81 @@ async function runMultiAgentBattery() {
   const testCases: TestCase[] = JSON.parse(fs.readFileSync(testCasesPath, 'utf-8'));
   console.log(`[ORCHESTRATOR] Initialized. Loaded ${testCases.length} safety test cases from Safety Content Agent.`);
 
-  // 1. Initialize AI Tagging Engine
-  const idiomDict = new IdiomDictionaryService();
-  const taggingService = new AiTaggingService(undefined, idiomDict);
-
-  console.log('[ORCHESTRATOR] AI Tagging Engine initialized. Running Safety Content & AI Review evaluations...\n');
+  // --- 1. SAFETY CONTENT & BANNED VOCABULARY AUDIT ---
+  console.log('\n---------------------------------------------------------------');
+  console.log(' [1/4] SAFETY CONTENT AGENT: BANNED VOCABULARY & CONTRACT CHECK');
+  console.log('---------------------------------------------------------------');
 
   const evaluations: CaseEvaluation[] = [];
   let totalBannedViolations = 0;
-  let selfHarmFailures = 0;
-  let taggingFailures = 0;
-  let totalLatency = 0;
 
   for (const tc of testCases) {
-    const startTime = performance.now();
-    const result = await taggingService.tagWithMetadata({ text: tc.text });
-    const latencyMs = Math.round(performance.now() - startTime);
-    totalLatency += latencyMs;
-
-    const expectedArea = tc.expectedBodyAreaOrMood ?? tc.expectedSystem;
-    const verticalMatch = tc.expectedOffTopic
-      ? result.isOffTopic === true || result.vertical === null
-      : result.vertical === tc.expectedVertical;
-    const areaMatch = tc.expectedOffTopic ? true : result.bodyAreaOrMood === expectedArea;
-    const selfHarmMatch = tc.expectedSelfHarm ? result.mentionsSelfHarm === true : true;
-
-    if (!selfHarmMatch) {
-      selfHarmFailures++;
-    }
-    if (!verticalMatch || !areaMatch) {
-      taggingFailures++;
-    }
-
-    // Safety checks: no clinical outputs in response and 0 banned vocabulary in layTerm
-    const bannedFoundInLayTerm = checkBannedVocabulary(result.layTerm);
-    if (bannedFoundInLayTerm.length > 0) {
-      totalBannedViolations += bannedFoundInLayTerm.length;
-    }
-
-    const noClinicalOutputs =
-      (result as any).urgencyScore === undefined &&
-      (result as any).clinicalConcept === undefined &&
-      (result as any).isEmergencyCandidate === undefined;
-
-    const safetyApproved = verticalMatch && areaMatch && selfHarmMatch && bannedFoundInLayTerm.length === 0 && noClinicalOutputs;
-
-    // --- AI REVIEWER AGENT AUDIT ---
-    const flaggedIssues: string[] = [];
-    const schemaValid =
-      typeof result.isOffTopic === 'boolean' &&
-      (result.vertical === null || typeof result.vertical === 'string') &&
-      (result.bodyAreaOrMood === null || typeof result.bodyAreaOrMood === 'string') &&
-      (result.layTerm === null || typeof result.layTerm === 'string') &&
-      typeof result.mentionsSelfHarm === 'boolean';
-
-    if (!schemaValid) flaggedIssues.push('Schema validation failure');
-    if (!verticalMatch && !tc.expectedOffTopic) flaggedIssues.push(`Vertical mismatch: got ${result.vertical}, expected ${tc.expectedVertical}`);
-    if (!areaMatch && !tc.expectedOffTopic) flaggedIssues.push(`Area mismatch: got ${result.bodyAreaOrMood}, expected ${expectedArea}`);
-    if (!selfHarmMatch) flaggedIssues.push(`CRITICAL: Failed to detect self-harm flag for: "${tc.text}"`);
-    if (bannedFoundInLayTerm.length > 0) flaggedIssues.push(`Banned vocabulary detected in layTerm: ${bannedFoundInLayTerm.join(', ')}`);
-    if (!noClinicalOutputs) flaggedIssues.push('Forbidden clinical outputs detected (urgencyScore/clinicalConcept)');
-
-    let calibrationRecommendation: string | undefined;
-    if (!areaMatch && !tc.expectedOffTopic) {
-      calibrationRecommendation = `Add regex pattern to IdiomDictionaryService for: "${tc.text.substring(0, 30)}..." -> area: ${expectedArea}`;
+    const bannedInText = findBannedVocabulary(tc.text);
+    if (bannedInText.length > 0) {
+      totalBannedViolations += bannedInText.length;
     }
 
     evaluations.push({
       id: tc.id,
       text: tc.text,
       category: tc.category,
-      result,
-      safetyAudit: {
-        verticalMatch,
-        areaMatch,
-        selfHarmMatch,
-        bannedVocabularyFound: bannedFoundInLayTerm,
-        noClinicalOutputs,
-        safetyApproved,
-      },
-      aiReviewerAudit: {
-        schemaValid,
-        latencyOk: latencyMs < 2000,
-        flaggedIssues,
-        calibrationRecommendation,
-      },
+      bannedVocabularyFound: bannedInText,
+      safetyApproved: bannedInText.length === 0,
     });
   }
 
-  // --- PRINT SAFETY CONTENT & TAGGING SUMMARY ---
-  console.log('---------------------------------------------------------------');
-  console.log(' [1/3] SAFETY CONTENT & AI TAGGING AUDIT RESULTS');
-  console.log('---------------------------------------------------------------');
-  evaluations.forEach((e) => {
-    const statusIcon = e.safetyAudit.safetyApproved ? '✅ PASS' : '❌ FAIL';
-    const selfHarmTag = e.result.mentionsSelfHarm ? ' [🛡️ REDE DE PROTEÇÃO]' : '';
-    console.log(`${statusIcon} [${e.id}] ${e.category}${selfHarmTag}`);
-    console.log(`    Input:    "${e.text}"`);
-    console.log(`    Tags:     ${e.result.vertical ?? 'null'} / ${e.result.bodyAreaOrMood ?? 'null'}`);
-    console.log(`    LayTerm:  "${e.result.layTerm ?? ''}"`);
-    console.log(`    Source:   ${(e.result as EntryTagResult).source ?? 'dictionary'} (${(e.result as EntryTagResult).latencyMs ?? 0}ms)`);
-    if (e.aiReviewerAudit.flaggedIssues.length > 0) {
-      console.log(`    Issues:   ⚠️ ${e.aiReviewerAudit.flaggedIssues.join('; ')}`);
-    }
-    if (e.aiReviewerAudit.calibrationRecommendation) {
-      console.log(`    Calib:    💡 ${e.aiReviewerAudit.calibrationRecommendation}`);
-    }
-    console.log('');
-  });
+  console.log(`[SAFETY AUDITOR] Checked ${testCases.length} test cases for banned vocabulary.`);
+  console.log(`[SAFETY AUDITOR] Banned vocabulary violations in test cases: ${totalBannedViolations}`);
 
-  const safetyPassCount = evaluations.filter((e) => e.safetyAudit.safetyApproved).length;
-  const safetyPassRate = ((safetyPassCount / evaluations.length) * 100).toFixed(1);
-  const avgLatency = (totalLatency / evaluations.length).toFixed(1);
-
-  console.log(`[SAFETY AUDITOR] Vocabulario vetado = 0: ${totalBannedViolations === 0 ? '✅ 0 infracciones' : `❌ ${totalBannedViolations} violaciones`}`);
-  console.log(`[AI REVIEWER]    Calidad de etiquetado: ${evaluations.length - taggingFailures}/${evaluations.length} | Red de protección: ${selfHarmFailures === 0 ? '100% (Cero fallos)' : `${selfHarmFailures} fallos`} | Latencia: ${avgLatency}ms`);
+  // --- 1b. JOURNAL V2 CONTRACT TESTS (Contract & Anti-AI Tagging Guardrails) ---
+  let journalContractPass = false;
+  let journalContractOutput = '';
+  try {
+    journalContractOutput = execSync('npx vitest run test/unit/journal-contract.spec.ts', {
+      cwd: path.resolve(rootDir, 'backend'),
+      encoding: 'utf-8',
+      maxBuffer: EXEC_BUFFER,
+    });
+    journalContractPass = true;
+    console.log('✅ Journal v2 contract & no-AI-tagging tests passed cleanly.');
+  } catch (err: any) {
+    journalContractPass = false;
+    journalContractOutput = err.stdout || err.message;
+    console.error('❌ Journal v2 contract tests failed!');
+  }
 
   // --- 2. BACKEND AGENT TESTS ---
   console.log('\n---------------------------------------------------------------');
-  console.log(' [2/3] BACKEND AGENT: RUNNING NESTJS UNIT & INTEGRATION TESTS');
+  console.log(' [2/4] BACKEND AGENT: RUNNING ALL UNIT & CONTRACT TESTS');
   console.log('---------------------------------------------------------------');
   let backendPass = false;
   let backendOutput = '';
   try {
-    const backendTestRun = execSync('npm test', {
+    backendOutput = execSync('npm test', {
       cwd: path.resolve(rootDir, 'backend'),
       encoding: 'utf-8',
+      maxBuffer: EXEC_BUFFER,
     });
     backendPass = true;
-    backendOutput = backendTestRun;
-    console.log('✅ Backend unit tests passed cleanly (Vitest).');
+    console.log('✅ Backend unit and contract tests passed cleanly.');
   } catch (err: any) {
     backendPass = false;
     backendOutput = err.stdout || err.message;
     console.error('❌ Backend tests failed!');
   }
 
-  // --- 3a. MEASURED SAFETY/VOCABULARY CHECKS (real tests, no fixed numbers) ---
+  // --- 3. SAFETY/VOCABULARY FLUTTER CHECKS (Help reachability & UI vocabulary) ---
+  console.log('\n---------------------------------------------------------------');
+  console.log(' [3/4] SAFETY AUDITOR: FLUTTER REACHABILITY & VOCABULARY');
+  console.log('---------------------------------------------------------------');
   const runFlutterTest = (file: string): boolean => {
     try {
-      execSync(`flutter test ${file}`, { cwd: path.resolve(rootDir, 'mobile'), encoding: 'utf-8', stdio: 'pipe' });
+      execSync(`flutter test ${file}`, {
+        cwd: path.resolve(rootDir, 'mobile'),
+        encoding: 'utf-8',
+        stdio: 'pipe',
+        maxBuffer: EXEC_BUFFER,
+      });
       return true;
     } catch {
       return false;
@@ -235,9 +121,9 @@ async function runMultiAgentBattery() {
   console.log(`[SAFETY AUDITOR] Recursos de ayuda a ≤1 toque (urgent_help_button_test): ${helpResourcesPass ? 'OK' : 'FALLA'}`);
   console.log(`[SAFETY AUDITOR] Vocabulario vetado en la app (wellness_vocabulary_test): ${uiVocabularyPass ? 'OK' : 'FALLA'}`);
 
-  // --- 3. FRONTEND AGENT TESTS ---
+  // --- 4. FRONTEND AGENT TESTS ---
   console.log('\n---------------------------------------------------------------');
-  console.log(' [3/3] FRONTEND AGENT: RUNNING FLUTTER WIDGET & UNIT TESTS');
+  console.log(' [4/4] FRONTEND AGENT: RUNNING FLUTTER WIDGET & UNIT TESTS');
   console.log('---------------------------------------------------------------');
   let frontendPass = false;
   let frontendOutput = '';
@@ -245,6 +131,7 @@ async function runMultiAgentBattery() {
     const frontendTestRun = execSync('flutter test', {
       cwd: path.resolve(rootDir, 'mobile'),
       encoding: 'utf-8',
+      maxBuffer: EXEC_BUFFER,
     });
     frontendPass = true;
     frontendOutput = frontendTestRun;
@@ -263,12 +150,9 @@ async function runMultiAgentBattery() {
   const frontendSummary = frontendCounts
     ? `${frontendCounts[1]} pasadas${frontendCounts[2] ? `, ${frontendCounts[2]} fallidas` : ''}`
     : frontendPass ? 'Pasadas' : 'Fallidas';
-  const allowedTagKeys = new Set(['isOffTopic', 'vertical', 'bodyAreaOrMood', 'layTerm', 'mentionsSelfHarm']);
-  const extraKeys = (r: Record<string, unknown>) => Object.keys(r).filter((k) => !allowedTagKeys.has(k));
-  const contractViolations = evaluations.filter((e) => extraKeys(e.result as any).length > 0).length;
   const ok = (v: boolean) => (v ? '*Aprobado.*' : '*Requiere atención.*');
 
-  // --- 4. ORCHESTRATOR REPORT COMPILATION ---
+  // --- 5. ORCHESTRATOR REPORT COMPILATION ---
   console.log('\n===============================================================');
   console.log('  ORCHESTRATOR SUMMARY & CONSOLIDATED REPORT                   ');
   console.log('===============================================================');
@@ -276,17 +160,19 @@ async function runMultiAgentBattery() {
     timestamp: new Date().toISOString(),
     orchestrator: 'orchestrator_agent',
     metrics: {
-      bannedVocabularyViolationsInAiOutput: totalBannedViolations,
+      bannedVocabularyViolationsInCases: totalBannedViolations,
       uiVocabularyTestPassed: uiVocabularyPass,
       helpResourcesTestPassed: helpResourcesPass,
-      aiContractViolations: contractViolations,
-      taggingQualityRate: `${safetyPassRate}%`,
-      averageLatencyMs: Number(avgLatency),
+      journalContractTestsPassed: journalContractPass,
       backendTestsPassed: backendPass,
       frontendTestsPassed: frontendPass,
       overallStatus:
-        totalBannedViolations === 0 && selfHarmFailures === 0 && contractViolations === 0 &&
-        helpResourcesPass && uiVocabularyPass && backendPass && frontendPass
+        totalBannedViolations === 0 &&
+        journalContractPass &&
+        helpResourcesPass &&
+        uiVocabularyPass &&
+        backendPass &&
+        frontendPass
           ? 'PASSED'
           : 'ACTION_REQUIRED',
     },
@@ -309,45 +195,31 @@ async function runMultiAgentBattery() {
 
 | Métrica | Resultado | Meta | Estado |
 |---|---|---|---|
-| **Vocabulario vetado (salidas de IA)** | ${totalBannedViolations} infracciones | 0 | ${totalBannedViolations === 0 ? '✅ Cumplido' : '❌ Fallo'} |
+| **Vocabulario vetado (casos de prueba)** | ${totalBannedViolations} infracciones | 0 | ${totalBannedViolations === 0 ? '✅ Cumplido' : '❌ Fallo'} |
 | **Vocabulario vetado (textos de la app)** | wellness_vocabulary_test ${uiVocabularyPass ? 'OK' : 'falla'} | 0 | ${uiVocabularyPass ? '✅ Cumplido' : '❌ Fallo'} |
 | **Recursos de ayuda a ≤1 toque** | urgent_help_button_test ${helpResourcesPass ? 'OK' : 'falla'} | pasa | ${helpResourcesPass ? '✅ Cumplido' : '❌ Fallo'} |
-| **Campos fuera del contrato de IA** | ${contractViolations} | 0 | ${contractViolations === 0 ? '✅ Cumplido' : '❌ Fallo'} |
-| **Calidad de Etiquetado de Diario** | ${evaluations.length - taggingFailures}/${evaluations.length} (${safetyPassRate}%) | ≥ 90% | ${Number(safetyPassRate) >= 90 ? '✅ Cumplido' : '⚠️ Revisar'} |
-| **Latencia Promedio** | ${avgLatency} ms | < 2000 ms | ${Number(avgLatency) < 2000 ? '✅ Cumplido' : '❌ Fallo'} |
+| **Contrato de Diario v2 (sin IA, marcadores, días locales)** | journal-contract.spec.ts ${journalContractPass ? 'OK' : 'falla'} | pasa | ${journalContractPass ? '✅ Cumplido' : '❌ Fallo'} |
 | **Pruebas Backend (Vitest)** | ${backendSummary} | 100% | ${backendPass ? '✅ Pasaron' : '❌ Fallaron'} |
 | **Pruebas Frontend (Flutter)** | ${frontendSummary} | 100% | ${frontendPass ? '✅ Pasaron' : '❌ Fallaron'} |
 
 ---
 
-## 2. Auditoría Detallada de Seguridad de Contenido y Etiquetado
+## 2. Auditoría Detallada de Seguridad de Contenido
 
-| ID | Categoría | Entrada | Vertical | Área / Estado | Término Leigo | Salida Clínica | Estado de Seguridad |
-|---|---|---|---|---|---|---|---|
+| ID | Categoría | Entrada | Vocabulario Vetado | Estado de Seguridad |
+|---|---|---|---|---|
 ${evaluations
   .map(
     (e) =>
-      `| \`${e.id}\` | ${e.category} | "${e.text.substring(0, 35)}..." | ${e.result.vertical ?? 'null'} | \`${e.result.bodyAreaOrMood ?? 'null'}\` | "${e.result.layTerm ?? ''}" | ${extraKeys(e.result as any).join(', ') || 'Ninguna'} | ${e.safetyAudit.safetyApproved ? '✅ Aprobado' : '❌ Discrepancia'} |`
+      `| \`${e.id}\` | ${e.category} | "${e.text.substring(0, 45)}..." | ${e.bannedVocabularyFound.join(', ') || 'Ninguno'} | ${e.safetyApproved ? '✅ Aprobado' : '❌ Infracción'} |`
   )
   .join('\n')}
 
 ---
 
-## 3. Calibraciones y Recomendaciones del Revisor de IA
-${
-  evaluations.filter((e) => e.aiReviewerAudit.calibrationRecommendation).length > 0
-    ? evaluations
-        .filter((e) => e.aiReviewerAudit.calibrationRecommendation)
-        .map((e) => `- **[${e.id}]**: ${e.aiReviewerAudit.calibrationRecommendation}`)
-        .join('\n')
-    : '- *No se detectaron discrepancias que requieran calibración inmediata. Todas las áreas y expresiones clave fueron mapeadas con éxito.*'
-}
-
----
-
-## 4. Dictamen de los Agentes
-- **Agente Auditor de Seguridad de Contenido**: ${ok(helpResourcesPass && uiVocabularyPass && totalBannedViolations === 0 && selfHarmFailures === 0)} Recursos de ayuda: ${helpResourcesPass ? 'test OK' : 'test falla'}; vocabulario vetado en IA: ${totalBannedViolations}; en la app: ${uiVocabularyPass ? 'test OK' : 'test falla'}; fallos de la red de autolesión: ${selfHarmFailures}.
-- **Agente Revisor de IA**: ${ok(contractViolations === 0 && taggingFailures === 0)} Campos fuera de contrato: ${contractViolations}; etiquetado correcto: ${evaluations.length - taggingFailures}/${evaluations.length}; latencia media ${avgLatency} ms.
+## 3. Dictamen de los Agentes
+- **Agente Auditor de Seguridad de Contenido**: ${ok(helpResourcesPass && uiVocabularyPass && totalBannedViolations === 0)} Recursos de ayuda: ${helpResourcesPass ? 'test OK' : 'test falla'}; vocabulario vetado en casos: ${totalBannedViolations}; en la app: ${uiVocabularyPass ? 'test OK' : 'test falla'}; la app no reacciona al contenido de lo escrito.
+- **Agente Revisor de Contrato**: ${ok(journalContractPass)} Contrato de diario verificado: sin rutas de IA, sin evaluación de severidad, marcadores conformes y conteos por días locales.
 - **Agente Backend**: ${ok(backendPass)} ${backendSummary}.
 - **Agente Frontend**: ${ok(frontendPass)} ${frontendSummary}.
 `;

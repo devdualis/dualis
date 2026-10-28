@@ -130,7 +130,7 @@ jobs:
       # Environment Variables Preparation
       # Supports:
       #  1. Full .env contents pasted into BACKEND_ENV secret
-      #  2. Individual GitHub Secrets (DATABASE_URL, GEMINI_API_KEY, etc.)
+      #  2. Individual GitHub Secrets (DATABASE_URL, ENCRYPTION_MASTER_KEY, etc.)
       #  3. Preserving existing Cloud Run environment variables if none passed
       # ------------------------------------------------------------------------
       - name: Prepare Cloud Run Environment Variables
@@ -139,7 +139,8 @@ jobs:
           RAW_ENV: ${{ secrets.BACKEND_ENV }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           ENCRYPTION_MASTER_KEY: ${{ secrets.ENCRYPTION_MASTER_KEY }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          VERTEX_CLIENT_EMAIL: ${{ secrets.VERTEX_CLIENT_EMAIL }}
+          VERTEX_PRIVATE_KEY: ${{ secrets.VERTEX_PRIVATE_KEY }}
           DISCLAIMER_VERSION: ${{ vars.DISCLAIMER_VERSION }}
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
@@ -175,7 +176,7 @@ jobs:
 
             // 2. Individual secrets override or supplement
             const individualKeys = [
-              'DATABASE_URL', 'ENCRYPTION_MASTER_KEY', 'GEMINI_API_KEY',
+              'DATABASE_URL', 'ENCRYPTION_MASTER_KEY', 'VERTEX_CLIENT_EMAIL', 'VERTEX_PRIVATE_KEY',
               'DISCLAIMER_VERSION', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER',
               'SMTP_PASS', 'MAIL_FROM', 'SUPABASE_URL', 'SUPABASE_ANON_KEY',
               'SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_AVATAR_BUCKET'
@@ -186,12 +187,19 @@ jobs:
               }
             }
 
+            // Vertex AI settings are added by the deploy step; drop any copies to avoid duplicate keys.
+            delete envMap['VERTEX_PROJECT'];
+            delete envMap['VERTEX_LOCATION'];
+            delete envMap['GOOGLE_CLOUD_PROJECT'];
+            delete envMap['GOOGLE_CLOUD_LOCATION'];
+            delete envMap['GEMINI_API_KEY'];
+
             // Always enforce production mode
             envMap['NODE_ENV'] = 'production';
 
             if (Object.keys(envMap).length > 1) {
               const yamlEntries = Object.entries(envMap).map(([k, v]) => \`\${k}: \${JSON.stringify(v)}\`);
-              fs.writeFileSync('cloudrun-env.yaml', yamlEntries.join('\n'));
+              fs.writeFileSync('cloudrun-env.yaml', yamlEntries.join('\n') + '\n');
               console.log('✅ Generated cloudrun-env.yaml with ' + Object.keys(envMap).length + ' environment variables.');
               fs.appendFileSync(process.env.GITHUB_OUTPUT, 'has_env_file=true\n');
             } else {
@@ -221,9 +229,23 @@ jobs:
             "--port=8080"
           )
 
+          # Gemini runs on Vertex AI (no API key). Credentials: VERTEX_CLIENT_EMAIL +
+          # VERTEX_PRIVATE_KEY secrets if given, else the Cloud Run service account
+          # (needs roles/aiplatform.user).
+          VERTEX_PROJECT="${{ env.GCP_PROJECT_ID }}"
+          VERTEX_LOCATION="${{ vars.VERTEX_LOCATION || env.GCP_REGION }}"
           if [ "$HAS_ENV_FILE" = "true" ]; then
             echo "Applying environment variables from cloudrun-env.yaml..."
+            {
+              echo "VERTEX_PROJECT: \"$VERTEX_PROJECT\""
+              echo "VERTEX_LOCATION: \"$VERTEX_LOCATION\""
+            } >> cloudrun-env.yaml
             DEPLOY_CMD+=("--env-vars-file=cloudrun-env.yaml")
+          else
+            DEPLOY_CMD+=("--update-env-vars=VERTEX_PROJECT=$VERTEX_PROJECT,VERTEX_LOCATION=$VERTEX_LOCATION")
+          fi
+          if [ -n "${{ vars.GCP_RUN_SERVICE_ACCOUNT }}" ]; then
+            DEPLOY_CMD+=("--service-account=${{ vars.GCP_RUN_SERVICE_ACCOUNT }}")
           fi
 
           echo "Running deployment..."

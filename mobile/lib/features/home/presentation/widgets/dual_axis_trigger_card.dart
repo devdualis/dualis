@@ -6,7 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
-import '../../../triage/domain/triage_vertical.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../journal/presentation/controllers/journal_flow_state.dart';
+import '../../../journal/presentation/screens/journal_flow_screen.dart';
 import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import '../../domain/axis_intensity_resolver.dart';
 import '../../domain/trigger_checkin_state.dart';
@@ -165,21 +167,15 @@ class DualAxisTriggerCard extends ConsumerWidget {
               retakeKey: 'retake_psicoemocional_button',
               onStart: () {
                 context.push(
-                  RoutePaths.triage,
-                  extra: TriageNavigationArgs(
-                    initialVertical: TriageVertical.psicoEmocional,
-                    isDual: false,
-                  ),
+                  RoutePaths.journal,
+                  extra: const JournalFlowArgs(initialArea: JournalArea.emotional),
                 );
               },
               onRetake: () {
                 notifier.prepareForUpdate();
                 context.push(
-                  RoutePaths.triage,
-                  extra: TriageNavigationArgs(
-                    initialVertical: TriageVertical.psicoEmocional,
-                    isDual: false,
-                  ),
+                  RoutePaths.journal,
+                  extra: const JournalFlowArgs(initialArea: JournalArea.emotional),
                 );
               },
               isDark: isDark,
@@ -205,26 +201,28 @@ class DualAxisTriggerCard extends ConsumerWidget {
               retakeKey: 'retake_fisica_button',
               onStart: () {
                 context.push(
-                  RoutePaths.triage,
-                  extra: TriageNavigationArgs(
-                    initialVertical: TriageVertical.fisica,
-                    isDual: false,
-                  ),
+                  RoutePaths.journal,
+                  extra: const JournalFlowArgs(initialArea: JournalArea.physical),
                 );
               },
               onRetake: () {
                 notifier.prepareForUpdate();
                 context.push(
-                  RoutePaths.triage,
-                  extra: TriageNavigationArgs(
-                    initialVertical: TriageVertical.fisica,
-                    isDual: false,
-                  ),
+                  RoutePaths.journal,
+                  extra: const JournalFlowArgs(initialArea: JournalArea.physical),
                 );
               },
               isDark: isDark,
               viewOnly: viewOnly,
             ),
+            if (state.conditionsSummary != null &&
+                state.conditionsSummary!.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              _ConditionsTodaySummary(
+                summary: state.conditionsSummary!,
+                isDark: isDark,
+              ),
+            ],
           ],
         ),
       ),
@@ -531,5 +529,54 @@ class DualAxisTriggerCard extends ConsumerWidget {
       return ClinicalIntensityTier.fromScore(intensity);
     }
     return status?.tier ?? ClinicalIntensityTier.none;
+  }
+}
+
+/// Today's "Minhas condições" items in the user's own words. Its own small
+/// block: conditions never fill the emotional or physical axis.
+class _ConditionsTodaySummary extends StatelessWidget {
+  final String summary;
+  final bool isDark;
+
+  const _ConditionsTodaySummary({required this.summary, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Container(
+      key: const Key('conditions_today_summary'),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.jv2ConditionsTitle,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            summary,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              color: isDark
+                  ? AppColors.textPrimaryDark
+                  : AppColors.textPrimaryLight,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

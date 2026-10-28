@@ -13,6 +13,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../l10n/locale_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../widgets/avatar_selector_sheet.dart';
+import 'photo_crop_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -80,13 +81,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       final picker = ImagePicker();
       final XFile? image = await picker.pickImage(
         source: source,
-        imageQuality: 85,
-        maxWidth: 512,
-        maxHeight: 512,
+        imageQuality: 90,
+        maxWidth: 1600,
+        maxHeight: 1600,
       );
       if (image != null && mounted) {
-        final bytes = await image.readAsBytes();
-        final base64Image = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+        final picked = await image.readAsBytes();
+        if (!mounted) return;
+        // Circular crop with zoom and drag before saving (strategy §13).
+        final bytes = await PhotoCropScreen.open(context, picked);
+        if (bytes == null || !mounted) return;
+        final base64Image = 'data:image/png;base64,${base64Encode(bytes)}';
         setState(() {
           _localImageBytes = bytes;
           _selectedPicture = base64Image;
@@ -103,23 +108,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         );
       }
     }
-  }
-
-  void _showAvatarSelectorSheet() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (ctx) => AvatarSelectorSheet(
-        currentPicture: _selectedPicture,
-        onSelected: (avatarId) {
-          setState(() {
-            _selectedPicture = avatarId;
-            _localImageBytes = null;
-          });
-        },
-      ),
-    );
   }
 
   void _showPhotoPickerSheet() {
@@ -510,7 +498,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(height: 10),
                       Center(
                         child: TextButton.icon(
-                          onPressed: _showAvatarSelectorSheet,
+                          onPressed: _showPhotoPickerSheet,
                           icon: const Icon(Icons.palette_outlined, size: 16),
                           label: Text(
                             l10n.changeAvatar,
@@ -991,6 +979,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
                         onTap: () => context.push(RoutePaths.history),
+                      ),
+                      const Divider(height: 1, color: AppColors.outlineLight),
+                      ListTile(
+                        key: const Key('settings_my_conditions_tile'),
+                        leading: const Icon(Icons.edit_note_rounded, color: AppColors.softIndigo),
+                        title: Text(
+                          l10n.jv2ConditionsTitle,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        subtitle: Text(
+                          l10n.jv2ConditionsSettingsSubtitle,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
+                        onTap: () => context.push(RoutePaths.myConditions),
                       ),
                       const Divider(height: 1, color: AppColors.outlineLight),
                       ListTile(

@@ -172,8 +172,9 @@ class _FakeHydrationRepository implements HydrationRepository {
             ]
           : const [];
   @override
-  Future<Map<DateTime, int>> getLast7DaysTotals({
+  Future<Map<DateTime, int>> getDailyTotals({
     required String userId,
+    int days = 30,
     DateTime? referenceDate,
   }) async =>
       const {};

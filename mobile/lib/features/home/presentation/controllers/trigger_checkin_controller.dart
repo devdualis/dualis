@@ -12,7 +12,6 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../dashboard/data/triage_history_remote_data_source.dart';
 import '../../../dashboard/domain/models/triage_history_models.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
-import '../../../triage/data/symptom_classification_remote_data_source.dart';
 import '../../../triage/domain/triage_vertical.dart';
 import '../../../triage_outcome/domain/triage_outcome_models.dart';
 import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
@@ -21,22 +20,10 @@ import '../../domain/trigger_checkin_state.dart';
 
 const Object _keepNarrative = Object();
 
-final symptomClassificationDataSourceProvider =
-    Provider<SymptomClassificationRemoteDataSource>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
-  final secureStorage = ref.watch(secureStorageServiceProvider);
-  return SymptomClassificationRemoteDataSource(
-    apiClient: apiClient,
-    secureStorage: secureStorage,
-  );
-});
-
 class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
   SecureStorageService get _storage => ref.read(secureStorageServiceProvider);
   TriageHistoryRemoteDataSource get _historyDataSource =>
       ref.read(triageHistoryDataSourceProvider);
-  SymptomClassificationRemoteDataSource get _classificationDataSource =>
-      ref.read(symptomClassificationDataSourceProvider);
 
   bool _isDisposed = false;
   String? _lastProfileId;
@@ -378,45 +365,6 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     _persistCurrentState();
   }
 
-  /// Classifies the typed symptom text and builds navigation args to open the
-  /// triage wizard pre-set to the right vertical/category, so free text always
-  /// reaches the onset/severity questions instead of being silently discarded.
-  ///
-  /// Returns `null` when there is no text to classify, or when classification
-  /// fails (offline, error) — callers should fall back to axis-only routing.
-  Future<TriageNavigationArgs?> resolveTextDrivenNavigation() async {
-    final text = state.naturalLanguageText.trim();
-    if (text.isEmpty) return null;
-
-    try {
-      final classification = await _classificationDataSource.classify(text);
-      final vertical = classification.primaryVertical == 'emotional'
-          ? TriageVertical.psicoEmocional
-          : TriageVertical.fisica;
-      final hasCrossVertical = (classification.primaryVertical == 'physical' &&
-              state.emotionalStatus != null &&
-              state.emotionalStatus != TriggerStatus.goodNormal) ||
-          (classification.primaryVertical == 'emotional' &&
-              state.physicalStatus != null &&
-              state.physicalStatus != TriggerStatus.goodNormal);
-
-      final isDual = (state.emotionalStatus != TriggerStatus.goodNormal &&
-              state.physicalStatus != TriggerStatus.goodNormal) ||
-          hasCrossVertical;
-
-      return TriageNavigationArgs(
-        initialVertical: vertical,
-        isDual: isDual,
-        naturalLanguageText: state.naturalLanguageText,
-        preselectedCategoryKey: classification.wizardCategoryKey,
-        isOffTopic: classification.isOffTopic,
-        mentionsSelfHarm: classification.mentionsSelfHarm,
-      );
-    } catch (_) {
-      return null;
-    }
-  }
-
   /// [narrative] is the free text the user typed in the triage that produced
   /// [outcome]. Pass it — even as `null` — only when submitting that triage.
   /// Omitting it (replaying a stored or remote outcome) keeps the axis's
@@ -545,6 +493,21 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       physicalStatus: isPhysical ? (status ?? state.physicalStatus) : state.physicalStatus,
       completedAt: DateTime.now(),
       checkInDate: today,
+      isModifiedAfterCompletion: false,
+    );
+    _persistCurrentState();
+    _syncCheckInReminders();
+  }
+
+  /// Records today's condition items on their own line of Home, without
+  /// touching the emotional or physical axis.
+  void completeConditions(String? summary) {
+    state = state.copyWith(
+      isCompletedToday: (summary != null && summary.isNotEmpty) ||
+          state.isCompletedToday,
+      conditionsSummary: summary,
+      completedAt: DateTime.now(),
+      checkInDate: _getTodayDateString(),
       isModifiedAfterCompletion: false,
     );
     _persistCurrentState();

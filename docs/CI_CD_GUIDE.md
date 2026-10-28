@@ -38,7 +38,7 @@ Both the backend on Google Cloud Run and the mobile Flutter client require speci
 │  - BACKEND_ENV (or individual)│ │  - API_BASE_URL           │
 │  - DATABASE_URL               │ │  - ANDROID_KEYSTORE_*     │
 │  - ENCRYPTION_MASTER_KEY      │ └───────────────────────────┘
-│  - GEMINI_API_KEY             │
+│  - VERTEX_* (Vertex AI)       │
 │  - SUPABASE_* / SMTP_*        │
 └───────────────────────────────┘
 ```
@@ -57,7 +57,10 @@ Both the backend on Google Cloud Run and the mobile Flutter client require speci
 | `DATABASE_CA_CERT` | Optional | Custom CA certificate string for PostgreSQL SSL | `-----BEGIN CERTIFICATE-----...` |
 | `DATABASE_SSL_REJECT_UNAUTHORIZED` | Optional | Set to `'false'` if using self-signed internal certs | `false` |
 | `ENCRYPTION_MASTER_KEY` | **Yes** | 64-char hex key (32 bytes) for AES-256-GCM PHI encryption | `0123456789abcdef0123456789abcdef...` |
-| `GEMINI_API_KEY` | **Yes** | Google Gemini API Key for clinical AI triage | `AIzaSy...` |
+| `VERTEX_PROJECT` | Auto | GCP project for Gemini on Vertex AI. Set by the deploy workflow from `GCP_PROJECT_ID`. Empty = AI off | `dualis-prod` |
+| `VERTEX_LOCATION` | Auto | Vertex AI region. Set from `vars.VERTEX_LOCATION`, else `GCP_REGION` | `southamerica-east1` |
+| `VERTEX_CLIENT_EMAIL` | Optional | Service-account email for Vertex AI. Omit to use the Cloud Run service account | `vertex@dualis-prod.iam.gserviceaccount.com` |
+| `VERTEX_PRIVATE_KEY` | Optional | That service account's private key (literal `\n` allowed) | `-----BEGIN PRIVATE KEY-----...` |
 | `GEMINI_MODEL` | Optional | Gemini model override (defaults to `gemini-2.5-flash`) | `gemini-2.5-flash` |
 | `DISCLAIMER_VERSION` | Optional | Current clinical disclaimer version | `2026.1` |
 | `JWT_SECRET` | Optional | Secret for signing auth tokens (defaults to master key) | `your-jwt-secret` |
@@ -85,11 +88,13 @@ You can provide the backend environment variables using **any** of the following
 Create individual secrets under **Repository Secrets** in GitHub:
 - `DATABASE_URL`
 - `ENCRYPTION_MASTER_KEY`
-- `GEMINI_API_KEY`
 - `SUPABASE_URL`
 - `SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `SMTP_USER`, `SMTP_PASS`, etc.
+
+#### Vertex AI access (no API key)
+Gemini is called through Vertex AI. Either add the `VERTEX_CLIENT_EMAIL` and `VERTEX_PRIVATE_KEY` secrets (service-account key), or leave them out and grant the Cloud Run service account `roles/aiplatform.user` (set `GCP_RUN_SERVICE_ACCOUNT` to pick a dedicated one). Enable the Vertex AI API (`aiplatform.googleapis.com`) in the project. Live check: `cd backend && npx tsx scripts/vertex-smoke.ts`.
 
 #### Approach C: Configure Once in Google Cloud Run (Recommended for Enterprise)
 If you configure environment variables directly in the Google Cloud Console or bind them to **Google Secret Manager**, the CI/CD deployment will **preserve and maintain all existing environment variables** across every new container image revision!
