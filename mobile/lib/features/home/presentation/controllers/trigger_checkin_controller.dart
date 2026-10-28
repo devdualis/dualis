@@ -12,7 +12,6 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../dashboard/data/triage_history_remote_data_source.dart';
 import '../../../dashboard/domain/models/triage_history_models.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
-import '../../../triage/data/symptom_classification_remote_data_source.dart';
 import '../../../triage/domain/triage_vertical.dart';
 import '../../../triage_outcome/domain/triage_outcome_models.dart';
 import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
@@ -20,16 +19,6 @@ import '../../domain/axis_intensity_resolver.dart';
 import '../../domain/trigger_checkin_state.dart';
 
 const Object _keepNarrative = Object();
-
-final symptomClassificationDataSourceProvider =
-    Provider<SymptomClassificationRemoteDataSource>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
-  final secureStorage = ref.watch(secureStorageServiceProvider);
-  return SymptomClassificationRemoteDataSource(
-    apiClient: apiClient,
-    secureStorage: secureStorage,
-  );
-});
 
 class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
   SecureStorageService get _storage => ref.read(secureStorageServiceProvider);
@@ -504,6 +493,21 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       physicalStatus: isPhysical ? (status ?? state.physicalStatus) : state.physicalStatus,
       completedAt: DateTime.now(),
       checkInDate: today,
+      isModifiedAfterCompletion: false,
+    );
+    _persistCurrentState();
+    _syncCheckInReminders();
+  }
+
+  /// Records today's condition items on their own line of Home, without
+  /// touching the emotional or physical axis.
+  void completeConditions(String? summary) {
+    state = state.copyWith(
+      isCompletedToday: (summary != null && summary.isNotEmpty) ||
+          state.isCompletedToday,
+      conditionsSummary: summary,
+      completedAt: DateTime.now(),
+      checkInDate: _getTodayDateString(),
       isModifiedAfterCompletion: false,
     );
     _persistCurrentState();

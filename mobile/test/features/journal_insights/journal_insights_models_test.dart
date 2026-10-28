@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:dualis_mobile/features/journal/presentation/journal_labels.dart';
 import 'package:dualis_mobile/features/journal_insights/domain/journal_insights_models.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
@@ -71,7 +72,9 @@ void main() {
     final sentences = cooccurrenceSentences(
         l10n, JournalSummary.compute(entries), entries);
     expect(sentences, [
+      "Nos 3 dias em que você marcou 'Mente acelerada', também marcou 'Cabeça e pescoço' em 2.",
       "Nos 3 dias em que você marcou 'Fico antecipando problemas', também marcou 'Cabeça e pescoço' em 2.",
+      "Nos 3 dias em que você marcou 'Mente acelerada', também marcou 'Aperto, peso ou pressão' em 2.",
     ]);
     for (final s in sentences) {
       expect(s, isNot(matches(RegExp(r'porque|causa|indica|tend[eê]ncia'))));
@@ -88,6 +91,42 @@ void main() {
     ]);
     final sentences = cooccurrenceSentences(l10n, summary, entries);
     expect(sentences.single, contains("'Noite mal dormida'"));
+  });
+
+  test('same local day counts once even with two entries', () {
+    final summary = JournalSummary.compute([
+      e(1, [head], triggers: ['sono']),
+      e(1, [head, mind], triggers: ['sono']),
+    ]);
+    expect(summary.byRegion, {'cabeca': 1});
+    expect(summary.byTime, {'futuro': 1});
+    expect(summary.byTrigger, {'sono': 1});
+  });
+
+  test('local fallback emits option, branch, region, time and trigger: keys', () {
+    final entry = e(1, [head, mind], triggers: ['sono']);
+    expect(
+      entry.markers,
+      containsAll([
+        'cabeca',
+        'cabeca.pressao',
+        'cabeca.pressao.temporas',
+        'futuro',
+        'futuro.mente',
+        'futuro.mente.antecipar',
+        'trigger:sono',
+      ]),
+    );
+    final summary = JournalSummary.compute([entry]);
+    expect(summary.byOptionKey['cabeca.pressao'], 1);
+    expect(summary.byOptionKey['futuro.mente.antecipar'], 1);
+  });
+
+  test('client resolves branch, bare region/time and trigger: markers', () {
+    expect(JournalLabels.marker(l10n, 'futuro.mente'), 'Mente acelerada');
+    expect(JournalLabels.marker(l10n, 'cabeca'), 'Cabeça e pescoço');
+    expect(JournalLabels.marker(l10n, 'futuro'), 'O que vem pela frente');
+    expect(JournalLabels.marker(l10n, 'trigger:sono'), 'Noite mal dormida');
   });
 
   test('unknown keys never produce a sentence', () {

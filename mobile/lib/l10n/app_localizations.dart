@@ -316,30 +316,6 @@ abstract class AppLocalizations {
   /// **'Número copiado para a área de transferência.'**
   String get emergencyCopiedToast;
 
-  /// Confirm button label
-  ///
-  /// In pt, this message translates to:
-  /// **'Confirmar'**
-  String get triageConfirm;
-
-  /// Title of the preview step card
-  ///
-  /// In pt, this message translates to:
-  /// **'Revise seu registro'**
-  String get triagePreviewTitle;
-
-  /// Outcome screen title (wellness)
-  ///
-  /// In pt, this message translates to:
-  /// **'Resumo do seu registro'**
-  String get outcomeScreenTitle;
-
-  /// Subtitle of Screen 6 Triage Outcome
-  ///
-  /// In pt, this message translates to:
-  /// **'Um retrato do que você registrou hoje'**
-  String get outcomeScreenSubtitle;
-
   /// Intensity title
   ///
   /// In pt, this message translates to:
@@ -363,18 +339,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Conteúdos educativos gerais. Não são orientação para o seu caso.'**
   String get outcomeArticlesSubtitle;
-
-  /// Article read time in minutes
-  ///
-  /// In pt, this message translates to:
-  /// **'{minutes} min de leitura'**
-  String outcomeReadTime(int minutes);
-
-  /// Button to finish triage and return home
-  ///
-  /// In pt, this message translates to:
-  /// **'Concluir e Voltar ao Início'**
-  String get outcomeDoneButton;
 
   /// Notice banner when device is offline
   ///
@@ -418,18 +382,6 @@ abstract class AppLocalizations {
   /// **'Física'**
   String get tabPhysical;
 
-  /// Title of the 2D anatomical body map
-  ///
-  /// In pt, this message translates to:
-  /// **'Mapa Corporal 2D (14 Dias)'**
-  String get bodyMapTitle;
-
-  /// Hint to interact with the body map
-  ///
-  /// In pt, this message translates to:
-  /// **'Toque em uma região para ver detalhes'**
-  String get bodyMapHint;
-
   /// Legend label for no pain
   ///
   /// In pt, this message translates to:
@@ -459,12 +411,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Evolução Emocional (7 Dias)'**
   String get emotionalChartTitle;
-
-  /// Title for critical recurrence cards
-  ///
-  /// In pt, this message translates to:
-  /// **'Foco de Atenção'**
-  String get criticalRecurrenceTitle;
 
   /// Title for retrospective list feed
   ///
@@ -849,30 +795,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Visualize seu histórico de registros'**
   String get settingsDataHistorySubtitle;
-
-  /// Title of the delete history item confirmation dialog
-  ///
-  /// In pt, this message translates to:
-  /// **'Descartar registro do histórico'**
-  String get deleteHistoryItemTitle;
-
-  /// Confirmation message when discarding a history entry
-  ///
-  /// In pt, this message translates to:
-  /// **'Tem certeza de que deseja descartar este registro do seu histórico? Esta ação é irreversível.'**
-  String get deleteHistoryItemConfirm;
-
-  /// Success snackbar message when record is deleted
-  ///
-  /// In pt, this message translates to:
-  /// **'Registro removido com sucesso.'**
-  String get deleteHistoryItemSuccess;
-
-  /// Error snackbar message when record deletion fails
-  ///
-  /// In pt, this message translates to:
-  /// **'Não foi possível remover o registro.'**
-  String get deleteHistoryItemError;
 
   /// Action button text to discard/delete
   ///
@@ -2224,258 +2146,6 @@ abstract class AppLocalizations {
   /// **'Desbloquear manualmente'**
   String get privacyVeilUnlockManually;
 
-  /// No description provided for @deleteHistoryItemIntensity.
-  ///
-  /// In pt, this message translates to:
-  /// **'Intensidade informada: {value}/5'**
-  String deleteHistoryItemIntensity(int value);
-
-  /// No description provided for @bodyMapRegionHeadNeck.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cabeça e pescoço'**
-  String get bodyMapRegionHeadNeck;
-
-  /// No description provided for @bodyMapRegionHeadNeckHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Dor de cabeça, dor ou rigidez no pescoço'**
-  String get bodyMapRegionHeadNeckHint;
-
-  /// No description provided for @bodyMapRegionDizziness.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tontura / formigamento'**
-  String get bodyMapRegionDizziness;
-
-  /// No description provided for @bodyMapRegionDizzinessHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tontura, sensação de desequilíbrio, formigamento'**
-  String get bodyMapRegionDizzinessHint;
-
-  /// No description provided for @bodyMapRegionBack.
-  ///
-  /// In pt, this message translates to:
-  /// **'Costas'**
-  String get bodyMapRegionBack;
-
-  /// No description provided for @bodyMapRegionBackHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Dor nas costas, na coluna ou na lombar'**
-  String get bodyMapRegionBackHint;
-
-  /// No description provided for @bodyMapRegionBreathing.
-  ///
-  /// In pt, this message translates to:
-  /// **'Respiração'**
-  String get bodyMapRegionBreathing;
-
-  /// No description provided for @bodyMapRegionBreathingHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Falta de ar, tosse'**
-  String get bodyMapRegionBreathingHint;
-
-  /// No description provided for @bodyMapRegionChest.
-  ///
-  /// In pt, this message translates to:
-  /// **'Peito'**
-  String get bodyMapRegionChest;
-
-  /// No description provided for @bodyMapRegionChestHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Aperto ou desconforto no peito, coração acelerado'**
-  String get bodyMapRegionChestHint;
-
-  /// No description provided for @bodyMapRegionBelly.
-  ///
-  /// In pt, this message translates to:
-  /// **'Barriga'**
-  String get bodyMapRegionBelly;
-
-  /// No description provided for @bodyMapRegionBellyHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Desconforto na barriga, cólica, azia'**
-  String get bodyMapRegionBellyHint;
-
-  /// No description provided for @bodyMapRegionPelvic.
-  ///
-  /// In pt, this message translates to:
-  /// **'Região íntima / urinária'**
-  String get bodyMapRegionPelvic;
-
-  /// No description provided for @bodyMapRegionPelvicHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Desconforto na região pélvica ou ao urinar'**
-  String get bodyMapRegionPelvicHint;
-
-  /// No description provided for @bodyMapRegionRightArm.
-  ///
-  /// In pt, this message translates to:
-  /// **'Braço direito'**
-  String get bodyMapRegionRightArm;
-
-  /// No description provided for @bodyMapRegionRightArmHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Braço, ombro, cotovelo ou punho direito'**
-  String get bodyMapRegionRightArmHint;
-
-  /// No description provided for @bodyMapRegionLeftArm.
-  ///
-  /// In pt, this message translates to:
-  /// **'Braço esquerdo'**
-  String get bodyMapRegionLeftArm;
-
-  /// No description provided for @bodyMapRegionLeftArmHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Braço, ombro, cotovelo ou punho esquerdo'**
-  String get bodyMapRegionLeftArmHint;
-
-  /// No description provided for @bodyMapRegionRightLeg.
-  ///
-  /// In pt, this message translates to:
-  /// **'Perna direita'**
-  String get bodyMapRegionRightLeg;
-
-  /// No description provided for @bodyMapRegionRightLegHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Quadril, coxa, joelho ou tornozelo direito'**
-  String get bodyMapRegionRightLegHint;
-
-  /// No description provided for @bodyMapRegionLeftLeg.
-  ///
-  /// In pt, this message translates to:
-  /// **'Perna esquerda'**
-  String get bodyMapRegionLeftLeg;
-
-  /// No description provided for @bodyMapRegionLeftLegHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Quadril, coxa, joelho ou tornozelo esquerdo'**
-  String get bodyMapRegionLeftLegHint;
-
-  /// No description provided for @bodyMapRegionSkin.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pele'**
-  String get bodyMapRegionSkin;
-
-  /// No description provided for @bodyMapRegionSkinHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Coceira, manchas'**
-  String get bodyMapRegionSkinHint;
-
-  /// No description provided for @bodyMapRegionWholeBody.
-  ///
-  /// In pt, this message translates to:
-  /// **'Corpo todo / cansaço'**
-  String get bodyMapRegionWholeBody;
-
-  /// No description provided for @bodyMapRegionWholeBodyHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Dor no corpo todo, cansaço'**
-  String get bodyMapRegionWholeBodyHint;
-
-  /// No description provided for @bodyMapRegionEnergy.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sede, fome ou energia'**
-  String get bodyMapRegionEnergy;
-
-  /// No description provided for @bodyMapRegionEnergyHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mudanças de energia, sede ou fome'**
-  String get bodyMapRegionEnergyHint;
-
-  /// No description provided for @bodyMapGroupHead.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cabeça'**
-  String get bodyMapGroupHead;
-
-  /// No description provided for @bodyMapGroupTrunk.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tronco'**
-  String get bodyMapGroupTrunk;
-
-  /// No description provided for @bodyMapGroupLimbs.
-  ///
-  /// In pt, this message translates to:
-  /// **'Braços e pernas'**
-  String get bodyMapGroupLimbs;
-
-  /// No description provided for @bodyMapGroupWholeBody.
-  ///
-  /// In pt, this message translates to:
-  /// **'Corpo todo e pele'**
-  String get bodyMapGroupWholeBody;
-
-  /// No description provided for @bodyMapViewMap.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mapa do corpo'**
-  String get bodyMapViewMap;
-
-  /// No description provided for @bodyMapViewAll.
-  ///
-  /// In pt, this message translates to:
-  /// **'Todas as áreas'**
-  String get bodyMapViewAll;
-
-  /// No description provided for @bodyMapShortSkin.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pele'**
-  String get bodyMapShortSkin;
-
-  /// No description provided for @bodyMapShortWholeBody.
-  ///
-  /// In pt, this message translates to:
-  /// **'Corpo todo'**
-  String get bodyMapShortWholeBody;
-
-  /// No description provided for @bodyMapShortEnergy.
-  ///
-  /// In pt, this message translates to:
-  /// **'Energia'**
-  String get bodyMapShortEnergy;
-
-  /// No description provided for @bodyMapMaxIntensity.
-  ///
-  /// In pt, this message translates to:
-  /// **'Maior intensidade informada nos últimos 14 dias: {value}/5'**
-  String bodyMapMaxIntensity(int value);
-
-  /// No description provided for @bodyMapNoEntriesThisSide.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sem registros deste lado nos últimos 14 dias.\n({otherArea}: intensidade informada {value}/5)'**
-  String bodyMapNoEntriesThisSide(String otherArea, int value);
-
-  /// No description provided for @bodyMapViewOtherSide.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ver {area}'**
-  String bodyMapViewOtherSide(String area);
-
-  /// No description provided for @bodyMapNoEntries14Days.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum registro nos últimos 14 dias'**
-  String get bodyMapNoEntries14Days;
-
   /// No description provided for @settingsChangePhotoSubtitle.
   ///
   /// In pt, this message translates to:
@@ -2956,35 +2626,17 @@ abstract class AppLocalizations {
   /// **'Conteúdos educativos gerais. Não são orientação para o seu caso.'**
   String get outcomeWellnessReadingsDisclaimer;
 
-  /// No description provided for @outcomeWellnessReadingsRelatedTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Leituras relacionadas ao tema que você registrou'**
-  String get outcomeWellnessReadingsRelatedTitle;
-
   /// No description provided for @outcomeWellnessReadingsCount.
   ///
   /// In pt, this message translates to:
   /// **'{count} leituras'**
   String outcomeWellnessReadingsCount(int count);
 
-  /// No description provided for @outcomeArticlesEmpty.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhuma leitura disponível no momento.'**
-  String get outcomeArticlesEmpty;
-
   /// No description provided for @journalPatternTitle.
   ///
   /// In pt, this message translates to:
   /// **'Padrões nos seus registros'**
   String get journalPatternTitle;
-
-  /// No description provided for @journalPatternDescription.
-  ///
-  /// In pt, this message translates to:
-  /// **'Você registrou {category} com intensidade alta {count} vezes nos últimos {windowDays} dias. Se isso está atrapalhando seu dia a dia, pode ser útil conversar com um profissional de saúde.'**
-  String journalPatternDescription(String category, int count, int windowDays);
 
   /// No description provided for @historyIntensityInformed.
   ///
@@ -3028,18 +2680,6 @@ abstract class AppLocalizations {
   /// **'Abrir loja de aplicativos'**
   String get appUpdateButton;
 
-  /// Chip on the Home summary card of today's entry. Self-reported intensity.
-  ///
-  /// In pt, this message translates to:
-  /// **'Intensidade informada: {value}/5'**
-  String outcomeSummaryIntensity(int value);
-
-  /// Time today's entry was saved (HH:mm).
-  ///
-  /// In pt, this message translates to:
-  /// **'Registrado às {time}'**
-  String outcomeSummaryRecordedAt(String time);
-
   /// Repeats the option the person chose, without reinterpreting it (audit C-32).
   ///
   /// In pt, this message translates to:
@@ -3063,18 +2703,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Mal'**
   String get outcomeTodayStatusBad;
-
-  /// No description provided for @outcomeHistoryDetailTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Detalhes do registro'**
-  String get outcomeHistoryDetailTitle;
-
-  /// No description provided for @outcomeHistoryNoNarrative.
-  ///
-  /// In pt, this message translates to:
-  /// **'Você não adicionou uma descrição neste registro.'**
-  String get outcomeHistoryNoNarrative;
 
   /// No description provided for @checkInSummaryTitle.
   ///
@@ -3273,6 +2901,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'O que vem pela frente'**
   String get jv2TimeFuturo;
+
+  /// No description provided for @jv2TimeShortPassado.
+  ///
+  /// In pt, this message translates to:
+  /// **'Passado'**
+  String get jv2TimeShortPassado;
+
+  /// No description provided for @jv2TimeShortPresente.
+  ///
+  /// In pt, this message translates to:
+  /// **'Presente'**
+  String get jv2TimeShortPresente;
+
+  /// No description provided for @jv2TimeShortFuturo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Futuro'**
+  String get jv2TimeShortFuturo;
 
   /// No description provided for @jv2BranchQuestion.
   ///
@@ -4186,342 +3832,6 @@ abstract class AppLocalizations {
   /// **'Agora não'**
   String get xv2HydrationOfferNo;
 
-  /// No description provided for @xv2OptPassadoTristezaCulpa.
-  ///
-  /// In pt, this message translates to:
-  /// **'Culpa ou arrependimento'**
-  String get xv2OptPassadoTristezaCulpa;
-
-  /// No description provided for @xv2OptPassadoTristezaSaudade.
-  ///
-  /// In pt, this message translates to:
-  /// **'Falta de alguém ou de como as coisas eram'**
-  String get xv2OptPassadoTristezaSaudade;
-
-  /// No description provided for @xv2OptPassadoMemoriaLembranca.
-  ///
-  /// In pt, this message translates to:
-  /// **'Uma lembrança ruim que volta'**
-  String get xv2OptPassadoMemoriaLembranca;
-
-  /// No description provided for @xv2OptPassadoMemoriaMagoa.
-  ///
-  /// In pt, this message translates to:
-  /// **'Fico remoendo mágoas antigas'**
-  String get xv2OptPassadoMemoriaMagoa;
-
-  /// No description provided for @xv2OptPresenteEnergiaCorpo.
-  ///
-  /// In pt, this message translates to:
-  /// **'Corpo pesado, tenso ou dolorido'**
-  String get xv2OptPresenteEnergiaCorpo;
-
-  /// No description provided for @xv2OptPresenteEnergiaDesligado.
-  ///
-  /// In pt, this message translates to:
-  /// **'No piloto automático, meio desligado'**
-  String get xv2OptPresenteEnergiaDesligado;
-
-  /// No description provided for @xv2OptPresenteSobrecargaPaciencia.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sem paciência, explodindo por pouco'**
-  String get xv2OptPresenteSobrecargaPaciencia;
-
-  /// No description provided for @xv2OptPresenteSobrecargaAperto.
-  ///
-  /// In pt, this message translates to:
-  /// **'Aperto no peito e momentos de desespero'**
-  String get xv2OptPresenteSobrecargaAperto;
-
-  /// No description provided for @xv2OptFuturoMenteAntecipar.
-  ///
-  /// In pt, this message translates to:
-  /// **'Fico antecipando problemas'**
-  String get xv2OptFuturoMenteAntecipar;
-
-  /// No description provided for @xv2OptFuturoMenteCobranca.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cobrança por perfeição ou controle'**
-  String get xv2OptFuturoMenteCobranca;
-
-  /// No description provided for @xv2OptFuturoMedoJulgamento.
-  ///
-  /// In pt, this message translates to:
-  /// **'Medo de falhar ou ser julgado(a)'**
-  String get xv2OptFuturoMedoJulgamento;
-
-  /// No description provided for @xv2OptFuturoMedoDesanimo.
-  ///
-  /// In pt, this message translates to:
-  /// **'Desânimo com o rumo das coisas'**
-  String get xv2OptFuturoMedoDesanimo;
-
-  /// No description provided for @xv2OptCabecaPressaoTemporas.
-  ///
-  /// In pt, this message translates to:
-  /// **'Dor ou pressão nas têmporas ou testa'**
-  String get xv2OptCabecaPressaoTemporas;
-
-  /// No description provided for @xv2OptCabecaPressaoLatejando.
-  ///
-  /// In pt, this message translates to:
-  /// **'Latejando, com incômodo à luz ou ao barulho'**
-  String get xv2OptCabecaPressaoLatejando;
-
-  /// No description provided for @xv2OptCabecaSentidosGarganta.
-  ///
-  /// In pt, this message translates to:
-  /// **'Garganta arranhando ou seca'**
-  String get xv2OptCabecaSentidosGarganta;
-
-  /// No description provided for @xv2OptCabecaSentidosOlhos.
-  ///
-  /// In pt, this message translates to:
-  /// **'Olhos pesados ou ardendo'**
-  String get xv2OptCabecaSentidosOlhos;
-
-  /// No description provided for @xv2OptPeitoRespiracaoCurta.
-  ///
-  /// In pt, this message translates to:
-  /// **'Respiração curta'**
-  String get xv2OptPeitoRespiracaoCurta;
-
-  /// No description provided for @xv2OptPeitoRespiracaoTosse.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tosse ou peito carregado'**
-  String get xv2OptPeitoRespiracaoTosse;
-
-  /// No description provided for @xv2OptPeitoIncomodoBatedeira.
-  ///
-  /// In pt, this message translates to:
-  /// **'Coração acelerado ou batedeira'**
-  String get xv2OptPeitoIncomodoBatedeira;
-
-  /// No description provided for @xv2OptPeitoIncomodoCostelas.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pontada nas costelas ao respirar fundo'**
-  String get xv2OptPeitoIncomodoCostelas;
-
-  /// No description provided for @xv2OptBarrigaQueimacaoSubindo.
-  ///
-  /// In pt, this message translates to:
-  /// **'Queimação subindo'**
-  String get xv2OptBarrigaQueimacaoSubindo;
-
-  /// No description provided for @xv2OptBarrigaQueimacaoEnjoo.
-  ///
-  /// In pt, this message translates to:
-  /// **'Enjoo'**
-  String get xv2OptBarrigaQueimacaoEnjoo;
-
-  /// No description provided for @xv2OptBarrigaColicaGases.
-  ///
-  /// In pt, this message translates to:
-  /// **'Gases ou barriga estufada'**
-  String get xv2OptBarrigaColicaGases;
-
-  /// No description provided for @xv2OptBarrigaColicaPontadas.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cólica ou pontadas'**
-  String get xv2OptBarrigaColicaPontadas;
-
-  /// No description provided for @xv2OptCostasRigidezOmbros.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pescoço e ombros duros'**
-  String get xv2OptCostasRigidezOmbros;
-
-  /// No description provided for @xv2OptCostasRigidezLombar.
-  ///
-  /// In pt, this message translates to:
-  /// **'Peso na lombar'**
-  String get xv2OptCostasRigidezLombar;
-
-  /// No description provided for @xv2OptCostasFisgadaIrradia.
-  ///
-  /// In pt, this message translates to:
-  /// **'Pontada que desce para braço ou perna'**
-  String get xv2OptCostasFisgadaIrradia;
-
-  /// No description provided for @xv2OptCostasFisgadaAoMexer.
-  ///
-  /// In pt, this message translates to:
-  /// **'Dor ao mexer'**
-  String get xv2OptCostasFisgadaAoMexer;
-
-  /// No description provided for @xv2OptMembrosCansacoJuntas.
-  ///
-  /// In pt, this message translates to:
-  /// **'Juntas doloridas'**
-  String get xv2OptMembrosCansacoJuntas;
-
-  /// No description provided for @xv2OptMembrosCansacoPesados.
-  ///
-  /// In pt, this message translates to:
-  /// **'Braços ou pernas cansados'**
-  String get xv2OptMembrosCansacoPesados;
-
-  /// No description provided for @xv2OptMembrosFormigamentoDormentes.
-  ///
-  /// In pt, this message translates to:
-  /// **'Mãos ou pés formigando ou dormentes'**
-  String get xv2OptMembrosFormigamentoDormentes;
-
-  /// No description provided for @xv2OptMembrosFormigamentoChoque.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sensação de choque'**
-  String get xv2OptMembrosFormigamentoChoque;
-
-  /// No description provided for @xv2RegionCabeca.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cabeça e pescoço'**
-  String get xv2RegionCabeca;
-
-  /// No description provided for @xv2RegionPeito.
-  ///
-  /// In pt, this message translates to:
-  /// **'Peito'**
-  String get xv2RegionPeito;
-
-  /// No description provided for @xv2RegionBarriga.
-  ///
-  /// In pt, this message translates to:
-  /// **'Barriga'**
-  String get xv2RegionBarriga;
-
-  /// No description provided for @xv2RegionCostas.
-  ///
-  /// In pt, this message translates to:
-  /// **'Costas'**
-  String get xv2RegionCostas;
-
-  /// No description provided for @xv2RegionMembros.
-  ///
-  /// In pt, this message translates to:
-  /// **'Braços, pernas e mãos'**
-  String get xv2RegionMembros;
-
-  /// No description provided for @xv2TimePassado.
-  ///
-  /// In pt, this message translates to:
-  /// **'O que já passou'**
-  String get xv2TimePassado;
-
-  /// No description provided for @xv2TimePresente.
-  ///
-  /// In pt, this message translates to:
-  /// **'O momento atual'**
-  String get xv2TimePresente;
-
-  /// No description provided for @xv2TimeFuturo.
-  ///
-  /// In pt, this message translates to:
-  /// **'O que vem pela frente'**
-  String get xv2TimeFuturo;
-
-  /// No description provided for @xv2TimeShortPassado.
-  ///
-  /// In pt, this message translates to:
-  /// **'Passado'**
-  String get xv2TimeShortPassado;
-
-  /// No description provided for @xv2TimeShortPresente.
-  ///
-  /// In pt, this message translates to:
-  /// **'Presente'**
-  String get xv2TimeShortPresente;
-
-  /// No description provided for @xv2TimeShortFuturo.
-  ///
-  /// In pt, this message translates to:
-  /// **'Futuro'**
-  String get xv2TimeShortFuturo;
-
-  /// No description provided for @xv2TriggerTrabalho.
-  ///
-  /// In pt, this message translates to:
-  /// **'Trabalho ou estudos'**
-  String get xv2TriggerTrabalho;
-
-  /// No description provided for @xv2TriggerFamilia.
-  ///
-  /// In pt, this message translates to:
-  /// **'Família ou relações'**
-  String get xv2TriggerFamilia;
-
-  /// No description provided for @xv2TriggerSono.
-  ///
-  /// In pt, this message translates to:
-  /// **'Noite mal dormida'**
-  String get xv2TriggerSono;
-
-  /// No description provided for @xv2TriggerAlimentacao.
-  ///
-  /// In pt, this message translates to:
-  /// **'Alimentação'**
-  String get xv2TriggerAlimentacao;
-
-  /// No description provided for @xv2TriggerEsforco.
-  ///
-  /// In pt, this message translates to:
-  /// **'Esforço físico'**
-  String get xv2TriggerEsforco;
-
-  /// No description provided for @xv2TriggerQueda.
-  ///
-  /// In pt, this message translates to:
-  /// **'Queda ou mau jeito'**
-  String get xv2TriggerQueda;
-
-  /// No description provided for @xv2TriggerMedicamento.
-  ///
-  /// In pt, this message translates to:
-  /// **'Medicamento novo'**
-  String get xv2TriggerMedicamento;
-
-  /// No description provided for @xv2TriggerClima.
-  ///
-  /// In pt, this message translates to:
-  /// **'Clima ou ambiente'**
-  String get xv2TriggerClima;
-
-  /// No description provided for @xv2TriggerNaoSei.
-  ///
-  /// In pt, this message translates to:
-  /// **'Não sei'**
-  String get xv2TriggerNaoSei;
-
-  /// No description provided for @xv2TriggerOutro.
-  ///
-  /// In pt, this message translates to:
-  /// **'Outro'**
-  String get xv2TriggerOutro;
-
-  /// No description provided for @xv2MoodBem.
-  ///
-  /// In pt, this message translates to:
-  /// **'Bem'**
-  String get xv2MoodBem;
-
-  /// No description provided for @xv2MoodNormal.
-  ///
-  /// In pt, this message translates to:
-  /// **'Normal'**
-  String get xv2MoodNormal;
-
-  /// No description provided for @xv2MoodNaoTaoBem.
-  ///
-  /// In pt, this message translates to:
-  /// **'Não tão bem'**
-  String get xv2MoodNaoTaoBem;
-
   /// No description provided for @xv2LibTitle.
   ///
   /// In pt, this message translates to:
@@ -4666,18 +3976,6 @@ abstract class AppLocalizations {
   /// **'Horários regulares e hábitos simples que favorecem noites mais tranquilas.'**
   String get xv2LibArtSonoSummary;
 
-  /// No description provided for @xv2LibArtCostasTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Postura e cuidados com as costas'**
-  String get xv2LibArtCostasTitle;
-
-  /// No description provided for @xv2LibArtCostasSummary.
-  ///
-  /// In pt, this message translates to:
-  /// **'Movimento e postura no dia a dia para quem passa muito tempo sentado.'**
-  String get xv2LibArtCostasSummary;
-
   /// No description provided for @xv2LibArtBracosTitle.
   ///
   /// In pt, this message translates to:
@@ -4689,30 +3987,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Informações gerais sobre esforço repetitivo e pausas durante o dia.'**
   String get xv2LibArtBracosSummary;
-
-  /// No description provided for @xv2LibArtCabecaTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tensão na cabeça e no pescoço no dia a dia'**
-  String get xv2LibArtCabecaTitle;
-
-  /// No description provided for @xv2LibArtCabecaSummary.
-  ///
-  /// In pt, this message translates to:
-  /// **'Postura, pausas e hábitos gerais para dias de tensão.'**
-  String get xv2LibArtCabecaSummary;
-
-  /// No description provided for @xv2LibArtPeleTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cuidados gerais com a pele'**
-  String get xv2LibArtPeleTitle;
-
-  /// No description provided for @xv2LibArtPeleSummary.
-  ///
-  /// In pt, this message translates to:
-  /// **'Hidratação da pele e cuidados simples do dia a dia.'**
-  String get xv2LibArtPeleSummary;
 
   /// No description provided for @xv2LibArtMovimentoTitle.
   ///
@@ -5115,6 +4389,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Excluir registro'**
   String get xv2WaterDeleteLog;
+
+  /// No description provided for @jv2PendingSync.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aguardando sincronizar'**
+  String get jv2PendingSync;
+
+  /// No description provided for @jv2OutboxRejectedNotice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Um registro não pôde ser enviado. Revise e tente de novo.'**
+  String get jv2OutboxRejectedNotice;
 }
 
 class _AppLocalizationsDelegate

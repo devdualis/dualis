@@ -32,12 +32,37 @@ class JournalLocalStore {
         );
   }
 
-  Future<List<JournalOutboxData>> pending({int limit = 50}) {
-    return (_db.select(_db.journalOutbox)
-          ..where((t) => t.status.equals('pending') | t.status.equals('failed'))
+  static const Duration syncingStaleAfter = Duration(minutes: 5);
+
+  Future<List<JournalOutboxData>> pending({
+    int limit = 50,
+    DateTime? now,
+  }) async {
+    final rows = await (_db.select(_db.journalOutbox)
+          ..where(
+            (t) =>
+                t.status.equals('pending') |
+                t.status.equals('failed') |
+                t.status.equals('syncing'),
+          )
           ..orderBy([(t) => OrderingTerm(expression: t.createdAt)])
           ..limit(limit))
         .get();
+    final clock = now ?? DateTime.now();
+    return [
+      for (final row in rows)
+        if (row.status != 'syncing' || _isStaleSyncing(row, clock)) row,
+    ];
+  }
+
+  bool _isStaleSyncing(JournalOutboxData row, DateTime now) {
+    final stamp = row.lastError;
+    DateTime? started;
+    if (stamp != null && stamp.startsWith('syncing:')) {
+      started = DateTime.tryParse(stamp.substring(8));
+    }
+    started ??= row.createdAt;
+    return now.difference(started) >= syncingStaleAfter;
   }
 
   /// Entries saved on the device that the server does not have yet.
@@ -65,7 +90,14 @@ class JournalLocalStore {
     jsonDecode(row.payloadJson) as Map<String, dynamic>,
   );
 
-  Future<void> markSyncing(int id) => _setStatus(id, 'syncing');
+  Future<void> markSyncing(int id) {
+    return (_db.update(_db.journalOutbox)..where((t) => t.id.equals(id))).write(
+      JournalOutboxCompanion(
+        status: const Value('syncing'),
+        lastError: Value('syncing:${DateTime.now().toIso8601String()}'),
+      ),
+    );
+  }
 
   Future<void> markSynced(int id) {
     return (_db.update(_db.journalOutbox)..where((t) => t.id.equals(id))).write(
@@ -76,24 +108,24 @@ class JournalLocalStore {
     );
   }
 
-  Future<void> markFailed(int id, String error) async {
+  Future<void> markFailed(int id, String error) =>
+      _markTerminal(id, 'failed', error);
+
+  Future<void> markRejected(int id, String error) =>
+      _markTerminal(id, 'rejected', error);
+
+  Future<void> _markTerminal(int id, String status, String error) async {
     final row =
         await (_db.select(_db.journalOutbox)
           ..where((t) => t.id.equals(id))).getSingleOrNull();
     if (row == null) return;
     await (_db.update(_db.journalOutbox)..where((t) => t.id.equals(id))).write(
       JournalOutboxCompanion(
-        status: const Value('failed'),
+        status: Value(status),
         lastError: Value(error),
         attempts: Value(row.attempts + 1),
       ),
     );
-  }
-
-  Future<void> _setStatus(int id, String status) {
-    return (_db.update(_db.journalOutbox)..where(
-      (t) => t.id.equals(id),
-    )).write(JournalOutboxCompanion(status: Value(status)));
   }
 
   Stream<int> pendingCountStream() {
@@ -101,7 +133,16 @@ class JournalLocalStore {
     final query =
         _db.selectOnly(_db.journalOutbox)
           ..addColumns([count])
-          ..where(_db.journalOutbox.status.isNotIn(['synced']));
+          ..where(_db.journalOutbox.status.isNotIn(['synced', 'rejected']));
+    return query.map((row) => row.read(count) ?? 0).watchSingle();
+  }
+
+  Stream<int> rejectedCountStream() {
+    final count = _db.journalOutbox.id.count();
+    final query =
+        _db.selectOnly(_db.journalOutbox)
+          ..addColumns([count])
+          ..where(_db.journalOutbox.status.equals('rejected'));
     return query.map((row) => row.read(count) ?? 0).watchSingle();
   }
 

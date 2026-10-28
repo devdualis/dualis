@@ -128,18 +128,6 @@ class AppLocalizationsPt extends AppLocalizations {
       'Número copiado para a área de transferência.';
 
   @override
-  String get triageConfirm => 'Confirmar';
-
-  @override
-  String get triagePreviewTitle => 'Revise seu registro';
-
-  @override
-  String get outcomeScreenTitle => 'Resumo do seu registro';
-
-  @override
-  String get outcomeScreenSubtitle => 'Um retrato do que você registrou hoje';
-
-  @override
   String get outcomeIntensityTitle => 'Intensidade que você informou';
 
   @override
@@ -152,14 +140,6 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get outcomeArticlesSubtitle =>
       'Conteúdos educativos gerais. Não são orientação para o seu caso.';
-
-  @override
-  String outcomeReadTime(int minutes) {
-    return '$minutes min de leitura';
-  }
-
-  @override
-  String get outcomeDoneButton => 'Concluir e Voltar ao Início';
 
   @override
   String get offlineBannerText =>
@@ -193,12 +173,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get tabPhysical => 'Física';
 
   @override
-  String get bodyMapTitle => 'Mapa Corporal 2D (14 Dias)';
-
-  @override
-  String get bodyMapHint => 'Toque em uma região para ver detalhes';
-
-  @override
   String get heatLegendNone => 'Sem registro';
 
   @override
@@ -212,9 +186,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get emotionalChartTitle => 'Evolução Emocional (7 Dias)';
-
-  @override
-  String get criticalRecurrenceTitle => 'Foco de Atenção';
 
   @override
   String get retrospectiveFeedTitle => 'Registros Anteriores';
@@ -420,19 +391,6 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get settingsDataHistorySubtitle =>
       'Visualize seu histórico de registros';
-
-  @override
-  String get deleteHistoryItemTitle => 'Descartar registro do histórico';
-
-  @override
-  String get deleteHistoryItemConfirm =>
-      'Tem certeza de que deseja descartar este registro do seu histórico? Esta ação é irreversível.';
-
-  @override
-  String get deleteHistoryItemSuccess => 'Registro removido com sucesso.';
-
-  @override
-  String get deleteHistoryItemError => 'Não foi possível remover o registro.';
 
   @override
   String get deleteAction => 'Descartar';
@@ -1239,148 +1197,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get privacyVeilUnlockManually => 'Desbloquear manualmente';
 
   @override
-  String deleteHistoryItemIntensity(int value) {
-    return 'Intensidade informada: $value/5';
-  }
-
-  @override
-  String get bodyMapRegionHeadNeck => 'Cabeça e pescoço';
-
-  @override
-  String get bodyMapRegionHeadNeckHint =>
-      'Dor de cabeça, dor ou rigidez no pescoço';
-
-  @override
-  String get bodyMapRegionDizziness => 'Tontura / formigamento';
-
-  @override
-  String get bodyMapRegionDizzinessHint =>
-      'Tontura, sensação de desequilíbrio, formigamento';
-
-  @override
-  String get bodyMapRegionBack => 'Costas';
-
-  @override
-  String get bodyMapRegionBackHint => 'Dor nas costas, na coluna ou na lombar';
-
-  @override
-  String get bodyMapRegionBreathing => 'Respiração';
-
-  @override
-  String get bodyMapRegionBreathingHint => 'Falta de ar, tosse';
-
-  @override
-  String get bodyMapRegionChest => 'Peito';
-
-  @override
-  String get bodyMapRegionChestHint =>
-      'Aperto ou desconforto no peito, coração acelerado';
-
-  @override
-  String get bodyMapRegionBelly => 'Barriga';
-
-  @override
-  String get bodyMapRegionBellyHint => 'Desconforto na barriga, cólica, azia';
-
-  @override
-  String get bodyMapRegionPelvic => 'Região íntima / urinária';
-
-  @override
-  String get bodyMapRegionPelvicHint =>
-      'Desconforto na região pélvica ou ao urinar';
-
-  @override
-  String get bodyMapRegionRightArm => 'Braço direito';
-
-  @override
-  String get bodyMapRegionRightArmHint =>
-      'Braço, ombro, cotovelo ou punho direito';
-
-  @override
-  String get bodyMapRegionLeftArm => 'Braço esquerdo';
-
-  @override
-  String get bodyMapRegionLeftArmHint =>
-      'Braço, ombro, cotovelo ou punho esquerdo';
-
-  @override
-  String get bodyMapRegionRightLeg => 'Perna direita';
-
-  @override
-  String get bodyMapRegionRightLegHint =>
-      'Quadril, coxa, joelho ou tornozelo direito';
-
-  @override
-  String get bodyMapRegionLeftLeg => 'Perna esquerda';
-
-  @override
-  String get bodyMapRegionLeftLegHint =>
-      'Quadril, coxa, joelho ou tornozelo esquerdo';
-
-  @override
-  String get bodyMapRegionSkin => 'Pele';
-
-  @override
-  String get bodyMapRegionSkinHint => 'Coceira, manchas';
-
-  @override
-  String get bodyMapRegionWholeBody => 'Corpo todo / cansaço';
-
-  @override
-  String get bodyMapRegionWholeBodyHint => 'Dor no corpo todo, cansaço';
-
-  @override
-  String get bodyMapRegionEnergy => 'Sede, fome ou energia';
-
-  @override
-  String get bodyMapRegionEnergyHint => 'Mudanças de energia, sede ou fome';
-
-  @override
-  String get bodyMapGroupHead => 'Cabeça';
-
-  @override
-  String get bodyMapGroupTrunk => 'Tronco';
-
-  @override
-  String get bodyMapGroupLimbs => 'Braços e pernas';
-
-  @override
-  String get bodyMapGroupWholeBody => 'Corpo todo e pele';
-
-  @override
-  String get bodyMapViewMap => 'Mapa do corpo';
-
-  @override
-  String get bodyMapViewAll => 'Todas as áreas';
-
-  @override
-  String get bodyMapShortSkin => 'Pele';
-
-  @override
-  String get bodyMapShortWholeBody => 'Corpo todo';
-
-  @override
-  String get bodyMapShortEnergy => 'Energia';
-
-  @override
-  String bodyMapMaxIntensity(int value) {
-    return 'Maior intensidade informada nos últimos 14 dias: $value/5';
-  }
-
-  @override
-  String bodyMapNoEntriesThisSide(String otherArea, int value) {
-    return 'Sem registros deste lado nos últimos 14 dias.\n($otherArea: intensidade informada $value/5)';
-  }
-
-  @override
-  String bodyMapViewOtherSide(String area) {
-    return 'Ver $area';
-  }
-
-  @override
-  String get bodyMapNoEntries14Days => 'Nenhum registro nos últimos 14 dias';
-
-  @override
   String get settingsChangePhotoSubtitle =>
       'Escolha como deseja selecionar sua foto de perfil.';
 
@@ -1651,24 +1467,12 @@ class AppLocalizationsPt extends AppLocalizations {
       'Conteúdos educativos gerais. Não são orientação para o seu caso.';
 
   @override
-  String get outcomeWellnessReadingsRelatedTitle =>
-      'Leituras relacionadas ao tema que você registrou';
-
-  @override
   String outcomeWellnessReadingsCount(int count) {
     return '$count leituras';
   }
 
   @override
-  String get outcomeArticlesEmpty => 'Nenhuma leitura disponível no momento.';
-
-  @override
   String get journalPatternTitle => 'Padrões nos seus registros';
-
-  @override
-  String journalPatternDescription(String category, int count, int windowDays) {
-    return 'Você registrou $category com intensidade alta $count vezes nos últimos $windowDays dias. Se isso está atrapalhando seu dia a dia, pode ser útil conversar com um profissional de saúde.';
-  }
 
   @override
   String historyIntensityInformed(int n) {
@@ -1696,16 +1500,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get appUpdateButton => 'Abrir loja de aplicativos';
 
   @override
-  String outcomeSummaryIntensity(int value) {
-    return 'Intensidade informada: $value/5';
-  }
-
-  @override
-  String outcomeSummaryRecordedAt(String time) {
-    return 'Registrado às $time';
-  }
-
-  @override
   String outcomeTodayYouLogged(String option) {
     return 'Você registrou: $option';
   }
@@ -1718,13 +1512,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get outcomeTodayStatusBad => 'Mal';
-
-  @override
-  String get outcomeHistoryDetailTitle => 'Detalhes do registro';
-
-  @override
-  String get outcomeHistoryNoNarrative =>
-      'Você não adicionou uma descrição neste registro.';
 
   @override
   String get checkInSummaryTitle => 'Registro salvo';
@@ -1830,6 +1617,15 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get jv2TimeFuturo => 'O que vem pela frente';
+
+  @override
+  String get jv2TimeShortPassado => 'Passado';
+
+  @override
+  String get jv2TimeShortPresente => 'Presente';
+
+  @override
+  String get jv2TimeShortFuturo => 'Futuro';
 
   @override
   String get jv2BranchQuestion => 'O que combina mais com você agora?';
@@ -2331,183 +2127,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get xv2HydrationOfferNo => 'Agora não';
 
   @override
-  String get xv2OptPassadoTristezaCulpa => 'Culpa ou arrependimento';
-
-  @override
-  String get xv2OptPassadoTristezaSaudade =>
-      'Falta de alguém ou de como as coisas eram';
-
-  @override
-  String get xv2OptPassadoMemoriaLembranca => 'Uma lembrança ruim que volta';
-
-  @override
-  String get xv2OptPassadoMemoriaMagoa => 'Fico remoendo mágoas antigas';
-
-  @override
-  String get xv2OptPresenteEnergiaCorpo => 'Corpo pesado, tenso ou dolorido';
-
-  @override
-  String get xv2OptPresenteEnergiaDesligado =>
-      'No piloto automático, meio desligado';
-
-  @override
-  String get xv2OptPresenteSobrecargaPaciencia =>
-      'Sem paciência, explodindo por pouco';
-
-  @override
-  String get xv2OptPresenteSobrecargaAperto =>
-      'Aperto no peito e momentos de desespero';
-
-  @override
-  String get xv2OptFuturoMenteAntecipar => 'Fico antecipando problemas';
-
-  @override
-  String get xv2OptFuturoMenteCobranca => 'Cobrança por perfeição ou controle';
-
-  @override
-  String get xv2OptFuturoMedoJulgamento => 'Medo de falhar ou ser julgado(a)';
-
-  @override
-  String get xv2OptFuturoMedoDesanimo => 'Desânimo com o rumo das coisas';
-
-  @override
-  String get xv2OptCabecaPressaoTemporas =>
-      'Dor ou pressão nas têmporas ou testa';
-
-  @override
-  String get xv2OptCabecaPressaoLatejando =>
-      'Latejando, com incômodo à luz ou ao barulho';
-
-  @override
-  String get xv2OptCabecaSentidosGarganta => 'Garganta arranhando ou seca';
-
-  @override
-  String get xv2OptCabecaSentidosOlhos => 'Olhos pesados ou ardendo';
-
-  @override
-  String get xv2OptPeitoRespiracaoCurta => 'Respiração curta';
-
-  @override
-  String get xv2OptPeitoRespiracaoTosse => 'Tosse ou peito carregado';
-
-  @override
-  String get xv2OptPeitoIncomodoBatedeira => 'Coração acelerado ou batedeira';
-
-  @override
-  String get xv2OptPeitoIncomodoCostelas =>
-      'Pontada nas costelas ao respirar fundo';
-
-  @override
-  String get xv2OptBarrigaQueimacaoSubindo => 'Queimação subindo';
-
-  @override
-  String get xv2OptBarrigaQueimacaoEnjoo => 'Enjoo';
-
-  @override
-  String get xv2OptBarrigaColicaGases => 'Gases ou barriga estufada';
-
-  @override
-  String get xv2OptBarrigaColicaPontadas => 'Cólica ou pontadas';
-
-  @override
-  String get xv2OptCostasRigidezOmbros => 'Pescoço e ombros duros';
-
-  @override
-  String get xv2OptCostasRigidezLombar => 'Peso na lombar';
-
-  @override
-  String get xv2OptCostasFisgadaIrradia =>
-      'Pontada que desce para braço ou perna';
-
-  @override
-  String get xv2OptCostasFisgadaAoMexer => 'Dor ao mexer';
-
-  @override
-  String get xv2OptMembrosCansacoJuntas => 'Juntas doloridas';
-
-  @override
-  String get xv2OptMembrosCansacoPesados => 'Braços ou pernas cansados';
-
-  @override
-  String get xv2OptMembrosFormigamentoDormentes =>
-      'Mãos ou pés formigando ou dormentes';
-
-  @override
-  String get xv2OptMembrosFormigamentoChoque => 'Sensação de choque';
-
-  @override
-  String get xv2RegionCabeca => 'Cabeça e pescoço';
-
-  @override
-  String get xv2RegionPeito => 'Peito';
-
-  @override
-  String get xv2RegionBarriga => 'Barriga';
-
-  @override
-  String get xv2RegionCostas => 'Costas';
-
-  @override
-  String get xv2RegionMembros => 'Braços, pernas e mãos';
-
-  @override
-  String get xv2TimePassado => 'O que já passou';
-
-  @override
-  String get xv2TimePresente => 'O momento atual';
-
-  @override
-  String get xv2TimeFuturo => 'O que vem pela frente';
-
-  @override
-  String get xv2TimeShortPassado => 'Passado';
-
-  @override
-  String get xv2TimeShortPresente => 'Presente';
-
-  @override
-  String get xv2TimeShortFuturo => 'Futuro';
-
-  @override
-  String get xv2TriggerTrabalho => 'Trabalho ou estudos';
-
-  @override
-  String get xv2TriggerFamilia => 'Família ou relações';
-
-  @override
-  String get xv2TriggerSono => 'Noite mal dormida';
-
-  @override
-  String get xv2TriggerAlimentacao => 'Alimentação';
-
-  @override
-  String get xv2TriggerEsforco => 'Esforço físico';
-
-  @override
-  String get xv2TriggerQueda => 'Queda ou mau jeito';
-
-  @override
-  String get xv2TriggerMedicamento => 'Medicamento novo';
-
-  @override
-  String get xv2TriggerClima => 'Clima ou ambiente';
-
-  @override
-  String get xv2TriggerNaoSei => 'Não sei';
-
-  @override
-  String get xv2TriggerOutro => 'Outro';
-
-  @override
-  String get xv2MoodBem => 'Bem';
-
-  @override
-  String get xv2MoodNormal => 'Normal';
-
-  @override
-  String get xv2MoodNaoTaoBem => 'Não tão bem';
-
-  @override
   String get xv2LibTitle => 'Biblioteca';
 
   @override
@@ -2591,33 +2210,11 @@ class AppLocalizationsPt extends AppLocalizations {
       'Horários regulares e hábitos simples que favorecem noites mais tranquilas.';
 
   @override
-  String get xv2LibArtCostasTitle => 'Postura e cuidados com as costas';
-
-  @override
-  String get xv2LibArtCostasSummary =>
-      'Movimento e postura no dia a dia para quem passa muito tempo sentado.';
-
-  @override
   String get xv2LibArtBracosTitle => 'Braços e ombros: pausas e postura';
 
   @override
   String get xv2LibArtBracosSummary =>
       'Informações gerais sobre esforço repetitivo e pausas durante o dia.';
-
-  @override
-  String get xv2LibArtCabecaTitle =>
-      'Tensão na cabeça e no pescoço no dia a dia';
-
-  @override
-  String get xv2LibArtCabecaSummary =>
-      'Postura, pausas e hábitos gerais para dias de tensão.';
-
-  @override
-  String get xv2LibArtPeleTitle => 'Cuidados gerais com a pele';
-
-  @override
-  String get xv2LibArtPeleSummary =>
-      'Hidratação da pele e cuidados simples do dia a dia.';
 
   @override
   String get xv2LibArtMovimentoTitle => 'Movimente-se no dia a dia';
@@ -2876,4 +2473,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get xv2WaterDeleteLog => 'Excluir registro';
+
+  @override
+  String get jv2PendingSync => 'Aguardando sincronizar';
+
+  @override
+  String get jv2OutboxRejectedNotice =>
+      'Um registro não pôde ser enviado. Revise e tente de novo.';
 }

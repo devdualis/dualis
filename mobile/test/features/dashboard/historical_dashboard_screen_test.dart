@@ -1,12 +1,16 @@
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:dualis_mobile/core/database/app_database.dart';
 import 'package:dualis_mobile/core/network/api_client.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/dashboard/presentation/screens/historical_dashboard_screen.dart';
 import 'package:dualis_mobile/features/home/domain/home_greeting.dart';
 import 'package:dualis_mobile/features/hydration/domain/models/hydration_settings.dart';
 import 'package:dualis_mobile/features/hydration/presentation/controllers/hydration_controller.dart';
+import 'package:dualis_mobile/features/journal/data/journal_local_store.dart';
+import 'package:dualis_mobile/features/journal/domain/journal_models.dart';
 import 'package:dualis_mobile/features/journal_insights/data/journal_insights_remote_data_source.dart';
 import 'package:dualis_mobile/features/journal_insights/domain/journal_insights_models.dart';
 import 'package:dualis_mobile/features/journal_insights/presentation/controllers/journal_insights_controller.dart';
@@ -90,16 +94,21 @@ Future<FakeJournalDataSource> pumpDashboard(
   List<JournalEntryView> entries, {
   JournalSummary? summary,
   Map<DateTime, int> water = const {},
+  AppDatabase? database,
 }) async {
   tester.view.physicalSize = const Size(900, 4000);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
 
+  final db = database ?? AppDatabase(NativeDatabase.memory());
+  addTearDown(db.close);
+
   final dataSource = FakeJournalDataSource(entries, summary: summary);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        appDatabaseProvider.overrideWithValue(db),
         homeClockProvider.overrideWithValue(() => today),
         journalInsightsDataSourceProvider.overrideWithValue(dataSource),
         hydrationControllerProvider.overrideWith(
@@ -277,6 +286,36 @@ void main() {
         },
       );
       expect(find.byKey(const Key('water_line_chart')), findsOneWidget);
+    });
+
+    testWidgets('shows pending offline entries marked as aguardando sincronizar',
+        (tester) async {
+      final db = AppDatabase(NativeDatabase.memory());
+      final store = JournalLocalStore(db);
+      await store.enqueue(
+        JournalEntry(
+          clientId: 'offline-entry-1',
+          recordedAt: today,
+          mood: 'bem',
+        ),
+      );
+
+      await pumpDashboard(
+        tester,
+        const [],
+        database: db,
+      );
+
+      expect(find.text('Aguardando sincronizar'), findsOneWidget);
+      expect(
+        find.byKey(const Key('journal_entry_pending_offline-entry-1')),
+        findsOneWidget,
+      );
+      // Pending entries cannot be deleted via remote API button
+      expect(
+        find.byKey(const Key('journal_entry_delete_offline-entry-1')),
+        findsNothing,
+      );
     });
   });
 }

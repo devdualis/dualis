@@ -26,6 +26,8 @@ class FakeJournalRemote implements JournalRemoteDataSource {
   final List<Map<String, dynamic>> requestBodies = [];
   List<UserCondition> conditions;
   bool fail = false;
+  int? errorStatus;
+  dynamic errorData;
 
   FakeJournalRemote({this.conditions = const []});
 
@@ -37,6 +39,18 @@ class FakeJournalRemote implements JournalRemoteDataSource {
   @override
   Future<JournalEntry> createEntry(JournalEntry entry, {String? profileId}) async {
     if (fail) throw _offline();
+    if (errorStatus != null) {
+      final request = RequestOptions(path: JournalEndpoints.entries);
+      throw DioException(
+        requestOptions: request,
+        response: Response(
+          requestOptions: request,
+          statusCode: errorStatus,
+          data: errorData,
+        ),
+        type: DioExceptionType.badResponse,
+      );
+    }
     requestBodies.add(entry.toRequestJson());
     created.add(entry);
     return entry.copyWith(id: 'srv-${created.length}');

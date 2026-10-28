@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/api_endpoints.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/security/secure_storage_service.dart';
+import '../../../core/utils/local_day.dart';
 import '../domain/journal_insights_models.dart';
 
 final journalInsightsDataSourceProvider =
@@ -52,7 +53,10 @@ class JournalInsightsRemoteDataSource {
     try {
       final response = await _apiClient.get(
         ApiEndpoints.journalSummary,
-        queryParameters: {'days': days},
+        queryParameters: {
+          'days': days,
+          'tzOffset': localTzOffsetMinutes(),
+        },
         options: await _auth(),
       );
       final data = response.data;

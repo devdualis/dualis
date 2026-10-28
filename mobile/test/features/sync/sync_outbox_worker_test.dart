@@ -196,6 +196,7 @@ void main() {
           overrides: [
             isOnlineProvider.overrideWith((ref) => Stream.value(false)),
             pendingOutboxCountProvider.overrideWith((ref) => Stream.value(1)),
+            rejectedOutboxCountProvider.overrideWith((ref) => Stream.value(0)),
           ],
           child: const MaterialApp(
             localizationsDelegates: [

@@ -144,22 +144,6 @@
   "@emergencyCopiedToast": {
     "description": "Toast or snackbar message indicating emergency number was copied"
   },
-  "triageConfirm": "Confirmar",
-  "@triageConfirm": {
-    "description": "Confirm button label"
-  },
-  "triagePreviewTitle": "Revise seu registro",
-  "@triagePreviewTitle": {
-    "description": "Title of the preview step card"
-  },
-  "outcomeScreenTitle": "Resumo do seu registro",
-  "@outcomeScreenTitle": {
-    "description": "Outcome screen title (wellness)"
-  },
-  "outcomeScreenSubtitle": "Um retrato do que você registrou hoje",
-  "@outcomeScreenSubtitle": {
-    "description": "Subtitle of Screen 6 Triage Outcome"
-  },
   "outcomeIntensityTitle": "Intensidade que você informou",
   "@outcomeIntensityTitle": {
     "description": "Intensity title"
@@ -175,19 +159,6 @@
   "outcomeArticlesSubtitle": "Conteúdos educativos gerais. Não são orientação para o seu caso.",
   "@outcomeArticlesSubtitle": {
     "description": "Articles section subtitle"
-  },
-  "outcomeReadTime": "{minutes} min de leitura",
-  "@outcomeReadTime": {
-    "description": "Article read time in minutes",
-    "placeholders": {
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
-  "outcomeDoneButton": "Concluir e Voltar ao Início",
-  "@outcomeDoneButton": {
-    "description": "Button to finish triage and return home"
   },
   "offlineBannerText": "Modo Offline — Seus check-ins serão salvos localmente e sincronizados automaticamente.",
   "@offlineBannerText": {
@@ -222,14 +193,6 @@
   "@tabPhysical": {
     "description": "Tab label for physical vertical"
   },
-  "bodyMapTitle": "Mapa Corporal 2D (14 Dias)",
-  "@bodyMapTitle": {
-    "description": "Title of the 2D anatomical body map"
-  },
-  "bodyMapHint": "Toque em uma região para ver detalhes",
-  "@bodyMapHint": {
-    "description": "Hint to interact with the body map"
-  },
   "heatLegendNone": "Sem registro",
   "@heatLegendNone": {
     "description": "Legend label for no pain"
@@ -249,10 +212,6 @@
   "emotionalChartTitle": "Evolução Emocional (7 Dias)",
   "@emotionalChartTitle": {
     "description": "Title for emotional trend chart"
-  },
-  "criticalRecurrenceTitle": "Foco de Atenção",
-  "@criticalRecurrenceTitle": {
-    "description": "Title for critical recurrence cards"
   },
   "retrospectiveFeedTitle": "Registros Anteriores",
   "@retrospectiveFeedTitle": {
@@ -514,22 +473,6 @@
   "settingsDataHistorySubtitle": "Visualize seu histórico de registros",
   "@settingsDataHistorySubtitle": {
     "description": "Subtitle for history tile"
-  },
-  "deleteHistoryItemTitle": "Descartar registro do histórico",
-  "@deleteHistoryItemTitle": {
-    "description": "Title of the delete history item confirmation dialog"
-  },
-  "deleteHistoryItemConfirm": "Tem certeza de que deseja descartar este registro do seu histórico? Esta ação é irreversível.",
-  "@deleteHistoryItemConfirm": {
-    "description": "Confirmation message when discarding a history entry"
-  },
-  "deleteHistoryItemSuccess": "Registro removido com sucesso.",
-  "@deleteHistoryItemSuccess": {
-    "description": "Success snackbar message when record is deleted"
-  },
-  "deleteHistoryItemError": "Não foi possível remover o registro.",
-  "@deleteHistoryItemError": {
-    "description": "Error snackbar message when record deletion fails"
   },
   "deleteAction": "Descartar",
   "@deleteAction": {
@@ -1069,79 +1012,6 @@
   "privacyVeilBiometricReason": "Autentique-se para acessar seus registros.",
   "privacyVeilUnlock": "Desbloquear",
   "privacyVeilUnlockManually": "Desbloquear manualmente",
-  "deleteHistoryItemIntensity": "Intensidade informada: {value}/5",
-  "@deleteHistoryItemIntensity": {
-    "placeholders": {
-      "value": {
-        "type": "int"
-      }
-    }
-  },
-  "bodyMapRegionHeadNeck": "Cabeça e pescoço",
-  "bodyMapRegionHeadNeckHint": "Dor de cabeça, dor ou rigidez no pescoço",
-  "bodyMapRegionDizziness": "Tontura / formigamento",
-  "bodyMapRegionDizzinessHint": "Tontura, sensação de desequilíbrio, formigamento",
-  "bodyMapRegionBack": "Costas",
-  "bodyMapRegionBackHint": "Dor nas costas, na coluna ou na lombar",
-  "bodyMapRegionBreathing": "Respiração",
-  "bodyMapRegionBreathingHint": "Falta de ar, tosse",
-  "bodyMapRegionChest": "Peito",
-  "bodyMapRegionChestHint": "Aperto ou desconforto no peito, coração acelerado",
-  "bodyMapRegionBelly": "Barriga",
-  "bodyMapRegionBellyHint": "Desconforto na barriga, cólica, azia",
-  "bodyMapRegionPelvic": "Região íntima / urinária",
-  "bodyMapRegionPelvicHint": "Desconforto na região pélvica ou ao urinar",
-  "bodyMapRegionRightArm": "Braço direito",
-  "bodyMapRegionRightArmHint": "Braço, ombro, cotovelo ou punho direito",
-  "bodyMapRegionLeftArm": "Braço esquerdo",
-  "bodyMapRegionLeftArmHint": "Braço, ombro, cotovelo ou punho esquerdo",
-  "bodyMapRegionRightLeg": "Perna direita",
-  "bodyMapRegionRightLegHint": "Quadril, coxa, joelho ou tornozelo direito",
-  "bodyMapRegionLeftLeg": "Perna esquerda",
-  "bodyMapRegionLeftLegHint": "Quadril, coxa, joelho ou tornozelo esquerdo",
-  "bodyMapRegionSkin": "Pele",
-  "bodyMapRegionSkinHint": "Coceira, manchas",
-  "bodyMapRegionWholeBody": "Corpo todo / cansaço",
-  "bodyMapRegionWholeBodyHint": "Dor no corpo todo, cansaço",
-  "bodyMapRegionEnergy": "Sede, fome ou energia",
-  "bodyMapRegionEnergyHint": "Mudanças de energia, sede ou fome",
-  "bodyMapGroupHead": "Cabeça",
-  "bodyMapGroupTrunk": "Tronco",
-  "bodyMapGroupLimbs": "Braços e pernas",
-  "bodyMapGroupWholeBody": "Corpo todo e pele",
-  "bodyMapViewMap": "Mapa do corpo",
-  "bodyMapViewAll": "Todas as áreas",
-  "bodyMapShortSkin": "Pele",
-  "bodyMapShortWholeBody": "Corpo todo",
-  "bodyMapShortEnergy": "Energia",
-  "bodyMapMaxIntensity": "Maior intensidade informada nos últimos 14 dias: {value}/5",
-  "@bodyMapMaxIntensity": {
-    "placeholders": {
-      "value": {
-        "type": "int"
-      }
-    }
-  },
-  "bodyMapNoEntriesThisSide": "Sem registros deste lado nos últimos 14 dias.\n({otherArea}: intensidade informada {value}/5)",
-  "@bodyMapNoEntriesThisSide": {
-    "placeholders": {
-      "otherArea": {
-        "type": "String"
-      },
-      "value": {
-        "type": "int"
-      }
-    }
-  },
-  "bodyMapViewOtherSide": "Ver {area}",
-  "@bodyMapViewOtherSide": {
-    "placeholders": {
-      "area": {
-        "type": "String"
-      }
-    }
-  },
-  "bodyMapNoEntries14Days": "Nenhum registro nos últimos 14 dias",
   "settingsChangePhotoSubtitle": "Escolha como deseja selecionar sua foto de perfil.",
   "settingsPhotoCamera": "Câmera",
   "settingsPhotoCameraSubtitle": "Tirar uma nova foto",
@@ -1243,7 +1113,6 @@
   },
   "outcomeWellnessReadingsTitle": "Leituras sobre bem-estar",
   "outcomeWellnessReadingsDisclaimer": "Conteúdos educativos gerais. Não são orientação para o seu caso.",
-  "outcomeWellnessReadingsRelatedTitle": "Leituras relacionadas ao tema que você registrou",
   "outcomeWellnessReadingsCount": "{count} leituras",
   "@outcomeWellnessReadingsCount": {
     "placeholders": {
@@ -1252,22 +1121,7 @@
       }
     }
   },
-  "outcomeArticlesEmpty": "Nenhuma leitura disponível no momento.",
   "journalPatternTitle": "Padrões nos seus registros",
-  "journalPatternDescription": "Você registrou {category} com intensidade alta {count} vezes nos últimos {windowDays} dias. Se isso está atrapalhando seu dia a dia, pode ser útil conversar com um profissional de saúde.",
-  "@journalPatternDescription": {
-    "placeholders": {
-      "category": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      },
-      "windowDays": {
-        "type": "int"
-      }
-    }
-  },
   "historyIntensityInformed": "Intensidade informada: {n}/5",
   "@historyIntensityInformed": {
     "placeholders": {
@@ -1289,24 +1143,6 @@
     }
   },
   "appUpdateButton": "Abrir loja de aplicativos",
-  "outcomeSummaryIntensity": "Intensidade informada: {value}/5",
-  "@outcomeSummaryIntensity": {
-    "description": "Chip on the Home summary card of today's entry. Self-reported intensity.",
-    "placeholders": {
-      "value": {
-        "type": "int"
-      }
-    }
-  },
-  "outcomeSummaryRecordedAt": "Registrado às {time}",
-  "@outcomeSummaryRecordedAt": {
-    "description": "Time today's entry was saved (HH:mm).",
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
   "outcomeTodayYouLogged": "Você registrou: {option}",
   "@outcomeTodayYouLogged": {
     "description": "Repeats the option the person chose, without reinterpreting it (audit C-32).",
@@ -1319,8 +1155,6 @@
   "outcomeTodayStatusGood": "Bem",
   "outcomeTodayStatusSoSo": "Mais ou menos",
   "outcomeTodayStatusBad": "Mal",
-  "outcomeHistoryDetailTitle": "Detalhes do registro",
-  "outcomeHistoryNoNarrative": "Você não adicionou uma descrição neste registro.",
   "checkInSummaryTitle": "Registro salvo",
   "checkInSummaryBackHome": "Voltar ao início",
   "checkInSummaryBackHomeCountdown": "Voltar ao início ({seconds})",
@@ -1375,6 +1209,9 @@
   "jv2TimePassado": "O que já passou",
   "jv2TimePresente": "O momento atual",
   "jv2TimeFuturo": "O que vem pela frente",
+  "jv2TimeShortPassado": "Passado",
+  "jv2TimeShortPresente": "Presente",
+  "jv2TimeShortFuturo": "Futuro",
   "jv2BranchQuestion": "O que combina mais com você agora?",
   "jv2OptionsQuestion": "Marque o que combina com você.",
   "jv2MultiSelectHint": "Você pode marcar mais de um.",
@@ -1576,62 +1413,6 @@
   "xv2HydrationOfferBody": "Você escolhe os horários e a sua meta nos ajustes de hidratação. Dá para mudar quando quiser.",
   "xv2HydrationOfferYes": "Sim, configurar",
   "xv2HydrationOfferNo": "Agora não",
-  "xv2OptPassadoTristezaCulpa": "Culpa ou arrependimento",
-  "xv2OptPassadoTristezaSaudade": "Falta de alguém ou de como as coisas eram",
-  "xv2OptPassadoMemoriaLembranca": "Uma lembrança ruim que volta",
-  "xv2OptPassadoMemoriaMagoa": "Fico remoendo mágoas antigas",
-  "xv2OptPresenteEnergiaCorpo": "Corpo pesado, tenso ou dolorido",
-  "xv2OptPresenteEnergiaDesligado": "No piloto automático, meio desligado",
-  "xv2OptPresenteSobrecargaPaciencia": "Sem paciência, explodindo por pouco",
-  "xv2OptPresenteSobrecargaAperto": "Aperto no peito e momentos de desespero",
-  "xv2OptFuturoMenteAntecipar": "Fico antecipando problemas",
-  "xv2OptFuturoMenteCobranca": "Cobrança por perfeição ou controle",
-  "xv2OptFuturoMedoJulgamento": "Medo de falhar ou ser julgado(a)",
-  "xv2OptFuturoMedoDesanimo": "Desânimo com o rumo das coisas",
-  "xv2OptCabecaPressaoTemporas": "Dor ou pressão nas têmporas ou testa",
-  "xv2OptCabecaPressaoLatejando": "Latejando, com incômodo à luz ou ao barulho",
-  "xv2OptCabecaSentidosGarganta": "Garganta arranhando ou seca",
-  "xv2OptCabecaSentidosOlhos": "Olhos pesados ou ardendo",
-  "xv2OptPeitoRespiracaoCurta": "Respiração curta",
-  "xv2OptPeitoRespiracaoTosse": "Tosse ou peito carregado",
-  "xv2OptPeitoIncomodoBatedeira": "Coração acelerado ou batedeira",
-  "xv2OptPeitoIncomodoCostelas": "Pontada nas costelas ao respirar fundo",
-  "xv2OptBarrigaQueimacaoSubindo": "Queimação subindo",
-  "xv2OptBarrigaQueimacaoEnjoo": "Enjoo",
-  "xv2OptBarrigaColicaGases": "Gases ou barriga estufada",
-  "xv2OptBarrigaColicaPontadas": "Cólica ou pontadas",
-  "xv2OptCostasRigidezOmbros": "Pescoço e ombros duros",
-  "xv2OptCostasRigidezLombar": "Peso na lombar",
-  "xv2OptCostasFisgadaIrradia": "Pontada que desce para braço ou perna",
-  "xv2OptCostasFisgadaAoMexer": "Dor ao mexer",
-  "xv2OptMembrosCansacoJuntas": "Juntas doloridas",
-  "xv2OptMembrosCansacoPesados": "Braços ou pernas cansados",
-  "xv2OptMembrosFormigamentoDormentes": "Mãos ou pés formigando ou dormentes",
-  "xv2OptMembrosFormigamentoChoque": "Sensação de choque",
-  "xv2RegionCabeca": "Cabeça e pescoço",
-  "xv2RegionPeito": "Peito",
-  "xv2RegionBarriga": "Barriga",
-  "xv2RegionCostas": "Costas",
-  "xv2RegionMembros": "Braços, pernas e mãos",
-  "xv2TimePassado": "O que já passou",
-  "xv2TimePresente": "O momento atual",
-  "xv2TimeFuturo": "O que vem pela frente",
-  "xv2TimeShortPassado": "Passado",
-  "xv2TimeShortPresente": "Presente",
-  "xv2TimeShortFuturo": "Futuro",
-  "xv2TriggerTrabalho": "Trabalho ou estudos",
-  "xv2TriggerFamilia": "Família ou relações",
-  "xv2TriggerSono": "Noite mal dormida",
-  "xv2TriggerAlimentacao": "Alimentação",
-  "xv2TriggerEsforco": "Esforço físico",
-  "xv2TriggerQueda": "Queda ou mau jeito",
-  "xv2TriggerMedicamento": "Medicamento novo",
-  "xv2TriggerClima": "Clima ou ambiente",
-  "xv2TriggerNaoSei": "Não sei",
-  "xv2TriggerOutro": "Outro",
-  "xv2MoodBem": "Bem",
-  "xv2MoodNormal": "Normal",
-  "xv2MoodNaoTaoBem": "Não tão bem",
   "xv2LibTitle": "Biblioteca",
   "xv2LibIntro": "Textos gerais de fontes públicas sobre hábitos saudáveis. São iguais para todas as pessoas e não são orientação para o seu caso.",
   "xv2LibSource": "Fonte: {source}",
@@ -1670,14 +1451,8 @@
   "xv2LibArtRespiracaoSummary": "Alguns minutos de respiração tranquila podem ajudar a desacelerar em dias exigentes.",
   "xv2LibArtSonoTitle": "Hábitos para dormir melhor",
   "xv2LibArtSonoSummary": "Horários regulares e hábitos simples que favorecem noites mais tranquilas.",
-  "xv2LibArtCostasTitle": "Postura e cuidados com as costas",
-  "xv2LibArtCostasSummary": "Movimento e postura no dia a dia para quem passa muito tempo sentado.",
   "xv2LibArtBracosTitle": "Braços e ombros: pausas e postura",
   "xv2LibArtBracosSummary": "Informações gerais sobre esforço repetitivo e pausas durante o dia.",
-  "xv2LibArtCabecaTitle": "Tensão na cabeça e no pescoço no dia a dia",
-  "xv2LibArtCabecaSummary": "Postura, pausas e hábitos gerais para dias de tensão.",
-  "xv2LibArtPeleTitle": "Cuidados gerais com a pele",
-  "xv2LibArtPeleSummary": "Hidratação da pele e cuidados simples do dia a dia.",
   "xv2LibArtMovimentoTitle": "Movimente-se no dia a dia",
   "xv2LibArtMovimentoSummary": "Orientações gerais sobre atividade física em todas as idades.",
   "xv2LibArtAlimentacaoTitle": "Guia Alimentar para a População Brasileira",
@@ -1836,5 +1611,7 @@
       }
     }
   },
-  "xv2WaterDeleteLog": "Excluir registro"
+  "xv2WaterDeleteLog": "Excluir registro",
+  "jv2PendingSync": "Aguardando sincronizar",
+  "jv2OutboxRejectedNotice": "Um registro não pôde ser enviado. Revise e tente de novo."
 }

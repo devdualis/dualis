@@ -125,7 +125,15 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     );
     complete(
       TriageVertical.psicoEmocional,
-      entry.items.where((i) => i.kind != JournalKeys.kindPhysical),
+      entry.items.where((i) => i.kind == JournalKeys.kindEmotional),
+    );
+    // Conditions get their own line on Home and never fill an axis.
+    final conditions =
+        entry.items.where((i) => i.kind == JournalKeys.kindCondition);
+    home.completeConditions(
+      conditions.isEmpty
+          ? null
+          : conditions.map((i) => journalItemText(l10n, i)).join(' · '),
     );
   }
 

@@ -58,6 +58,21 @@ void main() {
     }
   });
 
+  test('every link is a distinct page of a public institution', () {
+    final urls = kLibraryArticles.map((a) => a.url).toList();
+    expect(urls.toSet().length, urls.length);
+    for (final url in urls) {
+      final host = Uri.parse(url).host;
+      expect(
+        host.endsWith('.gov.br') || host == 'www.paho.org',
+        isTrue,
+        reason: url,
+      );
+    }
+    final ids = kLibraryArticles.map((a) => a.id).toList();
+    expect(ids.toSet().length, ids.length);
+  });
+
   testWidgets('same articles in the same order for everyone', (tester) async {
     await pumpLibrary(tester, 'pt');
     final first = renderedArticleIds(tester);

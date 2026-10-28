@@ -126,18 +126,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emergencyCopiedToast => 'Number copied to clipboard.';
 
   @override
-  String get triageConfirm => 'Confirm';
-
-  @override
-  String get triagePreviewTitle => 'Review your entry';
-
-  @override
-  String get outcomeScreenTitle => 'Your entry summary';
-
-  @override
-  String get outcomeScreenSubtitle => 'A snapshot of what you logged today';
-
-  @override
   String get outcomeIntensityTitle => 'Intensity you reported';
 
   @override
@@ -150,14 +138,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get outcomeArticlesSubtitle =>
       'General educational content. Not guidance for your situation.';
-
-  @override
-  String outcomeReadTime(int minutes) {
-    return '$minutes min read';
-  }
-
-  @override
-  String get outcomeDoneButton => 'Finish and Return Home';
 
   @override
   String get offlineBannerText =>
@@ -192,12 +172,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabPhysical => 'Physical';
 
   @override
-  String get bodyMapTitle => '2D Body Map (14 Days)';
-
-  @override
-  String get bodyMapHint => 'Tap a region to view details';
-
-  @override
   String get heatLegendNone => 'No entries';
 
   @override
@@ -211,9 +185,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emotionalChartTitle => 'Emotional Evolution (7 Days)';
-
-  @override
-  String get criticalRecurrenceTitle => 'Focus of Attention';
 
   @override
   String get retrospectiveFeedTitle => 'Past Records';
@@ -418,19 +389,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsDataHistorySubtitle => 'View your entry history';
-
-  @override
-  String get deleteHistoryItemTitle => 'Delete history record';
-
-  @override
-  String get deleteHistoryItemConfirm =>
-      'Are you sure you want to discard this entry from your history? This action cannot be undone.';
-
-  @override
-  String get deleteHistoryItemSuccess => 'Record removed successfully.';
-
-  @override
-  String get deleteHistoryItemError => 'Could not remove the record.';
 
   @override
   String get deleteAction => 'Delete';
@@ -1230,143 +1188,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacyVeilUnlockManually => 'Unlock manually';
 
   @override
-  String deleteHistoryItemIntensity(int value) {
-    return 'Reported intensity: $value/5';
-  }
-
-  @override
-  String get bodyMapRegionHeadNeck => 'Head and neck';
-
-  @override
-  String get bodyMapRegionHeadNeckHint => 'Headache, neck pain or stiffness';
-
-  @override
-  String get bodyMapRegionDizziness => 'Dizziness / tingling';
-
-  @override
-  String get bodyMapRegionDizzinessHint =>
-      'Dizziness, feeling off balance, tingling';
-
-  @override
-  String get bodyMapRegionBack => 'Back';
-
-  @override
-  String get bodyMapRegionBackHint => 'Pain in the back, spine or lower back';
-
-  @override
-  String get bodyMapRegionBreathing => 'Breathing';
-
-  @override
-  String get bodyMapRegionBreathingHint => 'Shortness of breath, cough';
-
-  @override
-  String get bodyMapRegionChest => 'Chest';
-
-  @override
-  String get bodyMapRegionChestHint =>
-      'Tightness or discomfort in the chest, racing heart';
-
-  @override
-  String get bodyMapRegionBelly => 'Belly';
-
-  @override
-  String get bodyMapRegionBellyHint => 'Belly discomfort, cramps, heartburn';
-
-  @override
-  String get bodyMapRegionPelvic => 'Intimate / urinary area';
-
-  @override
-  String get bodyMapRegionPelvicHint =>
-      'Discomfort in the pelvic area or when urinating';
-
-  @override
-  String get bodyMapRegionRightArm => 'Right arm';
-
-  @override
-  String get bodyMapRegionRightArmHint => 'Right arm, shoulder, elbow or wrist';
-
-  @override
-  String get bodyMapRegionLeftArm => 'Left arm';
-
-  @override
-  String get bodyMapRegionLeftArmHint => 'Left arm, shoulder, elbow or wrist';
-
-  @override
-  String get bodyMapRegionRightLeg => 'Right leg';
-
-  @override
-  String get bodyMapRegionRightLegHint => 'Right hip, thigh, knee or ankle';
-
-  @override
-  String get bodyMapRegionLeftLeg => 'Left leg';
-
-  @override
-  String get bodyMapRegionLeftLegHint => 'Left hip, thigh, knee or ankle';
-
-  @override
-  String get bodyMapRegionSkin => 'Skin';
-
-  @override
-  String get bodyMapRegionSkinHint => 'Itching, spots';
-
-  @override
-  String get bodyMapRegionWholeBody => 'Whole body / tiredness';
-
-  @override
-  String get bodyMapRegionWholeBodyHint => 'Aches all over the body, tiredness';
-
-  @override
-  String get bodyMapRegionEnergy => 'Thirst, hunger or energy';
-
-  @override
-  String get bodyMapRegionEnergyHint => 'Changes in energy, thirst or hunger';
-
-  @override
-  String get bodyMapGroupHead => 'Head';
-
-  @override
-  String get bodyMapGroupTrunk => 'Trunk';
-
-  @override
-  String get bodyMapGroupLimbs => 'Arms and legs';
-
-  @override
-  String get bodyMapGroupWholeBody => 'Whole body and skin';
-
-  @override
-  String get bodyMapViewMap => 'Body map';
-
-  @override
-  String get bodyMapViewAll => 'All areas';
-
-  @override
-  String get bodyMapShortSkin => 'Skin';
-
-  @override
-  String get bodyMapShortWholeBody => 'Whole body';
-
-  @override
-  String get bodyMapShortEnergy => 'Energy';
-
-  @override
-  String bodyMapMaxIntensity(int value) {
-    return 'Highest intensity you reported in the last 14 days: $value/5';
-  }
-
-  @override
-  String bodyMapNoEntriesThisSide(String otherArea, int value) {
-    return 'No entries on this side in the last 14 days.\n($otherArea: reported intensity $value/5)';
-  }
-
-  @override
-  String bodyMapViewOtherSide(String area) {
-    return 'View $area';
-  }
-
-  @override
-  String get bodyMapNoEntries14Days => 'No entries in the last 14 days';
-
-  @override
   String get settingsChangePhotoSubtitle =>
       'Choose how you want to select your profile photo.';
 
@@ -1638,24 +1459,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'General educational content. Not guidance for your situation.';
 
   @override
-  String get outcomeWellnessReadingsRelatedTitle =>
-      'Readings related to what you logged';
-
-  @override
   String outcomeWellnessReadingsCount(int count) {
     return '$count readings';
   }
 
   @override
-  String get outcomeArticlesEmpty => 'No readings available right now.';
-
-  @override
   String get journalPatternTitle => 'Patterns in your entries';
-
-  @override
-  String journalPatternDescription(String category, int count, int windowDays) {
-    return 'You logged $category with high intensity $count times in the last $windowDays days. If this is affecting your daily life, talking to a healthcare professional may help.';
-  }
 
   @override
   String historyIntensityInformed(int n) {
@@ -1683,16 +1492,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appUpdateButton => 'Open app store';
 
   @override
-  String outcomeSummaryIntensity(int value) {
-    return 'Reported intensity: $value/5';
-  }
-
-  @override
-  String outcomeSummaryRecordedAt(String time) {
-    return 'Logged at $time';
-  }
-
-  @override
   String outcomeTodayYouLogged(String option) {
     return 'You logged: $option';
   }
@@ -1705,13 +1504,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get outcomeTodayStatusBad => 'Not well';
-
-  @override
-  String get outcomeHistoryDetailTitle => 'Entry details';
-
-  @override
-  String get outcomeHistoryNoNarrative =>
-      'You did not add a description to this entry.';
 
   @override
   String get checkInSummaryTitle => 'Entry saved';
@@ -1817,6 +1609,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get jv2TimeFuturo => 'What lies ahead';
+
+  @override
+  String get jv2TimeShortPassado => 'Past';
+
+  @override
+  String get jv2TimeShortPresente => 'Present';
+
+  @override
+  String get jv2TimeShortFuturo => 'Future';
 
   @override
   String get jv2BranchQuestion => 'What fits you best right now?';
@@ -2321,185 +2122,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get xv2HydrationOfferNo => 'Not now';
 
   @override
-  String get xv2OptPassadoTristezaCulpa => 'Guilt or regret';
-
-  @override
-  String get xv2OptPassadoTristezaSaudade =>
-      'Missing someone or how things used to be';
-
-  @override
-  String get xv2OptPassadoMemoriaLembranca =>
-      'A bad memory that keeps coming back';
-
-  @override
-  String get xv2OptPassadoMemoriaMagoa => 'I keep going over old hurts';
-
-  @override
-  String get xv2OptPresenteEnergiaCorpo => 'Body feels heavy, tense or sore';
-
-  @override
-  String get xv2OptPresenteEnergiaDesligado =>
-      'On autopilot, a bit switched off';
-
-  @override
-  String get xv2OptPresenteSobrecargaPaciencia =>
-      'Short on patience, snapping over little things';
-
-  @override
-  String get xv2OptPresenteSobrecargaAperto =>
-      'Tight chest and moments of despair';
-
-  @override
-  String get xv2OptFuturoMenteAntecipar => 'I keep anticipating problems';
-
-  @override
-  String get xv2OptFuturoMenteCobranca => 'Pressure for perfection or control';
-
-  @override
-  String get xv2OptFuturoMedoJulgamento => 'Fear of failing or being judged';
-
-  @override
-  String get xv2OptFuturoMedoDesanimo =>
-      'Discouraged about where things are going';
-
-  @override
-  String get xv2OptCabecaPressaoTemporas =>
-      'Pain or pressure in the temples or forehead';
-
-  @override
-  String get xv2OptCabecaPressaoLatejando =>
-      'Throbbing, bothered by light or noise';
-
-  @override
-  String get xv2OptCabecaSentidosGarganta => 'Scratchy or dry throat';
-
-  @override
-  String get xv2OptCabecaSentidosOlhos => 'Heavy or burning eyes';
-
-  @override
-  String get xv2OptPeitoRespiracaoCurta => 'Short breath';
-
-  @override
-  String get xv2OptPeitoRespiracaoTosse => 'Cough or heavy chest';
-
-  @override
-  String get xv2OptPeitoIncomodoBatedeira => 'Racing or pounding heart';
-
-  @override
-  String get xv2OptPeitoIncomodoCostelas =>
-      'Twinge in the ribs when breathing deeply';
-
-  @override
-  String get xv2OptBarrigaQueimacaoSubindo => 'Burning feeling rising up';
-
-  @override
-  String get xv2OptBarrigaQueimacaoEnjoo => 'Queasy';
-
-  @override
-  String get xv2OptBarrigaColicaGases => 'Gas or bloated belly';
-
-  @override
-  String get xv2OptBarrigaColicaPontadas => 'Cramps or twinges';
-
-  @override
-  String get xv2OptCostasRigidezOmbros => 'Stiff neck and shoulders';
-
-  @override
-  String get xv2OptCostasRigidezLombar => 'Heaviness in the lower back';
-
-  @override
-  String get xv2OptCostasFisgadaIrradia =>
-      'Twinge that runs down an arm or leg';
-
-  @override
-  String get xv2OptCostasFisgadaAoMexer => 'Hurts when moving';
-
-  @override
-  String get xv2OptMembrosCansacoJuntas => 'Sore joints';
-
-  @override
-  String get xv2OptMembrosCansacoPesados => 'Tired arms or legs';
-
-  @override
-  String get xv2OptMembrosFormigamentoDormentes =>
-      'Tingling or numb hands or feet';
-
-  @override
-  String get xv2OptMembrosFormigamentoChoque => 'Feeling of a jolt';
-
-  @override
-  String get xv2RegionCabeca => 'Head and neck';
-
-  @override
-  String get xv2RegionPeito => 'Chest';
-
-  @override
-  String get xv2RegionBarriga => 'Belly';
-
-  @override
-  String get xv2RegionCostas => 'Back';
-
-  @override
-  String get xv2RegionMembros => 'Arms, legs and hands';
-
-  @override
-  String get xv2TimePassado => 'What already happened';
-
-  @override
-  String get xv2TimePresente => 'The present moment';
-
-  @override
-  String get xv2TimeFuturo => 'What lies ahead';
-
-  @override
-  String get xv2TimeShortPassado => 'Past';
-
-  @override
-  String get xv2TimeShortPresente => 'Present';
-
-  @override
-  String get xv2TimeShortFuturo => 'Future';
-
-  @override
-  String get xv2TriggerTrabalho => 'Work or studies';
-
-  @override
-  String get xv2TriggerFamilia => 'Family or relationships';
-
-  @override
-  String get xv2TriggerSono => 'Poor night of sleep';
-
-  @override
-  String get xv2TriggerAlimentacao => 'Food';
-
-  @override
-  String get xv2TriggerEsforco => 'Physical effort';
-
-  @override
-  String get xv2TriggerQueda => 'Fall or awkward movement';
-
-  @override
-  String get xv2TriggerMedicamento => 'New medication';
-
-  @override
-  String get xv2TriggerClima => 'Weather or surroundings';
-
-  @override
-  String get xv2TriggerNaoSei => 'Not sure';
-
-  @override
-  String get xv2TriggerOutro => 'Other';
-
-  @override
-  String get xv2MoodBem => 'Good';
-
-  @override
-  String get xv2MoodNormal => 'Okay';
-
-  @override
-  String get xv2MoodNaoTaoBem => 'Not so good';
-
-  @override
   String get xv2LibTitle => 'Library';
 
   @override
@@ -2582,32 +2204,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Regular times and simple habits that support calmer nights.';
 
   @override
-  String get xv2LibArtCostasTitle => 'Posture and caring for your back';
-
-  @override
-  String get xv2LibArtCostasSummary =>
-      'Everyday movement and posture for people who sit a lot.';
-
-  @override
   String get xv2LibArtBracosTitle => 'Arms and shoulders: breaks and posture';
 
   @override
   String get xv2LibArtBracosSummary =>
       'General information about repetitive effort and breaks during the day.';
-
-  @override
-  String get xv2LibArtCabecaTitle => 'Everyday tension in the head and neck';
-
-  @override
-  String get xv2LibArtCabecaSummary =>
-      'Posture, breaks and general habits for tense days.';
-
-  @override
-  String get xv2LibArtPeleTitle => 'General skin care';
-
-  @override
-  String get xv2LibArtPeleSummary =>
-      'Skin moisturising and simple everyday care.';
 
   @override
   String get xv2LibArtMovimentoTitle => 'Move more every day';
@@ -2863,4 +2464,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get xv2WaterDeleteLog => 'Delete log';
+
+  @override
+  String get jv2PendingSync => 'Waiting to sync';
+
+  @override
+  String get jv2OutboxRejectedNotice =>
+      'One entry could not be sent. Check it and try again.';
 }

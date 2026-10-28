@@ -52,7 +52,7 @@ class HydrationState {
 
     var day = totalFor(today) >= dailyTargetMl
         ? today
-        : today.subtract(const Duration(days: 1));
+        : DateTime(today.year, today.month, today.day - 1);
     var streak = 0;
     while (totalFor(day) >= dailyTargetMl) {
       streak++;

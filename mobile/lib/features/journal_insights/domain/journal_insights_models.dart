@@ -1,5 +1,6 @@
 import '../../../l10n/app_localizations.dart';
-import 'journal_labels.dart';
+import '../../journal/domain/journal_models.dart';
+import '../../journal/presentation/journal_labels.dart';
 
 /// One item of a journal entry as returned by `GET /v1/journal/entries`
 /// (contract: docs/bienestar/CONTRATO-JOURNAL-V2.md).
@@ -27,6 +28,18 @@ class JournalItemView {
     this.intensity,
     this.legacyLabel,
   });
+
+  factory JournalItemView.fromItem(JournalItem item) => JournalItemView(
+        kind: item.kind,
+        optionKey: item.optionKey,
+        customLabel: item.customLabel,
+        conditionId: item.conditionId,
+        conditionLabel: item.conditionLabel,
+        bodySide: item.bodySide,
+        persistence: item.persistence,
+        intensity: item.intensity,
+        legacyLabel: item.legacyLabel,
+      );
 
   factory JournalItemView.fromJson(Map<String, dynamic> json) {
     return JournalItemView(
@@ -72,7 +85,7 @@ class JournalItemView {
     final key = optionKey;
     if (key == null) return '';
     final option = JournalLabels.option(l10n, key);
-    if (option == null) return '';
+    if (option.isEmpty) return '';
     final region = this.region;
     final regionText =
         region != null ? JournalLabels.region(l10n, region) : null;
@@ -87,6 +100,7 @@ class JournalEntryView {
   final List<String> triggers;
   final bool legacy;
   final List<JournalItemView> items;
+  final bool pendingSync;
 
   const JournalEntryView({
     required this.id,
@@ -95,7 +109,18 @@ class JournalEntryView {
     this.triggers = const [],
     this.legacy = false,
     this.items = const [],
+    this.pendingSync = false,
   });
+
+  factory JournalEntryView.fromEntry(JournalEntry entry) => JournalEntryView(
+        id: entry.id ?? entry.clientId,
+        recordedAt: entry.recordedAt,
+        mood: entry.mood,
+        triggers: entry.triggers,
+        legacy: entry.legacy,
+        items: [for (final item in entry.items) JournalItemView.fromItem(item)],
+        pendingSync: entry.pendingSync,
+      );
 
   factory JournalEntryView.fromJson(Map<String, dynamic> json) {
     return JournalEntryView(
@@ -118,16 +143,19 @@ class JournalEntryView {
   DateTime get day =>
       DateTime(recordedAt.year, recordedAt.month, recordedAt.day);
 
-  /// Markers counted in the summary: times and option keys of emotional
-  /// items, regions of physical items, and triggers.
+  /// Markers counted in the summary: option, branch, bare time/region,
+  /// and `trigger:<key>`. Same set the server uses.
   Set<String> get markers {
     final result = <String>{};
     for (final item in items) {
-      if (item.time != null) {
-        result.add(item.time!);
-        if (!item.isCustom) result.add(item.optionKey!);
+      final key = item.optionKey;
+      if (key == null || key.isEmpty) continue;
+      final parts = key.split('.');
+      result.add(parts.first);
+      if (parts.length >= 2 && parts[1] != 'custom') {
+        result.add('${parts[0]}.${parts[1]}');
       }
-      if (item.region != null) result.add(item.region!);
+      if (!item.isCustom) result.add(key);
     }
     for (final t in triggers) {
       result.add('trigger:$t');
@@ -222,11 +250,12 @@ class JournalSummary {
       ..sort();
     for (var i = 0; i < keys.length; i++) {
       for (var j = i + 1; j < keys.length; j++) {
-        final both = daysByMarker[keys[i]]!
-            .intersection(daysByMarker[keys[j]]!)
-            .length;
+        final a = keys[i];
+        final b = keys[j];
+        if (a.startsWith('$b.') || b.startsWith('$a.')) continue;
+        final both = daysByMarker[a]!.intersection(daysByMarker[b]!).length;
         if (both >= 2) {
-          pairs.add(JournalCooccurrence(a: keys[i], b: keys[j], days: both));
+          pairs.add(JournalCooccurrence(a: a, b: b, days: both));
         }
       }
     }
@@ -291,8 +320,7 @@ List<String> cooccurrenceSentences(
 
 /// The summary endpoint may send triggers without the `trigger:` prefix.
 String _normalizeMarker(String key) {
-  if (JournalLabels.triggers.contains(key)) {
-    return 'trigger:$key';
-  }
+  if (key.startsWith('trigger:')) return key;
+  if (JournalLabels.triggers.contains(key)) return 'trigger:$key';
   return key;
 }

@@ -58,6 +58,10 @@ class TriggerCheckInState {
   final String? physicalSummary;
   final String? emotionalNarrative;
   final String? physicalNarrative;
+
+  /// Today's "Minhas condições" items, in the user's own words. Kept apart
+  /// from both axes: a condition is never filed as emotional or physical.
+  final String? conditionsSummary;
   final DateTime? completedAt;
   final String? checkInDate;
   final bool isModifiedAfterCompletion;
@@ -79,6 +83,7 @@ class TriggerCheckInState {
     this.physicalSummary,
     this.emotionalNarrative,
     this.physicalNarrative,
+    this.conditionsSummary,
     this.completedAt,
     this.checkInDate,
     this.isModifiedAfterCompletion = false,
@@ -146,6 +151,7 @@ class TriggerCheckInState {
     String? physicalSummary,
     Object? emotionalNarrative = _unset,
     Object? physicalNarrative = _unset,
+    Object? conditionsSummary = _unset,
     DateTime? completedAt,
     String? checkInDate,
     bool? isModifiedAfterCompletion,
@@ -171,6 +177,9 @@ class TriggerCheckInState {
       physicalNarrative: identical(physicalNarrative, _unset)
           ? this.physicalNarrative
           : physicalNarrative as String?,
+      conditionsSummary: identical(conditionsSummary, _unset)
+          ? this.conditionsSummary
+          : conditionsSummary as String?,
       completedAt: completedAt ?? this.completedAt,
       checkInDate: checkInDate ?? this.checkInDate,
       isModifiedAfterCompletion:
@@ -195,6 +204,7 @@ class TriggerCheckInState {
       'physicalSummary': physicalSummary,
       'emotionalNarrative': emotionalNarrative,
       'physicalNarrative': physicalNarrative,
+      'conditionsSummary': conditionsSummary,
       'completedAt': completedAt?.toIso8601String(),
       'checkInDate': checkInDate,
       'isModifiedAfterCompletion': isModifiedAfterCompletion,
@@ -242,6 +252,7 @@ class TriggerCheckInState {
       physicalSummary: json['physicalSummary'] as String?,
       emotionalNarrative: cleanNarrative(json['emotionalNarrative']),
       physicalNarrative: cleanNarrative(json['physicalNarrative']),
+      conditionsSummary: json['conditionsSummary'] as String?,
       completedAt: json['completedAt'] != null
           ? DateTime.tryParse(json['completedAt'] as String)
           : null,
