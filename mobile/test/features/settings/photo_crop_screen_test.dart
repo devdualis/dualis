@@ -52,11 +52,17 @@ void main() {
 
     expect(find.text('Ajustar foto'), findsOneWidget);
     expect(find.byKey(const Key('photo_crop_viewer')), findsOneWidget);
-    final viewer = tester.widget<InteractiveViewer>(
-      find.byKey(const Key('photo_crop_viewer')),
-    );
+    final viewerFinder = find.byKey(const Key('photo_crop_viewer'));
+    final viewer = tester.widget<InteractiveViewer>(viewerFinder);
     expect(viewer.minScale, 1);
     expect(viewer.maxScale, greaterThan(1));
+    final image = tester.widget<Image>(
+      find.descendant(
+        of: viewerFinder,
+        matching: find.byType(Image),
+      ),
+    );
+    expect(image.fit, BoxFit.contain);
     expect(find.byKey(const Key('photo_crop_confirm')), findsOneWidget);
   });
 

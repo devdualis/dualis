@@ -117,7 +117,9 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
                                   height: side,
                                   child: Image.memory(
                                     widget.imageBytes,
-                                    fit: BoxFit.cover,
+                                    // Contain keeps the whole picture (heads included).
+                                    // Cover was cropping the top before the person could zoom.
+                                    fit: BoxFit.contain,
                                     gaplessPlayback: true,
                                   ),
                                 ),
