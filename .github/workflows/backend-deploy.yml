@@ -225,7 +225,7 @@ jobs:
             # Exam reading runs after the upload response returns, so CPU must stay allocated.
             "--no-cpu-throttling"
             "--min-instances=0"
-            "--max-instances=10"
+            "--max-instances=2"
             "--port=8080"
           )
 
