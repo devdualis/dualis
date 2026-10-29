@@ -1,0 +1,12 @@
+[
+  {
+    "name": "delete-old-images",
+    "action": { "type": "Delete" },
+    "condition": { "tagState": "ANY", "olderThan": "0s" }
+  },
+  {
+    "name": "keep-10-most-recent",
+    "action": { "type": "Keep" },
+    "mostRecentVersions": { "packageNamePrefixes": ["dualis-backend"], "keepCount": 10 }
+  }
+]
