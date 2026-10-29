@@ -1,0 +1,63 @@
+name: Database - Daily Backup
+
+# Daily pg_dump of the production database (Supabase Free has no backups).
+# Dumps land in a private bucket in southamerica-east1; a lifecycle rule
+# deletes them after 30 days (infra/gcp/db-backups-lifecycle.json).
+on:
+  schedule:
+    - cron: '0 6 * * *' # 03:00 in Brasília
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: pg_dump to Cloud Storage
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      BACKUP_BUCKET: ${{ vars.DB_BACKUP_BUCKET || 'dualis-db-backups-509318' }}
+    steps:
+      - name: Verify configuration
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+        run: |
+          if [ -z "$BACKUP_DATABASE_URL" ]; then
+            echo "::error::BACKUP_DATABASE_URL is empty. Set it on the 'production' environment (table-owner role, session pooler)."
+            exit 1
+          fi
+
+      # The deployer service account only has storage.objectCreator on the
+      # bucket: it can write new dumps but cannot read or delete them.
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      # Uses the table-owner role (BYPASSRLS) so FORCE ROW LEVEL SECURITY
+      # tables are dumped in full; pg_dump fails instead of dumping partially.
+      - name: Dump and upload
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          FILE="dualis-$(date -u +%Y%m%dT%H%M%SZ).dump"
+          docker run --rm -e BACKUP_DATABASE_URL postgres:17 \
+            sh -c 'pg_dump "$BACKUP_DATABASE_URL" --format=custom --no-owner --no-privileges --schema=public --schema=drizzle' \
+            > "$FILE"
+          SIZE=$(stat -c %s "$FILE")
+          if [ "$SIZE" -lt 1024 ]; then
+            echo "::error::Dump is only $SIZE bytes; refusing to upload."
+            exit 1
+          fi
+          gcloud storage cp "$FILE" "gs://$BACKUP_BUCKET/$FILE" --quiet
+          echo "Uploaded $FILE ($SIZE bytes) to gs://$BACKUP_BUCKET" >> "$GITHUB_STEP_SUMMARY"
+          rm -f "$FILE"
