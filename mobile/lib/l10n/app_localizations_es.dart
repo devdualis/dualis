@@ -3598,4 +3598,236 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get careMedicationNew => 'Nuevo medicamento';
+
+  @override
+  String get gxTabEmotions => 'Emociones';
+
+  @override
+  String get gxTabBody => 'Cuerpo';
+
+  @override
+  String get gxTabWater => 'Agua';
+
+  @override
+  String get gxTabTogether => 'Juntos';
+
+  @override
+  String get gxPieTitle => 'Pasado, presente y futuro';
+
+  @override
+  String get gxPieSubtitle =>
+      'Parte de los registros emocionales en cada tiempo. La intensidad no cambia el tamaño de la porción.';
+
+  @override
+  String gxRecords(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count registros',
+      one: '1 registro',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String gxPieTop(String answer, int count, int total) {
+    return 'Opción más registrada: “$answer” · $count de $total';
+  }
+
+  @override
+  String gxPieTied(int count, int total) {
+    return 'Opciones empatadas, $count de $total cada una:';
+  }
+
+  @override
+  String gxPieWithoutAxis(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count registros sin elección de tiempo (fuera del gráfico)',
+      one: '1 registro sin elección de tiempo (fuera del gráfico)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get gxLinesTitleEmotional => 'Intensidad informada por tiempo';
+
+  @override
+  String get gxLinesTitlePhysical => 'Intensidad informada por región';
+
+  @override
+  String get gxLinesSubtitle =>
+      'Cada punto es un registro (1 a 5). La línea se corta en los días sin registro.';
+
+  @override
+  String get gxLegendHint =>
+      'Toca la leyenda para mostrar u ocultar una línea. Toca un punto para ver el registro.';
+
+  @override
+  String gxIntensityValue(int value) {
+    return 'Intensidad $value/5';
+  }
+
+  @override
+  String get gxAnswersTitleEmotional => 'Respuestas por tiempo';
+
+  @override
+  String get gxAnswersTitlePhysical => 'Respuestas por región';
+
+  @override
+  String get gxAnswersSubtitle =>
+      'El símbolo muestra el camino elegido. La altura es la intensidad informada.';
+
+  @override
+  String get gxWrittenByYou => 'Escrito por ti';
+
+  @override
+  String get gxNoIntensityPoints =>
+      'Ningún registro con intensidad en este filtro.';
+
+  @override
+  String get gxBodyMapTitle => 'Marcas en el cuerpo';
+
+  @override
+  String gxRegionDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days días con marca',
+      one: '1 día con marca',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String gxMarks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count marcas',
+      one: '1 marca',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get gxBodyMapCaption =>
+      'Número = días con al menos una marca en la región. El color solo identifica la región.';
+
+  @override
+  String get gxWholeBody => 'Cuerpo entero (sin posición en el mapa)';
+
+  @override
+  String get gxViewUnspecified => 'vista no informada';
+
+  @override
+  String get gxSeeEvolution => 'Ver evolución';
+
+  @override
+  String get gxCalendarTitle => 'Calendario combinado';
+
+  @override
+  String get gxCalendarSubtitle =>
+      'Cabeza: emociones · Silueta: cuerpo · Gota: agua registrada';
+
+  @override
+  String get gxCalendarCaption =>
+      'Cabeza y silueta: tamaño según la intensidad informada. Gota: tamaño fijo, litros del día. Día sin registro no es cero. Toca el día para ver todo.';
+
+  @override
+  String get gxOutOfPeriod => 'Fuera del período';
+
+  @override
+  String get gxIntensityNotInformed => 'intensidad no informada';
+
+  @override
+  String get gxWaterLogged => 'Agua registrada';
+
+  @override
+  String get gxDayNothing => 'Ningún registro en este día.';
+
+  @override
+  String get gxSameDayNote =>
+      'Estar en el mismo día no indica relación entre los elementos.';
+
+  @override
+  String gxGoalPercent(int percent, int goal) {
+    return '$percent% de la meta elegida ($goal ml)';
+  }
+
+  @override
+  String gxPeriodRange(String start, String end) {
+    return '$start a $end';
+  }
+
+  @override
+  String get gxNoWaterRecord => 'Ningún registro de agua';
+
+  @override
+  String gxWaterDayTitle(String date) {
+    return 'Agua registrada el $date';
+  }
+
+  @override
+  String get gxWaterStepTitle => 'Volumen registrado a lo largo del día';
+
+  @override
+  String gxWaterGoalLine(int goal) {
+    return 'Meta elegida: $goal ml';
+  }
+
+  @override
+  String gxWaterStepTooltip(String time, int added, int total) {
+    return '$time · +$added ml\nAcumulado: $total ml';
+  }
+
+  @override
+  String get gxWaterBarsTitle => 'Agua registrada en el período';
+
+  @override
+  String get gxWaterCardTotal => 'Total';
+
+  @override
+  String get gxWaterCardDays => 'Días con registro';
+
+  @override
+  String get gxWaterCardAverage => 'Promedio por día con registro';
+
+  @override
+  String get gxWaterCardGoal => 'Días que alcanzaron la meta elegida';
+
+  @override
+  String gxOfN(int a, int b) {
+    return '$a de $b';
+  }
+
+  @override
+  String get gxNoRecord => 'Sin registro';
+
+  @override
+  String get gxTodayInProgress => 'Hoy aún está en curso.';
+
+  @override
+  String get gxWaterCalendarTitle => 'Calendario de agua';
+
+  @override
+  String get gxWaterCalendarHint =>
+      'Toca un día para ver el volumen a lo largo del día.';
+
+  @override
+  String gxWaterLoggedSnack(int ml) {
+    return '$ml ml registrados';
+  }
+
+  @override
+  String get gxUndo => 'Deshacer';
+
+  @override
+  String gxDayDetailTitle(String date) {
+    return 'Registros del $date';
+  }
+
+  @override
+  String get gxIntensityAxis => 'Intensidad informada';
 }

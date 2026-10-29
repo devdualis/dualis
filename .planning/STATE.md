@@ -94,6 +94,7 @@ None yet.
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
+| 261029-gx2 | Gráficos consolidados v2.0: Emoções (E1–E3), Corpo (F1–F3), Água (H1–H4) e calendário Juntos (C1) no histórico; aba Água com H2/H3 e Desfazer | 2026-10-29 | (this commit) | [261029-gx2-graficos-consolidados-v2](./quick/261029-gx2-graficos-consolidados-v2/) |
 | 261028-jv21 | Journal v2.1 mobile flow: Bem/Não tão bem with icons, axis from Home card, conditions on body screen, area + sensation fields, side-aware body tree, Home marks only the entry axis | 2026-10-28 | (this commit) | [261028-jv21-fluxo-registro-mobile](./quick/261028-jv21-fluxo-registro-mobile/) |
 | 261028-hc1 | Histórico em abas Psicoemocional/Físico (7/30/90 dias, mapa, conexões, linha do tempo) e menu sem Meu Dia | 2026-10-28 | 25a0ec2 | [261028-hc1-historico-duas-abas-e-menu](./quick/261028-hc1-historico-duas-abas-e-menu/) |
 | 260926-en3 | Configure API_BASE_URL default in mobile-release workflow (APK builds now target production Cloud Run backend instead of emulator-only 10.0.2.2) | 2026-09-26 | 05a39f4 | [260926-en3-configure-api-base-url-default-in-mobile](./quick/260926-en3-configure-api-base-url-default-in-mobile/) |

@@ -63,34 +63,6 @@ void main() {
     expect(pair.days, 2);
   });
 
-  test('sentences only count, framed by the marker seen on more days', () {
-    final entries = [
-      e(1, [head, mind]),
-      e(2, [head, mind]),
-      e(3, [mind]),
-    ];
-    final sentences = cooccurrenceSentences(
-        l10n, JournalSummary.compute(entries), entries);
-    expect(sentences, [
-      "Nos 3 dias em que você marcou 'Mente acelerada', também marcou 'Cabeça e pescoço' em 2.",
-    ]);
-    for (final s in sentences) {
-      expect(s, isNot(matches(RegExp(r'porque|causa|indica|tend[eê]ncia'))));
-    }
-  });
-
-  test('server pairs with bare trigger keys are understood', () {
-    final entries = [
-      e(1, [head], triggers: ['sono']),
-      e(2, [head], triggers: ['sono']),
-    ];
-    const summary = JournalSummary(cooccurrence: [
-      JournalCooccurrence(a: 'sono', b: 'cabeca', days: 2),
-    ]);
-    final sentences = cooccurrenceSentences(l10n, summary, entries);
-    expect(sentences.single, contains("'Noite mal dormida'"));
-  });
-
   test('same local day counts once even with two entries', () {
     final summary = JournalSummary.compute([
       e(1, [head], triggers: ['sono']),
@@ -116,12 +88,5 @@ void main() {
     expect(JournalLabels.marker(l10n, 'cabeca'), 'Cabeça e pescoço');
     expect(JournalLabels.marker(l10n, 'futuro'), 'O que vem pela frente');
     expect(JournalLabels.marker(l10n, 'trigger:sono'), 'Noite mal dormida');
-  });
-
-  test('unknown keys never produce a sentence', () {
-    const summary = JournalSummary(cooccurrence: [
-      JournalCooccurrence(a: 'grupo_x', b: 'cabeca', days: 2),
-    ]);
-    expect(cooccurrenceSentences(l10n, summary, const []), isEmpty);
   });
 }

@@ -8,7 +8,9 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../home/domain/home_greeting.dart';
 import '../../../house_ads/data/house_ads_repository.dart';
 import '../../../house_ads/presentation/house_ad_card.dart';
-import '../../../journal_insights/presentation/widgets/journal_line_charts.dart';
+import '../../../journal_insights/domain/chart_data.dart';
+import '../../../journal_insights/domain/history_series.dart' show periodStart;
+import '../../../journal_insights/presentation/widgets/water_charts.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../controllers/hydration_controller.dart';
 import '../widgets/hydration_visuals.dart';
@@ -79,16 +81,13 @@ class _HydrationDashboardScreenState
                   const SizedBox(height: 12),
                   _TodayLogs(state: state, viewOnly: viewOnly),
                   const SizedBox(height: 24),
+                  _SectionTitle(l10n.gxWaterStepTitle),
+                  const SizedBox(height: 12),
+                  _Panel(child: _TodaySteps(state: state)),
+                  const SizedBox(height: 24),
                   _SectionTitle(l10n.xv2WaterHistoryTitle),
                   const SizedBox(height: 12),
-                  _Panel(
-                    child: WaterLine(
-                      dailyTotals: state.last30DaysTotals,
-                      goalMl: state.dailyTargetMl,
-                      today: ref.read(homeClockProvider)(),
-                      windowDays: HydrationDashboardScreen.historyDays,
-                    ),
-                  ),
+                  _Panel(child: _PeriodBars(state: state)),
                   const SizedBox(height: 28),
                   _SectionTitle(l10n.xv2WaterRemindersTitle),
                   const SizedBox(height: 12),
@@ -124,6 +123,68 @@ class _HydrationDashboardScreenState
         actions: const [SizedBox(width: 56)],
       ),
       body: content,
+    );
+  }
+}
+
+/// Logs a quick amount, then confirms it with "Desfazer" (handoff H1).
+Future<void> _logWithUndo(BuildContext context, WidgetRef ref, int ml) async {
+  final notifier = ref.read(hydrationControllerProvider.notifier);
+  final messenger = ScaffoldMessenger.of(context);
+  final l10n = AppLocalizations.of(context);
+  final ok = await notifier.logWater(amountMl: ml, source: 'quick_chip');
+  if (!ok) return;
+  final logs = ref.read(hydrationControllerProvider).todayLogs;
+  if (logs.isEmpty) return;
+  final added = logs.last;
+  messenger
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(
+      key: const Key('hydration_logged_snack'),
+      content: Text(l10n.gxWaterLoggedSnack(ml)),
+      action: SnackBarAction(
+        key: const Key('hydration_logged_undo'),
+        label: l10n.gxUndo,
+        onPressed: () => notifier.deleteLog(added),
+      ),
+    ));
+}
+
+/// H2 for today.
+class _TodaySteps extends ConsumerWidget {
+  final HydrationState state;
+  const _TodaySteps({required this.state});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final now = ref.read(homeClockProvider)();
+    return WaterStepChart(
+      steps: waterSteps(state.todayLogs),
+      goalMl: state.dailyTargetMl > 0 ? state.dailyTargetMl : null,
+      endHour: now.hour + now.minute / 60,
+    );
+  }
+}
+
+/// H3 for the last 30 days.
+class _PeriodBars extends ConsumerWidget {
+  final HydrationState state;
+  const _PeriodBars({required this.state});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final today = ref.read(homeClockProvider)();
+    const days = HydrationDashboardScreen.historyDays;
+    return WaterPeriodBars(
+      totals: {
+        ...normalizeWaterTotals(state.last30DaysTotals),
+        if (state.todayTotalMl > 0)
+          DateTime(today.year, today.month, today.day): state.todayTotalMl,
+      },
+      start: periodStart(today, days),
+      days: days,
+      goalMl: state.dailyTargetMl > 0 ? state.dailyTargetMl : null,
+      today: today,
     );
   }
 }
@@ -182,7 +243,6 @@ class _TodayCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final notifier = ref.read(hydrationControllerProvider.notifier);
     final streak = state.streakDays(ref.read(homeClockProvider)());
 
     return _Panel(
@@ -250,8 +310,7 @@ class _TodayCard extends ConsumerWidget {
                     key: const Key('hydration_quick_add_200'),
                     emoji: '🥛',
                     label: '200 ml',
-                    onTap: () =>
-                        notifier.logWater(amountMl: 200, source: 'quick_chip'),
+                    onTap: () => _logWithUndo(context, ref, 200),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -260,8 +319,7 @@ class _TodayCard extends ConsumerWidget {
                     key: const Key('hydration_quick_add_500'),
                     emoji: '🍶',
                     label: '500 ml',
-                    onTap: () =>
-                        notifier.logWater(amountMl: 500, source: 'quick_chip'),
+                    onTap: () => _logWithUndo(context, ref, 500),
                   ),
                 ),
                 const SizedBox(width: 8),

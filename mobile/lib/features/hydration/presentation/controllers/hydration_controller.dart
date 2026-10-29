@@ -309,3 +309,17 @@ final hydrationControllerProvider =
     NotifierProvider<HydrationController, HydrationState>(
   HydrationController.new,
 );
+
+/// Water events of one local day (H2 and the day details). Reloads when the
+/// hydration state changes, so a new or deleted log updates every chart.
+final waterLogsForDayProvider = FutureProvider.autoDispose
+    .family<List<WaterIntakeEntry>, DateTime>((ref, day) async {
+  ref.watch(hydrationControllerProvider.select(
+    (s) => (s.todayTotalMl, s.todayLogs.length, s.last30DaysTotals),
+  ));
+  final userId = ref.read(authControllerProvider).user?.id ?? 'guest_user';
+  return ref.read(hydrationRepositoryProvider).getLogsForDay(
+        userId: userId,
+        day: DateTime(day.year, day.month, day.day),
+      );
+});

@@ -14,7 +14,6 @@ import 'package:dualis_mobile/features/journal/data/journal_local_store.dart';
 import 'package:dualis_mobile/features/journal/domain/journal_models.dart';
 import 'package:dualis_mobile/features/journal_insights/data/journal_insights_remote_data_source.dart';
 import 'package:dualis_mobile/features/journal_insights/domain/journal_insights_models.dart';
-import 'package:dualis_mobile/features/journal_insights/presentation/controllers/journal_insights_controller.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 final DateTime today = DateTime(2026, 10, 27, 15);
@@ -112,6 +111,7 @@ Future<FakeJournalDataSource> pumpDashboard(
         appDatabaseProvider.overrideWithValue(db),
         homeClockProvider.overrideWithValue(() => today),
         journalInsightsDataSourceProvider.overrideWithValue(dataSource),
+        waterLogsForDayProvider.overrideWith((ref, day) async => const []),
         hydrationControllerProvider.overrideWith(
           () => FixedHydration(
             HydrationState(
@@ -138,69 +138,54 @@ int visibleLineCount(WidgetTester tester) {
   return chart.data.lineBarsData.length;
 }
 
-Future<void> openPhysicalTab(WidgetTester tester) async {
-  await tester.tap(find.byKey(const Key('history_tab_HistoryTab.physical')));
-  await tester.pumpAndSettle();
-}
-
 void main() {
-  group('HistoricalDashboardScreen (Psicoemocional | Físico)', () {
-    testWidgets('loads 90 days once and starts on 30 dias, Psicoemocional',
+  group('HistoricalDashboardScreen (Emoções | Corpo | Água | Juntos)', () {
+    testWidgets('loads 30 days once and starts on 30 dias, Emoções',
         (tester) async {
       final ds = await pumpDashboard(tester, [entry('e1', 0, [head])]);
-      expect(ds.requestedEntryDays, 90);
+      expect(ds.requestedEntryDays, 30);
       expect(ds.requestedSummaryDays, isNull);
-      expect(JournalInsightsState.fetchDays, 90);
       expect(find.text('Seus registros dos últimos 30 dias'), findsOneWidget);
-      expect(find.text('Psicoemocional'), findsOneWidget);
-      expect(find.text('Físico'), findsOneWidget);
-      for (final days in [7, 30, 90]) {
-        expect(find.byKey(Key('history_period_$days')), findsOneWidget);
+      for (final tab in ['Emoções', 'Corpo', 'Água', 'Juntos']) {
+        expect(find.text(tab), findsWidgets);
       }
+      expect(find.byKey(const Key('history_period_7')), findsOneWidget);
+      expect(find.byKey(const Key('history_period_30')), findsOneWidget);
+      // Free shows up to 30 days (handoff v2.0).
+      expect(find.byKey(const Key('history_period_90')), findsNothing);
     });
 
-    testWidgets('emotional tab: one line per branch, chips toggle each line',
+    testWidgets('Emoções: pie counts records per time, lines one per time',
         (tester) async {
       await pumpDashboard(tester, [
         entry('e1', 0, [
           mind,
           const JournalItemView(
-              kind: 'emotional', optionKey: 'presente.sobrecarga.aperto', intensity: 2),
-          const JournalItemView(
               kind: 'emotional', optionKey: 'passado.memoria.magoa', intensity: 1),
-          const JournalItemView(
-              kind: 'emotional', optionKey: 'futuro.medo.desanimo', intensity: 3),
         ]),
         entry('e2', 1, [
           const JournalItemView(
               kind: 'emotional', optionKey: 'futuro.mente.cobranca', intensity: 5),
         ]),
+        JournalEntryView(id: 'bem', recordedAt: today, mood: 'bem'),
       ]);
 
-      expect(find.text('Seus últimos 30 dias'), findsOneWidget);
-      // Both "Mente acelerada" options share one line.
-      expect(find.text('Futuro · Mente acelerada'), findsOneWidget);
-      expect(find.byKey(const Key('emotional_chip_futuro.mente')), findsOneWidget);
-      // First 3 lines start visible, the 4th starts hidden.
-      expect(visibleLineCount(tester), 3);
+      expect(find.byKey(const Key('temporal_pie')), findsOneWidget);
+      expect(find.byKey(const Key('temporal_pie_row_futuro')), findsOneWidget);
+      expect(find.byKey(const Key('temporal_pie_row_presente')), findsNothing);
+      expect(find.textContaining('2 registros · 67%'), findsOneWidget);
+      expect(find.byKey(const Key('temporal_pie_without_axis')), findsOneWidget);
 
-      await tester.tap(find.byKey(const Key('emotional_chip_futuro.mente')));
+      // E2: one series per time; hiding Futuro removes its line.
+      expect(find.byKey(const Key('emotional_chip_futuro')), findsOneWidget);
+      final before = visibleLineCount(tester);
+      await tester.tap(find.byKey(const Key('emotional_chip_futuro')));
       await tester.pumpAndSettle();
-      expect(visibleLineCount(tester), 2);
+      expect(visibleLineCount(tester), lessThan(before));
 
-      await tester.tap(find.byKey(const Key('emotional_chip_futuro.mente')));
-      await tester.pumpAndSettle();
-      expect(visibleLineCount(tester), 3);
-
-      expect(find.byKey(const Key('time_distribution_bar')), findsOneWidget);
-      expect(find.text('Passado · Presente · Futuro'), findsOneWidget);
-      expect(find.text('Futuro: 2'), findsOneWidget);
-      // Segments are drawn with height (they used to collapse to 0).
-      final segment = find.descendant(
-        of: find.byKey(const Key('time_distribution_bar')),
-        matching: find.byType(ColoredBox),
-      );
-      expect(tester.getSize(segment.first).height, 18);
+      // E3: filter by time, legend names each fork.
+      expect(find.byKey(const Key('emotional_answers')), findsOneWidget);
+      expect(find.byKey(const Key('emotional_filter_passado')), findsOneWidget);
     });
 
     testWidgets('period chips filter entries on the device', (tester) async {
@@ -210,199 +195,95 @@ void main() {
           const JournalItemView(
               kind: 'emotional', optionKey: 'passado.memoria.magoa', intensity: 2),
         ]),
-        entry('oldest', 60, [
-          const JournalItemView(
-              kind: 'emotional', optionKey: 'presente.energia.corpo', intensity: 2),
-        ]),
       ]);
-      expect(find.byKey(const Key('emotional_chip_passado.memoria')), findsOneWidget);
-      expect(find.byKey(const Key('emotional_chip_presente.energia')), findsNothing);
+      expect(find.byKey(const Key('emotional_chip_passado')), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('history_period_7')));
       await tester.pumpAndSettle();
-      expect(find.text('Como foi sua semana'), findsOneWidget);
-      expect(find.byKey(const Key('emotional_chip_passado.memoria')), findsNothing);
+      expect(find.byKey(const Key('emotional_chip_passado')), findsNothing);
       expect(find.byKey(const Key('journal_entry_older')), findsNothing);
-
-      await tester.tap(find.byKey(const Key('history_period_90')));
-      await tester.pumpAndSettle();
-      expect(find.byKey(const Key('emotional_chip_presente.energia')), findsOneWidget);
-      expect(find.byKey(const Key('journal_entry_oldest')), findsOneWidget);
     });
 
-    testWidgets('physical tab: map counts include whole-body areas',
+    testWidgets('Corpo: markers count days, sheet lists marks and opens F3',
         (tester) async {
       await pumpDashboard(tester, [
-        entry('e1', 0, [head]),
-        entry('e2', 1, [head]),
-        entry('e3', 2, const [
-          JournalItemView(
-            kind: 'physical',
-            optionKey: 'pele.coceira.coceira',
-            sensation: 'incomodo',
-            intensity: 2,
-          ),
+        entry('e1', 0, [head, head]),
+        entry('e2', 2, [
+          head,
+          const JournalItemView(
+              kind: 'physical', optionKey: 'pele.coceira.ardencia', intensity: 2),
         ]),
-        entry('e4', 3, const [
-          JournalItemView(
-            kind: 'physical',
-            optionKey: 'hormonios.temperatura.calorao',
-            sensation: 'incomodo',
-            intensity: 3,
-          ),
+        entry('e3', 3, [
+          const JournalItemView(
+              kind: 'physical',
+              optionKey: 'costas.fisgada.ao_mexer',
+              bodySide: 'back',
+              intensity: 2),
         ]),
       ]);
-      await openPhysicalTab(tester);
+      await tester.tap(find.byKey(const Key('history_tab_HistoryTab.body')));
+      await tester.pumpAndSettle();
 
-      expect(find.text('Este mês'), findsOneWidget);
-      expect(find.byKey(const Key('journal_body_map')), findsOneWidget);
-      expect(find.text('Cabeça e pescoço: 2 dias'), findsOneWidget);
-      expect(find.text('Pele: 1 dia'), findsOneWidget);
-      expect(find.text('Hormônios e metabolismo: 1 dia'), findsOneWidget);
-      // Regions never marked are left out of the list.
-      expect(find.byKey(const Key('body_map_count_peito')), findsNothing);
-      expect(find.text('Cor = quantos dias você marcou. Toque numa parte do corpo para ver a linha do tempo.'), findsOneWidget);
+      expect(find.byKey(const Key('body_marker_map')), findsOneWidget);
+      expect(find.byKey(const Key('body_marker_cabeca')), findsOneWidget);
+      expect(find.byKey(const Key('body_marker_costas')), findsOneWidget);
+      // Whole-body areas are listed, never placed on the map.
+      expect(find.byKey(const Key('body_marker_pele')), findsNothing);
+      expect(find.byKey(const Key('body_region_row_pele')), findsOneWidget);
+      expect(find.text('Cabeça e pescoço · 2 dias com marcação'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('body_marker_cabeca')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('region_marks_cabeca')), findsOneWidget);
+      expect(find.text('2 dias com marcação · 3 marcações'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('region_marks_see_evolution')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('region_marks_cabeca')), findsNothing);
+      final chip = tester.widget<ChoiceChip>(
+          find.byKey(const Key('physical_filter_cabeca')));
+      expect(chip.selected, isTrue);
     });
 
-    testWidgets('physical tab: Conexões counts same-day time and region',
+    testWidgets('Água: H1–H4 share one base and a tapped day drives H1',
+        (tester) async {
+      await pumpDashboard(tester, [], water: {
+        DateTime(2026, 10, 20): 1600,
+        DateTime(2026, 10, 21): 2400,
+      });
+      await tester.tap(find.byKey(const Key('history_tab_HistoryTab.water')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('water_period_bars')), findsOneWidget);
+      expect(find.byKey(const Key('water_calendar')), findsOneWidget);
+      expect(find.text('Nenhum registro de água'), findsWidgets);
+
+      await tester.tap(find.byKey(const Key('water_day_20261021')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('water_day_ring_percent')), findsOneWidget);
+      expect(find.text('120%'), findsWidgets);
+      expect(find.text('2,4 L'), findsOneWidget);
+      // Entries list is not part of the water tab.
+      expect(find.text('Seus registros'), findsNothing);
+    });
+
+    testWidgets('Juntos: calendar keeps head and body apart and opens the day',
         (tester) async {
       await pumpDashboard(tester, [
-        entry('e1', 0, [head]),
-        entry('e1b', 0, [mind]),
-        entry('e2', 1, [head]),
-        entry('e2b', 1, [mind]),
-        entry('e3', 2, [mind]),
-      ]);
-      await openPhysicalTab(tester);
-      await tester.tap(find.byKey(const Key('physical_view__PhysicalView.links')));
+        entry('e1', 0, [mind, head]),
+      ], water: {
+        DateTime(2026, 10, 27): 1600,
+      });
+      await tester.tap(find.byKey(const Key('history_tab_HistoryTab.together')));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('time_region_flow')), findsOneWidget);
-      expect(
-        find.text('Mesmo dia: Futuro e Cabeça e pescoço em 2 dias. Só contagem.'),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('physical tab: Conexões explains when nothing overlaps',
-        (tester) async {
-      await pumpDashboard(tester, [entry('e1', 0, [head])]);
-      await openPhysicalTab(tester);
-      await tester.tap(find.byKey(const Key('physical_view__PhysicalView.links')));
+      expect(find.byKey(const Key('combined_calendar')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('combined_day_20261027')));
       await tester.pumpAndSettle();
-      expect(find.byKey(const Key('time_region_flow_empty')), findsOneWidget);
-    });
-
-    testWidgets('physical timeline splits by sensation and offers a dashed emotional line',
-        (tester) async {
-      await pumpDashboard(tester, [
-        entry('e1', 0, const [
-          JournalItemView(
-            kind: 'physical',
-            optionKey: 'cabeca.pressao.latejando',
-            bodySide: 'front',
-            sensation: 'dor',
-            intensity: 4,
-          ),
-        ]),
-        entry('e1b', 0, [mind]),
-        entry('e2', 1, [head]),
-      ]);
-      await openPhysicalTab(tester);
-
-      expect(find.text('Linha do tempo'), findsOneWidget);
-      expect(find.text('Cabeça e pescoço · dor'), findsOneWidget);
-      expect(find.byKey(const Key('physical_chip_cabeca:dor')), findsOneWidget);
-      // Old item without sensation keeps a region-only line.
-      expect(find.byKey(const Key('physical_chip_cabeca')), findsOneWidget);
-
-      final overlayChip = find.byKey(const Key('physical_overlay_chip'));
-      expect(overlayChip, findsOneWidget);
-      expect(find.text('+ Futuro · Mente acelerada'), findsOneWidget);
-      expect(visibleLineCount(tester), 2);
-      await tester.tap(overlayChip);
-      await tester.pumpAndSettle();
-      expect(visibleLineCount(tester), 3);
-      final chart = tester.widget<LineChart>(find.byType(LineChart).first);
-      expect(chart.data.lineBarsData.last.dashArray, isNotNull);
-    });
-
-    testWidgets('tapping a region opens its timeline with counts per sensation',
-        (tester) async {
-      const throbbing = JournalItemView(
-        kind: 'physical',
-        optionKey: 'cabeca.pressao.latejando',
-        bodySide: 'front',
-        sensation: 'dor',
-        intensity: 4,
-      );
-      await pumpDashboard(tester, [
-        entry('e1', 0, const [throbbing]),
-        entry('e2', 2, const [throbbing]),
-        entry('e3', 2, const [
-          JournalItemView(
-            kind: 'physical',
-            optionKey: 'cabeca.nuca.rigida',
-            bodySide: 'back',
-            sensation: 'incomodo',
-            intensity: 2,
-          ),
-        ]),
-      ]);
-      await openPhysicalTab(tester);
-
-      await tester.tap(find.byKey(const Key('body_map_count_cabeca')));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('region_timeline_cabeca')), findsOneWidget);
-      expect(
-        find.text('Nos últimos 30 dias você marcou Cabeça e pescoço 3 vezes, em 2 dias.'),
-        findsOneWidget,
-      );
-      expect(find.text('Dor: 2 vezes'), findsOneWidget);
-      expect(find.text('Incômodo: 1 vez'), findsOneWidget);
-      expect(find.text('Intensidade 4 de 5'), findsNWidgets(2));
-    });
-
-    testWidgets('tapping the head on the silhouette opens the same timeline',
-        (tester) async {
-      await pumpDashboard(tester, [entry('e1', 0, [head])]);
-      await openPhysicalTab(tester);
-
-      final front = find.byKey(const Key('journal_body_map_front'));
-      final box = tester.getRect(front);
-      // The head sits at the top centre of the silhouette.
-      await tester.tapAt(Offset(box.center.dx, box.top + box.height * 0.06));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('region_timeline_cabeca')), findsOneWidget);
-    });
-
-    testWidgets('co-occurrence sentence on Físico counts days, without cause',
-        (tester) async {
-      await pumpDashboard(tester, [
-        entry('e1', 0, [head, mind]),
-        entry('e2', 1, [head, mind]),
-        entry('e3', 2, [mind]),
-      ]);
-      await openPhysicalTab(tester);
-      expect(
-        find.text(
-            "Nos 3 dias em que você marcou 'Mente acelerada', também marcou 'Cabeça e pescoço' em 2."),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('history has no water line (it lives on the Água tab)',
-        (tester) async {
-      await pumpDashboard(
-        tester,
-        [entry('e1', 0, [head])],
-        water: {DateTime(2026, 10, 26): 1800},
-      );
-      expect(find.byKey(const Key('water_line_chart')), findsNothing);
-      await openPhysicalTab(tester);
-      expect(find.byKey(const Key('water_line_chart')), findsNothing);
+      expect(find.byKey(const Key('calendar_day_20261027')), findsOneWidget);
+      expect(find.textContaining('Intensidade 4/5'), findsOneWidget);
+      expect(find.textContaining('Intensidade 3/5'), findsOneWidget);
+      expect(find.textContaining('1.600 ml'), findsOneWidget);
     });
 
     testWidgets('entries list shows the reported intensity', (tester) async {

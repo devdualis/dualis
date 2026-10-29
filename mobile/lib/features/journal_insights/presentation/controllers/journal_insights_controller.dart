@@ -6,9 +6,9 @@ import '../../data/journal_insights_remote_data_source.dart';
 import '../../domain/journal_insights_models.dart';
 
 class JournalInsightsState {
-  /// Longest period on the history screen (chips 7 / 30 / 90 dias). Shorter
+  /// Longest period on the history screen (chips 7 / 30 dias). Shorter
   /// periods are filtered on the device from these entries.
-  static const int fetchDays = 90;
+  static const int fetchDays = 30;
 
   final List<JournalEntryView> entries;
   final JournalSummary summary;

@@ -2269,5 +2269,190 @@
       }
     }
   },
-  "careMedicationNew": "Novo medicamento"
+  "careMedicationNew": "Novo medicamento",
+  "gxTabEmotions": "Emoções",
+  "gxTabBody": "Corpo",
+  "gxTabWater": "Água",
+  "gxTabTogether": "Juntos",
+  "gxPieTitle": "Passado, presente e futuro",
+  "gxPieSubtitle": "Parte dos registros emocionais em cada tempo. A intensidade não muda o tamanho da fatia.",
+  "gxRecords": "{count, plural, =1{1 registro} other{{count} registros}}",
+  "@gxRecords": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gxPieTop": "Escolha mais registrada: “{answer}” · {count} de {total}",
+  "@gxPieTop": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "gxPieTied": "Escolhas empatadas, {count} de {total} cada:",
+  "@gxPieTied": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "gxPieWithoutAxis": "{count, plural, =1{1 registro sem escolha temporal (fora da pizza)} other{{count} registros sem escolha temporal (fora da pizza)}}",
+  "@gxPieWithoutAxis": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gxLinesTitleEmotional": "Intensidade informada por tempo",
+  "gxLinesTitlePhysical": "Intensidade informada por região",
+  "gxLinesSubtitle": "Cada ponto é um registro (1 a 5). O traço para nos dias sem registro.",
+  "gxLegendHint": "Toque na legenda para mostrar ou esconder uma linha. Toque num ponto para ver o registro.",
+  "gxIntensityValue": "Intensidade {value}/5",
+  "@gxIntensityValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "gxAnswersTitleEmotional": "Respostas por tempo",
+  "gxAnswersTitlePhysical": "Respostas por região",
+  "gxAnswersSubtitle": "O símbolo mostra o caminho escolhido. A altura é a intensidade informada.",
+  "gxWrittenByYou": "Escrito por você",
+  "gxNoIntensityPoints": "Nenhum registro com intensidade neste filtro.",
+  "gxBodyMapTitle": "Marcações no corpo",
+  "gxRegionDays": "{days, plural, =1{1 dia com marcação} other{{days} dias com marcação}}",
+  "@gxRegionDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "gxMarks": "{count, plural, =1{1 marcação} other{{count} marcações}}",
+  "@gxMarks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gxBodyMapCaption": "Número = dias com ao menos uma marcação na região. A cor só identifica a região.",
+  "gxWholeBody": "Corpo todo (sem posição no mapa)",
+  "gxViewUnspecified": "vista não informada",
+  "gxSeeEvolution": "Ver evolução",
+  "gxCalendarTitle": "Calendário combinado",
+  "gxCalendarSubtitle": "Cabeça: emoções · Silhueta: corpo · Gota: água registrada",
+  "gxCalendarCaption": "Cabeça e silhueta: tamanho pela intensidade informada. Gota: tamanho fixo, litros do dia. Dia sem registro não é zero. Toque no dia para ver tudo.",
+  "gxOutOfPeriod": "Fora do período",
+  "gxIntensityNotInformed": "intensidade não informada",
+  "gxWaterLogged": "Água registrada",
+  "gxDayNothing": "Nenhum registro neste dia.",
+  "gxSameDayNote": "Estar no mesmo dia não indica relação entre os itens.",
+  "gxGoalPercent": "{percent}% da meta escolhida ({goal} ml)",
+  "@gxGoalPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "goal": {
+        "type": "int"
+      }
+    }
+  },
+  "gxPeriodRange": "{start} a {end}",
+  "@gxPeriodRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "gxNoWaterRecord": "Nenhum registro de água",
+  "gxWaterDayTitle": "Água registrada em {date}",
+  "@gxWaterDayTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "gxWaterStepTitle": "Volume registrado ao longo do dia",
+  "gxWaterGoalLine": "Meta escolhida: {goal} ml",
+  "@gxWaterGoalLine": {
+    "placeholders": {
+      "goal": {
+        "type": "int"
+      }
+    }
+  },
+  "gxWaterStepTooltip": "{time} · +{added} ml\nAcumulado: {total} ml",
+  "@gxWaterStepTooltip": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "added": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "gxWaterBarsTitle": "Água registrada no período",
+  "gxWaterCardTotal": "Total",
+  "gxWaterCardDays": "Dias com registro",
+  "gxWaterCardAverage": "Média por dia com registro",
+  "gxWaterCardGoal": "Dias que alcançaram a meta escolhida",
+  "gxOfN": "{a} de {b}",
+  "@gxOfN": {
+    "placeholders": {
+      "a": {
+        "type": "int"
+      },
+      "b": {
+        "type": "int"
+      }
+    }
+  },
+  "gxNoRecord": "Sem registro",
+  "gxTodayInProgress": "Hoje ainda está em andamento.",
+  "gxWaterCalendarTitle": "Calendário de água",
+  "gxWaterCalendarHint": "Toque num dia para ver o volume ao longo do dia.",
+  "gxWaterLoggedSnack": "{ml} ml registrados",
+  "@gxWaterLoggedSnack": {
+    "placeholders": {
+      "ml": {
+        "type": "int"
+      }
+    }
+  },
+  "gxUndo": "Desfazer",
+  "gxDayDetailTitle": "Registros de {date}",
+  "@gxDayDetailTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "gxIntensityAxis": "Intensidade informada"
 }

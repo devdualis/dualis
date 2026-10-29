@@ -6,25 +6,31 @@ import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../home/domain/home_greeting.dart';
+import '../../../hydration/presentation/controllers/hydration_controller.dart';
+import '../../../journal/domain/journal_keys.dart';
+import '../../../journal/presentation/journal_labels.dart';
+import '../../../journal_insights/domain/chart_data.dart';
 import '../../../journal_insights/domain/history_series.dart';
 import '../../../journal_insights/domain/journal_insights_models.dart';
-import '../../../journal/presentation/journal_labels.dart';
 import '../../../journal_insights/presentation/controllers/journal_insights_controller.dart';
+import '../../../journal_insights/presentation/widgets/body_marker_map.dart';
+import '../../../journal_insights/presentation/widgets/combined_calendar.dart';
 import '../../../journal_insights/presentation/widgets/history_widgets.dart';
-import '../../../journal_insights/presentation/widgets/region_timeline_sheet.dart';
 import '../../../journal_insights/presentation/widgets/journal_overview_widgets.dart';
+import '../../../journal_insights/presentation/widgets/record_series_chart.dart';
+import '../../../journal_insights/presentation/widgets/temporal_pie.dart';
+import '../../../journal_insights/presentation/widgets/water_charts.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 
-/// History of the last 7 / 30 / 90 days (strategy §9): what the person
-/// recorded, counted and drawn, never interpreted. Everything is computed on
-/// the device from the loaded entries.
+/// History of the last 7 / 30 days (handoff "Dualis | Gráficos do aplicativo"
+/// v2.0): what the person recorded, counted and drawn, never interpreted.
+/// Everything is computed on the device from one filtered base.
 ///
-/// Psicoemocional: one intensity line per emotional branch with chips that
-/// show or hide each line, then the Passado · Presente · Futuro bar.
-/// Físico: body map or time-to-region flow for the period, then one line per
-/// region (optional dashed emotional line) and count-only sentences (§9.2).
-/// Water lives on the Água tab only.
+/// Emoções: E1 pie, E2 lines per time, E3 answers per time.
+/// Corpo: F1 body map, F2 lines per region, F3 answers per region.
+/// Água: H1 ring and H2 steps of the picked day, H3 bars, H4 calendar.
+/// Juntos: C1 combined calendar. No crossing of times × regions.
 class HistoricalDashboardScreen extends ConsumerWidget {
   final bool isEmbedded;
   const HistoricalDashboardScreen({super.key, this.isEmbedded = false});
@@ -102,9 +108,7 @@ class HistoricalDashboardScreen extends ConsumerWidget {
   }
 }
 
-enum HistoryTab { emotional, physical }
-
-enum _PhysicalView { map, links }
+enum HistoryTab { emotions, body, water, together }
 
 class _DashboardBody extends ConsumerStatefulWidget {
   final JournalInsightsState state;
@@ -116,9 +120,15 @@ class _DashboardBody extends ConsumerStatefulWidget {
 }
 
 class _DashboardBodyState extends ConsumerState<_DashboardBody> {
-  HistoryTab _tab = HistoryTab.emotional;
+  HistoryTab _tab = HistoryTab.emotions;
   int _days = 30;
-  _PhysicalView _physicalView = _PhysicalView.map;
+
+  /// Region picked on F3 from "Ver evolução" on the body map.
+  String? _bodyRegion;
+  final GlobalKey _bodyAnswersKey = GlobalKey();
+
+  /// Day shown on H1/H2 (null = today).
+  DateTime? _waterDay;
 
   @override
   Widget build(BuildContext context) {
@@ -137,8 +147,10 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
         HistorySegmented<HistoryTab>(
           keyPrefix: 'history_tab',
           options: [
-            (HistoryTab.emotional, l10n.histTabEmotional),
-            (HistoryTab.physical, l10n.histTabPhysical),
+            (HistoryTab.emotions, l10n.gxTabEmotions),
+            (HistoryTab.body, l10n.gxTabBody),
+            (HistoryTab.water, l10n.gxTabWater),
+            (HistoryTab.together, l10n.gxTabTogether),
           ],
           selected: _tab,
           onChanged: (tab) => setState(() => _tab = tab),
@@ -159,198 +171,234 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
             ),
           ),
         ),
-        if (_tab == HistoryTab.emotional)
-          ..._emotionalTab(l10n, entries, today, start)
-        else
-          ..._physicalTab(l10n, entries, today, start),
-        InsightsCard(
-          title: l10n.xv2DashEntriesTitle,
-          child: _EntriesList(entries: entries),
-        ),
+        ...switch (_tab) {
+          HistoryTab.emotions => _emotionsTab(l10n, entries, start),
+          HistoryTab.body => _bodyTab(l10n, entries, start),
+          HistoryTab.water => _waterTab(l10n, today, start),
+          HistoryTab.together => _togetherTab(l10n, entries, start),
+        },
+        if (_tab != HistoryTab.water)
+          InsightsCard(
+            title: l10n.xv2DashEntriesTitle,
+            child: _EntriesList(entries: entries),
+          ),
       ],
     );
   }
 
-  List<Widget> _emotionalTab(
+  /// E1–E3.
+  List<Widget> _emotionsTab(
     AppLocalizations l10n,
     List<JournalEntryView> entries,
-    DateTime today,
     DateTime start,
   ) {
-    final lines = emotionalLines(l10n, entries, today: today, days: _days);
-    final summary = JournalSummary.compute(entries);
+    final points = emotionalPoints(l10n, entries);
+    final series = emotionalSeries(l10n, points);
+    final hasIntensity = points.any((p) => p.intensity != null);
     return [
       InsightsCard(
-        title: _days == 7
-            ? l10n.histEmotionalTitleWeek
-            : l10n.histEmotionalTitle(_days),
-        subtitle: l10n.histIntensitySubtitle,
-        child: lines.isEmpty
-            ? _emptyText(l10n.xv2DashNoEmotional)
-            : ToggleableLines(
+        title: l10n.gxPieTitle,
+        subtitle: l10n.gxPieSubtitle,
+        child: TemporalPieChart(pie: TemporalPie.compute(points, entries)),
+      ),
+      InsightsCard(
+        title: l10n.gxLinesTitleEmotional,
+        subtitle: l10n.gxLinesSubtitle,
+        child: hasIntensity
+            ? SeriesLinesCard(
                 key: ValueKey('emotional_$_days'),
                 keyPrefix: 'emotional',
-                lines: lines,
-                palette: emotionalLineColors,
-                days: _days,
+                series: series,
                 start: start,
-              ),
+                days: _days,
+              )
+            : _emptyText(l10n.xv2DashNoEmotional),
       ),
-      InsightsCard(
-        title: l10n.histTimeBarTitle,
-        child: TimeDistributionBar(byTime: summary.byTime),
-      ),
+      if (series.isNotEmpty)
+        InsightsCard(
+          title: l10n.gxAnswersTitleEmotional,
+          subtitle: l10n.gxAnswersSubtitle,
+          child: SeriesAnswersCard(
+            key: ValueKey('emotional_answers_$_days'),
+            keyPrefix: 'emotional',
+            series: series,
+            tree: JournalKeys.emotionalTree,
+            start: start,
+            days: _days,
+          ),
+        ),
     ];
   }
 
-  List<Widget> _physicalTab(
+  /// F1–F3.
+  List<Widget> _bodyTab(
     AppLocalizations l10n,
     List<JournalEntryView> entries,
+    DateTime start,
+  ) {
+    final points = physicalPoints(l10n, entries);
+    final series = physicalSeries(l10n, points);
+    final hasIntensity = points.any((p) => p.intensity != null);
+    return [
+      InsightsCard(
+        title: l10n.gxBodyMapTitle,
+        child: BodyMarkerMap(
+          regions: regionSummaries(points),
+          onSeeEvolution: (region) {
+            setState(() => _bodyRegion = region);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final target = _bodyAnswersKey.currentContext;
+              if (target != null && target.mounted) {
+                Scrollable.ensureVisible(target,
+                    duration: const Duration(milliseconds: 300));
+              }
+            });
+          },
+        ),
+      ),
+      InsightsCard(
+        title: l10n.gxLinesTitlePhysical,
+        subtitle: l10n.gxLinesSubtitle,
+        child: hasIntensity
+            ? SeriesLinesCard(
+                key: ValueKey('physical_$_days'),
+                keyPrefix: 'physical',
+                series: series,
+                start: start,
+                days: _days,
+              )
+            : _emptyText(l10n.histNoPhysical),
+      ),
+      if (series.isNotEmpty)
+        InsightsCard(
+          key: _bodyAnswersKey,
+          title: l10n.gxAnswersTitlePhysical,
+          subtitle: l10n.gxAnswersSubtitle,
+          child: SeriesAnswersCard(
+            key: ValueKey('physical_answers_$_days'),
+            keyPrefix: 'physical',
+            series: series,
+            tree: JournalKeys.physicalTree,
+            selected: _bodyRegion,
+            start: start,
+            days: _days,
+          ),
+        ),
+    ];
+  }
+
+  /// Daily totals with today's live total (same base for H1–H4 and C1).
+  Map<DateTime, int> _waterTotals(HydrationState water, DateTime today) => {
+        ...normalizeWaterTotals(water.last30DaysTotals),
+        if (water.todayTotalMl > 0)
+          DateTime(today.year, today.month, today.day): water.todayTotalMl,
+      };
+
+  int? _goal(HydrationState water) =>
+      water.dailyTargetMl > 0 ? water.dailyTargetMl : null;
+
+  /// H1–H4 for the period; H1/H2 follow the day picked on H3/H4.
+  List<Widget> _waterTab(
+    AppLocalizations l10n,
     DateTime today,
     DateTime start,
   ) {
-    final lines = physicalLines(l10n, entries, today: today, days: _days);
-    final summary = JournalSummary.compute(entries);
-    final overlay = _overlayFor(
-      lines,
-      emotionalLines(l10n, entries, today: today, days: _days),
-    );
-    bool isRegion(String key) => historyRegions.contains(key);
-    final sentences = cooccurrenceSentences(
-      l10n,
-      summary,
-      entries,
-      where: (a, b) => isRegion(a) || isRegion(b),
-      labelOf: (key) => historyMarkerLabel(l10n, key),
-    );
-    final title = switch (_days) {
-      7 => l10n.histPhysicalTitleWeek,
-      30 => l10n.histPhysicalTitleMonth,
-      _ => l10n.histPhysicalTitle(_days),
-    };
+    final water = ref.watch(hydrationControllerProvider);
+    final totals = _waterTotals(water, today);
+    final goal = _goal(water);
+    final todayDay = DateTime(today.year, today.month, today.day);
+    final selected = _waterDay != null && inPeriod(_waterDay!, start, _days)
+        ? _waterDay!
+        : todayDay;
+    final isToday = selected == todayDay;
+    final logs = ref.watch(waterLogsForDayProvider(selected));
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    void pick(DateTime day) => setState(() => _waterDay = day);
     return [
-      Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceLight,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.outlineLight),
-        ),
+      InsightsCard(
+        title: l10n.gxWaterDayTitle(DateFormat('dd/MM', locale).format(selected)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimaryLight,
-                    ),
-                  ),
-                ),
-                HistorySegmented<_PhysicalView>(
-                  keyPrefix: 'physical_view',
-                  compact: true,
-                  options: [
-                    (_PhysicalView.map, l10n.histViewMap),
-                    (_PhysicalView.links, l10n.histViewLinks),
-                  ],
-                  selected: _physicalView,
-                  onChanged: (v) => setState(() => _physicalView = v),
-                ),
-              ],
+            Center(
+              child: WaterDayRing(totalMl: totals[selected] ?? 0, goalMl: goal),
             ),
-            const SizedBox(height: 12),
-            if (_physicalView == _PhysicalView.map)
-              HistoryBodyMap(
-                byRegion: summary.byRegion,
-                onRegionTap: (region) => showRegionTimelineSheet(
-                  context,
-                  timeline: regionTimeline(
-                    l10n,
-                    entries,
-                    region,
-                    today: today,
-                    days: _days,
-                  ),
-                  days: _days,
-                  start: start,
-                ),
-              )
-            else
-              TimeRegionFlow(links: timeRegionDays(entries)),
+            const SizedBox(height: 16),
+            Text(l10n.gxWaterStepTitle, style: _subtitleStyle),
+            const SizedBox(height: 8),
+            logs.when(
+              loading: () => const SizedBox(
+                height: 120,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (_, __) => _emptyText(l10n.gxNoWaterRecord),
+              data: (list) => WaterStepChart(
+                steps: waterSteps(list),
+                goalMl: goal,
+                endHour: isToday ? today.hour + today.minute / 60 : 24,
+              ),
+            ),
           ],
         ),
       ),
       InsightsCard(
-        title: l10n.histTimelineTitle,
-        subtitle: l10n.histIntensitySubtitle,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (lines.isEmpty)
-              _emptyText(l10n.histNoPhysical)
-            else
-              ToggleableLines(
-                key: ValueKey('physical_$_days'),
-                keyPrefix: 'physical',
-                lines: lines,
-                palette: physicalLineColors,
-                days: _days,
-                start: start,
-                overlay: overlay,
-              ),
-            if (sentences.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Column(
-                key: const Key('cooccurrence_sentences'),
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (final s in sentences)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(
-                        s,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          height: 1.4,
-                          color: AppColors.textPrimaryLight,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ],
-          ],
+        title: l10n.gxWaterBarsTitle,
+        child: WaterPeriodBars(
+          totals: totals,
+          start: start,
+          days: _days,
+          goalMl: goal,
+          today: today,
+          selected: selected,
+          onDayTap: pick,
+        ),
+      ),
+      InsightsCard(
+        title: l10n.gxWaterCalendarTitle,
+        subtitle: l10n.gxWaterCalendarHint,
+        child: WaterCalendar(
+          totals: totals,
+          start: start,
+          days: _days,
+          goalMl: goal,
+          selected: selected,
+          onDayTap: pick,
         ),
       ),
     ];
   }
 
-  /// Emotional line offered as a dashed overlay: the one sharing the most
-  /// days with the first physical line, then the one with most days.
-  HistoryLine? _overlayFor(
-    List<HistoryLine> physical,
-    List<HistoryLine> emotional,
+  /// C1.
+  List<Widget> _togetherTab(
+    AppLocalizations l10n,
+    List<JournalEntryView> entries,
+    DateTime start,
   ) {
-    if (physical.isEmpty || emotional.isEmpty) return null;
-    final reference = physical.first.days;
-    HistoryLine? best;
-    var bestShared = -1;
-    for (final line in emotional) {
-      final shared = line.days.intersection(reference).length;
-      if (shared > bestShared ||
-          (shared == bestShared && line.days.length > best!.days.length)) {
-        best = line;
-        bestShared = shared;
-      }
-    }
-    return best;
+    final water = ref.watch(hydrationControllerProvider);
+    final today = ref.read(homeClockProvider)();
+    return [
+      InsightsCard(
+        title: l10n.gxCalendarTitle,
+        subtitle: l10n.gxCalendarSubtitle,
+        child: CombinedCalendar(
+          days: calendarDays(
+            emotional: emotionalPoints(l10n, entries),
+            physical: physicalPoints(l10n, entries),
+            waterTotals: _waterTotals(water, today),
+          ),
+          start: start,
+          periodDays: _days,
+          goalMl: _goal(water),
+        ),
+      ),
+    ];
   }
+
+  TextStyle get _subtitleStyle => GoogleFonts.plusJakartaSans(
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+        color: AppColors.textPrimaryLight,
+      );
 
   Widget _emptyText(String text) => Text(
         text,
