@@ -115,6 +115,8 @@ jobs:
           BUILD_TYPE: ${{ inputs.build_type || 'release' }}
           SPLIT_ABI: ${{ inputs.split_per_abi || false }}
           DART_DEFINES_JSON: ${{ secrets.MOBILE_DART_DEFINES_JSON }}
+          # Google Maps SDK key for the appointment map (read by android/app/build.gradle.kts).
+          MAPS_API_KEY_ANDROID: ${{ secrets.MAPS_API_KEY_ANDROID }}
         run: |
           BUILD_ARGS="apk --$BUILD_TYPE"
           if [ "$SPLIT_ABI" = "true" ]; then
