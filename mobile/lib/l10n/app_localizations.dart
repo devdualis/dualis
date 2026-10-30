@@ -4288,53 +4288,191 @@ abstract class AppLocalizations {
   /// **'Saiba mais'**
   String get xv2AdLearnMore;
 
+  /// No description provided for @xv2AdPremiumTags.
+  ///
+  /// In pt, this message translates to:
+  /// **'💉 Vacinas|💊 Lembretes|📅 Consultas|📄 PDF'**
+  String get xv2AdPremiumTags;
+
+  /// No description provided for @xv2AdPremiumCta.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conhecer o Premium'**
+  String get xv2AdPremiumCta;
+
+  /// No description provided for @xv2AdPremiumPrice.
+  ///
+  /// In pt, this message translates to:
+  /// **'a partir de R\$ 31,90/mês no plano anual'**
+  String get xv2AdPremiumPrice;
+
+  /// No description provided for @xv2AdZocTags.
+  ///
+  /// In pt, this message translates to:
+  /// **'⏱ Apontamento|📊 Painel financeiro|🖥 Windows e macOS'**
+  String get xv2AdZocTags;
+
+  /// No description provided for @xv2AdZocCta.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conhecer o ZOC'**
+  String get xv2AdZocCta;
+
+  /// No description provided for @xv2AdEbefTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Beneficiário final (UBO) com evidência, sem planilhas'**
+  String get xv2AdEbefTitle;
+
+  /// No description provided for @xv2AdEbefBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Documentos societários viram um grafo de poder rastreável, pronto para a IN RFB nº 2.119/2022.'**
+  String get xv2AdEbefBody;
+
+  /// No description provided for @xv2AdEbefTags.
+  ///
+  /// In pt, this message translates to:
+  /// **'○ Controle|■ Governança|△ Influência|◆ Transação'**
+  String get xv2AdEbefTags;
+
+  /// No description provided for @xv2AdEbefCta.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conhecer o e-BEF'**
+  String get xv2AdEbefCta;
+
+  /// No description provided for @premiumPromoBadge.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só no Premium'**
+  String get premiumPromoBadge;
+
+  /// No description provided for @premiumPromoTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seus cuidados, organizados num só lugar'**
+  String get premiumPromoTitle;
+
+  /// No description provided for @premiumPromoSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tudo do gratuito, sem anúncios, mais Meus cuidados.'**
+  String get premiumPromoSubtitle;
+
+  /// No description provided for @premiumPromoVaccines.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vacinas'**
+  String get premiumPromoVaccines;
+
+  /// No description provided for @premiumPromoVaccinesDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Doses e calendário'**
+  String get premiumPromoVaccinesDesc;
+
+  /// No description provided for @premiumPromoAllergies.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alergias'**
+  String get premiumPromoAllergies;
+
+  /// No description provided for @premiumPromoAllergiesDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nas suas palavras'**
+  String get premiumPromoAllergiesDesc;
+
+  /// No description provided for @premiumPromoMedication.
+  ///
+  /// In pt, this message translates to:
+  /// **'Medicamentos'**
+  String get premiumPromoMedication;
+
+  /// No description provided for @premiumPromoMedicationDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembretes e estoque'**
+  String get premiumPromoMedicationDesc;
+
+  /// No description provided for @premiumPromoAppointments.
+  ///
+  /// In pt, this message translates to:
+  /// **'Consultas'**
+  String get premiumPromoAppointments;
+
+  /// No description provided for @premiumPromoAppointmentsDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aviso 1 dia antes'**
+  String get premiumPromoAppointmentsDesc;
+
+  /// No description provided for @premiumPromoExams.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exames'**
+  String get premiumPromoExams;
+
+  /// No description provided for @premiumPromoExamsDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Documentos guardados'**
+  String get premiumPromoExamsDesc;
+
+  /// No description provided for @premiumPromoPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resumo em PDF'**
+  String get premiumPromoPdf;
+
+  /// No description provided for @premiumPromoPdfDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para levar à consulta'**
+  String get premiumPromoPdfDesc;
+
+  /// No description provided for @premiumPromoCta.
+  ///
+  /// In pt, this message translates to:
+  /// **'Assinar a partir de R\$ 31,90/mês'**
+  String get premiumPromoCta;
+
+  /// No description provided for @premiumPromoNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'A assinatura é feita em dualischeckup.com.'**
+  String get premiumPromoNote;
+
+  /// No description provided for @navCareLockedTooltip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Meus cuidados · só no Premium'**
+  String get navCareLockedTooltip;
+
   /// No description provided for @xv2AdPremiumTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Dualis Premium'**
+  /// **'Meus cuidados, organizados num só lugar'**
   String get xv2AdPremiumTitle;
 
   /// No description provided for @xv2AdPremiumBody.
   ///
   /// In pt, this message translates to:
-  /// **'Veja seus registros de até 12 meses e escolha seus fundos. Em breve.'**
+  /// **'Vacinas, alergias, lembretes de medicamentos, consultas e exames. Sem anúncios.'**
   String get xv2AdPremiumBody;
 
   /// No description provided for @xv2AdZocTitle.
   ///
   /// In pt, this message translates to:
-  /// **'ZOC · Cadernos e agendas'**
+  /// **'Cada hora da equipe, no projeto certo'**
   String get xv2AdZocTitle;
 
   /// No description provided for @xv2AdZocBody.
   ///
   /// In pt, this message translates to:
-  /// **'Planeje a semana com calma, no papel. Exemplo de anúncio.'**
+  /// **'Apontamento de horas por cliente, projeto e tarefa, com painel de orçamento e produtividade para gestores.'**
   String get xv2AdZocBody;
-
-  /// No description provided for @xv2AdWgiTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'WGI · Garrafas reutilizáveis'**
-  String get xv2AdWgiTitle;
-
-  /// No description provided for @xv2AdWgiBody.
-  ///
-  /// In pt, this message translates to:
-  /// **'Leve sua água para onde for. Exemplo de anúncio.'**
-  String get xv2AdWgiBody;
-
-  /// No description provided for @xv2AdUboTitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'UBO · Playlists para relaxar'**
-  String get xv2AdUboTitle;
-
-  /// No description provided for @xv2AdUboBody.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sons de natureza para pausas no dia. Exemplo de anúncio.'**
-  String get xv2AdUboBody;
 
   /// No description provided for @xv2DashTitle.
   ///

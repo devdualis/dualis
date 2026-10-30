@@ -22,72 +22,56 @@ type LocalizedAd = Omit<HouseAdDto, 'title' | 'body'> & {
 
 /**
  * Own ads (strategy §14): a static list, identical for every person, that never depends
- * on what anyone recorded. ZOC, WGI and UBO are fictional internal examples (§18, decision 3):
- * replace them with real advertisers or Dualis Premium before launch. No health promises.
+ * on what anyone recorded. Our own apps, alpha test list (2026-10-30). The app draws each
+ * brand's card from `assetKey`. No health promises.
  */
 const HOUSE_ADS: LocalizedAd[] = [
   {
     id: 'dualis-premium',
     brand: 'Dualis Premium',
     assetKey: 'house_ad_dualis_premium',
-    url: 'https://example.com/dualis-premium',
+    url: 'https://dualischeckup.com/#pricing',
     title: {
-      pt: 'Dualis Premium',
-      en: 'Dualis Premium',
-      es: 'Dualis Premium',
+      pt: 'Meus cuidados, organizados num só lugar',
+      en: 'My care, organised in one place',
+      es: 'Mis cuidados, organizados en un solo lugar',
     },
     body: {
-      pt: 'Veja seus registros de até 12 meses e escolha fundos personalizados.',
-      en: 'See up to 12 months of your entries and choose custom backgrounds.',
-      es: 'Mira hasta 12 meses de tus registros y elige fondos personalizados.',
+      pt: 'Vacinas, alergias, lembretes de medicamentos, consultas e exames. Sem anúncios.',
+      en: 'Vaccines, allergies, medication reminders, appointments and exams. No ads.',
+      es: 'Vacunas, alergias, recordatorios de medicamentos, citas y exámenes. Sin anuncios.',
     },
   },
   {
     id: 'zoc',
     brand: 'ZOC',
     assetKey: 'house_ad_zoc',
-    url: 'https://example.com/zoc',
+    url: 'https://www.zoctec.com',
     title: {
-      pt: 'ZOC: organize sua semana',
-      en: 'ZOC: plan your week',
-      es: 'ZOC: organiza tu semana',
+      pt: 'Cada hora da equipe, no projeto certo',
+      en: 'Every team hour, on the right project',
+      es: 'Cada hora del equipo, en el proyecto correcto',
     },
     body: {
-      pt: 'Listas e lembretes simples para o dia a dia. Exemplo de anúncio.',
-      en: 'Simple lists and reminders for everyday life. Sample ad.',
-      es: 'Listas y recordatorios sencillos para el día a día. Anuncio de ejemplo.',
+      pt: 'Apontamento de horas por cliente, projeto e tarefa, com painel de orçamento e produtividade para gestores.',
+      en: 'Time tracking by client, project and task, with a budget and productivity dashboard for managers.',
+      es: 'Registro de horas por cliente, proyecto y tarea, con panel de presupuesto y productividad para gestores.',
     },
   },
   {
-    id: 'wgi',
-    brand: 'WGI',
-    assetKey: 'house_ad_wgi',
-    url: 'https://example.com/wgi',
+    id: 'ebef',
+    brand: 'e-BEF',
+    assetKey: 'house_ad_ebef',
+    url: 'https://e-ubo.com',
     title: {
-      pt: 'WGI: garrafas e copos',
-      en: 'WGI: bottles and cups',
-      es: 'WGI: botellas y vasos',
+      pt: 'Beneficiário final (UBO) com evidência, sem planilhas',
+      en: 'Ultimate beneficial owner (UBO) with evidence, no spreadsheets',
+      es: 'Beneficiario final (UBO) con evidencia, sin hojas de cálculo',
     },
     body: {
-      pt: 'Garrafas reutilizáveis em várias cores. Exemplo de anúncio.',
-      en: 'Reusable bottles in many colours. Sample ad.',
-      es: 'Botellas reutilizables en varios colores. Anuncio de ejemplo.',
-    },
-  },
-  {
-    id: 'ubo',
-    brand: 'UBO',
-    assetKey: 'house_ad_ubo',
-    url: 'https://example.com/ubo',
-    title: {
-      pt: 'UBO: caminhe junto',
-      en: 'UBO: walk together',
-      es: 'UBO: camina en compañía',
-    },
-    body: {
-      pt: 'Encontre pessoas para caminhar perto de você. Exemplo de anúncio.',
-      en: 'Find people to walk with near you. Sample ad.',
-      es: 'Encuentra personas para caminar cerca de ti. Anuncio de ejemplo.',
+      pt: 'Documentos societários viram um grafo de poder rastreável, pronto para a IN RFB nº 2.119/2022.',
+      en: 'Corporate documents become a traceable power graph, ready for RFB Normative Instruction 2,119/2022.',
+      es: 'Los documentos societarios se vuelven un grafo de poder rastreable, listo para la IN RFB n.º 2.119/2022.',
     },
   },
 ];

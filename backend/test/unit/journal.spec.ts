@@ -353,12 +353,12 @@ describe('buildJournalSummary', () => {
 });
 
 describe('houseAdsFor', () => {
-  it('returns the 4 demo ads in every language, same ids and order', () => {
+  it('returns our 3 own ads in every language, same ids and order', () => {
     const ids = (lang: 'pt' | 'en' | 'es') => houseAdsFor(lang).ads.map((a) => a.id);
-    expect(ids('pt')).toEqual(['dualis-premium', 'zoc', 'wgi', 'ubo']);
+    expect(ids('pt')).toEqual(['dualis-premium', 'zoc', 'ebef']);
     expect(ids('en')).toEqual(ids('pt'));
     expect(ids('es')).toEqual(ids('pt'));
-    expect(houseAdsFor('pt').ads.map((a) => a.brand)).toEqual(['Dualis Premium', 'ZOC', 'WGI', 'UBO']);
+    expect(houseAdsFor('pt').ads.map((a) => a.brand)).toEqual(['Dualis Premium', 'ZOC', 'e-BEF']);
   });
 
   it('every ad has the contract fields and localized text', () => {

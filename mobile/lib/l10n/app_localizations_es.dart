@@ -2390,31 +2390,104 @@ class AppLocalizationsEs extends AppLocalizations {
   String get xv2AdLearnMore => 'Más información';
 
   @override
-  String get xv2AdPremiumTitle => 'Dualis Premium';
+  String get xv2AdPremiumTags => '💉 Vacunas|💊 Recordatorios|📅 Citas|📄 PDF';
+
+  @override
+  String get xv2AdPremiumCta => 'Conocer Premium';
+
+  @override
+  String get xv2AdPremiumPrice => 'desde R\$ 31,90/mes en el plan anual';
+
+  @override
+  String get xv2AdZocTags =>
+      '⏱ Registro de horas|📊 Panel financiero|🖥 Windows y macOS';
+
+  @override
+  String get xv2AdZocCta => 'Conocer ZOC';
+
+  @override
+  String get xv2AdEbefTitle =>
+      'Beneficiario final (UBO) con evidencia, sin hojas de cálculo';
+
+  @override
+  String get xv2AdEbefBody =>
+      'Los documentos societarios se vuelven un grafo de poder rastreable, listo para la IN RFB n.º 2.119/2022.';
+
+  @override
+  String get xv2AdEbefTags =>
+      '○ Control|■ Gobernanza|△ Influencia|◆ Transacción';
+
+  @override
+  String get xv2AdEbefCta => 'Conocer e-BEF';
+
+  @override
+  String get premiumPromoBadge => 'Solo en Premium';
+
+  @override
+  String get premiumPromoTitle => 'Tus cuidados, organizados en un solo lugar';
+
+  @override
+  String get premiumPromoSubtitle =>
+      'Todo lo gratuito, sin anuncios, más Mis cuidados.';
+
+  @override
+  String get premiumPromoVaccines => 'Vacunas';
+
+  @override
+  String get premiumPromoVaccinesDesc => 'Dosis y calendario';
+
+  @override
+  String get premiumPromoAllergies => 'Alergias';
+
+  @override
+  String get premiumPromoAllergiesDesc => 'Con tus palabras';
+
+  @override
+  String get premiumPromoMedication => 'Medicamentos';
+
+  @override
+  String get premiumPromoMedicationDesc => 'Recordatorios y existencias';
+
+  @override
+  String get premiumPromoAppointments => 'Citas';
+
+  @override
+  String get premiumPromoAppointmentsDesc => 'Aviso 1 día antes';
+
+  @override
+  String get premiumPromoExams => 'Exámenes';
+
+  @override
+  String get premiumPromoExamsDesc => 'Documentos guardados';
+
+  @override
+  String get premiumPromoPdf => 'Resumen en PDF';
+
+  @override
+  String get premiumPromoPdfDesc => 'Para llevar a la cita';
+
+  @override
+  String get premiumPromoCta => 'Suscribirse desde R\$ 31,90/mes';
+
+  @override
+  String get premiumPromoNote => 'La suscripción se hace en dualischeckup.com.';
+
+  @override
+  String get navCareLockedTooltip => 'Mis cuidados · solo en Premium';
+
+  @override
+  String get xv2AdPremiumTitle => 'Mis cuidados, organizados en un solo lugar';
 
   @override
   String get xv2AdPremiumBody =>
-      'Ve hasta 12 meses de tus registros y elige tus fondos. Muy pronto.';
+      'Vacunas, alergias, recordatorios de medicamentos, citas y exámenes. Sin anuncios.';
 
   @override
-  String get xv2AdZocTitle => 'ZOC · Cuadernos y agendas';
+  String get xv2AdZocTitle => 'Cada hora del equipo, en el proyecto correcto';
 
   @override
   String get xv2AdZocBody =>
-      'Planifica la semana con calma, en papel. Anuncio de ejemplo.';
-
-  @override
-  String get xv2AdWgiTitle => 'WGI · Botellas reutilizables';
-
-  @override
-  String get xv2AdWgiBody => 'Lleva tu agua a donde vayas. Anuncio de ejemplo.';
-
-  @override
-  String get xv2AdUboTitle => 'UBO · Listas para relajarte';
-
-  @override
-  String get xv2AdUboBody =>
-      'Sonidos de la naturaleza para pausas en el día. Anuncio de ejemplo.';
+      'Registro de horas por cliente, proyecto y tarea, con panel de presupuesto y productividad para gestores.';
 
   @override
   String get xv2DashTitle => 'Historial';

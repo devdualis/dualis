@@ -36,8 +36,15 @@ class HouseAd {
   bool get isValid => id.isNotEmpty && brand.isNotEmpty && title.isNotEmpty;
 }
 
-/// Bundled demo ads used when `/v1/house-ads` is not reachable. ZOC, WGI and
-/// UBO are fictional internal examples (strategy §18, decision 3).
+/// Brand key without the `house_ad_` prefix the API uses, so remote and
+/// bundled ads share the same look.
+String? houseAdBrandKey(HouseAd ad) => ad.assetKey?.replaceFirst('house_ad_', '');
+
+/// Plans section of the Dualis site, where Premium is sold for now.
+const String dualisPremiumUrl = 'https://dualischeckup.com/#pricing';
+
+/// Bundled ads used when `/v1/house-ads` is not reachable: our own apps
+/// (alpha test list, 2026-10-30).
 List<HouseAd> bundledHouseAds(AppLocalizations l10n) => [
       HouseAd(
         id: 'bundled-dualis-premium',
@@ -45,6 +52,7 @@ List<HouseAd> bundledHouseAds(AppLocalizations l10n) => [
         title: l10n.xv2AdPremiumTitle,
         body: l10n.xv2AdPremiumBody,
         assetKey: 'dualis_premium',
+        url: dualisPremiumUrl,
       ),
       HouseAd(
         id: 'bundled-zoc',
@@ -52,20 +60,15 @@ List<HouseAd> bundledHouseAds(AppLocalizations l10n) => [
         title: l10n.xv2AdZocTitle,
         body: l10n.xv2AdZocBody,
         assetKey: 'zoc',
+        url: 'https://www.zoctec.com',
       ),
       HouseAd(
-        id: 'bundled-wgi',
-        brand: 'WGI',
-        title: l10n.xv2AdWgiTitle,
-        body: l10n.xv2AdWgiBody,
-        assetKey: 'wgi',
-      ),
-      HouseAd(
-        id: 'bundled-ubo',
-        brand: 'UBO',
-        title: l10n.xv2AdUboTitle,
-        body: l10n.xv2AdUboBody,
-        assetKey: 'ubo',
+        id: 'bundled-ebef',
+        brand: 'e-BEF',
+        title: l10n.xv2AdEbefTitle,
+        body: l10n.xv2AdEbefBody,
+        assetKey: 'ebef',
+        url: 'https://e-ubo.com',
       ),
     ];
 

@@ -204,4 +204,19 @@ void main() {
     expect(morning!.id, night!.id);
     expect(pickHouseAd(ads, DateTime(2026, 10, 28))!.id, isNot(morning.id));
   });
+
+  test('bundled ads are our own three apps with their official sites', () {
+    final ads = bundledHouseAds(lookupAppLocalizations(const Locale('pt')));
+    expect(ads.map((a) => a.brand), ['Dualis Premium', 'ZOC', 'e-BEF']);
+    expect(ads.map((a) => a.url), [
+      'https://dualischeckup.com/#pricing',
+      'https://www.zoctec.com',
+      'https://e-ubo.com',
+    ]);
+  });
+
+  test('remote and bundled brand keys share the same card', () {
+    const remote = HouseAd(id: 'ebef', brand: 'e-BEF', title: 't', body: 'b', assetKey: 'house_ad_ebef');
+    expect(houseAdBrandKey(remote), 'ebef');
+  });
 }
