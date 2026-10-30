@@ -54,7 +54,7 @@ export class HydrationService {
 
       return {
         id: inserted.id,
-        userId: inserted.userId,
+        userId,
         profileId: inserted.profileId,
         amountMl: inserted.amountMl,
         source: inserted.source,

@@ -7,9 +7,7 @@ export const waterIntakeLogs = pgTable(
   'water_intake_logs',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    userId: uuid('user_id')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }), // author (always the caller)
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }), // author (the caller); NULL once they delete their account
     profileId: uuid('profile_id')
       .notNull()
       .references(() => profiles.id, { onDelete: 'cascade' }), // subject (whose health data)

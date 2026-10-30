@@ -1,6 +1,7 @@
 export class WaterIntakeLogItemDto {
   id!: string;
-  userId!: string;
+  /** Author; null once the author deleted their account. */
+  userId!: string | null;
   profileId!: string;
   amountMl!: number;
   source!: string;

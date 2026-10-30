@@ -40,7 +40,8 @@ export const careRecords = pgTable(
   'care_records',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }), // author
+    /** Author; NULL once the author deletes their account (the record stays with the profile). */
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
     profileId: uuid('profile_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }), // subject
     kind: text('kind').$type<CareRecordKind>().notNull(),
     /** medication_intake -> its medication. */
@@ -63,7 +64,7 @@ export const careDocuments = pgTable(
   'care_documents',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }), // author, as in care_records
     profileId: uuid('profile_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
     kind: text('kind').$type<CareDocumentKind>().notNull(),
     mime: text('mime').notNull(),

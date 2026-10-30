@@ -176,6 +176,13 @@
       "when": 1790275174099,
       "tag": "0023_care_document_requests",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1790275174100,
+      "tag": "0024_keep_records_of_deleted_authors",
+      "breakpoints": true
     }
   ]
 }
