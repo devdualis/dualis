@@ -8,6 +8,7 @@ import { StorageModule } from '../../common/storage/storage.module';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { jwtSecret } from './jwt-secret';
 
 @Module({
   imports: [
@@ -19,9 +20,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret:
-          configService.get<string>('JWT_SECRET') ||
-          'dualis-secret-key-development-minimum-32-characters-secure',
+        secret: jwtSecret(configService),
         signOptions: {
           expiresIn: '15m',
         },

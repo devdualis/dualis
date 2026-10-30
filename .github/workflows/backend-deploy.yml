@@ -139,6 +139,7 @@ jobs:
           RAW_ENV: ${{ secrets.BACKEND_ENV }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           ENCRYPTION_MASTER_KEY: ${{ secrets.ENCRYPTION_MASTER_KEY }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
           VERTEX_CLIENT_EMAIL: ${{ secrets.VERTEX_CLIENT_EMAIL }}
           VERTEX_PRIVATE_KEY: ${{ secrets.VERTEX_PRIVATE_KEY }}
           DISCLAIMER_VERSION: ${{ vars.DISCLAIMER_VERSION }}
@@ -174,7 +175,7 @@ jobs:
 
             // 2. Individual secrets override or supplement
             const individualKeys = [
-              'DATABASE_URL', 'ENCRYPTION_MASTER_KEY', 'VERTEX_CLIENT_EMAIL', 'VERTEX_PRIVATE_KEY',
+              'DATABASE_URL', 'ENCRYPTION_MASTER_KEY', 'JWT_SECRET', 'VERTEX_CLIENT_EMAIL', 'VERTEX_PRIVATE_KEY',
               'DISCLAIMER_VERSION', 'RESEND_API_KEY', 'MAIL_FROM', 'SUPABASE_URL', 'SUPABASE_ANON_KEY',
               'SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_AVATAR_BUCKET',
               'GOOGLE_VISION_API_KEY'
