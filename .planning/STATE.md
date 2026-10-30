@@ -5,10 +5,10 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-10-30T19:35:29.746375Z"
+last_updated: "2026-10-30T19:36:27.435Z"
 last_activity: 2026-10-30
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: 8f9c2dc4d39e25fbed4a7cf6505d3ecb509bdc18
+state_head: d918011e59b4e56fa8c33d42ae82b924c090ddb6
 progress:
   total_phases: 15
   completed_phases: 10
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-10-30 - Completed quick task 261030-mka: four reviewed side effects fixed and verified (8f9c2dc)
+Last activity: 2026-10-30 - Completed quick task 261030-mkb: Security fixes from the care sweep (required JWT_SECRET, 1 MB body limit, daily document limit, keep records of deleted authors)
 
 Progress: [██████████] 100%
 
@@ -128,6 +128,7 @@ None yet.
 | 261030-lrh (2) | Consulta: escolher o local num mapa dentro do app (pino no centro, toque/busca, endereço pelo geocoder do telefone, só com zoom de rua); salva placeLat/placeLng e o cartão abre o ponto exato no Google Maps. Chaves Maps SDK fora do git | 2026-10-30 | 52aaf19 | [261030-lrh-consulta-especialidade-com-busca-e-local](./quick/261030-lrh-consulta-especialidade-com-busca-e-local/) |
 | 261030-lw3 | Shorten document-reading consent dialog copy in pt/es/en | 2026-10-30 | a7eb1a6 | [261030-lw3-shorten-document-reading-consent-dialog-](./quick/261030-lw3-shorten-document-reading-consent-dialog-/) |
 | 261030-mka | Fix four reviewed side effects: safe exam numbers, isolated series, latest sorting and atomic OCR | 2026-10-30 | 8f9c2dc | [261030-mka-fix-exam-history-decimal-parsing-series-](./quick/261030-mka-fix-exam-history-decimal-parsing-series-/) |
+| 261030-mkb | Correções de segurança da varredura de cuidados: JWT_SECRET obrigatório (produção usava a chave pública, rotacionada), limite de 1 MB por requisição (15 MB só no envio de documentos, 5 MB no avatar), limite diário de 30 documentos/releituras (migração 0023), registros ficam no perfil quando o autor apaga a conta (migração 0024) | 2026-10-30 | d918011 | [261030-mkb-care-sweep-security-fixes-reading-cap-bo](./quick/261030-mkb-care-sweep-security-fixes-reading-cap-bo/) |
 
 ## Deferred Items
 
