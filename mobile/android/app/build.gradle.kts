@@ -13,6 +13,12 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+
 android {
     namespace = "com.dualischeckup.app.dualis_mobile"
     compileSdk = flutter.compileSdkVersion
@@ -37,6 +43,8 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["mapsApiKey"] = System.getenv("MAPS_API_KEY_ANDROID")
+            ?: localProperties.getProperty("MAPS_API_KEY_ANDROID", "")
     }
 
     signingConfigs {

@@ -3263,7 +3263,29 @@ class AppLocalizationsPt extends AppLocalizations {
   String get careAppointmentPlace => 'Local';
 
   @override
-  String get careAppointmentOpenMap => 'Abrir no Google Maps';
+  String get careAppointmentOpenMap => 'Escolher no mapa';
+
+  @override
+  String get careMapTitle => 'Escolher local';
+
+  @override
+  String get careMapSearchHint => 'Buscar endereço ou lugar';
+
+  @override
+  String get careMapUsePlace => 'Usar este local';
+
+  @override
+  String get careMapLooking => 'Procurando o endereço…';
+
+  @override
+  String get careMapMoveHint => 'Mova o mapa até o local da consulta';
+
+  @override
+  String get careMapZoomHint => 'Aproxime o mapa até a rua do local';
+
+  @override
+  String get careMapNotFound =>
+      'Não encontramos esse lugar. Tente outro endereço.';
 
   @override
   String get careAppointmentReminderNone => 'Sem lembrete';

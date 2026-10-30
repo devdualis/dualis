@@ -54,6 +54,8 @@ class CareRecord {
   }
 
   int? integer(String key) => data[key] is int ? data[key] as int : null;
+
+  double? number(String key) => data[key] is num ? (data[key] as num).toDouble() : null;
 }
 
 /// Medication as configured by the person.

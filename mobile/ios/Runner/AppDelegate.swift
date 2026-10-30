@@ -1,4 +1,5 @@
 import Flutter
+import GoogleMaps
 import UIKit
 import UserNotifications
 // Required for FlutterLocalNotificationsPlugin.setPluginRegistrantCallback.
@@ -13,6 +14,8 @@ import flutter_local_notifications
     // Without a delegate iOS never reports notification taps (nor shows
     // notifications in the foreground) to flutter_local_notifications.
     UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
+    // Key comes from the git-ignored ios/Flutter/Secrets.xcconfig (MAPS_API_KEY_IOS).
+    GMSServices.provideAPIKey(Bundle.main.object(forInfoDictionaryKey: "GMSApiKey") as? String ?? "")
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 

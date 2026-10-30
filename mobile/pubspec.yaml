@@ -54,6 +54,8 @@ dependencies:
   pdf: ^3.13.1
   share_plus: ^13.3.1
   file_picker: ^13.3.0
+  google_maps_flutter: ^2.19.0
+  geocoding: ^5.0.1
 
 dev_dependencies:
   flutter_test:

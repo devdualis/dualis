@@ -3254,7 +3254,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get careAppointmentPlace => 'Place';
 
   @override
-  String get careAppointmentOpenMap => 'Open in Google Maps';
+  String get careAppointmentOpenMap => 'Pick on the map';
+
+  @override
+  String get careMapTitle => 'Pick a place';
+
+  @override
+  String get careMapSearchHint => 'Search an address or place';
+
+  @override
+  String get careMapUsePlace => 'Use this place';
+
+  @override
+  String get careMapLooking => 'Finding the address…';
+
+  @override
+  String get careMapMoveHint => 'Move the map to the appointment place';
+
+  @override
+  String get careMapZoomHint => 'Zoom in to the street of the place';
+
+  @override
+  String get careMapNotFound =>
+      'We could not find that place. Try another address.';
 
   @override
   String get careAppointmentReminderNone => 'No reminder';

@@ -10,10 +10,13 @@ import '../../domain/care_models.dart';
 import '../../domain/specialties.dart';
 import '../care_providers.dart';
 import '../widgets/care_widgets.dart';
+import 'place_picker_screen.dart';
 
-/// Opens Google Maps (app if installed, else web) searching for [place].
-Future<void> _openInMaps(String place) =>
-    launchUrl(Uri.https('www.google.com', '/maps/search/', {'api': '1', 'query': place}), mode: LaunchMode.externalApplication);
+/// Opens Google Maps (app if installed, else web) on the picked point, or searching for [place].
+Future<void> _openInMaps(String place, {double? lat, double? lng}) => launchUrl(
+      Uri.https('www.google.com', '/maps/search/', {'api': '1', 'query': lat != null && lng != null ? '$lat,$lng' : place}),
+      mode: LaunchMode.externalApplication,
+    );
 
 /// Appointment agenda: date, professional, place, "perguntas que quero fazer"
 /// and the person's notes afterwards.
@@ -108,7 +111,7 @@ class _AppointmentCard extends StatelessWidget {
                     if (a.str('place') != null)
                       InkWell(
                         key: const Key('appt_card_place'),
-                        onTap: () => _openInMaps(a.str('place')!),
+                        onTap: () => _openInMaps(a.str('place')!, lat: a.number('placeLat'), lng: a.number('placeLng')),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 2),
                           child: Row(children: [
@@ -162,6 +165,11 @@ class _AppointmentFormState extends ConsumerState<_AppointmentForm> {
   late final _questions = TextEditingController(text: widget.existing?.str('questions'));
   late final _notes = TextEditingController(text: widget.existing?.str('notes'));
   final _specialtyFocus = FocusNode();
+  /// Point picked on the map; dropped when the place text no longer matches it.
+  late PickedPlace? _picked = switch ((widget.existing?.str('place'), widget.existing?.number('placeLat'), widget.existing?.number('placeLng'))) {
+    (final String place, final double lat, final double lng) => PickedPlace(place, lat, lng),
+    _ => null,
+  };
   late String _reminder = widget.existing?.str('reminder') ?? '1d';
   bool _busy = false;
 
@@ -191,6 +199,7 @@ class _AppointmentFormState extends ConsumerState<_AppointmentForm> {
           if (t(_professional) != null) 'professional': t(_professional),
           if (t(_specialty) != null) 'specialty': t(_specialty),
           if (t(_place) != null) 'place': t(_place),
+          if (_picked != null && _picked!.address == t(_place)) ...{'placeLat': _picked!.lat, 'placeLng': _picked!.lng},
           if (t(_questions) != null) 'questions': t(_questions),
           if (t(_notes) != null) 'notes': t(_notes),
           'reminder': _reminder,
@@ -203,6 +212,17 @@ class _AppointmentFormState extends ConsumerState<_AppointmentForm> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  Future<void> _pickOnMap() async {
+    final text = _place.text.trim();
+    final keep = _picked != null && _picked!.address == text ? _picked : null;
+    final picked = await ref.read(placePickerProvider)(context, query: text, initial: keep);
+    if (picked == null || !mounted) return;
+    setState(() {
+      _picked = picked;
+      _place.text = picked.address.length > 160 ? picked.address.substring(0, 160) : picked.address;
+    });
   }
 
   Future<void> _delete() async {
@@ -293,25 +313,24 @@ class _AppointmentFormState extends ConsumerState<_AppointmentForm> {
           ),
         ),
         const SizedBox(height: 10),
-        ValueListenableBuilder(
-          valueListenable: _place,
-          builder: (context, value, _) => TextFormField(
-            key: const Key('appt_place'),
-            controller: _place,
-            maxLength: 160,
-            decoration: InputDecoration(
-              labelText: l10n.careAppointmentPlace,
-              counterText: '',
-              filled: true,
-              fillColor: AppColors.surfaceLight,
-              suffixIcon: IconButton(
-                key: const Key('appt_place_map'),
-                tooltip: l10n.careAppointmentOpenMap,
-                icon: const Icon(Icons.map_outlined),
-                onPressed: value.text.trim().isEmpty ? null : () => _openInMaps(value.text.trim()),
-              ),
+        TextFormField(
+          key: const Key('appt_place'),
+          controller: _place,
+          maxLength: 160,
+          decoration: InputDecoration(
+            labelText: l10n.careAppointmentPlace,
+            counterText: '',
+            filled: true,
+            fillColor: AppColors.surfaceLight,
+            suffixIcon: IconButton(
+              key: const Key('appt_place_map'),
+              tooltip: l10n.careAppointmentOpenMap,
+              icon: Icon(_picked != null && _picked!.address == _place.text.trim() ? Icons.where_to_vote : Icons.map_outlined),
+              color: AppColors.dualisNavy,
+              onPressed: _pickOnMap,
             ),
           ),
+          onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: 10),
         CareField(controller: _questions, label: l10n.careAppointmentQuestions, maxLength: 1000, maxLines: 3),

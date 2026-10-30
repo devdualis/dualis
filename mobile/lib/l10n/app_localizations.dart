@@ -5635,8 +5635,50 @@ abstract class AppLocalizations {
   /// No description provided for @careAppointmentOpenMap.
   ///
   /// In pt, this message translates to:
-  /// **'Abrir no Google Maps'**
+  /// **'Escolher no mapa'**
   String get careAppointmentOpenMap;
+
+  /// No description provided for @careMapTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher local'**
+  String get careMapTitle;
+
+  /// No description provided for @careMapSearchHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar endereço ou lugar'**
+  String get careMapSearchHint;
+
+  /// No description provided for @careMapUsePlace.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar este local'**
+  String get careMapUsePlace;
+
+  /// No description provided for @careMapLooking.
+  ///
+  /// In pt, this message translates to:
+  /// **'Procurando o endereço…'**
+  String get careMapLooking;
+
+  /// No description provided for @careMapMoveHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mova o mapa até o local da consulta'**
+  String get careMapMoveHint;
+
+  /// No description provided for @careMapZoomHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aproxime o mapa até a rua do local'**
+  String get careMapZoomHint;
+
+  /// No description provided for @careMapNotFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não encontramos esse lugar. Tente outro endereço.'**
+  String get careMapNotFound;
 
   /// No description provided for @careAppointmentReminderNone.
   ///

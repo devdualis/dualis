@@ -6,6 +6,8 @@ import {
   IsIn,
   IsInt,
   IsISO8601,
+  IsLatitude,
+  IsLongitude,
   IsObject,
   IsOptional,
   IsString,
@@ -77,6 +79,9 @@ export class AppointmentData {
   @IsOptional() @IsString() @MaxLength(120) professional?: string;
   @IsOptional() @IsString() @MaxLength(80) specialty?: string;
   @IsOptional() @IsString() @MaxLength(160) place?: string;
+  /** Point the person picked on the map for [place]. */
+  @IsOptional() @IsLatitude() placeLat?: number;
+  @IsOptional() @IsLongitude() placeLng?: number;
   @IsOptional() @IsString() @MaxLength(1000) questions?: string;
   @IsOptional() @IsString() @MaxLength(2000) notes?: string;
   @IsIn(['none', '1d', '2h']) reminder!: 'none' | '1d' | '2h';

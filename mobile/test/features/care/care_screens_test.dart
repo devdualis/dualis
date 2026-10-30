@@ -12,6 +12,7 @@ import 'package:dualis_mobile/features/care/presentation/screens/exam_item_scree
 import 'package:dualis_mobile/features/care/presentation/screens/exam_review_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/exams_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/medications_screen.dart';
+import 'package:dualis_mobile/features/care/presentation/screens/place_picker_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/vaccines_screen.dart';
 import 'package:dualis_mobile/features/home/presentation/widgets/dualis_bottom_nav_bar.dart';
 import 'package:dualis_mobile/features/profile/domain/models/profile.dart';
@@ -130,7 +131,7 @@ Profile _me({ProfileAccessLevel access = ProfileAccessLevel.owner, DateTime? bir
 void main() {
   final pt = AppLocalizationsPt();
 
-  Future<FakeCareApi> pump(WidgetTester tester, Widget screen, {FakeCareApi? api, Profile? profile}) async {
+  Future<FakeCareApi> pump(WidgetTester tester, Widget screen, {FakeCareApi? api, Profile? profile, PlacePicker? placePicker}) async {
     tester.view.physicalSize = const Size(1000, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -141,6 +142,7 @@ void main() {
         careApiProvider.overrideWithValue(fake),
         careNotificationServiceProvider.overrideWithValue(_NoopNotifications()),
         activeProfileControllerProvider.overrideWith(() => _Profile(profile ?? _me())),
+        if (placePicker != null) placePickerProvider.overrideWithValue(placePicker),
       ],
       child: MaterialApp(
         theme: AppTheme.lightTheme,
@@ -499,7 +501,6 @@ void main() {
     await pump(tester, const AppointmentsScreen());
     await tester.tap(find.byKey(const Key('appointments_add')));
     await tester.pumpAndSettle();
-    expect(tester.widget<IconButton>(find.byKey(const Key('appt_place_map'))).onPressed, isNull);
     await tester.enterText(find.byKey(const Key('appt_specialty')), 'clinica');
     await tester.pumpAndSettle();
     await tester.tap(find.text('Clínica médica'));
@@ -514,9 +515,36 @@ void main() {
     await tester.tap(find.byKey(const Key('appt_place')));
     await tester.pumpAndSettle();
     expect(tester.widget<EditableText>(find.descendant(of: find.byKey(const Key('appt_place')), matching: find.byType(EditableText))).focusNode.hasFocus, isTrue);
-    await tester.enterText(find.byKey(const Key('appt_place')), 'Hospital Sírio-Libanês');
+  });
+
+  testWidgets('place picked on the map is saved with its point, and dropped once the text changes', (tester) async {
+    const paulista = 'Av. Paulista, 1578 – Bela Vista, São Paulo';
+    final queries = <String>[];
+    final api = FakeCareApi()
+      ..add(CareKind.appointment, {'specialty': 'Cardiologia', 'place': 'Hospital', 'reminder': '1d'}, occursAt: DateTime(2030, 1, 10, 9));
+    await pump(tester, const AppointmentsScreen(), api: api, placePicker: (context, {query = '', initial}) async {
+      queries.add(query);
+      return const PickedPlace(paulista, -23.5614, -46.6559);
+    });
+    await tester.tap(find.text('Cardiologia'));
     await tester.pumpAndSettle();
-    expect(tester.widget<IconButton>(find.byKey(const Key('appt_place_map'))).onPressed, isNotNull);
+    await tester.tap(find.byKey(const Key('appt_place_map')));
+    await tester.pumpAndSettle();
+    expect(queries, ['Hospital']);
+    expect(find.widgetWithText(TextFormField, paulista), findsOneWidget);
+    await tester.tap(find.byKey(const Key('appt_save')));
+    await tester.pumpAndSettle();
+    expect(api.records[CareKind.allergy]!.first.data, containsPair('placeLat', -23.5614));
+    expect(api.records[CareKind.allergy]!.first.data, containsPair('placeLng', -46.6559));
+
+    await tester.tap(find.text('Cardiologia'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('appt_place_map')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('appt_place')), 'Outro lugar');
+    await tester.tap(find.byKey(const Key('appt_save')));
+    await tester.pumpAndSettle();
+    expect(api.records[CareKind.allergy]!.first.data.containsKey('placeLat'), isFalse);
   });
 
   testWidgets('premium nav bar adds the care tab before the help button', (tester) async {
