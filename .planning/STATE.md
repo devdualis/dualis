@@ -5,10 +5,10 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-10-30T18:36:08.882Z"
-last_activity: 2026-10-29
+last_updated: "2026-10-30T18:46:21.841Z"
+last_activity: 2026-10-30
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: fd7bbf616711a88450fb63d2002236456004fc99
+state_head: a7eb1a6043ab3bab757f2d076b2313b8e916ddc1
 progress:
   total_phases: 15
   completed_phases: 10
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-10-30 - Completed quick task 261030-lrh: Appointment specialty search and place on Google Maps
+Last activity: 2026-10-30 - Completed quick task 261030-lw3: Shorten document-reading consent dialog copy in pt/es/en
 
 Progress: [██████████] 100%
 
@@ -125,6 +125,7 @@ None yet.
 | 261029-0w1 | Infra cost controls: Cloud Run max 2 instances, Artifact Registry cleanup, daily DB backup to GCS | 2026-10-29 | 0ca2151 | [261029-0w1-infra-cost-controls-cloud-run-max-instan](./quick/261029-0w1-infra-cost-controls-cloud-run-max-instan/) |
 | 261030-lmi | Separate prescriptions from exams in Meus cuidados | 2026-10-30 | fd7bbf6 | [261030-lmi-separate-prescriptions-from-exams-in-meu](./quick/261030-lmi-separate-prescriptions-from-exams-in-meu/) |
 | 261030-lrh | Consulta: especialidade em linha própria com lista pesquisável (sem acento, aceita texto livre); local com botão que abre o Google Maps, e o local no cartão abre o Maps | 2026-10-30 | 21065ee | [261030-lrh-consulta-especialidade-com-busca-e-local](./quick/261030-lrh-consulta-especialidade-com-busca-e-local/) |
+| 261030-lw3 | Shorten document-reading consent dialog copy in pt/es/en | 2026-10-30 | a7eb1a6 | [261030-lw3-shorten-document-reading-consent-dialog-](./quick/261030-lw3-shorten-document-reading-consent-dialog-/) |
 
 ## Deferred Items
 
