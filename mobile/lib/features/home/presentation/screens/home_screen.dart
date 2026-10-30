@@ -18,6 +18,7 @@ import '../../../sync/presentation/controllers/sync_outbox_worker.dart';
 import '../../../settings/presentation/widgets/avatar_selector_sheet.dart';
 import '../widgets/dualis_bottom_nav_bar.dart';
 import '../../../care/presentation/screens/care_hub_screen.dart';
+import '../../../care/presentation/screens/premium_promo_screen.dart';
 import 'dart:async';
 import '../../../dashboard/presentation/screens/historical_dashboard_screen.dart';
 import '../../../journal_insights/presentation/controllers/journal_insights_controller.dart';
@@ -127,8 +128,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.watch(hydrationControllerProvider);
 
     final triggerState = ref.watch(triggerCheckInProvider);
-    final showCare = ref.watch(premiumProfilesEnabledProvider);
-    if (!showCare && _currentTabIndex == 3) _currentTabIndex = 0;
+    // The care tab is always visible; in the free build it shows the Premium promo.
+    final careLocked = !ref.watch(premiumProfilesEnabledProvider);
 
     Widget appBarTitle;
     List<Widget> appBarActions = [];
@@ -198,6 +199,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           onTap: () => context.push(RoutePaths.library),
         ),
         const SizedBox(width: 8),
+        _AppBarIconButton(
+          key: const Key('home_settings_button'),
+          icon: Icons.settings_outlined,
+          color: AppColors.clinicalTealDark,
+          tooltip: 'Configurações',
+          onTap: () => context.push(RoutePaths.settings),
+        ),
+        const SizedBox(width: 8),
+      ];
+    } else if (_currentTabIndex == 3 && careLocked) {
+      appBarTitle = Text(
+        'Dualis Premium',
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimaryLight,
+        ),
+      );
+      appBarActions = [
         _AppBarIconButton(
           key: const Key('home_settings_button'),
           icon: Icons.settings_outlined,
@@ -291,7 +311,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
       bottomNavigationBar: DualisBottomNavBar(
-        showCare: showCare,
+        showCare: true,
+        careLocked: careLocked,
         currentIndex: _currentTabIndex,
         onTap: (index) {
           setState(() => _currentTabIndex = index);
@@ -326,7 +347,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       case 2:
         return const HydrationDashboardScreen(isEmbedded: true);
       case 3:
-        return const CareHubScreen();
+        return ref.watch(premiumProfilesEnabledProvider)
+            ? const CareHubScreen()
+            : const PremiumPromoScreen();
       default:
         return _buildHomeTab(
           context,

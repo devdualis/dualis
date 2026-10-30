@@ -17,6 +17,8 @@ import 'package:dualis_mobile/features/care/presentation/screens/place_picker_sc
 import 'package:dualis_mobile/features/care/presentation/screens/vaccines_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/widgets/exam_values_list.dart';
 import 'package:dualis_mobile/features/home/presentation/widgets/dualis_bottom_nav_bar.dart';
+import 'package:dualis_mobile/features/care/presentation/screens/premium_promo_screen.dart';
+import 'package:dualis_mobile/features/house_ads/domain/house_ad.dart';
 import 'package:dualis_mobile/features/profile/domain/models/profile.dart';
 import 'package:dualis_mobile/features/profile/presentation/controllers/active_profile_controller.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
@@ -639,5 +641,39 @@ void main() {
     expect(tapped, 3);
     await tester.tap(find.byKey(const Key('nav_destination_emergency')));
     expect(help, isTrue);
+  });
+
+  testWidgets('free nav bar shows the care tab with a PRO badge', (tester) async {
+    var tapped = -1;
+    await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(
+        bottomNavigationBar: DualisBottomNavBar(currentIndex: 0, showCare: true, careLocked: true, onTap: (i) => tapped = i, onEmergencyTap: () {}),
+      ),
+    ));
+    expect(find.byKey(const Key('nav_care_pro_badge')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('nav_destination_care')));
+    expect(tapped, 3);
+  });
+
+  testWidgets('Premium promo lists the care features and a subscribe button', (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(const MaterialApp(
+      locale: Locale('pt'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(body: PremiumPromoScreen()),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Seus cuidados, organizados num só lugar'), findsOneWidget);
+    for (final feature in ['Vacinas', 'Alergias', 'Medicamentos', 'Consultas', 'Exames', 'Resumo em PDF']) {
+      expect(find.text(feature), findsOneWidget);
+    }
+    expect(find.byKey(const Key('premium_promo_subscribe')), findsOneWidget);
+    expect(dualisPremiumUrl, 'https://dualischeckup.com/#pricing');
   });
 }

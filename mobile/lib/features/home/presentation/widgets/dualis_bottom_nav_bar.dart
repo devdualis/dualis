@@ -14,8 +14,11 @@ class DualisBottomNavBar extends StatelessWidget {
   final ValueChanged<int> onTap;
   final VoidCallback onEmergencyTap;
 
-  /// Premium: adds the "Meus cuidados" tab before the help button.
+  /// Adds the "Meus cuidados" tab before the help button.
   final bool showCare;
+
+  /// Free build: the care tab shows a "PRO" badge and opens the Premium promo.
+  final bool careLocked;
 
   const DualisBottomNavBar({
     super.key,
@@ -23,6 +26,7 @@ class DualisBottomNavBar extends StatelessWidget {
     required this.onTap,
     required this.onEmergencyTap,
     this.showCare = false,
+    this.careLocked = false,
   });
 
   /// Index of the help button, always the last destination.
@@ -87,10 +91,10 @@ class DualisBottomNavBar extends StatelessWidget {
           if (showCare)
             NavigationDestination(
               key: const Key('nav_destination_care'),
-              icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textSecondaryLight),
-              selectedIcon: const Icon(Icons.favorite_rounded, color: AppColors.clinicalTealDark),
+              icon: _careGlyph(const Icon(Icons.favorite_border_rounded, color: AppColors.textSecondaryLight)),
+              selectedIcon: _careGlyph(const Icon(Icons.favorite_rounded, color: AppColors.clinicalTealDark)),
               label: '',
-              tooltip: careLabel,
+              tooltip: careLocked ? (l10n?.navCareLockedTooltip ?? careLabel) : careLabel,
             ),
           NavigationDestination(
             key: const Key('nav_destination_emergency'),
@@ -101,6 +105,20 @@ class DualisBottomNavBar extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _careGlyph(Widget icon) {
+    if (!careLocked) return icon;
+    return Badge(
+      key: const Key('nav_care_pro_badge'),
+      offset: const Offset(14, -6),
+      backgroundColor: AppColors.dualisSymbolBlue,
+      label: const Text(
+        'PRO',
+        style: TextStyle(fontSize: 8, fontWeight: FontWeight.w800, color: Colors.white),
+      ),
+      child: icon,
     );
   }
 
