@@ -8,13 +8,15 @@ import { Logger } from 'nestjs-pino';
 import fastifyHelmet from '@fastify/helmet';
 import fastifyCors from '@fastify/cors';
 import { AppModule } from './app.module';
+import { applyRouteBodyLimits, DEFAULT_BODY_LIMIT } from './common/http/body-limit';
 
 async function bootstrap() {
   const fastifyAdapter = new FastifyAdapter({
     logger: false, // Pino handles structured logging via nestjs-pino
     trustProxy: true, // Necessary for reverse proxies / GCP Cloud Run
-    bodyLimit: 15728640, // 15MB: base64 of a 10MB exam document (profile pictures need 5MB)
+    bodyLimit: DEFAULT_BODY_LIMIT, // 1MB; uploads raise it per route with @BodyLimit
   });
+  applyRouteBodyLimits(fastifyAdapter.getInstance());
 
   // Fastify by default rejects empty bodies with Content-Type: application/json with HTTP 400.
   // Many mobile clients (Dio) set default headers: {'Content-Type': 'application/json'}.

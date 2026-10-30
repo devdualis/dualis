@@ -12,6 +12,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { FastifyRequest } from 'fastify';
+import { BodyLimit } from '../../common/http/body-limit';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -102,6 +103,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Patch('profile')
   @HttpCode(HttpStatus.OK)
+  @BodyLimit(5 * 1024 * 1024) // profile picture as a data URL
   async updateProfile(
     @Req() req: AuthenticatedRequest,
     @Body() dto: UpdateProfileDto,

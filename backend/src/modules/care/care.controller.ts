@@ -19,6 +19,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
+import { BodyLimit } from '../../common/http/body-limit';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ActiveProfile, ProfileAccess, ProfileContext, ProfileContextGuard } from '../profiles/profile-context';
 import {
@@ -95,6 +96,7 @@ export class CareController {
   @Post('documents')
   @HttpCode(HttpStatus.CREATED)
   @ProfileAccess('write')
+  @BodyLimit(15 * 1024 * 1024) // base64 of a 10 MB document
   upload(@Request() req: any, @ActiveProfile() profile: ProfileContext, @Body() dto: UploadDocumentDto) {
     return this.care.uploadDocument(userIdOf(req), profile.profileId, dto);
   }
