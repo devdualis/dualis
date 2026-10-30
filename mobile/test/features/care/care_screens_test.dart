@@ -505,9 +505,15 @@ void main() {
     await tester.tap(find.text('Clínica médica'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(TextFormField, 'Clínica médica'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('appt_place')));
+    await tester.pumpAndSettle();
+    expect(tester.widget<EditableText>(find.descendant(of: find.byKey(const Key('appt_place')), matching: find.byType(EditableText))).focusNode.hasFocus, isTrue);
     await tester.enterText(find.byKey(const Key('appt_specialty')), 'Homeopatia');
     await tester.pumpAndSettle();
     expect(find.widgetWithText(TextFormField, 'Homeopatia'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('appt_place')));
+    await tester.pumpAndSettle();
+    expect(tester.widget<EditableText>(find.descendant(of: find.byKey(const Key('appt_place')), matching: find.byType(EditableText))).focusNode.hasFocus, isTrue);
     await tester.enterText(find.byKey(const Key('appt_place')), 'Hospital Sírio-Libanês');
     await tester.pumpAndSettle();
     expect(tester.widget<IconButton>(find.byKey(const Key('appt_place_map'))).onPressed, isNotNull);
