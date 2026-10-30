@@ -63,6 +63,12 @@ jobs:
             echo "::error::Dump is only $SIZE bytes; refusing to upload."
             exit 1
           fi
-          gcloud storage cp "$FILE" "gs://$BACKUP_BUCKET/$FILE" --quiet
+          # Plain upload API: `gcloud storage cp` also reads the object, which
+          # the write-only service account is not allowed to do.
+          curl -sS --fail-with-body -X POST --data-binary @"$FILE" \
+            -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+            -H "Content-Type: application/octet-stream" \
+            "https://storage.googleapis.com/upload/storage/v1/b/$BACKUP_BUCKET/o?uploadType=media&name=$FILE&ifGenerationMatch=0" \
+            > /dev/null
           echo "Uploaded $FILE ($SIZE bytes) to gs://$BACKUP_BUCKET" >> "$GITHUB_STEP_SUMMARY"
           rm -f "$FILE"
