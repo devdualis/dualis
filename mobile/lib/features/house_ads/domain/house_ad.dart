@@ -68,7 +68,7 @@ List<HouseAd> bundledHouseAds(AppLocalizations l10n) => [
         title: l10n.xv2AdEbefTitle,
         body: l10n.xv2AdEbefBody,
         assetKey: 'ebef',
-        url: 'https://e-ubo.com',
+        url: 'https://e-bef.com.br',
       ),
     ];
 

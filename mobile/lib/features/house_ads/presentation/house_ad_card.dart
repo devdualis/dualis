@@ -321,7 +321,7 @@ class _BrandStyle {
           ),
           tags: l10n.xv2AdEbefTags,
           cta: l10n.xv2AdEbefCta,
-          footnote: 'e-ubo.com',
+          footnote: 'e-bef.com.br',
         );
     }
     return null;

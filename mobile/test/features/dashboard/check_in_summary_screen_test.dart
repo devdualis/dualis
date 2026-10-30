@@ -211,7 +211,7 @@ void main() {
     expect(ads.map((a) => a.url), [
       'https://dualischeckup.com/#pricing',
       'https://www.zoctec.com',
-      'https://e-ubo.com',
+      'https://e-bef.com.br',
     ]);
   });
 

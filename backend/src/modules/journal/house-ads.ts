@@ -62,7 +62,7 @@ const HOUSE_ADS: LocalizedAd[] = [
     id: 'ebef',
     brand: 'e-BEF',
     assetKey: 'house_ad_ebef',
-    url: 'https://e-ubo.com',
+    url: 'https://e-bef.com.br',
     title: {
       pt: 'Beneficiário final (UBO) com evidência, sem planilhas',
       en: 'Ultimate beneficial owner (UBO) with evidence, no spreadsheets',
