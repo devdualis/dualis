@@ -431,7 +431,7 @@ void main() {
         'collectedOn': day,
         'values': [
           {'section': 'HEMOGRAMA COMPLETO', 'item': 'Hemoglobina', 'value': hb, 'unit': 'g/dL', 'confirmed': true},
-          for (var i = 0; i < 6; i++) {'section': 'HEMOGRAMA COMPLETO', 'item': 'Item $i', 'value': '1', 'confirmed': true},
+          for (var i = 0; i < 6; i++) {'section': 'HEMOGRAMA COMPLETO', 'item': i == 0 ? 'Hematócrito' : 'Item $i', 'value': '1', 'confirmed': true},
           for (var i = 0; i < 10; i++) {'section': 'Bioquímica', 'item': 'Dosagem $i', 'value': '2', 'confirmed': true},
         ],
       }));
@@ -448,6 +448,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('exam_values_Hemoglobina')), findsOneWidget);
     expect(find.text('Bioquímica'), findsNothing);
+
+    await tester.enterText(find.byKey(const Key('exam_values_search')), 'HEMATOCRITO');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('exam_values_Hematócrito')), findsOneWidget);
   });
 
   testWidgets('a file stuck while being read can be swiped away', (tester) async {
