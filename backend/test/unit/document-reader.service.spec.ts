@@ -46,17 +46,21 @@ describe('DocumentReaderService', () => {
 
   it('keeps the section, reads Brazilian dates and drops rows whose item is a number', () => {
     const lab = sanitizeReading('lab', {
+      title: 'HEMOGRAMA COMPLETO, FERRITINA',
       collectedOn: '31/02/2026',
       values: [
         { section: 'HEMOGRAMA COMPLETO', item: 'SEGMENTADOS', value: '38', unit: '%', printedReference: '40 a 75 %' },
         { section: 'HEMOGRAMA COMPLETO', item: 'SEGMENTADOS', value: '1.938', unit: '/mm³', printedReference: '1.440 a 9.000 /mm³' },
         { item: '1.938', value: '/mm³' },
+        { section: 'FERRITINA', item: 'FERRITINA', value: '447,6', unit: 'ng/mL', printedReference: '23,9 a 336,2 ng/mL' },
       ],
     });
     expect(lab.collectedOn).toBeUndefined();
+    expect(lab.title).toBeUndefined();
     expect(lab.values).toEqual([
       { section: 'HEMOGRAMA COMPLETO', item: 'SEGMENTADOS', value: '38', unit: '%', reference: '40 a 75 %' },
       { section: 'HEMOGRAMA COMPLETO', item: 'SEGMENTADOS', value: '1.938', unit: '/mm³', reference: '1.440 a 9.000 /mm³' },
+      { section: 'FERRITINA', item: 'FERRITINA', value: '447,6', unit: 'ng/mL', reference: '23,9 a 336,2 ng/mL' },
     ]);
   });
 

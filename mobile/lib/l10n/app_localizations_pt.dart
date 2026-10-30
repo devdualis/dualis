@@ -3441,7 +3441,23 @@ class AppLocalizationsPt extends AppLocalizations {
       'Lendo o arquivo de novo. Isso pode levar alguns segundos.';
 
   @override
-  String get careExamTitleField => 'Nome do exame';
+  String get careExamTitleField => 'Título do documento';
+
+  @override
+  String careExamTitleMany(String first, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count exames',
+      one: '1 exame',
+    );
+    return '$first + $_temp0';
+  }
+
+  @override
+  String careExamSections(int count) {
+    return 'Exames neste documento ($count)';
+  }
 
   @override
   String get careExamLab => 'Laboratório';

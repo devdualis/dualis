@@ -131,6 +131,8 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
   final _lab = TextEditingController();
   DateTime? _collected;
   bool _busy = false;
+  /// Section headings, to jump from the exam chips to each exam.
+  final _sectionKeys = <String, GlobalKey>{};
 
   @override
   void dispose() {
@@ -142,7 +144,14 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
   void _init(CareDocument doc) {
     if (_rows != null) return;
     _rows = doc.values;
-    _title.text = doc.title ?? '';
+    // A document can hold several exams: suggest "First exam + N exams"; the person can change it.
+    final sections = doc.sections;
+    _title.text = doc.title ??
+        switch (sections.length) {
+          0 => '',
+          1 => sections.first,
+          _ => AppLocalizations.of(context).careExamTitleMany(sections.first, sections.length - 1),
+        };
     _lab.text = doc.labName ?? '';
     _collected = DateTime.tryParse(doc.collectedOn ?? '');
   }
@@ -279,6 +288,22 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                   const SizedBox(width: 10),
                   Expanded(child: CareDateField(label: l10n.careExamCollected, value: _collected, onChanged: (d) => setState(() => _collected = d), lastDate: DateTime.now())),
                 ]),
+                if (doc.sections.length > 1) ...[
+                  const SizedBox(height: 14),
+                  Text(l10n.careExamSections(doc.sections.length), style: careTitle(13)),
+                  const SizedBox(height: 8),
+                  Wrap(spacing: 6, runSpacing: 6, children: [
+                    for (final section in doc.sections)
+                      ActionChip(
+                        label: Text(section, style: careBody(12).copyWith(color: AppColors.dualisNavy)),
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () {
+                          final target = _sectionKeys[section]?.currentContext;
+                          if (target != null) Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 300));
+                        },
+                      ),
+                  ]),
+                ],
                 const SizedBox(height: 12),
                 CareCard(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -295,6 +320,8 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                       for (var i = 0; i < rows.length; i++) ...[
                         if (rows[i].section != null && (i == 0 || rows[i].section != rows[i - 1].section))
                           Padding(
+                            // Only the first heading of a section gets the jump key (keys must be unique).
+                            key: rows.indexWhere((r) => r.section == rows[i].section) == i ? _sectionKeys.putIfAbsent(rows[i].section!, GlobalKey.new) : null,
                             padding: const EdgeInsets.only(top: 12, bottom: 2),
                             child: Align(
                               alignment: Alignment.centerLeft,

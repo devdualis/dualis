@@ -291,7 +291,10 @@ class _DocRow extends StatelessWidget {
       DocumentStatus.failed => CarePill(l10n.careExamReadFailed, tone: PillTone.amber),
       _ => CarePill(l10n.careExamArchived),
     };
+    final sections = d.sections;
     final title = d.title ??
+        (sections.length > 1 ? l10n.careExamTitleMany(sections.first, sections.length - 1) : null) ??
+        (sections.length == 1 ? sections.first : null) ??
         switch (d.kind) {
           DocumentKind.lab => l10n.careExamKindLab,
           DocumentKind.prescription => l10n.careExamKindPrescription,

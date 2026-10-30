@@ -3432,7 +3432,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'Reading the file again. This can take a few seconds.';
 
   @override
-  String get careExamTitleField => 'Exam name';
+  String get careExamTitleField => 'Document title';
+
+  @override
+  String careExamTitleMany(String first, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count exams',
+      one: '1 exam',
+    );
+    return '$first + $_temp0';
+  }
+
+  @override
+  String careExamSections(int count) {
+    return 'Exams in this document ($count)';
+  }
 
   @override
   String get careExamLab => 'Laboratory';

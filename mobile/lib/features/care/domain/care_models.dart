@@ -139,6 +139,12 @@ class CareDocument {
       .map((v) => ExamValue.fromJson(Map<String, dynamic>.from(v as Map)))
       .toList();
 
+  /// Exams in the document (headings as printed), in reading order.
+  List<String> get sections => {
+        for (final v in values)
+          if (v.section != null && v.section!.trim().isNotEmpty) v.section!.trim(),
+      }.toList();
+
   List<PrescribedItem> get medications => (data['medications'] as List? ?? const [])
       .map((v) => PrescribedItem.fromJson(Map<String, dynamic>.from(v as Map)))
       .toList();

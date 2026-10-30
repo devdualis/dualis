@@ -13,7 +13,7 @@ const LAB_SCHEMA = {
   properties: {
     title: {
       type: 'string',
-      description: 'Exam name as printed, e.g. "Hemograma completo". If the document has several exams, their names joined with ", ".',
+      description: 'Exam name as printed, e.g. "Hemograma completo".',
     },
     labName: { type: 'string', description: 'Laboratory name as printed, often in the logo, header or footer (e.g. "Vita Gene").' },
     collectedOn: { type: 'string', description: 'Collection date ("Data Coleta", "Coleta", "Data da coleta") as YYYY-MM-DD, only if printed.' },
@@ -112,18 +112,12 @@ export function sanitizeReading(kind: 'lab' | 'prescription', raw: any): Documen
     .filter((v: any) => v.item && v.value && !/^[\d.,\s]+$/.test(v.item))
     .slice(0, 200);
   return {
-    title: shortTitle(str(raw?.title, 400)),
+    // With several exams the app suggests "First exam + N exams" in the person's language.
+    title: new Set(values.map((v: any) => v.section).filter(Boolean)).size > 1 ? undefined : str(raw?.title, 120),
     labName: str(raw?.labName, 120),
     collectedOn,
     values,
   };
-}
-
-/** Long lists of exam names are cut at the last comma that fits in 120 characters. */
-function shortTitle(title: string | undefined): string | undefined {
-  if (!title || title.length <= 120) return title;
-  const cut = title.slice(0, 120);
-  return cut.lastIndexOf(', ') > 0 ? cut.slice(0, cut.lastIndexOf(', ')) : cut;
 }
 
 /** YYYY-MM-DD from "2026-05-21" or the Brazilian "21/05/2026"; anything else is dropped. */

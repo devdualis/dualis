@@ -267,6 +267,10 @@ void main() {
     expect(find.byKey(const Key('exam_section_0')), findsOneWidget);
     expect(find.byKey(const Key('exam_section_1')), findsNothing);
     expect(find.byKey(const Key('exam_section_2')), findsOneWidget);
+    // Several exams: the title is suggested and each exam has a chip.
+    expect(find.text(pt.careExamTitleMany('HEMOGRAMA COMPLETO', 1)), findsOneWidget);
+    expect(find.text(pt.careExamSections(2)), findsOneWidget);
+    expect(find.widgetWithText(ActionChip, 'FERRITINA'), findsOneWidget);
     // % and /mm³ of one item: the name once, a remove button per result.
     expect(find.text('SEGMENTADOS'), findsOneWidget);
     expect(find.byKey(const Key('row_remove_0')), findsOneWidget);
@@ -278,6 +282,7 @@ void main() {
     await tester.pumpAndSettle();
     final values = api.reviews.single['values'] as List;
     expect(values.map((v) => v['section']), ['HEMOGRAMA COMPLETO', 'HEMOGRAMA COMPLETO', 'FERRITINA']);
+    expect(api.reviews.single['title'], 'HEMOGRAMA COMPLETO + 1 exame');
   });
 
   testWidgets('removing one of two results keeps only the chosen one', (tester) async {
@@ -358,6 +363,17 @@ void main() {
     await tester.tap(find.text(pt.careDelete).last);
     await tester.pumpAndSettle();
     expect(api.docs, isEmpty);
+  });
+
+  testWidgets('a document with several exams is named after the first one plus the count', (tester) async {
+    final api = FakeCareApi();
+    api.docs.add(CareDocument(id: 'd1', kind: DocumentKind.lab, mime: 'application/pdf', status: DocumentStatus.review, createdAt: DateTime(2026, 10, 28), data: {
+      'values': [
+        for (final s in ['HEMOGRAMA COMPLETO', 'FERRITINA', 'T4 LIVRE']) {'section': s, 'item': s, 'value': '1', 'confirmed': false},
+      ],
+    }));
+    await pump(tester, const ExamsScreen(), api: api);
+    expect(find.text(pt.careExamTitleMany('HEMOGRAMA COMPLETO', 2)), findsOneWidget);
   });
 
   testWidgets('a file stuck while being read can be swiped away', (tester) async {

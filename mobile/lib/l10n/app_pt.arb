@@ -2197,7 +2197,26 @@
   "careExamFailedHint": "Não conseguimos ler este arquivo. Você pode digitar os valores ou tentar outra foto, com boa luz e o papel inteiro.",
   "careReadAgain": "Ler o arquivo de novo",
   "careReadingAgain": "Lendo o arquivo de novo. Isso pode levar alguns segundos.",
-  "careExamTitleField": "Nome do exame",
+  "careExamTitleField": "Título do documento",
+  "careExamTitleMany": "{first} + {count, plural, =1{1 exame} other{{count} exames}}",
+  "@careExamTitleMany": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careExamSections": "Exames neste documento ({count})",
+  "@careExamSections": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "careExamLab": "Laboratório",
   "careExamCollected": "Data da coleta",
   "careExamItem": "Item",

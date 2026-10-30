@@ -5965,8 +5965,20 @@ abstract class AppLocalizations {
   /// No description provided for @careExamTitleField.
   ///
   /// In pt, this message translates to:
-  /// **'Nome do exame'**
+  /// **'Título do documento'**
   String get careExamTitleField;
+
+  /// No description provided for @careExamTitleMany.
+  ///
+  /// In pt, this message translates to:
+  /// **'{first} + {count, plural, =1{1 exame} other{{count} exames}}'**
+  String careExamTitleMany(String first, int count);
+
+  /// No description provided for @careExamSections.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exames neste documento ({count})'**
+  String careExamSections(int count);
 
   /// No description provided for @careExamLab.
   ///

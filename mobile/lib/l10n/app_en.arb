@@ -991,7 +991,26 @@
   "careExamFailedHint": "We could not read this file. You can type the values or try another photo, in good light with the whole page.",
   "careReadAgain": "Read the file again",
   "careReadingAgain": "Reading the file again. This can take a few seconds.",
-  "careExamTitleField": "Exam name",
+  "careExamTitleField": "Document title",
+  "careExamTitleMany": "{first} + {count, plural, =1{1 exam} other{{count} exams}}",
+  "@careExamTitleMany": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careExamSections": "Exams in this document ({count})",
+  "@careExamSections": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "careExamLab": "Laboratory",
   "careExamCollected": "Collection date",
   "careExamItem": "Item",
