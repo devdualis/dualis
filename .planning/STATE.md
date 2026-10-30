@@ -5,10 +5,10 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-10-29T03:40:30.827Z"
-last_activity: 2026-10-28
+last_updated: "2026-10-30T18:36:08.882Z"
+last_activity: 2026-10-29
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: 0ca215120a1cbeac55cfede34fb83a53aec93de2
+state_head: fd7bbf616711a88450fb63d2002236456004fc99
 progress:
   total_phases: 15
   completed_phases: 10
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-10-29 - Completed quick task 261029-0w1: Infra cost controls (max instances, registry cleanup, daily DB backup)
+Last activity: 2026-10-30 - Completed quick task 261030-lmi: Separate prescriptions from exams in Meus cuidados
 
 Progress: [██████████] 100%
 
@@ -123,6 +123,7 @@ None yet.
 | 261028-jwx | Provider-neutral processors section in privacy policy | 2026-10-28 | 00e01ef | [261028-jwx-provider-neutral-processors-section-in-p](./quick/261028-jwx-provider-neutral-processors-section-in-p/) |
 | 261028-jxy | Branded verification and reset emails with the Dualis logo | 2026-10-28 | 5bde0a6 | [261028-jxy-branded-email-templates-with-the-dualis-](./quick/261028-jxy-branded-email-templates-with-the-dualis-/) |
 | 261029-0w1 | Infra cost controls: Cloud Run max 2 instances, Artifact Registry cleanup, daily DB backup to GCS | 2026-10-29 | 0ca2151 | [261029-0w1-infra-cost-controls-cloud-run-max-instan](./quick/261029-0w1-infra-cost-controls-cloud-run-max-instan/) |
+| 261030-lmi | Separate prescriptions from exams in Meus cuidados | 2026-10-30 | fd7bbf6 | [261030-lmi-separate-prescriptions-from-exams-in-meu](./quick/261030-lmi-separate-prescriptions-from-exams-in-meu/) |
 
 ## Deferred Items
 
