@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -7,6 +8,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../domain/care_models.dart';
 import '../care_providers.dart';
+import '../care_routes.dart';
 import '../widgets/care_widgets.dart';
 
 /// Shows the original document (photo inline; PDF through the system viewer).
@@ -114,6 +116,60 @@ class DocumentActions extends StatelessWidget {
   }
 }
 
+/// Asks about a reading that holds the same exams as another document of the profile.
+/// Nothing is removed unless the person chooses "Discard this one".
+class PossibleDuplicateCard extends ConsumerWidget {
+  const PossibleDuplicateCard({super.key, required this.doc, required this.onKeep});
+  final CareDocument doc;
+  final VoidCallback onKeep;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final otherId = doc.possibleDuplicateOf!;
+    return CareCard(
+      key: const Key('exam_possible_duplicate'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CareNote(l10n.careExamPossibleDuplicate, icon: Icons.content_copy_outlined),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              key: const Key('duplicate_see_other'),
+              onPressed: () => context.push(CarePaths.examReview(otherId)),
+              child: Text(l10n.careExamDuplicateSeeOther),
+            ),
+          ),
+          Row(children: [
+            Expanded(
+              child: OutlinedButton(
+                key: const Key('duplicate_discard'),
+                style: OutlinedButton.styleFrom(foregroundColor: CareColors.slate, minimumSize: const Size.fromHeight(46)),
+                onPressed: () async {
+                  if (!await confirmCareDelete(context)) return;
+                  await ref.read(careActionsProvider).deleteDocument(doc.id);
+                  if (context.mounted) await Navigator.of(context).maybePop();
+                },
+                child: Text(l10n.careExamDuplicateDiscard),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: OutlinedButton(
+                key: const Key('duplicate_keep'),
+                style: OutlinedButton.styleFrom(foregroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(46)),
+                onPressed: onKeep,
+                child: Text(l10n.careExamDuplicateKeep),
+              ),
+            ),
+          ]),
+        ],
+      ),
+    );
+  }
+}
+
 /// Row-by-row check of a transcribed lab report. Values and references are the
 /// lab's; there are no colours, arrows or judgments, and saving needs every
 /// row confirmed.
@@ -131,6 +187,8 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
   final _lab = TextEditingController();
   DateTime? _collected;
   bool _busy = false;
+  /// The person answered "keep both" to the possible-duplicate question (saving clears it on the server).
+  bool _keepBoth = false;
   /// Section headings, to jump from the exam chips to each exam.
   final _sectionKeys = <String, GlobalKey>{};
 
@@ -266,6 +324,9 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
           final rows = _rows!;
           final pending = rows.where((r) => !r.confirmed).length;
           final archiveOnly = doc.status == DocumentStatus.archived;
+          // Asked only while the other document still exists.
+          final otherExists = ref.watch(careDocumentsProvider).value?.any((d) => d.id == doc.possibleDuplicateOf) ?? false;
+          final askDuplicate = canEdit && !_keepBoth && doc.status == DocumentStatus.review && otherExists;
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
             children: [
@@ -278,6 +339,10 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                 onTap: () => openOriginalDocument(context, ref, doc),
               ),
               if (doc.status == DocumentStatus.failed) ...[const SizedBox(height: 10), CareNote(l10n.careExamFailedHint)],
+              if (askDuplicate) ...[
+                const SizedBox(height: 10),
+                PossibleDuplicateCard(doc: doc, onKeep: () => setState(() => _keepBoth = true)),
+              ],
               if (canEdit) ...[const SizedBox(height: 10), DocumentActions(doc: doc)],
               if (!archiveOnly) ...[
                 const SizedBox(height: 12),

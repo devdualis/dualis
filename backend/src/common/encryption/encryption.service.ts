@@ -1,11 +1,13 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
+import { createCipheriv, createDecipheriv, createHmac, hkdfSync, randomBytes } from 'node:crypto';
 
 @Injectable()
 export class EncryptionService {
   private readonly algorithm = 'aes-256-gcm';
   private readonly key: Buffer;
+  /** Separate key for file fingerprints, derived so the encryption key is never reused for HMAC. */
+  private readonly fingerprintKey: Buffer;
   private readonly currentVersion = 'v1';
 
   constructor(@Inject(ConfigService) private readonly configService: ConfigService) {
@@ -18,6 +20,7 @@ export class EncryptionService {
     if (this.key.length !== 32) {
       throw new Error('ENCRYPTION_MASTER_KEY must be a 64-character hex string (32 bytes).');
     }
+    this.fingerprintKey = Buffer.from(hkdfSync('sha256', this.key, Buffer.alloc(0), 'care-document-fingerprint', 32));
   }
 
   /**
@@ -93,5 +96,13 @@ export class EncryptionService {
     const decipher = createDecipheriv(this.algorithm, this.key, payload.subarray(0, 12));
     decipher.setAuthTag(payload.subarray(12, 28));
     return Buffer.concat([decipher.update(payload.subarray(28)), decipher.final()]);
+  }
+
+  /**
+   * Keyed fingerprint of a file (HMAC-SHA256, hex). Equal files give equal fingerprints,
+   * but nobody without the server key can compute one to check whether a file is stored.
+   */
+  fingerprint(plain: Buffer): string {
+    return createHmac('sha256', this.fingerprintKey).update(plain).digest('hex');
   }
 }

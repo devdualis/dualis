@@ -3434,6 +3434,23 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não conseguimos ler este arquivo. Você pode digitar os valores ou tentar outra foto, com boa luz e o papel inteiro.';
 
   @override
+  String get careExamDuplicateFile =>
+      'Este arquivo já foi enviado. Abrimos o que você já tem.';
+
+  @override
+  String get careExamPossibleDuplicate =>
+      'Parece o mesmo exame que você já tem em outro documento.';
+
+  @override
+  String get careExamDuplicateSeeOther => 'Ver o outro';
+
+  @override
+  String get careExamDuplicateDiscard => 'Descartar este';
+
+  @override
+  String get careExamDuplicateKeep => 'Manter os dois';
+
+  @override
   String get careReadAgain => 'Ler o arquivo de novo';
 
   @override

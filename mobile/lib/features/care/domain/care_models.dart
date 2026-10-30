@@ -110,6 +110,9 @@ class CareDocument {
   final String? error;
   final DateTime createdAt;
 
+  /// Upload only: the same file was already stored for this profile and this is it.
+  final bool duplicate;
+
   const CareDocument({
     required this.id,
     required this.kind,
@@ -118,6 +121,7 @@ class CareDocument {
     required this.data,
     required this.createdAt,
     this.error,
+    this.duplicate = false,
   });
 
   factory CareDocument.fromJson(Map<String, dynamic> json) => CareDocument(
@@ -128,9 +132,12 @@ class CareDocument {
         data: Map<String, dynamic>.from(json['data'] as Map? ?? const {}),
         error: json['error'] as String?,
         createdAt: DateTime.parse(json['createdAt'] as String),
+        duplicate: json['duplicate'] == true,
       );
 
   String? get title => _s('title');
+  /// Another document of the profile with the same exams (asked in the review, never removed by the app).
+  String? get possibleDuplicateOf => _s('possibleDuplicateOf');
   String? get labName => _s('labName');
   String? get collectedOn => _s('collectedOn');
   bool get isPdf => mime == 'application/pdf';

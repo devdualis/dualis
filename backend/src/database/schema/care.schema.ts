@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, integer, timestamp, pgPolicy, index, customType, check, type AnyPgColumn } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, integer, timestamp, pgPolicy, index, uniqueIndex, customType, check, type AnyPgColumn } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { users } from './users.schema';
 import { profiles } from './profiles.schema';
@@ -69,6 +69,8 @@ export const careDocuments = pgTable(
     mime: text('mime').notNull(),
     sizeBytes: integer('size_bytes').notNull(),
     file: bytea('file').notNull(),
+    /** Keyed HMAC of the plain file (migration 0022): the same file is stored and read once per profile. */
+    fileHmac: text('file_hmac'),
     status: text('status').$type<CareDocumentStatus>().notNull(),
     data: text('data'),
     error: text('error'),
@@ -77,6 +79,7 @@ export const careDocuments = pgTable(
   },
   (table) => [
     index('idx_care_documents_profile_created').on(table.profileId, table.createdAt.desc()),
+    uniqueIndex('uq_care_documents_profile_file_hmac').on(table.profileId, table.fileHmac),
     check('care_documents_kind_check', sql`kind IN ('lab', 'prescription', 'other')`),
     check('care_documents_status_check', sql`status IN ('archived', 'processing', 'review', 'ready', 'failed')`),
     ...profilePolicies('care_documents'),

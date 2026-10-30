@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
-import { and, desc, eq, gte, lte } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, lte, ne } from 'drizzle-orm';
 import { DatabaseService, DrizzleTransaction } from '../../database/database.service';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import { careDocuments, careRecords, CareDocumentStatus, CareRecordKind } from '../../database/schema/care.schema';
@@ -36,7 +36,7 @@ const documentMeta = {
   createdAt: careDocuments.createdAt,
   updatedAt: careDocuments.updatedAt,
 };
-type DocumentMetaRow = Omit<typeof careDocuments.$inferSelect, 'file'>;
+type DocumentMetaRow = Omit<typeof careDocuments.$inferSelect, 'file' | 'fileHmac'>;
 
 @Injectable()
 export class CareService {
@@ -154,8 +154,9 @@ export class CareService {
     const willRead = dto.read && dto.kind !== 'other';
     const status: CareDocumentStatus = willRead ? 'processing' : 'archived';
     const data: DocumentData = dto.title ? { title: dto.title } : {};
+    const fileHmac = this.encryption.fingerprint(file);
 
-    const row = await this.databaseService.withRls(userId, async (tx) => {
+    const { row, read, base, duplicate } = await this.databaseService.withRls(userId, async (tx) => {
       const [inserted] = await tx
         .insert(careDocuments)
         .values({
@@ -165,18 +166,37 @@ export class CareService {
           mime: dto.mime,
           sizeBytes: file.length,
           file: this.encryption.encryptBuffer(file),
+          fileHmac,
           status,
           data: this.encryption.encrypt(JSON.stringify(data)),
         })
+        .onConflictDoNothing({ target: [careDocuments.profileId, careDocuments.fileHmac] })
         .returning(documentMeta);
-      return inserted;
+      if (inserted) return { row: inserted, read: willRead, base: data, duplicate: false };
+
+      // The same file is already stored for this profile: it is never stored or read twice.
+      const [existing] = await tx
+        .select(documentMeta)
+        .from(careDocuments)
+        .where(and(eq(careDocuments.profileId, profileId), eq(careDocuments.fileHmac, fileHmac)));
+      if (!existing) throw new BadRequestException('Document could not be stored.');
+      if (existing.status !== 'archived' || !willRead) return { row: existing, read: false, base: data, duplicate: true };
+
+      // Stored earlier without reading; now the person asks for the reading.
+      const title = this.decryptDocumentData(existing).title ?? dto.title;
+      const [updated] = await tx
+        .update(careDocuments)
+        .set({ kind: dto.kind, status: 'processing', error: null, updatedAt: new Date() })
+        .where(eq(careDocuments.id, existing.id))
+        .returning(documentMeta);
+      return { row: updated, read: true, base: title ? { title } : {}, duplicate: false };
     });
 
-    if (willRead) {
+    if (read) {
       // Runs after the response (Cloud Run is deployed with --no-cpu-throttling).
-      setImmediate(() => void this.readDocument(userId, row.id, dto.kind as 'lab' | 'prescription', dto.mime, file, data));
+      setImmediate(() => void this.readDocument(userId, row.id, row.kind as 'lab' | 'prescription', row.mime, file, base));
     }
-    return this.toDocument(row);
+    return { ...this.toDocument(row), ...(duplicate && { duplicate: true }) };
   }
 
   /** OCR + transcription. The person confirms every value before the document is "ready". */
@@ -206,12 +226,16 @@ export class CareService {
       this.logger.warn(`Document ${documentId} reading failed: ${(err as Error).message?.slice(0, 200)}`);
     }
     try {
-      await this.databaseService.withRls(userId, (tx) =>
-        tx
+      await this.databaseService.withRls(userId, async (tx) => {
+        if (status === 'review' && kind === 'lab') {
+          const possibleDuplicateOf = await this.findSameExams(tx, documentId, data);
+          if (possibleDuplicateOf) data = { ...data, possibleDuplicateOf };
+        }
+        await tx
           .update(careDocuments)
           .set({ status, error, data: this.encryption.encrypt(JSON.stringify(data)), updatedAt: new Date() })
-          .where(and(eq(careDocuments.id, documentId), eq(careDocuments.status, 'processing'))),
-      );
+          .where(and(eq(careDocuments.id, documentId), eq(careDocuments.status, 'processing')));
+      });
     } catch (err) {
       this.logger.error(`Document ${documentId} status update failed: ${(err as Error).message}`);
     }
@@ -261,6 +285,8 @@ export class CareService {
         ...(dto.medications !== undefined && { medications: dto.medications }),
         ...(dto.note !== undefined && { note: dto.note }),
       };
+      // Saving is the person's answer to "same exams as another document?": keep this one.
+      delete data.possibleDuplicateOf;
       const status: CareDocumentStatus = existing.status === 'archived' ? 'archived' : 'ready';
       const [row] = await tx
         .update(careDocuments)
@@ -318,6 +344,25 @@ export class CareService {
     return row;
   }
 
+  /** The oldest other lab document of the same profile that holds the same exams, if any. */
+  private async findSameExams(tx: DrizzleTransaction, documentId: string, data: DocumentData): Promise<string | undefined> {
+    const [self] = await tx.select({ profileId: careDocuments.profileId }).from(careDocuments).where(eq(careDocuments.id, documentId));
+    if (!self) return undefined;
+    const others = await tx
+      .select(documentMeta)
+      .from(careDocuments)
+      .where(
+        and(
+          eq(careDocuments.profileId, self.profileId),
+          eq(careDocuments.kind, 'lab'),
+          ne(careDocuments.id, documentId),
+          inArray(careDocuments.status, ['review', 'ready']),
+        ),
+      )
+      .orderBy(asc(careDocuments.createdAt));
+    return others.find((other) => sameExams(data, this.decryptDocumentData(other)))?.id;
+  }
+
   private async findDocument(tx: DrizzleTransaction, profileId: string, id: string): Promise<DocumentMetaRow> {
     const [row] = await tx
       .select(documentMeta)
@@ -362,6 +407,35 @@ export class CareService {
       updatedAt: row.updatedAt.toISOString(),
     };
   }
+}
+
+/** Fewest shared results for two readings to count as the same exams. */
+const SAME_EXAMS_MIN_SHARED = 3;
+/** Share of the smaller reading's results that must also be in the other one. */
+const SAME_EXAMS_MIN_SHARE = 0.8;
+
+/** Lower case, no accents, no punctuation, decimal comma as point: "Hemácias:" == "HEMACIAS". */
+function comparable(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/(\d),(\d)/g, '$1.$2')
+    .replace(/[^a-z0-9.<>%]+/g, '');
+}
+
+/**
+ * Two lab readings hold the same exams (e.g. another photo of the same report): the
+ * collection dates do not differ and most item/value pairs are equal. Only used to ask
+ * the person; nothing is discarded automatically.
+ */
+export function sameExams(a: DocumentData, b: DocumentData): boolean {
+  if (a.collectedOn && b.collectedOn && a.collectedOn !== b.collectedOn) return false;
+  const pairs = (d: DocumentData) => new Set((d.values ?? []).map((v) => `${comparable(v.item)}=${comparable(v.value)}`));
+  const pa = pairs(a);
+  const pb = pairs(b);
+  const shared = [...pa].filter((p) => pb.has(p)).length;
+  return shared >= SAME_EXAMS_MIN_SHARED && shared >= SAME_EXAMS_MIN_SHARE * Math.min(pa.size, pb.size);
 }
 
 /** The date a record is sorted by. Medications have none. */

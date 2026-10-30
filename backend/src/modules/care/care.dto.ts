@@ -188,6 +188,8 @@ export interface DocumentReading {
 export interface DocumentData extends DocumentReading {
   note?: string;
   values?: ExamValueDto[];
+  /** Another lab document of the profile with the same exams; cleared when the person saves this one. */
+  possibleDuplicateOf?: string;
 }
 
 export interface CareDocumentResponse {
@@ -201,4 +203,6 @@ export interface CareDocumentResponse {
   error: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Upload only: the same file was already stored for this profile; this is that document. */
+  duplicate?: boolean;
 }

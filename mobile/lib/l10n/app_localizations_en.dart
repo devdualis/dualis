@@ -3425,6 +3425,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'We could not read this file. You can type the values or try another photo, in good light with the whole page.';
 
   @override
+  String get careExamDuplicateFile =>
+      'This file was already sent. Here is the one you have.';
+
+  @override
+  String get careExamPossibleDuplicate =>
+      'This looks like the same exam you already have in another document.';
+
+  @override
+  String get careExamDuplicateSeeOther => 'See the other one';
+
+  @override
+  String get careExamDuplicateDiscard => 'Discard this one';
+
+  @override
+  String get careExamDuplicateKeep => 'Keep both';
+
+  @override
   String get careReadAgain => 'Read the file again';
 
   @override

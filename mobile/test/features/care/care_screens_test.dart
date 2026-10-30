@@ -365,6 +365,54 @@ void main() {
     expect(api.docs, isEmpty);
   });
 
+  testWidgets('a reading with the same exams as another document asks to discard or keep both', (tester) async {
+    final api = FakeCareApi();
+    CareDocument lab(String id, DocumentStatus status, [Map<String, dynamic> extra = const {}]) => CareDocument(
+          id: id,
+          kind: DocumentKind.lab,
+          mime: 'application/pdf',
+          status: status,
+          createdAt: DateTime(2026, 10, 28),
+          data: {
+            'values': [
+              {'item': 'LDL', 'value': '138', 'confirmed': false},
+            ],
+            ...extra,
+          },
+        );
+    api.docs.addAll([lab('old', DocumentStatus.ready), lab('new', DocumentStatus.review, {'possibleDuplicateOf': 'old'})]);
+    await pump(tester, const ExamReviewScreen(documentId: 'new'), api: api);
+    expect(find.text(pt.careExamPossibleDuplicate), findsOneWidget);
+
+    // Keep both: the question goes away and nothing is deleted.
+    await tester.tap(find.byKey(const Key('duplicate_keep')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('exam_possible_duplicate')), findsNothing);
+    expect(api.docs, hasLength(2));
+
+    // Discard this one (after confirming): only the new document is removed.
+    await pump(tester, ExamReviewScreen(key: UniqueKey(), documentId: 'new'), api: api);
+    await tester.tap(find.byKey(const Key('duplicate_discard')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(pt.careDelete).last);
+    await tester.pumpAndSettle();
+    expect(api.docs.map((d) => d.id), ['old']);
+  });
+
+  testWidgets('the possible-duplicate question is not asked once the other document is gone', (tester) async {
+    final api = FakeCareApi();
+    api.docs.add(CareDocument(
+      id: 'new',
+      kind: DocumentKind.lab,
+      mime: 'application/pdf',
+      status: DocumentStatus.review,
+      createdAt: DateTime(2026, 10, 28),
+      data: const {'possibleDuplicateOf': 'deleted'},
+    ));
+    await pump(tester, const ExamReviewScreen(documentId: 'new'), api: api);
+    expect(find.byKey(const Key('exam_possible_duplicate')), findsNothing);
+  });
+
   testWidgets('a document with several exams is named after the first one plus the count', (tester) async {
     final api = FakeCareApi();
     api.docs.add(CareDocument(id: 'd1', kind: DocumentKind.lab, mime: 'application/pdf', status: DocumentStatus.review, createdAt: DateTime(2026, 10, 28), data: {

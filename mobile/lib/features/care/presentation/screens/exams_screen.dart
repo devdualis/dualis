@@ -140,12 +140,17 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
 
     setState(() => _uploading = true);
     try {
-      await ref.read(careActionsProvider).upload(
+      final doc = await ref.read(careActionsProvider).upload(
             kind: kind == 'prescription' ? DocumentKind.prescription : kind == 'lab' ? DocumentKind.lab : DocumentKind.other,
             mime: mime,
             bytes: bytes,
             read: read,
           );
+      // The same file is never stored or read twice: show the one already there.
+      if (doc.duplicate && mounted) {
+        careSnack(context, l10n.careExamDuplicateFile);
+        _open(doc);
+      }
     } catch (_) {
       if (mounted) careSnack(context, l10n.careSaveError);
     } finally {

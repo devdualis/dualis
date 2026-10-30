@@ -248,6 +248,28 @@ describe('Security Regression: 0021 premium care (care_records, care_documents R
     expect((await service.getDocumentFile(ownerA, primaryA, doc.id)).file.equals(img)).toBe(true);
   });
 
+  it('the same file is stored once per profile and never read twice', async (ctx) => {
+    if (!isDbAvailable) return ctx.skip();
+    const pdf = Buffer.from('%PDF-1.4 same report uploaded twice');
+    const upload = (profileId: string, read: boolean) =>
+      service.uploadDocument(ownerA, profileId, { kind: read ? 'lab' : 'other', mime: 'application/pdf', fileBase64: pdf.toString('base64'), read });
+
+    const first = await upload(primaryA, false);
+    expect(first).toMatchObject({ status: 'archived' });
+    expect(first.duplicate).toBeUndefined();
+    // Asked again with reading: the archived copy is read in place, no second row.
+    const reading = await upload(primaryA, true);
+    expect(reading).toMatchObject({ id: first.id, kind: 'lab', status: 'processing' });
+    const again = await upload(primaryA, true);
+    expect(again).toMatchObject({ id: first.id, duplicate: true });
+    // Another profile is another person: the same file is a new document there.
+    const dependent = await upload(dependentId, false);
+    expect(dependent.id).not.toBe(first.id);
+
+    const rows = (await adminPool.query(`SELECT count(*)::int AS n FROM care_documents WHERE profile_id = $1 AND file_hmac IS NOT NULL AND id = $2`, [primaryA, first.id])).rows[0];
+    expect(rows.n).toBe(1);
+  });
+
   it('check constraints reject unknown kinds even without the API', async (ctx) => {
     if (!isDbAvailable) return ctx.skip();
     await expect(

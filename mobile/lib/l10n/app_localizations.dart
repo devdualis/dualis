@@ -5950,6 +5950,36 @@ abstract class AppLocalizations {
   /// **'Não conseguimos ler este arquivo. Você pode digitar os valores ou tentar outra foto, com boa luz e o papel inteiro.'**
   String get careExamFailedHint;
 
+  /// No description provided for @careExamDuplicateFile.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este arquivo já foi enviado. Abrimos o que você já tem.'**
+  String get careExamDuplicateFile;
+
+  /// No description provided for @careExamPossibleDuplicate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parece o mesmo exame que você já tem em outro documento.'**
+  String get careExamPossibleDuplicate;
+
+  /// No description provided for @careExamDuplicateSeeOther.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver o outro'**
+  String get careExamDuplicateSeeOther;
+
+  /// No description provided for @careExamDuplicateDiscard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Descartar este'**
+  String get careExamDuplicateDiscard;
+
+  /// No description provided for @careExamDuplicateKeep.
+  ///
+  /// In pt, this message translates to:
+  /// **'Manter os dois'**
+  String get careExamDuplicateKeep;
+
   /// No description provided for @careReadAgain.
   ///
   /// In pt, this message translates to:

@@ -162,6 +162,13 @@
       "when": 1790275174097,
       "tag": "0021_premium_care",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1790275174098,
+      "tag": "0022_care_document_fingerprint",
+      "breakpoints": true
     }
   ]
 }
