@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-10-30 - Completed quick task 261030-lw3: Shorten document-reading consent dialog copy in pt/es/en
+Last activity: 2026-10-30 - Quick task 261030-lrh: appointment place picked on an in-app map
 
 Progress: [██████████] 100%
 
@@ -125,6 +125,7 @@ None yet.
 | 261029-0w1 | Infra cost controls: Cloud Run max 2 instances, Artifact Registry cleanup, daily DB backup to GCS | 2026-10-29 | 0ca2151 | [261029-0w1-infra-cost-controls-cloud-run-max-instan](./quick/261029-0w1-infra-cost-controls-cloud-run-max-instan/) |
 | 261030-lmi | Separate prescriptions from exams in Meus cuidados | 2026-10-30 | fd7bbf6 | [261030-lmi-separate-prescriptions-from-exams-in-meu](./quick/261030-lmi-separate-prescriptions-from-exams-in-meu/) |
 | 261030-lrh | Consulta: especialidade em linha própria com lista pesquisável (sem acento, aceita texto livre); local com botão que abre o Google Maps, e o local no cartão abre o Maps | 2026-10-30 | 21065ee | [261030-lrh-consulta-especialidade-com-busca-e-local](./quick/261030-lrh-consulta-especialidade-com-busca-e-local/) |
+| 261030-lrh (2) | Consulta: escolher o local num mapa dentro do app (pino no centro, toque/busca, endereço pelo geocoder do telefone, só com zoom de rua); salva placeLat/placeLng e o cartão abre o ponto exato no Google Maps. Chaves Maps SDK fora do git | 2026-10-30 | 52aaf19 | [261030-lrh-consulta-especialidade-com-busca-e-local](./quick/261030-lrh-consulta-especialidade-com-busca-e-local/) |
 | 261030-lw3 | Shorten document-reading consent dialog copy in pt/es/en | 2026-10-30 | a7eb1a6 | [261030-lw3-shorten-document-reading-consent-dialog-](./quick/261030-lw3-shorten-document-reading-consent-dialog-/) |
 
 ## Deferred Items
