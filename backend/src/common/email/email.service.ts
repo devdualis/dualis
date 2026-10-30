@@ -15,11 +15,7 @@ export class EmailService {
 
   constructor(@Optional() private readonly configService?: ConfigService) {
     this.apiKey = this.configService?.get<string>('RESEND_API_KEY') || process.env.RESEND_API_KEY;
-    // The sender domain must be verified in Resend.
-    this.mailFrom =
-      this.configService?.get<string>('MAIL_FROM') ||
-      process.env.MAIL_FROM ||
-      'DualisCheckUp <nao-responda@dualischeckup.com>';
+    this.mailFrom = 'Dualis CheckUp <nao-responda@dualischeckup.com>';
 
     if (this.apiKey) {
       this.logger.log('[EmailService] Envio de e-mails via Resend');
@@ -86,15 +82,15 @@ export class EmailService {
       title: 'Confirme seu e-mail',
       firstName,
       intro:
-        'Obrigado por criar sua conta no <strong>DualisCheckUp</strong>. Para confirmar que este endereço de e-mail é seu e ativar sua conta com segurança, use o código abaixo:',
+        'Obrigado por criar sua conta no <strong>Dualis CheckUp</strong>. Para confirmar que este endereço de e-mail é seu e ativar sua conta com segurança, use o código abaixo:',
       code,
       ignoreNote: 'Se você não solicitou este cadastro, ignore esta mensagem com segurança.',
     });
 
     await this.deliver(
       normalizedEmail,
-      `${code} é seu código de verificação DualisCheckUp`,
-      `Olá${firstName ? ` ${firstName}` : ''}, seu código de verificação do DualisCheckUp é: ${code}. Ele expira em 15 minutos.`,
+      `${code} é seu código de verificação Dualis CheckUp`,
+      `Olá${firstName ? ` ${firstName}` : ''}, seu código de verificação do Dualis CheckUp é: ${code}. Ele expira em 15 minutos.`,
       htmlContent,
     );
   }

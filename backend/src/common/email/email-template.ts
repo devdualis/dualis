@@ -83,10 +83,10 @@ export function renderCodeEmail(email: CodeEmailContent): string {
   </table>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
     <tr><td align="center" style="padding:20px 24px 0;font-family:${FONT};font-size:12px;line-height:18px;color:#94A3B8;">
-      Mensagem automática do DualisCheckUp, seu diário de <span style="white-space:nowrap;">bem-estar</span>.<br>
+      Mensagem automática do Dualis CheckUp, seu diário de <span style="white-space:nowrap;">bem-estar</span>.<br>
       Não responda a este e-mail.<br>
       Dúvidas: <a href="mailto:contato@dualischeckup.com" style="color:#64748B;text-decoration:underline;">contato@dualischeckup.com</a><br>
-      &copy; ${year} DualisCheckUp · Em conformidade com a LGPD (Lei nº 13.709/2018)
+      &copy; ${year} Dualis CheckUp · Em conformidade com a LGPD (Lei nº 13.709/2018)
     </td></tr>
   </table>
 </td></tr>
