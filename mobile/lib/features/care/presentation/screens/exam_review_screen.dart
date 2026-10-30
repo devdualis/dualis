@@ -208,6 +208,10 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
     });
   }
 
+  /// Rows [a] and [b] are results of the same item in the same exam.
+  static bool _sameItem(List<ExamValue> rows, int a, int b) =>
+      b >= 0 && b < rows.length && rows[a].section == rows[b].section && rows[a].item.toLowerCase() == rows[b].item.toLowerCase();
+
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context);
     setState(() => _busy = true);
@@ -297,12 +301,35 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                               child: Text(rows[i].section!, key: Key('exam_section_$i'), style: careTitle(12).copyWith(color: AppColors.dualisNavy)),
                             ),
                           ),
+                        if (_sameItem(rows, i, i + 1) && !_sameItem(rows, i, i - 1))
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Align(alignment: Alignment.centerLeft, child: Text(rows[i].item, key: Key('exam_item_$i'), style: careTitle(13))),
+                          ),
                         InkWell(
                           onTap: canEdit ? () => _editRow(i) : null,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             child: Row(children: [
-                              Expanded(flex: 4, child: Text(rows[i].item, style: careTitle(13))),
+                              Expanded(
+                                flex: 4,
+                                // Several results of one item (e.g. % and /mm³) share the name above;
+                                // each line can be removed to keep only the one the person wants.
+                                child: _sameItem(rows, i, i - 1) || _sameItem(rows, i, i + 1)
+                                    ? Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: canEdit
+                                            ? IconButton(
+                                                key: Key('row_remove_$i'),
+                                                tooltip: l10n.careExamRowRemove,
+                                                visualDensity: VisualDensity.compact,
+                                                icon: Icon(Icons.close, size: 16, color: CareColors.slate.withValues(alpha: 0.55)),
+                                                onPressed: () => setState(() => rows.removeAt(i)),
+                                              )
+                                            : const SizedBox.shrink(),
+                                      )
+                                    : Text(rows[i].item, style: careTitle(13)),
+                              ),
                               Expanded(flex: 3, child: Text([rows[i].value, rows[i].unit].whereType<String>().join(' '), style: careBody(13).copyWith(color: AppColors.textPrimaryLight))),
                               Expanded(flex: 3, child: Text(rows[i].reference ?? '—', style: careBody(12))),
                               SizedBox(

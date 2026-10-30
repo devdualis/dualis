@@ -7,6 +7,7 @@ import 'package:dualis_mobile/features/care/domain/care_models.dart';
 import 'package:dualis_mobile/features/care/domain/pni_calendar.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/allergies_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/care_hub_screen.dart';
+import 'package:dualis_mobile/features/care/presentation/screens/exam_item_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/exam_review_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/exams_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/medications_screen.dart';
@@ -266,12 +267,76 @@ void main() {
     expect(find.byKey(const Key('exam_section_0')), findsOneWidget);
     expect(find.byKey(const Key('exam_section_1')), findsNothing);
     expect(find.byKey(const Key('exam_section_2')), findsOneWidget);
+    // % and /mm³ of one item: the name once, a remove button per result.
+    expect(find.text('SEGMENTADOS'), findsOneWidget);
+    expect(find.byKey(const Key('row_remove_0')), findsOneWidget);
+    expect(find.byKey(const Key('row_remove_1')), findsOneWidget);
+    expect(find.byKey(const Key('row_remove_2')), findsNothing);
 
     await tester.ensureVisible(find.byKey(const Key('exam_save')));
     await tester.tap(find.byKey(const Key('exam_save')));
     await tester.pumpAndSettle();
     final values = api.reviews.single['values'] as List;
     expect(values.map((v) => v['section']), ['HEMOGRAMA COMPLETO', 'HEMOGRAMA COMPLETO', 'FERRITINA']);
+  });
+
+  testWidgets('removing one of two results keeps only the chosen one', (tester) async {
+    final api = FakeCareApi();
+    api.docs.add(CareDocument(
+      id: 'd1',
+      kind: DocumentKind.lab,
+      mime: 'application/pdf',
+      status: DocumentStatus.review,
+      createdAt: DateTime(2026, 10, 28),
+      data: {
+        'values': [
+          {'section': 'HEMOGRAMA COMPLETO', 'item': 'SEGMENTADOS', 'value': '38', 'unit': '%', 'confirmed': true},
+          {'section': 'HEMOGRAMA COMPLETO', 'item': 'SEGMENTADOS', 'value': '1.938', 'unit': '/mm³', 'confirmed': true},
+        ],
+      },
+    ));
+    await pump(tester, const ExamReviewScreen(documentId: 'd1'), api: api);
+    await tester.tap(find.byKey(const Key('row_remove_1')));
+    await tester.pumpAndSettle();
+    // A single result goes back to a plain row with the item name.
+    expect(find.byKey(const Key('row_remove_0')), findsNothing);
+    expect(find.text('SEGMENTADOS'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('exam_save')));
+    await tester.pumpAndSettle();
+    final values = api.reviews.single['values'] as List;
+    expect(values.map((v) => v['value']), ['38']);
+  });
+
+  testWidgets('item history lists one unit at a time', (tester) async {
+    final api = FakeCareApi();
+    for (final (id, day, pct, abs) in [('d1', '2026-05-21', '38', '1.938'), ('d2', '2026-01-10', '52', '2.700')]) {
+      api.docs.add(CareDocument(
+        id: id,
+        kind: DocumentKind.lab,
+        mime: 'application/pdf',
+        status: DocumentStatus.ready,
+        createdAt: DateTime(2026, 10, 28),
+        data: {
+          'collectedOn': day,
+          'values': [
+            {'item': 'SEGMENTADOS', 'value': pct, 'unit': '%', 'confirmed': true},
+            {'item': 'SEGMENTADOS', 'value': abs, 'unit': id == 'd1' ? '/mm³' : '/mm 3', 'confirmed': true},
+          ],
+        },
+      ));
+    }
+    await pump(tester, const ExamItemScreen(item: 'SEGMENTADOS'), api: api);
+    expect(find.byType(ChoiceChip), findsNWidgets(2));
+    expect(find.text('38 %'), findsOneWidget);
+    expect(find.text('52 %'), findsOneWidget);
+    expect(find.textContaining('1.938'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('exam_unit_/mm3')));
+    await tester.pumpAndSettle();
+    expect(find.text('1.938 /mm³'), findsOneWidget);
+    expect(find.text('2.700 /mm 3'), findsOneWidget);
+    expect(find.text('38 %'), findsNothing);
   });
 
   testWidgets('a failed exam can be read again; a confirmed one cannot', (tester) async {
