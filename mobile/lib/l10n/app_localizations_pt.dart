@@ -3592,7 +3592,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get careReadConsentBody =>
-      'Para ler a foto ou o PDF, o arquivo é enviado ao Google Cloud Vision, que extrai o texto em servidores nos Estados Unidos ou na União Europeia. Depois, a Gemini (região São Paulo) organiza esse texto, sem seu nome nem CPF. O Google não usa esses dados para treinar modelos.\n\nIsso é uma transferência internacional de dados de saúde (LGPD Art. 33; RGPD Art. 46). Você pode recusar e usar \"Só arquivar\" ou digitar os valores. Pode retirar este consentimento na Central de Privacidade.';
+      'A foto ou o PDF vai para o Google Cloud Vision, que lê o texto nos EUA ou na UE (transferência internacional de dados de saúde). A Gemini, em São Paulo, organiza o texto sem seu nome nem CPF. O Google não treina modelos com isso.\n\nSe preferir, use \"Só arquivar\" ou digite os valores. Você pode retirar o consentimento na Central de Privacidade.';
 
   @override
   String get careReadConsentAccept => 'Concordo';

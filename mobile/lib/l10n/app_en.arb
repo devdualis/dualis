@@ -1058,7 +1058,7 @@
   "careExamSaved": "Values saved.",
   "careExamItemIntro": "Values you checked, newest first. The reference is the one each lab printed.",
   "careReadConsentTitle": "Read documents with Google",
-  "careReadConsentBody": "To read the photo or PDF, the file is sent to Google Cloud Vision, which extracts the text on servers in the United States or the European Union. Gemini (São Paulo region) then organizes that text, without your name or CPF. Google does not use this data to train models.\n\nThis is an international transfer of health data (LGPD Art. 33; GDPR Art. 46). You can decline and use \"Just store it\" or type the values. You can withdraw this consent in the Privacy Center.",
+  "careReadConsentBody": "The photo or PDF goes to Google Cloud Vision, which reads the text in the US or EU (an international transfer of health data). Gemini, in São Paulo, organizes the text without your name or CPF. Google does not train models on it.\n\nIf you prefer, use \"Just store it\" or type the values. You can withdraw consent in the Privacy Center.",
   "careReadConsentAccept": "I agree",
   "careReadConsentDecline": "Not now",
   "careRxTitle": "Check prescription",
