@@ -3397,6 +3397,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get careExamSectionPrescriptions => 'Recetas';
 
   @override
+  String get careRxListAdd => 'Agregar receta';
+
+  @override
+  String get careRxListEmpty => 'Ninguna receta guardada.';
+
+  @override
+  String get careRxListNote =>
+      'Dualis copia lo que está escrito en la receta. Confirme siempre con quien la recetó o con la farmacia.';
+
+  @override
   String get careExamSectionOther => 'Otros archivos';
 
   @override

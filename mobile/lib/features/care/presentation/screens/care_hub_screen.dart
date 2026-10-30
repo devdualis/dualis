@@ -10,7 +10,7 @@ import '../care_routes.dart';
 import '../widgets/care_widgets.dart';
 
 /// "Meus cuidados" tab (premium): entry to vaccines, allergies, medications,
-/// appointments, exams and the PDF summary of the active profile.
+/// prescriptions, appointments, exams and the PDF summary of the active profile.
 class CareHubScreen extends ConsumerStatefulWidget {
   const CareHubScreen({super.key});
 
@@ -33,7 +33,9 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
     final doses = ref.watch(careRecordsProvider(CareKind.vaccineDose)).value;
     final allergies = ref.watch(careRecordsProvider(CareKind.allergy)).value;
     final appts = ref.watch(careRecordsProvider(CareKind.appointment)).value;
-    final docs = ref.watch(careDocumentsProvider).value;
+    final allDocs = ref.watch(careDocumentsProvider).value;
+    final docs = allDocs?.where((d) => d.kind != DocumentKind.prescription).length;
+    final prescriptions = allDocs?.where((d) => d.kind == DocumentKind.prescription).length;
 
     final now = DateTime.now();
     final todaySlots = [for (final m in meds) for (final s in m.slotsOn(now)) (m, s)]..sort((a, b) => a.$2.compareTo(b.$2));
@@ -115,6 +117,14 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
           ),
           const SizedBox(height: 10),
           CareRow(
+            key: const Key('care_hub_prescriptions'),
+            leading: const CareIconTile(Icons.receipt_long_outlined, background: AppColors.softIndigoLight, foreground: AppColors.dualisNavy),
+            title: l10n.careExamSectionPrescriptions,
+            subtitle: prescriptions == null ? null : l10n.careHubDocuments(prescriptions),
+            onTap: () => context.push(CarePaths.prescriptions),
+          ),
+          const SizedBox(height: 10),
+          CareRow(
             key: const Key('care_hub_appointments'),
             leading: const CareIconTile(Icons.event_outlined, background: CareColors.greenBg, foreground: CareColors.green),
             title: l10n.careAppointmentsTitle,
@@ -131,7 +141,7 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
             key: const Key('care_hub_exams'),
             leading: const CareIconTile(Icons.science_outlined, background: CareColors.slateBg, foreground: CareColors.slate),
             title: l10n.careExamsTitle,
-            subtitle: docs == null ? null : l10n.careHubDocuments(docs.length),
+            subtitle: docs == null ? null : l10n.careHubDocuments(docs),
             onTap: () => context.push(CarePaths.exams),
           ),
           const SizedBox(height: 10),

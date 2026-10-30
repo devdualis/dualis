@@ -21,10 +21,13 @@ import '../widgets/exam_values_list.dart';
 const _readingConsentKey = 'care_document_reading_consent_v1';
 const _maxBytes = 10 * 1024 * 1024;
 
-/// Exam and prescription documents. Reading only pre-fills: the person checks
-/// every value (docs/bienestar/PROPUESTA-CLIENTE-BIENESTAR.md §5).
+/// Exam documents, or prescriptions when [prescriptions] is set (own entry in
+/// "Meus cuidados"). Reading only pre-fills: the person checks every value
+/// (docs/bienestar/PROPUESTA-CLIENTE-BIENESTAR.md §5).
 class ExamsScreen extends ConsumerStatefulWidget {
-  const ExamsScreen({super.key});
+  const ExamsScreen({super.key, this.prescriptions = false});
+
+  final bool prescriptions;
 
   @override
   ConsumerState<ExamsScreen> createState() => _ExamsScreenState();
@@ -80,7 +83,7 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
       (ctx) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l10n.careExamAdd, style: careTitle(19)),
+          Text(widget.prescriptions ? l10n.careRxListAdd : l10n.careExamAdd, style: careTitle(19)),
           const SizedBox(height: 12),
           for (final (key, icon, label) in [
             ('camera', Icons.photo_camera_outlined, l10n.careExamFromCamera),
@@ -95,7 +98,7 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
     );
     if (source == null || !mounted) return;
 
-    final kind = await showCareSheet<String>(
+    final kind = widget.prescriptions ? 'prescription' : await showCareSheet<String>(
       context,
       (ctx) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -104,7 +107,6 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
           const SizedBox(height: 12),
           for (final (key, icon, title, sub) in [
             ('lab', Icons.science_outlined, l10n.careExamKindLab, l10n.careExamKindLabHint),
-            ('prescription', Icons.receipt_long_outlined, l10n.careExamKindPrescription, l10n.careExamKindPrescriptionHint),
             ('archive', Icons.inventory_2_outlined, l10n.careExamKindArchive, l10n.careExamKindArchiveHint),
           ]) ...[
             CareRow(key: Key('exam_kind_$key'), leading: CareIconTile(icon), title: title, subtitle: sub, onTap: () => Navigator.pop(ctx, key)),
@@ -199,6 +201,7 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final canEdit = ref.watch(activeProfileControllerProvider).activeProfile?.canEdit ?? true;
+    final rxOnly = widget.prescriptions;
     final async = ref.watch(careDocumentsProvider);
     async.whenData((docs) => WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) _syncPolling(docs);
@@ -206,7 +209,7 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
-      appBar: careAppBar(context, l10n.careExamsTitle),
+      appBar: careAppBar(context, rxOnly ? l10n.careExamSectionPrescriptions : l10n.careExamsTitle),
       floatingActionButton: canEdit
           ? FloatingActionButton.extended(
               key: const Key('exams_add'),
@@ -216,14 +219,16 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
               icon: _uploading
                   ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.add_a_photo_outlined),
-              label: Text(l10n.careExamAdd),
+              label: Text(rxOnly ? l10n.careRxListAdd : l10n.careExamAdd),
             )
           : null,
       body: CareAsync<List<CareDocument>>(
         value: async,
         onRetry: () => ref.invalidate(careDocumentsProvider),
         data: (all) {
-          final docs = all.where((d) => !_removed.contains(d.id)).toList();
+          final docs = all
+              .where((d) => !_removed.contains(d.id) && (d.kind == DocumentKind.prescription) == rxOnly)
+              .toList();
           final processing = docs.where((d) => d.status == DocumentStatus.processing).toList();
           final labs = docs.where((d) => d.kind == DocumentKind.lab && d.status != DocumentStatus.processing).toList();
           final rx = docs.where((d) => d.kind == DocumentKind.prescription && d.status != DocumentStatus.processing).toList();
@@ -246,10 +251,12 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
                 ),
                 const SizedBox(height: 10),
               ],
-              if (docs.isEmpty) CareEmpty(l10n.careExamEmpty, icon: Icons.science_outlined),
+              if (docs.isEmpty)
+                rxOnly
+                    ? CareEmpty(l10n.careRxListEmpty, icon: Icons.receipt_long_outlined)
+                    : CareEmpty(l10n.careExamEmpty, icon: Icons.science_outlined),
               if (labs.isNotEmpty) CareSection(l10n.careExamSectionLabs),
               for (final d in labs) ...[const SizedBox(height: 8), _swipeToDelete(d, canEdit, _DocRow(d, onTap: () => _open(d)))],
-              if (rx.isNotEmpty) CareSection(l10n.careExamSectionPrescriptions),
               for (final d in rx) ...[const SizedBox(height: 8), _swipeToDelete(d, canEdit, _DocRow(d, onTap: () => _open(d)))],
               if (other.isNotEmpty) CareSection(l10n.careExamSectionOther),
               for (final d in other) ...[const SizedBox(height: 8), _swipeToDelete(d, canEdit, _DocRow(d, onTap: () => _open(d)))],
@@ -259,7 +266,7 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
                 ExamValuesList(checked),
               ],
               const SizedBox(height: 14),
-              CareNote(l10n.careExamNote),
+              CareNote(rxOnly ? l10n.careRxListNote : l10n.careExamNote),
             ],
           );
         },

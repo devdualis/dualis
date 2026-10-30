@@ -3381,6 +3381,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get careExamSectionPrescriptions => 'Prescriptions';
 
   @override
+  String get careRxListAdd => 'Add prescription';
+
+  @override
+  String get careRxListEmpty => 'No prescriptions saved.';
+
+  @override
+  String get careRxListNote =>
+      'Dualis copies what is written on the prescription. Always confirm with the prescriber or the pharmacy.';
+
+  @override
   String get careExamSectionOther => 'Other files';
 
   @override

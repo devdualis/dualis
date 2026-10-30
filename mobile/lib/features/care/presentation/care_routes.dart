@@ -24,6 +24,7 @@ abstract final class CarePaths {
   static const exams = '/care/exams';
   static String examReview(String id) => '/care/exams/$id';
   static const examItem = '/care/exams/item';
+  static const prescriptions = '/care/prescriptions';
   static String prescription(String id) => '/care/prescriptions/$id';
 }
 
@@ -48,6 +49,7 @@ final List<RouteBase> careRoutes = [
   GoRoute(path: CarePaths.exams, builder: (_, __) => const ExamsScreen()),
   GoRoute(path: CarePaths.examItem, builder: (_, state) => ExamItemScreen(item: state.extra as String? ?? '')),
   GoRoute(path: '/care/exams/:id', builder: (_, state) => ExamReviewScreen(documentId: state.pathParameters['id']!)),
+  GoRoute(path: CarePaths.prescriptions, builder: (_, __) => const ExamsScreen(prescriptions: true)),
   GoRoute(
     path: '/care/prescriptions/:id',
     builder: (_, state) => PrescriptionReviewScreen(documentId: state.pathParameters['id']!),

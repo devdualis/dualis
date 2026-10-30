@@ -454,6 +454,34 @@ void main() {
     expect(find.byKey(const Key('exam_values_Hematócrito')), findsOneWidget);
   });
 
+  testWidgets('prescriptions have their own list, apart from exams', (tester) async {
+    final api = FakeCareApi();
+    api.docs
+      ..add(CareDocument(id: 'lab1', kind: DocumentKind.lab, mime: 'application/pdf', status: DocumentStatus.ready, createdAt: DateTime(2026, 10, 28), data: const {'title': 'Hemograma'}))
+      ..add(CareDocument(id: 'rx1', kind: DocumentKind.prescription, mime: 'application/pdf', status: DocumentStatus.ready, createdAt: DateTime(2026, 10, 28), data: const {'title': 'Receita Dr. Silva'}));
+
+    await pump(tester, const ExamsScreen(), api: api);
+    expect(find.text('Hemograma'), findsOneWidget);
+    expect(find.text('Receita Dr. Silva'), findsNothing);
+    expect(find.text(pt.careExamSectionPrescriptions), findsNothing);
+
+    await pump(tester, const ExamsScreen(prescriptions: true), api: api);
+    expect(find.text('Receita Dr. Silva'), findsOneWidget);
+    expect(find.text('Hemograma'), findsNothing);
+    expect(find.text(pt.careRxListAdd), findsOneWidget);
+  });
+
+  testWidgets('adding an exam no longer offers the prescription kind', (tester) async {
+    await pump(tester, const ExamsScreen(), api: FakeCareApi());
+    await tester.tap(find.byKey(const Key('exams_add')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('exam_source_pdf')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('exam_kind_lab')), findsOneWidget);
+    expect(find.byKey(const Key('exam_kind_archive')), findsOneWidget);
+    expect(find.byKey(const Key('exam_kind_prescription')), findsNothing);
+  });
+
   testWidgets('a file stuck while being read can be swiped away', (tester) async {
     final api = FakeCareApi();
     api.docs.add(CareDocument(id: 'd1', kind: DocumentKind.lab, mime: 'application/pdf', status: DocumentStatus.processing, createdAt: DateTime(2026, 10, 28), data: const {}));

@@ -5872,6 +5872,24 @@ abstract class AppLocalizations {
   /// **'Receitas'**
   String get careExamSectionPrescriptions;
 
+  /// No description provided for @careRxListAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar receita'**
+  String get careRxListAdd;
+
+  /// No description provided for @careRxListEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma receita guardada.'**
+  String get careRxListEmpty;
+
+  /// No description provided for @careRxListNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'O Dualis copia o que está escrito na receita. Confirme sempre com quem receitou ou com a farmácia.'**
+  String get careRxListNote;
+
   /// No description provided for @careExamSectionOther.
   ///
   /// In pt, this message translates to:
