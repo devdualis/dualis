@@ -245,6 +245,35 @@ void main() {
     expect(values.first, {'item': 'LDL', 'value': '138', 'unit': 'mg/dL', 'reference': 'até 130', 'confirmed': true});
   });
 
+  testWidgets('a report with several exams shows each heading once and keeps it on save', (tester) async {
+    final api = FakeCareApi();
+    api.docs.add(CareDocument(
+      id: 'd1',
+      kind: DocumentKind.lab,
+      mime: 'application/pdf',
+      status: DocumentStatus.review,
+      createdAt: DateTime(2026, 10, 28),
+      data: {
+        'values': [
+          {'section': 'HEMOGRAMA COMPLETO', 'item': 'SEGMENTADOS', 'value': '38', 'unit': '%', 'confirmed': true},
+          {'section': 'HEMOGRAMA COMPLETO', 'item': 'SEGMENTADOS', 'value': '1.938', 'unit': '/mm³', 'confirmed': true},
+          {'section': 'FERRITINA', 'item': 'FERRITINA', 'value': '447,6', 'unit': 'ng/mL', 'confirmed': true},
+        ],
+      },
+    ));
+    await pump(tester, const ExamReviewScreen(documentId: 'd1'), api: api);
+
+    expect(find.byKey(const Key('exam_section_0')), findsOneWidget);
+    expect(find.byKey(const Key('exam_section_1')), findsNothing);
+    expect(find.byKey(const Key('exam_section_2')), findsOneWidget);
+
+    await tester.ensureVisible(find.byKey(const Key('exam_save')));
+    await tester.tap(find.byKey(const Key('exam_save')));
+    await tester.pumpAndSettle();
+    final values = api.reviews.single['values'] as List;
+    expect(values.map((v) => v['section']), ['HEMOGRAMA COMPLETO', 'HEMOGRAMA COMPLETO', 'FERRITINA']);
+  });
+
   testWidgets('a failed exam can be read again; a confirmed one cannot', (tester) async {
     final api = FakeCareApi();
     api.docs.add(CareDocument(id: 'd1', kind: DocumentKind.lab, mime: 'application/pdf', status: DocumentStatus.failed, createdAt: DateTime(2026, 10, 28), data: const {}));

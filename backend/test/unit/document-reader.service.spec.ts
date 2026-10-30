@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { DocumentReaderService, redactIdentifiers, sanitizeReading } from '../../src/modules/care/document-reader.service';
+import { DocumentReaderService, layoutText, redactIdentifiers, sanitizeReading } from '../../src/modules/care/document-reader.service';
 
 const config = (key?: string) => ({ get: (k: string) => (k === 'GOOGLE_VISION_API_KEY' ? key : undefined) }) as any;
 
@@ -26,11 +26,65 @@ describe('DocumentReaderService', () => {
     expect(lab).toEqual({
       title: 'Perfil lipídico',
       labName: undefined,
-      collectedOn: undefined,
+      collectedOn: '2026-10-15',
       values: [{ item: 'LDL', value: '138', unit: 'mg/dL', reference: 'até 130' }],
     });
     const rx = sanitizeReading('prescription', { medications: [{ name: 'Losartana', instructions: '1 comp. de 12/12h', times: ['08:00', '20:00'] }] });
     expect(rx).toEqual({ medications: [{ name: 'Losartana', strength: undefined, instructions: '1 comp. de 12/12h' }] });
+  });
+
+  it('drops columns that hold identifying labels, such as "Nasc." and "Liberado por"', () => {
+    const text = [
+      'Paciente : ANA SOUZA | Protocolo | 0006606',
+      'Nasc. | : 14/01/1985 | Idade | : 41 Anos',
+      'HEMOGRAMA COMPLETO | Data Coleta: 21/05/2026 às 08:59:20',
+      'Cadastro | : 21/05/2026 | Médico(a) : Dr. Silva',
+      'Liberado por : | CRBM - 6 : | 0530 Dr. Jefferson',
+    ].join('\n');
+    expect(redactIdentifiers(text)).toBe('HEMOGRAMA COMPLETO | Data Coleta: 21/05/2026 às 08:59:20');
+  });
+
+  it('keeps the section, reads Brazilian dates and drops rows whose item is a number', () => {
+    const lab = sanitizeReading('lab', {
+      collectedOn: '31/02/2026',
+      values: [
+        { section: 'HEMOGRAMA COMPLETO', item: 'SEGMENTADOS', value: '38', unit: '%', printedReference: '40 a 75 %' },
+        { section: 'HEMOGRAMA COMPLETO', item: 'SEGMENTADOS', value: '1.938', unit: '/mm³', printedReference: '1.440 a 9.000 /mm³' },
+        { item: '1.938', value: '/mm³' },
+      ],
+    });
+    expect(lab.collectedOn).toBeUndefined();
+    expect(lab.values).toEqual([
+      { section: 'HEMOGRAMA COMPLETO', item: 'SEGMENTADOS', value: '38', unit: '%', reference: '40 a 75 %' },
+      { section: 'HEMOGRAMA COMPLETO', item: 'SEGMENTADOS', value: '1.938', unit: '/mm³', reference: '1.440 a 9.000 /mm³' },
+    ]);
+  });
+
+  it('rebuilds table rows from Vision word boxes, also on a tilted photo', () => {
+    // Columns arrive as separate blocks, as Vision returns them.
+    const row = (y: number) => [['SEGMENTADOS:', 40], ['38', 200], ['%', 225], ['1.938', 300], ['/mm³', 345], ['40', 420], ['a', 440], ['75', 455], ['%', 475]]
+      .map(([text, x]) => ({ text: text as string, x: x as number, y }));
+    const words = [...row(100), ...[['EOSINÓFILOS:', 40], ['3', 200], ['%', 215]].map(([text, x]) => ({ text: text as string, x: x as number, y: 120 }))];
+    const page = (tilt: number) => ({
+      width: 600,
+      height: 800,
+      blocks: [...new Set(words.map((w) => w.x))].map((x) => ({
+        paragraphs: [{
+          words: words.filter((w) => w.x === x).map((w) => {
+            const len = w.text.length * 7;
+            const pts = [[w.x, w.y], [w.x + len, w.y], [w.x + len, w.y + 10], [w.x, w.y + 10]].map(([px, py]) => ({ x: px, y: py + px * tilt }));
+            return {
+              boundingBox: { normalizedVertices: pts.map((p) => ({ x: p.x / 600, y: p.y / 800 })) },
+              symbols: [...w.text].map((c, i) => ({ text: c, ...(i === w.text.length - 1 && { property: { detectedBreak: { type: 'SPACE' } } }) })),
+            };
+          }),
+        }],
+      })),
+    });
+    const expected = 'SEGMENTADOS: | 38 % | 1.938 /mm³ | 40 a 75 %\nEOSINÓFILOS: | 3 %';
+    expect(layoutText(page(0))).toBe(expected);
+    expect(layoutText(page(0.05))).toBe(expected);
+    expect(layoutText(undefined)).toBe('');
   });
 
   it('calls Vision DOCUMENT_TEXT_DETECTION: images:annotate for photos, files:annotate (5 pages) for PDFs', async () => {

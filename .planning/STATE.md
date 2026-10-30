@@ -94,6 +94,7 @@ None yet.
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
+| 261030-drj | Leitura de exames: linhas da tabela pelas caixas do Vision (% e /mm³ em linhas próprias), seção por exame, data da coleta dd/mm/aaaa, laboratório pelo logo, sem data de nascimento nem nomes de médicos no texto enviado ao Gemini | 2026-10-30 | (this commit) | [261030-drj-fix-lab-exam-reading-layout-sections](./quick/261030-drj-fix-lab-exam-reading-layout-sections/) |
 | 261029-gx2 | Gráficos consolidados v2.0: Emoções (E1–E3), Corpo (F1–F3), Água (H1–H4) e calendário Juntos (C1) no histórico; aba Água com H2/H3 e Desfazer | 2026-10-29 | d76bdbb | [261029-gx2-graficos-consolidados-v2](./quick/261029-gx2-graficos-consolidados-v2/) |
 | 261028-jv21 | Journal v2.1 mobile flow: Bem/Não tão bem with icons, axis from Home card, conditions on body screen, area + sensation fields, side-aware body tree, Home marks only the entry axis | 2026-10-28 | (this commit) | [261028-jv21-fluxo-registro-mobile](./quick/261028-jv21-fluxo-registro-mobile/) |
 | 261028-hc1 | Histórico em abas Psicoemocional/Físico (7/30/90 dias, mapa, conexões, linha do tempo) e menu sem Meu Dia | 2026-10-28 | 25a0ec2 | [261028-hc1-historico-duas-abas-e-menu](./quick/261028-hc1-historico-duas-abas-e-menu/) |

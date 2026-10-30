@@ -145,6 +145,8 @@ export class UploadDocumentDto {
 }
 
 export class ExamValueDto {
+  /** Heading of the exam the row belongs to, as printed (a document can hold several exams). */
+  @IsOptional() @IsString() @MaxLength(120) section?: string;
   @IsString() @MinLength(1) @MaxLength(120) item!: string;
   /** Kept as printed (e.g. "1.250", "< 5", "Negativo"). */
   @IsString() @MinLength(1) @MaxLength(60) value!: string;

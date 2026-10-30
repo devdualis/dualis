@@ -178,6 +178,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
               Navigator.pop(
                 ctx,
                 ExamValue(
+                  section: row.section,
                   item: item.text.trim(),
                   value: value.text.trim(),
                   unit: unit.text.trim().isEmpty ? null : unit.text.trim(),
@@ -287,7 +288,15 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                       ]),
                       const Divider(),
                       if (rows.isEmpty) Padding(padding: const EdgeInsets.all(12), child: Text(l10n.careExamNoRows, style: careBody())),
-                      for (var i = 0; i < rows.length; i++)
+                      for (var i = 0; i < rows.length; i++) ...[
+                        if (rows[i].section != null && (i == 0 || rows[i].section != rows[i - 1].section))
+                          Padding(
+                            padding: const EdgeInsets.only(top: 12, bottom: 2),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(rows[i].section!, key: Key('exam_section_$i'), style: careTitle(12).copyWith(color: AppColors.dualisNavy)),
+                            ),
+                          ),
                         InkWell(
                           onTap: canEdit ? () => _editRow(i) : null,
                           child: Padding(
@@ -308,6 +317,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                             ]),
                           ),
                         ),
+                      ],
                       if (canEdit)
                         TextButton.icon(onPressed: () => _editRow(null), icon: const Icon(Icons.add), label: Text(l10n.careExamAddRow)),
                     ],

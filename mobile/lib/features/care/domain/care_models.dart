@@ -151,15 +151,18 @@ class CareDocument {
 
 /// One transcribed row: kept exactly as printed by the lab.
 class ExamValue {
+  /// Heading of the exam the row belongs to, as printed (a document can hold several exams).
+  final String? section;
   final String item;
   final String value;
   final String? unit;
   final String? reference;
   final bool confirmed;
 
-  const ExamValue({required this.item, required this.value, this.unit, this.reference, this.confirmed = false});
+  const ExamValue({this.section, required this.item, required this.value, this.unit, this.reference, this.confirmed = false});
 
   factory ExamValue.fromJson(Map<String, dynamic> json) => ExamValue(
+        section: json['section'] as String?,
         item: json['item'] as String? ?? '',
         value: json['value'] as String? ?? '',
         unit: json['unit'] as String?,
@@ -168,6 +171,7 @@ class ExamValue {
       );
 
   ExamValue copyWith({String? item, String? value, String? unit, String? reference, bool? confirmed}) => ExamValue(
+        section: section,
         item: item ?? this.item,
         value: value ?? this.value,
         unit: unit ?? this.unit,
@@ -176,6 +180,7 @@ class ExamValue {
       );
 
   Map<String, dynamic> toJson() => {
+        if (section != null && section!.isNotEmpty) 'section': section,
         'item': item,
         'value': value,
         if (unit != null && unit!.isNotEmpty) 'unit': unit,

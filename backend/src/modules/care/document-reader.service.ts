@@ -11,15 +11,19 @@ const VISION_TIMEOUT_MS = 45_000;
 const LAB_SCHEMA = {
   type: 'object',
   properties: {
-    title: { type: 'string', description: 'Exam name as printed, e.g. "Hemograma completo".' },
-    labName: { type: 'string', description: 'Laboratory name as printed.' },
-    collectedOn: { type: 'string', description: 'Collection date as YYYY-MM-DD, only if printed.' },
+    title: {
+      type: 'string',
+      description: 'Exam name as printed, e.g. "Hemograma completo". If the document has several exams, their names joined with ", ".',
+    },
+    labName: { type: 'string', description: 'Laboratory name as printed, often in the logo, header or footer (e.g. "Vita Gene").' },
+    collectedOn: { type: 'string', description: 'Collection date ("Data Coleta", "Coleta", "Data da coleta") as YYYY-MM-DD, only if printed.' },
     values: {
       type: 'array',
       items: {
         type: 'object',
         properties: {
-          item: { type: 'string', description: 'Analyte name exactly as printed.' },
+          section: { type: 'string', description: 'Heading of the exam this row belongs to, as printed (e.g. "HEMOGRAMA COMPLETO", "FERRITINA").' },
+          item: { type: 'string', description: 'Analyte name exactly as printed. Never a number.' },
           value: { type: 'string', description: 'Result exactly as printed, same digits and decimal separator.' },
           unit: { type: 'string', description: 'Unit as printed.' },
           printedReference: {
@@ -56,24 +60,39 @@ const PRESCRIPTION_SCHEMA = {
 const SYSTEM_INSTRUCTION = [
   'You copy text from a document into JSON. You are a transcriber, not a health professional.',
   'Copy names, values, units and reference ranges exactly as printed. Never convert units, round, fix or complete values.',
-  'OCR text of tables may put each cell on its own line: rebuild each row (item, value, unit, reference) from the column order.',
+  'Each line of the OCR text is one printed line; " | " separates columns.',
+  'When one row prints two results (for example "38 %" and "1.938 /mm³") with two references, return two entries with the same item name, each with its own value, unit and reference.',
+  'A document can hold several exams, each under its own heading: set "section" to the heading of every row. Results printed as "Resultado" take the heading as item name.',
   'Always copy the reference text printed for an item (for example "Desejável: inferior a 190"); copying it is not a judgment.',
   'Never judge, compare, flag or explain anything. Do not say whether a value is high, low, normal or altered.',
   'For prescriptions, copy the instructions as written. Never turn them into times, doses or schedules.',
   'If something is not printed or is unreadable, leave it out. Return only the JSON schema fields.',
 ].join('\n');
 
-/** Identifying lines (person, doctor, documents) are removed before the text reaches Gemini. */
-const IDENTIFYING_LINE = /^\s*(paciente|nome|name|nombre|cliente|cpf|rg|cns|cart[aã]o sus|m[eé]dic[oa]|doctor|dr\.?|dra\.?|crm|endere[cç]o|address|direcci[oó]n|telefone|phone|tel[eé]fono|data de nascimento|nascimento|birth|fecha de nacimiento)\b.*$/gim;
+/**
+ * Identifying lines (person, doctor, documents) are removed before the text reaches
+ * Gemini. A line goes when any of its columns (" | ") starts with one of these labels.
+ */
+const IDENTIFYING_LABEL = /^\s*(paciente|nome|name|nombre|cliente|cpf|rg|cns|cart[aã]o sus|m[eé]dic[oa]|doctor|dr\.?|dra\.?|crm|crbm|crf|liberado por|assinado|respons[aá]vel|endere[cç]o|address|direcci[oó]n|telefone|phone|tel[eé]fono|data de nascimento|nascimento|nasc|birth|fecha de nacimiento)\b/i;
 const CPF = /\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/g;
 
 export function redactIdentifiers(text: string): string {
-  return text.replace(IDENTIFYING_LINE, '').replace(CPF, '').replace(/\n{3,}/g, '\n\n').trim();
+  return text
+    .split('\n')
+    .filter((line) => !line.split(' | ').some((cell) => IDENTIFYING_LABEL.test(cell)))
+    .join('\n')
+    .replace(CPF, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 /** Keeps only schema fields with non-empty strings (drops anything the model adds). */
 export function sanitizeReading(kind: 'lab' | 'prescription', raw: any): DocumentReading {
-  const str = (v: unknown, max: number) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : undefined);
+  // " | " is the column separator of the OCR layout, never part of a printed value.
+  const str = (v: unknown, max: number) => {
+    const text = typeof v === 'string' ? v.replace(/\s*\|\s*/g, ' ').trim() : '';
+    return text ? text.slice(0, max) : undefined;
+  };
   if (kind === 'prescription') {
     const medications = (Array.isArray(raw?.medications) ? raw.medications : [])
       .map((m: any) => ({ name: str(m?.name, 120), strength: str(m?.strength, 40), instructions: str(m?.instructions, 300) }))
@@ -81,17 +100,111 @@ export function sanitizeReading(kind: 'lab' | 'prescription', raw: any): Documen
       .slice(0, 20);
     return { medications };
   }
-  const collectedOn = str(raw?.collectedOn, 10);
+  const collectedOn = isoDate(str(raw?.collectedOn, 20));
   const values = (Array.isArray(raw?.values) ? raw.values : [])
-    .map((v: any) => ({ item: str(v?.item, 120), value: str(v?.value, 60), unit: str(v?.unit, 30), reference: str(v?.printedReference ?? v?.reference, 200) }))
-    .filter((v: any) => v.item && v.value)
+    .map((v: any) => ({
+      ...(str(v?.section, 120) && { section: str(v?.section, 120) }),
+      item: str(v?.item, 120),
+      value: str(v?.value, 60),
+      unit: str(v?.unit, 30),
+      reference: str(v?.printedReference ?? v?.reference, 200),
+    }))
+    .filter((v: any) => v.item && v.value && !/^[\d.,\s]+$/.test(v.item))
     .slice(0, 200);
   return {
-    title: str(raw?.title, 120),
+    title: shortTitle(str(raw?.title, 400)),
     labName: str(raw?.labName, 120),
-    collectedOn: collectedOn && /^\d{4}-\d{2}-\d{2}$/.test(collectedOn) ? collectedOn : undefined,
+    collectedOn,
     values,
   };
+}
+
+/** Long lists of exam names are cut at the last comma that fits in 120 characters. */
+function shortTitle(title: string | undefined): string | undefined {
+  if (!title || title.length <= 120) return title;
+  const cut = title.slice(0, 120);
+  return cut.lastIndexOf(', ') > 0 ? cut.slice(0, cut.lastIndexOf(', ')) : cut;
+}
+
+/** YYYY-MM-DD from "2026-05-21" or the Brazilian "21/05/2026"; anything else is dropped. */
+function isoDate(text: string | undefined): string | undefined {
+  if (!text) return undefined;
+  const br = /^(\d{2})\/(\d{2})\/(\d{4})/.exec(text);
+  const iso = br ? `${br[3]}-${br[2]}-${br[1]}` : text.slice(0, 10);
+  const d = new Date(`${iso}T00:00:00Z`);
+  return /^\d{4}-\d{2}-\d{2}$/.test(iso) && !isNaN(d.getTime()) && d.toISOString().startsWith(iso) ? iso : undefined;
+}
+
+interface Word { text: string; space: boolean; x0: number; x1: number; y0: number; y1: number }
+
+/**
+ * Rebuilds printed lines from Vision word boxes. The plain `text` field lists table
+ * columns as separate blocks, which scrambles result rows; here words are grouped by
+ * their vertical centre (after undoing the page tilt of photos), sorted left to
+ * right, and wide gaps become " | ". Returns '' when the page has no layout.
+ */
+export function layoutText(page: any): string {
+  const width = page?.width || 1;
+  const height = page?.height || 1;
+  const boxes: { text: string; space: boolean; pts: { x: number; y: number }[] }[] = [];
+  for (const block of page?.blocks ?? []) {
+    for (const para of block?.paragraphs ?? []) {
+      for (const word of para?.words ?? []) {
+        const text = (word?.symbols ?? []).map((s: any) => s?.text ?? '').join('');
+        const norm = word?.boundingBox?.normalizedVertices;
+        const pts = norm?.length === 4
+          ? norm.map((v: any) => ({ x: (v.x ?? 0) * width, y: (v.y ?? 0) * height }))
+          : (word?.boundingBox?.vertices ?? []).map((v: any) => ({ x: v.x ?? 0, y: v.y ?? 0 }));
+        if (!text || pts.length !== 4) continue;
+        boxes.push({ text, space: !!word.symbols.at(-1)?.property?.detectedBreak, pts });
+      }
+    }
+  }
+  if (!boxes.length) return '';
+
+  // Undo the tilt with the median angle of the words' top edges.
+  const angles = boxes.map(({ pts }) => Math.atan2(pts[1].y - pts[0].y, pts[1].x - pts[0].x)).sort((a, b) => a - b);
+  const angle = angles[Math.floor(angles.length / 2)];
+  const cos = Math.cos(-angle);
+  const sin = Math.sin(-angle);
+  const words: Word[] = boxes.map(({ text, space, pts }) => {
+    const r = pts.map((p) => ({ x: p.x * cos - p.y * sin, y: p.x * sin + p.y * cos }));
+    const xs = r.map((p) => p.x);
+    const ys = r.map((p) => p.y);
+    return { text, space, x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
+  });
+
+  const heights = words.map((w) => w.y1 - w.y0).sort((a, b) => a - b);
+  const h = heights[Math.floor(heights.length / 2)] || 1;
+  const lines: { y: number; words: Word[] }[] = [];
+  for (const w of [...words].sort((a, b) => a.y0 + a.y1 - (b.y0 + b.y1))) {
+    const y = (w.y0 + w.y1) / 2;
+    const line = lines.find((l) => Math.abs(l.y - y) < h * 0.5);
+    if (line) {
+      line.words.push(w);
+      line.y += (y - line.y) / line.words.length;
+    } else {
+      lines.push({ y, words: [w] });
+    }
+  }
+  return lines
+    .sort((a, b) => a.y - b.y)
+    .map(({ words: ws }) => {
+      ws.sort((a, b) => a.x0 - b.x0);
+      return ws
+        .map((w, i) => {
+          if (i === 0) return w.text;
+          const prev = ws[i - 1];
+          const gap = w.x0 - prev.x1;
+          return (gap > h * 2.5 ? ' | ' : prev.space || gap > h * 0.4 ? ' ' : '') + w.text;
+        })
+        .join('');
+    })
+    .join('\n');
+}
+
+function pageText(annotation: any): string {
+  return layoutText(annotation?.pages?.[0]) || annotation?.text || '';
 }
 
 /**
@@ -151,8 +264,8 @@ export class DocumentReaderService {
     const first = json?.responses?.[0];
     if (first?.error) throw new Error(`Vision error ${first.error.code ?? ''}`);
     if (isPdf) {
-      return (first?.responses ?? []).map((p: any) => p?.fullTextAnnotation?.text ?? '').join('\n\n');
+      return (first?.responses ?? []).map((p: any) => pageText(p?.fullTextAnnotation)).join('\n\n');
     }
-    return first?.fullTextAnnotation?.text ?? '';
+    return pageText(first?.fullTextAnnotation);
   }
 }
