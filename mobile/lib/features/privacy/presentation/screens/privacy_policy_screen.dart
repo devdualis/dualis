@@ -156,6 +156,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   l10n.privacyPolicySection3Bullet1,
                   l10n.privacyPolicySection3Bullet2,
                   l10n.privacyPolicySection3Bullet3,
+                  l10n.privacyPolicySection3BulletMap,
                   l10n.privacyPolicySection3Bullet4,
                   l10n.privacyPolicySection3Bullet5,
                   l10n.privacyPolicySection3Bullet6,

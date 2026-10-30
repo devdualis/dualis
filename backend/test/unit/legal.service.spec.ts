@@ -129,7 +129,7 @@ describe('LegalService - SaaS Legal Foundations', () => {
     it.each(langs)('privacy policy describes processors by category, never by provider name (%s)', (lang) => {
       const privacy = service.getPrivacyPolicy(lang);
       const section3 = privacy.sections.find((s) => s.sectionId.startsWith('3-'));
-      expect(section3?.bullets).toHaveLength(6);
+      expect(section3?.bullets).toHaveLength(7);
       const serialized = JSON.stringify(privacy.sections);
       expect(serialized).not.toMatch(/Google|Gemini|Vertex|Vision|Resend|Supabase/);
       expect(serialized).toContain('Art. 18, VII');

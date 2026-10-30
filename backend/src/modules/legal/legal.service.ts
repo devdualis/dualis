@@ -25,7 +25,7 @@ export type SupportedLanguage = 'pt-BR' | 'es' | 'en';
 export const LEGAL_DOCUMENTS_VERSION = '2026.3';
 
 const LEGAL_DOCUMENTS_EFFECTIVE_DATE = '2026-10-16';
-const LEGAL_DOCUMENTS_LAST_UPDATED = '2026-10-28';
+const LEGAL_DOCUMENTS_LAST_UPDATED = '2026-10-30';
 
 /** Canonical intended-use statement (plan §1.1). Must stay identical everywhere. */
 export const INTENDED_USE_STATEMENT: Record<SupportedLanguage, string> = {
@@ -287,7 +287,7 @@ export class LegalService {
             bullets: [
               'Datos de registro: Nombre, correo electrónico, fecha de nacimiento, sexo biológico.',
               'Datos sensibles de salud: Anotaciones diarias sobre cómo se siente física y emocionalmente, la intensidad que usted informa, consumo de agua y otros hábitos.',
-              'Si usa "Meus cuidados" (Premium): vacunas, alergias, medicamentos y recordatorios, consultas, y los documentos de exámenes y recetas que usted sube, con los valores que usted confirma.',
+              'Si usa "Meus cuidados" (Premium): vacunas, alergias, medicamentos y recordatorios, consultas (con el lugar y, si lo elige en el mapa, el punto exacto), y los documentos de exámenes y recetas que usted sube, con los valores que usted confirma.',
               'Datos técnicos de seguridad: Dirección IP anonimizada, registros de auditoría de acceso, versión del dispositivo.',
             ],
           },
@@ -312,6 +312,7 @@ export class LegalService {
               'Inteligencia artificial: el texto de "escribir el mío" puede enviarse a un proveedor de IA solo para sugerir una opción ya existente del diario. La IA no evalúa su salud.',
               'Lectura de documentos: las fotos y PDF de exámenes y recetas que usted elige leer se envían a un proveedor de reconocimiento de texto, y un proveedor de IA ordena ese texto, sin su nombre ni CPF. Antes, la app le pide su consentimiento específico e indica el proveedor y el país donde se tratan los datos. Estos proveedores no pueden usar los datos para entrenar modelos.',
               'Envío de correos: su correo electrónico, su nombre de pila y los códigos de verificación o de restablecimiento de contraseña se envían a un proveedor de correo solo para entregar esos mensajes. No enviamos datos de salud por correo.',
+              'Mapa para elegir el lugar de una consulta: al abrir el mapa, el proveedor de mapas recibe el área del mapa que usted está viendo, solo para dibujarlo. La dirección que usted busca y la dirección del punto elegido se obtienen del servicio de direcciones del propio sistema del teléfono. No se envían datos de salud, y la app no lee su ubicación (GPS).',
               'Infraestructura en la nube: proveedores de alojamiento y base de datos.',
               'Transferencia internacional: algunos encargados tratan datos fuera de Brasil, y la app puede usarse desde fuera de Brasil. Se realiza con su consentimiento específico y con las garantías contractuales del proveedor (LGPD Art. 33; RGPD Art. 46, cláusulas contractuales tipo).',
               'Lista de encargados: puede pedir en cualquier momento la lista actualizada de encargados en contato@dualischeckup.com (LGPD Art. 18, VII).',
@@ -367,7 +368,7 @@ export class LegalService {
             bullets: [
               'Account info: Name, email address, date of birth, biological sex.',
               'Sensitive health data: Daily notes on how you feel physically and emotionally, the intensity you report, water intake and other habits.',
-              'If you use "Meus cuidados" (Premium): vaccines, allergies, medications and reminders, appointments, and the exam and prescription documents you upload, with the values you confirm.',
+              'If you use "Meus cuidados" (Premium): vaccines, allergies, medications and reminders, appointments (with the place and, if you pick it on the map, its exact point), and the exam and prescription documents you upload, with the values you confirm.',
               'Security logs: Anonymized IP addresses, session telemetry, audit hashes.',
             ],
           },
@@ -392,6 +393,7 @@ export class LegalService {
               'Artificial intelligence: text from "write my own" may be sent to an AI provider only to suggest an existing diary option. The AI does not assess your health.',
               'Document reading: photos and PDFs of exams and prescriptions you choose to read are sent to a text-recognition provider, and an AI provider organizes that text, without your name or CPF. Before that, the app asks for your specific consent and names the provider and the country where the data is processed. These providers may not use the data to train models.',
               'Email delivery: your email address, first name and verification or password-reset codes are sent to an email provider only to deliver those messages. We do not send health data by email.',
+              'Map to pick an appointment place: when you open the map, the map provider receives the map area you are viewing, only to draw it. The address you search for and the address of the point you pick come from your phone system\'s own address service. No health data is sent, and the app does not read your location (GPS).',
               'Cloud infrastructure: hosting and database providers.',
               'International transfer: some processors handle data outside Brazil, and the app can be used outside Brazil. This is done with your specific consent and the provider\'s contractual safeguards (LGPD Art. 33; GDPR Art. 46, standard contractual clauses).',
               'List of processors: you can ask for the current list of processors at any time at contato@dualischeckup.com (LGPD Art. 18, VII).',
@@ -448,7 +450,7 @@ export class LegalService {
           bullets: [
             'Dados Cadastrais: Nome completo, endereço de e-mail autenticado, data de nascimento e sexo biológico.',
             'Dados Sensíveis de Saúde: Anotações diárias sobre como você se sente física e emocionalmente, intensidade informada por você, registros de hidratação e de outros hábitos.',
-            'Se você usar "Meus cuidados" (Premium): vacinas, alergias, medicamentos e lembretes, consultas, e os documentos de exames e receitas que você enviar, com os valores que você confirmar.',
+            'Se você usar "Meus cuidados" (Premium): vacinas, alergias, medicamentos e lembretes, consultas (com o local e, se você o escolher no mapa, o ponto exato), e os documentos de exames e receitas que você enviar, com os valores que você confirmar.',
             'Dados de Acesso e Metadados: Endereço IP mascarado, registros cronológicos de login, hashes de integridade do histórico.',
           ],
         },
@@ -473,6 +475,7 @@ export class LegalService {
             'Inteligência artificial: o texto de "escrever o meu" pode ser enviado a um provedor de IA só para sugerir uma opção já existente do diário. A IA não avalia a sua saúde.',
             'Leitura de documentos: as fotos e PDFs de exames e receitas que você escolhe ler são enviados a um provedor de reconhecimento de texto, e um provedor de IA organiza esse texto, sem o seu nome nem CPF. Antes, o app pede o seu consentimento específico e informa o provedor e o país onde os dados são tratados. Esses provedores não podem usar os dados para treinar modelos.',
             'Envio de e-mails: o seu e-mail, o seu primeiro nome e os códigos de verificação ou de redefinição de senha são enviados a um provedor de e-mail só para entregar essas mensagens. Não enviamos dados de saúde por e-mail.',
+            'Mapa para escolher o local de uma consulta: ao abrir o mapa, o provedor de mapas recebe a área do mapa que você está vendo, só para desenhá-lo. O endereço que você busca e o endereço do ponto escolhido são obtidos pelo serviço de endereços do próprio sistema do celular. Nenhum dado de saúde é enviado, e o app não lê a sua localização (GPS).',
             'Infraestrutura em nuvem: provedores de hospedagem e banco de dados.',
             'Transferência internacional: alguns operadores tratam dados fora do Brasil, e o app pode ser usado fora do Brasil. Isso é feito com o seu consentimento específico e com as garantias contratuais do fornecedor (LGPD Art. 33; RGPD Art. 46, cláusulas contratuais-padrão).',
             'Lista de operadores: você pode pedir a qualquer momento a lista atualizada dos operadores pelo contato@dualischeckup.com (LGPD Art. 18, VII).',

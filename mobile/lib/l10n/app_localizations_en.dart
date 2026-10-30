@@ -1093,6 +1093,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Email delivery: your email address, first name and verification or password-reset codes are sent to an email provider only to deliver those messages. We do not send health data by email.';
 
   @override
+  String get privacyPolicySection3BulletMap =>
+      'Map to pick an appointment place: when you open the map, the map provider receives the map area you are viewing, only to draw it. The address you search for and the address of the point you pick come from your phone system\'s own address service. No health data is sent, and the app does not read your location (GPS).';
+
+  @override
   String get privacyPolicySection3Bullet4 =>
       'Cloud infrastructure: hosting and database providers.';
 

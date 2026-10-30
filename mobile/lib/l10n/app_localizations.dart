@@ -1996,6 +1996,12 @@ abstract class AppLocalizations {
   /// **'Envio de e-mails: o seu e-mail, o seu primeiro nome e os códigos de verificação ou de redefinição de senha são enviados a um provedor de e-mail só para entregar essas mensagens. Não enviamos dados de saúde por e-mail.'**
   String get privacyPolicySection3Bullet3;
 
+  /// No description provided for @privacyPolicySection3BulletMap.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mapa para escolher o local de uma consulta: ao abrir o mapa, o provedor de mapas recebe a área do mapa que você está vendo, só para desenhá-lo. O endereço que você busca e o endereço do ponto escolhido são obtidos pelo serviço de endereços do próprio sistema do celular. Nenhum dado de saúde é enviado, e o app não lê a sua localização (GPS).'**
+  String get privacyPolicySection3BulletMap;
+
   /// No description provided for @privacyPolicySection3Bullet4.
   ///
   /// In pt, this message translates to:

@@ -1102,6 +1102,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Envio de e-mails: o seu e-mail, o seu primeiro nome e os códigos de verificação ou de redefinição de senha são enviados a um provedor de e-mail só para entregar essas mensagens. Não enviamos dados de saúde por e-mail.';
 
   @override
+  String get privacyPolicySection3BulletMap =>
+      'Mapa para escolher o local de uma consulta: ao abrir o mapa, o provedor de mapas recebe a área do mapa que você está vendo, só para desenhá-lo. O endereço que você busca e o endereço do ponto escolhido são obtidos pelo serviço de endereços do próprio sistema do celular. Nenhum dado de saúde é enviado, e o app não lê a sua localização (GPS).';
+
+  @override
   String get privacyPolicySection3Bullet4 =>
       'Infraestrutura em nuvem: provedores de hospedagem e banco de dados.';
 
