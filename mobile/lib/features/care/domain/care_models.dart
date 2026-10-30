@@ -168,8 +168,8 @@ class ExamValue {
   const ExamValue({this.section, required this.item, required this.value, this.unit, this.reference, this.confirmed = false});
 
   factory ExamValue.fromJson(Map<String, dynamic> json) => ExamValue(
-        section: json['section'] as String?,
-        item: json['item'] as String? ?? '',
+        section: json['section'] == null ? null : tidyExamName(json['section'] as String),
+        item: tidyExamName(json['item'] as String? ?? ''),
         value: json['value'] as String? ?? '',
         unit: json['unit'] as String?,
         reference: json['reference'] as String?,
@@ -187,12 +187,38 @@ class ExamValue {
 
   Map<String, dynamic> toJson() => {
         if (section != null && section!.isNotEmpty) 'section': section,
-        'item': item,
+        'item': tidyExamName(item),
         'value': value,
         if (unit != null && unit!.isNotEmpty) 'unit': unit,
         if (reference != null && reference!.isNotEmpty) 'reference': reference,
         'confirmed': confirmed,
       };
+}
+
+const _shortWords = {'a', 'o', 'e', 'y', 'de', 'da', 'do', 'das', 'dos', 'del', 'la', 'el', 'em', 'en', 'com', 'con', 'sem', 'sin', 'por', 'pos', 'pre', 'no', 'na', 'of', 'and', 'the'};
+
+/// One spelling per exam item, so "SEGMENTADOS :" and "Segmentados:" are the same item
+/// (same rule as the backend's tidyName): only letters, digits and - / ( ) , . + % stay,
+/// the ends lose punctuation and the name is in sentence case. Acronyms keep capitals:
+/// words with digits, capitals inside a mixed-case name (HDL, HbA1c) and, in an
+/// all-capitals name, words without vowels or of up to 3 letters (VCM, TGO).
+String tidyExamName(String text) {
+  final clean = text
+      .replaceAll(RegExp(r'[^\p{L}\p{N}\s\-/(),.+%]', unicode: true), ' ')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .replaceAll(RegExp(r'^[^\p{L}\p{N}(]+|[^\p{L}\p{N})%]+$', unicode: true), '');
+  final allCaps = clean == clean.toUpperCase();
+  final name = clean.split(' ').map((word) {
+    final letters = word.replaceAll(RegExp(r'[^\p{L}]', unicode: true), '');
+    final rest = letters.length < 2 ? '' : letters.substring(1);
+    final acronym = RegExp(r'\p{N}', unicode: true).hasMatch(word) ||
+        (rest != rest.toLowerCase() &&
+            (!allCaps ||
+                !RegExp('[aeiouáàâãéêíóôõúü]', caseSensitive: false).hasMatch(letters) ||
+                (letters.length <= 3 && !_shortWords.contains(letters.toLowerCase()))));
+    return acronym ? word : word.toLowerCase();
+  }).join(' ');
+  return name.isEmpty ? name : name[0].toUpperCase() + name.substring(1);
 }
 
 /// A medicine read from a prescription, copied as written.

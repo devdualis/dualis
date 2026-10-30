@@ -18,7 +18,7 @@ import {
   ReviewDocumentDto,
   UploadDocumentDto,
 } from './care.dto';
-import { DocumentReaderService } from './document-reader.service';
+import { DocumentReaderService, tidyName } from './document-reader.service';
 
 type CareRecordRow = typeof careRecords.$inferSelect;
 
@@ -255,7 +255,9 @@ export class CareService {
         ...(dto.title !== undefined && { title: dto.title }),
         ...(dto.labName !== undefined && { labName: dto.labName }),
         ...(dto.collectedOn !== undefined && { collectedOn: dto.collectedOn }),
-        ...(dto.values !== undefined && { values: dto.values }),
+        ...(dto.values !== undefined && {
+          values: dto.values.map((v) => ({ ...v, item: tidyName(v.item), ...(v.section && { section: tidyName(v.section) || undefined }) })),
+        }),
         ...(dto.medications !== undefined && { medications: dto.medications }),
         ...(dto.note !== undefined && { note: dto.note }),
       };

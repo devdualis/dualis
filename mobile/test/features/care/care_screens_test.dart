@@ -268,11 +268,11 @@ void main() {
     expect(find.byKey(const Key('exam_section_1')), findsNothing);
     expect(find.byKey(const Key('exam_section_2')), findsOneWidget);
     // Several exams: the title is suggested and each exam has a chip.
-    expect(find.text(pt.careExamTitleMany('HEMOGRAMA COMPLETO', 1)), findsOneWidget);
+    expect(find.text(pt.careExamTitleMany('Hemograma completo', 1)), findsOneWidget);
     expect(find.text(pt.careExamSections(2)), findsOneWidget);
-    expect(find.widgetWithText(ActionChip, 'FERRITINA'), findsOneWidget);
+    expect(find.widgetWithText(ActionChip, 'Ferritina'), findsOneWidget);
     // % and /mm³ of one item: the name once, a remove button per result.
-    expect(find.text('SEGMENTADOS'), findsOneWidget);
+    expect(find.text('Segmentados'), findsOneWidget);
     expect(find.byKey(const Key('row_remove_0')), findsOneWidget);
     expect(find.byKey(const Key('row_remove_1')), findsOneWidget);
     expect(find.byKey(const Key('row_remove_2')), findsNothing);
@@ -281,8 +281,8 @@ void main() {
     await tester.tap(find.byKey(const Key('exam_save')));
     await tester.pumpAndSettle();
     final values = api.reviews.single['values'] as List;
-    expect(values.map((v) => v['section']), ['HEMOGRAMA COMPLETO', 'HEMOGRAMA COMPLETO', 'FERRITINA']);
-    expect(api.reviews.single['title'], 'HEMOGRAMA COMPLETO + 1 exame');
+    expect(values.map((v) => v['section']), ['Hemograma completo', 'Hemograma completo', 'Ferritina']);
+    expect(api.reviews.single['title'], 'Hemograma completo + 1 exame');
   });
 
   testWidgets('removing one of two results keeps only the chosen one', (tester) async {
@@ -305,7 +305,7 @@ void main() {
     await tester.pumpAndSettle();
     // A single result goes back to a plain row with the item name.
     expect(find.byKey(const Key('row_remove_0')), findsNothing);
-    expect(find.text('SEGMENTADOS'), findsOneWidget);
+    expect(find.text('Segmentados'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('exam_save')));
     await tester.pumpAndSettle();
@@ -373,7 +373,7 @@ void main() {
       ],
     }));
     await pump(tester, const ExamsScreen(), api: api);
-    expect(find.text(pt.careExamTitleMany('HEMOGRAMA COMPLETO', 2)), findsOneWidget);
+    expect(find.text(pt.careExamTitleMany('Hemograma completo', 2)), findsOneWidget);
   });
 
   testWidgets('a file stuck while being read can be swiped away', (tester) async {

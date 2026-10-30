@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { DocumentReaderService, layoutText, redactIdentifiers, sanitizeReading } from '../../src/modules/care/document-reader.service';
+import { DocumentReaderService, layoutText, redactIdentifiers, sanitizeReading, tidyName } from '../../src/modules/care/document-reader.service';
 
 const config = (key?: string) => ({ get: (k: string) => (k === 'GOOGLE_VISION_API_KEY' ? key : undefined) }) as any;
 
@@ -11,6 +11,20 @@ describe('DocumentReaderService', () => {
     const out = redactIdentifiers(text);
     expect(out).not.toMatch(/Ana|João|123\.456|98765432100/);
     expect(out).toContain('Colesterol total 212 mg/dL até 190');
+  });
+
+  it('writes each item name one way: no stray punctuation, sentence case, acronyms kept', () => {
+    expect(tidyName('SEGMENTADOS :')).toBe('Segmentados');
+    expect(tidyName('Segmentados:')).toBe('Segmentados');
+    expect(tidyName('* Leucócitos ...')).toBe('Leucócitos');
+    expect(tidyName('TEMPO DE PROTROMBINA')).toBe('Tempo de protrombina');
+    expect(tidyName('COLESTEROL HDL')).toBe('Colesterol HDL');
+    expect(tidyName('VCM')).toBe('VCM');
+    expect(tidyName('T4 LIVRE')).toBe('T4 livre');
+    expect(tidyName('Hemoglobina glicada (HbA1c)')).toBe('Hemoglobina glicada (HbA1c)');
+    expect(sanitizeReading('lab', { values: [{ section: 'HEMOGRAMA', item: 'SEGMENTADOS :', value: '60' }] }).values).toEqual([
+      { section: 'Hemograma', item: 'Segmentados', value: '60', unit: undefined, reference: undefined },
+    ]);
   });
 
   it('keeps only schema fields and drops judgments the model might add', () => {
@@ -58,9 +72,9 @@ describe('DocumentReaderService', () => {
     expect(lab.collectedOn).toBeUndefined();
     expect(lab.title).toBeUndefined();
     expect(lab.values).toEqual([
-      { section: 'HEMOGRAMA COMPLETO', item: 'SEGMENTADOS', value: '38', unit: '%', reference: '40 a 75 %' },
-      { section: 'HEMOGRAMA COMPLETO', item: 'SEGMENTADOS', value: '1.938', unit: '/mm³', reference: '1.440 a 9.000 /mm³' },
-      { section: 'FERRITINA', item: 'FERRITINA', value: '447,6', unit: 'ng/mL', reference: '23,9 a 336,2 ng/mL' },
+      { section: 'Hemograma completo', item: 'Segmentados', value: '38', unit: '%', reference: '40 a 75 %' },
+      { section: 'Hemograma completo', item: 'Segmentados', value: '1.938', unit: '/mm³', reference: '1.440 a 9.000 /mm³' },
+      { section: 'Ferritina', item: 'Ferritina', value: '447,6', unit: 'ng/mL', reference: '23,9 a 336,2 ng/mL' },
     ]);
   });
 

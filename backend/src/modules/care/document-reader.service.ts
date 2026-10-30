@@ -86,6 +86,35 @@ export function redactIdentifiers(text: string): string {
     .trim();
 }
 
+/** Short words that are not acronyms when a name is printed in capitals. */
+const SHORT_WORDS = new Set(['a', 'o', 'e', 'y', 'de', 'da', 'do', 'das', 'dos', 'del', 'la', 'el', 'em', 'en', 'com', 'con', 'sem', 'sin', 'por', 'pos', 'pre', 'no', 'na', 'of', 'and', 'the']);
+
+/**
+ * One spelling per exam item, so "SEGMENTADOS :" and "Segmentados:" are the same item:
+ * only letters, digits and - / ( ) , . + % stay, the ends lose punctuation, and the
+ * name is written in sentence case. Acronyms stay in capitals: words with digits, words
+ * with capitals inside a mixed-case name (HDL, HbA1c) and, in an all-capitals name,
+ * words without vowels or of up to 3 letters (VCM, TGO).
+ */
+export function tidyName(text: string): string {
+  const clean = text
+    .replace(/[^\p{L}\p{N}\s\-/(),.+%]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/^[^\p{L}\p{N}(]+|[^\p{L}\p{N})%]+$/gu, '');
+  const allCaps = clean === clean.toUpperCase();
+  const words = clean.split(' ').map((word) => {
+    const letters = word.replace(/[^\p{L}]/gu, '');
+    const acronym = /\p{N}/u.test(word)
+      ? true
+      : letters.length < 2 || letters.slice(1) === letters.slice(1).toLowerCase()
+        ? false
+        : !allCaps || !/[aeiouáàâãéêíóôõúü]/i.test(letters) || (letters.length <= 3 && !SHORT_WORDS.has(letters.toLowerCase()));
+    return acronym ? word : word.toLowerCase();
+  });
+  const name = words.join(' ');
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
 /** Keeps only schema fields with non-empty strings (drops anything the model adds). */
 export function sanitizeReading(kind: 'lab' | 'prescription', raw: any): DocumentReading {
   // " | " is the column separator of the OCR layout, never part of a printed value.
@@ -103,8 +132,8 @@ export function sanitizeReading(kind: 'lab' | 'prescription', raw: any): Documen
   const collectedOn = isoDate(str(raw?.collectedOn, 20));
   const values = (Array.isArray(raw?.values) ? raw.values : [])
     .map((v: any) => ({
-      ...(str(v?.section, 120) && { section: str(v?.section, 120) }),
-      item: str(v?.item, 120),
+      ...(str(v?.section, 120) && { section: tidyName(str(v?.section, 120)!) || undefined }),
+      item: tidyName(str(v?.item, 120) ?? ''),
       value: str(v?.value, 60),
       unit: str(v?.unit, 30),
       reference: str(v?.printedReference ?? v?.reference, 200),
