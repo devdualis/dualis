@@ -798,6 +798,7 @@
   "careHubLowStock": "stock bajo en {count}",
   "careHubNoUpcoming": "Ninguna consulta agendada",
   "careHubNextAppointment": "Próxima: {date} · {who}",
+  "careHubPrescriptions": "{count, plural, =0{Ninguna receta} =1{1 receta guardada} other{{count} recetas guardadas}}",
   "careHubDocuments": "{count, plural, =0{Ningún documento} =1{1 documento guardado} other{{count} documentos guardados}}",
   "careHubSummarySubtitle": "PDF para llevar a la consulta, si usted quiere",
   "careVaccinesTitle": "Vacunas",

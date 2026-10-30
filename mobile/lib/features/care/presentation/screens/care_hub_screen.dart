@@ -120,7 +120,7 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
             key: const Key('care_hub_prescriptions'),
             leading: const CareIconTile(Icons.receipt_long_outlined, background: AppColors.softIndigoLight, foreground: AppColors.dualisNavy),
             title: l10n.careExamSectionPrescriptions,
-            subtitle: prescriptions == null ? null : l10n.careHubDocuments(prescriptions),
+            subtitle: prescriptions == null ? null : l10n.careHubPrescriptions(prescriptions),
             onTap: () => context.push(CarePaths.prescriptions),
           ),
           const SizedBox(height: 10),

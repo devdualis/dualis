@@ -1821,6 +1821,14 @@
       }
     }
   },
+  "careHubPrescriptions": "{count, plural, =0{Nenhuma receita} =1{1 receita guardada} other{{count} receitas guardadas}}",
+  "@careHubPrescriptions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "careHubDocuments": "{count, plural, =0{Nenhum documento} =1{1 documento guardado} other{{count} documentos guardados}}",
   "@careHubDocuments": {
     "placeholders": {

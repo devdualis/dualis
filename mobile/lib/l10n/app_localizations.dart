@@ -4804,6 +4804,12 @@ abstract class AppLocalizations {
   /// **'Próxima: {date} · {who}'**
   String careHubNextAppointment(String date, String who);
 
+  /// No description provided for @careHubPrescriptions.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =0{Nenhuma receita} =1{1 receita guardada} other{{count} receitas guardadas}}'**
+  String careHubPrescriptions(int count);
+
   /// No description provided for @careHubDocuments.
   ///
   /// In pt, this message translates to:

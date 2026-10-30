@@ -798,6 +798,7 @@
   "careHubLowStock": "low stock on {count}",
   "careHubNoUpcoming": "No upcoming appointments",
   "careHubNextAppointment": "Next: {date} · {who}",
+  "careHubPrescriptions": "{count, plural, =0{No prescriptions} =1{1 prescription saved} other{{count} prescriptions saved}}",
   "careHubDocuments": "{count, plural, =0{No documents} =1{1 document saved} other{{count} documents saved}}",
   "careHubSummarySubtitle": "A PDF to take to your appointment, if you want",
   "careVaccinesTitle": "Vaccines",

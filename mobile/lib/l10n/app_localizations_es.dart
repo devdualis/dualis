@@ -2773,6 +2773,18 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String careHubPrescriptions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recetas guardadas',
+      one: '1 receta guardada',
+      zero: 'Ninguna receta',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String careHubDocuments(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
