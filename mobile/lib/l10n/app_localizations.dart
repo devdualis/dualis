@@ -5884,6 +5884,42 @@ abstract class AppLocalizations {
   /// **'Meus valores ao longo do tempo'**
   String get careExamValuesOverTime;
 
+  /// No description provided for @careExamValuesSearch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar item (ex.: TSH)'**
+  String get careExamValuesSearch;
+
+  /// No description provided for @careExamValuesNoMatch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum item com esse nome'**
+  String get careExamValuesNoMatch;
+
+  /// No description provided for @careExamValuesOtherGroup.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outros exames'**
+  String get careExamValuesOtherGroup;
+
+  /// No description provided for @careExamValuesItemCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} itens}}'**
+  String careExamValuesItemCount(int count);
+
+  /// No description provided for @careExamValuesShowMore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver mais {count}'**
+  String careExamValuesShowMore(int count);
+
+  /// No description provided for @careExamValuesShowLess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver menos'**
+  String get careExamValuesShowLess;
+
   /// No description provided for @careExamNote.
   ///
   /// In pt, this message translates to:

@@ -978,6 +978,26 @@
   "careExamSectionPrescriptions": "Prescriptions",
   "careExamSectionOther": "Other files",
   "careExamValuesOverTime": "My values over time",
+  "careExamValuesSearch": "Search item (e.g. TSH)",
+  "careExamValuesNoMatch": "No item with that name",
+  "careExamValuesOtherGroup": "Other exams",
+  "careExamValuesItemCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "@careExamValuesItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careExamValuesShowMore": "Show {count} more",
+  "@careExamValuesShowMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "careExamValuesShowLess": "Show less",
   "careExamNote": "Values and references are the lab's. Dualis never says whether a result is good or bad. Take your questions to whoever ordered the test.",
   "careExamToCheck": "Check {count}",
   "careExamCheck": "Check",

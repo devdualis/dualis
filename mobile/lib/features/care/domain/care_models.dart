@@ -228,6 +228,22 @@ String tidyExamName(String text) {
   return name.isEmpty ? name : name[0].toUpperCase() + name.substring(1);
 }
 
+/// "/mm 3" and "/mm³" are the same unit read twice.
+String examUnitKey(String? unit) => (unit ?? '').toLowerCase().replaceAll(' ', '').replaceAll('³', '3');
+
+/// The number in a printed value ("13,8", "1.938", "245.000"), or null when it is not one
+/// number (e.g. "Não reagente", "< 5").
+double? examNumber(String value) {
+  var text = value.trim();
+  if (!RegExp(r'^\d[\d.,]*$').hasMatch(text)) return null;
+  if (text.contains(',')) {
+    text = text.replaceAll('.', '').replaceAll(',', '.');
+  } else if (RegExp(r'^\d{1,3}(\.\d{3})+$').hasMatch(text)) {
+    text = text.replaceAll('.', '');
+  }
+  return double.tryParse(text);
+}
+
 /// A medicine read from a prescription, copied as written.
 class PrescribedItem {
   final String name;

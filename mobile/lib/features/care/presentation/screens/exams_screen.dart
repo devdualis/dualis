@@ -16,6 +16,7 @@ import '../../domain/care_models.dart';
 import '../care_providers.dart';
 import '../care_routes.dart';
 import '../widgets/care_widgets.dart';
+import '../widgets/exam_values_list.dart';
 
 const _readingConsentKey = 'care_document_reading_consent_v1';
 const _maxBytes = 10 * 1024 * 1024;
@@ -227,11 +228,7 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
           final labs = docs.where((d) => d.kind == DocumentKind.lab && d.status != DocumentStatus.processing).toList();
           final rx = docs.where((d) => d.kind == DocumentKind.prescription && d.status != DocumentStatus.processing).toList();
           final other = docs.where((d) => d.kind == DocumentKind.other).toList();
-          final items = <String>{
-            for (final doc in labs.where((doc) => doc.status == DocumentStatus.ready))
-              for (final v in doc.values) v.item,
-          }.toList()
-            ..sort();
+          final checked = labs.where((doc) => doc.status == DocumentStatus.ready && doc.values.isNotEmpty).toList();
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
             children: [
@@ -256,17 +253,10 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
               for (final d in rx) ...[const SizedBox(height: 8), _swipeToDelete(d, canEdit, _DocRow(d, onTap: () => _open(d)))],
               if (other.isNotEmpty) CareSection(l10n.careExamSectionOther),
               for (final d in other) ...[const SizedBox(height: 8), _swipeToDelete(d, canEdit, _DocRow(d, onTap: () => _open(d)))],
-              if (items.isNotEmpty) ...[
+              if (checked.isNotEmpty) ...[
                 CareSection(l10n.careExamValuesOverTime),
                 const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final item in items)
-                      ActionChip(label: Text(item), onPressed: () => context.push(CarePaths.examItem, extra: item)),
-                  ],
-                ),
+                ExamValuesList(checked),
               ],
               const SizedBox(height: 14),
               CareNote(l10n.careExamNote),

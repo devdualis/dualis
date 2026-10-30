@@ -3403,6 +3403,34 @@ class AppLocalizationsEs extends AppLocalizations {
   String get careExamValuesOverTime => 'Mis valores a lo largo del tiempo';
 
   @override
+  String get careExamValuesSearch => 'Buscar ítem (ej.: TSH)';
+
+  @override
+  String get careExamValuesNoMatch => 'Ningún ítem con ese nombre';
+
+  @override
+  String get careExamValuesOtherGroup => 'Otros exámenes';
+
+  @override
+  String careExamValuesItemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ítems',
+      one: '1 ítem',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String careExamValuesShowMore(int count) {
+    return 'Ver $count más';
+  }
+
+  @override
+  String get careExamValuesShowLess => 'Ver menos';
+
+  @override
   String get careExamNote =>
       'Los valores y referencias son los del informe. Dualis no dice si un resultado está bien o mal. Lleve sus dudas a quien pidió el examen.';
 

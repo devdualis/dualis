@@ -424,6 +424,32 @@ void main() {
     expect(find.text(pt.careExamTitleMany('Hemograma completo', 2)), findsOneWidget);
   });
 
+  testWidgets('values over time are grouped by exam with the latest value and a search', (tester) async {
+    final api = FakeCareApi();
+    for (final (id, day, hb) in [('d1', '2026-06-04', '13,1'), ('d2', '2026-10-21', '13,8')]) {
+      api.docs.add(CareDocument(id: id, kind: DocumentKind.lab, mime: 'application/pdf', status: DocumentStatus.ready, createdAt: DateTime(2026, 10, 28), data: {
+        'collectedOn': day,
+        'values': [
+          {'section': 'HEMOGRAMA COMPLETO', 'item': 'Hemoglobina', 'value': hb, 'unit': 'g/dL', 'confirmed': true},
+          for (var i = 0; i < 6; i++) {'section': 'HEMOGRAMA COMPLETO', 'item': 'Item $i', 'value': '1', 'confirmed': true},
+          for (var i = 0; i < 10; i++) {'section': 'Bioquímica', 'item': 'Dosagem $i', 'value': '2', 'confirmed': true},
+        ],
+      }));
+    }
+    await pump(tester, const ExamsScreen(), api: api);
+    await tester.scrollUntilVisible(find.text('Hemograma completo'), 200, scrollable: find.byType(Scrollable).first);
+    expect(find.text('13,8 g/dL'), findsOneWidget);
+    expect(find.text('13,1 g/dL'), findsNothing);
+    expect(find.text(pt.careExamValuesItemCount(7)), findsOneWidget);
+    expect(find.text(pt.careExamValuesShowMore(3)), findsOneWidget);
+    expect(find.byType(ActionChip), findsNothing);
+
+    await tester.enterText(find.byKey(const Key('exam_values_search')), 'hemo');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('exam_values_Hemoglobina')), findsOneWidget);
+    expect(find.text('Bioquímica'), findsNothing);
+  });
+
   testWidgets('a file stuck while being read can be swiped away', (tester) async {
     final api = FakeCareApi();
     api.docs.add(CareDocument(id: 'd1', kind: DocumentKind.lab, mime: 'application/pdf', status: DocumentStatus.processing, createdAt: DateTime(2026, 10, 28), data: const {}));

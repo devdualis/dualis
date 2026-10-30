@@ -17,9 +17,6 @@ class ExamItemScreen extends ConsumerStatefulWidget {
   ConsumerState<ExamItemScreen> createState() => _ExamItemScreenState();
 }
 
-/// "/mm 3" and "/mm³" are the same unit read twice.
-String _unitKey(String? unit) => (unit ?? '').toLowerCase().replaceAll(' ', '').replaceAll('³', '3');
-
 class _ExamItemScreenState extends ConsumerState<ExamItemScreen> {
   /// Unit shown when the item has results in several units (e.g. % and /mm³).
   String? _unit;
@@ -43,9 +40,9 @@ class _ExamItemScreenState extends ConsumerState<ExamItemScreen> {
                 (d.collectedOn ?? isoDay(d.createdAt), v, d.labName),
           ]..sort((a, b) => b.$1.compareTo(a.$1));
           // One chip per unit; values in different units are never listed together.
-          final units = <String, String>{for (final r in rows) _unitKey(r.$2.unit): r.$2.unit ?? '—'};
-          final unit = units.containsKey(_unit) ? _unit! : (rows.isEmpty ? '' : _unitKey(rows.first.$2.unit));
-          final shown = units.length > 1 ? rows.where((r) => _unitKey(r.$2.unit) == unit).toList() : rows;
+          final units = <String, String>{for (final r in rows) examUnitKey(r.$2.unit): r.$2.unit ?? '—'};
+          final unit = units.containsKey(_unit) ? _unit! : (rows.isEmpty ? '' : examUnitKey(rows.first.$2.unit));
+          final shown = units.length > 1 ? rows.where((r) => examUnitKey(r.$2.unit) == unit).toList() : rows;
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
             children: [
