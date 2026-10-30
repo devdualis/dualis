@@ -5,10 +5,10 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-10-30T18:46:21.841Z"
+last_updated: "2026-10-30T19:35:29.746375Z"
 last_activity: 2026-10-30
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: a7eb1a6043ab3bab757f2d076b2313b8e916ddc1
+state_head: 8f9c2dc4d39e25fbed4a7cf6505d3ecb509bdc18
 progress:
   total_phases: 15
   completed_phases: 10
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-10-30 - Quick task 261030-lrh: appointment place picked on an in-app map
+Last activity: 2026-10-30 - Completed quick task 261030-mka: four reviewed side effects fixed and verified (8f9c2dc)
 
 Progress: [██████████] 100%
 
@@ -127,6 +127,7 @@ None yet.
 | 261030-lrh | Consulta: especialidade em linha própria com lista pesquisável (sem acento, aceita texto livre); local com botão que abre o Google Maps, e o local no cartão abre o Maps | 2026-10-30 | 21065ee | [261030-lrh-consulta-especialidade-com-busca-e-local](./quick/261030-lrh-consulta-especialidade-com-busca-e-local/) |
 | 261030-lrh (2) | Consulta: escolher o local num mapa dentro do app (pino no centro, toque/busca, endereço pelo geocoder do telefone, só com zoom de rua); salva placeLat/placeLng e o cartão abre o ponto exato no Google Maps. Chaves Maps SDK fora do git | 2026-10-30 | 52aaf19 | [261030-lrh-consulta-especialidade-com-busca-e-local](./quick/261030-lrh-consulta-especialidade-com-busca-e-local/) |
 | 261030-lw3 | Shorten document-reading consent dialog copy in pt/es/en | 2026-10-30 | a7eb1a6 | [261030-lw3-shorten-document-reading-consent-dialog-](./quick/261030-lw3-shorten-document-reading-consent-dialog-/) |
+| 261030-mka | Fix four reviewed side effects: safe exam numbers, isolated series, latest sorting and atomic OCR | 2026-10-30 | 8f9c2dc | [261030-mka-fix-exam-history-decimal-parsing-series-](./quick/261030-mka-fix-exam-history-decimal-parsing-series-/) |
 
 ## Deferred Items
 
