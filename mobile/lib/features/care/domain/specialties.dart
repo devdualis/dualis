@@ -3,9 +3,9 @@
 const _specialties = {
   'pt': [
     'Acupuntura', 'Alergia e imunologia', 'Anestesiologia', 'Angiologia', 'Cardiologia', 'Cirurgia geral',
-    'Cirurgia plástica', 'Clínica médica', 'Coloproctologia', 'Dermatologia', 'Endocrinologia', 'Fisioterapia',
+    'Cirurgia plástica', 'Coloproctologia', 'Dermatologia', 'Endocrinologia', 'Fisioterapia',
     'Fonoaudiologia', 'Gastroenterologia', 'Geriatria', 'Ginecologia e obstetrícia', 'Hematologia', 'Infectologia',
-    'Mastologia', 'Medicina de família', 'Medicina do esporte', 'Nefrologia', 'Neurologia', 'Nutrição', 'Nutrologia',
+    'Mastologia', 'Medicina de família', 'Medicina do esporte', 'Medicina interna', 'Nefrologia', 'Neurologia', 'Nutrição', 'Nutrologia',
     'Odontologia', 'Oftalmologia', 'Oncologia', 'Ortopedia', 'Otorrinolaringologia', 'Pediatria', 'Pneumologia',
     'Psicologia', 'Psiquiatria', 'Radiologia', 'Reumatologia', 'Urologia',
   ],

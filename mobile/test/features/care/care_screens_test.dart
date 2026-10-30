@@ -501,11 +501,11 @@ void main() {
     await pump(tester, const AppointmentsScreen());
     await tester.tap(find.byKey(const Key('appointments_add')));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byKey(const Key('appt_specialty')), 'clinica');
+    await tester.enterText(find.byKey(const Key('appt_specialty')), 'nutricao');
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Clínica médica'));
+    await tester.tap(find.text('Nutrição'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(TextFormField, 'Clínica médica'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, 'Nutrição'), findsOneWidget);
     await tester.tap(find.byKey(const Key('appt_place')));
     await tester.pumpAndSettle();
     expect(tester.widget<EditableText>(find.descendant(of: find.byKey(const Key('appt_place')), matching: find.byType(EditableText))).focusNode.hasFocus, isTrue);
