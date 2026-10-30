@@ -5608,6 +5608,18 @@ abstract class AppLocalizations {
   /// **'Minhas anotações'**
   String get careAppointmentNotes;
 
+  /// No description provided for @careAppointmentQuestionsField.
+  ///
+  /// In pt, this message translates to:
+  /// **'Perguntas que quero fazer (opcional)'**
+  String get careAppointmentQuestionsField;
+
+  /// No description provided for @careAppointmentNotesField.
+  ///
+  /// In pt, this message translates to:
+  /// **'Minhas anotações (opcional)'**
+  String get careAppointmentNotesField;
+
   /// No description provided for @careAppointmentDate.
   ///
   /// In pt, this message translates to:
@@ -5629,13 +5641,13 @@ abstract class AppLocalizations {
   /// No description provided for @careAppointmentSpecialty.
   ///
   /// In pt, this message translates to:
-  /// **'Especialidade'**
+  /// **'Especialidade (opcional)'**
   String get careAppointmentSpecialty;
 
   /// No description provided for @careAppointmentPlace.
   ///
   /// In pt, this message translates to:
-  /// **'Local'**
+  /// **'Local (opcional)'**
   String get careAppointmentPlace;
 
   /// No description provided for @careAppointmentOpenMap.

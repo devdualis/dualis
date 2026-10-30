@@ -333,9 +333,9 @@ class _AppointmentFormState extends ConsumerState<_AppointmentForm> {
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: 10),
-        CareField(controller: _questions, label: l10n.careAppointmentQuestions, maxLength: 1000, maxLines: 3),
+        CareField(controller: _questions, label: l10n.careAppointmentQuestionsField, maxLength: 1000, maxLines: 3),
         const SizedBox(height: 10),
-        CareField(controller: _notes, label: l10n.careAppointmentNotes, maxLength: 2000, maxLines: 3),
+        CareField(controller: _notes, label: l10n.careAppointmentNotesField, maxLength: 2000, maxLines: 3),
         const SizedBox(height: 10),
         Wrap(spacing: 8, children: [
           for (final (key, label) in [

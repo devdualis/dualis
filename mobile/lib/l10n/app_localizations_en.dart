@@ -3243,6 +3243,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get careAppointmentNotes => 'My notes';
 
   @override
+  String get careAppointmentQuestionsField =>
+      'Questions I want to ask (optional)';
+
+  @override
+  String get careAppointmentNotesField => 'My notes (optional)';
+
+  @override
   String get careAppointmentDate => 'Date';
 
   @override
@@ -3252,10 +3259,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get careAppointmentProfessional => 'Professional (optional)';
 
   @override
-  String get careAppointmentSpecialty => 'Specialty';
+  String get careAppointmentSpecialty => 'Specialty (optional)';
 
   @override
-  String get careAppointmentPlace => 'Place';
+  String get careAppointmentPlace => 'Place (optional)';
 
   @override
   String get careAppointmentOpenMap => 'Pick on the map';

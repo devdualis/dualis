@@ -3252,6 +3252,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get careAppointmentNotes => 'Minhas anotações';
 
   @override
+  String get careAppointmentQuestionsField =>
+      'Perguntas que quero fazer (opcional)';
+
+  @override
+  String get careAppointmentNotesField => 'Minhas anotações (opcional)';
+
+  @override
   String get careAppointmentDate => 'Data';
 
   @override
@@ -3261,10 +3268,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get careAppointmentProfessional => 'Profissional (opcional)';
 
   @override
-  String get careAppointmentSpecialty => 'Especialidade';
+  String get careAppointmentSpecialty => 'Especialidade (opcional)';
 
   @override
-  String get careAppointmentPlace => 'Local';
+  String get careAppointmentPlace => 'Local (opcional)';
 
   @override
   String get careAppointmentOpenMap => 'Escolher no mapa';
