@@ -30,7 +30,7 @@ describe('EmailService (Resend)', () => {
     expect(init.method).toBe('POST');
     expect(init.headers.Authorization).toBe('Bearer re_test_key');
     const body = JSON.parse(init.body);
-    expect(body.from).toBe('DualisCheckUp <nao-responda@dualischeckup.com>');
+    expect(body.from).toBe('Dualis CheckUp <nao-responda@dualischeckup.com>');
     expect(body.to).toEqual(['maria@example.com']);
     expect(body.subject).toContain('123456');
     expect(body.text).toContain('Maria');
