@@ -187,9 +187,17 @@ export class CareService {
       const [updated] = await tx
         .update(careDocuments)
         .set({ kind: dto.kind, status: 'processing', error: null, updatedAt: new Date() })
-        .where(eq(careDocuments.id, existing.id))
+        .where(and(eq(careDocuments.id, existing.id), eq(careDocuments.status, 'archived')))
         .returning(documentMeta);
-      return { row: updated, read: true, base: title ? { title } : {}, duplicate: false };
+      if (updated) return { row: updated, read: true, base: title ? { title } : {}, duplicate: false };
+
+      // Another upload claimed the archived copy while this request was waiting.
+      const [current] = await tx
+        .select(documentMeta)
+        .from(careDocuments)
+        .where(and(eq(careDocuments.id, existing.id), eq(careDocuments.profileId, profileId)));
+      if (!current) throw new BadRequestException('Document could not be stored.');
+      return { row: current, read: false, base: data, duplicate: true };
     });
 
     if (read) {

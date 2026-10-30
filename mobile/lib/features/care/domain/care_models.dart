@@ -233,17 +233,34 @@ String tidyExamName(String text) {
 /// "/mm 3" and "/mm³" are the same unit read twice.
 String examUnitKey(String? unit) => (unit ?? '').toLowerCase().replaceAll(' ', '').replaceAll('³', '3');
 
-/// The number in a printed value ("13,8", "1.938", "245.000"), or null when it is not one
-/// number (e.g. "Não reagente", "< 5").
+/// The exam heading used by both the history list and its detail screen.
+String examGroupOf(CareDocument document, ExamValue value) {
+  final section = value.section?.trim();
+  if (section != null && section.isNotEmpty) return section;
+  final sections = document.sections;
+  return document.title?.trim() ?? (sections.length == 1 ? sections.single : '');
+}
+
+/// Parses only unambiguous printed numbers, in either decimal format. A single
+/// separator followed by three digits ("1.234") may mean a decimal or thousands;
+/// omit it from the chart rather than guess. The printed value stays unchanged.
 double? examNumber(String value) {
   var text = value.trim();
-  if (!RegExp(r'^\d[\d.,]*$').hasMatch(text)) return null;
-  if (text.contains(',')) {
+  if (RegExp(r'^[+-]?\d{1,3}(\.\d{3})+,\d+$').hasMatch(text)) {
     text = text.replaceAll('.', '').replaceAll(',', '.');
-  } else if (RegExp(r'^\d{1,3}(\.\d{3})+$').hasMatch(text)) {
+  } else if (RegExp(r'^[+-]?\d{1,3}(,\d{3})+\.\d+$').hasMatch(text)) {
+    text = text.replaceAll(',', '');
+  } else if (RegExp(r'^[+-]?\d{1,3}(\.\d{3}){2,}$').hasMatch(text)) {
     text = text.replaceAll('.', '');
+  } else if (RegExp(r'^[+-]?\d{1,3}(,\d{3}){2,}$').hasMatch(text)) {
+    text = text.replaceAll(',', '');
+  } else {
+    if (!RegExp(r'^[+-]?\d+([.,]\d+)?$').hasMatch(text)) return null;
+    if (RegExp(r'^[+-]?[1-9]\d{0,2}[.,]\d{3}$').hasMatch(text)) return null;
+    text = text.replaceAll(',', '.');
   }
-  return double.tryParse(text);
+  final number = double.tryParse(text);
+  return number != null && number.isFinite ? number : null;
 }
 
 /// A medicine read from a prescription, copied as written.

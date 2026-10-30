@@ -10,8 +10,10 @@ import '../widgets/care_widgets.dart';
 /// Confirmed values of one item over time, as a table. No chart with bands:
 /// each lab prints its own reference and the app does not compare them.
 class ExamItemScreen extends ConsumerStatefulWidget {
-  const ExamItemScreen({super.key, required this.item});
+  const ExamItemScreen({super.key, required this.item, this.group, this.unit});
   final String item;
+  final String? group;
+  final String? unit;
 
   @override
   ConsumerState<ExamItemScreen> createState() => _ExamItemScreenState();
@@ -36,9 +38,15 @@ class _ExamItemScreenState extends ConsumerState<ExamItemScreen> {
         data: (docs) {
           final rows = [
             for (final d in docs.where((d) => d.kind == DocumentKind.lab && d.status == DocumentStatus.ready))
-              for (final v in d.values.where((v) => v.item.toLowerCase() == item.toLowerCase()))
-                (d.collectedOn ?? isoDay(d.createdAt), v, d.labName),
-          ]..sort((a, b) => b.$1.compareTo(a.$1));
+              for (final v in d.values.where((v) =>
+                  v.item.toLowerCase() == item.toLowerCase() &&
+                  (widget.group == null || examGroupOf(d, v).toLowerCase() == widget.group!.toLowerCase()) &&
+                  (widget.unit == null || examUnitKey(v.unit) == widget.unit)))
+                (d.collectedOn ?? isoDay(d.createdAt), v, d.labName, d.createdAt),
+          ]..sort((a, b) {
+              final byDate = b.$1.compareTo(a.$1);
+              return byDate != 0 ? byDate : b.$4.compareTo(a.$4);
+            });
           // One chip per unit; values in different units are never listed together.
           final units = <String, String>{for (final r in rows) examUnitKey(r.$2.unit): r.$2.unit ?? '—'};
           final unit = units.containsKey(_unit) ? _unit! : (rows.isEmpty ? '' : examUnitKey(rows.first.$2.unit));
@@ -69,7 +77,7 @@ class _ExamItemScreenState extends ConsumerState<ExamItemScreen> {
                       for (final h in [l10n.careExamDate, l10n.careExamValue, l10n.careExamReferencePrinted, l10n.careExamLab])
                         Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Text(h, style: careBody(11))),
                     ]),
-                    for (final (date, v, lab) in shown)
+                    for (final (date, v, lab, _) in shown)
                       TableRow(children: [
                         _cell(careDate(context, careDay(date)!)),
                         _cell([v.value, v.unit].whereType<String>().join(' '), bold: true),

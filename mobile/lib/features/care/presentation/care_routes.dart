@@ -36,6 +36,14 @@ class MedicationFormArgs {
   const MedicationFormArgs({this.medication, this.fromPrescription, this.sourceDocumentId});
 }
 
+/// The selected history series. String extras still open the legacy item view.
+class ExamItemArgs {
+  final String item;
+  final String group;
+  final String unit;
+  const ExamItemArgs({required this.item, required this.group, required this.unit});
+}
+
 final List<RouteBase> careRoutes = [
   GoRoute(path: CarePaths.vaccines, builder: (_, __) => const VaccinesScreen()),
   GoRoute(path: CarePaths.allergies, builder: (_, __) => const AllergiesScreen()),
@@ -47,7 +55,15 @@ final List<RouteBase> careRoutes = [
   GoRoute(path: CarePaths.appointments, builder: (_, __) => const AppointmentsScreen()),
   GoRoute(path: CarePaths.summary, builder: (_, __) => const SummaryScreen()),
   GoRoute(path: CarePaths.exams, builder: (_, __) => const ExamsScreen()),
-  GoRoute(path: CarePaths.examItem, builder: (_, state) => ExamItemScreen(item: state.extra as String? ?? '')),
+  GoRoute(
+    path: CarePaths.examItem,
+    builder: (_, state) {
+      final extra = state.extra;
+      return extra is ExamItemArgs
+          ? ExamItemScreen(item: extra.item, group: extra.group, unit: extra.unit)
+          : ExamItemScreen(item: extra as String? ?? '');
+    },
+  ),
   GoRoute(path: '/care/exams/:id', builder: (_, state) => ExamReviewScreen(documentId: state.pathParameters['id']!)),
   GoRoute(path: CarePaths.prescriptions, builder: (_, __) => const ExamsScreen(prescriptions: true)),
   GoRoute(

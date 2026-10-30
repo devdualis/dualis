@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ConfigService } from '@nestjs/config';
+import { PgDialect } from 'drizzle-orm/pg-core';
+import type { SQL } from 'drizzle-orm';
 import { EncryptionService } from '../../src/common/encryption/encryption.service';
 import { CareService, sameExams } from '../../src/modules/care/care.service';
 import { DocumentData } from '../../src/modules/care/care.dto';
@@ -14,7 +16,8 @@ function chain(result: unknown) {
     {},
     {
       get(_, prop: string) {
-        if (prop === 'then') return (resolve: (v: unknown) => void) => resolve(result);
+        if (prop === 'then') return (resolve: (v: unknown) => void, reject: (err: unknown) => void) =>
+          Promise.resolve().then(() => typeof result === 'function' ? result(calls) : result).then(resolve, reject);
         if (prop === 'calls') return calls;
         return (...args: unknown[]) => {
           (calls[prop] ??= []).push(args);
@@ -161,6 +164,41 @@ describe('CareService repeated documents', () => {
     expect(builders[2].calls.set[0][0]).toMatchObject({ kind: 'lab', status: 'processing' });
     expect(result.duplicate).toBeUndefined();
     expect(service.readDocument).toHaveBeenCalledWith('usr-1', 'doc-1', 'lab', 'application/pdf', file, { title: 'Hemograma' });
+  });
+
+  it('starts only one reading when concurrent uploads both see the archived file', async () => {
+    let stored = row({ status: 'archived', kind: 'other' });
+    let selections = 0;
+    let release!: () => void;
+    const bothSelected = new Promise<void>((resolve) => { release = resolve; });
+    const dialect = new PgDialect();
+    const tx = {
+      insert: () => chain([]),
+      select: () => chain(async () => {
+        const snapshot = { ...stored };
+        if (selections < 2) {
+          if (++selections === 2) release();
+          await bothSelected;
+        }
+        return [snapshot];
+      }),
+      update: () => chain((calls: Record<string, unknown[][]>) => {
+        const query = dialect.sqlToQuery(calls.where[0][0] as SQL);
+        // Apply the actual UPDATE predicate to shared state, like competing DB transactions.
+        const expectedStatus = query.sql.includes('"care_documents"."status"') ? query.params.at(-1) : undefined;
+        if (expectedStatus !== undefined && stored.status !== expectedStatus) return [];
+        stored = { ...stored, ...calls.set[0][0] as object };
+        return [{ ...stored }];
+      }),
+    };
+    db.withRls.mockImplementation(async (_user: string, fn: (t: unknown) => unknown) => fn(tx));
+
+    const results = await Promise.all([upload(), upload()]);
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(service.readDocument).toHaveBeenCalledTimes(1);
+    expect(results.filter((result) => result.duplicate)).toHaveLength(1);
+    expect(results.every((result) => result.id === 'doc-1' && result.status === 'processing')).toBe(true);
   });
 
   it('marks a new reading that holds the same exams as an older document', async () => {

@@ -5,6 +5,7 @@ import 'package:dualis_mobile/features/care/data/care_api.dart';
 import 'package:dualis_mobile/features/care/data/care_notifications.dart';
 import 'package:dualis_mobile/features/care/domain/care_models.dart';
 import 'package:dualis_mobile/features/care/domain/pni_calendar.dart';
+import 'package:dualis_mobile/features/care/presentation/care_routes.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/allergies_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/appointments_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/care_hub_screen.dart';
@@ -14,6 +15,7 @@ import 'package:dualis_mobile/features/care/presentation/screens/exams_screen.da
 import 'package:dualis_mobile/features/care/presentation/screens/medications_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/place_picker_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/vaccines_screen.dart';
+import 'package:dualis_mobile/features/care/presentation/widgets/exam_values_list.dart';
 import 'package:dualis_mobile/features/home/presentation/widgets/dualis_bottom_nav_bar.dart';
 import 'package:dualis_mobile/features/profile/domain/models/profile.dart';
 import 'package:dualis_mobile/features/profile/presentation/controllers/active_profile_controller.dart';
@@ -23,6 +25,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 /// In-memory "Meus cuidados" API.
 class FakeCareApi implements CareApi {
@@ -130,6 +133,19 @@ Profile _me({ProfileAccessLevel access = ProfileAccessLevel.owner, DateTime? bir
 
 void main() {
   final pt = AppLocalizationsPt();
+
+  CareDocument historyDoc(String id, String value, {String section = 'Sangue', String unit = 'mg/dL', int hour = 12, String? collectedOn = '2026-10-30'}) =>
+      CareDocument(
+        id: id,
+        kind: DocumentKind.lab,
+        mime: 'application/pdf',
+        status: DocumentStatus.ready,
+        createdAt: DateTime(2026, 10, 30, hour),
+        data: {
+          if (collectedOn != null) 'collectedOn': collectedOn,
+          'values': [{'section': section, 'item': 'Glicose', 'value': value, 'unit': unit, 'confirmed': true}],
+        },
+      );
 
   Future<FakeCareApi> pump(WidgetTester tester, Widget screen, {FakeCareApi? api, Profile? profile, PlacePicker? placePicker}) async {
     tester.view.physicalSize = const Size(1000, 2400);
@@ -449,12 +465,74 @@ void main() {
 
     await tester.enterText(find.byKey(const Key('exam_values_search')), 'hemo');
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('exam_values_Hemoglobina')), findsOneWidget);
+    expect(find.byKey(const ValueKey(('hemograma completo', 'hemoglobina', 'g/dl'))), findsOneWidget);
     expect(find.text('Bioquímica'), findsNothing);
 
     await tester.enterText(find.byKey(const Key('exam_values_search')), 'HEMATOCRITO');
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('exam_values_Hematócrito')), findsOneWidget);
+    expect(find.byKey(const ValueKey(('hemograma completo', 'hematócrito', ''))), findsOneWidget);
+  });
+
+  for (final hasCollectionDate in [true, false]) {
+    testWidgets('history latest result breaks date ties by upload time (collection date: $hasCollectionDate)', (tester) async {
+      final date = hasCollectionDate ? '2026-10-30' : null;
+      final api = FakeCareApi()..docs.addAll([
+        historyDoc('new', '20', hour: 12, collectedOn: date),
+        historyDoc('old', '10', hour: 9, collectedOn: date),
+      ]);
+      await pump(tester, const ExamsScreen(), api: api);
+      expect(find.text('20 mg/dL'), findsOneWidget);
+      expect(find.text('10 mg/dL'), findsNothing);
+    });
+  }
+
+  testWidgets('history keeps sections and units separate for the same item name', (tester) async {
+    final api = FakeCareApi()..docs.addAll([
+      historyDoc('urine', '0', section: 'Urina', hour: 14),
+      historyDoc('blood-mmol', '5', unit: 'mmol/L', hour: 13),
+      historyDoc('blood-mg', '90'),
+    ]);
+    await pump(tester, const ExamsScreen(), api: api);
+    final history = find.byType(ExamValuesList);
+    expect(find.descendant(of: history, matching: find.text('Sangue')), findsOneWidget);
+    expect(find.descendant(of: history, matching: find.text('Urina')), findsOneWidget);
+    for (final value in ['90 mg/dL', '5 mmol/L', '0 mg/dL']) {
+      expect(find.text(value), findsOneWidget);
+    }
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('history detail keeps the selected section and unit and accepts legacy item routes', (tester) async {
+    final api = FakeCareApi()..docs.addAll([
+      historyDoc('urine', '0', section: 'Urina', hour: 14),
+      historyDoc('blood-mmol', '5', unit: 'mmol/L', hour: 13),
+      historyDoc('blood-mg', '90'),
+    ]);
+    final router = GoRouter(initialLocation: CarePaths.exams, routes: careRoutes);
+    addTearDown(router.dispose);
+    await pump(tester, MaterialApp.router(
+      routerConfig: router,
+      theme: AppTheme.lightTheme,
+      locale: const Locale('pt'),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+    ), api: api);
+    await tester.tap(find.byKey(const ValueKey(('sangue', 'glicose', 'mg/dl'))));
+    await tester.pumpAndSettle();
+    expect(find.text('90 mg/dL'), findsOneWidget);
+    expect(find.text('0 mg/dL'), findsNothing);
+    expect(find.text('5 mmol/L'), findsNothing);
+
+    router.go(CarePaths.examItem, extra: 'Glicose');
+    await tester.pumpAndSettle();
+    expect(find.text('90 mg/dL'), findsOneWidget);
+    expect(find.text('0 mg/dL'), findsOneWidget);
+    expect(find.byKey(const Key('exam_unit_mmol/l')), findsOneWidget);
   });
 
   testWidgets('prescriptions have their own list, apart from exams', (tester) async {
