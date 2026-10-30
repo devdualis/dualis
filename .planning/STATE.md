@@ -94,6 +94,7 @@ None yet.
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
+| 261030-evl | Valores ao longo do tempo: lista por exame com último valor, data e linha neutra; "Ver mais" e busca (>15 itens) no lugar dos chips | 2026-10-30 | 2d57809 | [261030-evl-exam-values-list](./quick/261030-evl-exam-values-list/) |
 | 261030-ktb | Exames repetidos: o mesmo arquivo não é guardado nem lido duas vezes por perfil (HMAC com chave do servidor, migração 0022, backfill); mesma leitura em outro arquivo pergunta "Descartar este / Manter os dois" | 2026-10-30 | (this commit) | [261030-ktb-documentos-de-exames-repetidos](./quick/261030-ktb-documentos-de-exames-repetidos/) |
 | 261030-nrm | Nomes de itens de exame num só formato: sem pontuação solta ("Segmentados :" = "Segmentados:"), primeira letra maiúscula, siglas mantidas (HDL, VCM, T4) | 2026-10-30 | (this commit) | [261030-nrm-normalize-exam-item-names](./quick/261030-nrm-normalize-exam-item-names/) |
 | 261030-drj | Leitura de exames: linhas da tabela pelas caixas do Vision (% e /mm³ em linhas próprias), seção por exame, data da coleta dd/mm/aaaa, laboratório pelo logo, sem data de nascimento nem nomes de médicos no texto enviado ao Gemini | 2026-10-30 | (this commit) | [261030-drj-fix-lab-exam-reading-layout-sections](./quick/261030-drj-fix-lab-exam-reading-layout-sections/) |
