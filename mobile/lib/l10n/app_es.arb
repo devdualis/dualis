@@ -936,6 +936,7 @@
   "careAppointmentProfessional": "Quién la atiende (opcional)",
   "careAppointmentSpecialty": "Especialidad",
   "careAppointmentPlace": "Lugar",
+  "careAppointmentOpenMap": "Abrir en Google Maps",
   "careAppointmentReminderNone": "Sin recordatorio",
   "careAppointmentReminder1d": "1 día antes",
   "careAppointmentReminder2h": "2 horas antes",

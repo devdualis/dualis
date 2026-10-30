@@ -3263,6 +3263,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get careAppointmentPlace => 'Local';
 
   @override
+  String get careAppointmentOpenMap => 'Abrir no Google Maps';
+
+  @override
   String get careAppointmentReminderNone => 'Sem lembrete';
 
   @override

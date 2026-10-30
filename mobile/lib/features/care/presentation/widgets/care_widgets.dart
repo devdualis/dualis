@@ -220,6 +220,11 @@ class CareAsync<T> extends StatelessWidget {
 }
 
 /// Labelled text field with the app's rounded style.
+const _plain = {'á': 'a', 'à': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e', 'í': 'i', 'ì': 'i', 'î': 'i', 'ï': 'i', 'ó': 'o', 'ò': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o', 'ú': 'u', 'ù': 'u', 'û': 'u', 'ü': 'u', 'ç': 'c', 'ñ': 'n'};
+
+/// Lower case without accents, so "hematocrito" finds "Hematócrito".
+String foldText(String text) => text.toLowerCase().split('').map((c) => _plain[c] ?? c).join();
+
 class CareField extends StatelessWidget {
   const CareField({
     super.key,

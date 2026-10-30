@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../domain/care_models.dart';
+import '../../domain/specialties.dart';
 import '../care_providers.dart';
 import '../widgets/care_widgets.dart';
+
+/// Opens Google Maps (app if installed, else web) searching for [place].
+Future<void> _openInMaps(String place) =>
+    launchUrl(Uri.https('www.google.com', '/maps/search/', {'api': '1', 'query': place}), mode: LaunchMode.externalApplication);
 
 /// Appointment agenda: date, professional, place, "perguntas que quero fazer"
 /// and the person's notes afterwards.
@@ -96,12 +102,22 @@ class _AppointmentCard extends StatelessWidget {
                   children: [
                     Text(a.str('professional') ?? a.str('specialty') ?? l10n.careAppointmentTitleFallback, style: careTitle()),
                     Text(
-                      [
-                        [if (a.str('professional') != null) a.str('specialty'), careTime(at)].whereType<String>().join(' · '),
-                        if (a.str('place') != null) a.str('place')!,
-                      ].join('\n'),
+                      [if (a.str('professional') != null) a.str('specialty'), careTime(at)].whereType<String>().join(' · '),
                       style: careBody(),
                     ),
+                    if (a.str('place') != null)
+                      InkWell(
+                        key: const Key('appt_card_place'),
+                        onTap: () => _openInMaps(a.str('place')!),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          child: Row(children: [
+                            const Icon(Icons.place_outlined, size: 16, color: AppColors.dualisNavy),
+                            const SizedBox(width: 4),
+                            Expanded(child: Text(a.str('place')!, style: careBody().copyWith(color: AppColors.dualisNavy, decoration: TextDecoration.underline))),
+                          ]),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -145,6 +161,7 @@ class _AppointmentFormState extends ConsumerState<_AppointmentForm> {
   late final _place = TextEditingController(text: widget.existing?.str('place'));
   late final _questions = TextEditingController(text: widget.existing?.str('questions'));
   late final _notes = TextEditingController(text: widget.existing?.str('notes'));
+  final _specialtyFocus = FocusNode();
   late String _reminder = widget.existing?.str('reminder') ?? '1d';
   bool _busy = false;
 
@@ -153,6 +170,7 @@ class _AppointmentFormState extends ConsumerState<_AppointmentForm> {
     for (final c in [_professional, _specialty, _place, _questions, _notes]) {
       c.dispose();
     }
+    _specialtyFocus.dispose();
     super.dispose();
   }
 
@@ -224,11 +242,77 @@ class _AppointmentFormState extends ConsumerState<_AppointmentForm> {
         const SizedBox(height: 10),
         CareField(fieldKey: const Key('appt_professional'), controller: _professional, label: l10n.careAppointmentProfessional, maxLength: 120),
         const SizedBox(height: 10),
-        Row(children: [
-          Expanded(child: CareField(controller: _specialty, label: l10n.careAppointmentSpecialty, maxLength: 80)),
-          const SizedBox(width: 10),
-          Expanded(child: CareField(controller: _place, label: l10n.careAppointmentPlace, maxLength: 160)),
-        ]),
+        Autocomplete<String>(
+          textEditingController: _specialty,
+          focusNode: _specialtyFocus,
+          optionsViewOpenDirection: OptionsViewOpenDirection.mostSpace,
+          optionsBuilder: (value) {
+            final query = foldText(value.text.trim());
+            final all = specialtiesFor(Localizations.localeOf(context).languageCode);
+            return query.isEmpty ? all : all.where((s) => foldText(s).contains(query));
+          },
+          optionsViewBuilder: (context, onSelected, options) => Align(
+            alignment: AlignmentDirectional.topStart,
+            child: Material(
+              elevation: 6,
+              color: AppColors.surfaceLight,
+              borderRadius: BorderRadius.circular(14),
+              clipBehavior: Clip.antiAlias,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 240),
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  shrinkWrap: true,
+                  children: [
+                    for (final option in options)
+                      InkWell(
+                        onTap: () => onSelected(option),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          child: Text(option, style: careBody(15).copyWith(color: AppColors.textPrimaryLight)),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          fieldViewBuilder: (context, controller, focusNode, onSubmitted) => TextFormField(
+            key: const Key('appt_specialty'),
+            controller: controller,
+            focusNode: focusNode,
+            maxLength: 80,
+            onFieldSubmitted: (_) => onSubmitted(),
+            decoration: InputDecoration(
+              labelText: l10n.careAppointmentSpecialty,
+              counterText: '',
+              filled: true,
+              fillColor: AppColors.surfaceLight,
+              suffixIcon: const Icon(Icons.search),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        ValueListenableBuilder(
+          valueListenable: _place,
+          builder: (context, value, _) => TextFormField(
+            key: const Key('appt_place'),
+            controller: _place,
+            maxLength: 160,
+            decoration: InputDecoration(
+              labelText: l10n.careAppointmentPlace,
+              counterText: '',
+              filled: true,
+              fillColor: AppColors.surfaceLight,
+              suffixIcon: IconButton(
+                key: const Key('appt_place_map'),
+                tooltip: l10n.careAppointmentOpenMap,
+                icon: const Icon(Icons.map_outlined),
+                onPressed: value.text.trim().isEmpty ? null : () => _openInMaps(value.text.trim()),
+              ),
+            ),
+          ),
+        ),
         const SizedBox(height: 10),
         CareField(controller: _questions, label: l10n.careAppointmentQuestions, maxLength: 1000, maxLines: 3),
         const SizedBox(height: 10),

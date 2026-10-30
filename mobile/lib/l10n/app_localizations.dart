@@ -5632,6 +5632,12 @@ abstract class AppLocalizations {
   /// **'Local'**
   String get careAppointmentPlace;
 
+  /// No description provided for @careAppointmentOpenMap.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir no Google Maps'**
+  String get careAppointmentOpenMap;
+
   /// No description provided for @careAppointmentReminderNone.
   ///
   /// In pt, this message translates to:

@@ -13,11 +13,6 @@ const _rowsPerGroup = 4;
 /// The search field appears once the list is longer than this.
 const _searchFrom = 15;
 
-const _plain = {'á': 'a', 'à': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e', 'í': 'i', 'ì': 'i', 'î': 'i', 'ï': 'i', 'ó': 'o', 'ò': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o', 'ú': 'u', 'ù': 'u', 'û': 'u', 'ü': 'u', 'ç': 'c', 'ñ': 'n'};
-
-/// Lower case without accents, so "hematocrito" finds "Hematócrito".
-String _fold(String text) => text.toLowerCase().split('').map((c) => _plain[c] ?? c).join();
-
 /// One exam item across the checked lab documents: its latest result and the earlier
 /// results in the same unit, oldest first.
 class _Item {
@@ -78,13 +73,13 @@ class _ExamValuesListState extends State<ExamValuesList> {
     final l10n = AppLocalizations.of(context);
     final all = _groups(l10n);
     final count = all.values.fold<int>(0, (n, items) => n + items.length);
-    final query = _fold(_query.trim());
+    final query = foldText(_query.trim());
     final groups = query.isEmpty
         ? all
         : {
             for (final MapEntry(:key, :value) in all.entries)
-              if (value.any((i) => _fold(i.name).contains(query)))
-                key: value.where((i) => _fold(i.name).contains(query)).toList(),
+              if (value.any((i) => foldText(i.name).contains(query)))
+                key: value.where((i) => foldText(i.name).contains(query)).toList(),
           };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

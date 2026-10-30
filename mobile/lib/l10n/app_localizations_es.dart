@@ -3269,6 +3269,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get careAppointmentPlace => 'Lugar';
 
   @override
+  String get careAppointmentOpenMap => 'Abrir en Google Maps';
+
+  @override
   String get careAppointmentReminderNone => 'Sin recordatorio';
 
   @override

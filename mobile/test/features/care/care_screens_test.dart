@@ -6,6 +6,7 @@ import 'package:dualis_mobile/features/care/data/care_notifications.dart';
 import 'package:dualis_mobile/features/care/domain/care_models.dart';
 import 'package:dualis_mobile/features/care/domain/pni_calendar.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/allergies_screen.dart';
+import 'package:dualis_mobile/features/care/presentation/screens/appointments_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/care_hub_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/exam_item_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/exam_review_screen.dart';
@@ -492,6 +493,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(api.docs, isEmpty);
     expect(find.text(pt.careExamReading), findsNothing);
+  });
+
+  testWidgets('appointment specialty is searchable without accents and place links to Maps', (tester) async {
+    await pump(tester, const AppointmentsScreen());
+    await tester.tap(find.byKey(const Key('appointments_add')));
+    await tester.pumpAndSettle();
+    expect(tester.widget<IconButton>(find.byKey(const Key('appt_place_map'))).onPressed, isNull);
+    await tester.enterText(find.byKey(const Key('appt_specialty')), 'clinica');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Clínica médica'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(TextFormField, 'Clínica médica'), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('appt_specialty')), 'Homeopatia');
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(TextFormField, 'Homeopatia'), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('appt_place')), 'Hospital Sírio-Libanês');
+    await tester.pumpAndSettle();
+    expect(tester.widget<IconButton>(find.byKey(const Key('appt_place_map'))).onPressed, isNotNull);
   });
 
   testWidgets('premium nav bar adds the care tab before the help button', (tester) async {
