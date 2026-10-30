@@ -1,10 +1,26 @@
-import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+  Optional,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
-import { and, asc, desc, eq, gte, inArray, lte, ne } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, lte, ne } from 'drizzle-orm';
 import { DatabaseService, DrizzleTransaction } from '../../database/database.service';
 import { EncryptionService } from '../../common/encryption/encryption.service';
-import { careDocuments, careRecords, CareDocumentStatus, CareRecordKind } from '../../database/schema/care.schema';
+import {
+  careDocumentRequests,
+  careDocuments,
+  careRecords,
+  CareDocumentStatus,
+  CareRecordKind,
+} from '../../database/schema/care.schema';
 import {
   CARE_DATA_CLASSES,
   CareDocumentResponse,
@@ -38,6 +54,10 @@ const documentMeta = {
 };
 type DocumentMetaRow = Omit<typeof careDocuments.$inferSelect, 'file' | 'fileHmac'>;
 
+/** Uploads plus re-reads one person may request in 24 hours (each reading calls Vision and Gemini). */
+const DEFAULT_DAILY_DOCUMENT_LIMIT = 30;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 @Injectable()
 export class CareService {
   private readonly logger = new Logger(CareService.name);
@@ -46,6 +66,7 @@ export class CareService {
     @Inject(DatabaseService) private readonly databaseService: DatabaseService,
     @Inject(EncryptionService) private readonly encryption: EncryptionService,
     @Inject(DocumentReaderService) private readonly reader: DocumentReaderService,
+    @Optional() @Inject(ConfigService) private readonly config?: ConfigService,
   ) {}
 
   // ---------------------------------------------------------------- records
@@ -157,6 +178,7 @@ export class CareService {
     const fileHmac = this.encryption.fingerprint(file);
 
     const { row, read, base, duplicate } = await this.databaseService.withRls(userId, async (tx) => {
+      await this.recordDocumentRequest(tx, userId);
       const [inserted] = await tx
         .insert(careDocuments)
         .values({
@@ -312,6 +334,7 @@ export class CareService {
       if (existing.kind === 'other' || !['failed', 'review'].includes(existing.status)) {
         throw new BadRequestException('Only unread or unconfirmed exams and prescriptions can be read again.');
       }
+      await this.recordDocumentRequest(tx, userId);
       const current = this.decryptDocumentData(existing);
       const [stored] = await tx.select({ file: careDocuments.file }).from(careDocuments).where(eq(careDocuments.id, id));
       const [updated] = await tx
@@ -335,6 +358,22 @@ export class CareService {
   }
 
   // ---------------------------------------------------------------- helpers
+
+  /**
+   * Counts an upload or re-read against the person's limit for the last 24 hours (429 when
+   * reached). Runs in the caller's transaction, so a request that fails is not counted.
+   */
+  private async recordDocumentRequest(tx: DrizzleTransaction, userId: string): Promise<void> {
+    const limit = Number(this.config?.get('CARE_DAILY_DOCUMENT_LIMIT')) || DEFAULT_DAILY_DOCUMENT_LIMIT;
+    const [{ requests }] = await tx
+      .select({ requests: count() })
+      .from(careDocumentRequests)
+      .where(and(eq(careDocumentRequests.userId, userId), gte(careDocumentRequests.createdAt, new Date(Date.now() - DAY_MS))));
+    if (requests >= limit) {
+      throw new HttpException('Daily document limit reached. Try again tomorrow.', HttpStatus.TOO_MANY_REQUESTS);
+    }
+    await tx.insert(careDocumentRequests).values({ userId });
+  }
 
   private validateData(kind: CareRecordKind, raw: Record<string, unknown>): Record<string, unknown> {
     const instance = plainToInstance(CARE_DATA_CLASSES[kind] as new () => object, raw ?? {});

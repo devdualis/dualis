@@ -132,6 +132,8 @@ describe('CareService repeated documents', () => {
     db = { withRls: vi.fn(async (_user: string, fn: (t: unknown) => unknown) => fn(tx)) };
     service = new CareService(db as any, encryption, reader as any);
     vi.spyOn(service, 'readDocument').mockResolvedValue();
+    // The daily limit has its own tests (care-document-limit.spec.ts).
+    vi.spyOn(service as any, 'recordDocumentRequest').mockResolvedValue(undefined);
   });
 
   const upload = (read = true, kind: 'lab' | 'other' = 'lab') =>

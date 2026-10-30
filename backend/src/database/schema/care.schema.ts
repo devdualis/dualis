@@ -85,3 +85,24 @@ export const careDocuments = pgTable(
     ...profilePolicies('care_documents'),
   ],
 );
+
+/** The caller's own rows (requests are counted per author, not per profile). */
+const ownRow = sql`user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`;
+
+/**
+ * One row per document upload or re-read (migration 0023), counted for the daily limit
+ * in CareService. Append-only: deleting a document does not give its request back.
+ */
+export const careDocumentRequests = pgTable(
+  'care_document_requests',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_care_document_requests_user_created').on(table.userId, table.createdAt.desc()),
+    pgPolicy('care_document_requests_own_select', { for: 'select', using: ownRow }),
+    pgPolicy('care_document_requests_own_insert', { for: 'insert', withCheck: ownRow }),
+  ],
+);
