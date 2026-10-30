@@ -27,6 +27,11 @@ jobs:
         env:
           BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
         run: |
+          # The repo is public. GitHub only masks the whole secret, so mask every
+          # piece of the URL too: a parse error can print the password alone.
+          for part in $(printf '%s' "$BACKUP_DATABASE_URL" | tr ':/@?&=#' '\n\n\n\n\n\n\n'); do
+            [ ${#part} -ge 6 ] && echo "::add-mask::$part"
+          done
           if [ -z "$BACKUP_DATABASE_URL" ]; then
             echo "::error::BACKUP_DATABASE_URL is empty. Set it on the 'production' environment (table-owner role, session pooler)."
             exit 1
