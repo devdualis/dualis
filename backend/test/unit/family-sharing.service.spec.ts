@@ -1,9 +1,19 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import {
+  BadRequestException,
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  NotFoundException,
+} from '@nestjs/common';
+import { SQL } from 'drizzle-orm';
+import { PgDialect } from 'drizzle-orm/pg-core';
 import {
   FamilySharingService,
   generateInviteCode,
+  FAILED_INVITE_ACCEPT_WINDOW_MS,
   INVITE_CODE_CHARS,
+  MAX_FAILED_INVITE_ACCEPTS,
 } from '../../src/modules/profiles/family-sharing.service';
 
 describe('FamilySharingService Unit Tests', () => {
@@ -18,14 +28,14 @@ describe('FamilySharingService Unit Tests', () => {
   });
 
   describe('Invite Code Generation', () => {
-    it('generates 6-character uppercase codes excluding ambiguous characters 0, O, 1, I', () => {
+    it('generates 10-character uppercase codes excluding ambiguous characters 0, O, 1, I', () => {
       const allowedCharsSet = new Set(INVITE_CODE_CHARS.split(''));
 
       // Run multiple iterations to verify stability
       for (let i = 0; i < 100; i++) {
         const code = generateInviteCode();
-        expect(code).toHaveLength(6);
-        expect(code).toMatch(/^[2-9A-HJ-NP-Z]{6}$/);
+        expect(code).toHaveLength(10);
+        expect(code).toMatch(/^[2-9A-HJ-NP-Z]{10}$/);
 
         // Explicitly check forbidden ambiguous characters
         expect(code).not.toContain('0');
@@ -259,6 +269,95 @@ describe('FamilySharingService Unit Tests', () => {
       await expect(service.acceptInvite(granteeUserId, inviteCode)).rejects.toThrow(
         BadRequestException,
       );
+    });
+
+    describe('failed-attempt cap', () => {
+      const acceptedRow = {
+        id: 'grant-uuid-1',
+        granter_user_id: 'user-granter-uuid',
+        target_profile_id: 'profile-uuid-1',
+        grantee_user_id: granteeUserId,
+        access_level: 'VIEW_ONLY',
+        invite_code: 'ABC234DEF5',
+        status: 'ACCEPTED',
+        expires_at: new Date(),
+        accepted_at: new Date(),
+        revoked_at: null,
+        created_at: new Date(),
+      };
+
+      const acceptReturns = (rows: unknown[]) =>
+        mockDatabaseService.withRls.mockImplementation(async (_uid: string, callback: any) =>
+          callback({ execute: vi.fn().mockResolvedValue({ rows }) }),
+        );
+
+      const failUntilCapped = async (userId = granteeUserId) => {
+        for (let i = 0; i < MAX_FAILED_INVITE_ACCEPTS; i++) {
+          await expect(service.acceptInvite(userId, inviteCode)).rejects.toThrow(NotFoundException);
+        }
+      };
+
+      const statusOf = (err: unknown) => (err instanceof HttpException ? err.getStatus() : undefined);
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it('answers 429 once the account used up its failed attempts, without querying again', async () => {
+        acceptReturns([]);
+        await failUntilCapped();
+        mockDatabaseService.withRls.mockClear();
+
+        const err = await service.acceptInvite(granteeUserId, inviteCode).catch((e) => e);
+
+        expect(statusOf(err)).toBe(HttpStatus.TOO_MANY_REQUESTS);
+        expect(mockDatabaseService.withRls).not.toHaveBeenCalled();
+        // The cap is per account.
+        await expect(service.acceptInvite('user-other-uuid', inviteCode)).rejects.toThrow(
+          NotFoundException,
+        );
+      });
+
+      it('counts parallel attempts before their lookups finish', async () => {
+        acceptReturns([]);
+
+        const results = await Promise.allSettled(
+          Array.from({ length: MAX_FAILED_INVITE_ACCEPTS + 3 }, () =>
+            service.acceptInvite(granteeUserId, inviteCode),
+          ),
+        );
+
+        const tooMany = results.filter(
+          (r) => r.status === 'rejected' && statusOf(r.reason) === HttpStatus.TOO_MANY_REQUESTS,
+        );
+        expect(tooMany).toHaveLength(3);
+        expect(mockDatabaseService.withRls).toHaveBeenCalledTimes(MAX_FAILED_INVITE_ACCEPTS);
+      });
+
+      it('does not count successful accepts', async () => {
+        acceptReturns([acceptedRow]);
+
+        for (let i = 0; i < MAX_FAILED_INVITE_ACCEPTS + 2; i++) {
+          await expect(service.acceptInvite(granteeUserId, inviteCode)).resolves.toMatchObject({
+            status: 'ACCEPTED',
+          });
+        }
+      });
+
+      it('lets the account try again once the window has passed', async () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-10-30T12:00:00Z'));
+        acceptReturns([]);
+        await failUntilCapped();
+        const blocked = await service.acceptInvite(granteeUserId, inviteCode).catch((e) => e);
+        expect(statusOf(blocked)).toBe(HttpStatus.TOO_MANY_REQUESTS);
+
+        vi.setSystemTime(Date.now() + FAILED_INVITE_ACCEPT_WINDOW_MS);
+
+        await expect(service.acceptInvite(granteeUserId, inviteCode)).rejects.toThrow(
+          NotFoundException,
+        );
+      });
     });
   });
 
@@ -500,6 +599,78 @@ describe('FamilySharingService Unit Tests', () => {
       expect(result.incoming[0].id).toBe('grant-in-1');
       expect(result.incoming[0].status).toBe('ACCEPTED');
       expect(result.incoming[0].targetProfileName).toBe('Helena Rincon');
+    });
+
+    it('names who accepted each outgoing grant, looking up only those grantees', async () => {
+      const grantRow = (id: string, status: string, granteeUserId: string | null) => ({
+        grant: {
+          id,
+          granterUserId: userId,
+          targetProfileId: 'profile-1',
+          accessLevel: 'VIEW_ONLY',
+          status,
+          inviteCode: `${id.slice(-4).toUpperCase()}234567`,
+          granteeUserId,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          acceptedAt: granteeUserId ? new Date() : null,
+          revokedAt: null,
+          createdAt: new Date(),
+        },
+        targetProfileName: 'Lucas Rincon',
+      });
+      const outgoingRows = [
+        grantRow('grant-out-a', 'ACCEPTED', 'user-maria'),
+        grantRow('grant-out-b', 'PENDING', null),
+      ];
+
+      const dialect = new PgDialect();
+      const executed: string[] = [];
+      let usersFilter: SQL | undefined;
+      let joinedQueries = 0;
+      mockDatabaseService.withRls.mockImplementation(async (_uid: string, callback: any) => {
+        const tx = {
+          execute: vi.fn().mockImplementation((query: SQL) => {
+            executed.push(dialect.sqlToQuery(query).sql);
+            return Promise.resolve({ rows: [] });
+          }),
+          select: vi.fn().mockImplementation(() => ({
+            from: vi.fn().mockImplementation(() => ({
+              leftJoin: vi.fn().mockReturnValue({
+                where: vi.fn().mockImplementation(() => {
+                  joinedQueries++;
+                  return Promise.resolve(joinedQueries === 1 ? outgoingRows : []);
+                }),
+              }),
+              where: vi.fn().mockImplementation((condition: SQL) => {
+                usersFilter = condition;
+                return Promise.resolve([
+                  { id: 'user-maria', name: 'Maria Souza', email: 'maria@example.com' },
+                ]);
+              }),
+            })),
+          })),
+        };
+        return callback(tx);
+      });
+
+      const result = await service.listGrants(userId);
+
+      expect(result.outgoing[0]).toMatchObject({
+        id: 'grant-out-a',
+        granteeName: 'Maria Souza',
+        granteeEmail: 'maria@example.com',
+      });
+      expect(result.outgoing[1]).toMatchObject({
+        id: 'grant-out-b',
+        granteeName: null,
+        granteeEmail: null,
+      });
+      expect(dialect.sqlToQuery(usersFilter!).params).toEqual(['user-maria']);
+      // The users RLS bypass is on only around that lookup.
+      expect(executed).toEqual([
+        "SELECT set_config('app.is_auth_service', 'true', true)",
+        "SELECT set_config('app.is_auth_service', '', true)",
+      ]);
     });
   });
 });

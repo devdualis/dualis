@@ -36,6 +36,9 @@ export class OutgoingGrantItemDto {
   status!: GrantStatus;
   inviteCode!: string;
   granteeUserId!: string | null;
+  /** Who accepted the invite, so the owner can check who has access. */
+  granteeName!: string | null;
+  granteeEmail!: string | null;
   expiresAt!: Date | string;
   acceptedAt!: Date | string | null;
   revokedAt!: Date | string | null;

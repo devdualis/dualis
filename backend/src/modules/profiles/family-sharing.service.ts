@@ -1,19 +1,25 @@
 import {
   BadRequestException,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from "@nestjs/common";
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { randomInt } from "node:crypto";
-import { DatabaseService } from "../../database/database.service";
+import {
+  DatabaseService,
+  DrizzleTransaction,
+} from "../../database/database.service";
 import { profiles } from "../../database/schema/profiles.schema";
 import {
   AccessLevel,
   sharedAccessGrants,
 } from "../../database/schema/shared-access-grants.schema";
+import { users } from "../../database/schema/users.schema";
 import {
   AcceptedGrantResponseDto,
   InviteCreatedResponseDto,
@@ -22,12 +28,16 @@ import {
 } from "./dto/grant-response.dto";
 
 export const INVITE_CODE_CHARS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
-export const INVITE_CODE_LENGTH = 6;
+// 32^10 ≈ 1.1e15 codes: guessing one within the 72-hour window is out of reach.
+export const INVITE_CODE_LENGTH = 10;
 export const INVITE_TTL_HOURS = 72;
 export const MAX_INVITE_COLLISION_RETRIES = 5;
+export const MAX_FAILED_INVITE_ACCEPTS = 5;
+export const FAILED_INVITE_ACCEPT_WINDOW_MS = 15 * 60 * 1000;
+const MAX_TRACKED_ACCEPT_USERS = 10_000;
 
 /**
- * Generates an uppercase 6-character alphanumeric invite code using node:crypto,
+ * Generates an uppercase 10-character alphanumeric invite code using node:crypto,
  * excluding ambiguous characters 0, O, 1, and I.
  */
 export function generateInviteCode(): string {
@@ -40,6 +50,12 @@ export function generateInviteCode(): string {
 
 @Injectable()
 export class FamilySharingService {
+  /** Accept attempts per user in the current window (memory of this instance). */
+  private readonly acceptAttempts = new Map<
+    string,
+    { count: number; windowStart: number }
+  >();
+
   constructor(
     @Inject(DatabaseService)
     private readonly databaseService: DatabaseService,
@@ -51,6 +67,39 @@ export class FamilySharingService {
         "A valid non-empty userId string is required.",
       );
     }
+  }
+
+  /**
+   * Counts an accept attempt before the lookup, so parallel requests cannot slip past
+   * the cap; a successful accept gives its slot back (releaseAcceptAttempt). After
+   * MAX_FAILED_INVITE_ACCEPTS failures in the window the account gets 429.
+   */
+  private takeAcceptAttempt(userId: string): void {
+    const now = Date.now();
+    const entry = this.acceptAttempts.get(userId);
+    if (!entry || now - entry.windowStart >= FAILED_INVITE_ACCEPT_WINDOW_MS) {
+      if (this.acceptAttempts.size >= MAX_TRACKED_ACCEPT_USERS) {
+        for (const [id, tracked] of this.acceptAttempts) {
+          if (now - tracked.windowStart >= FAILED_INVITE_ACCEPT_WINDOW_MS) {
+            this.acceptAttempts.delete(id);
+          }
+        }
+      }
+      this.acceptAttempts.set(userId, { count: 1, windowStart: now });
+      return;
+    }
+    if (entry.count >= MAX_FAILED_INVITE_ACCEPTS) {
+      throw new HttpException(
+        "Too many invite attempts. Try again later.",
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+    entry.count++;
+  }
+
+  private releaseAcceptAttempt(userId: string): void {
+    const entry = this.acceptAttempts.get(userId);
+    if (entry && entry.count > 0) entry.count--;
   }
 
   /**
@@ -138,7 +187,7 @@ export class FamilySharingService {
 
   /**
    * Accepts a pending family sharing invitation via the SECURITY DEFINER SQL function
-   * accept_shared_access_invite(p_invite_code).
+   * accept_shared_access_invite(p_invite_code). Failed attempts are capped per account.
    */
   async acceptInvite(
     userId: string,
@@ -155,7 +204,8 @@ export class FamilySharingService {
       throw new BadRequestException("Invite code is required");
     }
 
-    return this.databaseService.withRls(userId, async (tx) => {
+    this.takeAcceptAttempt(userId);
+    const accepted = await this.databaseService.withRls(userId, async (tx) => {
       try {
         const result = await tx.execute(
           sql`SELECT * FROM accept_shared_access_invite(${normalizedCode})`,
@@ -196,6 +246,8 @@ export class FamilySharingService {
         throw err;
       }
     });
+    this.releaseAcceptAttempt(userId);
+    return accepted;
   }
 
   /**
@@ -256,6 +308,7 @@ export class FamilySharingService {
   /**
    * Lists outgoing grants (created by user) and incoming grants (accepted by user).
    * - Outgoing PENDING past expiresAt are reported as EXPIRED.
+   * - Outgoing grants name the person who accepted, so the owner can check who has access.
    * - Incoming only lists active shares (status ACCEPTED and revokedAt is null).
    */
   async listGrants(userId: string): Promise<ListGrantsResponseDto> {
@@ -273,11 +326,19 @@ export class FamilySharingService {
         .leftJoin(profiles, eq(sharedAccessGrants.targetProfileId, profiles.id))
         .where(eq(sharedAccessGrants.granterUserId, userId));
 
+      const grantees = await this.findGrantees(
+        tx,
+        outgoingRows.map(({ grant }) => grant.granteeUserId),
+      );
+
       const outgoing = outgoingRows.map(({ grant, targetProfileName }) => {
         let effectiveStatus = grant.status;
         if (effectiveStatus === "PENDING" && new Date(grant.expiresAt) <= now) {
           effectiveStatus = "EXPIRED";
         }
+        const grantee = grant.granteeUserId
+          ? grantees.get(grant.granteeUserId)
+          : undefined;
 
         return {
           id: grant.id,
@@ -287,6 +348,8 @@ export class FamilySharingService {
           status: effectiveStatus,
           inviteCode: grant.inviteCode,
           granteeUserId: grant.granteeUserId,
+          granteeName: grantee?.name ?? null,
+          granteeEmail: grantee?.email ?? null,
           expiresAt: grant.expiresAt,
           acceptedAt: grant.acceptedAt,
           revokedAt: grant.revokedAt,
@@ -326,5 +389,31 @@ export class FamilySharingService {
         incoming,
       };
     });
+  }
+
+  /**
+   * Name and email of the people who accepted the caller's invites. users RLS only shows
+   * a caller their own row, so this one lookup sets the auth-service flag (as AuthService
+   * does), limited to the grantees of the caller's own grants, and clears it afterwards.
+   */
+  private async findGrantees(
+    tx: DrizzleTransaction,
+    granteeIds: Array<string | null>,
+  ): Promise<Map<string, { name: string; email: string }>> {
+    const ids = [...new Set(granteeIds.filter((id): id is string => !!id))];
+    const grantees = new Map<string, { name: string; email: string }>();
+    if (ids.length === 0) return grantees;
+
+    await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+    const rows = await tx
+      .select({ id: users.id, name: users.name, email: users.email })
+      .from(users)
+      .where(inArray(users.id, ids));
+    await tx.execute(sql`SELECT set_config('app.is_auth_service', '', true)`);
+
+    for (const row of rows) {
+      grantees.set(row.id, { name: row.name, email: row.email });
+    }
+    return grantees;
   }
 }
