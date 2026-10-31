@@ -1,4 +1,39 @@
-import { IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Validate,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
+import { JOURNAL_LIMITS } from '../../journal/constants/journal-keys.constant';
+
+/** Old wizard answers: a few short values per step. Caps the free-form object. */
+export const LEGACY_ANSWERS_MAX_KEYS = 20;
+export const LEGACY_ANSWER_MAX_LENGTH = 200;
+
+@ValidatorConstraint({ name: 'legacyAnswersShape', async: false })
+class LegacyAnswersShapeConstraint implements ValidatorConstraintInterface {
+  validate(value: unknown): boolean {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+    const entries = Object.entries(value as Record<string, unknown>);
+    return (
+      entries.length <= LEGACY_ANSWERS_MAX_KEYS &&
+      entries.every(
+        ([key, v]) =>
+          key.length <= 16 &&
+          (typeof v === 'string' || typeof v === 'number') &&
+          String(v).length <= LEGACY_ANSWER_MAX_LENGTH,
+      )
+    );
+  }
+  defaultMessage(): string {
+    return `answers aceita até ${LEGACY_ANSWERS_MAX_KEYS} respostas curtas (até ${LEGACY_ANSWER_MAX_LENGTH} caracteres).`;
+  }
+}
 
 export class SubmitTriageDto {
   @IsEnum(['physical', 'emotional'], {
@@ -9,18 +44,22 @@ export class SubmitTriageDto {
 
   @IsObject()
   @IsNotEmpty()
+  @Validate(LegacyAnswersShapeConstraint)
   answers!: Record<number, string>;
 
   @IsString()
   @IsOptional()
+  @MaxLength(JOURNAL_LIMITS.noteMax)
   narrative?: string;
 
   @IsString()
   @IsOptional()
+  @MaxLength(JOURNAL_LIMITS.clientIdMax)
   clientSessionId?: string;
 
   @IsString()
   @IsOptional()
+  @MaxLength(16)
   language?: string;
 }
 

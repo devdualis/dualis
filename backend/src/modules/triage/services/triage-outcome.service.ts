@@ -334,7 +334,6 @@ export class TriageOutcomeService {
     let recommendedArticles: RecommendedArticleDto[] = [];
     if (this.articlesVector) {
       recommendedArticles = await this.articlesVector.searchArticles({
-        queryText: narrative,
         category: mapping.code,
         vertical,
         language: lang,
@@ -465,7 +464,6 @@ export class TriageOutcomeService {
         if (physicalCategory) {
           searches.push(
             this.articlesVector.searchArticles({
-              queryText: narrative,
               category: physicalCategory,
               vertical: 'physical',
               language: userLang,
@@ -475,7 +473,6 @@ export class TriageOutcomeService {
         if (emotionalCategory) {
           searches.push(
             this.articlesVector.searchArticles({
-              queryText: narrative,
               category: emotionalCategory,
               vertical: 'emotional',
               language: userLang,

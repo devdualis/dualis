@@ -95,9 +95,10 @@ export class JournalController {
   @ProfileAccess('write')
   @validate(SuggestJournalOptionDto)
   suggestOption(
+    @Request() req: any,
     @Body() dto: SuggestJournalOptionDto,
   ): Promise<SuggestJournalOptionResponseDto> {
-    return this.journalSuggest.suggest(dto.text, dto.kind, dto.branch, dto.bodySide);
+    return this.journalSuggest.suggest(dto.text, dto.kind, dto.branch, dto.bodySide, userIdOf(req));
   }
 
   @Get('summary')

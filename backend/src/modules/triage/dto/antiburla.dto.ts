@@ -1,4 +1,5 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { JOURNAL_LIMITS } from '../../journal/constants/journal-keys.constant';
 
 /**
  * Journal consistency check ("Isso já apareceu antes?"): when an entry says it started
@@ -14,19 +15,23 @@ export class CheckRecurrenceDto {
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(64)
   category!: string;
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(64)
   selectedPersistence!: string;
 
   /** Accepted for old app versions and ignored: no rule depends on biological sex. */
   @IsString()
   @IsOptional()
+  @MaxLength(32)
   userGender?: string;
 
   @IsString()
   @IsOptional()
+  @MaxLength(JOURNAL_LIMITS.noteMax)
   narrative?: string;
 }
 

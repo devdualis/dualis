@@ -13,6 +13,7 @@
         android:label="Dualis"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
         android:usesCleartextTraffic="true">
         <!-- From MAPS_API_KEY_ANDROID (environment or git-ignored local.properties). -->
         <meta-data android:name="com.google.android.geo.API_KEY" android:value="${mapsApiKey}" />

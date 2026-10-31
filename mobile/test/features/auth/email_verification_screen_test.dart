@@ -14,6 +14,16 @@ import 'package:dualis_mobile/l10n/app_localizations.dart';
 import 'package:dualis_mobile/shared/widgets/dualis_primary_button.dart';
 
 class MockSecureStorageService extends SecureStorageService {
+
+  String? localDataOwnerId;
+
+  @override
+  Future<String?> getLocalDataOwnerId() async => localDataOwnerId;
+
+  @override
+  Future<void> saveLocalDataOwnerId(String userId) async {
+    localDataOwnerId = userId;
+  }
   UserProfile? _profile;
 
   @override

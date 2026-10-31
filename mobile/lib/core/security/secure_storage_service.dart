@@ -16,6 +16,7 @@ class SecureStorageService {
   static const String _keyPendingVerificationEmail =
       'dualis_pending_verification_email';
   static const String _prefixDailyCheckIn = 'dualis_daily_checkin_';
+  static const String _keyLocalDataOwner = 'dualis_local_data_owner';
 
   final FlutterSecureStorage _storage;
 
@@ -47,6 +48,13 @@ class SecureStorageService {
   Future<String?> getRefreshToken() => _storage.read(key: _keyRefreshToken);
 
   Future<String?> getUserId() => _storage.read(key: _keyUserId);
+
+  /// User whose entries are in the local database (kept across logout).
+  Future<String?> getLocalDataOwnerId() =>
+      _storage.read(key: _keyLocalDataOwner);
+
+  Future<void> saveLocalDataOwnerId(String userId) =>
+      _storage.write(key: _keyLocalDataOwner, value: userId);
 
   Future<void> saveUserProfile(UserProfile user) async {
     try {

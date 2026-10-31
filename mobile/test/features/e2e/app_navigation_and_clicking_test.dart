@@ -26,6 +26,16 @@ import 'package:dualis_mobile/features/sync/presentation/widgets/offline_indicat
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 class MockSecureStorageService extends SecureStorageService {
+
+  String? localDataOwnerId;
+
+  @override
+  Future<String?> getLocalDataOwnerId() async => localDataOwnerId;
+
+  @override
+  Future<void> saveLocalDataOwnerId(String userId) async {
+    localDataOwnerId = userId;
+  }
   String? token = 'valid-jwt-token';
 
   @override

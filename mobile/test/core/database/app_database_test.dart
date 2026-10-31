@@ -58,7 +58,7 @@ void main() {
       expect(pending[1].clientSessionId, equals('second-session'));
     });
 
-    test('updates status and marks outbox item as synced', () async {
+    test('updates status and deletes the outbox item once synced', () async {
       final item = await repository.enqueueTriageCheckIn(
         vertical: 'physical',
         answers: {0: 'articulacoes', 1: 'ha_alguns_dias', 2: '4'},
@@ -75,10 +75,10 @@ void main() {
 
       final syncedItem = await (db.select(db.triageOutbox)
             ..where((tbl) => tbl.id.equals(item.id)))
-          .getSingle();
+          .getSingleOrNull();
 
-      expect(syncedItem.status, equals('synced'));
-      expect(syncedItem.syncedAt, isNotNull);
+      // Synced records are deleted: the server has them.
+      expect(syncedItem, equals(null));
     });
 
     test('tracks pending count accurately through outbox lifecycle', () async {

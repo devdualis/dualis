@@ -99,13 +99,10 @@ class JournalLocalStore {
     );
   }
 
+  /// The server has the entry now: drop the local copy so the device does not
+  /// keep a plaintext history of the journal.
   Future<void> markSynced(int id) {
-    return (_db.update(_db.journalOutbox)..where((t) => t.id.equals(id))).write(
-      JournalOutboxCompanion(
-        status: const Value('synced'),
-        syncedAt: Value(DateTime.now()),
-      ),
-    );
+    return (_db.delete(_db.journalOutbox)..where((t) => t.id.equals(id))).go();
   }
 
   Future<void> markFailed(int id, String error) =>

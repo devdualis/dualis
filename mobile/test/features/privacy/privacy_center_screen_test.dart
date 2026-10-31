@@ -59,6 +59,16 @@ class FakePrivacyRemoteDataSource implements PrivacyRemoteDataSource {
 }
 
 class FakeSecureStorageService extends SecureStorageService {
+
+  String? localDataOwnerId;
+
+  @override
+  Future<String?> getLocalDataOwnerId() async => localDataOwnerId;
+
+  @override
+  Future<void> saveLocalDataOwnerId(String userId) async {
+    localDataOwnerId = userId;
+  }
   @override
   Future<String?> getAccessToken() async => 'mock-access-token';
 

@@ -69,13 +69,9 @@ class TriageOutboxRepository {
     );
   }
 
+  /// The server has the record now: drop the local copy (it holds free text).
   Future<void> markOutboxItemSynced(int id) {
-    return (_db.update(_db.triageOutbox)..where((tbl) => tbl.id.equals(id))).write(
-      TriageOutboxCompanion(
-        status: const Value('synced'),
-        syncedAt: Value(DateTime.now()),
-      ),
-    );
+    return (_db.delete(_db.triageOutbox)..where((tbl) => tbl.id.equals(id))).go();
   }
 
   Stream<int> getPendingCountStream() {

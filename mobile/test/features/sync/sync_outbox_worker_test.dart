@@ -91,7 +91,7 @@ void main() {
       expect(pendingAfter, isEmpty);
 
       final allRecords = await db.select(db.triageOutbox).get();
-      expect(allRecords.every((r) => r.status == 'synced'), isTrue);
+      expect(allRecords, isEmpty);
     });
 
     test('marks item failed and increments attempts when transmission fails', () async {

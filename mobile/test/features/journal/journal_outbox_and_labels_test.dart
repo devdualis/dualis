@@ -42,7 +42,7 @@ void main() {
     ok.remote.errorStatus = 409;
     ok.remote.errorData = {'id': 'srv-1', 'clientId': 'c1'};
     expect(await ok.repository.syncPending(), 1);
-    expect((await ok.db.select(ok.db.journalOutbox).get()).single.status, 'synced');
+    expect(await ok.db.select(ok.db.journalOutbox).get(), isEmpty);
 
     final bad = JournalHarness(online: true);
     await bad.local.enqueue(_entry());

@@ -12,7 +12,6 @@ export { SeedArticleDefinition };
 @Injectable()
 export class ArticlesVectorService implements OnModuleInit {
   private readonly logger = new Logger(ArticlesVectorService.name);
-  private readonly semanticCache = new Map<string, RecommendedArticleDto[]>();
 
   public readonly seedArticles: SeedArticleDefinition[] = MEDICAL_ARTICLES_SEED;
 
@@ -90,8 +89,11 @@ export class ArticlesVectorService implements OnModuleInit {
     );
   }
 
+  /**
+   * Reading suggestions for a category. Picked by category only: the person's free
+   * text is never embedded or sent to the AI provider (privacy policy, section 3).
+   */
   async searchArticles(params: {
-    queryText?: string;
     category: string;
     vertical: string;
     language?: string;
@@ -99,81 +101,29 @@ export class ArticlesVectorService implements OnModuleInit {
   }): Promise<RecommendedArticleDto[]> {
     const lang = (params.language || 'pt').toLowerCase();
     const limit = params.limit ?? 2;
-    const sanitizedNarrative = (params.queryText || '').trim().toLowerCase();
-    const cacheKey = `${lang}:${params.vertical}:${params.category}:${sanitizedNarrative}`;
-
-    if (this.semanticCache.has(cacheKey)) {
-      return this.semanticCache.get(cacheKey)!;
-    }
-
     let results: RecommendedArticleDto[] = [];
 
-    if (sanitizedNarrative.length > 0) {
-      try {
-        const queryVector = await this.embeddingService.embed(sanitizedNarrative);
-        const vectorString = `[${queryVector.join(',')}]`;
+    const categoryRows = await this.db.execute(sql`
+      SELECT 
+        id, title, category, author, author_role AS "authorRole",
+        read_time_minutes AS "readTimeMinutes", summary, url
+      FROM medical_articles
+      WHERE category = ${params.category} AND language = ${lang}
+      LIMIT ${limit}
+    `);
 
-        const queryResult = await this.db.execute(sql`
-          SELECT 
-            id, 
-            title, 
-            category, 
-            author, 
-            author_role AS "authorRole", 
-            read_time_minutes AS "readTimeMinutes", 
-            summary, 
-            url,
-            1 - (embedding <=> ${vectorString}::vector) AS similarity
-          FROM medical_articles
-          WHERE category = ${params.category} AND language = ${lang}
-          ORDER BY embedding <=> ${vectorString}::vector ASC
-          LIMIT ${limit}
-        `);
-
-        const rows = (queryResult as any).rows || queryResult;
-        if (Array.isArray(rows) && rows.length > 0) {
-          const topSimilarity = Number(rows[0].similarity ?? 0);
-          if (topSimilarity >= 0.60) {
-            results = rows.map((r: any) => ({
-              id: r.id,
-              title: r.title,
-              category: r.category,
-              author: r.author,
-              authorRole: r.authorRole,
-              readTimeMinutes: Number(r.readTimeMinutes),
-              summary: r.summary,
-              url: r.url,
-            }));
-          }
-        }
-      } catch (err) {
-        this.logger.warn(`Vector search failed, falling back to category match: ${(err as Error).message}`);
-      }
-    }
-
-    if (results.length === 0) {
-      const categoryRows = await this.db.execute(sql`
-        SELECT 
-          id, title, category, author, author_role AS "authorRole",
-          read_time_minutes AS "readTimeMinutes", summary, url
-        FROM medical_articles
-        WHERE category = ${params.category} AND language = ${lang}
-        LIMIT ${limit}
-      `);
-
-      const rows = (categoryRows as any).rows || categoryRows;
-      if (Array.isArray(rows) && rows.length > 0) {
-        results = rows.map((r: any) => ({
-          id: r.id,
-          title: r.title,
-          category: r.category,
-          author: r.author,
-          authorRole: r.authorRole,
-          readTimeMinutes: Number(r.readTimeMinutes),
-          summary: r.summary,
-          url: r.url,
-        }));
-      }
+    const rows = (categoryRows as any).rows || categoryRows;
+    if (Array.isArray(rows) && rows.length > 0) {
+      results = rows.map((r: any) => ({
+        id: r.id,
+        title: r.title,
+        category: r.category,
+        author: r.author,
+        authorRole: r.authorRole,
+        readTimeMinutes: Number(r.readTimeMinutes),
+        summary: r.summary,
+        url: r.url,
+      }));
     }
 
     if (results.length === 0) {
@@ -207,7 +157,6 @@ export class ArticlesVectorService implements OnModuleInit {
       }
     }
 
-    this.semanticCache.set(cacheKey, results);
     return results;
   }
 }

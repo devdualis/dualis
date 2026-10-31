@@ -11,6 +11,67 @@ import {
 
 const NONE = 'none';
 
+/** Per-person caps on AI suggestions; over them the app gets `null` (no chip), as when offline. */
+export const SUGGEST_LIMITS = { perMinute: 10, perDay: 100 } as const;
+const MINUTE_MS = 60 * 1000;
+const DAY_MS = 24 * 60 * MINUTE_MS;
+const MAX_TRACKED_USERS = 10_000;
+
+interface UsageWindow {
+  minuteStart: number;
+  minuteCount: number;
+  dayStart: number;
+  dayCount: number;
+}
+
+/**
+ * Counts suggestions per user in this server instance, so one account cannot use up the
+ * shared Vertex AI quota or run up its cost. In memory: each Cloud Run instance counts on
+ * its own, which is enough to stop a single client looping the endpoint.
+ */
+export class SuggestRateLimiter {
+  private readonly usage = new Map<string, UsageWindow>();
+
+  constructor(private readonly now: () => number = Date.now) {}
+
+  /** Records one call and returns false when the user is over a limit. */
+  tryConsume(userId: string): boolean {
+    const now = this.now();
+    let window = this.usage.get(userId);
+    if (!window) {
+      if (this.usage.size >= MAX_TRACKED_USERS) this.prune(now);
+      window = { minuteStart: now, minuteCount: 0, dayStart: now, dayCount: 0 };
+      this.usage.set(userId, window);
+    }
+    if (now - window.minuteStart >= MINUTE_MS) {
+      window.minuteStart = now;
+      window.minuteCount = 0;
+    }
+    if (now - window.dayStart >= DAY_MS) {
+      window.dayStart = now;
+      window.dayCount = 0;
+    }
+    if (window.minuteCount >= SUGGEST_LIMITS.perMinute || window.dayCount >= SUGGEST_LIMITS.perDay) {
+      return false;
+    }
+    window.minuteCount++;
+    window.dayCount++;
+    return true;
+  }
+
+  private prune(now: number): void {
+    for (const [userId, window] of this.usage) {
+      if (now - window.dayStart >= DAY_MS) this.usage.delete(userId);
+    }
+    // Still full (many active users): forget the oldest entries rather than grow.
+    while (this.usage.size >= MAX_TRACKED_USERS) {
+      const oldest = this.usage.keys().next().value;
+      if (oldest === undefined) break;
+      this.usage.delete(oldest);
+    }
+  }
+}
+
 /**
  * Same wording the app shows for each chip (mobile `app_pt.arb`, `jv2Opt*`).
  * The model matches meaning against these texts, not against the raw keys.
@@ -163,6 +224,7 @@ function systemInstruction(kind: 'emotional' | 'physical', allowed: string[]): s
 @Injectable()
 export class JournalSuggestService {
   private readonly logger = new Logger(JournalSuggestService.name);
+  private readonly limiter = new SuggestRateLimiter();
 
   constructor(@Optional() @Inject(GeminiService) private readonly gemini?: GeminiService) {}
 
@@ -171,10 +233,13 @@ export class JournalSuggestService {
     kind: 'emotional' | 'physical',
     branch?: string,
     bodySide?: BodySide,
+    userId?: string,
   ): Promise<{ optionKey: string | null }> {
     const allowed = catalogKeys(kind, branch, bodySide);
     const clean = deidentify(text);
     if (!clean || allowed.length === 0 || !this.gemini?.isAvailable) return { optionKey: null };
+    // The route always passes the signed-in user; scripts and evals call without one.
+    if (userId && !this.limiter.tryConsume(userId)) return { optionKey: null };
 
     try {
       const parsed = await this.gemini.generateJson<{ optionKey?: string }>({

@@ -64,9 +64,8 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
     expect(dot12).toBeGreaterThan(dot13);
   });
 
-  it('3. ArticlesVectorService returns orthopedic article for back pain query', async () => {
+  it('3. ArticlesVectorService returns the orthopedic article for the back category', async () => {
     const articles = await vectorService.searchArticles({
-      queryText: 'dor nas costas e coluna lombar',
       category: 'coluna_dor_dorsal',
       vertical: 'physical',
     });
@@ -77,25 +76,18 @@ describe('ArticlesVectorService & ArticleEmbeddingService Unit Tests', () => {
     expect(articles[0].authorRole).toBe('Fonte');
   });
 
-  it('4. Second query with identical symptom hits semantic cache without executing DB query again', async () => {
-    mockDb.execute.mockClear();
-
-    const firstResult = await vectorService.searchArticles({
-      queryText: 'dor nas costas e coluna lombar',
+  it('4. Article search never embeds or sends the person\'s text', async () => {
+    const embed = vi.spyOn(embeddingService, 'embed');
+    const params = {
+      queryText: 'Sou a Maria, 11 99999-0000, dor nas costas',
       category: 'coluna_dor_dorsal',
       vertical: 'physical',
-    });
+    } as any;
+    await vectorService.searchArticles(params);
 
-    expect(mockDb.execute).toHaveBeenCalledTimes(1);
-
-    const cachedResult = await vectorService.searchArticles({
-      queryText: 'dor nas costas e coluna lombar',
-      category: 'coluna_dor_dorsal',
-      vertical: 'physical',
-    });
-
-    expect(mockDb.execute).toHaveBeenCalledTimes(1);
-    expect(cachedResult).toEqual(firstResult);
+    expect(embed).not.toHaveBeenCalled();
+    const sqlText = JSON.stringify(mockDb.execute.mock.calls);
+    expect(sqlText).not.toContain('Maria');
   });
 
   it('5. Fallback without narrative matches by category directly', async () => {

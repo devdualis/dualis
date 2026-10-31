@@ -290,7 +290,7 @@ describe('Journal v2 E2E (/v1/journal/entries, conditions, summary, /v1/house-ad
     const pt = await app.inject({ method: 'GET', url: '/v1/house-ads' });
     expect(pt.statusCode).toBe(200);
     const ptAds = JSON.parse(pt.body).ads;
-    expect(ptAds.map((a: any) => a.brand)).toEqual(['Dualis Premium', 'ZOC', 'WGI', 'UBO']);
+    expect(ptAds.map((a: any) => a.brand)).toEqual(['Dualis Premium', 'ZOC', 'e-BEF']);
 
     const en = JSON.parse((await app.inject({ method: 'GET', url: '/v1/house-ads', headers: { 'accept-language': 'en-US' } })).body).ads;
     expect(en.map((a: any) => a.id)).toEqual(ptAds.map((a: any) => a.id));

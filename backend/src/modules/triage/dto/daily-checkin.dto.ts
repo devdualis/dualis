@@ -1,4 +1,5 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { JOURNAL_LIMITS } from '../../journal/constants/journal-keys.constant';
 import { RecommendedArticleDto } from './triage-outcome.dto';
 
 export type TriggerStatusType = 'goodNormal' | 'soSo' | 'badSick';
@@ -18,10 +19,12 @@ export class SubmitDailyCheckInDto {
 
   @IsString()
   @IsOptional()
+  @MaxLength(JOURNAL_LIMITS.noteMax)
   naturalLanguageText?: string;
 
   @IsString()
   @IsOptional()
+  @MaxLength(16)
   language?: string;
 }
 

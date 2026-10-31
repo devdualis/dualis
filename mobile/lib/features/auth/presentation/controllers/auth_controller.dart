@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/database/app_database.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/notifications/daily_checkin_notification_service.dart';
 import '../../../../core/notifications/hydration_notification_service.dart';
@@ -179,6 +180,7 @@ class AuthController extends Notifier<AuthState> {
       final refreshToken = res['refreshToken'] as String?;
 
       if (accessToken != null && refreshToken != null && user != null && user.id.isNotEmpty) {
+        await _claimLocalData(user.id);
         await _secureStorage.persistTokens(
           accessToken: accessToken,
           refreshToken: refreshToken,
@@ -229,6 +231,7 @@ class AuthController extends Notifier<AuthState> {
       final refreshToken = res['refreshToken'] as String?;
 
       if (accessToken != null && refreshToken != null && user.id.isNotEmpty) {
+        await _claimLocalData(user.id);
         await _secureStorage.persistTokens(
           accessToken: accessToken,
           refreshToken: refreshToken,
@@ -288,6 +291,7 @@ class AuthController extends Notifier<AuthState> {
       final refreshToken = res['refreshToken'] as String?;
 
       if (accessToken != null && refreshToken != null && user.id.isNotEmpty) {
+        await _claimLocalData(user.id);
         await _secureStorage.persistTokens(
           accessToken: accessToken,
           refreshToken: refreshToken,
@@ -433,9 +437,31 @@ class AuthController extends Notifier<AuthState> {
 
   Future<void> logout() async {
     await _cancelLocalReminders();
+    final ownerId = state.user?.id;
     await _secureStorage.clearAll();
+    // Unsent entries stay on the device for this person's next login; any
+    // other account that signs in here wipes them first (_claimLocalData).
+    if (ownerId != null && ownerId.isNotEmpty) {
+      try {
+        await _secureStorage.saveLocalDataOwnerId(ownerId);
+      } catch (_) {}
+    }
     _lastCodeSentAt = null;
     state = const AuthState.initial();
+  }
+
+  /// The local journal, drafts and outboxes carry no user id. Before another
+  /// account signs in on this device, wipe them, so nobody sees or uploads
+  /// entries written by someone else. The owner is recorded on every login and
+  /// kept across logout.
+  Future<void> _claimLocalData(String userId) async {
+    try {
+      final owner = await _secureStorage.getLocalDataOwnerId();
+      if (owner != null && owner != userId) {
+        await ref.read(appDatabaseProvider).wipeAllLocalData();
+      }
+      await _secureStorage.saveLocalDataOwnerId(userId);
+    } catch (_) {}
   }
 
   /// Reminders belong to the signed-in user: none may keep firing after
