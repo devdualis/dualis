@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EncryptionModule } from '../../common/encryption/encryption.module';
 import { EmailModule } from '../../common/email/email.module';
 import { StorageModule } from '../../common/storage/storage.module';
+import { RateLimiter } from '../../common/http/rate-limiter';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -28,7 +29,7 @@ import { jwtSecret } from './jwt-secret';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, RateLimiter],
   exports: [AuthService, JwtModule, PassportModule],
 })
 export class AuthModule {}

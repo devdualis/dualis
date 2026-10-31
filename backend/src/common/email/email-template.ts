@@ -24,7 +24,8 @@ export interface CodeEmailContent {
   firstName?: string;
   /** Trusted HTML (our own copy). */
   intro: string;
-  code: string;
+  /** Omitted for notices that carry no code. */
+  code?: string;
   /** Trusted HTML (our own copy). */
   ignoreNote: string;
 }
@@ -37,6 +38,18 @@ const MONO = "'SF Mono', Menlo, Consolas, 'Courier New', monospace";
 export function renderCodeEmail(email: CodeEmailContent): string {
   const greeting = email.firstName ? `Olá, <strong>${escapeHtml(email.firstName)}</strong>!` : 'Olá!';
   const year = new Date().getFullYear();
+  const codeBox = email.code
+    ? `    <tr><td colspan="3" style="padding:24px 32px 0;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F0F7FB;border:1px solid #CFE6F3;border-radius:12px;border-collapse:separate;">
+        <tr><td align="center" style="padding:20px 12px 22px;font-family:${FONT};">
+          <p style="margin:0 0 6px;font-size:12px;line-height:16px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;color:#2B9ED0;">Seu código</p>
+          <p style="margin:0;padding-left:10px;font-family:${MONO};font-size:36px;line-height:44px;letter-spacing:10px;font-weight:700;color:#0E3E6C;">${email.code}</p>
+          <p style="margin:8px 0 0;font-size:13px;line-height:18px;color:#64748B;">Válido por 15 minutos</p>
+        </td></tr>
+      </table>
+    </td></tr>
+`
+    : '';
 
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -65,16 +78,7 @@ export function renderCodeEmail(email: CodeEmailContent): string {
       <p style="margin:0 0 12px;font-size:16px;line-height:24px;color:#334155;">${greeting}</p>
       <p style="margin:0;font-size:16px;line-height:24px;color:#334155;">${email.intro}</p>
     </td></tr>
-    <tr><td colspan="3" style="padding:24px 32px 0;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F0F7FB;border:1px solid #CFE6F3;border-radius:12px;border-collapse:separate;">
-        <tr><td align="center" style="padding:20px 12px 22px;font-family:${FONT};">
-          <p style="margin:0 0 6px;font-size:12px;line-height:16px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;color:#2B9ED0;">Seu código</p>
-          <p style="margin:0;padding-left:10px;font-family:${MONO};font-size:36px;line-height:44px;letter-spacing:10px;font-weight:700;color:#0E3E6C;">${email.code}</p>
-          <p style="margin:8px 0 0;font-size:13px;line-height:18px;color:#64748B;">Válido por 15 minutos</p>
-        </td></tr>
-      </table>
-    </td></tr>
-    <tr><td colspan="3" style="padding:24px 32px 32px;font-family:${FONT};">
+${codeBox}    <tr><td colspan="3" style="padding:24px 32px 32px;font-family:${FONT};">
       <p style="margin:0;font-size:14px;line-height:22px;color:#64748B;">${email.ignoreNote}</p>
     </td></tr>
     <tr><td colspan="3" style="padding:16px 32px;background-color:#F8FAFC;border-top:1px solid #E2E8F0;font-family:${FONT};">

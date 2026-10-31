@@ -103,11 +103,12 @@ class MockAuthRepository implements AuthRepository {
       mockUser;
 
   @override
-  Future<void> changePassword({
+  Future<Map<String, dynamic>> changePassword({
     required String token,
     required String currentPassword,
     required String newPassword,
-  }) async {}
+  }) async =>
+      {};
 
   @override
   Future<Map<String, dynamic>> forgotPassword({

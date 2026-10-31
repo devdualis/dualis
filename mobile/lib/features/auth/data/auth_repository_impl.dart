@@ -36,7 +36,7 @@ abstract class AuthRepository {
     String? gender,
   });
 
-  Future<void> changePassword({
+  Future<Map<String, dynamic>> changePassword({
     required String token,
     required String currentPassword,
     required String newPassword,
@@ -126,7 +126,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> changePassword({
+  Future<Map<String, dynamic>> changePassword({
     required String token,
     required String currentPassword,
     required String newPassword,

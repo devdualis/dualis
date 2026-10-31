@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { BadRequestException, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../../src/modules/auth/auth.service';
 import { RegisterDto } from '../../src/modules/auth/dto/register.dto';
@@ -8,10 +8,38 @@ import { UpdateProfileDto } from '../../src/modules/auth/dto/update-profile.dto'
 import { ChangePasswordDto } from '../../src/modules/auth/dto/change-password.dto';
 import { hashPassword } from '../../src/modules/auth/utils/password.util';
 
+/**
+ * Drizzle-style query mock: every chained call returns the same object and awaiting it yields
+ * `result` (or rejects with it, when it is an Error). `calls` records the chain, e.g.
+ * [['set', [{...}]], ['where', [...]]].
+ */
+function query(result: unknown) {
+  const calls: Array<[string, unknown[]]> = [];
+  const builder: any = new Proxy(
+    {},
+    {
+      get(_target, prop) {
+        if (prop === 'then') {
+          const settled = result instanceof Error ? Promise.reject(result) : Promise.resolve(result);
+          return (resolve: any, reject: any) => settled.then(resolve, reject);
+        }
+        if (prop === 'calls') return calls;
+        return (...args: unknown[]) => {
+          calls.push([String(prop), args]);
+          return builder;
+        };
+      },
+    },
+  );
+  return builder;
+}
+
 describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
   let authService: AuthService;
   let mockDb: any;
   let mockJwtService: any;
+  let mockEmailService: any;
+  let mockEncryptionService: any;
   let mockTxExecute: ReturnType<typeof vi.fn>;
   let mockTxSelect: ReturnType<typeof vi.fn>;
   let mockTxInsert: ReturnType<typeof vi.fn>;
@@ -27,6 +55,21 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
     lgpdConsent: true,
     disclaimerVersion: '2026.1',
   };
+
+  const codeRecord = (overrides: Record<string, unknown> = {}) => ({
+    id: 'code-uuid-1',
+    userId: 'user-uuid-123',
+    email: 'patient@example.com',
+    codeHash: 'mock-hash-123456',
+    attempts: 0,
+    expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+    createdAt: new Date(),
+    ...overrides,
+  });
+
+  /** Payloads passed to jwtService.sign, by token type. */
+  const signedPayload = (type: 'access' | 'refresh') =>
+    mockJwtService.sign.mock.calls.map(([payload]: any[]) => payload).filter((p: any) => p.type === type).at(-1);
 
   beforeEach(() => {
     mockTxExecute = vi.fn().mockResolvedValue(undefined);
@@ -55,17 +98,19 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
       verifyAsync: vi.fn(),
     };
 
-    const mockEncryptionService = {
+    mockEncryptionService = {
       encrypt: vi.fn().mockReturnValue('encrypted-value'),
       decrypt: vi.fn().mockImplementation((val) => `decrypted-${val}`),
+      hashIp: vi.fn().mockImplementation((ip: string) => `hmac-of-${ip}`),
     };
 
-    const mockEmailService = {
+    mockEmailService = {
       generateVerificationCode: vi.fn().mockReturnValue('123456'),
       hashCode: vi.fn().mockReturnValue('mock-hash-123456'),
       verifyCodeHash: vi.fn().mockImplementation((code: string, hash: string) => code === '123456'),
       sendVerificationEmail: vi.fn().mockResolvedValue(undefined),
       sendPasswordResetEmail: vi.fn().mockResolvedValue(undefined),
+      sendAccountExistsEmail: vi.fn().mockResolvedValue(undefined),
       getLastSentCode: vi.fn().mockReturnValue('123456'),
     };
 
@@ -78,45 +123,24 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
   });
 
   describe('Scenario 1: Happy Path Registration', () => {
-    it('creates user, logs LGPD consent, generates OTP, dispatches verification email, and returns requiresVerification', async () => {
-      // 1. Email check: no existing user
-      const mockWhereLimit = vi.fn().mockReturnValue({
-        limit: vi.fn().mockResolvedValue([]),
-      });
-      mockTxSelect.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: mockWhereLimit,
-        }),
-      });
-
-      // 2. Insert into users, userDisclaimerConsents, and emailVerifications
-      const mockCreatedUser = {
+    it('creates user, logs LGPD consent with a keyed IP hash, stores a code and emails it', async () => {
+      const createdUser = {
         id: '123e4567-e89b-12d3-a456-426614174000',
         name: validRegisterDto.name,
-        email: validRegisterDto.email.toLowerCase().trim(),
-        gender: validRegisterDto.gender,
-        dateOfBirth: validRegisterDto.dateOfBirth,
-        picture: null,
+        email: validRegisterDto.email,
         isEmailVerified: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
-
-      const mockConsentValues = vi.fn().mockResolvedValue(undefined);
-      const mockUserValues = vi.fn().mockReturnValue({
-        returning: vi.fn().mockResolvedValue([mockCreatedUser]),
-      });
-      const mockEmailVerifValues = vi.fn().mockResolvedValue(undefined);
-
-      mockTxInsert.mockImplementation((table: any) => {
-        if (mockTxInsert.mock.calls.length === 1) {
-          return { values: mockUserValues };
-        }
-        if (mockTxInsert.mock.calls.length === 2) {
-          return { values: mockConsentValues };
-        }
-        return { values: mockEmailVerifValues };
-      });
+      const userInsert = query([createdUser]);
+      const consentInsert = query(undefined);
+      const codeInsert = query(undefined);
+      mockTxSelect
+        .mockReturnValueOnce(query([])) // email lookup: no account
+        .mockReturnValueOnce(query([])); // codes sent in the last day
+      mockTxInsert
+        .mockReturnValueOnce(userInsert)
+        .mockReturnValueOnce(consentInsert)
+        .mockReturnValueOnce(codeInsert);
+      mockTxDelete.mockReturnValue(query(undefined));
 
       const result = await authService.register(
         validRegisterDto,
@@ -124,32 +148,40 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
         'DualisCheckUp-Flutter/1.0.0',
       );
 
-      // Verify requiresVerification & user
-      expect(result).toHaveProperty('requiresVerification', true);
-      expect(result).toHaveProperty('email', validRegisterDto.email.toLowerCase().trim());
-      expect(result).toHaveProperty('userId', mockCreatedUser.id);
-      expect(result.user).toEqual(mockCreatedUser);
-      expect((result.user as any).passwordHash).toBeUndefined();
-
-      // Verify DB transaction calls
-      expect(mockDb.transaction).toHaveBeenCalledTimes(3); // check uniqueness + creation + emailVerifications
-      expect(mockTxInsert).toHaveBeenCalledTimes(3);
-      expect(mockUserValues).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: validRegisterDto.name,
-          email: validRegisterDto.email.toLowerCase().trim(),
-          gender: validRegisterDto.gender,
-          dateOfBirth: validRegisterDto.dateOfBirth,
-          passwordHash: expect.stringMatching(/^\$argon2id\$/),
-          isEmailVerified: false,
-        }),
-      );
-      expect(mockConsentValues).toHaveBeenCalledWith(
-        expect.objectContaining({
-          disclaimerVersion: '2026.1',
-          userAgent: 'DualisCheckUp-Flutter/1.0.0',
-          ipAddressHash: expect.any(String),
-        }),
+      expect(result).toEqual({
+        requiresVerification: true,
+        email: validRegisterDto.email,
+        message: 'Enviamos as instruções para o seu e-mail.',
+      });
+      expect(userInsert.calls[0]).toEqual([
+        'values',
+        [
+          expect.objectContaining({
+            name: validRegisterDto.name,
+            email: validRegisterDto.email,
+            gender: validRegisterDto.gender,
+            dateOfBirth: validRegisterDto.dateOfBirth,
+            passwordHash: expect.stringMatching(/^\$argon2id\$/),
+            isEmailVerified: false,
+          }),
+        ],
+      ]);
+      expect(consentInsert.calls[0]).toEqual([
+        'values',
+        [
+          expect.objectContaining({
+            disclaimerVersion: '2026.1',
+            userAgent: 'DualisCheckUp-Flutter/1.0.0',
+            ipAddressHash: 'hmac-of-192.168.1.100',
+          }),
+        ],
+      ]);
+      expect(mockEncryptionService.hashIp).toHaveBeenCalledWith('192.168.1.100');
+      expect(codeInsert.calls[0][1][0]).toMatchObject({ userId: createdUser.id, codeHash: 'mock-hash-123456', attempts: 0 });
+      expect(mockEmailService.sendVerificationEmail).toHaveBeenCalledWith(
+        validRegisterDto.email,
+        '123456',
+        validRegisterDto.name,
       );
     });
   });
@@ -170,22 +202,30 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
     });
   });
 
-  describe('Scenario 3: Duplicate Email Registration', () => {
-    it('throws ConflictException when email is already registered', async () => {
-      // Existing user found
-      mockTxSelect.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([{ id: 'existing-id', email: validRegisterDto.email }]),
-          }),
-        }),
+  describe('Scenario 3: Registration with an Address That Has an Account', () => {
+    it('answers exactly like a new sign-up and emails the owner instead of creating anything', async () => {
+      mockTxSelect.mockReturnValue(query([{ id: 'existing-id', name: 'Carlos Oliveira', email: validRegisterDto.email }]));
+
+      const result = await authService.register(validRegisterDto);
+
+      expect(result).toEqual({
+        requiresVerification: true,
+        email: validRegisterDto.email,
+        message: 'Enviamos as instruções para o seu e-mail.',
       });
-
-      await expect(authService.register(validRegisterDto)).rejects.toThrow(ConflictException);
-      await expect(authService.register(validRegisterDto)).rejects.toThrow('E-mail já cadastrado.');
-
-      // Should not proceed to insertion
       expect(mockTxInsert).not.toHaveBeenCalled();
+      expect(mockEmailService.sendVerificationEmail).not.toHaveBeenCalled();
+      expect(mockEmailService.sendAccountExistsEmail).toHaveBeenCalledWith(validRegisterDto.email, 'Carlos Oliveira');
+    });
+
+    it('answers the same when a parallel sign-up for the address wins the insert', async () => {
+      mockTxSelect.mockReturnValue(query([]));
+      mockTxInsert.mockReturnValue(query(Object.assign(new Error('duplicate key'), { code: '23505' })));
+
+      const result = await authService.register(validRegisterDto);
+
+      expect(result.requiresVerification).toBe(true);
+      expect(mockEmailService.sendVerificationEmail).not.toHaveBeenCalled();
     });
   });
 
@@ -276,33 +316,41 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
     });
   });
 
+  describe('Scenario 5b: Login Timing for Unknown Emails', () => {
+    it('checks the password against a dummy hash before answering, like for a real account', async () => {
+      mockTxSelect.mockReturnValue(query([]));
+
+      await expect(
+        authService.login({ email: 'nonexistent@example.com', password: 'AnyPassword123!' }),
+      ).rejects.toThrow('Credenciais inválidas.');
+
+      // The Argon2 work ran: the dummy hash exists only once an unknown email was checked.
+      await expect((authService as any).dummyPasswordHash).resolves.toMatch(/^\$argon2id\$/);
+    });
+  });
+
   describe('Scenario 6: Update Profile', () => {
+    const userId = '444e4567-e89b-12d3-a456-426614174003';
+    const updatedRecord = (picture: string | null) => ({
+      id: userId,
+      name: 'Carlos Oliveira Atualizado',
+      email: 'carlos.oliveira@example.com',
+      gender: 'masculino',
+      dateOfBirth: '1988-04-15',
+      picture,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
     it('updates user profile fields under RLS context and returns sanitized user', async () => {
-      const userId = '444e4567-e89b-12d3-a456-426614174003';
       const updateDto: UpdateProfileDto = {
         name: 'Carlos Oliveira Atualizado',
         dateOfBirth: '1988-04-15',
         picture: 'avatar_clinical_teal_01',
       };
-
-      const updatedRecord = {
-        id: userId,
-        name: updateDto.name!,
-        email: 'carlos.oliveira@example.com',
-        gender: 'masculino',
-        dateOfBirth: updateDto.dateOfBirth!,
-        picture: updateDto.picture!,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      mockTxUpdate.mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            returning: vi.fn().mockResolvedValue([updatedRecord]),
-          }),
-        }),
-      });
+      mockTxSelect.mockReturnValue(query([{ picture: null }]));
+      const update = query([updatedRecord(updateDto.picture!)]);
+      mockTxUpdate.mockReturnValue(update);
 
       const result = await authService.updateProfile(userId, updateDto);
 
@@ -310,22 +358,35 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
       expect(result.name).toBe(updateDto.name);
       expect(result.dateOfBirth).toBe(updateDto.dateOfBirth);
       expect(result.picture).toBe(updateDto.picture);
+      expect(update.calls[0][1][0]).toMatchObject({ picture: 'avatar_clinical_teal_01' });
       expect(mockTxExecute).toHaveBeenCalled();
     });
 
+    it('rejects a new picture that is not a preset or a PNG, JPEG or WebP image', async () => {
+      mockTxSelect.mockReturnValue(query([{ picture: null }]));
+
+      await expect(
+        authService.updateProfile(userId, { picture: 'https://tracker.example/pixel.png' }),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockTxUpdate).not.toHaveBeenCalled();
+    });
+
+    it('keeps an unchanged picture as it is, even one from an older app version', async () => {
+      const legacy = 'https://old-storage.example/avatars/user.png';
+      mockTxSelect.mockReturnValue(query([{ picture: legacy }]));
+      const update = query([updatedRecord(legacy)]);
+      mockTxUpdate.mockReturnValue(update);
+
+      const result = await authService.updateProfile(userId, { name: 'Carlos Oliveira Atualizado', picture: legacy });
+
+      expect(result.picture).toBe(legacy);
+      expect(update.calls[0][1][0]).not.toHaveProperty('picture');
+    });
+
     it('throws UnauthorizedException when user to update is not found', async () => {
-      const userId = 'nonexistent-user-id';
-      const updateDto: UpdateProfileDto = { name: 'Novo Nome' };
+      mockTxUpdate.mockReturnValue(query([]));
 
-      mockTxUpdate.mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            returning: vi.fn().mockResolvedValue([]),
-          }),
-        }),
-      });
-
-      await expect(authService.updateProfile(userId, updateDto)).rejects.toThrow(
+      await expect(authService.updateProfile('nonexistent-user-id', { name: 'Novo Nome' })).rejects.toThrow(
         UnauthorizedException,
       );
     });
@@ -399,6 +460,54 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
     });
   });
 
+  describe('Scenario 7b: Sessions End When the Password Changes', () => {
+    const userId = '555e4567-e89b-12d3-a456-426614174004';
+
+    it('gives the device that changed the password new tokens with a new session version', async () => {
+      const currentHash = await hashPassword('OldPassword123!');
+      const user = { id: userId, name: 'Carlos', email: 'carlos@example.com', passwordHash: currentHash };
+      mockTxSelect.mockReturnValue(query([user]));
+      mockTxUpdate.mockReturnValue(query(undefined));
+      const before = await authService.validateUserById(userId, undefined);
+      expect(before).toBeNull(); // tokens without a session version are refused
+
+      mockJwtService.verifyAsync.mockResolvedValue(undefined);
+      await authService.login({ email: user.email, password: 'OldPassword123!' }).catch(() => undefined);
+      const oldVersion = signedPayload('access')?.sv;
+
+      const result = await authService.changePassword(userId, {
+        currentPassword: 'OldPassword123!',
+        newPassword: 'NewSecurePassword456!',
+      });
+      const newVersion = signedPayload('access').sv;
+
+      expect(result).toMatchObject({ success: true, accessToken: expect.any(String), refreshToken: expect.any(String) });
+      expect(newVersion).toEqual(expect.any(String));
+      expect(newVersion).not.toBe(oldVersion);
+    });
+
+    it('accepts an access token only while its session version matches the stored password', async () => {
+      const passwordHash = await hashPassword('StrongPassword123!');
+      const user = {
+        id: userId,
+        name: 'Maria',
+        email: 'maria@example.com',
+        passwordHash,
+        isEmailVerified: true,
+      };
+      mockTxSelect.mockReturnValue(query([user]));
+      await authService.login({ email: user.email, password: 'StrongPassword123!' });
+      const sv = signedPayload('access').sv;
+
+      mockTxSelect.mockReturnValue(query([{ id: userId, email: user.email, passwordHash }]));
+      await expect(authService.validateUserById(userId, sv)).resolves.toEqual({ id: userId, email: user.email });
+
+      const changedHash = await hashPassword('StrongPassword123!'); // same password, new salt
+      mockTxSelect.mockReturnValue(query([{ id: userId, email: user.email, passwordHash: changedHash }]));
+      await expect(authService.validateUserById(userId, sv)).resolves.toBeNull();
+    });
+  });
+
   describe('Scenario 8: Login with Unverified Email', () => {
     it('throws UnauthorizedException when isEmailVerified is false', async () => {
       const password = 'StrongPassword123!';
@@ -436,32 +545,12 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
 
   describe('Scenario 9: Email Verification Flow', () => {
     it('verifies user email with valid 6-digit code and returns auth tokens', async () => {
-      const email = 'patient@example.com';
-      const userId = 'user-uuid-123';
-      const verificationRecord = {
-        id: 'verif-uuid-1',
-        userId,
-        email,
-        codeHash: 'mock-hash-123456',
-        attempts: 0,
-        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
-        createdAt: new Date(),
-      };
-
-      mockTxSelect.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue([verificationRecord]),
-            }),
-          }),
-        }),
-      });
-
+      const record = codeRecord();
       const updatedUser = {
-        id: userId,
+        id: record.userId,
         name: 'Patient Test',
-        email,
+        email: record.email,
+        passwordHash: '$argon2id$stored',
         gender: 'masculino',
         dateOfBirth: '1990-01-01',
         picture: null,
@@ -469,286 +558,236 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
+      mockTxSelect.mockReturnValue(query([record]));
+      mockTxUpdate
+        .mockReturnValueOnce(query([{ id: record.id }])) // attempt claimed
+        .mockReturnValueOnce(query([updatedUser]));
+      mockTxDelete.mockReturnValue(query([{ id: record.id }])); // code consumed
 
-      mockTxUpdate.mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            returning: vi.fn().mockResolvedValue([updatedUser]),
-          }),
-        }),
-      });
-
-      mockTxDelete.mockReturnValue({
-        where: vi.fn().mockResolvedValue(undefined),
-      });
-
-      const result = await authService.verifyEmail({ email, code: '123456' });
+      const result = await authService.verifyEmail({ email: record.email, code: '123456' });
 
       expect(result).toHaveProperty('accessToken');
       expect(result).toHaveProperty('refreshToken');
       expect(result.user.isEmailVerified).toBe(true);
-      expect(result.user.id).toBe(userId);
+      expect(result.user.id).toBe(record.userId);
+      expect(signedPayload('access').sv).toEqual(expect.any(String));
+      // The users policy only accepts an update to the row of app.current_user_id.
+      expect(JSON.stringify(mockTxExecute.mock.calls)).toContain(record.userId);
     });
 
-    it('rejects verification when code is expired', async () => {
-      const email = 'patient@example.com';
-      const verificationRecord = {
-        id: 'verif-uuid-1',
-        userId: 'user-uuid-123',
-        email,
-        codeHash: 'mock-hash-123456',
-        attempts: 0,
-        expiresAt: new Date(Date.now() - 1000),
-        createdAt: new Date(),
-      };
-
-      mockTxSelect.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue([verificationRecord]),
-            }),
-          }),
-        }),
-      });
+    it('rejects an expired code with the generic message', async () => {
+      mockTxSelect.mockReturnValue(query([codeRecord({ expiresAt: new Date(Date.now() - 1000) })]));
 
       await expect(
-        authService.verifyEmail({ email, code: '123456' }),
-      ).rejects.toThrow('Código de verificação expirado. Solicite um novo código.');
+        authService.verifyEmail({ email: 'patient@example.com', code: '123456' }),
+      ).rejects.toThrow('Código inválido ou expirado. Solicite um novo código.');
+      expect(mockTxUpdate).not.toHaveBeenCalled();
     });
 
-    it('rejects verification when code is incorrect and increments attempts', async () => {
-      const email = 'patient@example.com';
-      const verificationRecord = {
-        id: 'verif-uuid-1',
-        userId: 'user-uuid-123',
-        email,
-        codeHash: 'mock-hash-123456',
-        attempts: 0,
-        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
-        createdAt: new Date(),
-      };
-
-      mockTxSelect.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue([verificationRecord]),
-            }),
-          }),
-        }),
-      });
-
-      const mockSet = vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue(undefined),
-      });
-      mockTxUpdate.mockReturnValue({
-        set: mockSet,
-      });
+    it('spends an attempt before comparing, then rejects a wrong code', async () => {
+      mockTxSelect.mockReturnValue(query([codeRecord()]));
+      const claim = query([{ id: 'code-uuid-1' }]);
+      mockTxUpdate.mockReturnValue(claim);
 
       await expect(
-        authService.verifyEmail({ email, code: '999999' }),
-      ).rejects.toThrow('Código de verificação incorreto.');
+        authService.verifyEmail({ email: 'patient@example.com', code: '999999' }),
+      ).rejects.toThrow('Código inválido ou expirado. Solicite um novo código.');
+      expect(mockTxUpdate).toHaveBeenCalledTimes(1);
+      expect(claim.calls.map(([name]: [string]) => name)).toEqual(['set', 'where', 'returning']);
+    });
 
-      expect(mockSet).toHaveBeenCalledWith({ attempts: 1 });
+    it('rejects even the right code once its attempts are used up', async () => {
+      mockTxSelect.mockReturnValue(query([codeRecord({ attempts: 5 })]));
+      mockTxUpdate.mockReturnValue(query([])); // attempts < 5 no longer matches
+
+      await expect(
+        authService.verifyEmail({ email: 'patient@example.com', code: '123456' }),
+      ).rejects.toThrow('Código inválido ou expirado. Solicite um novo código.');
+    });
+
+    it('rejects a code that a parallel request already used', async () => {
+      mockTxSelect.mockReturnValue(query([codeRecord()]));
+      mockTxUpdate.mockReturnValue(query([{ id: 'code-uuid-1' }]));
+      mockTxDelete.mockReturnValue(query([])); // nothing left to consume
+
+      await expect(
+        authService.verifyEmail({ email: 'patient@example.com', code: '123456' }),
+      ).rejects.toThrow('Código inválido ou expirado. Solicite um novo código.');
+    });
+
+    it('rejects an email without any code with the same message', async () => {
+      mockTxSelect.mockReturnValue(query([]));
+
+      await expect(
+        authService.verifyEmail({ email: 'ghost@example.com', code: '123456' }),
+      ).rejects.toThrow('Código inválido ou expirado. Solicite um novo código.');
+    });
+  });
+
+  describe('Scenario 9a: Resend Verification', () => {
+    it('answers the same for an already confirmed account and sends nothing', async () => {
+      mockTxSelect.mockReturnValue(query([{ id: 'user-uuid-123', name: 'Ana', isEmailVerified: true }]));
+
+      const result = await authService.resendVerification({ email: 'ana@example.com' });
+
+      expect(result).toEqual({
+        success: true,
+        message: 'Se o e-mail estiver cadastrado e ainda não confirmado, enviamos um novo código.',
+      });
+      expect(mockEmailService.sendVerificationEmail).not.toHaveBeenCalled();
+    });
+
+    it('stores and sends a new code for an unconfirmed account', async () => {
+      mockTxSelect
+        .mockReturnValueOnce(query([{ id: 'user-uuid-123', name: 'Ana', isEmailVerified: false }]))
+        .mockReturnValueOnce(query([{ createdAt: new Date(Date.now() - 5 * 60 * 1000) }]));
+      mockTxDelete.mockReturnValue(query(undefined));
+      mockTxInsert.mockReturnValue(query(undefined));
+
+      await authService.resendVerification({ email: 'ana@example.com' });
+
+      expect(mockTxInsert).toHaveBeenCalledTimes(1);
+      expect(mockEmailService.sendVerificationEmail).toHaveBeenCalledWith('ana@example.com', '123456', 'Ana');
     });
   });
 
   describe('Scenario 9b: Forgot Password Flow', () => {
+    const user = { id: 'user-uuid-123', name: 'Patient Test', email: 'patient@example.com' };
+
     it('returns generic success and sends reset email when user exists', async () => {
-      const email = 'patient@example.com';
-      const user = {
-        id: 'user-uuid-123',
-        name: 'Patient Test',
-        email,
-      };
+      mockTxSelect.mockReturnValueOnce(query([user])).mockReturnValueOnce(query([]));
+      mockTxDelete.mockReturnValue(query(undefined));
+      mockTxInsert.mockReturnValue(query(undefined));
 
-      mockTxSelect
-        .mockReturnValueOnce({
-          from: vi.fn().mockReturnValue({
-            where: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue([user]),
-            }),
-          }),
-        })
-        .mockReturnValueOnce({
-          from: vi.fn().mockReturnValue({
-            where: vi.fn().mockReturnValue({
-              orderBy: vi.fn().mockReturnValue({
-                limit: vi.fn().mockResolvedValue([]),
-              }),
-            }),
-          }),
-        });
-
-      mockTxDelete.mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) });
-      mockTxInsert.mockReturnValue({ values: vi.fn().mockResolvedValue(undefined) });
-
-      const result = await authService.forgotPassword({ email });
+      const result = await authService.forgotPassword({ email: user.email });
 
       expect(result.success).toBe(true);
       expect(result.message).toContain('Se o e-mail estiver cadastrado');
+      expect(mockEmailService.sendPasswordResetEmail).toHaveBeenCalledWith(user.email, '123456', user.name);
+    });
+
+    it('answers the same, without a new code, when the last one is under a minute old', async () => {
+      mockTxSelect.mockReturnValueOnce(query([user])).mockReturnValueOnce(query([{ createdAt: new Date() }]));
+      mockTxDelete.mockReturnValue(query(undefined));
+
+      const result = await authService.forgotPassword({ email: user.email });
+
+      expect(result.message).toContain('Se o e-mail estiver cadastrado');
+      expect(mockTxInsert).not.toHaveBeenCalled();
+      expect(mockEmailService.sendPasswordResetEmail).not.toHaveBeenCalled();
+    });
+
+    it('answers the same, without a new code, once the account got 5 codes in a day', async () => {
+      const hourAgo = () => ({ createdAt: new Date(Date.now() - 60 * 60 * 1000) });
+      mockTxSelect
+        .mockReturnValueOnce(query([user]))
+        .mockReturnValueOnce(query([hourAgo(), hourAgo(), hourAgo(), hourAgo(), hourAgo()]));
+      mockTxDelete.mockReturnValue(query(undefined));
+
+      await authService.forgotPassword({ email: user.email });
+
+      expect(mockTxInsert).not.toHaveBeenCalled();
+      expect(mockEmailService.sendPasswordResetEmail).not.toHaveBeenCalled();
     });
 
     it('returns generic success without sending email when user does not exist', async () => {
-      mockTxSelect.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([]),
-          }),
-        }),
-      });
+      mockTxSelect.mockReturnValue(query([]));
 
       const result = await authService.forgotPassword({ email: 'ghost@example.com' });
 
       expect(result.success).toBe(true);
       expect(result.message).toContain('Se o e-mail estiver cadastrado');
+      expect(mockEmailService.sendPasswordResetEmail).not.toHaveBeenCalled();
     });
   });
 
   describe('Scenario 9c: Reset Password Flow', () => {
     it('resets password with a valid code', async () => {
-      const email = 'patient@example.com';
-      const userId = 'user-uuid-123';
-      const resetRecord = {
-        id: 'reset-uuid-1',
-        userId,
-        email,
-        codeHash: 'mock-hash-123456',
-        attempts: 0,
-        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
-        createdAt: new Date(),
-      };
-
-      mockTxSelect.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue([resetRecord]),
-            }),
-          }),
-        }),
-      });
-
-      mockTxUpdate.mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue(undefined),
-        }),
-      });
-      mockTxDelete.mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) });
+      const record = codeRecord();
+      mockTxSelect.mockReturnValue(query([record]));
+      const passwordUpdate = query(undefined);
+      mockTxUpdate.mockReturnValueOnce(query([{ id: record.id }])).mockReturnValueOnce(passwordUpdate);
+      mockTxDelete.mockReturnValue(query([{ id: record.id }]));
 
       const result = await authService.resetPassword({
-        email,
+        email: record.email,
         code: '123456',
         newPassword: 'NewSecurePass123!',
       });
 
       expect(result.success).toBe(true);
+      expect(passwordUpdate.calls[0][1][0]).toMatchObject({ passwordHash: expect.stringMatching(/^\$argon2id\$/) });
     });
 
     it('rejects reset when code is expired', async () => {
-      const email = 'patient@example.com';
-      const resetRecord = {
-        id: 'reset-uuid-1',
-        userId: 'user-uuid-123',
-        email,
-        codeHash: 'mock-hash-123456',
-        attempts: 0,
-        expiresAt: new Date(Date.now() - 1000),
-        createdAt: new Date(),
-      };
-
-      mockTxSelect.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue([resetRecord]),
-            }),
-          }),
-        }),
-      });
+      mockTxSelect.mockReturnValue(query([codeRecord({ expiresAt: new Date(Date.now() - 1000) })]));
 
       await expect(
-        authService.resetPassword({ email, code: '123456', newPassword: 'NewSecurePass123!' }),
-      ).rejects.toThrow('Código de redefinição expirado. Solicite um novo código.');
+        authService.resetPassword({ email: 'patient@example.com', code: '123456', newPassword: 'NewSecurePass123!' }),
+      ).rejects.toThrow('Código inválido ou expirado. Solicite um novo código.');
     });
 
-    it('rejects reset when code is incorrect and increments attempts', async () => {
-      const email = 'patient@example.com';
-      const resetRecord = {
-        id: 'reset-uuid-1',
-        userId: 'user-uuid-123',
-        email,
-        codeHash: 'mock-hash-123456',
-        attempts: 0,
-        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
-        createdAt: new Date(),
-      };
-
-      mockTxSelect.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue([resetRecord]),
-            }),
-          }),
-        }),
-      });
-
-      const mockSet = vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue(undefined),
-      });
-      mockTxUpdate.mockReturnValue({ set: mockSet });
+    it('rejects reset when code is incorrect, after spending an attempt', async () => {
+      mockTxSelect.mockReturnValue(query([codeRecord()]));
+      mockTxUpdate.mockReturnValue(query([{ id: 'code-uuid-1' }]));
 
       await expect(
-        authService.resetPassword({ email, code: '999999', newPassword: 'NewSecurePass123!' }),
-      ).rejects.toThrow('Código de redefinição incorreto.');
-
-      expect(mockSet).toHaveBeenCalledWith({ attempts: 1 });
+        authService.resetPassword({ email: 'patient@example.com', code: '999999', newPassword: 'NewSecurePass123!' }),
+      ).rejects.toThrow('Código inválido ou expirado. Solicite um novo código.');
+      expect(mockTxUpdate).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('Scenario 10: Token Refresh', () => {
-    const userRecord = {
-      id: '555e4567-e89b-12d3-a456-426614174004',
+    const userId = '555e4567-e89b-12d3-a456-426614174004';
+    let passwordHash: string;
+    const userRecord = () => ({
+      id: userId,
       name: 'Ana Souza',
       email: 'ana.souza@example.com',
+      passwordHash,
       gender: 'feminino',
       dateOfBirth: '1990-01-01',
       picture: null,
+      isEmailVerified: true,
       createdAt: new Date(),
       updatedAt: new Date(),
-    };
+    });
+
+    beforeEach(async () => {
+      passwordHash = await hashPassword('StrongPassword123!');
+      mockTxSelect.mockReturnValue(query([userRecord()]));
+      await authService.login({ email: 'ana.souza@example.com', password: 'StrongPassword123!' });
+      mockJwtService.verifyAsync.mockResolvedValue(signedPayload('refresh'));
+      mockJwtService.sign.mockClear();
+    });
 
     it('issues a new token pair when the refresh token is valid', async () => {
-      mockJwtService.verifyAsync.mockResolvedValue({
-        sub: userRecord.id,
-        email: userRecord.email,
-        type: 'refresh',
-      });
-
-      mockTxSelect.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([userRecord]),
-          }),
-        }),
-      });
-
       const result = await authService.refreshTokens('valid-refresh-token');
 
       expect(mockJwtService.verifyAsync).toHaveBeenCalledWith('valid-refresh-token');
       expect(result).toHaveProperty('accessToken');
       expect(result).toHaveProperty('refreshToken');
-      expect(result.user.id).toBe(userRecord.id);
+      expect(result.user.id).toBe(userId);
+      expect((result.user as any).passwordHash).toBeUndefined();
       expect(mockJwtService.sign).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'access' }),
+        expect.objectContaining({ type: 'access', sv: expect.any(String) }),
         { expiresIn: '15m' },
       );
       expect(mockJwtService.sign).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'refresh' }),
+        expect.objectContaining({ type: 'refresh', sv: expect.any(String) }),
         { expiresIn: '7d' },
       );
+    });
+
+    it('refuses a refresh token issued before the password changed', async () => {
+      passwordHash = await hashPassword('AnotherPassword456!');
+      mockTxSelect.mockReturnValue(query([userRecord()]));
+
+      await expect(authService.refreshTokens('stolen-refresh-token')).rejects.toThrow(
+        'Sessão encerrada. Entre novamente.',
+      );
+      expect(mockJwtService.sign).not.toHaveBeenCalled();
     });
 
     it('throws UnauthorizedException when the token is expired or malformed', async () => {
@@ -760,11 +799,7 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
     });
 
     it('throws UnauthorizedException when an access token is presented instead of a refresh token', async () => {
-      mockJwtService.verifyAsync.mockResolvedValue({
-        sub: userRecord.id,
-        email: userRecord.email,
-        type: 'access',
-      });
+      mockJwtService.verifyAsync.mockResolvedValue({ ...signedPayload('refresh'), type: 'access' });
 
       await expect(authService.refreshTokens('access-token-not-refresh')).rejects.toThrow(
         'Token de atualização inválido.',
@@ -772,22 +807,10 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
     });
 
     it('throws UnauthorizedException when the user no longer exists', async () => {
-      mockJwtService.verifyAsync.mockResolvedValue({
-        sub: 'deleted-user-id',
-        email: 'ghost@example.com',
-        type: 'refresh',
-      });
-
-      mockTxSelect.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([]),
-          }),
-        }),
-      });
+      mockTxSelect.mockReturnValue(query([]));
 
       await expect(authService.refreshTokens('valid-token-deleted-user')).rejects.toThrow(
-        'Usuário não encontrado.',
+        'Sessão encerrada. Entre novamente.',
       );
     });
   });

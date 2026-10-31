@@ -541,7 +541,7 @@ export class LegalService {
           sectionId: '2-authentication-defense',
           title: '2. Mecanismos de Autenticação e Proteção contra Ataques',
           content:
-            'Senhas são tratadas com o algoritmo Argon2id. Endpoints críticos contam com limitadores de taxa (Rate Limiting via Redis) para neutralizar tentativas de ataques de força bruta e injeção.',
+            'Senhas são tratadas com o algoritmo Argon2id. Entrada, cadastro e recuperação de senha limitam as tentativas por endereço de rede e por conta, e cada código enviado por e-mail aceita poucas tentativas, para dificultar ataques de força bruta. Trocar ou redefinir a senha encerra as outras sessões.',
         },
         {
           sectionId: '3-breach-response-plan',

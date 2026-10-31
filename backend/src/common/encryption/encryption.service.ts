@@ -8,6 +8,8 @@ export class EncryptionService {
   private readonly key: Buffer;
   /** Separate key for file fingerprints, derived so the encryption key is never reused for HMAC. */
   private readonly fingerprintKey: Buffer;
+  /** Separate key for the IP address kept as consent evidence. */
+  private readonly ipHashKey: Buffer;
   private readonly currentVersion = 'v1';
 
   constructor(@Inject(ConfigService) private readonly configService: ConfigService) {
@@ -21,6 +23,7 @@ export class EncryptionService {
       throw new Error('ENCRYPTION_MASTER_KEY must be a 64-character hex string (32 bytes).');
     }
     this.fingerprintKey = Buffer.from(hkdfSync('sha256', this.key, Buffer.alloc(0), 'care-document-fingerprint', 32));
+    this.ipHashKey = Buffer.from(hkdfSync('sha256', this.key, Buffer.alloc(0), 'consent-ip-hash', 32));
   }
 
   /**
@@ -104,5 +107,13 @@ export class EncryptionService {
    */
   fingerprint(plain: Buffer): string {
     return createHmac('sha256', this.fingerprintKey).update(plain).digest('hex');
+  }
+
+  /**
+   * Keyed hash of an IP address (HMAC-SHA256, hex). A plain SHA-256 of an IPv4 address can be
+   * reversed by hashing all 4 billion addresses; without the server key this one cannot.
+   */
+  hashIp(ip: string): string {
+    return createHmac('sha256', this.ipHashKey).update(ip).digest('hex');
   }
 }

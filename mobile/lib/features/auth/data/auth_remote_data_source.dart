@@ -145,12 +145,13 @@ class AuthRemoteDataSource {
     return response.data ?? {};
   }
 
-  Future<void> changePassword({
+  /// The response carries fresh tokens: changing the password ends every other session.
+  Future<Map<String, dynamic>> changePassword({
     required String token,
     required String currentPassword,
     required String newPassword,
   }) async {
-    await apiClient.post<Map<String, dynamic>>(
+    final response = await apiClient.post<Map<String, dynamic>>(
       ApiEndpoints.changePassword,
       data: {
         'currentPassword': currentPassword,
@@ -162,5 +163,7 @@ class AuthRemoteDataSource {
         },
       ),
     );
+
+    return response.data ?? {};
   }
 }

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { createHash } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import { EncryptionService } from '../../src/common/encryption/encryption.service';
 
@@ -51,6 +52,18 @@ describe('EncryptionService (SEC-02: AES-256-GCM Field Encryption)', () => {
     const tamperedPayload = `${parts[0]}:${parts[1]}:${parts[2]}:${tamperedCiphertext}`;
 
     expect(() => service.decrypt(tamperedPayload)).toThrow();
+  });
+
+  it('hashes an IP with a key derived from the master key, not with a plain SHA-256', () => {
+    const hash = service.hashIp('203.0.113.7');
+
+    expect(hash).toMatch(/^[0-9a-f]{64}$/); // fits user_disclaimer_consents.ip_address_hash
+    expect(service.hashIp('203.0.113.7')).toBe(hash);
+    expect(service.hashIp('203.0.113.8')).not.toBe(hash);
+    expect(hash).not.toBe(createHash('sha256').update('203.0.113.7').digest('hex'));
+
+    const otherKey = new EncryptionService(new ConfigService({ ENCRYPTION_MASTER_KEY: 'f'.repeat(64) }));
+    expect(otherKey.hashIp('203.0.113.7')).not.toBe(hash);
   });
 
   it('should throw an error if master key is missing or length is invalid', () => {

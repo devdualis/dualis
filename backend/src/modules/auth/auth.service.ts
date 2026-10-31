@@ -1,16 +1,16 @@
 import {
   Injectable,
   Inject,
-  ConflictException,
   UnauthorizedException,
   BadRequestException,
+  Logger,
   Optional,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, sql, desc, inArray } from 'drizzle-orm';
+import { eq, sql, desc, inArray, and, lt } from 'drizzle-orm';
 import * as crypto from 'crypto';
-import { DRIZZLE_DB } from '../../database/database.service';
+import { DRIZZLE_DB, DrizzleTransaction } from '../../database/database.service';
 import * as schema from '../../database/schema';
 import {
   users,
@@ -30,7 +30,12 @@ import { EmailService } from '../../common/email/email.service';
 import { hashPassword, verifyPassword } from './utils/password.util';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { AuthResponseDto, SanitizedUser, RegisterResponseDto } from './dto/auth-response.dto';
+import {
+  AuthResponseDto,
+  AuthenticatedUser,
+  SanitizedUser,
+  RegisterResponseDto,
+} from './dto/auth-response.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
@@ -47,9 +52,28 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { StorageService } from '../../common/storage/storage.service';
 import { JwtPayload } from './strategies/jwt.strategy';
 import { LEGAL_DOCUMENTS_VERSION } from '../legal/legal.service';
+import { isAllowedPicture } from './utils/picture.util';
+
+/** Wrong guesses allowed per verification or password reset code. */
+const MAX_CODE_ATTEMPTS = 5;
+/** Codes of one kind an account can get per 24 hours: with 5 tries each, 25 guesses a day. */
+const MAX_CODES_PER_DAY = 5;
+const CODE_TTL_MS = 15 * 60 * 1000;
+const CODE_COOLDOWN_MS = 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+/** Same message for every failure, so a reply never shows whether an email has an account. */
+const INVALID_CODE_MESSAGE = 'Código inválido ou expirado. Solicite um novo código.';
+
+type CodeTable = typeof emailVerifications | typeof passwordResets;
+type CodeRecord = typeof emailVerifications.$inferSelect;
+type UserRecord = typeof users.$inferSelect;
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+  /** Hash of a random password: logins for unknown emails check against it and take as long. */
+  private dummyPasswordHash?: Promise<string>;
+
   constructor(
     @Inject(DRIZZLE_DB) private readonly db: NodePgDatabase<typeof schema>,
     @Inject(JwtService) private readonly jwtService: JwtService,
@@ -68,135 +92,74 @@ export class AuthService {
     }
 
     const email = dto.email.toLowerCase().trim();
+    // Same answer and the same work (one Argon2 hash) for a new or a registered address.
+    // The owner of a registered one gets an email saying so instead of a code.
+    const response: RegisterResponseDto = {
+      requiresVerification: true,
+      email,
+      message: 'Enviamos as instruções para o seu e-mail.',
+    };
 
-    const existing = await this.db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
-      const [record] = await tx
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .limit(1);
-      return record;
-    });
-
+    const existing = await this.findUserByEmail(email);
+    const passwordHash = await hashPassword(dto.password);
     if (existing) {
-      throw new ConflictException('E-mail já cadastrado.');
+      this.sendInBackground(this.emailService.sendAccountExistsEmail(email, existing.name));
+      return response;
     }
 
     const newUserId = crypto.randomUUID();
-    const passwordHash = await hashPassword(dto.password);
-    const ipAddressHash = crypto.createHash('sha256').update(clientIp || '127.0.0.1').digest('hex');
+    let created: UserRecord;
+    try {
+      created = await this.db.transaction(async (tx) => {
+        await tx.execute(
+          sql`SELECT set_config('app.current_user_id', ${newUserId}, true)`,
+        );
 
-    const created = await this.db.transaction(async (tx) => {
-      await tx.execute(
-        sql`SELECT set_config('app.current_user_id', ${newUserId}, true)`,
-      );
+        const [insertedUser] = await tx
+          .insert(users)
+          .values({
+            id: newUserId,
+            name: dto.name,
+            email,
+            passwordHash,
+            gender: dto.gender,
+            dateOfBirth: dto.dateOfBirth,
+            isEmailVerified: false,
+          })
+          .returning();
 
-      const [insertedUser] = await tx
-        .insert(users)
-        .values({
-          id: newUserId,
-          name: dto.name,
-          email,
-          passwordHash,
-          gender: dto.gender,
-          dateOfBirth: dto.dateOfBirth,
-          isEmailVerified: false,
-        })
-        .returning();
+        await tx.insert(userDisclaimerConsents).values({
+          userId: newUserId,
+          disclaimerVersion: dto.disclaimerVersion || LEGAL_DOCUMENTS_VERSION,
+          ipAddressHash: this.encryptionService.hashIp(clientIp || '127.0.0.1'),
+          userAgent: userAgent || 'Unknown',
+        });
 
-      await tx.insert(userDisclaimerConsents).values({
-        userId: newUserId,
-        disclaimerVersion: dto.disclaimerVersion || LEGAL_DOCUMENTS_VERSION,
-        ipAddressHash,
-        userAgent: userAgent || 'Unknown',
+        return insertedUser;
       });
+    } catch (err) {
+      // A parallel sign-up for the same address won: answer as for a registered one.
+      if (isUniqueViolation(err)) return response;
+      throw err;
+    }
 
-      return insertedUser;
-    });
-
-    // Generate 6-digit OTP code & store in email_verifications
     const code = this.emailService.generateVerificationCode();
-    const codeHash = this.emailService.hashCode(code);
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 min expiry
+    await this.issueCode(emailVerifications, created.id, email, this.emailService.hashCode(code));
+    this.sendInBackground(this.emailService.sendVerificationEmail(email, code, created.name));
 
-    await this.db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
-      await tx.insert(emailVerifications).values({
-        userId: created.id,
-        email,
-        codeHash,
-        attempts: 0,
-        expiresAt,
-      });
-    });
-
-    // Send verification email via SMTP
-    await this.emailService.sendVerificationEmail(email, code, created.name);
-
-    const sanitizedUser: SanitizedUser = {
-      id: created.id,
-      name: created.name,
-      email: created.email,
-      gender: created.gender,
-      dateOfBirth: created.dateOfBirth,
-      picture: created.picture || null,
-      isEmailVerified: false,
-      createdAt: created.createdAt,
-      updatedAt: created.updatedAt,
-    };
-
-    return {
-      requiresVerification: true,
-      email: created.email,
-      userId: created.id,
-      message: 'Código de verificação enviado para seu e-mail.',
-      user: sanitizedUser,
-    };
+    return response;
   }
 
   async verifyEmail(dto: VerifyEmailDto): Promise<AuthResponseDto> {
-    const email = dto.email.toLowerCase().trim();
-    const code = dto.code.trim();
+    const record = await this.checkCode(
+      emailVerifications,
+      dto.email.toLowerCase().trim(),
+      dto.code.trim(),
+    );
 
-    const verificationRecord = await this.db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
-      const [record] = await tx
-        .select()
-        .from(emailVerifications)
-        .where(eq(emailVerifications.email, email))
-        .orderBy(desc(emailVerifications.createdAt))
-        .limit(1);
-      return record;
-    });
-
-    if (!verificationRecord) {
-      throw new BadRequestException('Nenhum código de verificação pendente encontrado para este e-mail.');
-    }
-
-    if (verificationRecord.expiresAt.getTime() < Date.now()) {
-      throw new BadRequestException('Código de verificação expirado. Solicite um novo código.');
-    }
-
-    if (verificationRecord.attempts >= 5) {
-      throw new BadRequestException('Limite de tentativas excedido. Solicite um novo código de verificação.');
-    }
-
-    const isValid = this.emailService.verifyCodeHash(code, verificationRecord.codeHash);
-    if (!isValid) {
-      await this.db.transaction(async (tx) => {
-        await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
-        await tx
-          .update(emailVerifications)
-          .set({ attempts: verificationRecord.attempts + 1 })
-          .where(eq(emailVerifications.id, verificationRecord.id));
-      });
-      throw new BadRequestException('Código de verificação incorreto.');
-    }
-
-    // Mark user verified and remove verification entries
     const updatedUser = await this.db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      await this.actAsAuthServiceFor(tx, record.userId);
+      await this.consumeCode(tx, emailVerifications, record);
       const [u] = await tx
         .update(users)
         .set({
@@ -204,214 +167,69 @@ export class AuthService {
           emailVerifiedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(users.id, verificationRecord.userId))
+        .where(eq(users.id, record.userId))
         .returning();
-
-      await tx
-        .delete(emailVerifications)
-        .where(eq(emailVerifications.userId, verificationRecord.userId));
-
       return u;
     });
 
-    const sanitizedUser: SanitizedUser = {
-      id: updatedUser.id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      gender: updatedUser.gender,
-      dateOfBirth: updatedUser.dateOfBirth,
-      picture: updatedUser.picture || null,
-      isEmailVerified: updatedUser.isEmailVerified,
-      createdAt: updatedUser.createdAt,
-      updatedAt: updatedUser.updatedAt,
-    };
-
-    const tokens = this.generateTokens(updatedUser.id, updatedUser.email);
     return {
-      ...tokens,
-      user: sanitizedUser,
+      ...this.generateTokens(updatedUser),
+      user: { ...this.sanitize(updatedUser), isEmailVerified: updatedUser.isEmailVerified },
     };
   }
 
   async resendVerification(dto: ResendVerificationDto): Promise<{ success: boolean; message: string }> {
     const email = dto.email.toLowerCase().trim();
+    const user = await this.findUserByEmail(email);
 
-    const user = await this.db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
-      const [u] = await tx
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .limit(1);
-      return u;
-    });
-
-    if (!user) {
-      return { success: true, message: 'Se o e-mail estiver cadastrado, um novo código foi enviado.' };
-    }
-
-    if (user.isEmailVerified) {
-      throw new BadRequestException('Este e-mail já foi verificado. Você pode entrar diretamente.');
-    }
-
-    const latestVerification = await this.db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
-      const [rec] = await tx
-        .select()
-        .from(emailVerifications)
-        .where(eq(emailVerifications.userId, user.id))
-        .orderBy(desc(emailVerifications.createdAt))
-        .limit(1);
-      return rec;
-    });
-
-    if (latestVerification) {
-      const diffMs = Date.now() - latestVerification.createdAt.getTime();
-      if (diffMs < 60 * 1000) {
-        const remainingSeconds = Math.ceil((60 * 1000 - diffMs) / 1000);
-        throw new BadRequestException(`Aguarde ${remainingSeconds} segundos antes de solicitar um novo código.`);
+    // Unknown, already confirmed, too soon or over the daily cap: the answer is the same.
+    if (user && !user.isEmailVerified) {
+      const code = this.emailService.generateVerificationCode();
+      if (await this.issueCode(emailVerifications, user.id, email, this.emailService.hashCode(code))) {
+        this.sendInBackground(this.emailService.sendVerificationEmail(email, code, user.name));
       }
     }
 
-    const code = this.emailService.generateVerificationCode();
-    const codeHash = this.emailService.hashCode(code);
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
-
-    await this.db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
-      await tx
-        .delete(emailVerifications)
-        .where(eq(emailVerifications.userId, user.id));
-
-      await tx.insert(emailVerifications).values({
-        userId: user.id,
-        email,
-        codeHash,
-        attempts: 0,
-        expiresAt,
-      });
-    });
-
-    await this.emailService.sendVerificationEmail(email, code, user.name);
-
-    return { success: true, message: 'Novo código de verificação enviado com sucesso.' };
+    return {
+      success: true,
+      message: 'Se o e-mail estiver cadastrado e ainda não confirmado, enviamos um novo código.',
+    };
   }
 
   async forgotPassword(dto: ForgotPasswordDto): Promise<{ success: boolean; message: string }> {
     const email = dto.email.toLowerCase().trim();
-    const genericMessage = 'Se o e-mail estiver cadastrado, um código de redefinição foi enviado.';
+    const user = await this.findUserByEmail(email);
 
-    const user = await this.db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
-      const [u] = await tx
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .limit(1);
-      return u;
-    });
-
-    if (!user) {
-      return { success: true, message: genericMessage };
-    }
-
-    const latestReset = await this.db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
-      const [rec] = await tx
-        .select()
-        .from(passwordResets)
-        .where(eq(passwordResets.userId, user.id))
-        .orderBy(desc(passwordResets.createdAt))
-        .limit(1);
-      return rec;
-    });
-
-    if (latestReset) {
-      const diffMs = Date.now() - latestReset.createdAt.getTime();
-      if (diffMs < 60 * 1000) {
-        const remainingSeconds = Math.ceil((60 * 1000 - diffMs) / 1000);
-        throw new BadRequestException(`Aguarde ${remainingSeconds} segundos antes de solicitar um novo código.`);
+    // Unknown, too soon or over the daily cap: the answer is the same.
+    if (user) {
+      const code = this.emailService.generateVerificationCode();
+      if (await this.issueCode(passwordResets, user.id, email, this.emailService.hashCode(code))) {
+        this.sendInBackground(this.emailService.sendPasswordResetEmail(email, code, user.name));
       }
     }
 
-    const code = this.emailService.generateVerificationCode();
-    const codeHash = this.emailService.hashCode(code);
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
-
-    await this.db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
-      await tx
-        .delete(passwordResets)
-        .where(eq(passwordResets.userId, user.id));
-
-      await tx.insert(passwordResets).values({
-        userId: user.id,
-        email,
-        codeHash,
-        attempts: 0,
-        expiresAt,
-      });
-    });
-
-    await this.emailService.sendPasswordResetEmail(email, code, user.name);
-
-    return { success: true, message: genericMessage };
+    return { success: true, message: 'Se o e-mail estiver cadastrado, um código de redefinição foi enviado.' };
   }
 
   async resetPassword(dto: ResetPasswordDto): Promise<{ success: boolean; message: string }> {
-    const email = dto.email.toLowerCase().trim();
-    const code = dto.code.trim();
-
-    const resetRecord = await this.db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
-      const [record] = await tx
-        .select()
-        .from(passwordResets)
-        .where(eq(passwordResets.email, email))
-        .orderBy(desc(passwordResets.createdAt))
-        .limit(1);
-      return record;
-    });
-
-    if (!resetRecord) {
-      throw new BadRequestException('Nenhuma solicitação de redefinição de senha encontrada para este e-mail.');
-    }
-
-    if (resetRecord.expiresAt.getTime() < Date.now()) {
-      throw new BadRequestException('Código de redefinição expirado. Solicite um novo código.');
-    }
-
-    if (resetRecord.attempts >= 5) {
-      throw new BadRequestException('Limite de tentativas excedido. Solicite um novo código de redefinição.');
-    }
-
-    const isValid = this.emailService.verifyCodeHash(code, resetRecord.codeHash);
-    if (!isValid) {
-      await this.db.transaction(async (tx) => {
-        await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
-        await tx
-          .update(passwordResets)
-          .set({ attempts: resetRecord.attempts + 1 })
-          .where(eq(passwordResets.id, resetRecord.id));
-      });
-      throw new BadRequestException('Código de redefinição incorreto.');
-    }
-
+    const record = await this.checkCode(
+      passwordResets,
+      dto.email.toLowerCase().trim(),
+      dto.code.trim(),
+    );
     const newPasswordHash = await hashPassword(dto.newPassword);
 
+    // The new hash also changes the session version, so every existing session ends.
     await this.db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      await this.actAsAuthServiceFor(tx, record.userId);
+      await this.consumeCode(tx, passwordResets, record);
       await tx
         .update(users)
         .set({
           passwordHash: newPasswordHash,
           updatedAt: new Date(),
         })
-        .where(eq(users.id, resetRecord.userId));
-
-      await tx
-        .delete(passwordResets)
-        .where(eq(passwordResets.userId, resetRecord.userId));
+        .where(eq(users.id, record.userId));
     });
 
     return { success: true, message: 'Senha redefinida com sucesso. Você já pode entrar com a nova senha.' };
@@ -419,18 +237,10 @@ export class AuthService {
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
     const email = dto.email.toLowerCase().trim();
-
-    const user = await this.db.transaction(async (tx) => {
-      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
-      const [record] = await tx
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .limit(1);
-      return record;
-    });
+    const user = await this.findUserByEmail(email);
 
     if (!user) {
+      await this.verifyAgainstDummyHash(dto.password);
       throw new UnauthorizedException('Credenciais inválidas.');
     }
 
@@ -449,22 +259,9 @@ export class AuthService {
       });
     }
 
-    const sanitizedUser: SanitizedUser = {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      gender: user.gender,
-      dateOfBirth: user.dateOfBirth,
-      picture: user.picture || null,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
-
-    const tokens = this.generateTokens(user.id, user.email);
-
     return {
-      ...tokens,
-      user: sanitizedUser,
+      ...this.generateTokens(user),
+      user: this.sanitize(user),
     };
   }
 
@@ -748,12 +545,30 @@ export class AuthService {
     userId: string,
     dto: UpdateProfileDto,
   ): Promise<SanitizedUser> {
-    let finalPicture = dto.picture;
-    if (dto.picture && this.storageService) {
-      finalPicture = await this.storageService.processAvatarImage(
-        userId,
-        dto.picture,
-      );
+    let picture: string | undefined;
+    if (dto.picture !== undefined) {
+      const current = await this.db.transaction(async (tx) => {
+        await tx.execute(
+          sql`SELECT set_config('app.current_user_id', ${userId}, true)`,
+        );
+        const [record] = await tx
+          .select({ picture: users.picture })
+          .from(users)
+          .where(eq(users.id, userId))
+          .limit(1);
+        return record;
+      });
+      // The app sends the current picture back with every save: only a new one is checked.
+      if (dto.picture !== current?.picture) {
+        if (!isAllowedPicture(dto.picture)) {
+          throw new BadRequestException(
+            'Foto de perfil inválida. Use uma imagem PNG, JPEG ou WebP de até 1,5 MB.',
+          );
+        }
+        picture = this.storageService
+          ? await this.storageService.processAvatarImage(userId, dto.picture)
+          : dto.picture;
+      }
     }
 
     const updated = await this.db.transaction(async (tx) => {
@@ -766,7 +581,7 @@ export class AuthService {
       };
       if (dto.name !== undefined) updateData.name = dto.name;
       if (dto.dateOfBirth !== undefined) updateData.dateOfBirth = dto.dateOfBirth;
-      if (dto.picture !== undefined) updateData.picture = finalPicture;
+      if (picture !== undefined) updateData.picture = picture;
       if (dto.gender !== undefined) updateData.gender = dto.gender;
 
       const [record] = await tx
@@ -782,33 +597,14 @@ export class AuthService {
       throw new UnauthorizedException('Usuário não encontrado.');
     }
 
-    return {
-      id: updated.id,
-      name: updated.name,
-      email: updated.email,
-      gender: updated.gender,
-      dateOfBirth: updated.dateOfBirth,
-      picture: updated.picture || null,
-      createdAt: updated.createdAt,
-      updatedAt: updated.updatedAt,
-    };
+    return this.sanitize(updated);
   }
 
   async changePassword(
     userId: string,
     dto: ChangePasswordDto,
-  ): Promise<{ success: boolean; message: string }> {
-    const user = await this.db.transaction(async (tx) => {
-      await tx.execute(
-        sql`SELECT set_config('app.current_user_id', ${userId}, true)`,
-      );
-      const [record] = await tx
-        .select()
-        .from(users)
-        .where(eq(users.id, userId))
-        .limit(1);
-      return record;
-    });
+  ): Promise<{ success: boolean; message: string; accessToken: string; refreshToken: string }> {
+    const user = await this.findUserById(userId);
 
     if (!user) {
       throw new UnauthorizedException('Usuário não encontrado.');
@@ -834,37 +630,45 @@ export class AuthService {
         .where(eq(users.id, userId));
     });
 
+    // The new hash ends every other session; this device gets fresh tokens.
     return {
       success: true,
-      message: 'Senha alterada com sucesso.',
+      message: 'Senha alterada com sucesso. As outras sessões foram encerradas.',
+      ...this.generateTokens({ ...user, passwordHash: newPasswordHash }),
     };
   }
 
-  async validateUserById(id: string): Promise<SanitizedUser | null> {
+  /**
+   * The user behind a token: null when the account is gone or the password changed after the
+   * token was issued. Reads only the columns a request needs, not the picture.
+   */
+  async validateUserById(
+    id: string,
+    sessionVersion: string | undefined,
+  ): Promise<AuthenticatedUser | null> {
     const user = await this.db.transaction(async (tx) => {
       await tx.execute(
         sql`SELECT set_config('app.current_user_id', ${id}, true)`,
       );
       const [record] = await tx
-        .select()
+        .select({ id: users.id, email: users.email, passwordHash: users.passwordHash })
         .from(users)
         .where(eq(users.id, id))
         .limit(1);
       return record;
     });
 
-    if (!user) return null;
+    if (!user || sessionVersion !== this.sessionVersion(user.passwordHash)) return null;
+    return { id: user.id, email: user.email };
+  }
 
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      gender: user.gender,
-      dateOfBirth: user.dateOfBirth,
-      picture: user.picture || null,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+  /** Full profile of the signed-in user, for `GET /auth/me`. */
+  async getProfile(userId: string): Promise<SanitizedUser> {
+    const user = await this.findUserById(userId);
+    if (!user) {
+      throw new UnauthorizedException('Usuário não encontrado.');
+    }
+    return this.sanitize(user);
   }
 
   async refreshTokens(refreshToken: string): Promise<AuthResponseDto> {
@@ -879,20 +683,174 @@ export class AuthService {
       throw new UnauthorizedException('Token de atualização inválido.');
     }
 
-    const user = await this.validateUserById(payload.sub);
-    if (!user) {
-      throw new UnauthorizedException('Usuário não encontrado.');
+    const user = await this.findUserById(payload.sub);
+    // Gone, or the password changed after this token was issued.
+    if (!user || payload.sv !== this.sessionVersion(user.passwordHash)) {
+      throw new UnauthorizedException('Sessão encerrada. Entre novamente.');
     }
 
-    const tokens = this.generateTokens(user.id, user.email);
-    return { ...tokens, user };
+    return { ...this.generateTokens(user), user: this.sanitize(user) };
   }
 
-  private generateTokens(userId: string, email: string) {
-    const accessPayload: JwtPayload = { sub: userId, email, type: 'access' };
-    const refreshPayload: JwtPayload = { sub: userId, email, type: 'refresh' };
+  /**
+   * Short hash of the stored password hash, carried in every token as `sv`. A password change
+   * or reset stores a new Argon2 hash (new salt), so tokens issued before it stop working.
+   */
+  private sessionVersion(passwordHash: string): string {
+    return crypto.createHash('sha256').update(passwordHash).digest('base64url').slice(0, 16);
+  }
+
+  private generateTokens(user: { id: string; email: string; passwordHash: string }) {
+    const sv = this.sessionVersion(user.passwordHash);
+    const accessPayload: JwtPayload = { sub: user.id, email: user.email, type: 'access', sv };
+    const refreshPayload: JwtPayload = { sub: user.id, email: user.email, type: 'refresh', sv };
     const accessToken = this.jwtService.sign(accessPayload, { expiresIn: '15m' });
     const refreshToken = this.jwtService.sign(refreshPayload, { expiresIn: '7d' });
     return { accessToken, refreshToken };
   }
+
+  private sanitize(user: UserRecord): SanitizedUser {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      gender: user.gender,
+      dateOfBirth: user.dateOfBirth,
+      picture: user.picture || null,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+
+  private async findUserById(id: string): Promise<UserRecord | undefined> {
+    return this.db.transaction(async (tx) => {
+      await tx.execute(
+        sql`SELECT set_config('app.current_user_id', ${id}, true)`,
+      );
+      const [record] = await tx
+        .select()
+        .from(users)
+        .where(eq(users.id, id))
+        .limit(1);
+      return record;
+    });
+  }
+
+  private async findUserByEmail(email: string): Promise<UserRecord | undefined> {
+    return this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      const [record] = await tx
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+      return record;
+    });
+  }
+
+  private async verifyAgainstDummyHash(password: string): Promise<void> {
+    this.dummyPasswordHash ??= hashPassword(crypto.randomUUID());
+    await verifyPassword(await this.dummyPasswordHash, password);
+  }
+
+  /** Emails go out after the reply, so reply times do not show which path ran. */
+  private sendInBackground(sending: Promise<void>): void {
+    sending.catch((err: Error) => this.logger.error(`Falha ao enviar e-mail: ${err.message}`));
+  }
+
+  /**
+   * Context for the code flows: the lookup flag, plus the target user, because the users
+   * policy only accepts an update to the row of `app.current_user_id`.
+   */
+  private async actAsAuthServiceFor(tx: DrizzleTransaction, userId: string): Promise<void> {
+    await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+    await tx.execute(sql`SELECT set_config('app.current_user_id', ${userId}, true)`);
+  }
+
+  /**
+   * Stores a new code for the account, unless one was stored in the last minute or the account
+   * already got MAX_CODES_PER_DAY in 24 hours. Earlier codes stay (only the newest is accepted)
+   * so the cap holds. Returns whether a code was stored.
+   */
+  private async issueCode(
+    table: CodeTable,
+    userId: string,
+    email: string,
+    codeHash: string,
+  ): Promise<boolean> {
+    return this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      // One issuer per account at a time, so parallel requests cannot pass the cap together.
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${userId}))`);
+      await tx
+        .delete(table)
+        .where(and(eq(table.userId, userId), lt(table.createdAt, new Date(Date.now() - DAY_MS))));
+      const recent = await tx
+        .select({ createdAt: table.createdAt })
+        .from(table)
+        .where(eq(table.userId, userId))
+        .orderBy(desc(table.createdAt));
+      if (recent.length >= MAX_CODES_PER_DAY) return false;
+      if (recent[0] && Date.now() - recent[0].createdAt.getTime() < CODE_COOLDOWN_MS) return false;
+
+      await tx.insert(table).values({
+        userId,
+        email,
+        codeHash,
+        attempts: 0,
+        expiresAt: new Date(Date.now() + CODE_TTL_MS),
+      });
+      return true;
+    });
+  }
+
+  /**
+   * Spends one attempt on the newest code sent to `email` and returns it when `code` matches.
+   * The attempt is counted atomically before the comparison, so parallel guesses each use one.
+   */
+  private async checkCode(table: CodeTable, email: string, code: string): Promise<CodeRecord> {
+    const record = await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.is_auth_service', 'true', true)`);
+      const [latest] = await tx
+        .select()
+        .from(table)
+        .where(eq(table.email, email))
+        .orderBy(desc(table.createdAt))
+        .limit(1);
+      if (!latest || latest.expiresAt.getTime() < Date.now()) return undefined;
+
+      const [claimed] = await tx
+        .update(table)
+        .set({ attempts: sql`${table.attempts} + 1` })
+        .where(and(eq(table.id, latest.id), lt(table.attempts, MAX_CODE_ATTEMPTS)))
+        .returning({ id: table.id });
+      return claimed ? latest : undefined;
+    });
+
+    if (!record || !this.emailService.verifyCodeHash(code, record.codeHash)) {
+      throw new BadRequestException(INVALID_CODE_MESSAGE);
+    }
+    return record;
+  }
+
+  /** Deletes the account's codes; fails when a parallel request already used this one. */
+  private async consumeCode(
+    tx: DrizzleTransaction,
+    table: CodeTable,
+    record: CodeRecord,
+  ): Promise<void> {
+    const deleted = await tx
+      .delete(table)
+      .where(eq(table.userId, record.userId))
+      .returning({ id: table.id });
+    if (!deleted.some((row) => row.id === record.id)) {
+      throw new BadRequestException(INVALID_CODE_MESSAGE);
+    }
+  }
+}
+
+/** Postgres unique violation, raw or wrapped by Drizzle. */
+function isUniqueViolation(err: unknown): boolean {
+  const e = err as { code?: string; cause?: { code?: string } } | undefined;
+  return e?.code === '23505' || e?.cause?.code === '23505';
 }

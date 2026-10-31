@@ -8,7 +8,6 @@ import {
   VersioningType,
   ValidationPipe,
   BadRequestException,
-  ConflictException,
   UnauthorizedException,
   Injectable,
   Inject,
@@ -48,13 +47,15 @@ class MockAuthService {
     }
 
     const email = dto.email.toLowerCase().trim();
+    // Same answer for a new or a registered address (the real service emails the owner).
+    const response = { requiresVerification: true, email, message: 'Enviamos as instruções para o seu e-mail.' };
     if (this.users.some((u) => u.email === email)) {
-      throw new ConflictException('E-mail já cadastrado.');
+      return response;
     }
 
     const newUserId = crypto.randomUUID();
     const passwordHash = await hashPassword(dto.password);
-    const user = {
+    this.users.push({
       id: newUserId,
       name: dto.name,
       email,
@@ -64,26 +65,9 @@ class MockAuthService {
       picture: null,
       createdAt: new Date(),
       updatedAt: new Date(),
-    };
+    });
 
-    this.users.push(user);
-
-    const sanitizedUser: SanitizedUser = {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      gender: user.gender,
-      dateOfBirth: user.dateOfBirth,
-      picture: user.picture,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
-
-    const tokens = this.generateTokens(user.id, user.email);
-    return {
-      ...tokens,
-      user: sanitizedUser,
-    };
+    return response;
   }
 
   async login(dto: LoginDto) {
@@ -154,9 +138,14 @@ class MockAuthService {
     return { success: true, message: 'Senha alterada com sucesso.' };
   }
 
-  async validateUserById(id: string): Promise<SanitizedUser | null> {
+  async validateUserById(id: string, _sessionVersion?: string): Promise<{ id: string; email: string } | null> {
     const user = this.users.find((u) => u.id === id);
-    if (!user) return null;
+    return user ? { id: user.id, email: user.email } : null;
+  }
+
+  async getProfile(userId: string): Promise<SanitizedUser> {
+    const user = this.users.find((u) => u.id === userId);
+    if (!user) throw new UnauthorizedException('Usuário não encontrado.');
 
     return {
       id: user.id,
@@ -254,7 +243,7 @@ describe('AuthModule E2E Integration Suite (AUTH-01 & AUTH-02)', () => {
     }
   });
 
-  it('Scenario 1: POST /v1/auth/register with valid payload returns HTTP 201 and sanitized user', async () => {
+  it('Scenario 1: POST /v1/auth/register with valid payload returns HTTP 201 and asks for the emailed code', async () => {
     const res = await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
@@ -262,18 +251,11 @@ describe('AuthModule E2E Integration Suite (AUTH-01 & AUTH-02)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    const body = JSON.parse(res.payload);
-    expect(body).toHaveProperty('accessToken');
-    expect(body).toHaveProperty('refreshToken');
-    expect(body).toHaveProperty('user');
-    expect(body.user).toHaveProperty('id');
-    expect(body.user.name).toBe(validRegistrationPayload.name);
-    expect(body.user.email).toBe(validRegistrationPayload.email);
-    expect(body.user.gender).toBe(validRegistrationPayload.gender);
-    expect(body.user.passwordHash).toBeUndefined();
-
-    // Store token for Scenario 6
-    validAccessToken = body.accessToken;
+    expect(JSON.parse(res.payload)).toEqual({
+      requiresVerification: true,
+      email: validRegistrationPayload.email,
+      message: 'Enviamos as instruções para o seu e-mail.',
+    });
   });
 
   it('Scenario 2: POST /v1/auth/register with lgpdConsent: false returns HTTP 400 Bad Request', async () => {
@@ -296,16 +278,19 @@ describe('AuthModule E2E Integration Suite (AUTH-01 & AUTH-02)', () => {
     expect(errorMsg).toContain('Consentimento LGPD Art. 11');
   });
 
-  it('Scenario 3: POST /v1/auth/register with duplicate email returns HTTP 409 Conflict', async () => {
+  it('Scenario 3: POST /v1/auth/register with a registered email answers exactly like a new one', async () => {
     const res = await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
       payload: validRegistrationPayload,
     });
 
-    expect(res.statusCode).toBe(409);
-    const body = JSON.parse(res.payload);
-    expect(body.message).toBe('E-mail já cadastrado.');
+    expect(res.statusCode).toBe(201);
+    expect(JSON.parse(res.payload)).toEqual({
+      requiresVerification: true,
+      email: validRegistrationPayload.email,
+      message: 'Enviamos as instruções para o seu e-mail.',
+    });
   });
 
   it('Scenario 4: POST /v1/auth/login with correct credentials returns HTTP 200 and valid JWT', async () => {
@@ -324,6 +309,9 @@ describe('AuthModule E2E Integration Suite (AUTH-01 & AUTH-02)', () => {
     expect(body).toHaveProperty('refreshToken');
     expect(body.user.email).toBe(validRegistrationPayload.email);
     expect(body.user.passwordHash).toBeUndefined();
+
+    // Store token for Scenario 6
+    validAccessToken = body.accessToken;
   });
 
   it('Scenario 5: POST /v1/auth/login with invalid password returns HTTP 401 Unauthorized', async () => {
@@ -463,5 +451,20 @@ describe('AuthModule E2E Integration Suite (AUTH-01 & AUTH-02)', () => {
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.payload);
     expect(body.success).toBe(true);
+  });
+
+  it('Scenario 12: more than 5 resend-verification requests an hour for one email return HTTP 429', async () => {
+    const statuses: number[] = [];
+    for (let i = 0; i < 5; i++) {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/v1/auth/resend-verification',
+        payload: { email: validRegistrationPayload.email },
+      });
+      statuses.push(res.statusCode);
+    }
+
+    // Scenario 11 sent the first one.
+    expect(statuses).toEqual([200, 200, 200, 200, 429]);
   });
 });

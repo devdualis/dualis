@@ -9,6 +9,8 @@ export interface JwtPayload {
   sub: string;
   email: string;
   type: 'access' | 'refresh';
+  /** Session version: changes when the password changes (see AuthService.sessionVersion). */
+  sv?: string;
 }
 
 @Injectable()
@@ -29,7 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Token inválido.');
     }
 
-    const user = await this.authService.validateUserById(payload.sub);
+    const user = await this.authService.validateUserById(payload.sub, payload.sv);
     if (!user) {
       throw new UnauthorizedException('Usuário não encontrado ou token inválido.');
     }

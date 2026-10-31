@@ -12,6 +12,17 @@ import 'package:dualis_mobile/features/settings/presentation/widgets/avatar_sele
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 class FakeSecureStorageService extends SecureStorageService {
+  String? persistedAccessToken;
+
+  @override
+  Future<void> persistTokens({
+    required String accessToken,
+    required String refreshToken,
+    required String userId,
+  }) async {
+    persistedAccessToken = accessToken;
+  }
+
   @override
   Future<String?> getAccessToken() async => 'mock-jwt-token';
 
@@ -102,7 +113,7 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> changePassword({
+  Future<Map<String, dynamic>> changePassword({
     required String token,
     required String currentPassword,
     required String newPassword,
@@ -110,6 +121,11 @@ class FakeAuthRepository implements AuthRepository {
     changePasswordCalled = true;
     lastCurrentPassword = currentPassword;
     lastNewPassword = newPassword;
+    return {
+      'success': true,
+      'accessToken': 'jwt-access-after-change',
+      'refreshToken': 'jwt-refresh-after-change',
+    };
   }
 
   @override
@@ -138,6 +154,7 @@ class _TestAuthController extends AuthController {
 Widget createSettingsTestApp({
   required FakeAuthRepository repository,
   required UserProfile user,
+  FakeSecureStorageService? storage,
 }) {
   final authState = AuthState(
     isAuthenticated: true,
@@ -148,7 +165,7 @@ Widget createSettingsTestApp({
   return ProviderScope(
     overrides: [
       authRepositoryProvider.overrideWithValue(repository),
-      secureStorageServiceProvider.overrideWithValue(FakeSecureStorageService()),
+      secureStorageServiceProvider.overrideWithValue(storage ?? FakeSecureStorageService()),
       authControllerProvider.overrideWith(() => _TestAuthController(authState)),
     ],
     child: const MaterialApp(
@@ -292,7 +309,8 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(createSettingsTestApp(repository: fakeRepo, user: testUser));
+      final storage = FakeSecureStorageService();
+      await tester.pumpWidget(createSettingsTestApp(repository: fakeRepo, user: testUser, storage: storage));
       await tester.pumpAndSettle();
 
       final curPass = find.byKey(const Key('settings_current_password_input'));
@@ -315,6 +333,8 @@ void main() {
       expect(fakeRepo.changePasswordCalled, isTrue);
       expect(fakeRepo.lastCurrentPassword, 'OldPass123!');
       expect(fakeRepo.lastNewPassword, 'BrandNewPass123!');
+      // The server ends every session on a password change: this device keeps the new tokens.
+      expect(storage.persistedAccessToken, 'jwt-access-after-change');
     });
   });
 }

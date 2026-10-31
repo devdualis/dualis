@@ -13,7 +13,9 @@ import { applyRouteBodyLimits, DEFAULT_BODY_LIMIT } from './common/http/body-lim
 async function bootstrap() {
   const fastifyAdapter = new FastifyAdapter({
     logger: false, // Pino handles structured logging via nestjs-pino
-    trustProxy: true, // Necessary for reverse proxies / GCP Cloud Run
+    // Cloud Run's front end appends the caller's address to X-Forwarded-For. Trusting that one
+    // hop makes req.ip that address; earlier entries are whatever the client sent.
+    trustProxy: 1,
     bodyLimit: DEFAULT_BODY_LIMIT, // 1MB; uploads raise it per route with @BodyLimit
   });
   applyRouteBodyLimits(fastifyAdapter.getInstance());

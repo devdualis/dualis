@@ -378,13 +378,30 @@ class AuthController extends Notifier<AuthState> {
         return false;
       }
 
-      await _repository.changePassword(
+      final res = await _repository.changePassword(
         token: token,
         currentPassword: currentPassword,
         newPassword: newPassword,
       );
 
-      state = state.copyWith(isLoading: false);
+      // The server ends every session on a password change; these tokens
+      // keep this device signed in.
+      final accessToken = res['accessToken'] as String?;
+      final refreshToken = res['refreshToken'] as String?;
+      if (accessToken != null && refreshToken != null) {
+        await _secureStorage.persistTokens(
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          userId: state.user?.id ?? await _secureStorage.getUserId() ?? '',
+        );
+        state = state.copyWith(
+          isLoading: false,
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+        );
+      } else {
+        state = state.copyWith(isLoading: false);
+      }
       return true;
     } catch (e) {
       state = state.copyWith(

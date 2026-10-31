@@ -95,6 +95,31 @@ export class EmailService {
     );
   }
 
+  /**
+   * Sent when someone signs up with an address that already has an account. Sign-up answers the
+   * same either way, so only the owner of the inbox learns that the account exists.
+   */
+  async sendAccountExistsEmail(to: string, name?: string): Promise<void> {
+    const normalizedEmail = to.toLowerCase().trim();
+    const firstName = name?.trim().split(' ')[0];
+
+    const htmlContent = renderCodeEmail({
+      preheader: 'Este e-mail já tem uma conta no Dualis CheckUp.',
+      title: 'Você já tem uma conta',
+      firstName,
+      intro:
+        'Alguém tentou criar uma conta no <strong>Dualis CheckUp</strong> com este e-mail, mas ele já está cadastrado. Se foi você, entre com sua senha. Se não lembra a senha, toque em <strong>Esqueci minha senha</strong> na tela de entrada.',
+      ignoreNote: 'Se não foi você, ignore esta mensagem com segurança; sua conta continua protegida.',
+    });
+
+    await this.deliver(
+      normalizedEmail,
+      'Você já tem uma conta no Dualis CheckUp',
+      `Olá${firstName ? ` ${firstName}` : ''}, alguém tentou criar uma conta no Dualis CheckUp com este e-mail, mas ele já está cadastrado. Se foi você, entre com sua senha ou use "Esqueci minha senha". Se não foi você, ignore esta mensagem.`,
+      htmlContent,
+    );
+  }
+
   getLastSentCode(email: string): string | undefined {
     return this.sentCodesMemory.get(email.toLowerCase().trim())?.code;
   }

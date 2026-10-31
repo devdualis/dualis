@@ -59,6 +59,18 @@ describe('EmailService (Resend)', () => {
     expect(body.html).toContain('654321');
   });
 
+  it('sends the account-exists notice without any code', async () => {
+    await new EmailService().sendAccountExistsEmail('ana@example.com', '<b>Ana</b> Souza');
+
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.to).toEqual(['ana@example.com']);
+    expect(body.subject).toBe('Você já tem uma conta no Dualis CheckUp');
+    expect(body.html).toContain('Esqueci minha senha');
+    expect(body.html).not.toContain('Seu código');
+    expect(body.html).toContain('&#60;b&#62;Ana');
+    expect(findBannedVocabulary(`${body.subject}\n${body.text}\n${body.html}`)).toEqual([]);
+  });
+
   it('escapes the name in the HTML and keeps the copy free of banned vocabulary', async () => {
     const service = new EmailService();
     await service.sendVerificationEmail('ana@example.com', '123456', '<b>Ana</b>');

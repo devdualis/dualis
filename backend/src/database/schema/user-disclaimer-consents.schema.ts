@@ -11,7 +11,7 @@ export const userDisclaimerConsents = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
     disclaimerVersion: varchar('disclaimer_version', { length: 20 }).notNull(),
     acceptedAt: timestamp('accepted_at', { withTimezone: true }).defaultNow().notNull(),
-    ipAddressHash: varchar('ip_address_hash', { length: 64 }).notNull(), // SHA-256 hashed IP
+    ipAddressHash: varchar('ip_address_hash', { length: 64 }).notNull(), // HMAC-SHA256 of the IP (EncryptionService.hashIp); rows before 2026-10-31 hold a plain SHA-256
     userAgent: varchar('user_agent', { length: 255 }),
   },
   (table) => [
