@@ -597,6 +597,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get familySharingActive => 'Acesso ativo';
 
   @override
+  String familySharingSharedWith(String person) {
+    return 'Compartilhado com $person';
+  }
+
+  @override
   String familySharingPendingUntil(String code, String date) {
     return 'Código $code · aguardando aceite até $date';
   }
@@ -662,13 +667,17 @@ class AppLocalizationsPt extends AppLocalizations {
   String get familySharingAcceptTitle => 'Inserir código de convite';
 
   @override
-  String get familySharingAcceptFieldLabel => 'Código de 6 caracteres';
+  String get familySharingAcceptFieldLabel => 'Código de 10 caracteres';
 
   @override
   String get familySharingAcceptSubmit => 'Aceitar Convite';
 
   @override
   String get familySharingAcceptError => 'Código inválido ou expirado.';
+
+  @override
+  String get familySharingAcceptTooMany =>
+      'Muitas tentativas. Aguarde 15 minutos e tente de novo.';
 
   @override
   String get familySharingAccepted =>

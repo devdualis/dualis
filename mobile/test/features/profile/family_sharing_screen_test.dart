@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dualis_mobile/core/config/feature_flags.dart';
+import 'package:dualis_mobile/features/profile/data/profile_repository.dart';
 import 'package:dualis_mobile/features/profile/domain/models/profile.dart';
 import 'package:dualis_mobile/features/profile/domain/models/shared_access_grant.dart';
 import 'package:dualis_mobile/features/profile/presentation/controllers/active_profile_controller.dart';
@@ -33,6 +34,8 @@ SharedAccessGrant _grant(
   GrantStatus status = GrantStatus.accepted,
   DateTime? expiresAt,
   String? code,
+  String? granteeName,
+  String? granteeEmail,
 }) =>
     SharedAccessGrant(
       id: id,
@@ -44,6 +47,8 @@ SharedAccessGrant _grant(
       expiresAt: expiresAt ?? DateTime.now().add(const Duration(hours: 72)),
       inviteCode: code,
       acceptedAt: status == GrantStatus.accepted ? DateTime(2026, 10, 1) : null,
+      granteeName: granteeName,
+      granteeEmail: granteeEmail,
     );
 
 /// In-memory controller: records calls and mutates state like the real one.
@@ -54,7 +59,7 @@ class _FakeController extends ActiveProfileController {
   final List<String> acceptedCodes = [];
   final List<String> revokedIds = [];
   ({String targetProfileId, ProfileShareLevel accessLevel})? lastInvite;
-  bool failAccept = false;
+  Object? acceptError;
 
   @override
   ActiveProfileState build() => _initial;
@@ -76,7 +81,7 @@ class _FakeController extends ActiveProfileController {
       accessLevel: accessLevel,
       status: GrantStatus.pending,
       expiresAt: DateTime.now().add(const Duration(hours: 72)),
-      inviteCode: 'AB12CD',
+      inviteCode: 'AB12CD34EF',
     );
     state = state.copyWith(outgoingGrants: [...state.outgoingGrants, invite]);
     return invite;
@@ -85,7 +90,7 @@ class _FakeController extends ActiveProfileController {
   @override
   Future<void> acceptInvite(String inviteCode) async {
     acceptedCodes.add(inviteCode);
-    if (failAccept) throw Exception('invalid');
+    if (acceptError != null) throw acceptError!;
   }
 
   @override
@@ -198,17 +203,17 @@ void main() {
 
     expect(controller.lastInvite?.targetProfileId, 'p-kid');
     expect(controller.lastInvite?.accessLevel, ProfileShareLevel.coManage);
-    expect(find.text('AB12CD'), findsOneWidget);
+    expect(find.text('AB12CD34EF'), findsOneWidget);
     expect(find.textContaining('Válido até'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('family-share-invite-copy')));
     await tester.pumpAndSettle();
-    expect(clipboard, 'AB12CD');
+    expect(clipboard, 'AB12CD34EF');
     expect(find.text('Código copiado.'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('family-share-invite-done')));
     await tester.pumpAndSettle();
-    expect(find.textContaining('AB12CD'), findsOneWidget); // pending row
+    expect(find.textContaining('AB12CD34EF'), findsOneWidget); // pending row
   });
 
   testWidgets('accept sheet uppercases the code and calls acceptInvite',
@@ -225,19 +230,88 @@ void main() {
     final field = find.byKey(const ValueKey('invite-code-field'));
     expect(field, findsOneWidget);
 
-    controller.failAccept = true;
-    await tester.enterText(field, 'ab12cd');
+    controller.acceptError = Exception('invalid');
+    await tester.enterText(field, 'ab12cd34ef');
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('invite-code-submit')));
     await tester.pumpAndSettle();
-    expect(controller.acceptedCodes, ['AB12CD']);
+    expect(controller.acceptedCodes, ['AB12CD34EF']);
     expect(find.text('Código inválido ou expirado.'), findsOneWidget);
 
-    controller.failAccept = false;
+    controller.acceptError = null;
     await tester.tap(find.byKey(const ValueKey('invite-code-submit')));
     await tester.pumpAndSettle();
-    expect(controller.acceptedCodes.last, 'AB12CD');
+    expect(controller.acceptedCodes.last, 'AB12CD34EF');
     expect(field, findsNothing);
+  });
+
+  testWidgets('accept sheet waits for all 10 characters', (tester) async {
+    final controller = _FakeController(_state());
+    await tester.pumpWidget(_app(controller));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('family-share-tab-incoming')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('family-share-accept-button')));
+    await tester.pumpAndSettle();
+
+    final field = find.byKey(const ValueKey('invite-code-field'));
+    final submit = find.byKey(const ValueKey('invite-code-submit'));
+    await tester.enterText(field, 'AB12CD');
+    await tester.pump();
+    expect(tester.widget<FilledButton>(submit).onPressed, isNull);
+
+    await tester.enterText(field, 'AB12CD34EF');
+    await tester.pump();
+    expect(tester.widget<FilledButton>(submit).onPressed, isNotNull);
+  });
+
+  testWidgets('accept sheet explains the wait after too many attempts (429)',
+      (tester) async {
+    final controller = _FakeController(_state())
+      ..acceptError = const ProfileApiException('Too many invite attempts.',
+          statusCode: 429);
+    await tester.pumpWidget(_app(controller));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('family-share-tab-incoming')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('family-share-accept-button')));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+        find.byKey(const ValueKey('invite-code-field')), 'AB12CD34EF');
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('invite-code-submit')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Muitas tentativas. Aguarde 15 minutos e tente de novo.'),
+        findsOneWidget);
+    expect(find.text('Código inválido ou expirado.'), findsNothing);
+  });
+
+  testWidgets('active outgoing grants name who accepted; incoming ones do not',
+      (tester) async {
+    final controller = _FakeController(_state(
+      outgoing: [
+        _grant('g1', GrantDirection.outgoing, 'Ana',
+            granteeName: 'Maria Souza', granteeEmail: 'maria@example.com'),
+        _grant('g2', GrantDirection.outgoing, 'Pedro',
+            status: GrantStatus.pending, code: 'ZZ99YY88XX'),
+      ],
+      incoming: [
+        _grant('g3', GrantDirection.incoming, 'Marta',
+            granteeName: 'Eu Mesmo', granteeEmail: 'eu@example.com'),
+      ],
+    ));
+    await tester.pumpWidget(_app(controller));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Compartilhado com Maria Souza (maria@example.com)'),
+        findsOneWidget);
+    expect(find.byKey(const ValueKey('family-share-grantee-g2')), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('family-share-tab-incoming')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('family-share-grantee-g3')), findsNothing);
   });
 
   testWidgets('single active grant uses family-share-revoke and row disappears',

@@ -670,6 +670,14 @@
     }
   },
   "familySharingActive": "Acesso ativo",
+  "familySharingSharedWith": "Compartilhado com {person}",
+  "@familySharingSharedWith": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      }
+    }
+  },
   "familySharingPendingUntil": "Código {code} · aguardando aceite até {date}",
   "@familySharingPendingUntil": {
     "placeholders": {
@@ -706,9 +714,10 @@
   "familySharingCodeCopied": "Código copiado.",
   "familySharingDone": "Concluir",
   "familySharingAcceptTitle": "Inserir código de convite",
-  "familySharingAcceptFieldLabel": "Código de 6 caracteres",
+  "familySharingAcceptFieldLabel": "Código de 10 caracteres",
   "familySharingAcceptSubmit": "Aceitar Convite",
   "familySharingAcceptError": "Código inválido ou expirado.",
+  "familySharingAcceptTooMany": "Muitas tentativas. Aguarde 15 minutos e tente de novo.",
   "familySharingAccepted": "Convite aceito. O perfil já aparece na sua lista.",
   "addDependentTitle": "Cadastrar Dependente Legal",
   "@addDependentTitle": {

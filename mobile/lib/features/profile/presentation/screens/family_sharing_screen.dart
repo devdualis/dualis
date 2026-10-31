@@ -293,6 +293,10 @@ class _GrantTile extends StatelessWidget {
       subtitle = l10n.familySharingPendingUntil(grant.inviteCode ?? '',
           familySharingDateFormat.format(grant.expiresAt.toLocal()));
     }
+    // Owners see who accepted, so a share with the wrong person can be revoked.
+    final grantee = grant.isActive && grant.direction == GrantDirection.outgoing
+        ? grant.granteeLabel
+        : null;
 
     return Card(
       key: ValueKey('family-share-grant-${grant.id}'),
@@ -340,6 +344,14 @@ class _GrantTile extends StatelessWidget {
                 ),
               ],
             ),
+            if (grantee != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                l10n.familySharingSharedWith(grantee),
+                key: ValueKey('family-share-grantee-${grant.id}'),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
             if (grant.isActive) ...[
               const SizedBox(height: 8),
               Align(

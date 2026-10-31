@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../data/profile_repository.dart';
 import '../../domain/models/shared_access_grant.dart';
 import '../controllers/active_profile_controller.dart';
 
@@ -147,14 +148,16 @@ class _FamilySharingInviteDialogState
       children: [
         Text(l10n.familySharingInviteCodeHint, textAlign: TextAlign.center),
         const SizedBox(height: 16),
+        // One line: 10 characters fit a 320 dp phone at this size.
         SelectableText(
           code,
           key: const ValueKey('family-share-invite-code'),
           textAlign: TextAlign.center,
+          maxLines: 1,
           style: const TextStyle(
-            fontSize: 36,
+            fontSize: 24,
             fontWeight: FontWeight.w700,
-            letterSpacing: 6,
+            letterSpacing: 3,
             color: AppColors.softIndigo,
           ),
         ),
@@ -181,7 +184,7 @@ class _FamilySharingInviteDialogState
   }
 }
 
-/// Bottom sheet to enter and accept a 6-char invite code. Pops `true` on success.
+/// Bottom sheet to enter and accept a 10-char invite code. Pops `true` on success.
 class FamilySharingAcceptSheet extends ConsumerStatefulWidget {
   const FamilySharingAcceptSheet({super.key});
 
@@ -192,10 +195,11 @@ class FamilySharingAcceptSheet extends ConsumerStatefulWidget {
 
 class _FamilySharingAcceptSheetState
     extends ConsumerState<FamilySharingAcceptSheet> {
-  static const _codeLength = 6;
+  static const _codeLength = 10;
   final _controller = TextEditingController();
   bool _submitting = false;
   bool _failed = false;
+  bool _tooManyAttempts = false;
 
   @override
   void dispose() {
@@ -213,8 +217,14 @@ class _FamilySharingAcceptSheetState
           .read(activeProfileControllerProvider.notifier)
           .acceptInvite(_controller.text.trim().toUpperCase());
       if (mounted) Navigator.of(context).pop(true);
-    } catch (_) {
-      if (mounted) setState(() => _failed = true);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _failed = true;
+          // The server caps failed codes per account (429 for 15 minutes).
+          _tooManyAttempts = e is ProfileApiException && e.statusCode == 429;
+        });
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -249,7 +259,11 @@ class _FamilySharingAcceptSheetState
             ],
             decoration: InputDecoration(
               labelText: l10n.familySharingAcceptFieldLabel,
-              errorText: _failed ? l10n.familySharingAcceptError : null,
+              errorText: _failed
+                  ? (_tooManyAttempts
+                      ? l10n.familySharingAcceptTooMany
+                      : l10n.familySharingAcceptError)
+                  : null,
             ),
             onChanged: (_) => setState(() => _failed = false),
             onSubmitted: (_) => ready ? _submit() : null,

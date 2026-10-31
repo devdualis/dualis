@@ -187,6 +187,32 @@ void main() {
     expect(inc.inviteCode, isNull);
   });
 
+  test('fetchGrants reads who accepted an outgoing invite', () async {
+    adapter.enqueue(200, {
+      'outgoing': [
+        {
+          'id': 'g1',
+          'targetProfileId': 'p1',
+          'targetProfileName': 'Ana',
+          'accessLevel': 'VIEW_ONLY',
+          'status': 'ACCEPTED',
+          'inviteCode': 'ABC234DEF5',
+          'granteeUserId': 'u2',
+          'granteeName': 'Maria Souza',
+          'granteeEmail': 'maria@example.com',
+          'expiresAt': '2026-10-16T12:00:00.000Z',
+          'acceptedAt': '2026-10-15T12:00:00.000Z',
+        },
+      ],
+      'incoming': [],
+    });
+
+    final out = (await repository.fetchGrants()).outgoing.single;
+    expect(out.granteeName, 'Maria Souza');
+    expect(out.granteeEmail, 'maria@example.com');
+    expect(out.granteeLabel, 'Maria Souza (maria@example.com)');
+  });
+
   test('createInvite, acceptInvite and revokeGrant hit the sharing routes',
       () async {
     adapter.enqueue(201, {

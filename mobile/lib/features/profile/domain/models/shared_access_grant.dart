@@ -12,6 +12,8 @@ class SharedAccessGrant {
   final String? inviteCode; // outgoing only
   final DateTime expiresAt; // deadline to accept a PENDING invite only
   final DateTime? acceptedAt;
+  final String? granteeName; // outgoing only: who accepted the invite
+  final String? granteeEmail; // outgoing only
 
   const SharedAccessGrant({
     required this.id,
@@ -23,6 +25,8 @@ class SharedAccessGrant {
     required this.expiresAt,
     this.inviteCode,
     this.acceptedAt,
+    this.granteeName,
+    this.granteeEmail,
   });
 
   /// [fallbackTargetProfileName] fills in responses that omit the name
@@ -48,10 +52,20 @@ class SharedAccessGrant {
       inviteCode: json['inviteCode'] as String?,
       expiresAt: _parseDate(json['expiresAt']) ?? DateTime.now(),
       acceptedAt: _parseDate(json['acceptedAt']),
+      granteeName: json['granteeName'] as String?,
+      granteeEmail: json['granteeEmail'] as String?,
     );
   }
 
   bool get isActive => status == GrantStatus.accepted;
+
+  /// "Name (email)" of who accepted an outgoing invite, or null if unknown.
+  String? get granteeLabel {
+    final name = granteeName?.trim() ?? '';
+    final email = granteeEmail?.trim() ?? '';
+    if (name.isEmpty) return email.isEmpty ? null : email;
+    return email.isEmpty ? name : '$name ($email)';
+  }
 }
 
 /// `VIEW_ONLY` | `CO_MANAGE` in the API.

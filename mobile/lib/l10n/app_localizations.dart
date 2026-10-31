@@ -1132,6 +1132,12 @@ abstract class AppLocalizations {
   /// **'Acesso ativo'**
   String get familySharingActive;
 
+  /// No description provided for @familySharingSharedWith.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhado com {person}'**
+  String familySharingSharedWith(String person);
+
   /// No description provided for @familySharingPendingUntil.
   ///
   /// In pt, this message translates to:
@@ -1249,7 +1255,7 @@ abstract class AppLocalizations {
   /// No description provided for @familySharingAcceptFieldLabel.
   ///
   /// In pt, this message translates to:
-  /// **'Código de 6 caracteres'**
+  /// **'Código de 10 caracteres'**
   String get familySharingAcceptFieldLabel;
 
   /// No description provided for @familySharingAcceptSubmit.
@@ -1263,6 +1269,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Código inválido ou expirado.'**
   String get familySharingAcceptError;
+
+  /// No description provided for @familySharingAcceptTooMany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Muitas tentativas. Aguarde 15 minutos e tente de novo.'**
+  String get familySharingAcceptTooMany;
 
   /// No description provided for @familySharingAccepted.
   ///

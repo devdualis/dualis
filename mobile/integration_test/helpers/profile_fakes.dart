@@ -262,7 +262,7 @@ class FakeProfileBackend {
 
   String _nextCode() {
     _seq++;
-    final code = 'INV${_seq.toString().padLeft(3, '0')}';
+    final code = 'INV${_seq.toString().padLeft(7, '0')}'; // 10 chars, like the API
     issuedCodes.add(code);
     return code;
   }
