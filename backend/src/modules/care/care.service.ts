@@ -11,7 +11,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
-import { and, asc, count, desc, eq, gte, inArray, lte, ne } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, lte, ne, sql } from 'drizzle-orm';
 import { DatabaseService, DrizzleTransaction } from '../../database/database.service';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import {
@@ -365,6 +365,9 @@ export class CareService {
    */
   private async recordDocumentRequest(tx: DrizzleTransaction, userId: string): Promise<void> {
     const limit = Number(this.config?.get('CARE_DAILY_DOCUMENT_LIMIT')) || DEFAULT_DAILY_DOCUMENT_LIMIT;
+    // Reserve one slot at a time for this caller, across profiles and API instances.
+    // The lock is released with the surrounding transaction, including on rollback.
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('care_document_requests'), hashtext(${userId}))`);
     const [{ requests }] = await tx
       .select({ requests: count() })
       .from(careDocumentRequests)

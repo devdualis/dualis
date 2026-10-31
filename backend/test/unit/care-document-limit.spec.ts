@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { EncryptionService } from '../../src/common/encryption/encryption.service';
 import { CareService } from '../../src/modules/care/care.service';
 import { careDocumentRequests } from '../../src/database/schema/care.schema';
+import { PgDialect } from 'drizzle-orm/pg-core';
+import type { SQL } from 'drizzle-orm';
 
 const KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
@@ -66,7 +68,7 @@ describe('CareService daily document limit (uploads and re-reads)', () => {
       builders.push({ builder, args });
       return builder;
     };
-    const tx = { insert: next, select: next, update: next };
+    const tx = { insert: next, select: next, update: next, execute: vi.fn().mockResolvedValue(undefined) };
     db = { withRls: vi.fn(async (_user: string, fn: (t: unknown) => unknown) => fn(tx)) };
   });
 
@@ -98,5 +100,58 @@ describe('CareService daily document limit (uploads and re-reads)', () => {
     await expect(upload(serviceWith({ CARE_DAILY_DOCUMENT_LIMIT: '2' }))).rejects.toMatchObject({
       status: HttpStatus.TOO_MANY_REQUESTS,
     });
+  });
+
+  it.each(['upload', 're-read'])('reserves the last daily slot only once during concurrent %s requests', async (operation) => {
+    let committedRequests = 29;
+    let lockTail = Promise.resolve();
+    const dialect = new PgDialect();
+    db.withRls.mockImplementation(async (userId: string, fn: (tx: unknown) => Promise<unknown>) => {
+      let pendingRequests = 0;
+      let unlock = () => {};
+      const tx = {
+        execute: async (statement: SQL) => {
+          const query = dialect.sqlToQuery(statement);
+          expect(query.sql).toContain('pg_advisory_xact_lock');
+          expect(query.params).toContain(userId);
+          const previous = lockTail;
+          lockTail = new Promise<void>((resolve) => { unlock = resolve; });
+          await previous;
+        },
+        select: () => ({ from: (table: unknown) => table === careDocumentRequests
+          ? { where: async () => {
+              const requests = committedRequests;
+              // Other transactions may count before this one commits, as in PostgreSQL.
+              await new Promise((resolve) => setImmediate(resolve));
+              return [{ requests }];
+            } }
+          : chain([row({ file: encryption.encryptBuffer(file) })]),
+        }),
+        insert: (table: unknown) => table === careDocumentRequests
+          ? { values: async () => { pendingRequests++; } }
+          : chain([row({ status: 'processing' })]),
+        update: () => chain([row({ status: 'processing' })]),
+      };
+      try {
+        const result = await fn(tx);
+        committedRequests += pendingRequests;
+        return result;
+      } finally {
+        // Transaction advisory locks are released on commit and rollback alike.
+        unlock();
+      }
+    });
+    const service = serviceWith();
+    const request = () => operation === 'upload'
+      ? upload(service)
+      : service.reprocessDocument('usr-1', 'prof-1', 'doc-1');
+    const results = await Promise.allSettled([request(), request()]);
+    expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+    expect(results.find((result) => result.status === 'rejected')).toMatchObject({
+      reason: { status: HttpStatus.TOO_MANY_REQUESTS },
+    });
+    expect(committedRequests).toBe(30);
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(service.readDocument).toHaveBeenCalledTimes(1);
   });
 });
