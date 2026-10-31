@@ -5,10 +5,10 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-10-30T20:32:47.435Z"
+last_updated: "2026-10-31T01:49:58.446Z"
 last_activity: 2026-10-30
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: f6a18192312667b7fdbce94d65ace368cc12751b
+state_head: c1f3e6868c9288afced97ec8f008dda1de499f51
 progress:
   total_phases: 15
   completed_phases: 10
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-10-30 - Completed quick task 261030-o69: Real house ads (Premium, ZOC, e-BEF) and Premium promo on the care tab in the free build
+Last activity: 2026-10-30 - Completed quick task 261030-vdx: Harden family-sharing invites (10-character codes, 5 failed accepts per 15 min, owner sees who accepted)
 
 Progress: [██████████] 100%
 
@@ -130,6 +130,7 @@ None yet.
 | 261030-mka | Fix four reviewed side effects: safe exam numbers, isolated series, latest sorting and atomic OCR | 2026-10-30 | 8f9c2dc | [261030-mka-fix-exam-history-decimal-parsing-series-](./quick/261030-mka-fix-exam-history-decimal-parsing-series-/) |
 | 261030-mkb | Correções de segurança da varredura de cuidados: JWT_SECRET obrigatório (produção usava a chave pública, rotacionada), limite de 1 MB por requisição (15 MB só no envio de documentos, 5 MB no avatar), limite diário de 30 documentos/releituras (migração 0023), registros ficam no perfil quando o autor apaga a conta (migração 0024) | 2026-10-30 | d918011 | [261030-mkb-care-sweep-security-fixes-reading-cap-bo](./quick/261030-mkb-care-sweep-security-fixes-reading-cap-bo/) |
 | 261030-o69 | Real house ads (Premium, ZOC, e-BEF) and Premium promo on the care tab in the free build | 2026-10-30 | f6a1819 | [261030-o69-anuncios-reales-zoc-e-bef-premium-y-cora](./quick/261030-o69-anuncios-reales-zoc-e-bef-premium-y-cora/) |
+| 261030-vdx | Convites de compartilhamento familiar: códigos de 10 caracteres, limite de 5 tentativas erradas por conta a cada 15 min (429) e o titular vê quem aceitou (nome e e-mail) | 2026-10-30 | c1f3e68 | [261030-vdx-harden-family-sharing-invites-longer-cod](./quick/261030-vdx-harden-family-sharing-invites-longer-cod/) |
 
 ## Deferred Items
 
