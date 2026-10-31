@@ -54,7 +54,7 @@ class _PlacePickerScreenState extends State<PlacePickerScreen> {
   GoogleMapController? _map;
   late LatLng _center = widget.initial == null ? _fallback.target : LatLng(widget.initial!.lat, widget.initial!.lng);
   late double _zoom = widget.initial == null ? _fallback.zoom : 17;
-  late String? _address = widget.initial?.address;
+  late PickedPlace? _picked = widget.initial;
   bool _looking = false;
   int _lookup = 0;
   Geocoding? _geo;
@@ -84,37 +84,50 @@ class _PlacePickerScreenState extends State<PlacePickerScreen> {
     }
   }
 
+  void _invalidateSelection() {
+    ++_lookup;
+    if (_picked == null && _looking) return;
+    setState(() {
+      _picked = null;
+      _looking = true;
+    });
+  }
+
   Future<void> _describeCenter() async {
-    final id = ++_lookup;
-    // onCameraMove is not reported for animated moves on every platform; ask the map.
-    final map = _map;
-    if (map != null) {
-      final region = await map.getVisibleRegion();
-      _zoom = await map.getZoomLevel();
-      _center = LatLng(
-        (region.northeast.latitude + region.southwest.latitude) / 2,
-        (region.northeast.longitude + region.southwest.longitude) / 2,
-      );
+    _invalidateSelection();
+    final id = _lookup;
+    var center = _center;
+    var zoom = _zoom;
+    try {
+      // Animated moves do not report onCameraMove on every platform; ask the map.
+      final map = _map;
+      if (map != null) {
+        final region = await map.getVisibleRegion();
+        if (!mounted || id != _lookup) return;
+        zoom = await map.getZoomLevel();
+        if (!mounted || id != _lookup) return;
+        center = LatLng(
+          (region.northeast.latitude + region.southwest.latitude) / 2,
+          (region.northeast.longitude + region.southwest.longitude) / 2,
+        );
+        _center = center;
+        _zoom = zoom;
+      }
+      if (zoom < _streetZoom) {
+        setState(() => _looking = false);
+        return;
+      }
+      final marks = await _geocoder.placemarkFromCoordinates(center.latitude, center.longitude);
       if (!mounted || id != _lookup) return;
-    }
-    if (_zoom < _streetZoom) {
+      final address = marks.isEmpty ? '' : placemarkAddress(marks.first);
       setState(() {
         _looking = false;
-        _address = null;
+        // Keep the address with the exact point that produced it.
+        _picked = address.isEmpty ? null : PickedPlace(address, center.latitude, center.longitude);
       });
-      return;
+    } catch (_) {
+      if (mounted && id == _lookup) setState(() => _looking = false);
     }
-    setState(() => _looking = true);
-    String? address;
-    try {
-      final marks = await _geocoder.placemarkFromCoordinates(_center.latitude, _center.longitude);
-      if (marks.isNotEmpty) address = placemarkAddress(marks.first);
-    } catch (_) {}
-    if (!mounted || id != _lookup) return;
-    setState(() {
-      _looking = false;
-      _address = (address == null || address.isEmpty) ? null : address;
-    });
   }
 
   @override
@@ -131,7 +144,9 @@ class _PlacePickerScreenState extends State<PlacePickerScreen> {
             myLocationButtonEnabled: false,
             mapToolbarEnabled: false,
             zoomControlsEnabled: false,
+            onCameraMoveStarted: _invalidateSelection,
             onCameraMove: (p) {
+              _invalidateSelection();
               _center = p.target;
               _zoom = p.zoom;
             },
@@ -187,7 +202,7 @@ class _PlacePickerScreenState extends State<PlacePickerScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        _looking ? l10n.careMapLooking : (_address ?? (_zoom < _streetZoom ? l10n.careMapZoomHint : l10n.careMapMoveHint)),
+                        _looking ? l10n.careMapLooking : (_picked?.address ?? (_zoom < _streetZoom ? l10n.careMapZoomHint : l10n.careMapMoveHint)),
                         style: careTitle(15),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -196,9 +211,11 @@ class _PlacePickerScreenState extends State<PlacePickerScreen> {
                       FilledButton(
                         key: const Key('place_use'),
                         style: FilledButton.styleFrom(backgroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(50)),
-                        onPressed: _looking || _address == null
+                        onPressed: _looking || _picked == null
                             ? null
-                            : () => Navigator.pop(context, PickedPlace(_address!, _center.latitude, _center.longitude)),
+                            : () {
+                                if (!_looking && _picked != null) Navigator.pop(context, _picked);
+                              },
                         child: Text(l10n.careMapUsePlace),
                       ),
                     ],
