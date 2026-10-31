@@ -5,10 +5,10 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-10-31T01:49:58.446Z"
+last_updated: "2026-10-31T02:11:40.243Z"
 last_activity: 2026-10-30
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: c1f3e6868c9288afced97ec8f008dda1de499f51
+state_head: c1bc8f181c7eded5e072530768c8b266df7a6dc2
 progress:
   total_phases: 15
   completed_phases: 10
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-10-30 - Completed quick task 261030-vdx: Harden family-sharing invites (10-character codes, 5 failed accepts per 15 min, owner sees who accepted)
+Last activity: 2026-10-30 - Completed quick task 261030-vao: Auth security fixes: rate limits, code caps, session revocation, anti-enumeration, picture and consent IP
 
 Progress: [██████████] 100%
 
@@ -131,6 +131,7 @@ None yet.
 | 261030-mkb | Correções de segurança da varredura de cuidados: JWT_SECRET obrigatório (produção usava a chave pública, rotacionada), limite de 1 MB por requisição (15 MB só no envio de documentos, 5 MB no avatar), limite diário de 30 documentos/releituras (migração 0023), registros ficam no perfil quando o autor apaga a conta (migração 0024) | 2026-10-30 | d918011 | [261030-mkb-care-sweep-security-fixes-reading-cap-bo](./quick/261030-mkb-care-sweep-security-fixes-reading-cap-bo/) |
 | 261030-o69 | Real house ads (Premium, ZOC, e-BEF) and Premium promo on the care tab in the free build | 2026-10-30 | f6a1819 | [261030-o69-anuncios-reales-zoc-e-bef-premium-y-cora](./quick/261030-o69-anuncios-reales-zoc-e-bef-premium-y-cora/) |
 | 261030-vdx | Convites de compartilhamento familiar: códigos de 10 caracteres, limite de 5 tentativas erradas por conta a cada 15 min (429) e o titular vê quem aceitou (nome e e-mail) | 2026-10-30 | c1f3e68 | [261030-vdx-harden-family-sharing-invites-longer-cod](./quick/261030-vdx-harden-family-sharing-invites-longer-cod/) |
+| 261030-vao | Auth security fixes: rate limits, code caps, session revocation, anti-enumeration, picture and consent IP | 2026-10-30 | fd0a57a | [261030-vao-auth-security-fixes-rate-limits-code-cap](./quick/261030-vao-auth-security-fixes-rate-limits-code-cap/) |
 
 ## Deferred Items
 
