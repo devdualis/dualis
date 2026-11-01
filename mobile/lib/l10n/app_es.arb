@@ -1274,7 +1274,7 @@
   "habitsChartMovementTitle": "Movimiento corporal",
   "habitsChartPeriodTitle": "Ciclo menstrual",
   "habitsChartSleepBadCount": "Dormiste mal en {count} de los últimos {days} días",
-  "habitsChartMovementCount": "Moviste el cuerpo en {count} días",
+  "habitsChartMovementCount": "{count, plural, =1{Moviste el cuerpo en 1 día} other{Moviste el cuerpo en {count} días}}",
   "habitsChartPeriodCount": "Días con menstruación: {count}",
   "habitsChartEmpty": "Sin registros en el período",
   "habitsPeriodLabel": "Menstruación"

@@ -10,7 +10,13 @@ import 'journal_insights_models.dart';
 /// infers a cause.
 
 /// The five regions drawn on the body map (F1), in display order.
-const List<String> mapRegions = ['cabeca', 'peito', 'barriga', 'costas', 'membros'];
+const List<String> mapRegions = [
+  'cabeca',
+  'peito',
+  'barriga',
+  'costas',
+  'membros',
+];
 
 /// One emotional or physical item, placed at the moment it was recorded.
 class RecordPoint {
@@ -93,19 +99,21 @@ List<RecordPoint> _points(
       if (!roots.contains(root)) continue;
       final hasBranch = !item.isCustom && parts.length >= 3;
       final branches = tree[root]?.keys.toList() ?? const <String>[];
-      result.add(RecordPoint(
-        id: '${entry.id}#$i',
-        at: entry.recordedAt,
-        series: root,
-        branchKey: hasBranch ? '${parts[0]}.${parts[1]}' : null,
-        branchIndex: hasBranch ? branches.indexOf(parts[1]) : -1,
-        answerKey: _answerKey(item),
-        answer: _answerText(l10n, item),
-        intensity: item.intensity,
-        view: item.bodySide,
-        sensation: item.sensation,
-        positive: kind == JournalKeys.kindPositive,
-      ));
+      result.add(
+        RecordPoint(
+          id: '${entry.id}#$i',
+          at: entry.recordedAt,
+          series: root,
+          branchKey: hasBranch ? '${parts[0]}.${parts[1]}' : null,
+          branchIndex: hasBranch ? branches.indexOf(parts[1]) : -1,
+          answerKey: _answerKey(item),
+          answer: _answerText(l10n, item),
+          intensity: item.intensity,
+          view: item.bodySide,
+          sensation: item.sensation,
+          positive: kind == JournalKeys.kindPositive,
+        ),
+      );
     }
   }
   result.sort((a, b) => a.at.compareTo(b.at));
@@ -116,31 +124,37 @@ List<RecordPoint> _points(
 List<RecordPoint> emotionalPoints(
   AppLocalizations l10n,
   List<JournalEntryView> entries,
-) =>
-    _points(l10n, entries,
-        kind: JournalKeys.kindEmotional,
-        roots: JournalLabels.times,
-        tree: JournalKeys.emotionalTree);
+) => _points(
+  l10n,
+  entries,
+  kind: JournalKeys.kindEmotional,
+  roots: JournalLabels.times,
+  tree: JournalKeys.emotionalTree,
+);
 
 /// Good moments of "Bem" entries (v2.2), oldest first.
 List<RecordPoint> positivePoints(
   AppLocalizations l10n,
   List<JournalEntryView> entries,
-) =>
-    _points(l10n, entries,
-        kind: JournalKeys.kindPositive,
-        roots: JournalLabels.times,
-        tree: JournalKeys.positiveTree);
+) => _points(
+  l10n,
+  entries,
+  kind: JournalKeys.kindPositive,
+  roots: JournalLabels.times,
+  tree: JournalKeys.positiveTree,
+);
 
 /// Physical marks (body regions and whole-body areas), oldest first.
 List<RecordPoint> physicalPoints(
   AppLocalizations l10n,
   List<JournalEntryView> entries,
-) =>
-    _points(l10n, entries,
-        kind: JournalKeys.kindPhysical,
-        roots: JournalLabels.regions,
-        tree: JournalKeys.physicalTree);
+) => _points(
+  l10n,
+  entries,
+  kind: JournalKeys.kindPhysical,
+  roots: JournalLabels.regions,
+  tree: JournalKeys.physicalTree,
+);
 
 /// Most registered final answer(s) and how many times; ties keep all.
 class TopAnswer {
@@ -172,8 +186,9 @@ class TemporalPie {
   final Map<String, int> counts;
   final Map<String, TopAnswer> top;
 
-  /// Records (entries) saved with no emotional or physical choice
-  /// ("Bem" without an axis). They never become Presente.
+  /// Records (entries) saved with no choice at all ("Bem" saved with
+  /// "Só registrar"). They never become Presente. Good moments are shown in
+  /// their own card, so an entry with them is not counted here.
   final int withoutAxis;
 
   const TemporalPie({
@@ -197,13 +212,19 @@ class TemporalPie {
       final t = topAnswer(ofTime);
       if (t != null) top[time] = t;
     }
-    final withoutAxis = entries
-        .where((e) =>
-            !e.legacy &&
-            !e.items.any((i) =>
-                i.kind == JournalKeys.kindEmotional ||
-                i.kind == JournalKeys.kindPhysical))
-        .length;
+    final withoutAxis =
+        entries
+            .where(
+              (e) =>
+                  !e.legacy &&
+                  !e.items.any(
+                    (i) =>
+                        i.kind == JournalKeys.kindEmotional ||
+                        i.kind == JournalKeys.kindPhysical ||
+                        i.kind == JournalKeys.kindPositive,
+                  ),
+            )
+            .length;
     return TemporalPie(counts: counts, top: top, withoutAxis: withoutAxis);
   }
 }
@@ -233,7 +254,8 @@ class RegionSummary {
   /// region marked only from the back goes there; otherwise the front.
   String get mapView {
     if (region == 'costas') return JournalKeys.sideBack;
-    if (marks.isNotEmpty && marks.every((m) => m.view == JournalKeys.sideBack)) {
+    if (marks.isNotEmpty &&
+        marks.every((m) => m.view == JournalKeys.sideBack)) {
       return JournalKeys.sideBack;
     }
     return JournalKeys.sideFront;
@@ -350,9 +372,9 @@ Map<DateTime, CalendarDay> calendarDays({
 
 /// Local-midnight keys, dropping days without water (0 is "no record").
 Map<DateTime, int> normalizeWaterTotals(Map<DateTime, int> totals) => {
-      for (final e in totals.entries)
-        if (e.value > 0) DateTime(e.key.year, e.key.month, e.key.day): e.value,
-    };
+  for (final e in totals.entries)
+    if (e.value > 0) DateTime(e.key.year, e.key.month, e.key.day): e.value,
+};
 
 /// H3 cards: counts over the days of the period.
 class WaterPeriodStats {
@@ -428,7 +450,11 @@ List<WaterStep> waterSteps(List<WaterIntakeEntry> logs) {
 
 /// Mondays-first weeks covering the period, for the calendars (C1, H4).
 List<List<DateTime>> calendarWeeks(DateTime start, int days) {
-  final first = DateTime(start.year, start.month, start.day - (start.weekday - 1));
+  final first = DateTime(
+    start.year,
+    start.month,
+    start.day - (start.weekday - 1),
+  );
   final end = DateTime(start.year, start.month, start.day + days - 1);
   final weeks = <List<DateTime>>[];
   var cursor = first;
@@ -445,8 +471,11 @@ List<List<DateTime>> calendarWeeks(DateTime start, int days) {
 /// True when [day] is inside the [days]-day period starting at [start].
 bool inPeriod(DateTime day, DateTime start, int days) {
   final d = DateTime(day.year, day.month, day.day);
-  final index = DateTime.utc(d.year, d.month, d.day)
-      .difference(DateTime.utc(start.year, start.month, start.day))
-      .inDays;
+  final index =
+      DateTime.utc(
+        d.year,
+        d.month,
+        d.day,
+      ).difference(DateTime.utc(start.year, start.month, start.day)).inDays;
   return index >= 0 && index < days;
 }

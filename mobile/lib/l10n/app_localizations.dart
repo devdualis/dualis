@@ -7477,7 +7477,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitsChartMovementCount.
   ///
   /// In pt, this message translates to:
-  /// **'Você se mexeu em {count} dias'**
+  /// **'{count, plural, =1{Você se mexeu em 1 dia} other{Você se mexeu em {count} dias}}'**
   String habitsChartMovementCount(int count);
 
   /// No description provided for @habitsChartPeriodCount.

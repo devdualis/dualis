@@ -4350,7 +4350,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String habitsChartMovementCount(int count) {
-    return 'Você se mexeu em $count dias';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Você se mexeu em $count dias',
+      one: 'Você se mexeu em 1 dia',
+    );
+    return '$_temp0';
   }
 
   @override

@@ -31,9 +31,10 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
     final viewOnly = activeProfileIsViewOnly(ref);
 
     final activeDayString =
-        _isYesterday ? controller.yesterdayDayString : controller.todayDayString;
-    final activeHabit =
-        _isYesterday ? state.yesterdayHabit : state.todayHabit;
+        _isYesterday
+            ? controller.yesterdayDayString
+            : controller.todayDayString;
+    final activeHabit = _isYesterday ? state.yesterdayHabit : state.todayHabit;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -55,80 +56,85 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
           SizedBox(width: 56),
         ],
       ),
-      body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: () => controller.loadData(),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const ActiveProfileBanner(),
-                    if (viewOnly) const ActiveProfileReadOnlyNote(),
-                    const SizedBox(height: 8),
+      body:
+          state.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : RefreshIndicator(
+                onRefresh: () => controller.loadData(),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const ActiveProfileBanner(),
+                      if (viewOnly) const ActiveProfileReadOnlyNote(),
+                      const SizedBox(height: 8),
 
-                    // Day switcher: Hoje / Ontem
-                    _DaySwitcher(
-                      isYesterday: _isYesterday,
-                      todayLabel: l10n.habitsTabToday,
-                      yesterdayLabel: l10n.habitsTabYesterday,
-                      onChanged: (yesterday) {
-                        setState(() => _isYesterday = yesterday);
-                      },
-                    ),
-                    const SizedBox(height: 16),
+                      // Day switcher: Hoje / Ontem
+                      _DaySwitcher(
+                        isYesterday: _isYesterday,
+                        todayLabel: l10n.habitsTabToday,
+                        yesterdayLabel: l10n.habitsTabYesterday,
+                        onChanged: (yesterday) {
+                          setState(() => _isYesterday = yesterday);
+                        },
+                      ),
+                      const SizedBox(height: 16),
 
-                    // Card 1: Sleep Quality & Hours
-                    _SleepCard(
-                      dayString: activeDayString,
-                      habit: activeHabit,
-                      controller: controller,
-                      l10n: l10n,
-                      viewOnly: viewOnly,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Card 2: Movement & Minutes
-                    _MovementCard(
-                      dayString: activeDayString,
-                      habit: activeHabit,
-                      controller: controller,
-                      l10n: l10n,
-                      viewOnly: viewOnly,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Setting: Track Menstrual Cycle switch
-                    _CycleSettingTile(
-                      enabled: state.trackMenstrualCycle,
-                      title: l10n.habitsTrackMenstrualCycleSetting,
-                      onChanged: viewOnly
-                          ? null
-                          : (val) => controller.setTrackMenstrualCycle(val),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Card 3: Menstrual Cycle (Period)
-                    // Shown only when setting is on OR period = true in last 60 days
-                    if (state.showPeriodCard) ...[
-                      _PeriodCard(
+                      // Card 1: Sleep Quality & Hours
+                      _SleepCard(
                         dayString: activeDayString,
                         habit: activeHabit,
                         controller: controller,
                         l10n: l10n,
                         viewOnly: viewOnly,
                       ),
-                      const SizedBox(height: 24),
-                    ],
+                      const SizedBox(height: 16),
 
-                    const SizedBox(height: 32),
-                  ],
+                      // Card 2: Movement & Minutes
+                      _MovementCard(
+                        dayString: activeDayString,
+                        habit: activeHabit,
+                        controller: controller,
+                        l10n: l10n,
+                        viewOnly: viewOnly,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Setting: Track Menstrual Cycle switch
+                      _CycleSettingTile(
+                        enabled: state.trackMenstrualCycle,
+                        title: l10n.habitsTrackMenstrualCycleSetting,
+                        onChanged:
+                            viewOnly
+                                ? null
+                                : (val) =>
+                                    controller.setTrackMenstrualCycle(val),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Card 3: Menstrual Cycle (Period)
+                      // Shown only when setting is on OR period = true in last 60 days
+                      if (state.showPeriodCard) ...[
+                        _PeriodCard(
+                          dayString: activeDayString,
+                          habit: activeHabit,
+                          controller: controller,
+                          l10n: l10n,
+                          viewOnly: viewOnly,
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+
+                      const SizedBox(height: 32),
+                    ],
+                  ),
                 ),
               ),
-            ),
     );
   }
 }
@@ -239,54 +245,60 @@ class _SleepCard extends StatelessWidget {
       title: l10n.habitsSleepQualityQuestion,
       titleKey: const Key('habits_sleep_question'),
       children: [
-        // 3 Big Emoji buttons
-        Row(
-          children: [
-            Expanded(
-              child: _EmojiOptionButton(
-                key: const Key('habits_sleep_bem'),
-                emoji: '😴',
-                label: l10n.habitsSleepQualityBem.replaceFirst('😴 ', ''),
-                selected: habit.sleepQuality == HabitSleepQuality.bem,
-                onTap: viewOnly
-                    ? null
-                    : () => controller.saveAnswer(
-                          day: dayString,
-                          sleepQuality: HabitSleepQuality.bem,
-                        ),
+        // 3 Big Emoji buttons, same height even when a label wraps.
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _EmojiOptionButton(
+                  key: const Key('habits_sleep_bem'),
+                  emoji: '😴',
+                  label: l10n.habitsSleepQualityBem.replaceFirst('😴 ', ''),
+                  selected: habit.sleepQuality == HabitSleepQuality.bem,
+                  onTap:
+                      viewOnly
+                          ? null
+                          : () => controller.saveAnswer(
+                            day: dayString,
+                            sleepQuality: HabitSleepQuality.bem,
+                          ),
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _EmojiOptionButton(
-                key: const Key('habits_sleep_regular'),
-                emoji: '😐',
-                label: l10n.habitsSleepQualityRegular.replaceFirst('😐 ', ''),
-                selected: habit.sleepQuality == HabitSleepQuality.regular,
-                onTap: viewOnly
-                    ? null
-                    : () => controller.saveAnswer(
-                          day: dayString,
-                          sleepQuality: HabitSleepQuality.regular,
-                        ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _EmojiOptionButton(
+                  key: const Key('habits_sleep_regular'),
+                  emoji: '😐',
+                  label: l10n.habitsSleepQualityRegular.replaceFirst('😐 ', ''),
+                  selected: habit.sleepQuality == HabitSleepQuality.regular,
+                  onTap:
+                      viewOnly
+                          ? null
+                          : () => controller.saveAnswer(
+                            day: dayString,
+                            sleepQuality: HabitSleepQuality.regular,
+                          ),
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _EmojiOptionButton(
-                key: const Key('habits_sleep_mal'),
-                emoji: '😫',
-                label: l10n.habitsSleepQualityMal.replaceFirst('😫 ', ''),
-                selected: habit.sleepQuality == HabitSleepQuality.mal,
-                onTap: viewOnly
-                    ? null
-                    : () => controller.saveAnswer(
-                          day: dayString,
-                          sleepQuality: HabitSleepQuality.mal,
-                        ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _EmojiOptionButton(
+                  key: const Key('habits_sleep_mal'),
+                  emoji: '😫',
+                  label: l10n.habitsSleepQualityMal.replaceFirst('😫 ', ''),
+                  selected: habit.sleepQuality == HabitSleepQuality.mal,
+                  onTap:
+                      viewOnly
+                          ? null
+                          : () => controller.saveAnswer(
+                            day: dayString,
+                            sleepQuality: HabitSleepQuality.mal,
+                          ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 16),
         Text(
@@ -306,9 +318,10 @@ class _SleepCard extends StatelessWidget {
               key: const Key('habits_hours_menos_5'),
               label: l10n.habitsSleepHoursMenos5,
               selected: habit.sleepHours == HabitSleepHours.menos5,
-              onSelected: viewOnly
-                  ? null
-                  : (s) => controller.saveAnswer(
+              onSelected:
+                  viewOnly
+                      ? null
+                      : (s) => controller.saveAnswer(
                         day: dayString,
                         sleepHours: HabitSleepHours.menos5,
                       ),
@@ -317,9 +330,10 @@ class _SleepCard extends StatelessWidget {
               key: const Key('habits_hours_5_6'),
               label: l10n.habitsSleepHours5To6,
               selected: habit.sleepHours == HabitSleepHours.hours5To6,
-              onSelected: viewOnly
-                  ? null
-                  : (s) => controller.saveAnswer(
+              onSelected:
+                  viewOnly
+                      ? null
+                      : (s) => controller.saveAnswer(
                         day: dayString,
                         sleepHours: HabitSleepHours.hours5To6,
                       ),
@@ -328,9 +342,10 @@ class _SleepCard extends StatelessWidget {
               key: const Key('habits_hours_7_8'),
               label: l10n.habitsSleepHours7To8,
               selected: habit.sleepHours == HabitSleepHours.hours7To8,
-              onSelected: viewOnly
-                  ? null
-                  : (s) => controller.saveAnswer(
+              onSelected:
+                  viewOnly
+                      ? null
+                      : (s) => controller.saveAnswer(
                         day: dayString,
                         sleepHours: HabitSleepHours.hours7To8,
                       ),
@@ -339,9 +354,10 @@ class _SleepCard extends StatelessWidget {
               key: const Key('habits_hours_9_mais'),
               label: l10n.habitsSleepHours9Mais,
               selected: habit.sleepHours == HabitSleepHours.hours9Mais,
-              onSelected: viewOnly
-                  ? null
-                  : (s) => controller.saveAnswer(
+              onSelected:
+                  viewOnly
+                      ? null
+                      : (s) => controller.saveAnswer(
                         day: dayString,
                         sleepHours: HabitSleepHours.hours9Mais,
                       ),
@@ -381,12 +397,11 @@ class _MovementCard extends StatelessWidget {
                 key: const Key('habits_moved_sim'),
                 label: l10n.habitsMovedYes,
                 selected: habit.moved == true,
-                onTap: viewOnly
-                    ? null
-                    : () => controller.saveAnswer(
-                          day: dayString,
-                          moved: true,
-                        ),
+                onTap:
+                    viewOnly
+                        ? null
+                        : () =>
+                            controller.saveAnswer(day: dayString, moved: true),
               ),
             ),
             const SizedBox(width: 12),
@@ -395,9 +410,10 @@ class _MovementCard extends StatelessWidget {
                 key: const Key('habits_moved_nao'),
                 label: l10n.habitsMovedNo,
                 selected: habit.moved == false,
-                onTap: viewOnly
-                    ? null
-                    : () => controller.saveAnswer(
+                onTap:
+                    viewOnly
+                        ? null
+                        : () => controller.saveAnswer(
                           day: dayString,
                           moved: false,
                           clearMovementMinutes: true,
@@ -425,9 +441,10 @@ class _MovementCard extends StatelessWidget {
                 key: const Key('habits_minutes_ate_15'),
                 label: l10n.habitsMovementMinutesAte15,
                 selected: habit.movementMinutes == HabitMovementMinutes.ate15,
-                onSelected: viewOnly
-                    ? null
-                    : (s) => controller.saveAnswer(
+                onSelected:
+                    viewOnly
+                        ? null
+                        : (s) => controller.saveAnswer(
                           day: dayString,
                           movementMinutes: HabitMovementMinutes.ate15,
                         ),
@@ -437,9 +454,10 @@ class _MovementCard extends StatelessWidget {
                 label: l10n.habitsMovementMinutes15To30,
                 selected:
                     habit.movementMinutes == HabitMovementMinutes.minutes15To30,
-                onSelected: viewOnly
-                    ? null
-                    : (s) => controller.saveAnswer(
+                onSelected:
+                    viewOnly
+                        ? null
+                        : (s) => controller.saveAnswer(
                           day: dayString,
                           movementMinutes: HabitMovementMinutes.minutes15To30,
                         ),
@@ -449,9 +467,10 @@ class _MovementCard extends StatelessWidget {
                 label: l10n.habitsMovementMinutes30To60,
                 selected:
                     habit.movementMinutes == HabitMovementMinutes.minutes30To60,
-                onSelected: viewOnly
-                    ? null
-                    : (s) => controller.saveAnswer(
+                onSelected:
+                    viewOnly
+                        ? null
+                        : (s) => controller.saveAnswer(
                           day: dayString,
                           movementMinutes: HabitMovementMinutes.minutes30To60,
                         ),
@@ -460,9 +479,10 @@ class _MovementCard extends StatelessWidget {
                 key: const Key('habits_minutes_mais_60'),
                 label: l10n.habitsMovementMinutesMais60,
                 selected: habit.movementMinutes == HabitMovementMinutes.mais60,
-                onSelected: viewOnly
-                    ? null
-                    : (s) => controller.saveAnswer(
+                onSelected:
+                    viewOnly
+                        ? null
+                        : (s) => controller.saveAnswer(
                           day: dayString,
                           movementMinutes: HabitMovementMinutes.mais60,
                         ),
@@ -504,12 +524,11 @@ class _PeriodCard extends StatelessWidget {
                 key: const Key('habits_period_sim'),
                 label: l10n.habitsPeriodYes,
                 selected: habit.period == true,
-                onTap: viewOnly
-                    ? null
-                    : () => controller.saveAnswer(
-                          day: dayString,
-                          period: true,
-                        ),
+                onTap:
+                    viewOnly
+                        ? null
+                        : () =>
+                            controller.saveAnswer(day: dayString, period: true),
               ),
             ),
             const SizedBox(width: 12),
@@ -518,9 +537,10 @@ class _PeriodCard extends StatelessWidget {
                 key: const Key('habits_period_nao'),
                 label: l10n.habitsPeriodNo,
                 selected: habit.period == false,
-                onTap: viewOnly
-                    ? null
-                    : () => controller.saveAnswer(
+                onTap:
+                    viewOnly
+                        ? null
+                        : () => controller.saveAnswer(
                           day: dayString,
                           period: false,
                         ),
@@ -636,9 +656,10 @@ class _EmojiOptionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected
-          ? AppColors.clinicalTeal.withValues(alpha: 0.12)
-          : AppColors.backgroundLight,
+      color:
+          selected
+              ? AppColors.clinicalTeal.withValues(alpha: 0.12)
+              : AppColors.backgroundLight,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
@@ -652,12 +673,9 @@ class _EmojiOptionButton extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                emoji,
-                style: const TextStyle(fontSize: 28),
-              ),
+              Text(emoji, style: const TextStyle(fontSize: 28)),
               const SizedBox(height: 6),
               Text(
                 label,
@@ -665,9 +683,10 @@ class _EmojiOptionButton extends StatelessWidget {
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 12,
                   fontWeight: selected ? FontWeight.bold : FontWeight.w600,
-                  color: selected
-                      ? AppColors.clinicalTealDark
-                      : AppColors.textPrimaryLight,
+                  color:
+                      selected
+                          ? AppColors.clinicalTealDark
+                          : AppColors.textPrimaryLight,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -695,9 +714,10 @@ class _YesNoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected
-          ? AppColors.clinicalTeal.withValues(alpha: 0.12)
-          : AppColors.backgroundLight,
+      color:
+          selected
+              ? AppColors.clinicalTeal.withValues(alpha: 0.12)
+              : AppColors.backgroundLight,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
@@ -716,9 +736,10 @@ class _YesNoButton extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 15,
                 fontWeight: selected ? FontWeight.bold : FontWeight.w600,
-                color: selected
-                    ? AppColors.clinicalTealDark
-                    : AppColors.textPrimaryLight,
+                color:
+                    selected
+                        ? AppColors.clinicalTealDark
+                        : AppColors.textPrimaryLight,
               ),
             ),
           ),
@@ -754,7 +775,8 @@ class _ChipOption extends StatelessWidget {
       labelStyle: GoogleFonts.plusJakartaSans(
         fontSize: 13,
         fontWeight: selected ? FontWeight.bold : FontWeight.w500,
-        color: selected ? AppColors.clinicalTealDark : AppColors.textPrimaryLight,
+        color:
+            selected ? AppColors.clinicalTealDark : AppColors.textPrimaryLight,
       ),
     );
   }

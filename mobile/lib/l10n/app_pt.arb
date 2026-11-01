@@ -2688,7 +2688,7 @@
           }
       }
   },
-  "habitsChartMovementCount": "Você se mexeu em {count} dias",
+  "habitsChartMovementCount": "{count, plural, =1{Você se mexeu em 1 dia} other{Você se mexeu em {count} dias}}",
   "@habitsChartMovementCount": {
       "placeholders": {
           "count": {
