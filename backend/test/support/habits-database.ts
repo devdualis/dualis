@@ -6,7 +6,7 @@ import { DatabaseService } from '../../src/database/database.service';
 import { HabitsService } from '../../src/modules/habits/habits.service';
 
 // Preparation refuses non-local URLs and never loads a dotenv file.
-const { prepareLocalDatabase } = require('../../scripts/prepare-v22-test-db.cjs');
+const { prepareLocalDatabase } = require('./prepare-local-test-db.cjs');
 
 export async function habitsDatabase() {
   const rawUrl = process.env.TEST_DATABASE_URL;
