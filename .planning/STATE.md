@@ -5,10 +5,10 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-11-01T02:55:47.360Z"
+last_updated: "2026-11-01T03:18:06.425Z"
 last_activity: 2026-10-31
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: 0209c51a7b7f2643218121ff28bc2d5ddec1cd15
+state_head: 0c718ac7799e260030dc44deeff39b68f3b00e47
 progress:
   total_phases: 15
   completed_phases: 10
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-10-31 - Completed quick task 261031-vhh: Journal v2.2 wellness questions and daily habits
+Last activity: 2026-11-01 - Completed quick task 261101-0f3: Pin midnight-sensitive Home tests to midday
 
 Progress: [██████████] 100%
 
@@ -137,6 +137,7 @@ None yet.
 | 261031-u9e | Varredura de segurança (legal): códigos de e-mail ficam na memória só nos testes; a exportação de dados (LGPD) inclui Meus cuidados (registros e documentos, sem os arquivos originais) | 2026-10-31 | f046d08 | [261031-u9e-keep-email-codes-in-memory-only-in-tests](./quick/261031-u9e-keep-email-codes-in-memory-only-in-tests/) |
 | 261031-uso | Profiles and safety-event sweep fixes: help-event logs keep only the action, help events stay on the caller's own profiles, profiles take and return no picture link | 2026-10-31 | 0209c51 | [261031-uso-close-profiles-and-safety-event-sweep-fi](./quick/261031-uso-close-profiles-and-safety-event-sweep-fi/) |
 | 261031-vhh | Journal v2.2: good moments, more options, closing questions, sleep/movement/cycle habits (multi-agent: Codex, Cursor, Gemini) | 2026-10-31 | 4516fef | [261031-vhh-journal-v2-2-more-wellness-questions](./quick/261031-vhh-journal-v2-2-more-wellness-questions/) |
+| 261101-0f3 | Pin midnight-sensitive Home tests to midday (they failed right after midnight) | 2026-11-01 | 0c718ac | [261101-0f3-pin-midnight-sensitive-home-tests-to-mid](./quick/261101-0f3-pin-midnight-sensitive-home-tests-to-mid/) |
 
 ## Deferred Items
 
