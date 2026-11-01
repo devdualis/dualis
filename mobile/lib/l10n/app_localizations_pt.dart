@@ -4235,9 +4235,6 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get jv22InsightsEmpty => 'Nada anotado neste período.';
-
-  @override
   String jv22EntryCoping(String label) {
     return 'Como foi lidar: $label';
   }

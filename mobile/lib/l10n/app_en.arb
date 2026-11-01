@@ -1238,7 +1238,6 @@
   "jv22GoodMoment": "Good moment",
   "jv22HelpedTitle": "What helped you",
   "jv22HelpedLine": "You marked “{label}” on {count, plural, =1{1 day} other{{count} days}}",
-  "jv22InsightsEmpty": "Nothing noted in this period.",
   "jv22EntryCoping": "Dealing with it: {label}",
   "jv22EntryHelpers": "What helped: {labels}"
 }

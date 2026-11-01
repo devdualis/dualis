@@ -8,6 +8,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../home/domain/home_greeting.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../journal/domain/journal_keys.dart';
+import '../../../journal/presentation/journal_item_text.dart';
 import '../../../journal/presentation/journal_labels.dart';
 import '../../../journal_insights/domain/chart_data.dart';
 import '../../../journal_insights/domain/history_series.dart';
@@ -20,6 +21,7 @@ import '../../../journal_insights/presentation/widgets/journal_overview_widgets.
 import '../../../journal_insights/presentation/widgets/record_series_chart.dart';
 import '../../../journal_insights/presentation/widgets/temporal_pie.dart';
 import '../../../journal_insights/presentation/widgets/water_charts.dart';
+import '../../../journal_insights/presentation/widgets/wellbeing_cards.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 
@@ -195,6 +197,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
     final points = emotionalPoints(l10n, entries);
     final series = emotionalSeries(l10n, points);
     final hasIntensity = points.any((p) => p.intensity != null);
+    final summary = JournalSummary.compute(entries);
     return [
       InsightsCard(
         title: l10n.gxPieTitle,
@@ -226,6 +229,19 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
             start: start,
             days: _days,
           ),
+        ),
+      if (summary.positiveByTime.isNotEmpty)
+        InsightsCard(
+          key: const Key('good_moments_card'),
+          title: l10n.jv22GoodMomentsTitle,
+          subtitle: l10n.jv22GoodMomentsSubtitle,
+          child: GoodMomentsSummary(summary: summary),
+        ),
+      if (summary.byHelper.isNotEmpty || summary.byCoping.isNotEmpty)
+        InsightsCard(
+          key: const Key('helped_card'),
+          title: l10n.jv22HelpedTitle,
+          child: HelpedSummary(summary: summary),
         ),
     ];
   }
@@ -384,6 +400,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
           days: calendarDays(
             emotional: emotionalPoints(l10n, entries),
             physical: physicalPoints(l10n, entries),
+            positive: positivePoints(l10n, entries),
             waterTotals: _waterTotals(water, today),
           ),
           start: start,
@@ -504,10 +521,19 @@ class _EntriesList extends ConsumerWidget {
                             JournalLabels.mood(l10n, entry.mood!))),
                       for (final item in entry.items)
                         _line(
-                          item.intensity != null
-                              ? '${item.label(l10n)} · ${l10n.xv2ReportedIntensity(item.intensity!)}'
-                              : item.label(l10n),
+                          item.kind == JournalKeys.kindPositive
+                              ? '${journalEmojis[item.optionKey] ?? '✨'} ${item.label(l10n)}'
+                              : item.intensity != null
+                                  ? '${item.label(l10n)} · ${l10n.xv2ReportedIntensity(item.intensity!)}'
+                                  : item.label(l10n),
                         ),
+                      if (entry.coping != null)
+                        _line(l10n.jv22EntryCoping(
+                            JournalLabels.coping(l10n, entry.coping!))),
+                      if (entry.helpers.isNotEmpty)
+                        _line(l10n.jv22EntryHelpers(entry.helpers
+                            .map((h) => JournalLabels.helper(l10n, h))
+                            .join(', '))),
                     ],
                   ),
                 ),

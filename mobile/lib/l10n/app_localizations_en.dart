@@ -4229,9 +4229,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get jv22InsightsEmpty => 'Nothing noted in this period.';
-
-  @override
   String jv22EntryCoping(String label) {
     return 'Dealing with it: $label';
   }

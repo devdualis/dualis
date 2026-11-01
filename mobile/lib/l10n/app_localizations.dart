@@ -7258,12 +7258,6 @@ abstract class AppLocalizations {
   /// **'Você marcou “{label}” em {count, plural, =1{1 dia} other{{count} dias}}'**
   String jv22HelpedLine(String label, int count);
 
-  /// No description provided for @jv22InsightsEmpty.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nada anotado neste período.'**
-  String get jv22InsightsEmpty;
-
   /// No description provided for @jv22EntryCoping.
   ///
   /// In pt, this message translates to:

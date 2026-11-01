@@ -1238,7 +1238,6 @@
   "jv22GoodMoment": "Momento bueno",
   "jv22HelpedTitle": "Lo que te ayudó",
   "jv22HelpedLine": "Marcaste “{label}” en {count, plural, =1{1 día} other{{count} días}}",
-  "jv22InsightsEmpty": "Nada anotado en este período.",
   "jv22EntryCoping": "Cómo fue lidiar: {label}",
   "jv22EntryHelpers": "Lo que ayudó: {labels}"
 }
