@@ -225,30 +225,7 @@ class AuthController extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final res = await _repository.verifyEmail(email: email, code: code);
-      final userJson = res['user'] as Map<String, dynamic>? ?? {};
-      final user = UserProfile.fromJson(userJson);
-      final accessToken = res['accessToken'] as String?;
-      final refreshToken = res['refreshToken'] as String?;
-
-      if (accessToken != null && refreshToken != null && user.id.isNotEmpty) {
-        await _claimLocalData(user.id);
-        await _secureStorage.persistTokens(
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-          userId: user.id,
-        );
-        await _secureStorage.saveUserProfile(user);
-      }
-      await _forgetPendingVerification();
-
-      state = state.copyWith(
-        isLoading: false,
-        isAuthenticated: true,
-        user: user,
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-        clearPendingVerification: true,
-      );
+      await _startSession(res);
       return true;
     } catch (e) {
       state = state.copyWith(
@@ -285,30 +262,7 @@ class AuthController extends Notifier<AuthState> {
     lastLoginNeedsVerification = false;
     try {
       final res = await _repository.login(email: email, password: password);
-      final userJson = res['user'] as Map<String, dynamic>? ?? {};
-      final user = UserProfile.fromJson(userJson);
-      final accessToken = res['accessToken'] as String?;
-      final refreshToken = res['refreshToken'] as String?;
-
-      if (accessToken != null && refreshToken != null && user.id.isNotEmpty) {
-        await _claimLocalData(user.id);
-        await _secureStorage.persistTokens(
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-          userId: user.id,
-        );
-        await _secureStorage.saveUserProfile(user);
-      }
-      await _forgetPendingVerification();
-
-      state = state.copyWith(
-        isLoading: false,
-        isAuthenticated: true,
-        user: user,
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-        clearPendingVerification: true,
-      );
+      await _startSession(res);
       return true;
     } catch (e) {
       if (_isEmailNotVerifiedError(e)) {
@@ -465,6 +419,33 @@ class AuthController extends Notifier<AuthState> {
     }
     _lastCodeSentAt = null;
     state = const AuthState.initial();
+  }
+
+  Future<void> _startSession(Map<String, dynamic> response) async {
+    final userJson = response['user'] as Map<String, dynamic>? ?? {};
+    final user = UserProfile.fromJson(userJson);
+    final accessToken = response['accessToken'] as String?;
+    final refreshToken = response['refreshToken'] as String?;
+
+    if (accessToken != null && refreshToken != null && user.id.isNotEmpty) {
+      await _claimLocalData(user.id);
+      await _secureStorage.persistTokens(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        userId: user.id,
+      );
+      await _secureStorage.saveUserProfile(user);
+    }
+    await _forgetPendingVerification();
+
+    state = state.copyWith(
+      isLoading: false,
+      isAuthenticated: true,
+      user: user,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      clearPendingVerification: true,
+    );
   }
 
   /// The local journal, drafts and outboxes carry no user id. Before another

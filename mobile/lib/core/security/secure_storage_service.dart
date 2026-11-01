@@ -88,12 +88,6 @@ class SecureStorageService {
     }
   }
 
-  Future<void> clearUserProfile() async {
-    try {
-      await _storage.delete(key: _keyUserProfile);
-    } catch (_) {}
-  }
-
   /// Email of an account registered but not yet verified. Survives app
   /// restarts so the verification screen can come back until it is verified.
   Future<void> savePendingVerificationEmail(String email) =>

@@ -34,7 +34,6 @@ void main() {
     mockRepository = MockAuthRepository();
     mockSecureStorage = MockSecureStorageService();
 
-    when(() => mockSecureStorage.clearUserProfile()).thenAnswer((_) async {});
     when(() => mockSecureStorage.clearSession()).thenAnswer((_) async {});
     when(() => mockSecureStorage.saveUserProfile(any())).thenAnswer((_) async {});
     when(() => mockSecureStorage.getRefreshToken()).thenAnswer((_) async => null);

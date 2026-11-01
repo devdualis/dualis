@@ -507,17 +507,7 @@ export class AuthService {
     userId: string,
     dto: DeleteAccountDto,
   ): Promise<{ success: boolean; message: string }> {
-    const user = await this.db.transaction(async (tx) => {
-      await tx.execute(
-        sql`SELECT set_config('app.current_user_id', ${userId}, true)`,
-      );
-      const [record] = await tx
-        .select()
-        .from(users)
-        .where(eq(users.id, userId))
-        .limit(1);
-      return record;
-    });
+    const user = await this.findUserById(userId);
 
     if (!user) {
       throw new UnauthorizedException('Usuário não encontrado.');
