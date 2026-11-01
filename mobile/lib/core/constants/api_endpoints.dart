@@ -13,7 +13,7 @@ class ApiEndpoints {
             File('/dev/socket/qemud').existsSync();
         return isEmulator ? 'http://10.0.2.2:8888' : 'http://127.0.0.1:8888';
       }
-    } catch (_) {}
+    } catch (_) {}\
     return 'http://localhost:8888';
   }
 
@@ -52,6 +52,10 @@ class ApiEndpoints {
   static const String hydrationHistory = '/v1/hydration/history';
   static const String hydrationSettings = '/v1/hydration/settings';
   static String hydrationLogItem(String id) => '/v1/hydration/log/$id';
+
+  // Daily habits (docs/bienestar/CONTRATO-JOURNAL-V2.md section 6).
+  static const String habits = '/v1/habits';
+  static String habitDay(String day) => '/v1/habits/$day';
 
   // Journal v2 read side and house ads (docs/bienestar/CONTRATO-JOURNAL-V2.md).
   static const String journalEntries = '/v1/journal/entries';
