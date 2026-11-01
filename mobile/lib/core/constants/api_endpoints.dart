@@ -13,7 +13,7 @@ class ApiEndpoints {
             File('/dev/socket/qemud').existsSync();
         return isEmulator ? 'http://10.0.2.2:8888' : 'http://127.0.0.1:8888';
       }
-    } catch (_) {}\
+    } catch (_) {}
     return 'http://localhost:8888';
   }
 

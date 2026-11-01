@@ -37,10 +37,11 @@ class CombinedCalendar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toLanguageTag();
+    final hasPeriod = days.values.any((d) => d.period == true);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _Legend(),
+        _Legend(hasPeriod: hasPeriod),
         const SizedBox(height: 10),
         PeriodCalendar(
           keyPrefix: 'combined',
@@ -54,24 +55,43 @@ class CombinedCalendar extends StatelessWidget {
           ),
           cellBuilder: (context, day) {
             final data = days[day];
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            return Stack(
               children: [
-                _VerticalRow(
-                  points: data?.emotional ?? const [],
-                  icon: (p, size) => HeadProfileIcon(
-                    size: size,
-                    color: ChartTokens.time(p.series),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _VerticalRow(
+                      points: data?.emotional ?? const [],
+                      icon: (p, size) => HeadProfileIcon(
+                        size: size,
+                        color: ChartTokens.time(p.series),
+                      ),
+                      color: (p) => ChartTokens.time(p.series),
+                    ),
+                    _VerticalRow(
+                      points: data?.physical ?? const [],
+                      icon: (p, size) =>
+                          BodyFigureIcon(size: size, color: ChartTokens.body),
+                      color: (_) => ChartTokens.body,
+                    ),
+                    _WaterRow(ml: data?.waterMl, locale: locale),
+                  ],
+                ),
+                if (data?.period == true)
+                  Positioned(
+                    top: 2,
+                    right: 2,
+                    child: Container(
+                      key: Key(
+                          'calendar_period_marker_${DateFormat('yyyyMMdd').format(day)}'),
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFD32F2F),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
                   ),
-                  color: (p) => ChartTokens.time(p.series),
-                ),
-                _VerticalRow(
-                  points: data?.physical ?? const [],
-                  icon: (p, size) =>
-                      BodyFigureIcon(size: size, color: ChartTokens.body),
-                  color: (_) => ChartTokens.body,
-                ),
-                _WaterRow(ml: data?.waterMl, locale: locale),
               ],
             );
           },
@@ -188,6 +208,10 @@ class _WaterRow extends StatelessWidget {
 }
 
 class _Legend extends StatelessWidget {
+  final bool hasPeriod;
+
+  const _Legend({this.hasPeriod = false});
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -220,6 +244,19 @@ class _Legend extends StatelessWidget {
           const SizedBox(width: 4),
           Text(l10n.gxWaterLogged, style: style),
         ]),
+        if (hasPeriod)
+          Row(mainAxisSize: MainAxisSize.min, children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: const BoxDecoration(
+                color: Color(0xFFD32F2F),
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(l10n.habitsPeriodLabel, style: style),
+          ]),
       ],
     );
   }
@@ -419,6 +456,25 @@ class CalendarDayView extends ConsumerWidget {
                 ),
             ],
           ),
+        ],
+        if (day.period == true) ...[
+          Text(l10n.habitsPeriodLabel, style: title),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFD32F2F),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(l10n.habitsPeriodYes, style: body),
+            ],
+          ),
+          const SizedBox(height: 8),
         ],
         if (!day.isEmpty) ...[
           const SizedBox(height: 12),

@@ -270,20 +270,29 @@ class CalendarDay {
   /// Sum of water events that day, null when there was none.
   final int? waterMl;
 
+  /// Period reported that day, null or bool.
+  final bool? period;
+
   const CalendarDay({
     required this.day,
     this.emotional = const [],
     this.physical = const [],
     this.waterMl,
+    this.period,
   });
 
-  bool get isEmpty => emotional.isEmpty && physical.isEmpty && waterMl == null;
+  bool get isEmpty =>
+      emotional.isEmpty &&
+      physical.isEmpty &&
+      waterMl == null &&
+      period != true;
 }
 
 Map<DateTime, CalendarDay> calendarDays({
   required List<RecordPoint> emotional,
   required List<RecordPoint> physical,
   required Map<DateTime, int> waterTotals,
+  Map<DateTime, bool>? periodDays,
 }) {
   final emo = <DateTime, List<RecordPoint>>{};
   final phy = <DateTime, List<RecordPoint>>{};
@@ -294,7 +303,8 @@ Map<DateTime, CalendarDay> calendarDays({
     phy.putIfAbsent(p.day, () => []).add(p);
   }
   final water = normalizeWaterTotals(waterTotals);
-  final days = {...emo.keys, ...phy.keys, ...water.keys};
+  final periods = periodDays ?? const {};
+  final days = {...emo.keys, ...phy.keys, ...water.keys, ...periods.keys};
   return {
     for (final d in days)
       d: CalendarDay(
@@ -302,6 +312,7 @@ Map<DateTime, CalendarDay> calendarDays({
         emotional: emo[d] ?? const [],
         physical: phy[d] ?? const [],
         waterMl: water[d],
+        period: periods[d],
       ),
   };
 }
