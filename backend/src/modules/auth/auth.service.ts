@@ -647,10 +647,21 @@ export class AuthService {
       }
     }
 
+    let replacedPicture: string | null = null;
     const updated = await this.db.transaction(async (tx) => {
       await tx.execute(
         sql`SELECT set_config('app.current_user_id', ${userId}, true)`,
       );
+      if (picture !== undefined) {
+        // Row lock: overlapping picture saves take turns, so each one knows the exact picture
+        // it replaces.
+        const [before] = await tx
+          .select({ picture: users.picture })
+          .from(users)
+          .where(eq(users.id, userId))
+          .for('update');
+        replacedPicture = before?.picture ?? null;
+      }
 
       const updateData: Partial<typeof users.$inferInsert> = {
         updatedAt: new Date(),
@@ -672,9 +683,10 @@ export class AuthService {
     if (!updated) {
       throw new UnauthorizedException('Usuário não encontrado.');
     }
-    // Only the picture now in use stays in storage; earlier uploads are deleted.
-    if (picture !== undefined) {
-      await this.storageService?.removeAvatars(userId, updated.picture);
+    // Delete only the picture this save replaced. Cleaning the whole folder could delete the
+    // upload of another save still in progress, which may end up as the picture in use.
+    if (picture !== undefined && replacedPicture && replacedPicture !== updated.picture) {
+      await this.storageService?.removeAvatar(userId, replacedPicture);
     }
 
     return this.sanitize(updated);

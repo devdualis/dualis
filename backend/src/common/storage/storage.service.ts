@@ -149,17 +149,38 @@ export class StorageService {
   }
 
   /**
-   * Deletes the person's uploaded pictures (`<userId>/` in the bucket) except the file `keep`
-   * links to: pass the picture now in use after a change, or nothing once the account is
-   * deleted. Failures are logged and never thrown.
+   * Deletes the one uploaded picture `url` links to, when it is a file in the person's folder
+   * (`<userId>/` in the bucket); presets, data URIs and other links are left alone. Used for the
+   * picture a change replaced: deleting only that file never touches the upload of another save
+   * still in progress. Failures are logged and never thrown.
    */
-  async removeAvatars(userId: string, keep?: string | null): Promise<void> {
-    if (!this.supabase) return;
+  async removeAvatar(userId: string, url: string | null | undefined): Promise<void> {
+    if (!this.supabase || !url) return;
 
     const folder = `${this.bucketName}/${userId}/`;
-    const keepName = keep?.includes(folder)
-      ? keep.slice(keep.indexOf(folder) + folder.length).split('?')[0]
-      : null;
+    if (!url.includes(folder)) return;
+    const name = url.slice(url.indexOf(folder) + folder.length).split('?')[0];
+    if (!name || name.includes('/')) return;
+
+    try {
+      const { error } = await this.supabase.storage
+        .from(this.bucketName)
+        .remove([`${userId}/${name}`]);
+      if (error) throw error;
+    } catch (err) {
+      this.logger.warn(
+        `Could not delete an old picture of user ${userId}: ${(err as Error).message}`,
+      );
+    }
+  }
+
+  /**
+   * Deletes every uploaded picture of the person (`<userId>/` in the bucket), once the account
+   * is deleted. Failures are logged and never thrown.
+   */
+  async removeAvatars(userId: string): Promise<void> {
+    if (!this.supabase) return;
+
     const bucket = this.supabase.storage.from(this.bucketName);
 
     try {
@@ -167,9 +188,7 @@ export class StorageService {
       for (let page = 0; page < MAX_AVATAR_PAGES; page++) {
         const { data, error } = await bucket.list(userId, { limit: AVATAR_PAGE_SIZE });
         if (error) throw error;
-        const paths = data
-          .filter((file) => file.name !== keepName)
-          .map((file) => `${userId}/${file.name}`);
+        const paths = data.map((file) => `${userId}/${file.name}`);
         if (paths.length === 0) return;
         const { error: removeError } = await bucket.remove(paths);
         if (removeError) throw removeError;

@@ -34,24 +34,38 @@ function storageWith(names: string[]) {
 }
 
 describe('StorageService avatars', () => {
-  it('deletes every earlier picture and keeps the one in use', async () => {
+  it('deletes only the replaced picture, never another upload in the folder', async () => {
+    // 2.jpg belongs to another save still in progress; it may become the picture in use.
     const { service, bucket, files } = storageWith(['1.png', '2.jpg', '3.webp']);
 
-    await service.removeAvatars(userId, publicUrl('3.webp'));
+    await service.removeAvatar(userId, `${publicUrl('1.png')}?v=1`);
 
-    expect(bucket.list).toHaveBeenCalledWith(userId, { limit: 100 });
-    expect(bucket.remove).toHaveBeenCalledWith([`${userId}/1.png`, `${userId}/2.jpg`]);
-    expect(files).toEqual(['3.webp']);
+    expect(bucket.list).not.toHaveBeenCalled();
+    expect(bucket.remove).toHaveBeenCalledWith([`${userId}/1.png`]);
+    expect(files).toEqual(['2.jpg', '3.webp']);
   });
 
-  it('deletes them all once the account is gone or the picture is no longer an upload', async () => {
-    const deleted = storageWith(['1.png', '2.jpg']);
-    await deleted.service.removeAvatars(userId);
-    expect(deleted.files).toEqual([]);
+  it('leaves presets, data URIs and other people\'s files alone', async () => {
+    const { service, bucket } = storageWith(['1.png']);
 
-    const preset = storageWith(['1.png']);
-    await preset.service.removeAvatars(userId, 'avatar_clinical_teal_01');
-    expect(preset.files).toEqual([]);
+    await service.removeAvatar(userId, 'avatar_clinical_teal_01');
+    await service.removeAvatar(userId, 'data:image/png;base64,iVBORw0KGgo=');
+    await service.removeAvatar(userId, null);
+    await service.removeAvatar(
+      userId,
+      'https://ref.supabase.co/storage/v1/object/public/avatars/someone-else/1.png',
+    );
+
+    expect(bucket.remove).not.toHaveBeenCalled();
+  });
+
+  it('deletes every picture once the account is gone', async () => {
+    const { service, bucket, files } = storageWith(['1.png', '2.jpg']);
+
+    await service.removeAvatars(userId);
+
+    expect(bucket.list).toHaveBeenCalledWith(userId, { limit: 100 });
+    expect(files).toEqual([]);
   });
 
   it('pages through folders with more pictures than one listing returns', async () => {
@@ -66,11 +80,14 @@ describe('StorageService avatars', () => {
   it('logs and never throws when storage fails', async () => {
     const { service, bucket } = storageWith(['1.png']);
     bucket.list.mockResolvedValueOnce({ data: null, error: new Error('storage down') } as any);
+    bucket.remove.mockResolvedValueOnce({ data: null, error: new Error('storage down') } as any);
     const warn = vi.spyOn((service as any).logger, 'warn').mockImplementation(() => undefined);
 
     await expect(service.removeAvatars(userId)).resolves.toBeUndefined();
-
     expect(bucket.remove).not.toHaveBeenCalled();
+    await expect(service.removeAvatar(userId, publicUrl('1.png'))).resolves.toBeUndefined();
+
+    expect(warn).toHaveBeenCalledTimes(2);
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('storage down'));
   });
 
@@ -79,6 +96,7 @@ describe('StorageService avatars', () => {
     (service as any).supabase = null;
 
     await expect(service.removeAvatars(userId)).resolves.toBeUndefined();
+    await expect(service.removeAvatar(userId, publicUrl('1.png'))).resolves.toBeUndefined();
   });
 
   it('uploads into the person\'s folder without writing the public link to the logs', async () => {

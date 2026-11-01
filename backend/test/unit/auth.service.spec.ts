@@ -395,11 +395,16 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
       const oldUrl = `https://ref.supabase.co/storage/v1/object/public/avatars/${userId}/1.png`;
       const newUrl = `https://ref.supabase.co/storage/v1/object/public/avatars/${userId}/2.png`;
       const newPicture = `data:image/png;base64,${Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0]).toString('base64')}`;
-      let storage: { processAvatarImage: ReturnType<typeof vi.fn>; removeAvatars: ReturnType<typeof vi.fn> };
+      let storage: {
+        processAvatarImage: ReturnType<typeof vi.fn>;
+        removeAvatar: ReturnType<typeof vi.fn>;
+        removeAvatars: ReturnType<typeof vi.fn>;
+      };
 
       beforeEach(() => {
         storage = {
           processAvatarImage: vi.fn().mockResolvedValue(newUrl),
+          removeAvatar: vi.fn().mockResolvedValue(undefined),
           removeAvatars: vi.fn().mockResolvedValue(undefined),
         };
         authService = new AuthService(
@@ -411,14 +416,32 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
         );
       });
 
-      it('deletes the earlier uploads once the new picture is saved', async () => {
+      it('deletes only the picture the new one replaced once it is saved', async () => {
         mockTxSelect.mockReturnValue(query([{ picture: oldUrl }]));
         mockTxUpdate.mockReturnValue(query([updatedRecord(newUrl)]));
 
         await authService.updateProfile(userId, { picture: newPicture });
 
         expect(storage.processAvatarImage).toHaveBeenCalledWith(userId, newPicture);
-        expect(storage.removeAvatars).toHaveBeenCalledWith(userId, newUrl);
+        expect(storage.removeAvatar).toHaveBeenCalledTimes(1);
+        expect(storage.removeAvatar).toHaveBeenCalledWith(userId, oldUrl);
+        expect(storage.removeAvatars).not.toHaveBeenCalled();
+      });
+
+      it('overlapping saves: deletes the picture read under the row lock, never another upload', async () => {
+        // Another save committed its picture between this save's first read and its update.
+        const otherUrl = `https://ref.supabase.co/storage/v1/object/public/avatars/${userId}/3.png`;
+        const firstRead = query([{ picture: oldUrl }]);
+        const lockedRead = query([{ picture: otherUrl }]);
+        mockTxSelect.mockReturnValueOnce(firstRead).mockReturnValueOnce(lockedRead);
+        mockTxUpdate.mockReturnValue(query([updatedRecord(newUrl)]));
+
+        await authService.updateProfile(userId, { picture: newPicture });
+
+        expect(lockedRead.calls).toContainEqual(['for', ['update']]);
+        expect(storage.removeAvatar).toHaveBeenCalledTimes(1);
+        expect(storage.removeAvatar).toHaveBeenCalledWith(userId, otherUrl);
+        expect(storage.removeAvatars).not.toHaveBeenCalled();
       });
 
       it('leaves storage alone when the picture did not change or the save failed', async () => {
@@ -431,6 +454,12 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
           UnauthorizedException,
         );
 
+        // The replaced picture is the new one itself (an identical upload): nothing to delete.
+        mockTxSelect.mockReturnValue(query([{ picture: newUrl }]));
+        mockTxUpdate.mockReturnValue(query([updatedRecord(newUrl)]));
+        await authService.updateProfile(userId, { picture: newPicture });
+
+        expect(storage.removeAvatar).not.toHaveBeenCalled();
         expect(storage.removeAvatars).not.toHaveBeenCalled();
       });
     });
