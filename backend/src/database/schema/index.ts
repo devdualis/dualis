@@ -12,3 +12,5 @@ export * from './legal-guardianships.schema';
 export * from './shared-access-grants.schema';
 export * from './journal.schema';
 export * from './care.schema';
+
+export * from './daily-habits.schema';

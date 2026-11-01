@@ -18,6 +18,7 @@ const JOURNAL_MIGRATION = '0017_journal_v2.sql';
 const AI_REMOVAL_MIGRATION = '0018_remove_ai_tagging.sql';
 const CLIENT_ID_MIGRATION = '0019_journal_v2_profile_client_id.sql';
 const AREA_SENSATION_MIGRATION = '0020_journal_v2_1_area_sensation.sql';
+const WELLNESS_MIGRATION = '0026_journal_v2_2_wellness.sql';
 const APP_ROLE = 'dualis_journal_app';
 const APP_PASSWORD = 'dualis_journal_app';
 
@@ -103,12 +104,12 @@ describe('Security Regression: 0017 journal v2 (journal_entries, journal_items, 
     `);
 
     const migrations = readdirSync(MIGRATIONS_DIR).filter((f) => /^\d{4}_.*\.sql$/.test(f)).sort();
-    expect(migrations).toEqual(expect.arrayContaining([JOURNAL_MIGRATION, AI_REMOVAL_MIGRATION, CLIENT_ID_MIGRATION, AREA_SENSATION_MIGRATION]));
+    expect(migrations).toEqual(expect.arrayContaining([JOURNAL_MIGRATION, AI_REMOVAL_MIGRATION, CLIENT_ID_MIGRATION, AREA_SENSATION_MIGRATION, WELLNESS_MIGRATION]));
     for (const file of migrations) {
       await adminPool.query(readFileSync(join(MIGRATIONS_DIR, file), 'utf8'));
     }
     // Idempotent: a second run must not fail.
-    for (const file of [JOURNAL_MIGRATION, AI_REMOVAL_MIGRATION, CLIENT_ID_MIGRATION, AREA_SENSATION_MIGRATION]) {
+    for (const file of [JOURNAL_MIGRATION, AI_REMOVAL_MIGRATION, CLIENT_ID_MIGRATION, AREA_SENSATION_MIGRATION, WELLNESS_MIGRATION]) {
       await adminPool.query(readFileSync(join(MIGRATIONS_DIR, file), 'utf8'));
     }
 
@@ -428,6 +429,24 @@ describe('Security Regression: 0017 journal v2 (journal_entries, journal_items, 
         c.query(`INSERT INTO journal_entries (user_id, profile_id, recorded_at, mood, client_id) VALUES ($1, $2, now(), 'bem', $3)`, [coManagerC, primaryA, randomUUID()]),
       ),
     ).rejects.toThrow(RLS_VIOLATION);
+  });
+
+  it('v2.2 persists positive items, closing answers and their separate day counts under RLS', async (ctx) => {
+    if (!isDbAvailable) return ctx.skip();
+    const positive = await service.createEntry(ownerA, primaryA, entryDto({ mood: 'bem', area: 'emotional', triggers: [], items: [{ kind: 'positive', optionKey: 'presente.calma.paz' }] }));
+    expect(positive).toMatchObject({ coping: null, helpers: [], items: [{ kind: 'positive', intensity: null, persistence: null, bodySide: null, sensation: null }] });
+    const closing = await service.createEntry(ownerA, primaryA, entryDto({ area: 'emotional', triggers: ['dinheiro', 'telas', 'ciclo'], coping: 'consegui', helpers: ['pausa'], items: [{ kind: 'emotional', optionKey: 'presente.solidao.sozinho', persistence: 'hoje', intensity: 2 }] }));
+    expect(closing).toMatchObject({ coping: 'consegui', helpers: ['pausa'] });
+    const summary = await service.summary(ownerA, primaryA, { tzOffset: -180 });
+    expect(summary.positive.byOptionKey['presente.calma.paz']).toBe(1);
+    expect(summary.byOptionKey['presente.calma.paz']).toBeUndefined();
+    expect(summary.byCoping.consegui).toBe(1);
+    expect(summary.byHelper.pausa).toBe(1);
+    expect((await service.listEntries(strangerD, primaryA, {})).entries).toEqual([]);
+    for (const assignment of ["intensity = 1", "persistence = 'hoje'", "body_side = 'front'", "sensation = 'dor'"]) {
+      await expect(asUser(ownerA, (c) => c.query(`UPDATE journal_items SET ${assignment} WHERE entry_id = $1`, [positive.id]))).rejects.toThrow(/journal_items_.*check/);
+    }
+    await expect(asUser(ownerA, (c) => c.query("UPDATE journal_entries SET coping = 'outro' WHERE id = $1", [closing.id]))).rejects.toThrow(/journal_entries_coping_check/);
   });
 
   it('deleting a profile cascades its entries, items and conditions', async (ctx) => {

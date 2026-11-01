@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { getTableConfig } from 'drizzle-orm/pg-core';
 import { AppModule } from '../../src/app.module';
-import { journalEntries, journalItems, userConditions } from '../../src/database/schema';
+import { dailyHabits, journalEntries, journalItems, userConditions } from '../../src/database/schema';
 import { JournalService } from '../../src/modules/journal/journal.service';
 import { buildJournalSummary, dayMarkers } from '../../src/modules/journal/journal-summary';
 import { houseAdsFor } from '../../src/modules/journal/house-ads';
@@ -19,6 +19,12 @@ const SRC = join(__dirname, '../../src');
 // columns by their existing names to return old rows as "registro anterior".
 const CONTRACT_FILES = [
   'database/schema/journal.schema.ts',
+  'database/schema/daily-habits.schema.ts',
+  'database/migrations/0026_journal_v2_2_wellness.sql',
+  'modules/habits/dto/habits.dto.ts',
+  'modules/habits/habits.service.ts',
+  'modules/habits/habits.controller.ts',
+  'modules/habits/habits.module.ts',
   'database/migrations/0017_journal_v2.sql',
   'database/migrations/0020_journal_v2_1_area_sensation.sql',
   'modules/journal/constants/journal-keys.constant.ts',
@@ -52,11 +58,12 @@ describe('Journal v2 contract: no grouping, assessment or disorder names', () =>
   it('the three tables have only the contract columns', () => {
     const columns = (t: any) => getTableConfig(t).columns.map((c) => c.name).sort();
     expect(columns(journalEntries)).toEqual(
-      ['area', 'client_id', 'created_at', 'id', 'mood', 'note', 'profile_id', 'recorded_at', 'transition_variant_ids', 'trigger_note', 'triggers', 'user_id'].sort(),
+      ['coping', 'helpers', 'area', 'client_id', 'created_at', 'id', 'mood', 'note', 'profile_id', 'recorded_at', 'transition_variant_ids', 'trigger_note', 'triggers', 'user_id'].sort(),
     );
     expect(columns(journalItems)).toEqual(
       ['body_side', 'condition_id', 'custom_label', 'entry_id', 'id', 'intensity', 'kind', 'option_key', 'persistence', 'sensation'].sort(),
     );
+    expect(columns(dailyHabits)).toEqual(['id', 'user_id', 'profile_id', 'day', 'sleep_quality', 'sleep_hours', 'moved', 'movement_minutes', 'period', 'created_at', 'updated_at'].sort());
     expect(columns(userConditions)).toEqual(['archived_at', 'created_at', 'id', 'label', 'profile_id', 'user_id'].sort());
   });
 

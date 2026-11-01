@@ -9,6 +9,10 @@ import {
 } from '../../src/modules/journal/dto/journal.dto';
 import {
   EMOTIONAL_OPTION_KEYS,
+  POSITIVE_OPTION_KEYS,
+  POSITIVE_TREE,
+  TRIGGER_KEYS,
+  PHYSICAL_ONLY_TRIGGER_KEYS,
   ENTRY_AREAS,
   PHYSICAL_OPTION_KEYS,
   SENSATION_KEYS,
@@ -38,9 +42,9 @@ const withItem = (item: Record<string, unknown>, extra: Record<string, unknown> 
   errorsOf({ ...baseEntry, ...extra, items: [item] });
 
 describe('Journal v2 keys', () => {
-  it('match the contract tables: 12 emotional + 3 custom, 34 physical + 8 custom', () => {
-    expect(EMOTIONAL_OPTION_KEYS).toHaveLength(15);
-    expect(PHYSICAL_OPTION_KEYS).toHaveLength(42);
+  it('match the contract tables: 20 emotional + 3 custom, 41 physical + 8 custom', () => {
+    expect(EMOTIONAL_OPTION_KEYS).toHaveLength(23);
+    expect(PHYSICAL_OPTION_KEYS).toHaveLength(49);
     expect(EMOTIONAL_OPTION_KEYS).toContain('passado.memoria.magoa');
     expect(EMOTIONAL_OPTION_KEYS).toContain('presente.custom');
     expect(PHYSICAL_OPTION_KEYS).toContain('costas.fisgada.ao_mexer');
@@ -372,5 +376,73 @@ describe('houseAdsFor', () => {
   it('takes no input besides the language: identical for every person', () => {
     expect(houseAdsFor.length).toBe(1);
     expect(houseAdsFor('pt')).toEqual(houseAdsFor('pt'));
+  });
+});
+
+
+describe('Journal v2.2 wellness choices', () => {
+  const positive = { ...baseEntry, mood: 'bem', area: 'emotional', items: [{ kind: 'positive', optionKey: 'presente.calma.paz' }] };
+  it('accepts every positive chip and written item, with absent or null intensity', () => {
+    expect(POSITIVE_OPTION_KEYS).toHaveLength(15);
+    for (const optionKey of POSITIVE_OPTION_KEYS) {
+      const item = { kind: 'positive', optionKey, intensity: null, ...(optionKey.endsWith('.custom') ? { customLabel: 'um dia bom' } : {}) };
+      expect(errorsOf({ ...positive, items: [item] }), optionKey).toEqual([]);
+    }
+    expect(errorsOf(positive)).toEqual([]);
+    expect(errorsOf({ ...positive, items: [...positive.items, { kind: 'condition', conditionId: '11111111-1111-4111-8111-111111111111', intensity: 2 }] })).toEqual([]);
+  });
+  it('rejects positive items outside their mood/area, mixed axes and forbidden fields', () => {
+    for (const change of [{ mood: 'nao_tao_bem' }, { mood: 'normal' }, { area: null }, { area: 'physical' }, { triggers: ['sono'] }, { coping: 'consegui' }, { helpers: ['pausa'] }]) {
+      expect(errorsOf({ ...positive, ...change })).toContain('journalEntryShape');
+    }
+    for (const extra of [{ intensity: 1 }, { persistence: 'hoje' }, { bodySide: 'front' }, { sensation: 'dor' }, { conditionId: '11111111-1111-4111-8111-111111111111' }, { optionKey: 'presente.energia.corpo' }, { customLabel: 'texto' }]) {
+      expect(errorsOf({ ...positive, items: [{ ...positive.items[0], ...extra }] })).toContain('journalItemShape');
+    }
+    expect(errorsOf({ ...positive, items: [...positive.items, ...baseEntry.items] })).toContain('journalEntryShape');
+    for (const time of Object.keys(POSITIVE_TREE)) {
+      expect(errorsOf({ ...positive, items: [{ kind: 'positive', optionKey: `${time}.custom` }] })).toContain('journalItemShape');
+    }
+  });
+  it('accepts new choices and every new trigger on emotional entries', () => {
+    for (const optionKey of EMOTIONAL_OPTION_KEYS.filter((k) => !k.endsWith('.custom'))) {
+      expect(withItem({ ...baseEntry.items[0], optionKey }, { area: 'emotional' }), optionKey).toEqual([]);
+    }
+    for (const trigger of ['dinheiro', 'telas', 'ciclo']) {
+      expect(TRIGGER_KEYS).toContain(trigger);
+      expect(PHYSICAL_ONLY_TRIGGER_KEYS).not.toContain(trigger);
+      expect(errorsOf({ ...baseEntry, triggers: [trigger] })).toEqual([]);
+    }
+    for (const optionKey of ['cabeca.rosto.tontura', 'cabeca.rosto.nariz', 'cabeca.rosto.ouvido', 'cabeca.rosto.mandibula', 'barriga.colica.menstrual', 'barriga.intestino.preso', 'barriga.intestino.solto']) {
+      const item = { kind: 'physical', optionKey, bodySide: 'front', sensation: 'incomodo', persistence: 'hoje', intensity: 2 };
+      expect(withItem(item, { area: 'physical' })).toEqual([]);
+      expect(withItem({ ...item, bodySide: 'back' }, { area: 'physical' })).toContain('journalEntryShape');
+    }
+  });
+  it('closing questions are optional, unique and only on nao_tao_bem', () => {
+    expect(errorsOf({ ...baseEntry, coping: 'esperei', helpers: ['pausa', 'descansar'] })).toEqual([]);
+    expect(errorsOf({ ...baseEntry, helpers: ['nada_ainda'] })).toEqual([]);
+    for (const change of [{ coping: 'outro' }, { helpers: ['pausa', 'pausa'] }, { helpers: ['nada_ainda', 'pausa'] }, { helpers: ['outro'] }, { helpers: Array(7).fill('pausa') }]) {
+      expect(errorsOf({ ...baseEntry, ...change }).length).toBeGreaterThan(0);
+    }
+    for (const mood of ['bem', 'normal']) {
+      expect(errorsOf({ ...baseEntry, mood, coping: 'dificil' })).toContain('journalEntryShape');
+      expect(errorsOf({ ...baseEntry, mood, helpers: ['pausa'] })).toContain('journalEntryShape');
+      expect(errorsOf({ ...baseEntry, mood, coping: null, helpers: [] })).toEqual([]);
+    }
+  });
+  it('summary counts local days separately and excludes good moments from pairs', () => {
+    const entries = ['2026-10-20T22:00:00Z', '2026-10-21T01:00:00Z', '2026-10-21T12:00:00Z'].flatMap((recordedAt) => [
+      { recordedAt: new Date(recordedAt), triggers: [], items: [{ kind: 'positive', optionKey: 'presente.calma.paz' }] },
+      { recordedAt: new Date(recordedAt), triggers: ['ciclo'], coping: 'consegui', helpers: ['pausa', 'pausa'], items: [{ kind: 'emotional', optionKey: 'futuro.mente.indecisao' }] },
+    ]);
+    const summary = buildJournalSummary(entries, 30, -180);
+    expect(summary.positive).toEqual({ byTime: { passado: 0, presente: 2, futuro: 0 }, byOptionKey: { 'presente.calma.paz': 2 } });
+    expect(summary.byTime).toEqual({ passado: 0, presente: 0, futuro: 2 });
+    expect(summary.byOptionKey).toEqual({ 'futuro.mente.indecisao': 2 });
+    expect(summary.byCoping).toEqual({ consegui: 2, esperei: 0, dificil: 0 });
+    expect(summary.byHelper.pausa).toBe(2);
+    expect(summary.byHelper.nada_ainda).toBe(0);
+    expect(summary.byTrigger.ciclo).toBe(2);
+    expect(summary.cooccurrence).toEqual([{ a: 'futuro.mente', b: 'trigger:ciclo', days: 2 }]);
   });
 });

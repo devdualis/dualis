@@ -1,5 +1,7 @@
 import {
   EMOTIONAL_TIMES,
+  COPING_KEYS,
+  HELPER_KEYS,
   PHYSICAL_REGIONS,
   TRIGGER_KEYS,
   isCustomOptionKey,
@@ -12,6 +14,8 @@ import { JournalSummaryDto } from './dto/journal.dto';
 export interface SummaryEntryInput {
   recordedAt: Date;
   triggers: string[];
+  coping?: string | null;
+  helpers?: string[];
   items: Array<{ kind: string; optionKey: string | null }>;
 }
 
@@ -57,6 +61,10 @@ export function buildJournalSummary(
   tzOffsetMinutes = 0,
 ): JournalSummaryDto {
   const daysByKey = {
+    positiveTime: new Map<string, Set<string>>(),
+    positiveOption: new Map<string, Set<string>>(),
+    coping: new Map<string, Set<string>>(),
+    helper: new Map<string, Set<string>>(),
     time: new Map<string, Set<string>>(),
     region: new Map<string, Set<string>>(),
     option: new Map<string, Set<string>>(),
@@ -73,10 +81,17 @@ export function buildJournalSummary(
     const day = localDay(entry.recordedAt, tzOffsetMinutes);
     for (const item of entry.items) {
       if (!item.optionKey) continue;
+      if (item.kind === 'positive') {
+        mark(daysByKey.positiveTime, optionKeyRoot(item.optionKey), day);
+        mark(daysByKey.positiveOption, item.optionKey, day);
+        continue;
+      }
       mark(daysByKey.option, item.optionKey, day);
       if (item.kind === 'emotional') mark(daysByKey.time, optionKeyRoot(item.optionKey), day);
       if (item.kind === 'physical') mark(daysByKey.region, optionKeyRoot(item.optionKey), day);
     }
+    if (entry.coping) mark(daysByKey.coping, entry.coping, day);
+    for (const helper of entry.helpers ?? []) mark(daysByKey.helper, helper, day);
     for (const t of entry.triggers) mark(daysByKey.trigger, t, day);
 
     const dayMarkerSet = markersByDay.get(day) ?? new Set<string>();
@@ -121,6 +136,9 @@ export function buildJournalSummary(
     byRegion,
     byOptionKey,
     byTrigger,
+    positive: { byTime: counted(daysByKey.positiveTime, EMOTIONAL_TIMES), byOptionKey: counted(daysByKey.positiveOption) },
+    byCoping: counted(daysByKey.coping, COPING_KEYS),
+    byHelper: counted(daysByKey.helper, HELPER_KEYS),
     cooccurrence,
   };
 }

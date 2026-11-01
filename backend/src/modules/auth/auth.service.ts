@@ -19,6 +19,7 @@ import {
   safetyResourceEvents,
   waterIntakeLogs,
   profiles,
+  dailyHabits,
   journalEntries,
   journalItems,
   userConditions,
@@ -335,6 +336,9 @@ export class AuthService {
             .from(userConditions)
             .where(inArray(userConditions.profileId, ownedProfileIds))
         : [];
+      const habitRecords = ownedProfileIds.length
+        ? await tx.select().from(dailyHabits).where(inArray(dailyHabits.profileId, ownedProfileIds))
+        : [];
       const conditionLabels = new Map(conditionRecords.map((c) => [c.id, this.decryptForExport(c.label)]));
 
       const clinicalDataFor = (profileId: string | undefined) => ({
@@ -357,6 +361,13 @@ export class AuthService {
             amountMl: w.amountMl,
             source: w.source,
             recordedAt: w.recordedAt.toISOString(),
+          })),
+        dailyHabits: habitRecords
+          .filter((h) => h.profileId === profileId)
+          .sort((a, b) => b.day.localeCompare(a.day))
+          .map(({ id, day, sleepQuality, sleepHours, moved, movementMinutes, period, createdAt, updatedAt }) => ({
+            id, day, sleepQuality, sleepHours, moved, movementMinutes, period,
+            createdAt: createdAt.toISOString(), updatedAt: updatedAt.toISOString(),
           })),
         journalEntries: journalEntryRecords
           .filter((e) => e.profileId === profileId)
@@ -433,6 +444,8 @@ export class AuthService {
       recordedAt: e.recordedAt.toISOString(),
       mood: e.mood,
       triggers: e.triggers,
+      coping: e.coping ?? null,
+      helpers: e.helpers ?? [],
       triggerNote: this.decryptForExport(e.triggerNote),
       note: this.decryptForExport(e.note),
       createdAt: e.createdAt.toISOString(),
