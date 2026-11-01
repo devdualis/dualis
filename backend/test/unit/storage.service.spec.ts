@@ -9,8 +9,10 @@ const publicUrl = (name: string) =>
 function storageWith(names: string[]) {
   const files = [...names];
   const bucket = {
-    list: vi.fn(async (_folder: string, options: { limit: number }) => ({
-      data: files.slice(0, options.limit).map((name) => ({ name, id: name })),
+    list: vi.fn(async (_folder: string, options: { limit: number; offset?: number }) => ({
+      data: files
+        .slice(options.offset ?? 0, (options.offset ?? 0) + options.limit)
+        .map((name) => ({ name, id: name })),
       error: null,
     })),
     remove: vi.fn(async (paths: string[]) => {
@@ -66,6 +68,45 @@ describe('StorageService avatars', () => {
 
     expect(bucket.list).toHaveBeenCalledWith(userId, { limit: 100 });
     expect(files).toEqual([]);
+  });
+
+  describe('leftovers of failed saves', () => {
+    const now = Date.parse('2026-11-01T12:00:00Z');
+    const minutesAgo = (m: number) => `${now - m * 60_000}`;
+
+    it('deletes old uploads that are not in use; keeps the picture in use and recent uploads', async () => {
+      const inUse = `${minutesAgo(60)}.png`;
+      const leftover = `${minutesAgo(30)}.jpg`;
+      const uploading = `${minutesAgo(1)}.webp`; // another save still in progress
+      const { service, files } = storageWith([inUse, leftover, uploading, 'notes.txt']);
+
+      await service.removeLeftoverAvatars(userId, `${publicUrl(inUse)}?v=2`, now);
+
+      expect(files).toEqual([inUse, uploading, 'notes.txt']);
+    });
+
+    it('pages through the whole folder before deleting', async () => {
+      const names = Array.from({ length: 150 }, (_, i) => `${now - (20 + i) * 60_000}.png`);
+      const { service, bucket, files } = storageWith(names);
+
+      await service.removeLeftoverAvatars(userId, publicUrl(names[149]), now);
+
+      expect(bucket.list).toHaveBeenCalledWith(userId, { limit: 100, offset: 100 });
+      expect(bucket.remove).toHaveBeenCalledTimes(1);
+      expect(files).toEqual([names[149]]);
+    });
+
+    it('keeps everything recent when the picture is a preset; logs and never throws', async () => {
+      const { service, bucket, files } = storageWith([`${minutesAgo(2)}.png`]);
+      await service.removeLeftoverAvatars(userId, 'avatar_clinical_teal_01', now);
+      expect(bucket.remove).not.toHaveBeenCalled();
+      expect(files).toHaveLength(1);
+
+      bucket.list.mockResolvedValueOnce({ data: null, error: new Error('storage down') } as any);
+      const warn = vi.spyOn((service as any).logger, 'warn').mockImplementation(() => undefined);
+      await expect(service.removeLeftoverAvatars(userId, null, now)).resolves.toBeUndefined();
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('storage down'));
+    });
   });
 
   it('pages through folders with more pictures than one listing returns', async () => {

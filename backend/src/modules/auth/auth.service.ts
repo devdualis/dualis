@@ -685,8 +685,13 @@ export class AuthService {
     }
     // Delete only the picture this save replaced. Cleaning the whole folder could delete the
     // upload of another save still in progress, which may end up as the picture in use.
-    if (picture !== undefined && replacedPicture && replacedPicture !== updated.picture) {
-      await this.storageService?.removeAvatar(userId, replacedPicture);
+    if (picture !== undefined) {
+      if (replacedPicture && replacedPicture !== updated.picture) {
+        await this.storageService?.removeAvatar(userId, replacedPicture);
+      }
+      // Uploads of saves that failed, or deletes that failed, would otherwise stay in the public
+      // bucket until the account is deleted.
+      await this.storageService?.removeLeftoverAvatars(userId, updated.picture);
     }
 
     return this.sanitize(updated);

@@ -6,6 +6,8 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 const AVATAR_PAGE_SIZE = 100;
 /** Bound on `list` calls per cleanup, so a folder that never empties cannot loop forever. */
 const MAX_AVATAR_PAGES = 20;
+/** Age after which an upload that is not the picture in use is a leftover: no save takes this long. */
+const LEFTOVER_AVATAR_AGE_MS = 10 * 60 * 1000;
 
 @Injectable()
 export class StorageService {
@@ -170,6 +172,55 @@ export class StorageService {
     } catch (err) {
       this.logger.warn(
         `Could not delete an old picture of user ${userId}: ${(err as Error).message}`,
+      );
+    }
+  }
+
+  /**
+   * Deletes uploads left behind in the person's folder (by a save that failed after its upload,
+   * or a failed delete): files named `<upload time>.<ext>` older than LEFTOVER_AVATAR_AGE_MS that
+   * are not `keep`, the picture now in use. A save still in progress uploaded its file seconds
+   * ago, so it is never touched. Failures are logged and never thrown.
+   */
+  async removeLeftoverAvatars(
+    userId: string,
+    keep: string | null | undefined,
+    now = Date.now(),
+  ): Promise<void> {
+    if (!this.supabase) return;
+
+    const folder = `${this.bucketName}/${userId}/`;
+    const keepName = keep?.includes(folder)
+      ? keep.slice(keep.indexOf(folder) + folder.length).split('?')[0]
+      : null;
+    const bucket = this.supabase.storage.from(this.bucketName);
+
+    try {
+      const stale: string[] = [];
+      for (let page = 0; page < MAX_AVATAR_PAGES; page++) {
+        const { data, error } = await bucket.list(userId, {
+          limit: AVATAR_PAGE_SIZE,
+          offset: page * AVATAR_PAGE_SIZE,
+        });
+        if (error) throw error;
+        for (const file of data) {
+          const uploadedAt = /^(\d+)\.(png|jpg|webp)$/.exec(file.name)?.[1];
+          if (
+            file.name !== keepName &&
+            uploadedAt !== undefined &&
+            now - Number(uploadedAt) > LEFTOVER_AVATAR_AGE_MS
+          ) {
+            stale.push(`${userId}/${file.name}`);
+          }
+        }
+        if (data.length < AVATAR_PAGE_SIZE) break;
+      }
+      if (stale.length === 0) return;
+      const { error: removeError } = await bucket.remove(stale);
+      if (removeError) throw removeError;
+    } catch (err) {
+      this.logger.warn(
+        `Could not delete leftover pictures of user ${userId}: ${(err as Error).message}`,
       );
     }
   }

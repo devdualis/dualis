@@ -398,6 +398,7 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
       let storage: {
         processAvatarImage: ReturnType<typeof vi.fn>;
         removeAvatar: ReturnType<typeof vi.fn>;
+        removeLeftoverAvatars: ReturnType<typeof vi.fn>;
         removeAvatars: ReturnType<typeof vi.fn>;
       };
 
@@ -405,6 +406,7 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
         storage = {
           processAvatarImage: vi.fn().mockResolvedValue(newUrl),
           removeAvatar: vi.fn().mockResolvedValue(undefined),
+          removeLeftoverAvatars: vi.fn().mockResolvedValue(undefined),
           removeAvatars: vi.fn().mockResolvedValue(undefined),
         };
         authService = new AuthService(
@@ -425,6 +427,8 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
         expect(storage.processAvatarImage).toHaveBeenCalledWith(userId, newPicture);
         expect(storage.removeAvatar).toHaveBeenCalledTimes(1);
         expect(storage.removeAvatar).toHaveBeenCalledWith(userId, oldUrl);
+        // Leftovers of failed saves go too; the picture now in use stays.
+        expect(storage.removeLeftoverAvatars).toHaveBeenCalledWith(userId, newUrl);
         expect(storage.removeAvatars).not.toHaveBeenCalled();
       });
 
@@ -453,6 +457,7 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
         await expect(authService.updateProfile(userId, { picture: newPicture })).rejects.toThrow(
           UnauthorizedException,
         );
+        expect(storage.removeLeftoverAvatars).not.toHaveBeenCalled();
 
         // The replaced picture is the new one itself (an identical upload): nothing to delete.
         mockTxSelect.mockReturnValue(query([{ picture: newUrl }]));

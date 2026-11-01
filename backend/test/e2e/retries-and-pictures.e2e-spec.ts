@@ -24,6 +24,7 @@ class RecordingStorage {
   async removeAvatar(_userId: string, url: string | null | undefined): Promise<void> {
     if (url) this.removed.push(url);
   }
+  async removeLeftoverAvatars(): Promise<void> {}
   async removeAvatars(): Promise<void> {}
 }
 
