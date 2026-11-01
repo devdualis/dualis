@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/security/secure_storage_service.dart';
+import '../../home/domain/home_greeting.dart' show homeClockProvider;
 import '../../profile/domain/models/profile.dart';
 import '../../profile/presentation/controllers/active_profile_controller.dart';
 import '../domain/models/habit_day.dart';
@@ -21,14 +23,39 @@ class HabitsRepositoryImpl implements HabitsRepository {
   final SecureStorageService _storage;
   final HabitsRemoteDataSource? _remoteDataSource;
   final Ref? _ref;
+  final DateTime Function()? _clock;
 
   HabitsRepositoryImpl({
     required SecureStorageService storage,
     HabitsRemoteDataSource? remoteDataSource,
     Ref? ref,
+    DateTime Function()? clock,
   })  : _storage = storage,
         _remoteDataSource = remoteDataSource,
-        _ref = ref;
+        _ref = ref,
+        _clock = clock;
+
+  DateTime get _now {
+    if (_clock != null) return _clock();
+    if (_ref != null) {
+      try {
+        return _ref.read(homeClockProvider)();
+      } catch (_) {}
+    }
+    return DateTime.now();
+  }
+
+  static String _formatDay(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  bool _isClientError(Object e) {
+    if (e is HabitClientException) return true;
+    if (e is DioException) {
+      final status = e.response?.statusCode;
+      return status != null && status >= 400 && status < 500;
+    }
+    return false;
+  }
 
   Profile? get _activeProfile =>
       _ref?.read(activeProfileControllerProvider).activeProfile;
@@ -116,11 +143,20 @@ class HabitsRepositoryImpl implements HabitsRepository {
     for (final day in pending) {
       final habit = store[day];
       if (habit != null) {
-        final saved = await remote.saveHabitDay(day, habit, profileId: profileId);
-        if (saved == null) {
-          remaining.add(day);
-        } else {
-          store[day] = saved;
+        try {
+          final saved = await remote.saveHabitDay(day, habit, profileId: profileId);
+          if (saved == null) {
+            remaining.add(day);
+          } else {
+            store[day] = saved;
+          }
+        } catch (e) {
+          if (_isClientError(e)) {
+            // 4xx validation error: drop from pending and remove invalid local state
+            store.remove(day);
+          } else {
+            remaining.add(day);
+          }
         }
       }
     }
@@ -142,24 +178,41 @@ class HabitsRepositoryImpl implements HabitsRepository {
           profileId: profileId,
         );
         if (remoteDays != null) {
-          final store = await _readLocalStore(pk);
+          final oldStore = await _readLocalStore(pk);
           final pending = await _readPending(pk);
+          final newStore = <String, HabitDay>{};
+
+          // Server is source of truth: rebuild from server days...
           for (final rd in remoteDays) {
-            if (!pending.contains(rd.day)) {
-              store[rd.day] = rd;
+            newStore[rd.day] = rd;
+          }
+
+          // ...plus locally pending days only (pending un-synced offline writes)
+          for (final pDay in pending) {
+            final pendingHabit = oldStore[pDay];
+            if (pendingHabit != null) {
+              newStore[pDay] = pendingHabit;
             }
           }
-          await _writeLocalStore(pk, store);
+
+          await _writeLocalStore(pk, newStore);
         }
       } catch (_) {}
     }
 
     final store = await _readLocalStore(pk);
-    final list = store.values.toList();
+
+    // Only return days inside the window: day >= local today minus (days-1)
+    final now = _now;
+    final today = DateTime(now.year, now.month, now.day);
+    final cutoff = today.subtract(Duration(days: days - 1));
+    final cutoffStr = _formatDay(cutoff);
+    final todayStr = _formatDay(today);
+
+    final list = store.values
+        .where((h) => h.day.compareTo(cutoffStr) >= 0 && h.day.compareTo(todayStr) <= 0)
+        .toList();
     list.sort((a, b) => b.day.compareTo(a.day)); // newest first
-    if (list.length > days) {
-      return list.sublist(0, days);
-    }
     return list;
   }
 
@@ -174,10 +227,13 @@ class HabitsRepositoryImpl implements HabitsRepository {
   Future<HabitDay> saveHabitDay(HabitDay habitDay, {String? profileId}) async {
     final pk = _profileKey(profileId);
     final store = await _readLocalStore(pk);
+    final serverState = store[habitDay.day]; // previous state before this write
+
     store[habitDay.day] = habitDay;
     await _writeLocalStore(pk, store);
 
     var synced = false;
+    var clientError = false;
     final remote = _remoteDataSource;
     if (remote != null) {
       try {
@@ -191,11 +247,22 @@ class HabitsRepositoryImpl implements HabitsRepository {
           store[habitDay.day] = result;
           await _writeLocalStore(pk, store);
         }
-      } catch (_) {}
+      } catch (e) {
+        if (_isClientError(e)) {
+          clientError = true;
+          // Revert to server state
+          if (serverState != null) {
+            store[habitDay.day] = serverState;
+          } else {
+            store.remove(habitDay.day);
+          }
+          await _writeLocalStore(pk, store);
+        }
+      }
     }
 
     final pending = await _readPending(pk);
-    if (synced) {
+    if (synced || clientError) {
       pending.remove(habitDay.day);
     } else {
       pending.add(habitDay.day);
@@ -227,7 +294,7 @@ class HabitsRepositoryImpl implements HabitsRepository {
   Future<bool> getTrackMenstrualCycleSetting({String? profileId}) async {
     final pk = _profileKey(profileId);
     final val = await _storage.read(key: _cycleKey(pk));
-    return val == 'true';
+    return val == '1' || val == 'true';
   }
 
   @override
@@ -236,16 +303,16 @@ class HabitsRepositoryImpl implements HabitsRepository {
     String? profileId,
   }) async {
     final pk = _profileKey(profileId);
-    await _storage.write(key: _cycleKey(pk), value: enabled ? 'true' : 'false');
+    await _storage.write(key: _cycleKey(pk), value: enabled ? '1' : '0');
   }
 }
 
 final habitsRepositoryProvider = Provider<HabitsRepository>((ref) {
   final storage = ref.watch(secureStorageServiceProvider);
-  final remoteDataSource = ref.watch(habitsRemoteDataSourceProvider);
+  final remote = ref.watch(habitsRemoteDataSourceProvider);
   return HabitsRepositoryImpl(
     storage: storage,
-    remoteDataSource: remoteDataSource,
+    remoteDataSource: remote,
     ref: ref,
   );
 });

@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/habits/data/habits_remote_data_source.dart';
 import 'package:dualis_mobile/features/habits/data/habits_repository.dart';
 import 'package:dualis_mobile/features/habits/domain/models/habit_day.dart';
+import 'package:dualis_mobile/features/home/domain/home_greeting.dart' show homeClockProvider;
 import 'package:dualis_mobile/features/profile/presentation/controllers/active_profile_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -33,6 +35,7 @@ void main() {
   late _MemStorage storage;
   late HabitsRepositoryImpl repository;
   late ProviderContainer container;
+  final fixedClock = DateTime(2026, 10, 31, 12, 0);
 
   setUp(() {
     remoteDataSource = MockHabitsRemoteDataSource();
@@ -40,6 +43,7 @@ void main() {
     registerFallbackValue(const HabitDay(day: '2026-10-31'));
     container = ProviderContainer(
       overrides: [
+        homeClockProvider.overrideWithValue(() => fixedClock),
         activeProfileControllerProvider.overrideWith(
           () => _TestActiveProfileController(),
         ),
@@ -49,6 +53,7 @@ void main() {
       remoteDataSource: remoteDataSource,
       storage: storage,
       ref: container.read(_testRefProvider),
+      clock: () => fixedClock,
     );
   });
 
@@ -157,6 +162,142 @@ void main() {
 
       final pending = await repository.getPendingDays();
       expect(pending.contains('2026-10-29'), isFalse);
+    });
+
+    // Orchestrator review note case 1:
+    // getHabits must return only days inside the window (day >= local today minus (days-1)), not newest N
+    test('getHabits returns only days inside the window (day >= local today minus (days-1)), not newest N',
+        () async {
+      // today is 2026-10-31. A 30-day window starts at 2026-10-02 (31 - 29).
+      final insideDays = [
+        const HabitDay(day: '2026-10-31', sleepQuality: HabitSleepQuality.bem),
+        const HabitDay(day: '2026-10-15', sleepQuality: HabitSleepQuality.regular),
+        const HabitDay(day: '2026-10-02', sleepQuality: HabitSleepQuality.bem),
+      ];
+      final outsideDays = [
+        const HabitDay(day: '2026-10-01', sleepQuality: HabitSleepQuality.mal),
+        const HabitDay(day: '2026-09-15', sleepQuality: HabitSleepQuality.mal),
+      ];
+
+      when(() => remoteDataSource.getHabits(days: 30))
+          .thenAnswer((_) async => [...insideDays, ...outsideDays]);
+
+      final result = await repository.getHabits(days: 30);
+
+      expect(result.map((h) => h.day).toList(), equals([
+        '2026-10-31',
+        '2026-10-15',
+        '2026-10-02',
+      ]));
+      expect(result.any((h) => h.day == '2026-10-01'), isFalse);
+      expect(result.any((h) => h.day == '2026-09-15'), isFalse);
+    });
+
+    // Orchestrator review note case 2:
+    // Server is source of truth: rebuild local store from server days plus locally pending days only
+    test('rebuilds local store from server days plus locally pending days only (deleted day disappears)',
+        () async {
+      // Pre-populate local cache with 2 days
+      // 1) 2026-10-25 (synced)
+      // 2) 2026-10-26 (pending offline change)
+      when(() => remoteDataSource.saveHabitDay('2026-10-25', any()))
+          .thenAnswer((_) async => const HabitDay(day: '2026-10-25'));
+      when(() => remoteDataSource.saveHabitDay('2026-10-26', any()))
+          .thenAnswer((_) async => null); // offline
+
+      await repository.saveHabitDay(const HabitDay(day: '2026-10-25', sleepQuality: HabitSleepQuality.bem));
+      await repository.saveHabitDay(const HabitDay(day: '2026-10-26', sleepQuality: HabitSleepQuality.mal));
+
+      final pending = await repository.getPendingDays();
+      expect(pending.contains('2026-10-26'), isTrue);
+      expect(pending.contains('2026-10-25'), isFalse);
+
+      // Now server is read. On another device, 2026-10-25 was deleted.
+      // Server returns only 2026-10-31 and 2026-10-30.
+      when(() => remoteDataSource.saveHabitDay('2026-10-26', any()))
+          .thenAnswer((_) async => null); // still offline for 2026-10-26 sync
+      when(() => remoteDataSource.getHabits(days: 30)).thenAnswer((_) async => [
+            const HabitDay(day: '2026-10-31', sleepQuality: HabitSleepQuality.bem),
+            const HabitDay(day: '2026-10-30', sleepQuality: HabitSleepQuality.regular),
+          ]);
+
+      final habits = await repository.getHabits(days: 30);
+
+      // 2026-10-25 was deleted on server and not pending locally -> disappeared!
+      expect(await repository.getHabitForDay('2026-10-25'), isNull);
+      expect(habits.any((h) => h.day == '2026-10-25'), isFalse);
+
+      // 2026-10-26 was pending locally -> retained!
+      expect(await repository.getHabitForDay('2026-10-26'), isNotNull);
+
+      // Server days are present
+      expect(await repository.getHabitForDay('2026-10-31'), isNotNull);
+      expect(await repository.getHabitForDay('2026-10-30'), isNotNull);
+    });
+
+    // Orchestrator review note case 3:
+    // A 4xx answer from PUT (validation) must not stay pending forever: drop from pending and keep server state
+    test('a 4xx answer from PUT drops day from pending and keeps server state',
+        () async {
+      // 1. Initial state from server
+      const serverHabit = HabitDay(
+        day: '2026-10-30',
+        sleepQuality: HabitSleepQuality.bem,
+      );
+      when(() => remoteDataSource.getHabits(days: 30))
+          .thenAnswer((_) async => [serverHabit]);
+      await repository.getHabits(days: 30);
+
+      expect((await repository.getHabitForDay('2026-10-30'))?.sleepQuality,
+          equals(HabitSleepQuality.bem));
+
+      // 2. User tries to save an invalid habit that triggers 4xx validation error
+      const invalidHabit = HabitDay(
+        day: '2026-10-30',
+        sleepQuality: HabitSleepQuality.mal,
+      );
+      when(() => remoteDataSource.saveHabitDay('2026-10-30', any()))
+          .thenThrow(HabitClientException(400, 'Invalid parameters'));
+
+      final returned = await repository.saveHabitDay(invalidHabit);
+
+      // 3. Must be dropped from pending (never retried forever)
+      final pending = await repository.getPendingDays();
+      expect(pending.contains('2026-10-30'), isFalse);
+
+      // 4. Server state is retained
+      expect(returned.sleepQuality, equals(HabitSleepQuality.bem));
+      final stored = await repository.getHabitForDay('2026-10-30');
+      expect(stored?.sleepQuality, equals(HabitSleepQuality.bem));
+    });
+
+    test('syncPending drops 4xx rejected day from pending queue', () async {
+      // Save offline first
+      when(() => remoteDataSource.saveHabitDay('2026-10-30', any()))
+          .thenAnswer((_) async => null);
+
+      await repository.saveHabitDay(const HabitDay(
+        day: '2026-10-30',
+        sleepQuality: HabitSleepQuality.mal,
+      ));
+
+      expect((await repository.getPendingDays()).contains('2026-10-30'), isTrue);
+
+      // On sync, server rejects with 422
+      when(() => remoteDataSource.saveHabitDay('2026-10-30', any())).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: '/v1/habits/2026-10-30'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/v1/habits/2026-10-30'),
+            statusCode: 422,
+          ),
+        ),
+      );
+
+      await repository.syncPending();
+
+      // Dropped from pending
+      expect((await repository.getPendingDays()).contains('2026-10-30'), isFalse);
     });
   });
 }
