@@ -107,6 +107,10 @@ class JournalEntryView {
   /// `emotional`, `physical` or null (entries saved before journal v2.1).
   final String? area;
   final List<String> triggers;
+
+  /// Closing answers of a "não tão bem" entry (v2.2); null / [] otherwise.
+  final String? coping;
+  final List<String> helpers;
   final bool legacy;
   final List<JournalItemView> items;
   final bool pendingSync;
@@ -117,6 +121,8 @@ class JournalEntryView {
     this.mood,
     this.area,
     this.triggers = const [],
+    this.coping,
+    this.helpers = const [],
     this.legacy = false,
     this.items = const [],
     this.pendingSync = false,
@@ -126,7 +132,10 @@ class JournalEntryView {
         id: entry.id ?? entry.clientId,
         recordedAt: entry.recordedAt,
         mood: entry.mood,
+        area: entry.area,
         triggers: entry.triggers,
+        coping: entry.coping,
+        helpers: entry.helpers,
         legacy: entry.legacy,
         items: [for (final item in entry.items) JournalItemView.fromItem(item)],
         pendingSync: entry.pendingSync,
@@ -141,6 +150,10 @@ class JournalEntryView {
       mood: json['mood'] as String?,
       area: json['area'] as String?,
       triggers: (json['triggers'] as List<dynamic>? ?? const [])
+          .map((e) => e.toString())
+          .toList(),
+      coping: json['coping'] as String?,
+      helpers: (json['helpers'] as List<dynamic>? ?? const [])
           .map((e) => e.toString())
           .toList(),
       legacy: json['legacy'] as bool? ?? false,
@@ -208,12 +221,22 @@ class JournalSummary {
   final Map<String, int> byTrigger;
   final List<JournalCooccurrence> cooccurrence;
 
+  /// Good moments (v2.2), kept apart from [byTime] and [byOptionKey].
+  final Map<String, int> positiveByTime;
+  final Map<String, int> positiveByOptionKey;
+  final Map<String, int> byCoping;
+  final Map<String, int> byHelper;
+
   const JournalSummary({
     this.byTime = const {},
     this.byRegion = const {},
     this.byOptionKey = const {},
     this.byTrigger = const {},
     this.cooccurrence = const [],
+    this.positiveByTime = const {},
+    this.positiveByOptionKey = const {},
+    this.byCoping = const {},
+    this.byHelper = const {},
   });
 
   static Map<String, int> _counts(dynamic raw) {
@@ -225,7 +248,13 @@ class JournalSummary {
   }
 
   factory JournalSummary.fromJson(Map<String, dynamic> json) {
+    final positive = json['positive'];
     return JournalSummary(
+      positiveByTime: positive is Map ? _counts(positive['byTime']) : const {},
+      positiveByOptionKey:
+          positive is Map ? _counts(positive['byOptionKey']) : const {},
+      byCoping: _counts(json['byCoping']),
+      byHelper: _counts(json['byHelper']),
       byTime: _counts(json['byTime']),
       byRegion: _counts(json['byRegion']),
       byOptionKey: _counts(json['byOptionKey']),
@@ -246,6 +275,10 @@ class JournalSummary {
     final regionDays = <String, Set<DateTime>>{};
     final optionDays = <String, Set<DateTime>>{};
     final triggerDays = <String, Set<DateTime>>{};
+    final positiveTimeDays = <String, Set<DateTime>>{};
+    final positiveOptionDays = <String, Set<DateTime>>{};
+    final copingDays = <String, Set<DateTime>>{};
+    final helperDays = <String, Set<DateTime>>{};
     void mark(Map<String, Set<DateTime>> map, String key, DateTime day) {
       map.putIfAbsent(key, () => <DateTime>{}).add(day);
     }
@@ -255,6 +288,11 @@ class JournalSummary {
         final key = item.optionKey;
         if (key == null || key.isEmpty) continue;
         final root = key.split('.').first;
+        if (item.kind == 'positive') {
+          mark(positiveTimeDays, root, entry.day);
+          if (!item.isCustom) mark(positiveOptionDays, key, entry.day);
+          continue;
+        }
         if (item.kind == 'emotional') mark(timeDays, root, entry.day);
         if (item.kind == 'physical') mark(regionDays, root, entry.day);
         if (!item.isCustom) mark(optionDays, key, entry.day);
@@ -262,18 +300,19 @@ class JournalSummary {
       for (final t in entry.triggers) {
         mark(triggerDays, t, entry.day);
       }
+      if (entry.coping != null) mark(copingDays, entry.coping!, entry.day);
+      for (final h in entry.helpers) {
+        mark(helperDays, h, entry.day);
+      }
     }
 
-    final byTime = {for (final e in timeDays.entries) e.key: e.value.length};
-    final byRegion = {
-      for (final e in regionDays.entries) e.key: e.value.length,
-    };
-    final byOptionKey = {
-      for (final e in optionDays.entries) e.key: e.value.length,
-    };
-    final byTrigger = {
-      for (final e in triggerDays.entries) e.key: e.value.length,
-    };
+    Map<String, int> days(Map<String, Set<DateTime>> map) => {
+          for (final e in map.entries) e.key: e.value.length,
+        };
+    final byTime = days(timeDays);
+    final byRegion = days(regionDays);
+    final byOptionKey = days(optionDays);
+    final byTrigger = days(triggerDays);
 
     // Pairs of markers recorded on the same day, counted in days.
     final pairs = <JournalCooccurrence>[];
@@ -300,6 +339,10 @@ class JournalSummary {
       byOptionKey: byOptionKey,
       byTrigger: byTrigger,
       cooccurrence: pairs,
+      positiveByTime: days(positiveTimeDays),
+      positiveByOptionKey: days(positiveOptionDays),
+      byCoping: days(copingDays),
+      byHelper: days(helperDays),
     );
   }
 

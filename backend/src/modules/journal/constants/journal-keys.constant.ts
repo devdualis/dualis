@@ -8,15 +8,16 @@
 export const EMOTIONAL_TREE = {
   passado: {
     tristeza: ['culpa', 'saudade'],
-    memoria: ['lembranca', 'magoa'],
+    memoria: ['lembranca', 'magoa', 'vergonha'],
   },
   presente: {
-    energia: ['corpo', 'desligado'],
-    sobrecarga: ['paciencia', 'aperto'],
+    energia: ['corpo', 'desligado', 'concentracao'],
+    sobrecarga: ['paciencia', 'aperto', 'muita_coisa', 'inquieto'],
+    solidao: ['sozinho', 'menos'],
   },
   futuro: {
-    mente: ['antecipar', 'cobranca'],
-    medo: ['julgamento', 'desanimo'],
+    mente: ['antecipar', 'cobranca', 'indecisao'],
+    medo: ['julgamento', 'desanimo', 'evitar'],
   },
 } as const;
 
@@ -28,6 +29,7 @@ export const PHYSICAL_TREE = {
   cabeca: {
     pressao: ['temporas', 'latejando'],
     sentidos: ['garganta', 'olhos'], // front only
+    rosto: ['tontura', 'nariz', 'ouvido', 'mandibula'], // front only
     nuca: ['rigida', 'pontada'], // back only
   },
   peito: {
@@ -36,7 +38,8 @@ export const PHYSICAL_TREE = {
   },
   barriga: {
     queimacao: ['subindo', 'enjoo'],
-    colica: ['gases', 'pontadas'],
+    colica: ['gases', 'pontadas', 'menstrual'],
+    intestino: ['preso', 'solto'],
   },
   costas: {
     rigidez: ['ombros', 'lombar'],
@@ -86,7 +89,16 @@ export const EMOTIONAL_OPTION_KEYS: readonly string[] = flatten(EMOTIONAL_TREE);
 /** Every accepted physical optionKey, custom keys included. */
 export const PHYSICAL_OPTION_KEYS: readonly string[] = flatten(PHYSICAL_TREE);
 
-export const ITEM_KINDS = ['emotional', 'physical', 'condition'] as const;
+export const POSITIVE_TREE = {
+  passado: { gratidao: ['alguem', 'algo'], orgulho: ['conquista', 'resolvi'] },
+  presente: { calma: ['paz', 'descansado'], conexao: ['pessoas', 'foco'] },
+  futuro: { animo: ['planos', 'esperanca'], confianca: ['confiante', 'preparado'] },
+} as const;
+export const POSITIVE_OPTION_KEYS: readonly string[] = flatten(POSITIVE_TREE);
+export const COPING_KEYS = ['consegui', 'esperei', 'dificil'] as const;
+export const HELPER_KEYS = ['mexer_corpo', 'conversar', 'pausa', 'lazer', 'descansar', 'nada_ainda'] as const;
+
+export const ITEM_KINDS = ['emotional', 'physical', 'condition', 'positive'] as const;
 export type JournalItemKind = (typeof ITEM_KINDS)[number];
 
 export const BODY_SIDES = ['front', 'back'] as const;
@@ -98,7 +110,7 @@ export const WHOLE_BODY_REGIONS: readonly PhysicalRegion[] = ['pele', 'musculos'
 /** Region -> branches shown on each side of the body map. `<region>.custom` follows its region. */
 export const PHYSICAL_SIDE_BRANCHES: Record<BodySide, Partial<Record<PhysicalRegion, readonly string[]>>> = {
   front: {
-    cabeca: ['pressao', 'sentidos'],
+    cabeca: ['pressao', 'sentidos', 'rosto'],
     peito: Object.keys(PHYSICAL_TREE.peito),
     barriga: Object.keys(PHYSICAL_TREE.barriga),
     membros: Object.keys(PHYSICAL_TREE.membros),
@@ -139,6 +151,9 @@ export const TRIGGER_KEYS = [
   'trabalho',
   'familia',
   'sono',
+  'dinheiro',
+  'telas',
+  'ciclo',
   'alimentacao',
   'esforco',
   'queda',

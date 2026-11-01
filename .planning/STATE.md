@@ -5,7 +5,7 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-11-01T01:18:40.178Z"
+last_updated: "2026-11-01T02:55:47.360Z"
 last_activity: 2026-10-31
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
 state_head: 0209c51a7b7f2643218121ff28bc2d5ddec1cd15
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-10-31 - Completed quick task 261031-uso: Profiles and safety-event sweep fixes (help-event logs, own-profile filing, no profile picture links)
+Last activity: 2026-10-31 - Completed quick task 261031-vhh: Journal v2.2 wellness questions and daily habits
 
 Progress: [██████████] 100%
 
@@ -136,6 +136,7 @@ None yet.
 | 261031-u8e | Security sweep fixes: old profile pictures deleted on change and on account deletion (no links in logs), safety-event calls capped with 429, Android build token read-only | 2026-10-31 | 3d3f804 | [261031-u8e-security-sweep-fixes-delete-avatar-files](./quick/261031-u8e-security-sweep-fixes-delete-avatar-files/) |
 | 261031-u9e | Varredura de segurança (legal): códigos de e-mail ficam na memória só nos testes; a exportação de dados (LGPD) inclui Meus cuidados (registros e documentos, sem os arquivos originais) | 2026-10-31 | f046d08 | [261031-u9e-keep-email-codes-in-memory-only-in-tests](./quick/261031-u9e-keep-email-codes-in-memory-only-in-tests/) |
 | 261031-uso | Profiles and safety-event sweep fixes: help-event logs keep only the action, help events stay on the caller's own profiles, profiles take and return no picture link | 2026-10-31 | 0209c51 | [261031-uso-close-profiles-and-safety-event-sweep-fi](./quick/261031-uso-close-profiles-and-safety-event-sweep-fi/) |
+| 261031-vhh | Journal v2.2: good moments, more options, closing questions, sleep/movement/cycle habits (multi-agent: Codex, Cursor, Gemini) | 2026-10-31 | 4516fef | [261031-vhh-journal-v2-2-more-wellness-questions](./quick/261031-vhh-journal-v2-2-more-wellness-questions/) |
 
 ## Deferred Items
 

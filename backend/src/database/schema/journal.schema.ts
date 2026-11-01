@@ -54,6 +54,8 @@ export const journalEntries = pgTable(
     recordedAt: timestamp('recorded_at', { withTimezone: true }).notNull(),
     mood: text('mood').notNull(),
     area: text('area'), // 'emotional' | 'physical'; null on entries saved before v2.1
+    coping: text('coping'),
+    helpers: text('helpers').array().default(sql`'{}'::text[]`).notNull(),
     triggers: text('triggers').array().default(sql`'{}'::text[]`).notNull(),
     triggerNote: text('trigger_note'), // encrypted
     note: text('note'), // encrypted
@@ -64,6 +66,7 @@ export const journalEntries = pgTable(
   (table) => [
     index('idx_journal_entries_profile_recorded').on(table.profileId, table.recordedAt.desc()),
     unique('journal_entries_profile_client_id_unique').on(table.profileId, table.clientId),
+    check('journal_entries_coping_check', sql`${table.coping} IS NULL OR ${table.coping} IN ('consegui', 'esperei', 'dificil')`),
     check('journal_entries_mood_check', sql`${table.mood} IN ('bem', 'normal', 'nao_tao_bem')`),
     check('journal_entries_area_check', sql`${table.area} IS NULL OR ${table.area} IN ('emotional', 'physical')`),
     pgPolicy('journal_entries_profile_select', {
@@ -105,12 +108,13 @@ export const journalItems = pgTable(
   (table) => [
     index('idx_journal_items_entry').on(table.entryId),
     index('idx_journal_items_condition').on(table.conditionId),
-    check('journal_items_kind_check', sql`${table.kind} IN ('emotional', 'physical', 'condition')`),
+    check('journal_items_kind_check', sql`${table.kind} IN ('emotional', 'physical', 'condition', 'positive')`),
     check(
       'journal_items_shape_check',
       sql`(${table.kind} = 'condition' AND ${table.conditionId} IS NOT NULL AND ${table.optionKey} IS NULL AND ${table.customLabel} IS NULL)
-        OR (${table.kind} IN ('emotional', 'physical') AND ${table.optionKey} IS NOT NULL AND ${table.conditionId} IS NULL)`,
+        OR (${table.kind} IN ('emotional', 'physical', 'positive') AND ${table.optionKey} IS NOT NULL AND ${table.conditionId} IS NULL)`,
     ),
+    check('journal_items_positive_check', sql`${table.kind} <> 'positive' OR (${table.intensity} IS NULL AND ${table.persistence} IS NULL AND ${table.bodySide} IS NULL AND ${table.sensation} IS NULL)`),
     check('journal_items_body_side_check', sql`${table.bodySide} IS NULL OR ${table.bodySide} IN ('front', 'back')`),
     check(
       'journal_items_sensation_check',

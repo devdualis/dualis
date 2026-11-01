@@ -19,6 +19,7 @@ import '../../features/privacy/presentation/screens/terms_of_service_screen.dart
 import '../../features/privacy/presentation/screens/privacy_policy_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/hydration/presentation/screens/hydration_dashboard_screen.dart';
+import '../../features/habits/presentation/screens/habits_screen.dart';
 import '../../features/profile/presentation/screens/family_sharing_screen.dart';
 import '../../features/library/presentation/library_screen.dart';
 import '../../features/care/presentation/care_routes.dart';
@@ -175,6 +176,11 @@ GoRouter createRouter({
         path: RoutePaths.hydration,
         name: 'hydration',
         builder: (context, state) => const HydrationDashboardScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.habits,
+        name: 'habits',
+        builder: (context, state) => const HabitsScreen(),
       ),
       GoRoute(
         path: RoutePaths.familySharing,

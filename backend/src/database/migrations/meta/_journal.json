@@ -190,6 +190,13 @@
       "when": 1790361574100,
       "tag": "0025_hydration_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1790361574101,
+      "tag": "0026_journal_v2_2_wellness",
+      "breakpoints": true
     }
   ]
 }

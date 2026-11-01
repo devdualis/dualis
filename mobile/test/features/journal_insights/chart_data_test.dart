@@ -10,38 +10,69 @@ import 'package:dualis_mobile/l10n/app_localizations.dart';
 void main() {
   final l10n = lookupAppLocalizations(const Locale('pt'));
 
-  JournalEntryView e(String id, DateTime at, List<JournalItemView> items,
-          {String? mood}) =>
-      JournalEntryView(id: id, recordedAt: at, items: items, mood: mood);
+  JournalEntryView e(
+    String id,
+    DateTime at,
+    List<JournalItemView> items, {
+    String? mood,
+  }) => JournalEntryView(id: id, recordedAt: at, items: items, mood: mood);
 
   JournalItemView emo(String key, int? intensity) =>
       JournalItemView(kind: 'emotional', optionKey: key, intensity: intensity);
 
   JournalItemView phy(String key, int? intensity, {String? side}) =>
       JournalItemView(
-          kind: 'physical', optionKey: key, intensity: intensity, bodySide: side);
+        kind: 'physical',
+        optionKey: key,
+        intensity: intensity,
+        bodySide: side,
+      );
 
   DateTime at(int day, [int hour = 10]) => DateTime(2026, 10, day, hour);
 
   group('E1 · pizza temporal', () {
-    test('2 Passado + 1 Presente + 1 Futuro + 2 sem eixo = 50/25/25 over 4',
-        () {
+    test(
+      '2 Passado + 1 Presente + 1 Futuro + 2 sem eixo = 50/25/25 over 4',
+      () {
+        final entries = [
+          e('a', at(1), [emo('passado.memoria.magoa', 5)]),
+          e('b', at(2), [emo('passado.memoria.magoa', 1)]),
+          e('c', at(3), [emo('presente.energia.desligado', 3)]),
+          e('d', at(4), [emo('futuro.mente.cobranca', null)]),
+          e('e', at(5), const [], mood: 'bem'),
+          e('f', at(6), const [], mood: 'normal'),
+        ];
+        final pie = TemporalPie.compute(
+          emotionalPoints(l10n, entries),
+          entries,
+        );
+        expect(pie.counts, {'passado': 2, 'presente': 1, 'futuro': 1});
+        expect(pie.total, 4);
+        expect(pie.withoutAxis, 2);
+        expect(
+          pie.counts.containsKey('presente') && pie.counts['presente'] == 1,
+          isTrue,
+          reason: 'Bem/Normal without axis never becomes Presente',
+        );
+        expect(pie.top['passado']!.count, 2);
+        expect(pie.top['passado']!.answers, ['Fico remoendo mágoas antigas']);
+      },
+    );
+
+    test('a "Bem" entry with good moments is not counted outside the pie', () {
       final entries = [
-        e('a', at(1), [emo('passado.memoria.magoa', 5)]),
-        e('b', at(2), [emo('passado.memoria.magoa', 1)]),
-        e('c', at(3), [emo('presente.energia.desligado', 3)]),
-        e('d', at(4), [emo('futuro.mente.cobranca', null)]),
-        e('e', at(5), const [], mood: 'bem'),
-        e('f', at(6), const [], mood: 'normal'),
+        e('a', at(1), [emo('passado.memoria.magoa', 3)]),
+        e('b', at(2), const [
+          JournalItemView(
+            kind: 'positive',
+            optionKey: 'passado.gratidao.alguem',
+          ),
+        ], mood: 'bem'),
+        e('c', at(3), const [], mood: 'bem'),
       ];
       final pie = TemporalPie.compute(emotionalPoints(l10n, entries), entries);
-      expect(pie.counts, {'passado': 2, 'presente': 1, 'futuro': 1});
-      expect(pie.total, 4);
-      expect(pie.withoutAxis, 2);
-      expect(pie.counts.containsKey('presente') && pie.counts['presente'] == 1,
-          isTrue, reason: 'Bem/Normal without axis never becomes Presente');
-      expect(pie.top['passado']!.count, 2);
-      expect(pie.top['passado']!.answers, ['Fico remoendo mágoas antigas']);
+      expect(pie.counts, {'passado': 1});
+      expect(pie.withoutAxis, 1, reason: 'only the "Só registrar" entry');
     });
 
     test('ties list every tied answer', () {
@@ -56,57 +87,68 @@ void main() {
   });
 
   group('E2/E3/F2/F3 · séries', () {
-    test('two records of one day stay apart; a day without record breaks the line',
-        () {
-      final points = emotionalPoints(l10n, [
-        e('a', at(1, 9), [emo('futuro.mente.cobranca', 2)]),
-        e('b', at(1, 18), [emo('futuro.medo.desanimo', 4)]),
-        e('c', at(2), [emo('futuro.mente.cobranca', 3)]),
-        e('d', at(4), [emo('futuro.mente.cobranca', 1)]),
-        e('e', at(5), [emo('futuro.mente.cobranca', null)]),
-      ]);
-      final runs = seriesRuns(points);
-      expect(runs.map((r) => r.length), [3, 1]);
-      expect(runs.first[0].at.hour, 9);
-      expect(runs.first[1].at.hour, 18);
-      // Missing intensity never becomes a point.
-      expect(runs.expand((r) => r).any((p) => p.intensity == null), isFalse);
-    });
+    test(
+      'two records of one day stay apart; a day without record breaks the line',
+      () {
+        final points = emotionalPoints(l10n, [
+          e('a', at(1, 9), [emo('futuro.mente.cobranca', 2)]),
+          e('b', at(1, 18), [emo('futuro.medo.desanimo', 4)]),
+          e('c', at(2), [emo('futuro.mente.cobranca', 3)]),
+          e('d', at(4), [emo('futuro.mente.cobranca', 1)]),
+          e('e', at(5), [emo('futuro.mente.cobranca', null)]),
+        ]);
+        final runs = seriesRuns(points);
+        expect(runs.map((r) => r.length), [3, 1]);
+        expect(runs.first[0].at.hour, 9);
+        expect(runs.first[1].at.hour, 18);
+        // Missing intensity never becomes a point.
+        expect(runs.expand((r) => r).any((p) => p.intensity == null), isFalse);
+      },
+    );
 
-    test('branch index drives the symbol: first fork circle, second square', () {
-      final points = physicalPoints(l10n, [
-        e('a', at(1), [
-          phy('costas.rigidez.ombros', 4),
-          phy('costas.fisgada.ao_mexer', 2),
-        ]),
-      ]);
-      expect(points.map((p) => p.branchIndex), [0, 1]);
-      expect(points.map((p) => p.id).toSet().length, 2);
-    });
+    test(
+      'branch index drives the symbol: first fork circle, second square',
+      () {
+        final points = physicalPoints(l10n, [
+          e('a', at(1), [
+            phy('costas.rigidez.ombros', 4),
+            phy('costas.fisgada.ao_mexer', 2),
+          ]),
+        ]);
+        expect(points.map((p) => p.branchIndex), [0, 1]);
+        expect(points.map((p) => p.id).toSet().length, 2);
+      },
+    );
   });
 
   group('F1 · mapa corporal', () {
-    test('three Costas marks on one day: one day on the marker, three marks',
-        () {
-      final summaries = regionSummaries(physicalPoints(l10n, [
-        e('a', at(3, 8), [phy('costas.rigidez.ombros', 4, side: 'back')]),
-        e('b', at(3, 12), [phy('costas.rigidez.ombros', 3, side: 'back')]),
-        e('c', at(3, 20), [phy('costas.fisgada.irradia', 2)]),
-      ]));
-      final costas = summaries.single;
-      expect(costas.days, 1);
-      expect(costas.marks.length, 3);
-      expect(costas.byView, {'back': 2, null: 1});
-      expect(costas.top!.count, 2);
-      expect(costas.mapView, 'back');
-    });
+    test(
+      'three Costas marks on one day: one day on the marker, three marks',
+      () {
+        final summaries = regionSummaries(
+          physicalPoints(l10n, [
+            e('a', at(3, 8), [phy('costas.rigidez.ombros', 4, side: 'back')]),
+            e('b', at(3, 12), [phy('costas.rigidez.ombros', 3, side: 'back')]),
+            e('c', at(3, 20), [phy('costas.fisgada.irradia', 2)]),
+          ]),
+        );
+        final costas = summaries.single;
+        expect(costas.days, 1);
+        expect(costas.marks.length, 3);
+        expect(costas.byView, {'back': 2, null: 1});
+        expect(costas.top!.count, 2);
+        expect(costas.mapView, 'back');
+      },
+    );
 
     test('a region in both views counts the union of days', () {
-      final summaries = regionSummaries(physicalPoints(l10n, [
-        e('a', at(1), [phy('cabeca.pressao.temporas', 2, side: 'front')]),
-        e('b', at(1), [phy('cabeca.nuca.rigida', 3, side: 'back')]),
-        e('c', at(2), [phy('cabeca.nuca.rigida', 3, side: 'back')]),
-      ]));
+      final summaries = regionSummaries(
+        physicalPoints(l10n, [
+          e('a', at(1), [phy('cabeca.pressao.temporas', 2, side: 'front')]),
+          e('b', at(1), [phy('cabeca.nuca.rigida', 3, side: 'back')]),
+          e('c', at(2), [phy('cabeca.nuca.rigida', 3, side: 'back')]),
+        ]),
+      );
       expect(summaries.single.days, 2);
       expect(summaries.single.mapView, 'front');
     });
@@ -146,7 +188,10 @@ void main() {
 
   group('H1–H4 · água', () {
     WaterIntakeEntry log(int ml, int hour) => WaterIntakeEntry(
-        userId: 'u', amountMl: ml, timestamp: DateTime(2026, 10, 15, hour));
+      userId: 'u',
+      amountMl: ml,
+      timestamp: DateTime(2026, 10, 15, hour),
+    );
 
     test('200 + 500 + 300 = 1.000 ml, 50% of 2.000; 2.400 keeps 120%', () {
       final steps = waterSteps([log(300, 13), log(200, 8), log(500, 10)]);
@@ -170,4 +215,45 @@ void main() {
     });
   });
 
+  group('v2.2 · momentos bons', () {
+    JournalItemView good(String key) =>
+        JournalItemView(kind: 'positive', optionKey: key);
+
+    test('good moments are their own points and never emotional ones', () {
+      final entries = [
+        e('a', at(1), [
+          good('presente.calma.paz'),
+          good('presente.conexao.foco'),
+        ], mood: 'bem'),
+        e('b', at(2), [emo('futuro.mente.cobranca', 3)]),
+      ];
+      final positive = positivePoints(l10n, entries);
+      expect(positive.map((p) => p.answerKey), [
+        'presente.calma.paz',
+        'presente.conexao.foco',
+      ]);
+      expect(positive.every((p) => p.positive && p.intensity == null), isTrue);
+      expect(positive.first.branchKey, 'presente.calma');
+      expect(positive.first.answer, 'Em paz, tranquilo(a)');
+      expect(emotionalPoints(l10n, entries).map((p) => p.answerKey), [
+        'futuro.mente.cobranca',
+      ]);
+    });
+
+    test('calendar marks the day with good moments', () {
+      final entries = [
+        e('a', at(1), [good('passado.gratidao.alguem')], mood: 'bem'),
+      ];
+      final days = calendarDays(
+        emotional: emotionalPoints(l10n, entries),
+        physical: physicalPoints(l10n, entries),
+        positive: positivePoints(l10n, entries),
+        waterTotals: const {},
+      );
+      final day = days[DateTime(2026, 10, 1)]!;
+      expect(day.positive, hasLength(1));
+      expect(day.emotional, isEmpty);
+      expect(day.isEmpty, isFalse);
+    });
+  });
 }

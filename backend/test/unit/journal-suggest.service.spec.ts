@@ -87,7 +87,7 @@ describe('JournalSuggestService', () => {
   });
 
   it('only offers the options of the branch on screen', async () => {
-    expect(catalogKeys('emotional', 'futuro.mente')).toEqual(['futuro.mente.antecipar', 'futuro.mente.cobranca']);
+    expect(catalogKeys('emotional', 'futuro.mente')).toEqual(['futuro.mente.antecipar', 'futuro.mente.cobranca', 'futuro.mente.indecisao']);
     const generateJson = vi.fn().mockResolvedValue({ optionKey: 'futuro.medo.desanimo' });
     const service = new JournalSuggestService({ isAvailable: true, generateJson } as any);
 
@@ -95,6 +95,7 @@ describe('JournalSuggestService', () => {
     expect(generateJson.mock.calls[0][0].schema.properties.optionKey.enum).toEqual([
       'futuro.mente.antecipar',
       'futuro.mente.cobranca',
+      'futuro.mente.indecisao',
       'none',
     ]);
 
@@ -102,4 +103,13 @@ describe('JournalSuggestService', () => {
     expect(await service.suggest('dor', 'physical', 'nada.disso')).toEqual({ optionKey: null });
     expect(generateJson).not.toHaveBeenCalled();
   });
+});
+
+
+it('never receives or suggests positive items and includes new side-aware chips', () => {
+  expect(catalogKeys('positive' as any)).toEqual([]);
+  expect(catalogKeys('emotional', 'presente.calma')).toEqual([]);
+  expect(catalogKeys('emotional', 'presente.solidao')).toEqual(['presente.solidao.sozinho', 'presente.solidao.menos']);
+  expect(catalogKeys('physical', 'cabeca.rosto', 'back')).toEqual([]);
+  expect(catalogKeys('physical', 'cabeca.rosto', 'front')).toHaveLength(4);
 });

@@ -5,9 +5,11 @@ import 'package:intl/intl.dart';
 import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../habits/presentation/controllers/habits_controller.dart';
 import '../../../home/domain/home_greeting.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../journal/domain/journal_keys.dart';
+import '../../../journal/presentation/journal_item_text.dart';
 import '../../../journal/presentation/journal_labels.dart';
 import '../../../journal_insights/domain/chart_data.dart';
 import '../../../journal_insights/domain/history_series.dart';
@@ -15,11 +17,13 @@ import '../../../journal_insights/domain/journal_insights_models.dart';
 import '../../../journal_insights/presentation/controllers/journal_insights_controller.dart';
 import '../../../journal_insights/presentation/widgets/body_marker_map.dart';
 import '../../../journal_insights/presentation/widgets/combined_calendar.dart';
+import '../../../journal_insights/presentation/widgets/habits_charts.dart';
 import '../../../journal_insights/presentation/widgets/history_widgets.dart';
 import '../../../journal_insights/presentation/widgets/journal_overview_widgets.dart';
 import '../../../journal_insights/presentation/widgets/record_series_chart.dart';
 import '../../../journal_insights/presentation/widgets/temporal_pie.dart';
 import '../../../journal_insights/presentation/widgets/water_charts.dart';
+import '../../../journal_insights/presentation/widgets/wellbeing_cards.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 
@@ -30,6 +34,7 @@ import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 /// Emoções: E1 pie, E2 lines per time, E3 answers per time.
 /// Corpo: F1 body map, F2 lines per region, F3 answers per region.
 /// Água: H1 ring and H2 steps of the picked day, H3 bars, H4 calendar.
+/// Hábitos: sono, movimento, ciclo menstrual (contagens apenas).
 /// Juntos: C1 combined calendar. No crossing of times × regions.
 class HistoricalDashboardScreen extends ConsumerWidget {
   final bool isEmbedded;
@@ -108,7 +113,7 @@ class HistoricalDashboardScreen extends ConsumerWidget {
   }
 }
 
-enum HistoryTab { emotions, body, water, together }
+enum HistoryTab { emotions, body, water, habits, together }
 
 class _DashboardBody extends ConsumerStatefulWidget {
   final JournalInsightsState state;
@@ -150,6 +155,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
             (HistoryTab.emotions, l10n.gxTabEmotions),
             (HistoryTab.body, l10n.gxTabBody),
             (HistoryTab.water, l10n.gxTabWater),
+            (HistoryTab.habits, l10n.habitsChartTitle),
             (HistoryTab.together, l10n.gxTabTogether),
           ],
           selected: _tab,
@@ -175,15 +181,27 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
           HistoryTab.emotions => _emotionsTab(l10n, entries, start),
           HistoryTab.body => _bodyTab(l10n, entries, start),
           HistoryTab.water => _waterTab(l10n, today, start),
+          HistoryTab.habits => _habitsTab(l10n, today, start),
           HistoryTab.together => _togetherTab(l10n, entries, start),
         },
-        if (_tab != HistoryTab.water)
+        if (_tab != HistoryTab.water && _tab != HistoryTab.habits)
           InsightsCard(
             title: l10n.xv2DashEntriesTitle,
             child: _EntriesList(entries: entries),
           ),
       ],
     );
+  }
+
+  Set<DateTime> _periodDates(HabitsState habits) {
+    final dates = <DateTime>{};
+    for (final h in habits.recentDays) {
+      if (h.period == true) {
+        final d = DateTime.tryParse(h.day);
+        if (d != null) dates.add(DateTime(d.year, d.month, d.day));
+      }
+    }
+    return dates;
   }
 
   /// E1–E3.
@@ -195,6 +213,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
     final points = emotionalPoints(l10n, entries);
     final series = emotionalSeries(l10n, points);
     final hasIntensity = points.any((p) => p.intensity != null);
+    final summary = JournalSummary.compute(entries);
     return [
       InsightsCard(
         title: l10n.gxPieTitle,
@@ -226,6 +245,19 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
             start: start,
             days: _days,
           ),
+        ),
+      if (summary.positiveByTime.isNotEmpty)
+        InsightsCard(
+          key: const Key('good_moments_card'),
+          title: l10n.jv22GoodMomentsTitle,
+          subtitle: l10n.jv22GoodMomentsSubtitle,
+          child: GoodMomentsSummary(summary: summary),
+        ),
+      if (summary.byHelper.isNotEmpty || summary.byCoping.isNotEmpty)
+        InsightsCard(
+          key: const Key('helped_card'),
+          title: l10n.jv22HelpedTitle,
+          child: HelpedSummary(summary: summary),
         ),
     ];
   }
@@ -368,6 +400,24 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
     ];
   }
 
+  /// Habits charts tab.
+  List<Widget> _habitsTab(
+    AppLocalizations l10n,
+    DateTime today,
+    DateTime start,
+  ) {
+    final habits = ref.watch(habitsControllerProvider);
+    return [
+      HabitsChartsSection(
+        habits: habits.recentDays,
+        days: _days,
+        today: today,
+        start: start,
+        showPeriod: habits.showPeriodCard,
+      ),
+    ];
+  }
+
   /// C1.
   List<Widget> _togetherTab(
     AppLocalizations l10n,
@@ -375,7 +425,11 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
     DateTime start,
   ) {
     final water = ref.watch(hydrationControllerProvider);
+    final habits = ref.watch(habitsControllerProvider);
     final today = ref.read(homeClockProvider)();
+    final periodMap = <DateTime, bool>{
+      for (final d in _periodDates(habits)) d: true,
+    };
     return [
       InsightsCard(
         title: l10n.gxCalendarTitle,
@@ -384,7 +438,9 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
           days: calendarDays(
             emotional: emotionalPoints(l10n, entries),
             physical: physicalPoints(l10n, entries),
+            positive: positivePoints(l10n, entries),
             waterTotals: _waterTotals(water, today),
+            periodDays: periodMap,
           ),
           start: start,
           periodDays: _days,
@@ -504,10 +560,19 @@ class _EntriesList extends ConsumerWidget {
                             JournalLabels.mood(l10n, entry.mood!))),
                       for (final item in entry.items)
                         _line(
-                          item.intensity != null
-                              ? '${item.label(l10n)} · ${l10n.xv2ReportedIntensity(item.intensity!)}'
-                              : item.label(l10n),
+                          item.kind == JournalKeys.kindPositive
+                              ? '${journalEmojis[item.optionKey] ?? '✨'} ${item.label(l10n)}'
+                              : item.intensity != null
+                                  ? '${item.label(l10n)} · ${l10n.xv2ReportedIntensity(item.intensity!)}'
+                                  : item.label(l10n),
                         ),
+                      if (entry.coping != null)
+                        _line(l10n.jv22EntryCoping(
+                            JournalLabels.coping(l10n, entry.coping!))),
+                      if (entry.helpers.isNotEmpty)
+                        _line(l10n.jv22EntryHelpers(entry.helpers
+                            .map((h) => JournalLabels.helper(l10n, h))
+                            .join(', '))),
                     ],
                   ),
                 ),

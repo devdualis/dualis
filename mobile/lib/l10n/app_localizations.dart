@@ -6867,6 +6867,636 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Intensidade informada'**
   String get gxIntensityAxis;
+
+  /// No description provided for @jv22PositiveQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Que bom! Quer anotar o que fez seu dia bom?'**
+  String get jv22PositiveQuestion;
+
+  /// No description provided for @jv22JustSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só registrar'**
+  String get jv22JustSave;
+
+  /// No description provided for @jv22PositiveTimeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se quiser, conte com o que tem a ver:'**
+  String get jv22PositiveTimeHint;
+
+  /// No description provided for @jv22BranchPassadoGratidao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gratidão'**
+  String get jv22BranchPassadoGratidao;
+
+  /// No description provided for @jv22OptPassadoGratidaoAlguem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Grato(a) por alguém'**
+  String get jv22OptPassadoGratidaoAlguem;
+
+  /// No description provided for @jv22OptPassadoGratidaoAlgo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Grato(a) por algo que aconteceu'**
+  String get jv22OptPassadoGratidaoAlgo;
+
+  /// No description provided for @jv22BranchPassadoOrgulho.
+  ///
+  /// In pt, this message translates to:
+  /// **'Orgulho'**
+  String get jv22BranchPassadoOrgulho;
+
+  /// No description provided for @jv22OptPassadoOrgulhoConquista.
+  ///
+  /// In pt, this message translates to:
+  /// **'Consegui algo que queria'**
+  String get jv22OptPassadoOrgulhoConquista;
+
+  /// No description provided for @jv22OptPassadoOrgulhoResolvi.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resolvi algo que me pesava'**
+  String get jv22OptPassadoOrgulhoResolvi;
+
+  /// No description provided for @jv22BranchPresenteCalma.
+  ///
+  /// In pt, this message translates to:
+  /// **'Calma'**
+  String get jv22BranchPresenteCalma;
+
+  /// No description provided for @jv22OptPresenteCalmaPaz.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em paz, tranquilo(a)'**
+  String get jv22OptPresenteCalmaPaz;
+
+  /// No description provided for @jv22OptPresenteCalmaDescansado.
+  ///
+  /// In pt, this message translates to:
+  /// **'Descansado(a), com energia'**
+  String get jv22OptPresenteCalmaDescansado;
+
+  /// No description provided for @jv22BranchPresenteConexao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conexão'**
+  String get jv22BranchPresenteConexao;
+
+  /// No description provided for @jv22OptPresenteConexaoPessoas.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bem com as pessoas ao meu redor'**
+  String get jv22OptPresenteConexaoPessoas;
+
+  /// No description provided for @jv22OptPresenteConexaoFoco.
+  ///
+  /// In pt, this message translates to:
+  /// **'Focado(a) no que estou fazendo'**
+  String get jv22OptPresenteConexaoFoco;
+
+  /// No description provided for @jv22BranchFuturoAnimo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ânimo'**
+  String get jv22BranchFuturoAnimo;
+
+  /// No description provided for @jv22OptFuturoAnimoPlanos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Animado(a) com meus planos'**
+  String get jv22OptFuturoAnimoPlanos;
+
+  /// No description provided for @jv22OptFuturoAnimoEsperanca.
+  ///
+  /// In pt, this message translates to:
+  /// **'Com esperança'**
+  String get jv22OptFuturoAnimoEsperanca;
+
+  /// No description provided for @jv22BranchFuturoConfianca.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confiança'**
+  String get jv22BranchFuturoConfianca;
+
+  /// No description provided for @jv22OptFuturoConfiancaConfiante.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confiante no que vem'**
+  String get jv22OptFuturoConfiancaConfiante;
+
+  /// No description provided for @jv22OptFuturoConfiancaPreparado.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preparado(a)'**
+  String get jv22OptFuturoConfiancaPreparado;
+
+  /// No description provided for @jv22OptPassadoMemoriaVergonha.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vergonha de algo que fiz ou disse'**
+  String get jv22OptPassadoMemoriaVergonha;
+
+  /// No description provided for @jv22OptPresenteEnergiaConcentracao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Difícil me concentrar ou lembrar das coisas'**
+  String get jv22OptPresenteEnergiaConcentracao;
+
+  /// No description provided for @jv22OptPresenteSobrecargaMuitaCoisa.
+  ///
+  /// In pt, this message translates to:
+  /// **'Muita coisa ao mesmo tempo'**
+  String get jv22OptPresenteSobrecargaMuitaCoisa;
+
+  /// No description provided for @jv22OptPresenteSobrecargaInquieto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agitado(a), inquieto(a)'**
+  String get jv22OptPresenteSobrecargaInquieto;
+
+  /// No description provided for @jv22BranchPresenteSolidao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sozinho(a) ou inseguro(a)'**
+  String get jv22BranchPresenteSolidao;
+
+  /// No description provided for @jv22OptPresenteSolidaoSozinho.
+  ///
+  /// In pt, this message translates to:
+  /// **'Me sinto sozinho(a)'**
+  String get jv22OptPresenteSolidaoSozinho;
+
+  /// No description provided for @jv22OptPresenteSolidaoMenos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Me sinto menos que os outros'**
+  String get jv22OptPresenteSolidaoMenos;
+
+  /// No description provided for @jv22OptFuturoMenteIndecisao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não consigo decidir'**
+  String get jv22OptFuturoMenteIndecisao;
+
+  /// No description provided for @jv22OptFuturoMedoEvitar.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vontade de evitar ou fugir de uma situação'**
+  String get jv22OptFuturoMedoEvitar;
+
+  /// No description provided for @jv22BranchCabecaRosto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tontura, nariz, ouvido ou mandíbula'**
+  String get jv22BranchCabecaRosto;
+
+  /// No description provided for @jv22OptCabecaRostoTontura.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tontura'**
+  String get jv22OptCabecaRostoTontura;
+
+  /// No description provided for @jv22OptCabecaRostoNariz.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nariz entupido ou escorrendo'**
+  String get jv22OptCabecaRostoNariz;
+
+  /// No description provided for @jv22OptCabecaRostoOuvido.
+  ///
+  /// In pt, this message translates to:
+  /// **'Incômodo no ouvido'**
+  String get jv22OptCabecaRostoOuvido;
+
+  /// No description provided for @jv22OptCabecaRostoMandibula.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mandíbula ou dentes travados'**
+  String get jv22OptCabecaRostoMandibula;
+
+  /// No description provided for @jv22OptBarrigaColicaMenstrual.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cólica menstrual'**
+  String get jv22OptBarrigaColicaMenstrual;
+
+  /// No description provided for @jv22BranchBarrigaIntestino.
+  ///
+  /// In pt, this message translates to:
+  /// **'Intestino'**
+  String get jv22BranchBarrigaIntestino;
+
+  /// No description provided for @jv22OptBarrigaIntestinoPreso.
+  ///
+  /// In pt, this message translates to:
+  /// **'Intestino preso'**
+  String get jv22OptBarrigaIntestinoPreso;
+
+  /// No description provided for @jv22OptBarrigaIntestinoSolto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Intestino solto'**
+  String get jv22OptBarrigaIntestinoSolto;
+
+  /// No description provided for @jv22TriggerDinheiro.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dinheiro'**
+  String get jv22TriggerDinheiro;
+
+  /// No description provided for @jv22TriggerTelas.
+  ///
+  /// In pt, this message translates to:
+  /// **'Telas ou redes sociais'**
+  String get jv22TriggerTelas;
+
+  /// No description provided for @jv22TriggerCiclo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ciclo menstrual'**
+  String get jv22TriggerCiclo;
+
+  /// No description provided for @jv22CopingQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como foi lidar com isso?'**
+  String get jv22CopingQuestion;
+
+  /// No description provided for @jv22CopingConsegui.
+  ///
+  /// In pt, this message translates to:
+  /// **'Consegui lidar'**
+  String get jv22CopingConsegui;
+
+  /// No description provided for @jv22CopingEsperei.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esperei passar'**
+  String get jv22CopingEsperei;
+
+  /// No description provided for @jv22CopingDificil.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foi difícil'**
+  String get jv22CopingDificil;
+
+  /// No description provided for @jv22HelpersQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que te ajudou hoje?'**
+  String get jv22HelpersQuestion;
+
+  /// No description provided for @jv22HelperMexerCorpo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mexer o corpo'**
+  String get jv22HelperMexerCorpo;
+
+  /// No description provided for @jv22HelperConversar.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conversar com alguém'**
+  String get jv22HelperConversar;
+
+  /// No description provided for @jv22HelperPausa.
+  ///
+  /// In pt, this message translates to:
+  /// **'Uma pausa para respirar'**
+  String get jv22HelperPausa;
+
+  /// No description provided for @jv22HelperLazer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Música ou lazer'**
+  String get jv22HelperLazer;
+
+  /// No description provided for @jv22HelperDescansar.
+  ///
+  /// In pt, this message translates to:
+  /// **'Descansar'**
+  String get jv22HelperDescansar;
+
+  /// No description provided for @jv22HelperNadaAinda.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nada ainda'**
+  String get jv22HelperNadaAinda;
+
+  /// No description provided for @jv22PhrasePositive1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Que bom ler isso. O que combina mais?'**
+  String get jv22PhrasePositive1;
+
+  /// No description provided for @jv22PhrasePositive2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos guardar esse momento.'**
+  String get jv22PhrasePositive2;
+
+  /// No description provided for @jv22PhrasePositive3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obrigado por contar. Vamos anotar o que foi bom.'**
+  String get jv22PhrasePositive3;
+
+  /// No description provided for @jv22PhraseClosing1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Último passo. É opcional.'**
+  String get jv22PhraseClosing1;
+
+  /// No description provided for @jv22PhraseClosing2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se quiser, marque o que te ajudou.'**
+  String get jv22PhraseClosing2;
+
+  /// No description provided for @jv22PhraseClosing3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obrigado por registrar. Você pode pular.'**
+  String get jv22PhraseClosing3;
+
+  /// No description provided for @jv22GoodMomentsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Momentos bons'**
+  String get jv22GoodMomentsTitle;
+
+  /// No description provided for @jv22GoodMomentsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dias em que você anotou algo bom.'**
+  String get jv22GoodMomentsSubtitle;
+
+  /// No description provided for @jv22GoodMomentsMost.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais marcados'**
+  String get jv22GoodMomentsMost;
+
+  /// No description provided for @jv22GoodMoment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Momento bom'**
+  String get jv22GoodMoment;
+
+  /// No description provided for @jv22HelpedTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que te ajudou'**
+  String get jv22HelpedTitle;
+
+  /// No description provided for @jv22HelpedLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você marcou “{label}” em {count, plural, =1{1 dia} other{{count} dias}}'**
+  String jv22HelpedLine(String label, int count);
+
+  /// No description provided for @jv22EntryCoping.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como foi lidar: {label}'**
+  String jv22EntryCoping(String label);
+
+  /// No description provided for @jv22EntryHelpers.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que ajudou: {labels}'**
+  String jv22EntryHelpers(String labels);
+
+  /// No description provided for @habitsTitleToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hábitos de hoje'**
+  String get habitsTitleToday;
+
+  /// No description provided for @habitsTitleYesterday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hábitos de ontem'**
+  String get habitsTitleYesterday;
+
+  /// No description provided for @habitsTabToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hoje'**
+  String get habitsTabToday;
+
+  /// No description provided for @habitsTabYesterday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ontem'**
+  String get habitsTabYesterday;
+
+  /// No description provided for @habitsRegisterAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar'**
+  String get habitsRegisterAction;
+
+  /// No description provided for @habitsNoRecordsToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum hábito registrado hoje'**
+  String get habitsNoRecordsToday;
+
+  /// No description provided for @habitsSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvo'**
+  String get habitsSaved;
+
+  /// No description provided for @habitsSleepQualityQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como você dormiu?'**
+  String get habitsSleepQualityQuestion;
+
+  /// No description provided for @habitsSleepQualityBem.
+  ///
+  /// In pt, this message translates to:
+  /// **'😴 Dormi bem'**
+  String get habitsSleepQualityBem;
+
+  /// No description provided for @habitsSleepQualityRegular.
+  ///
+  /// In pt, this message translates to:
+  /// **'😐 Mais ou menos'**
+  String get habitsSleepQualityRegular;
+
+  /// No description provided for @habitsSleepQualityMal.
+  ///
+  /// In pt, this message translates to:
+  /// **'😫 Dormi mal'**
+  String get habitsSleepQualityMal;
+
+  /// No description provided for @habitsSleepHoursQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quantas horas, mais ou menos?'**
+  String get habitsSleepHoursQuestion;
+
+  /// No description provided for @habitsSleepHoursMenos5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Menos de 5 h'**
+  String get habitsSleepHoursMenos5;
+
+  /// No description provided for @habitsSleepHours5To6.
+  ///
+  /// In pt, this message translates to:
+  /// **'5 a 6 h'**
+  String get habitsSleepHours5To6;
+
+  /// No description provided for @habitsSleepHours7To8.
+  ///
+  /// In pt, this message translates to:
+  /// **'7 a 8 h'**
+  String get habitsSleepHours7To8;
+
+  /// No description provided for @habitsSleepHours9Mais.
+  ///
+  /// In pt, this message translates to:
+  /// **'9 h ou mais'**
+  String get habitsSleepHours9Mais;
+
+  /// No description provided for @habitsMovedQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mexeu o corpo hoje?'**
+  String get habitsMovedQuestion;
+
+  /// No description provided for @habitsMovedYes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim'**
+  String get habitsMovedYes;
+
+  /// No description provided for @habitsMovedNo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não'**
+  String get habitsMovedNo;
+
+  /// No description provided for @habitsMovementMinutesQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Por quanto tempo?'**
+  String get habitsMovementMinutesQuestion;
+
+  /// No description provided for @habitsMovementMinutesAte15.
+  ///
+  /// In pt, this message translates to:
+  /// **'Até 15 min'**
+  String get habitsMovementMinutesAte15;
+
+  /// No description provided for @habitsMovementMinutes15To30.
+  ///
+  /// In pt, this message translates to:
+  /// **'15 a 30 min'**
+  String get habitsMovementMinutes15To30;
+
+  /// No description provided for @habitsMovementMinutes30To60.
+  ///
+  /// In pt, this message translates to:
+  /// **'30 a 60 min'**
+  String get habitsMovementMinutes30To60;
+
+  /// No description provided for @habitsMovementMinutesMais60.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais de 1 h'**
+  String get habitsMovementMinutesMais60;
+
+  /// No description provided for @habitsPeriodQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Menstruação hoje?'**
+  String get habitsPeriodQuestion;
+
+  /// No description provided for @habitsPeriodYes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim'**
+  String get habitsPeriodYes;
+
+  /// No description provided for @habitsPeriodNo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não'**
+  String get habitsPeriodNo;
+
+  /// No description provided for @habitsTrackMenstrualCycleSetting.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acompanhar ciclo menstrual'**
+  String get habitsTrackMenstrualCycleSetting;
+
+  /// No description provided for @habitsChartTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hábitos'**
+  String get habitsChartTitle;
+
+  /// No description provided for @habitsChartSleepQualityTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qualidade do sono'**
+  String get habitsChartSleepQualityTitle;
+
+  /// No description provided for @habitsChartSleepHoursTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Horas de sono'**
+  String get habitsChartSleepHoursTitle;
+
+  /// No description provided for @habitsChartMovementTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Movimento do corpo'**
+  String get habitsChartMovementTitle;
+
+  /// No description provided for @habitsChartPeriodTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ciclo menstrual'**
+  String get habitsChartPeriodTitle;
+
+  /// No description provided for @habitsChartSleepBadCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você dormiu mal em {count} dos últimos {days} dias'**
+  String habitsChartSleepBadCount(int count, int days);
+
+  /// No description provided for @habitsChartMovementCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Você se mexeu em 1 dia} other{Você se mexeu em {count} dias}}'**
+  String habitsChartMovementCount(int count);
+
+  /// No description provided for @habitsChartPeriodCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dias com menstruação: {count}'**
+  String habitsChartPeriodCount(int count);
+
+  /// No description provided for @habitsChartEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem registros no período'**
+  String get habitsChartEmpty;
+
+  /// No description provided for @habitsPeriodLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Menstruação'**
+  String get habitsPeriodLabel;
 }
 
 class _AppLocalizationsDelegate

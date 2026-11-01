@@ -7,6 +7,11 @@ import '../../domain/journal_models.dart';
 /// The Home card picks the axis, so there is no "what to record" screen.
 enum JournalStep {
   mood,
+
+  /// "Bem": "Só registrar" or the three times (good moments, v2.2).
+  positiveStart,
+  positiveBranch,
+  positiveOptions,
   time,
   branch,
   options,
@@ -17,6 +22,9 @@ enum JournalStep {
   moreBody,
   intensity,
   triggers,
+
+  /// Coping and helpers, optional (v2.2).
+  closing,
   note,
 }
 
@@ -76,6 +84,8 @@ class JournalFlowState {
   final List<JournalItem> items;
   final Set<String> triggers;
   final String triggerNote;
+  final String? coping;
+  final Set<String> helpers;
   final String note;
 
   /// Phrase variant shown on the current screen, if any.
@@ -104,6 +114,8 @@ class JournalFlowState {
     this.items = const [],
     this.triggers = const {},
     this.triggerNote = '',
+    this.coping,
+    this.helpers = const {},
     this.note = '',
     this.phraseId,
     this.shownPhraseIds = const [],
@@ -150,6 +162,9 @@ class JournalFlowState {
     List<JournalItem>? items,
     Set<String>? triggers,
     String? triggerNote,
+    String? coping,
+    bool clearCoping = false,
+    Set<String>? helpers,
     String? note,
     String? phraseId,
     bool clearPhrase = false,
@@ -174,6 +189,8 @@ class JournalFlowState {
       items: items ?? this.items,
       triggers: triggers ?? this.triggers,
       triggerNote: triggerNote ?? this.triggerNote,
+      coping: clearCoping ? null : (coping ?? this.coping),
+      helpers: helpers ?? this.helpers,
       note: note ?? this.note,
       phraseId: clearPhrase ? null : (phraseId ?? this.phraseId),
       shownPhraseIds: shownPhraseIds ?? this.shownPhraseIds,

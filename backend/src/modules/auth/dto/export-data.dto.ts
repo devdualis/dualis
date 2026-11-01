@@ -70,6 +70,8 @@ export interface ExportedJournalEntryDto {
   recordedAt: string;
   mood: string;
   triggers: string[];
+  coping: string | null;
+  helpers: string[];
   triggerNote: string | null;
   note: string | null;
   createdAt: string;
@@ -129,6 +131,7 @@ export interface ExportedDependentDataDto {
   symptomLogs: ExportedSymptomLogDto[];
   safetyResourceEvents: ExportedSafetyResourceEventDto[];
   waterIntakeLogs: ExportedWaterIntakeLogDto[];
+  dailyHabits: ExportedHabitDayDto[];
   journalEntries: ExportedJournalEntryDto[];
   userConditions: ExportedUserConditionDto[];
   careRecords: ExportedCareRecordDto[];
@@ -151,9 +154,22 @@ export interface UserDataExportResponseDto {
   symptomLogs: ExportedSymptomLogDto[];
   safetyResourceEvents: ExportedSafetyResourceEventDto[];
   waterIntakeLogs: ExportedWaterIntakeLogDto[];
+  dailyHabits: ExportedHabitDayDto[];
   journalEntries: ExportedJournalEntryDto[];
   userConditions: ExportedUserConditionDto[];
   careRecords: ExportedCareRecordDto[];
   careDocuments: ExportedCareDocumentDto[];
   dependentProfiles: ExportedDependentDataDto[];
+}
+
+export interface ExportedHabitDayDto {
+  id: string;
+  day: string;
+  sleepQuality: string | null;
+  sleepHours: string | null;
+  moved: boolean | null;
+  movementMinutes: string | null;
+  period: boolean | null;
+  createdAt: string;
+  updatedAt: string;
 }

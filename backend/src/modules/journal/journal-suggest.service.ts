@@ -77,6 +77,21 @@ export class SuggestRateLimiter {
  * The model matches meaning against these texts, not against the raw keys.
  */
 export const OPTION_TEXT_PT: Record<string, string> = {
+  'passado.memoria.vergonha': 'Vergonha de algo que fiz ou disse',
+  'presente.energia.concentracao': 'Difícil me concentrar ou lembrar das coisas',
+  'presente.sobrecarga.muita_coisa': 'Muita coisa ao mesmo tempo',
+  'presente.sobrecarga.inquieto': 'Agitado(a), inquieto(a)',
+  'presente.solidao.sozinho': 'Me sinto sozinho(a)',
+  'presente.solidao.menos': 'Me sinto menos que os outros',
+  'futuro.mente.indecisao': 'Não consigo decidir',
+  'futuro.medo.evitar': 'Vontade de evitar ou fugir de uma situação',
+  'cabeca.rosto.tontura': 'Tontura',
+  'cabeca.rosto.nariz': 'Nariz entupido ou escorrendo',
+  'cabeca.rosto.ouvido': 'Incômodo no ouvido',
+  'cabeca.rosto.mandibula': 'Mandíbula ou dentes travados',
+  'barriga.colica.menstrual': 'Cólica menstrual',
+  'barriga.intestino.preso': 'Intestino preso',
+  'barriga.intestino.solto': 'Intestino solto',
   'passado.tristeza.culpa': 'Culpa ou arrependimento',
   'passado.tristeza.saudade': 'Falta de alguém ou de como as coisas eram',
   'passado.memoria.lembranca': 'Uma lembrança ruim que volta',
@@ -130,6 +145,7 @@ export const OPTION_TEXT_PT: Record<string, string> = {
  * side (physical), only chips the body map shows on that side, plus the whole-body ones.
  */
 export function catalogKeys(kind: 'emotional' | 'physical', branch?: string, bodySide?: BodySide): string[] {
+  if (kind !== 'emotional' && kind !== 'physical') return [];
   const source = kind === 'physical' ? PHYSICAL_OPTION_KEYS : EMOTIONAL_OPTION_KEYS;
   return source.filter(
     (key) =>

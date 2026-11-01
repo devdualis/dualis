@@ -1,6 +1,8 @@
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
+  ArrayUnique,
+  ValidateIf,
   IsArray,
   IsIn,
   IsInt,
@@ -21,6 +23,9 @@ import {
 } from 'class-validator';
 import {
   BODY_SIDES,
+  COPING_KEYS,
+  HELPER_KEYS,
+  POSITIVE_OPTION_KEYS,
   BodySide,
   EMOTIONAL_OPTION_KEYS,
   ENTRY_AREAS,
@@ -43,7 +48,7 @@ import {
   isWholeBodyOptionKey,
 } from '../constants/journal-keys.constant';
 
-const ALL_OPTION_KEYS = [...EMOTIONAL_OPTION_KEYS, ...PHYSICAL_OPTION_KEYS];
+const ALL_OPTION_KEYS = [...EMOTIONAL_OPTION_KEYS, ...PHYSICAL_OPTION_KEYS, ...POSITIVE_OPTION_KEYS];
 
 /** Returns why an item is inconsistent with its kind, or null when it is valid. */
 export function journalItemShapeError(item: Partial<JournalItemInputDto>): string | null {
@@ -54,6 +59,13 @@ export function journalItemShapeError(item: Partial<JournalItemInputDto>): strin
       if (item.optionKey || item.customLabel !== undefined || item.bodySide || item.sensation) {
         return 'Itens de condição não aceitam optionKey, customLabel, bodySide nem sensation.';
       }
+      return null;
+    case 'positive':
+      if (!item.optionKey || !POSITIVE_OPTION_KEYS.includes(item.optionKey)) return 'optionKey inválido para positive.';
+      if ([item.intensity, item.persistence, item.bodySide, item.sensation, item.conditionId].some((v) => v != null)) {
+        return 'Itens positive não aceitam intensity, persistence, bodySide, sensation nem conditionId.';
+      }
+      if (isCustomOptionKey(item.optionKey) !== hasText) return 'customLabel é obrigatório com a chave custom e só é aceito com ela.';
       return null;
     case 'emotional':
     case 'physical': {
@@ -89,6 +101,19 @@ export function journalItemShapeError(item: Partial<JournalItemInputDto>): strin
  */
 export function journalEntryShapeError(entry: Partial<CreateJournalEntryDto>): string | null {
   const items = Array.isArray(entry.items) ? entry.items : [];
+  const helpers = entry.helpers ?? [];
+  if (entry.coping != null && !(COPING_KEYS as readonly string[]).includes(entry.coping)) return 'coping inválido.';
+  if (!Array.isArray(helpers) || helpers.length > 6 || new Set(helpers).size !== helpers.length ||
+      helpers.some((h) => !(HELPER_KEYS as readonly string[]).includes(h))) return 'helpers inválido.';
+  if ((entry.coping != null || helpers.length > 0) && entry.mood !== 'nao_tao_bem') {
+    return 'coping e helpers só são aceitos com mood nao_tao_bem.';
+  }
+  if (helpers.includes('nada_ainda') && helpers.length > 1) return 'nada_ainda não pode ser combinado.';
+  if (items.some((i) => i?.kind === 'positive')) {
+    if (entry.mood !== 'bem' || entry.area !== 'emotional') return 'Itens positive exigem mood bem e area emotional.';
+    if (items.some((i) => i?.kind === 'emotional' || i?.kind === 'physical')) return 'Itens positive não podem ser misturados com emotional ou physical.';
+    if (entry.triggers?.length || entry.coping != null || helpers.length) return 'Itens positive não aceitam triggers, coping nem helpers.';
+  }
   if (!entry.area) return null;
   if (!(ENTRY_MOOD_KEYS as readonly string[]).includes(entry.mood ?? '')) {
     return `mood deve ser ${ENTRY_MOOD_KEYS.join(' ou ')} quando o registro tem area.`;
@@ -170,10 +195,11 @@ export class JournalItemInputDto {
   @IsIn(PERSISTENCE_KEYS)
   persistence?: (typeof PERSISTENCE_KEYS)[number];
 
+  @ValidateIf((item) => item.kind !== 'positive' || item.intensity != null)
   @IsInt()
   @Min(INTENSITY_MIN)
   @Max(INTENSITY_MAX)
-  intensity!: number;
+  intensity?: number | null;
 }
 
 export class CreateJournalEntryDto {
@@ -198,6 +224,17 @@ export class CreateJournalEntryDto {
   @IsIn(TRIGGER_KEYS, { each: true })
   @Validate(PhysicalOnlyTriggersConstraint)
   triggers!: string[];
+
+  @IsOptional()
+  @IsIn(COPING_KEYS)
+  coping?: (typeof COPING_KEYS)[number] | null;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(6)
+  @ArrayUnique()
+  @IsIn(HELPER_KEYS, { each: true })
+  helpers?: string[];
 
   @IsOptional()
   @IsString()
@@ -278,6 +315,8 @@ export interface JournalEntryDto {
   /** `emotional` | `physical`; null on entries saved before v2.1. */
   area: string | null;
   triggers: string[];
+  coping: string | null;
+  helpers: string[];
   triggerNote: string | null;
   note: string | null;
   transitionVariantIds: string[];
@@ -320,6 +359,9 @@ export interface JournalSummaryDto {
   byRegion: Record<string, number>;
   byOptionKey: Record<string, number>;
   byTrigger: Record<string, number>;
+  positive: { byTime: Record<string, number>; byOptionKey: Record<string, number> };
+  byCoping: Record<string, number>;
+  byHelper: Record<string, number>;
   cooccurrence: Array<{ a: string; b: string; days: number }>;
 }
 

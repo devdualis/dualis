@@ -275,6 +275,8 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       expect(result.metadata.formatVersion).toBe('1.4');
       expect(result.journalEntries.map((e) => e.id)).toEqual(['entry-new', 'entry-old']);
       expect(result.journalEntries[0]).toEqual({
+        coping: null,
+        helpers: [],
         id: 'entry-new',
         clientId: 'client-entry-new',
         recordedAt: '2026-10-20T10:00:00.000Z',
@@ -332,6 +334,7 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
         [], // water
         [], // journal entries (no items query)
         [], // conditions
+        [], // daily habits
         [
           careRecord('vac-1', primaryProfileId, 'vaccine_dose', '2026-03-10T00:00:00Z', 'v1:json:{"vaccine":"Influenza","doseLabel":"Anual"}'),
           careRecord('med-1', primaryProfileId, 'medication', null, 'v1:json:{"name":"Vitamina D","stockCount":20}'),

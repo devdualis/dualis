@@ -160,6 +160,23 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     switch (state.step) {
       case JournalStep.mood:
         return _moodStep(l10n, state);
+      case JournalStep.positiveStart:
+        return _positiveStartStep(l10n, state);
+      case JournalStep.positiveBranch:
+        return _branchStep(l10n, state, JournalKeys.positiveTree[state.time]!,
+            state.time!);
+      case JournalStep.positiveOptions:
+        return _optionsStep(
+          l10n,
+          state,
+          JournalKeys.positiveTree[state.time]![state.branch]!,
+          '${state.time}.${state.branch}',
+          () {
+            if (_controller.confirmPositiveOptions()) _save();
+          },
+          confirmKey: const Key('jv2_save'),
+          confirmLabel: l10n.jv2Save,
+        );
       case JournalStep.time:
         return _timeStep(l10n, state);
       case JournalStep.branch:
@@ -196,6 +213,8 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         return _intensityStep(l10n, state);
       case JournalStep.triggers:
         return _triggersStep(l10n, state);
+      case JournalStep.closing:
+        return _closingStep(l10n, state);
       case JournalStep.note:
         return _noteStep(l10n, state);
     }
@@ -235,6 +254,31 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           const Padding(
             padding: EdgeInsets.all(16),
             child: Center(child: CircularProgressIndicator()),
+          ),
+      ],
+    );
+  }
+
+  /// "Bem": "Só registrar" saves at once; a time opens the good moments.
+  Widget _positiveStartStep(AppLocalizations l10n, JournalFlowState state) {
+    return _StepLayout(
+      question: l10n.jv22PositiveQuestion,
+      children: [
+        _ContinueButton(
+          key: const Key('jv22_just_save'),
+          label: l10n.jv22JustSave,
+          busy: state.isSaving,
+          onPressed: state.isSaving ? null : _save,
+        ),
+        const SizedBox(height: 20),
+        _SectionLabel(l10n.jv22PositiveTimeHint),
+        for (final time in JournalKeys.positiveTree.keys)
+          _ChoiceTile(
+            key: Key('jv22_positive_time_$time'),
+            emoji: journalEmojis[time],
+            label: JournalLabels.root(l10n, time),
+            enabled: !state.isSaving,
+            onTap: () => _controller.choosePositiveTime(time),
           ),
       ],
     );
@@ -321,15 +365,19 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     JournalFlowState state,
     List<String> options,
     String prefix,
-    VoidCallback onConfirm,
-  ) {
+    VoidCallback onConfirm, {
+    Key? confirmKey,
+    String? confirmLabel,
+  }) {
     return _StepLayout(
       eyebrow: JournalLabels.branch(l10n, prefix),
       question: l10n.jv2OptionsQuestion,
       hint: l10n.jv2MultiSelectHint,
       bottom: _ContinueButton(
-        label: l10n.jv2Continue,
-        onPressed: state.hasOptionSelection ? onConfirm : null,
+        key: confirmKey,
+        label: confirmLabel ?? l10n.jv2Continue,
+        busy: state.isSaving,
+        onPressed: state.hasOptionSelection && !state.isSaving ? onConfirm : null,
       ),
       children: [
         for (final option in options)
@@ -398,6 +446,13 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     );
     if (clean.isEmpty) return;
     final state = ref.read(journalFlowControllerProvider);
+    // Good moments are never sent to the AI suggestion.
+    if (state.step == JournalStep.positiveOptions) {
+      _controller.addCustomLabel(clean);
+      _customController.clear();
+      setState(() => _writingCustom = false);
+      return;
+    }
     final physical = state.step == JournalStep.regionOptions;
     final kind =
         physical ? JournalKeys.kindPhysical : JournalKeys.kindEmotional;
@@ -715,27 +770,14 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       lead: _phrase(l10n, state),
       question: l10n.jv2TriggersQuestion,
       hint: l10n.jv2MultiSelectHint,
-      bottom: Row(
-        children: [
-          Expanded(
-            child: OutlinedButton(
-              key: const Key('jv2_skip'),
-              style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-              onPressed: () {
-                _triggerNoteController.clear();
-                _controller.confirmTriggers(skip: true);
-              },
-              child: Text(l10n.jv2Skip),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _ContinueButton(
-              label: l10n.jv2Continue,
-              onPressed: () => _controller.confirmTriggers(),
-            ),
-          ),
-        ],
+      bottom: _skipOrContinue(
+        l10n,
+        skipKey: const Key('jv2_skip'),
+        onSkip: () {
+          _triggerNoteController.clear();
+          _controller.confirmTriggers(skip: true);
+        },
+        onContinue: () => _controller.confirmTriggers(),
       ),
       children: [
         Wrap(
@@ -761,6 +803,70 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             onChanged: _controller.setTriggerNote,
           ),
         ],
+      ],
+    );
+  }
+
+  Widget _skipOrContinue(
+    AppLocalizations l10n, {
+    required Key skipKey,
+    required VoidCallback onSkip,
+    required VoidCallback onContinue,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            key: skipKey,
+            style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+            onPressed: onSkip,
+            child: Text(l10n.jv2Skip),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _ContinueButton(label: l10n.jv2Continue, onPressed: onContinue),
+        ),
+      ],
+    );
+  }
+
+  /// Optional closing questions; "Pular" stays visible.
+  Widget _closingStep(AppLocalizations l10n, JournalFlowState state) {
+    return _StepLayout(
+      lead: _phrase(l10n, state),
+      question: l10n.jv22CopingQuestion,
+      bottom: _skipOrContinue(
+        l10n,
+        skipKey: const Key('jv22_closing_skip'),
+        onSkip: () => _controller.confirmClosing(skip: true),
+        onContinue: () => _controller.confirmClosing(),
+      ),
+      children: [
+        for (final c in JournalKeys.copings)
+          _ChoiceTile(
+            key: Key('jv22_coping_$c'),
+            emoji: journalEmojis[c],
+            label: JournalLabels.coping(l10n, c),
+            selected: state.coping == c,
+            onTap: () => _controller.chooseCoping(c),
+          ),
+        const SizedBox(height: 8),
+        _SectionLabel(l10n.jv22HelpersQuestion, strong: true),
+        _SectionLabel(l10n.jv2MultiSelectHint),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final h in JournalKeys.helpers)
+              FilterChip(
+                key: Key('jv22_helper_$h'),
+                label: Text('${journalEmojis[h]} ${JournalLabels.helper(l10n, h)}'),
+                selected: state.helpers.contains(h),
+                onSelected: (_) => _controller.toggleHelper(h),
+              ),
+          ],
+        ),
       ],
     );
   }

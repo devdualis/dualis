@@ -12,6 +12,9 @@ class ChartTokens {
   static const Color presente = Color(0xFF178779);
   static const Color futuro = Color(0xFFDE8A28);
 
+  /// Good moments of a "Bem" entry (v2.2).
+  static const Color good = Color(0xFF2E9E5B);
+
   /// Emotional record without an axis (never inferred).
   static const Color neutral = Color(0xFF94A3B8);
 

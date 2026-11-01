@@ -4016,4 +4016,351 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gxIntensityAxis => 'Reported intensity';
+
+  @override
+  String get jv22PositiveQuestion =>
+      'Great! Want to note what made your day good?';
+
+  @override
+  String get jv22JustSave => 'Just save';
+
+  @override
+  String get jv22PositiveTimeHint =>
+      'If you like, tell us what it has to do with:';
+
+  @override
+  String get jv22BranchPassadoGratidao => 'Gratitude';
+
+  @override
+  String get jv22OptPassadoGratidaoAlguem => 'Grateful for someone';
+
+  @override
+  String get jv22OptPassadoGratidaoAlgo =>
+      'Grateful for something that happened';
+
+  @override
+  String get jv22BranchPassadoOrgulho => 'Pride';
+
+  @override
+  String get jv22OptPassadoOrgulhoConquista => 'I got something I wanted';
+
+  @override
+  String get jv22OptPassadoOrgulhoResolvi =>
+      'I sorted out something that weighed on me';
+
+  @override
+  String get jv22BranchPresenteCalma => 'Calm';
+
+  @override
+  String get jv22OptPresenteCalmaPaz => 'At peace, relaxed';
+
+  @override
+  String get jv22OptPresenteCalmaDescansado => 'Rested, with energy';
+
+  @override
+  String get jv22BranchPresenteConexao => 'Connection';
+
+  @override
+  String get jv22OptPresenteConexaoPessoas => 'Good with the people around me';
+
+  @override
+  String get jv22OptPresenteConexaoFoco => 'Focused on what I\'m doing';
+
+  @override
+  String get jv22BranchFuturoAnimo => 'Looking forward';
+
+  @override
+  String get jv22OptFuturoAnimoPlanos => 'Excited about my plans';
+
+  @override
+  String get jv22OptFuturoAnimoEsperanca => 'Hopeful';
+
+  @override
+  String get jv22BranchFuturoConfianca => 'Confidence';
+
+  @override
+  String get jv22OptFuturoConfiancaConfiante => 'Confident about what\'s ahead';
+
+  @override
+  String get jv22OptFuturoConfiancaPreparado => 'Ready for it';
+
+  @override
+  String get jv22OptPassadoMemoriaVergonha =>
+      'Embarrassed about something I did or said';
+
+  @override
+  String get jv22OptPresenteEnergiaConcentracao =>
+      'Hard to focus or remember things';
+
+  @override
+  String get jv22OptPresenteSobrecargaMuitaCoisa => 'Too much at once';
+
+  @override
+  String get jv22OptPresenteSobrecargaInquieto => 'Restless and unsettled';
+
+  @override
+  String get jv22BranchPresenteSolidao => 'Lonely or unsure of myself';
+
+  @override
+  String get jv22OptPresenteSolidaoSozinho => 'I feel lonely';
+
+  @override
+  String get jv22OptPresenteSolidaoMenos => 'I feel less than others';
+
+  @override
+  String get jv22OptFuturoMenteIndecisao => 'I can\'t make up my mind';
+
+  @override
+  String get jv22OptFuturoMedoEvitar =>
+      'I want to avoid or get away from something';
+
+  @override
+  String get jv22BranchCabecaRosto => 'Dizziness, nose, ears or jaw';
+
+  @override
+  String get jv22OptCabecaRostoTontura => 'Dizziness';
+
+  @override
+  String get jv22OptCabecaRostoNariz => 'Blocked or runny nose';
+
+  @override
+  String get jv22OptCabecaRostoOuvido => 'Ear discomfort';
+
+  @override
+  String get jv22OptCabecaRostoMandibula => 'Tight jaw or clenched teeth';
+
+  @override
+  String get jv22OptBarrigaColicaMenstrual => 'Period cramps';
+
+  @override
+  String get jv22BranchBarrigaIntestino => 'Bowels';
+
+  @override
+  String get jv22OptBarrigaIntestinoPreso => 'Constipated';
+
+  @override
+  String get jv22OptBarrigaIntestinoSolto => 'Loose stools';
+
+  @override
+  String get jv22TriggerDinheiro => 'Money';
+
+  @override
+  String get jv22TriggerTelas => 'Screens or social media';
+
+  @override
+  String get jv22TriggerCiclo => 'Menstrual cycle';
+
+  @override
+  String get jv22CopingQuestion => 'How did dealing with it go?';
+
+  @override
+  String get jv22CopingConsegui => 'I managed it';
+
+  @override
+  String get jv22CopingEsperei => 'I waited for it to pass';
+
+  @override
+  String get jv22CopingDificil => 'It was hard';
+
+  @override
+  String get jv22HelpersQuestion => 'What helped you today?';
+
+  @override
+  String get jv22HelperMexerCorpo => 'Moving my body';
+
+  @override
+  String get jv22HelperConversar => 'Talking to someone';
+
+  @override
+  String get jv22HelperPausa => 'A pause to breathe';
+
+  @override
+  String get jv22HelperLazer => 'Music or leisure';
+
+  @override
+  String get jv22HelperDescansar => 'Resting';
+
+  @override
+  String get jv22HelperNadaAinda => 'Nothing yet';
+
+  @override
+  String get jv22PhrasePositive1 => 'Good to hear. What fits best?';
+
+  @override
+  String get jv22PhrasePositive2 => 'Let\'s keep this moment.';
+
+  @override
+  String get jv22PhrasePositive3 =>
+      'Thanks for sharing. Let\'s note what was good.';
+
+  @override
+  String get jv22PhraseClosing1 => 'Last step. It\'s optional.';
+
+  @override
+  String get jv22PhraseClosing2 => 'If you like, mark what helped you.';
+
+  @override
+  String get jv22PhraseClosing3 => 'Thanks for recording. You can skip.';
+
+  @override
+  String get jv22GoodMomentsTitle => 'Good moments';
+
+  @override
+  String get jv22GoodMomentsSubtitle => 'Days you noted something good.';
+
+  @override
+  String get jv22GoodMomentsMost => 'Most marked';
+
+  @override
+  String get jv22GoodMoment => 'Good moment';
+
+  @override
+  String get jv22HelpedTitle => 'What helped you';
+
+  @override
+  String jv22HelpedLine(String label, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return 'You marked “$label” on $_temp0';
+  }
+
+  @override
+  String jv22EntryCoping(String label) {
+    return 'Dealing with it: $label';
+  }
+
+  @override
+  String jv22EntryHelpers(String labels) {
+    return 'What helped: $labels';
+  }
+
+  @override
+  String get habitsTitleToday => 'Today\'s habits';
+
+  @override
+  String get habitsTitleYesterday => 'Yesterday\'s habits';
+
+  @override
+  String get habitsTabToday => 'Today';
+
+  @override
+  String get habitsTabYesterday => 'Yesterday';
+
+  @override
+  String get habitsRegisterAction => 'Log';
+
+  @override
+  String get habitsNoRecordsToday => 'No habits logged today';
+
+  @override
+  String get habitsSaved => 'Saved';
+
+  @override
+  String get habitsSleepQualityQuestion => 'How did you sleep?';
+
+  @override
+  String get habitsSleepQualityBem => '😴 Slept well';
+
+  @override
+  String get habitsSleepQualityRegular => '😐 So-so';
+
+  @override
+  String get habitsSleepQualityMal => '😫 Slept badly';
+
+  @override
+  String get habitsSleepHoursQuestion => 'About how many hours?';
+
+  @override
+  String get habitsSleepHoursMenos5 => 'Under 5 h';
+
+  @override
+  String get habitsSleepHours5To6 => '5–6 h';
+
+  @override
+  String get habitsSleepHours7To8 => '7–8 h';
+
+  @override
+  String get habitsSleepHours9Mais => '9 h or more';
+
+  @override
+  String get habitsMovedQuestion => 'Did you move your body today?';
+
+  @override
+  String get habitsMovedYes => 'Yes';
+
+  @override
+  String get habitsMovedNo => 'No';
+
+  @override
+  String get habitsMovementMinutesQuestion => 'For how long?';
+
+  @override
+  String get habitsMovementMinutesAte15 => 'Up to 15 min';
+
+  @override
+  String get habitsMovementMinutes15To30 => '15–30 min';
+
+  @override
+  String get habitsMovementMinutes30To60 => '30–60 min';
+
+  @override
+  String get habitsMovementMinutesMais60 => 'Over 1 h';
+
+  @override
+  String get habitsPeriodQuestion => 'Period today?';
+
+  @override
+  String get habitsPeriodYes => 'Yes';
+
+  @override
+  String get habitsPeriodNo => 'No';
+
+  @override
+  String get habitsTrackMenstrualCycleSetting => 'Track menstrual cycle';
+
+  @override
+  String get habitsChartTitle => 'Habits';
+
+  @override
+  String get habitsChartSleepQualityTitle => 'Sleep quality';
+
+  @override
+  String get habitsChartSleepHoursTitle => 'Hours of sleep';
+
+  @override
+  String get habitsChartMovementTitle => 'Body movement';
+
+  @override
+  String get habitsChartPeriodTitle => 'Menstrual cycle';
+
+  @override
+  String habitsChartSleepBadCount(int count, int days) {
+    return 'You slept badly on $count of the last $days days';
+  }
+
+  @override
+  String habitsChartMovementCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'You moved your body on $count days',
+      one: 'You moved your body on 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String habitsChartPeriodCount(int count) {
+    return 'Days with period: $count';
+  }
+
+  @override
+  String get habitsChartEmpty => 'No records in the period';
+
+  @override
+  String get habitsPeriodLabel => 'Period';
 }

@@ -42,6 +42,9 @@ class MockJournalService {
       clientId: dto.clientId,
       recordedAt: dto.recordedAt,
       mood: dto.mood,
+      area: dto.area ?? null,
+      coping: dto.coping ?? null,
+      helpers: dto.helpers ?? [],
       triggers: dto.triggers,
       triggerNote: dto.triggerNote ?? null,
       note: dto.note ?? null,
@@ -55,7 +58,7 @@ class MockJournalService {
         label: i.conditionId ? (this.conditions.find((c) => c.id === i.conditionId)?.label ?? null) : null,
         bodySide: i.bodySide ?? null,
         persistence: i.persistence ?? null,
-        intensity: i.intensity,
+        intensity: i.intensity ?? null,
       })),
       createdAt: new Date().toISOString(),
     };
@@ -77,7 +80,7 @@ class MockJournalService {
   async summary(_userId: string, profileId: string, query: any) {
     const entries = this.entries
       .filter((e) => e.profileId === profileId)
-      .map((e) => ({ recordedAt: new Date(e.dto.recordedAt), triggers: e.dto.triggers, items: e.dto.items }));
+      .map((e) => ({ recordedAt: new Date(e.dto.recordedAt), triggers: e.dto.triggers, coping: e.dto.coping, helpers: e.dto.helpers, items: e.dto.items }));
     return buildJournalSummary(entries, query.days ?? 30, query.tzOffset ?? 0);
   }
 
@@ -160,6 +163,31 @@ describe('Journal v2 E2E (/v1/journal/entries, conditions, summary, /v1/house-ad
   const post = (url: string, payload: unknown, profileId?: string) =>
     app.inject({ method: 'POST', url, headers: auth(profileId), payload: payload as any });
   const get = (url: string, headers: Record<string, string> = auth()) => app.inject({ method: 'GET', url, headers });
+
+  it('v2.2 saves good moments without intensity and rejects invalid combinations', async () => {
+    const positive = entry({ mood: 'bem', area: 'emotional', triggers: [], items: [{ kind: 'positive', optionKey: 'presente.calma.paz' }] });
+    const saved = await post('/v1/journal/entries', positive);
+    expect(saved.statusCode, saved.body).toBe(201);
+    expect(saved.json()).toMatchObject({ coping: null, helpers: [], items: [{ kind: 'positive', intensity: null }] });
+    for (const extra of [{ mood: 'nao_tao_bem' }, { area: null }, { triggers: ['telas'] }, { coping: 'consegui' }, { helpers: ['pausa'] },
+      { items: [...positive.items as any[], { kind: 'emotional', optionKey: 'presente.solidao.sozinho', persistence: 'hoje', intensity: 1 }] },
+      { items: [{ kind: 'positive', optionKey: 'presente.calma.paz', intensity: 1 }] }]) {
+      expect((await post('/v1/journal/entries', { ...positive, ...extra })).statusCode).toBe(400);
+    }
+    expect((await post('/v1/journal/suggest-option', { text: 'um dia bom', kind: 'positive' })).statusCode).toBe(400);
+  });
+
+  it('v2.2 accepts closing choices and new chips and rejects invalid helpers', async () => {
+    const saved = await post('/v1/journal/entries', entry({ area: 'emotional', triggers: ['dinheiro', 'telas', 'ciclo'], coping: 'esperei', helpers: ['conversar', 'descansar'],
+      items: [{ kind: 'emotional', optionKey: 'presente.solidao.menos', persistence: 'hoje', intensity: 2 }] }));
+    expect(saved.statusCode, saved.body).toBe(201);
+    expect(saved.json()).toMatchObject({ coping: 'esperei', helpers: ['conversar', 'descansar'] });
+    for (const extra of [{ helpers: ['nada_ainda', 'pausa'] }, { helpers: ['pausa', 'pausa'] }, { mood: 'normal', coping: 'dificil' }, { mood: 'bem', helpers: ['lazer'] }]) {
+      expect((await post('/v1/journal/entries', entry(extra))).statusCode).toBe(400);
+    }
+    const physical = await post('/v1/journal/entries', entry({ area: 'physical', items: [{ kind: 'physical', optionKey: 'cabeca.rosto.tontura', bodySide: 'front', sensation: 'incomodo', persistence: 'hoje', intensity: 1 }] }));
+    expect(physical.statusCode, physical.body).toBe(201);
+  });
 
   it('1. every journal v2 route requires authentication', async () => {
     for (const [method, url] of [
@@ -278,7 +306,7 @@ describe('Journal v2 E2E (/v1/journal/entries, conditions, summary, /v1/house-ad
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.body);
     expect(Object.keys(body).sort()).toEqual(
-      ['byOptionKey', 'byRegion', 'byTime', 'byTrigger', 'cooccurrence', 'days', 'daysWithEntries', 'totalEntries'].sort(),
+      ['byCoping', 'byHelper', 'positive', 'byOptionKey', 'byRegion', 'byTime', 'byTrigger', 'cooccurrence', 'days', 'daysWithEntries', 'totalEntries'].sort(),
     );
     expect(body.byTime.futuro).toBeGreaterThan(0);
     expect(body.byRegion.cabeca).toBeGreaterThan(0);

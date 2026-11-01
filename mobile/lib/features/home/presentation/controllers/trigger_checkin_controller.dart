@@ -576,6 +576,18 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       TriageVertical.psicoEmocional,
       entry.items.where((i) => i.kind == JournalKeys.kindEmotional),
     );
+    // Good moments of a "Bem" entry (v2.2): done, in the person's words.
+    final positive =
+        entry.items.where((i) => i.kind == JournalKeys.kindPositive);
+    if (positive.isNotEmpty && axes.contains(TriageVertical.psicoEmocional)) {
+      completeStage(
+        vertical: TriageVertical.psicoEmocional,
+        summary: positive.map((i) => journalItemText(l10n, i)).join(' · '),
+        status: TriggerStatus.goodNormal,
+        intensity: 0,
+        at: at,
+      );
+    }
     final conditions =
         entry.items.where((i) => i.kind == JournalKeys.kindCondition);
     completeConditions(

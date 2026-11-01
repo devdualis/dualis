@@ -53,6 +53,10 @@ class ApiEndpoints {
   static const String hydrationSettings = '/v1/hydration/settings';
   static String hydrationLogItem(String id) => '/v1/hydration/log/$id';
 
+  // Daily habits (docs/bienestar/CONTRATO-JOURNAL-V2.md section 6).
+  static const String habits = '/v1/habits';
+  static String habitDay(String day) => '/v1/habits/$day';
+
   // Journal v2 read side and house ads (docs/bienestar/CONTRATO-JOURNAL-V2.md).
   static const String journalEntries = '/v1/journal/entries';
   static String journalEntry(String id) => '/v1/journal/entries/$id';
