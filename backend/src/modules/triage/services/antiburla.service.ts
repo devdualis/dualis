@@ -34,8 +34,6 @@ export class RecurrenceCheckService {
     // 14-day consistency check (ANTI-01, ANTI-02)
     // Only triggers if user states symptom started today / just now
     const isTodayPersistence =
-      selectedPersistence === 'comecou_hoje' ||
-      selectedPersistence === 'comecou_agora' ||
       selectedPersistence.includes('hoje') ||
       selectedPersistence.includes('agora');
 

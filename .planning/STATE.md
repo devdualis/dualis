@@ -5,10 +5,10 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-11-01T04:06:27.400Z"
+last_updated: "2026-11-01T15:25:03.651Z"
 last_activity: 2026-11-01
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: f0d1c82c66fd0a43548033e61d18b05ca605d9b2
+state_head: 78011649f0a5dbbd78d17ec3f87303cf10713bb8
 progress:
   total_phases: 15
   completed_phases: 10
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-11-01 - Completed quick task 261101-504: Fix the seven side-effect review findings
+Last activity: 2026-11-01 - Completed quick task 261101-h2t: Simplify backend history recurrence checks and decryption fallback
 
 Progress: [██████████] 100%
 
@@ -139,6 +139,7 @@ None yet.
 | 261031-vhh | Journal v2.2: good moments, more options, closing questions, sleep/movement/cycle habits (multi-agent: Codex, Cursor, Gemini) | 2026-10-31 | 4516fef | [261031-vhh-journal-v2-2-more-wellness-questions](./quick/261031-vhh-journal-v2-2-more-wellness-questions/) |
 | 261101-0f3 | Pin midnight-sensitive Home tests to midday (they failed right after midnight) | 2026-11-01 | 0c718ac | [261101-0f3-pin-midnight-sensitive-home-tests-to-mid](./quick/261101-0f3-pin-midnight-sensitive-home-tests-to-mid/) |
 | 261101-504 | Side effects review fixes: habits stay on their profile and in tap order, unsent habit answers survive logout, water retries count once (client id), photo saves delete only the replaced picture, Home merges journal and check-ins by time, reminders turned off elsewhere stop ringing | 2026-11-01 | f0d1c82 | [261101-504-fix-the-seven-side-effect-review-finding](./quick/261101-504-fix-the-seven-side-effect-review-finding/) |
+| 261101-h2t | Simplify backend history recurrence checks and decryption fallback; 379 unit tests and typecheck pass | 2026-11-01 | 7801164 | [261101-h2t-simplify-backend-history-recurrence-chec](./quick/261101-h2t-simplify-backend-history-recurrence-chec/) |
 
 ## Deferred Items
 

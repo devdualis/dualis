@@ -12,6 +12,23 @@ describe('RecurrenceCheckService Unit Tests (ANTI-01, ANTI-02, UC-01)', () => {
     service = new RecurrenceCheckService(mockDb);
   });
 
+  it.each([
+    ['comecou_hoje', true],
+    ['comecou_agora', true],
+    ['desde_hoje_cedo', true],
+    ['agora_mesmo', true],
+    ['ha_alguns_dias', false],
+    ['', false],
+    ['HOJE_AGORA', false],
+  ])('preserves substring matching for %j (queries: %s)', async (selectedPersistence, queries) => {
+    mockDb.transaction.mockResolvedValue([]);
+
+    expect(await service.checkHistoricalConsistency('usr-1', 'prof-usr-1', {
+      vertical: 'physical', category: 'cabeca_pescoco', selectedPersistence,
+    })).toEqual({ triggered: false });
+    expect(mockDb.transaction).toHaveBeenCalledTimes(queries ? 1 : 0);
+  });
+
   it('1. triggers the recurrence check with UC-01 empathetic dialog when identical symptom logged 4 days ago', async () => {
     const fourDaysAgo = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
     mockDb.transaction.mockImplementation(async (callback: any) => {

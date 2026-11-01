@@ -84,14 +84,7 @@ export class TriageHistoryService {
     const logs: TriageLogItemDto[] = rows.map((row) => {
       let parsedAnswers: any = null;
       if (row.stepAnswers) {
-        let rawAnswers = row.stepAnswers;
-        if (rawAnswers.startsWith('v1:') && this.encryptionService) {
-          try {
-            rawAnswers = this.encryptionService.decrypt(rawAnswers);
-          } catch {
-            // retain raw if decryption fails
-          }
-        }
+        const rawAnswers = this.decryptOrKeepRaw(row.stepAnswers);
         try {
           parsedAnswers = JSON.parse(rawAnswers);
         } catch {
@@ -101,16 +94,7 @@ export class TriageHistoryService {
 
       let decryptedNarrative: string | null = null;
       if (row.encryptedNarrative) {
-        let rawNarrative = row.encryptedNarrative;
-        if (rawNarrative.startsWith('v1:') && this.encryptionService) {
-          try {
-            decryptedNarrative = this.encryptionService.decrypt(rawNarrative);
-          } catch {
-            decryptedNarrative = rawNarrative;
-          }
-        } else {
-          decryptedNarrative = rawNarrative;
-        }
+        decryptedNarrative = this.decryptOrKeepRaw(row.encryptedNarrative);
       }
 
       let vertical: TriageLogItemDto['vertical'] = null;
@@ -233,6 +217,17 @@ export class TriageHistoryService {
 
       return { success: true, id };
     });
+  }
+
+  private decryptOrKeepRaw(value: string): string {
+    if (value.startsWith('v1:') && this.encryptionService) {
+      try {
+        return this.encryptionService.decrypt(value);
+      } catch {
+        // retain raw if decryption fails
+      }
+    }
+    return value;
   }
 
   private buildEmotionalSummary(rows: Array<typeof symptomLogs.$inferSelect>): EmotionalDayDataDto[] {
