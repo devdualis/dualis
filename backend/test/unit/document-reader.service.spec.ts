@@ -22,6 +22,10 @@ describe('DocumentReaderService', () => {
     expect(tidyName('VCM')).toBe('VCM');
     expect(tidyName('T4 LIVRE')).toBe('T4 livre');
     expect(tidyName('Hemoglobina glicada (HbA1c)')).toBe('Hemoglobina glicada (HbA1c)');
+    expect(tidyName('VITAMINA D - 25 HIDROXI')).toBe('Vitamina D - 25 hidroxi');
+    expect(tidyName('PROTEÍNA C REATIVA')).toBe('Proteína C reativa');
+    expect(tidyName('VITAMINA A')).toBe('Vitamina A');
+    expect(tidyName('COLESTEROL E FRAÇÕES')).toBe('Colesterol e frações');
     expect(sanitizeReading('lab', { values: [{ section: 'HEMOGRAMA', item: 'SEGMENTADOS :', value: '60' }] }).values).toEqual([
       { section: 'Hemograma', item: 'Segmentados', value: '60', unit: undefined, reference: undefined },
     ]);
@@ -45,6 +49,24 @@ describe('DocumentReaderService', () => {
     });
     const rx = sanitizeReading('prescription', { medications: [{ name: 'Losartana', instructions: '1 comp. de 12/12h', times: ['08:00', '20:00'] }] });
     expect(rx).toEqual({ medications: [{ name: 'Losartana', strength: undefined, instructions: '1 comp. de 12/12h' }] });
+  });
+
+  it('names "Resultado" rows after their exam and drops values without a letter or digit', () => {
+    const lab = sanitizeReading('lab', {
+      values: [
+        { section: 'ÁCIDO VALPRÓICO', item: 'Resultado', value: '109,0', unit: 'µg/mL', printedReference: '50,0 a 100,0 µg/mL' },
+        { section: 'FERRITINA', item: 'RESULTADO:', value: '447,6', unit: 'ng/mL', printedReference: '' },
+        { section: 'BACTERIOSCOPIA', item: 'Bacilos Gram Negativos', value: '...', unit: '', printedReference: '' },
+        { section: 'HEMOGRAMA', item: 'BASTONETES', value: '0', unit: '%', printedReference: '0 a 5 %' },
+      ],
+    });
+    expect(lab.values).toEqual([
+      { section: 'Ácido valpróico', item: 'Ácido valpróico', value: '109,0', unit: 'µg/mL', reference: '50,0 a 100,0 µg/mL' },
+      { section: 'Ferritina', item: 'Ferritina', value: '447,6', unit: 'ng/mL', reference: undefined },
+      { section: 'Hemograma', item: 'Bastonetes', value: '0', unit: '%', reference: '0 a 5 %' },
+    ]);
+    // Without a heading, the title names the single exam.
+    expect(sanitizeReading('lab', { title: 'CREATININA', values: [{ item: 'Resultado', value: '0,82' }] }).values?.[0].item).toBe('Creatinina');
   });
 
   it('drops columns that hold identifying labels, such as "Nasc." and "Liberado por"', () => {

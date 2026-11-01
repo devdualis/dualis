@@ -93,7 +93,8 @@ const SHORT_WORDS = new Set(['a', 'o', 'e', 'y', 'de', 'da', 'do', 'das', 'dos',
  * One spelling per exam item, so "SEGMENTADOS :" and "Segmentados:" are the same item:
  * only letters, digits and - / ( ) , . + % stay, the ends lose punctuation, and the
  * name is written in sentence case. Acronyms stay in capitals: words with digits, words
- * with capitals inside a mixed-case name (HDL, HbA1c) and, in an all-capitals name,
+ * with capitals inside a mixed-case name (HDL, HbA1c), single capital letters (Vitamina D,
+ * Hepatite B; "a", "o", "e", "y" only as the last word) and, in an all-capitals name,
  * words without vowels or of up to 3 letters (VCM, TGO).
  */
 export function tidyName(text: string): string {
@@ -102,18 +103,24 @@ export function tidyName(text: string): string {
     .replace(/\s+/g, ' ')
     .replace(/^[^\p{L}\p{N}(]+|[^\p{L}\p{N})%]+$/gu, '');
   const allCaps = clean === clean.toUpperCase();
-  const words = clean.split(' ').map((word) => {
+  const parts = clean.split(' ');
+  const words = parts.map((word, i) => {
     const letters = word.replace(/[^\p{L}]/gu, '');
     const acronym = /\p{N}/u.test(word)
       ? true
-      : letters.length < 2 || letters.slice(1) === letters.slice(1).toLowerCase()
-        ? false
-        : !allCaps || !/[aeiouáàâãéêíóôõúü]/i.test(letters) || (letters.length <= 3 && !SHORT_WORDS.has(letters.toLowerCase()));
+      : letters.length === 1
+        ? letters !== letters.toLowerCase() && (!SHORT_WORDS.has(letters.toLowerCase()) || i === parts.length - 1)
+        : letters.length < 2 || letters.slice(1) === letters.slice(1).toLowerCase()
+          ? false
+          : !allCaps || !/[aeiouáàâãéêíóôõúü]/i.test(letters) || (letters.length <= 3 && !SHORT_WORDS.has(letters.toLowerCase()));
     return acronym ? word : word.toLowerCase();
   });
   const name = words.join(' ');
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
+
+/** Column labels some labs print where the item name goes ("Resultado"). */
+const GENERIC_ITEM = /^(resultados?|results?)$/i;
 
 /** Keeps only schema fields with non-empty strings (drops anything the model adds). */
 export function sanitizeReading(kind: 'lab' | 'prescription', raw: any): DocumentReading {
@@ -130,19 +137,26 @@ export function sanitizeReading(kind: 'lab' | 'prescription', raw: any): Documen
     return { medications };
   }
   const collectedOn = isoDate(str(raw?.collectedOn, 20));
+  const title = str(raw?.title, 120);
   const values = (Array.isArray(raw?.values) ? raw.values : [])
-    .map((v: any) => ({
-      ...(str(v?.section, 120) && { section: tidyName(str(v?.section, 120)!) || undefined }),
-      item: tidyName(str(v?.item, 120) ?? ''),
-      value: str(v?.value, 60),
-      unit: str(v?.unit, 30),
-      reference: str(v?.printedReference ?? v?.reference, 200),
-    }))
-    .filter((v: any) => v.item && v.value && !/^[\d.,\s]+$/.test(v.item))
+    .map((v: any) => {
+      const section = tidyName(str(v?.section, 120) ?? '') || undefined;
+      const item = tidyName(str(v?.item, 120) ?? '');
+      return {
+        ...(section && { section }),
+        // "Resultado" is a column label, not a name: the exam heading names the row.
+        item: GENERIC_ITEM.test(item) ? section ?? (title && tidyName(title)) ?? item : item,
+        value: str(v?.value, 60),
+        unit: str(v?.unit, 30),
+        reference: str(v?.printedReference ?? v?.reference, 200),
+      };
+    })
+    // A value needs a letter or digit ("..." is not a result); an item is never a number.
+    .filter((v: any) => v.item && v.value && /[\p{L}\p{N}]/u.test(v.value) && !/^[\d.,\s]+$/.test(v.item))
     .slice(0, 200);
   return {
     // With several exams the app suggests "First exam + N exams" in the person's language.
-    title: new Set(values.map((v: any) => v.section).filter(Boolean)).size > 1 ? undefined : str(raw?.title, 120),
+    title: new Set(values.map((v: any) => v.section).filter(Boolean)).size > 1 ? undefined : title,
     labName: str(raw?.labName, 120),
     collectedOn,
     values,

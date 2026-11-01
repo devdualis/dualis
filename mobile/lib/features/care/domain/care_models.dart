@@ -206,18 +206,25 @@ const _shortWords = {'a', 'o', 'e', 'y', 'de', 'da', 'do', 'das', 'dos', 'del', 
 /// One spelling per exam item, so "SEGMENTADOS :" and "Segmentados:" are the same item
 /// (same rule as the backend's tidyName): only letters, digits and - / ( ) , . + % stay,
 /// the ends lose punctuation and the name is in sentence case. Acronyms keep capitals:
-/// words with digits, capitals inside a mixed-case name (HDL, HbA1c) and, in an
-/// all-capitals name, words without vowels or of up to 3 letters (VCM, TGO).
+/// words with digits, capitals inside a mixed-case name (HDL, HbA1c), single capital
+/// letters (Vitamina D) and, in an all-capitals name, words without vowels or of up to
+/// 3 letters (VCM, TGO).
 String tidyExamName(String text) {
   final clean = text
       .replaceAll(RegExp(r'[^\p{L}\p{N}\s\-/(),.+%]', unicode: true), ' ')
       .replaceAll(RegExp(r'\s+'), ' ')
       .replaceAll(RegExp(r'^[^\p{L}\p{N}(]+|[^\p{L}\p{N})%]+$', unicode: true), '');
   final allCaps = clean == clean.toUpperCase();
-  final name = clean.split(' ').map((word) {
+  final parts = clean.split(' ');
+  final name = parts.indexed.map((entry) {
+    final (i, word) = entry;
     final letters = word.replaceAll(RegExp(r'[^\p{L}]', unicode: true), '');
     final rest = letters.length < 2 ? '' : letters.substring(1);
     final acronym = RegExp(r'\p{N}', unicode: true).hasMatch(word) ||
+        // Single capitals: Vitamina D, Hepatite B; "a", "o", "e", "y" only as the last word.
+        (letters.length == 1 &&
+            letters != letters.toLowerCase() &&
+            (!_shortWords.contains(letters.toLowerCase()) || i == parts.length - 1)) ||
         (rest != rest.toLowerCase() &&
             (!allCaps ||
                 !RegExp('[aeiouáàâãéêíóôõúü]', caseSensitive: false).hasMatch(letters) ||

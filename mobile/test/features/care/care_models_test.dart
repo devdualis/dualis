@@ -36,6 +36,10 @@ void main() {
     expect(tidyExamName('VCM'), 'VCM');
     expect(tidyExamName('T4 LIVRE'), 'T4 livre');
     expect(tidyExamName('Hemoglobina glicada (HbA1c)'), 'Hemoglobina glicada (HbA1c)');
+    expect(tidyExamName('VITAMINA D - 25 HIDROXI'), 'Vitamina D - 25 hidroxi');
+    expect(tidyExamName('PROTEÍNA C REATIVA'), 'Proteína C reativa');
+    expect(tidyExamName('VITAMINA A'), 'Vitamina A');
+    expect(tidyExamName('COLESTEROL E FRAÇÕES'), 'Colesterol e frações');
     final v = ExamValue.fromJson({'section': 'HEMOGRAMA', 'item': 'Segmentados :', 'value': '60'});
     expect((v.section, v.item), ('Hemograma', 'Segmentados'));
   });
