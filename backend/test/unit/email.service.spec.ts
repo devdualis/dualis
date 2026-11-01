@@ -84,22 +84,39 @@ describe('EmailService (Resend)', () => {
     }
   });
 
-  it('does not call Resend without an API key and keeps the code in memory', async () => {
+  it('does not call Resend without an API key', async () => {
     delete process.env.RESEND_API_KEY;
     const service = new EmailService();
 
     await service.sendVerificationEmail('ana@example.com', '111222');
 
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(service.getLastSentCode('ana@example.com')).toBe('111222');
   });
 
-  it('does not call Resend when NODE_ENV is test', async () => {
+  it('does not call Resend when NODE_ENV is test and keeps the codes for tests', async () => {
     process.env.NODE_ENV = 'test';
+    const service = new EmailService();
 
-    await new EmailService().sendVerificationEmail('ana@example.com', '111222');
+    await service.sendVerificationEmail(' Ana@Example.com ', '111222');
+    await service.sendPasswordResetEmail('joao@example.com', '333444');
 
     expect(fetchMock).not.toHaveBeenCalled();
+    expect(service.getLastSentCode('ana@example.com')).toBe('111222');
+    expect(service.getLastSentCode('JOAO@example.com')).toBe('333444');
+  });
+
+  it.each(['production', 'development'])('keeps no code in memory when NODE_ENV is %s', async (nodeEnv) => {
+    process.env.NODE_ENV = nodeEnv;
+    for (const apiKey of ['re_test_key', undefined]) {
+      if (apiKey) process.env.RESEND_API_KEY = apiKey;
+      else delete process.env.RESEND_API_KEY;
+      const service = new EmailService();
+
+      await service.sendVerificationEmail('ana@example.com', '111222');
+      await service.sendPasswordResetEmail('ana@example.com', '333444');
+
+      expect(service.getLastSentCode('ana@example.com')).toBeUndefined();
+    }
   });
 
   it('logs a Resend rejection without the code and does not throw', async () => {

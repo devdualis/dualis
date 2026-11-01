@@ -11,7 +11,8 @@ export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private readonly apiKey: string | undefined;
   private readonly mailFrom: string;
-  private readonly sentCodesMemory = new Map<string, { code: string; sentAt: Date }>();
+  /** Last code sent to each address, kept only under NODE_ENV=test (see getLastSentCode). */
+  private readonly codesForTests = new Map<string, string>();
 
   constructor(@Optional() private readonly configService?: ConfigService) {
     this.apiKey = this.configService?.get<string>('RESEND_API_KEY') || process.env.RESEND_API_KEY;
@@ -22,7 +23,7 @@ export class EmailService {
     } else if (process.env.NODE_ENV === 'production') {
       this.logger.error('[EmailService] RESEND_API_KEY ausente em produção: nenhum e-mail será enviado.');
     } else {
-      this.logger.warn('[EmailService] RESEND_API_KEY ausente. Operando em modo de simulação (memória e console).');
+      this.logger.warn('[EmailService] RESEND_API_KEY ausente. Operando em modo de simulação (console).');
     }
   }
 
@@ -31,6 +32,13 @@ export class EmailService {
   private logCodeForSimulation(kind: string, email: string, code: string) {
     if (this.apiKey || process.env.NODE_ENV === 'production') return;
     this.logger.log(`[EmailService] Simulação: código de ${kind} para ${email}: [${code}]`);
+  }
+
+  // Only tests read sent codes back (Vitest sets NODE_ENV=test). Anywhere else codes are not
+  // kept, so a running server never holds them in plain text and the map cannot grow.
+  private rememberCodeForTests(email: string, code: string) {
+    if (process.env.NODE_ENV !== 'test') return;
+    this.codesForTests.set(email, code);
   }
 
   // Failures are logged, never thrown: the code hash is already stored and the
@@ -72,7 +80,7 @@ export class EmailService {
 
   async sendVerificationEmail(to: string, code: string, name?: string): Promise<void> {
     const normalizedEmail = to.toLowerCase().trim();
-    this.sentCodesMemory.set(normalizedEmail, { code, sentAt: new Date() });
+    this.rememberCodeForTests(normalizedEmail, code);
 
     const firstName = name?.trim().split(' ')[0];
     this.logCodeForSimulation('verificação', normalizedEmail, code);
@@ -120,13 +128,14 @@ export class EmailService {
     );
   }
 
+  /** Test helper: the last code sent to `email`, only kept under NODE_ENV=test. */
   getLastSentCode(email: string): string | undefined {
-    return this.sentCodesMemory.get(email.toLowerCase().trim())?.code;
+    return this.codesForTests.get(email.toLowerCase().trim());
   }
 
   async sendPasswordResetEmail(to: string, code: string, name?: string): Promise<void> {
     const normalizedEmail = to.toLowerCase().trim();
-    this.sentCodesMemory.set(normalizedEmail, { code, sentAt: new Date() });
+    this.rememberCodeForTests(normalizedEmail, code);
 
     const firstName = name?.trim().split(' ')[0];
     this.logCodeForSimulation('redefinição de senha', normalizedEmail, code);

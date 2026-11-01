@@ -92,7 +92,7 @@ describe('Security Regression: auth codes and sessions', () => {
     expect(role.rows[0]).toEqual({ rolsuper: false, rolbypassrls: false });
 
     const encryption = new EncryptionService({ get: () => randomBytes(32).toString('hex') } as any);
-    email = new EmailService({ get: () => undefined } as any); // no API key: codes stay in memory
+    email = new EmailService({ get: () => undefined } as any); // no API key; NODE_ENV=test keeps codes for getLastSentCode
     auth = new AuthService(
       drizzle(appPool, { schema }) as any,
       new JwtService({ secret: randomBytes(32).toString('hex') }),
