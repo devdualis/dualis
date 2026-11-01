@@ -10,6 +10,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import { MINUTE_MS, RateLimiter } from '../../common/http/rate-limiter';
 import { SafetyEventsService } from './safety-events.service';
 import { CreateSafetyEventDto } from './dto/create-safety-event.dto';
 import { LegacyEmergencyEventDto } from './dto/legacy-emergency-event.dto';
@@ -24,6 +25,9 @@ import {
 /**
  * Audit of the static help resources. Session and X-Profile-Id are optional, and read
  * access is enough: reaching help must never be blocked by a login or a permission level.
+ * Every call stores a row, so calls are capped (429): per account when signed in, per IP and
+ * in total when anonymous. The app sends these events fire-and-forget, so a 429 never delays
+ * the help screen or the call.
  */
 @Controller({ version: '1' })
 @UseGuards(OptionalJwtAuthGuard, ProfileContextGuard)
@@ -32,7 +36,17 @@ export class SafetyEventsController {
   constructor(
     @Inject(SafetyEventsService)
     private readonly safetyEventsService: SafetyEventsService,
+    @Inject(RateLimiter) private readonly rateLimiter: RateLimiter,
   ) {}
+
+  private limit(req: any): void {
+    if (req.user?.id) {
+      this.rateLimiter.hit(`safety-event:user:${req.user.id}`, 30, MINUTE_MS);
+      return;
+    }
+    this.rateLimiter.hit(`safety-event:ip:${req.ip}`, 10, MINUTE_MS);
+    this.rateLimiter.hit('safety-event:anonymous', 30, MINUTE_MS);
+  }
 
   @Post('journal/safety-event')
   @HttpCode(HttpStatus.CREATED)
@@ -49,6 +63,7 @@ export class SafetyEventsController {
     @Req() req: any,
     @ActiveProfile() profile?: ProfileContext,
   ) {
+    this.limit(req);
     const event = await this.safetyEventsService.recordSafetyEvent(
       dto,
       req.user?.id || null,
@@ -73,6 +88,7 @@ export class SafetyEventsController {
     @Req() req: any,
     @ActiveProfile() profile?: ProfileContext,
   ) {
+    this.limit(req);
     const event = await this.safetyEventsService.recordLegacyEmergencyEvent(
       dto,
       req.user?.id || null,
