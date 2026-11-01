@@ -2,13 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 
-enum DualisNavTab {
-  home,
-  history,
-  hydration,
-  care;
-}
-
 class DualisBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;

@@ -72,7 +72,7 @@ void main() {
       DualisBottomNavBar bar({bool care = false}) =>
           DualisBottomNavBar(currentIndex: 0, onTap: (_) {}, onEmergencyTap: () {}, showCare: care);
       expect(bar().emergencyIndex, 3);
-      expect(bar(care: true).emergencyIndex, DualisNavTab.values.length);
+      expect(bar(care: true).emergencyIndex, 4);
     });
 
     testWidgets('Emergency destination is crimson and does not change tab index',

@@ -160,14 +160,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           onTap: () => context.push(RoutePaths.library),
         ),
         const SizedBox(width: 8),
-        _AppBarIconButton(
-          key: const Key('home_settings_button'),
-          icon: Icons.settings_outlined,
-          color: AppColors.clinicalTealDark,
-          tooltip: 'Configurações',
-          onTap: () => context.push(RoutePaths.settings),
-        ),
-        const SizedBox(width: 8),
       ];
     } else if (_currentTabIndex == 1) {
       appBarTitle = Text(
@@ -199,14 +191,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           onTap: () => context.push(RoutePaths.library),
         ),
         const SizedBox(width: 8),
-        _AppBarIconButton(
-          key: const Key('home_settings_button'),
-          icon: Icons.settings_outlined,
-          color: AppColors.clinicalTealDark,
-          tooltip: 'Configurações',
-          onTap: () => context.push(RoutePaths.settings),
-        ),
-        const SizedBox(width: 8),
       ];
     } else if (_currentTabIndex == 3 && careLocked) {
       appBarTitle = Text(
@@ -217,16 +201,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           color: AppColors.textPrimaryLight,
         ),
       );
-      appBarActions = [
-        _AppBarIconButton(
-          key: const Key('home_settings_button'),
-          icon: Icons.settings_outlined,
-          color: AppColors.clinicalTealDark,
-          tooltip: 'Configurações',
-          onTap: () => context.push(RoutePaths.settings),
-        ),
-        const SizedBox(width: 8),
-      ];
+      appBarActions = [];
     } else if (_currentTabIndex == 3) {
       appBarTitle = Text(
         l10n.careHubTitle,
@@ -238,14 +213,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
       appBarActions = [
         const ProfileAppBarPill(),
-        const SizedBox(width: 8),
-        _AppBarIconButton(
-          key: const Key('home_settings_button'),
-          icon: Icons.settings_outlined,
-          color: AppColors.clinicalTealDark,
-          tooltip: 'Configurações',
-          onTap: () => context.push(RoutePaths.settings),
-        ),
         const SizedBox(width: 8),
       ];
     } else {
@@ -270,16 +237,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           onTap: () => context.push(RoutePaths.library),
         ),
         const SizedBox(width: 8),
-        _AppBarIconButton(
-          key: const Key('home_settings_button'),
-          icon: Icons.settings_outlined,
-          color: AppColors.clinicalTealDark,
-          tooltip: 'Configurações',
-          onTap: () => context.push(RoutePaths.settings),
-        ),
-        const SizedBox(width: 8),
       ];
     }
+
+    appBarActions = [
+      ...appBarActions,
+      _AppBarIconButton(
+        key: const Key('home_settings_button'),
+        icon: Icons.settings_outlined,
+        color: AppColors.clinicalTealDark,
+        tooltip: 'Configurações',
+        onTap: () => context.push(RoutePaths.settings),
+      ),
+      const SizedBox(width: 8),
+    ];
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -332,16 +303,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     TriggerCheckInState triggerState,
   ) {
     switch (_currentTabIndex) {
-      case 0:
-        return _buildHomeTab(
-          context,
-          user,
-          cardDisplayName,
-          cardDisplaySubtitle,
-          cardAvatarInitial,
-          viewOnlyActive,
-          triggerState,
-        );
       case 1:
         return const HistoricalDashboardScreen(isEmbedded: true);
       case 2:

@@ -205,5 +205,3 @@ GoRouter createRouter({
     ],
   );
 }
-
-final GoRouter appRouter = createRouter();
