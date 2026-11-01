@@ -118,6 +118,13 @@ class _PrescriptionReviewScreenState extends ConsumerState<PrescriptionReviewScr
               const SizedBox(height: 10),
               DocumentActions(doc: doc),
               if (items.isEmpty && doc.status != DocumentStatus.failed) CareEmpty(l10n.careRxNothingRead, icon: Icons.receipt_long_outlined),
+              // Nothing read: the file may be an exam uploaded as a prescription.
+              if (items.isEmpty && (doc.status == DocumentStatus.review || doc.status == DocumentStatus.failed)) ...[
+                const SizedBox(height: 10),
+                CareNote(l10n.careRxMaybeExam, icon: Icons.science_outlined),
+                const SizedBox(height: 8),
+                ReprocessDocumentButton(documentId: doc.id, asExam: true),
+              ],
               for (var i = 0; i < items.length; i++) ...[
                 const SizedBox(height: 10),
                 CareCard(

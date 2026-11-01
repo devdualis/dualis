@@ -39,10 +39,12 @@ Future<void> openOriginalDocument(BuildContext context, WidgetRef ref, CareDocum
 }
 
 /// Sends the stored file through the reader again, then returns to the list,
-/// which shows it as "reading" until it finishes.
+/// which shows it as "reading" until it finishes. With [asExam] the file is
+/// read as an exam (a lab report uploaded as a prescription).
 class ReprocessDocumentButton extends ConsumerStatefulWidget {
-  const ReprocessDocumentButton({super.key, required this.documentId});
+  const ReprocessDocumentButton({super.key, required this.documentId, this.asExam = false});
   final String documentId;
+  final bool asExam;
 
   @override
   ConsumerState<ReprocessDocumentButton> createState() => _ReprocessDocumentButtonState();
@@ -55,9 +57,9 @@ class _ReprocessDocumentButtonState extends ConsumerState<ReprocessDocumentButto
     final l10n = AppLocalizations.of(context);
     setState(() => _busy = true);
     try {
-      await ref.read(careActionsProvider).reprocess(widget.documentId);
+      await ref.read(careActionsProvider).reprocess(widget.documentId, kind: widget.asExam ? DocumentKind.lab : null);
       if (!mounted) return;
-      careSnack(context, l10n.careReadingAgain);
+      careSnack(context, widget.asExam ? l10n.careReadingAsExam : l10n.careReadingAgain);
       await Navigator.of(context).maybePop();
     } catch (_) {
       if (mounted) careSnack(context, l10n.careSaveError);
@@ -68,14 +70,15 @@ class _ReprocessDocumentButtonState extends ConsumerState<ReprocessDocumentButto
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return OutlinedButton.icon(
-      key: const Key('document_reprocess'),
+      key: Key(widget.asExam ? 'document_reprocess_as_exam' : 'document_reprocess'),
       style: OutlinedButton.styleFrom(foregroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(46)),
       onPressed: _busy ? null : _reprocess,
       icon: _busy
           ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-          : const Icon(Icons.refresh),
-      label: Text(AppLocalizations.of(context).careReadAgain),
+          : Icon(widget.asExam ? Icons.science_outlined : Icons.refresh),
+      label: Text(widget.asExam ? l10n.careReadAsExam : l10n.careReadAgain),
     );
   }
 }

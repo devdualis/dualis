@@ -177,6 +177,11 @@ export class ReviewDocumentDto {
   @IsOptional() @IsString() @MaxLength(2000) note?: string;
 }
 
+/** Re-read a document, optionally as another kind (a lab report uploaded as a prescription). */
+export class ReprocessDocumentDto {
+  @IsOptional() @IsIn(['lab', 'prescription']) kind?: 'lab' | 'prescription';
+}
+
 export class ListDocumentsQueryDto {
   @IsOptional() @IsIn(CARE_DOCUMENT_KINDS) kind?: CareDocumentKind;
 }

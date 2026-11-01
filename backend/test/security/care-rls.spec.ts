@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { readdirSync, readFileSync } from 'node:fs';
@@ -29,7 +29,7 @@ describe('Security Regression: 0021 premium care (care_records, care_documents R
   let appPool: Pool;
   let service: CareService;
   let encryption: EncryptionService;
-  let reader: { read: () => Promise<unknown> };
+  let reader: { read: (kind?: string) => Promise<unknown> };
   let readerResult: unknown = { values: [{ item: 'Colesterol total', value: '212', unit: 'mg/dL', reference: 'até 190' }] };
   let isDbAvailable = false;
 
@@ -250,6 +250,30 @@ describe('Security Regression: 0021 premium care (care_records, care_documents R
     const after = await service.getDocument(ownerA, primaryA, doc.id);
     expect(after).toMatchObject({ status: 'failed', error: 'read_failed' });
     expect((await service.getDocumentFile(ownerA, primaryA, doc.id)).file.equals(img)).toBe(true);
+  });
+
+  it('a prescription that is really an exam can be read again as an exam', async (ctx) => {
+    if (!isDbAvailable) return ctx.skip();
+    const kinds: (string | undefined)[] = [];
+    reader.read = async (kind) => {
+      kinds.push(kind);
+      return kind === 'lab' ? readerResult : { medications: [] };
+    };
+    const pdf = Buffer.from('%PDF-1.4 lab report sent as a prescription');
+    const doc = await service.uploadDocument(ownerA, primaryA, { kind: 'prescription', mime: 'application/pdf', fileBase64: pdf.toString('base64'), read: true });
+    await service.readDocument(ownerA, doc.id, 'prescription', 'application/pdf', pdf, {});
+    expect(await service.getDocument(ownerA, primaryA, doc.id)).toMatchObject({ kind: 'prescription', status: 'review', data: { medications: [] } });
+
+    // A viewer cannot change it; the owner re-reads it as an exam.
+    await expect(service.reprocessDocument(strangerD, primaryA, doc.id, 'lab')).rejects.toThrow('Document not found');
+    const again = await service.reprocessDocument(ownerA, primaryA, doc.id, 'lab');
+    expect(again).toMatchObject({ id: doc.id, kind: 'lab', status: 'processing' });
+    await vi.waitFor(async () => expect((await service.getDocument(ownerA, primaryA, doc.id)).status).toBe('review'));
+    const read = await service.getDocument(ownerA, primaryA, doc.id);
+    expect(read.kind).toBe('lab');
+    expect(read.data.values).toEqual([{ item: 'Colesterol total', value: '212', unit: 'mg/dL', reference: 'até 190', confirmed: false }]);
+    expect(read.data.medications).toBeUndefined();
+    expect(kinds.at(-1)).toBe('lab');
   });
 
   it('the same file is stored once per profile and never read twice', async (ctx) => {

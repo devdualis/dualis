@@ -95,6 +95,29 @@ describe('CareService daily document limit (uploads and re-reads)', () => {
     expect(builders).toHaveLength(2);
   });
 
+  it.each([
+    ['as an exam when asked (a lab report uploaded as a prescription)', 'lab' as const, { kind: 'lab', status: 'processing' }],
+    ['with the same kind by default', undefined, { status: 'processing' }],
+  ])('re-reads %s', async (_label, kind, expectedSet) => {
+    const readAs = kind ?? 'prescription';
+    queue.push(
+      [row({ kind: 'prescription' })],
+      [{ requests: 0 }],
+      undefined,
+      [{ file: encryption.encryptBuffer(file) }],
+      [row({ kind: readAs, status: 'processing' })],
+    );
+    const service = serviceWith();
+    const result = await service.reprocessDocument('usr-1', 'prof-1', 'doc-1', kind);
+
+    expect(result).toMatchObject({ kind: readAs, status: 'processing' });
+    const set = builders[4].builder.calls.set[0][0];
+    expect(set).toMatchObject(expectedSet);
+    if (!kind) expect(set).not.toHaveProperty('kind');
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(service.readDocument).toHaveBeenCalledWith('usr-1', 'doc-1', readAs, 'application/pdf', file, { title: 'Hemograma' });
+  });
+
   it('takes the limit from CARE_DAILY_DOCUMENT_LIMIT', async () => {
     queue.push([{ requests: 2 }]);
     await expect(upload(serviceWith({ CARE_DAILY_DOCUMENT_LIMIT: '2' }))).rejects.toMatchObject({

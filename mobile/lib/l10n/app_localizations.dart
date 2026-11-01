@@ -6424,6 +6424,24 @@ abstract class AppLocalizations {
   /// **'Nenhum medicamento lido.'**
   String get careRxNothingRead;
 
+  /// No description provided for @careRxMaybeExam.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este arquivo é um exame, e não uma receita? Leia-o como exame.'**
+  String get careRxMaybeExam;
+
+  /// No description provided for @careReadAsExam.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ler como exame'**
+  String get careReadAsExam;
+
+  /// No description provided for @careReadingAsExam.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lendo como exame. Ele vai aparecer em Exames.'**
+  String get careReadingAsExam;
+
   /// No description provided for @careRxName.
   ///
   /// In pt, this message translates to:

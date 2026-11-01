@@ -3719,6 +3719,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get careRxNothingRead => 'No medicines read.';
 
   @override
+  String get careRxMaybeExam =>
+      'Is this file an exam, not a prescription? Read it as an exam.';
+
+  @override
+  String get careReadAsExam => 'Read as an exam';
+
+  @override
+  String get careReadingAsExam =>
+      'Reading it as an exam. It will appear under Exams.';
+
+  @override
   String get careRxName => 'Name read';
 
   @override

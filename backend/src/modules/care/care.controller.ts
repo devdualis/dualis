@@ -27,6 +27,7 @@ import {
   CreateIntakeDto,
   ListCareRecordsQueryDto,
   ListDocumentsQueryDto,
+  ReprocessDocumentDto,
   ReviewDocumentDto,
   UpdateCareRecordDto,
   UploadDocumentDto,
@@ -133,8 +134,13 @@ export class CareController {
   @Post('documents/:id/reprocess')
   @HttpCode(HttpStatus.ACCEPTED)
   @ProfileAccess('write')
-  reprocess(@Request() req: any, @ActiveProfile() profile: ProfileContext, @Param('id', new ParseUUIDPipe()) id: string) {
-    return this.care.reprocessDocument(userIdOf(req), profile.profileId, id);
+  reprocess(
+    @Request() req: any,
+    @ActiveProfile() profile: ProfileContext,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: ReprocessDocumentDto,
+  ) {
+    return this.care.reprocessDocument(userIdOf(req), profile.profileId, id, dto?.kind);
   }
 
   @Delete('documents/:id')

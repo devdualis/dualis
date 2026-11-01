@@ -327,8 +327,16 @@ export class CareService {
     });
   }
 
-  /** Reads the stored file again. Confirmed (ready) documents are never overwritten. */
-  async reprocessDocument(userId: string, profileId: string, id: string): Promise<CareDocumentResponse> {
+  /**
+   * Reads the stored file again, as `kind` when given (an exam uploaded as a prescription).
+   * Confirmed (ready) documents are never overwritten.
+   */
+  async reprocessDocument(
+    userId: string,
+    profileId: string,
+    id: string,
+    kind?: 'lab' | 'prescription',
+  ): Promise<CareDocumentResponse> {
     const { row, file, base } = await this.databaseService.withRls(userId, async (tx) => {
       const existing = await this.findDocument(tx, profileId, id);
       if (existing.kind === 'other' || !['failed', 'review'].includes(existing.status)) {
@@ -339,7 +347,7 @@ export class CareService {
       const [stored] = await tx.select({ file: careDocuments.file }).from(careDocuments).where(eq(careDocuments.id, id));
       const [updated] = await tx
         .update(careDocuments)
-        .set({ status: 'processing', error: null, updatedAt: new Date() })
+        .set({ ...(kind && { kind }), status: 'processing', error: null, updatedAt: new Date() })
         .where(eq(careDocuments.id, id))
         .returning(documentMeta);
       const base: DocumentData = current.title ? { title: current.title } : {};

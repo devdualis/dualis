@@ -145,8 +145,13 @@ class CareApi {
     return CareDocument.fromJson(_map(response.data));
   }
 
-  Future<CareDocument> reprocess(String id) async {
-    final response = await _apiClient.post(CareEndpoints.reprocess(id), options: await _options());
+  /// Reads the stored file again, as [kind] when given (an exam uploaded as a prescription).
+  Future<CareDocument> reprocess(String id, {DocumentKind? kind}) async {
+    final response = await _apiClient.post(
+      CareEndpoints.reprocess(id),
+      data: kind == null ? null : {'kind': kind.name},
+      options: await _options(),
+    );
     return CareDocument.fromJson(_map(response.data));
   }
 

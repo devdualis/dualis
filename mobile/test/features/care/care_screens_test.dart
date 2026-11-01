@@ -14,6 +14,7 @@ import 'package:dualis_mobile/features/care/presentation/screens/exam_review_scr
 import 'package:dualis_mobile/features/care/presentation/screens/exams_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/medications_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/place_picker_screen.dart';
+import 'package:dualis_mobile/features/care/presentation/screens/prescription_review_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/screens/vaccines_screen.dart';
 import 'package:dualis_mobile/features/care/presentation/widgets/exam_values_list.dart';
 import 'package:dualis_mobile/features/home/presentation/widgets/dualis_bottom_nav_bar.dart';
@@ -99,8 +100,8 @@ class FakeCareApi implements CareApi {
   final List<String> reprocessed = [];
 
   @override
-  Future<CareDocument> reprocess(String id) async {
-    reprocessed.add(id);
+  Future<CareDocument> reprocess(String id, {DocumentKind? kind}) async {
+    reprocessed.add(kind == null ? id : '$id:${kind.name}');
     return docs.firstWhere((d) => d.id == id);
   }
 
@@ -384,6 +385,32 @@ void main() {
     await tester.tap(find.text(pt.careDelete).last);
     await tester.pumpAndSettle();
     expect(api.docs, isEmpty);
+  });
+
+  testWidgets('a prescription with no medicines read offers to read the file as an exam', (tester) async {
+    final api = FakeCareApi();
+    CareDocument rx(String id, Map<String, dynamic> data) => CareDocument(
+        id: id, kind: DocumentKind.prescription, mime: 'application/pdf', status: DocumentStatus.review, createdAt: DateTime(2026, 11, 1), data: data);
+    api.docs.add(rx('rx1', const {'medications': []}));
+    await pump(tester, const PrescriptionReviewScreen(documentId: 'rx1'), api: api);
+    expect(find.text(pt.careRxMaybeExam), findsOneWidget);
+    await tester.tap(find.byKey(const Key('document_reprocess_as_exam')));
+    await tester.pump();
+    expect(api.reprocessed, ['rx1:lab']);
+    expect(find.text(pt.careReadingAsExam), findsOneWidget);
+    await tester.pumpAndSettle();
+
+    api.docs
+      ..clear()
+      ..add(rx('rx2', const {
+        'medications': [
+          {'name': 'Losartana', 'strength': '50 mg'},
+        ],
+      }));
+    // A new key: the same screen type at the same place would keep rx1's state.
+    await pump(tester, const PrescriptionReviewScreen(key: ValueKey('rx2'), documentId: 'rx2'), api: api);
+    expect(find.text('Losartana'), findsOneWidget);
+    expect(find.byKey(const Key('document_reprocess_as_exam')), findsNothing);
   });
 
   testWidgets('a reading with the same exams as another document asks to discard or keep both', (tester) async {

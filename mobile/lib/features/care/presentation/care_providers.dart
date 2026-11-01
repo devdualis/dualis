@@ -82,8 +82,8 @@ class CareActions {
     return doc;
   }
 
-  Future<CareDocument> reprocess(String id) async {
-    final doc = await _api.reprocess(id);
+  Future<CareDocument> reprocess(String id, {DocumentKind? kind}) async {
+    final doc = await _api.reprocess(id, kind: kind);
     _ref.invalidate(careDocumentsProvider);
     _ref.invalidate(careDocumentProvider(id));
     return doc;
