@@ -5,10 +5,10 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-11-01T15:25:03.651Z"
+last_updated: "2026-11-01T20:29:46.638Z"
 last_activity: 2026-11-01
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: 78011649f0a5dbbd78d17ec3f87303cf10713bb8
+state_head: f260fa46ce8b72f6a277f0357c5b413954c26e5d
 progress:
   total_phases: 15
   completed_phases: 10
@@ -101,6 +101,7 @@ None yet.
 | 261030-drj | Leitura de exames: linhas da tabela pelas caixas do Vision (% e /mm³ em linhas próprias), seção por exame, data da coleta dd/mm/aaaa, laboratório pelo logo, sem data de nascimento nem nomes de médicos no texto enviado ao Gemini | 2026-10-30 | (this commit) | [261030-drj-fix-lab-exam-reading-layout-sections](./quick/261030-drj-fix-lab-exam-reading-layout-sections/) |
 | 261029-gx2 | Gráficos consolidados v2.0: Emoções (E1–E3), Corpo (F1–F3), Água (H1–H4) e calendário Juntos (C1) no histórico; aba Água com H2/H3 e Desfazer | 2026-10-29 | d76bdbb | [261029-gx2-graficos-consolidados-v2](./quick/261029-gx2-graficos-consolidados-v2/) |
 | 261028-jv21 | Journal v2.1 mobile flow: Bem/Não tão bem with icons, axis from Home card, conditions on body screen, area + sensation fields, side-aware body tree, Home marks only the entry axis | 2026-10-28 | (this commit) | [261028-jv21-fluxo-registro-mobile](./quick/261028-jv21-fluxo-registro-mobile/) |
+| 261028-jv21 | Diário v2.1 backend: área por registro, sensação, árvore física com lado, migração 0020 | 2026-10-28 | 0e8c3aa | [261028-jv21-diario-v2-1-backend](./quick/261028-jv21-diario-v2-1-backend/) |
 | 261028-hc1 | Histórico em abas Psicoemocional/Físico (7/30/90 dias, mapa, conexões, linha do tempo) e menu sem Meu Dia | 2026-10-28 | 25a0ec2 | [261028-hc1-historico-duas-abas-e-menu](./quick/261028-hc1-historico-duas-abas-e-menu/) |
 | 260926-en3 | Configure API_BASE_URL default in mobile-release workflow (APK builds now target production Cloud Run backend instead of emulator-only 10.0.2.2) | 2026-09-26 | 05a39f4 | [260926-en3-configure-api-base-url-default-in-mobile](./quick/260926-en3-configure-api-base-url-default-in-mobile/) |
 | 260925-np5 | Fix psycho-emotional intensity badge showing Intensa (4-5) for level 3 records on Today result and Home check-in cards | 2026-09-25 | uncommitted | [260925-np5-fix-psycho-emotional-intensity-badge-sho](./quick/260925-np5-fix-psycho-emotional-intensity-badge-sho/) |
@@ -133,13 +134,17 @@ None yet.
 | 261030-o69 | Real house ads (Premium, ZOC, e-BEF) and Premium promo on the care tab in the free build | 2026-10-30 | f6a1819 | [261030-o69-anuncios-reales-zoc-e-bef-premium-y-cora](./quick/261030-o69-anuncios-reales-zoc-e-bef-premium-y-cora/) |
 | 261030-vdx | Convites de compartilhamento familiar: códigos de 10 caracteres, limite de 5 tentativas erradas por conta a cada 15 min (429) e o titular vê quem aceitou (nome e e-mail) | 2026-10-30 | c1f3e68 | [261030-vdx-harden-family-sharing-invites-longer-cod](./quick/261030-vdx-harden-family-sharing-invites-longer-cod/) |
 | 261030-vao | Auth security fixes: rate limits, code caps, session revocation, anti-enumeration, picture and consent IP | 2026-10-30 | fd0a57a | [261030-vao-auth-security-fixes-rate-limits-code-cap](./quick/261030-vao-auth-security-fixes-rate-limits-code-cap/) |
+| 261031-u5c | Simplify lab exam model and history table; 30 care tests pass, analysis clean, pushed to main | 2026-10-31 | 7ded8fb | [261031-u5c-simplify-lab-exam-model-and-history-tabl](./quick/261031-u5c-simplify-lab-exam-model-and-history-tabl/) |
 | 261031-u8e | Security sweep fixes: old profile pictures deleted on change and on account deletion (no links in logs), safety-event calls capped with 429, Android build token read-only | 2026-10-31 | 3d3f804 | [261031-u8e-security-sweep-fixes-delete-avatar-files](./quick/261031-u8e-security-sweep-fixes-delete-avatar-files/) |
 | 261031-u9e | Varredura de segurança (legal): códigos de e-mail ficam na memória só nos testes; a exportação de dados (LGPD) inclui Meus cuidados (registros e documentos, sem os arquivos originais) | 2026-10-31 | f046d08 | [261031-u9e-keep-email-codes-in-memory-only-in-tests](./quick/261031-u9e-keep-email-codes-in-memory-only-in-tests/) |
 | 261031-uso | Profiles and safety-event sweep fixes: help-event logs keep only the action, help events stay on the caller's own profiles, profiles take and return no picture link | 2026-10-31 | 0209c51 | [261031-uso-close-profiles-and-safety-event-sweep-fi](./quick/261031-uso-close-profiles-and-safety-event-sweep-fi/) |
 | 261031-vhh | Journal v2.2: good moments, more options, closing questions, sleep/movement/cycle habits (multi-agent: Codex, Cursor, Gemini) | 2026-10-31 | 4516fef | [261031-vhh-journal-v2-2-more-wellness-questions](./quick/261031-vhh-journal-v2-2-more-wellness-questions/) |
 | 261101-0f3 | Pin midnight-sensitive Home tests to midday (they failed right after midnight) | 2026-11-01 | 0c718ac | [261101-0f3-pin-midnight-sensitive-home-tests-to-mid](./quick/261101-0f3-pin-midnight-sensitive-home-tests-to-mid/) |
 | 261101-504 | Side effects review fixes: habits stay on their profile and in tap order, unsent habit answers survive logout, water retries count once (client id), photo saves delete only the replaced picture, Home merges journal and check-ins by time, reminders turned off elsewhere stop ringing | 2026-11-01 | f0d1c82 | [261101-504-fix-the-seven-side-effect-review-finding](./quick/261101-504-fix-the-seven-side-effect-review-finding/) |
+| 261101-ckz | Simplify mobile daily check-in: remove unused dialog and decision code, drop an impossible fallback, share narrative cleanup; 643 Flutter tests and analysis pass | 2026-11-01 | 09d3d71 | [261101-ckz-simplify-mobile-daily-check-in-remove-un](./quick/261101-ckz-simplify-mobile-daily-check-in-remove-un/) |
 | 261101-h2t | Simplify backend history recurrence checks and decryption fallback; 379 unit tests and typecheck pass | 2026-11-01 | 7801164 | [261101-h2t-simplify-backend-history-recurrence-chec](./quick/261101-h2t-simplify-backend-history-recurrence-chec/) |
+| 261101-nsb | Prescription with no medicines read can be read again as an exam (reprocess takes an optional kind; 'Ler como exame' button); production file fingerprint backfill run (2 filled) | 2026-11-01 | 570dce1 | [261101-nsb-read-a-prescription-upload-as-an-exam-wh](./quick/261101-nsb-read-a-prescription-upload-as-an-exam-wh/) |
+| 261101-o6w | Exam reading guards: Resultado rows take the exam name, values need a letter or digit, single capitals kept (Vitamina D); old confirmed readings identified as the source of the zero and Resultado rows | 2026-11-01 | f260fa4 | [261101-o6w-exam-reading-guards-resultado-takes-the-](./quick/261101-o6w-exam-reading-guards-resultado-takes-the-/) |
 
 ## Deferred Items
 
