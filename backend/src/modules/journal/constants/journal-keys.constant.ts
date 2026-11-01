@@ -28,7 +28,7 @@ export const EMOTIONAL_TREE = {
 export const PHYSICAL_TREE = {
   cabeca: {
     pressao: ['temporas', 'latejando'],
-    sentidos: ['garganta', 'olhos'],
+    sentidos: ['garganta', 'olhos'], // front only
     rosto: ['tontura', 'nariz', 'ouvido', 'mandibula'], // front only
     nuca: ['rigida', 'pontada'], // back only
   },
