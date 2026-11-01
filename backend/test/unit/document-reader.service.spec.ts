@@ -51,19 +51,21 @@ describe('DocumentReaderService', () => {
     expect(rx).toEqual({ medications: [{ name: 'Losartana', strength: undefined, instructions: '1 comp. de 12/12h' }] });
   });
 
-  it('names "Resultado" rows after their exam and drops values without a letter or digit', () => {
+  it('names "Resultado" rows after their exam and drops values that are only dots', () => {
     const lab = sanitizeReading('lab', {
       values: [
         { section: 'ÁCIDO VALPRÓICO', item: 'Resultado', value: '109,0', unit: 'µg/mL', printedReference: '50,0 a 100,0 µg/mL' },
         { section: 'FERRITINA', item: 'RESULTADO:', value: '447,6', unit: 'ng/mL', printedReference: '' },
         { section: 'BACTERIOSCOPIA', item: 'Bacilos Gram Negativos', value: '...', unit: '', printedReference: '' },
         { section: 'HEMOGRAMA', item: 'BASTONETES', value: '0', unit: '%', printedReference: '0 a 5 %' },
+        { section: 'URINA', item: 'Células epiteliais', value: '++', unit: '', printedReference: '+' },
       ],
     });
     expect(lab.values).toEqual([
       { section: 'Ácido valpróico', item: 'Ácido valpróico', value: '109,0', unit: 'µg/mL', reference: '50,0 a 100,0 µg/mL' },
       { section: 'Ferritina', item: 'Ferritina', value: '447,6', unit: 'ng/mL', reference: undefined },
       { section: 'Hemograma', item: 'Bastonetes', value: '0', unit: '%', reference: '0 a 5 %' },
+      { section: 'Urina', item: 'Células epiteliais', value: '++', unit: undefined, reference: '+' },
     ]);
     // Without a heading, the title names the single exam.
     expect(sanitizeReading('lab', { title: 'CREATININA', values: [{ item: 'Resultado', value: '0,82' }] }).values?.[0].item).toBe('Creatinina');

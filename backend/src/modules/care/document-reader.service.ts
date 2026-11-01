@@ -151,8 +151,8 @@ export function sanitizeReading(kind: 'lab' | 'prescription', raw: any): Documen
         reference: str(v?.printedReference ?? v?.reference, 200),
       };
     })
-    // A value needs a letter or digit ("..." is not a result); an item is never a number.
-    .filter((v: any) => v.item && v.value && /[\p{L}\p{N}]/u.test(v.value) && !/^[\d.,\s]+$/.test(v.item))
+    // Dots alone ("...") are not a result ("++" is); an item is never a number.
+    .filter((v: any) => v.item && v.value && !/^[.…·_\s]+$/.test(v.value) && !/^[\d.,\s]+$/.test(v.item))
     .slice(0, 200);
   return {
     // With several exams the app suggests "First exam + N exams" in the person's language.
