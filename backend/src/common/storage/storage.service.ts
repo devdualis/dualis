@@ -2,6 +2,11 @@ import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
+/** Names per `list` call when deleting a person's pictures. */
+const AVATAR_PAGE_SIZE = 100;
+/** Bound on `list` calls per cleanup, so a folder that never empties cannot loop forever. */
+const MAX_AVATAR_PAGES = 20;
+
 @Injectable()
 export class StorageService {
   private readonly logger = new Logger(StorageService.name);
@@ -134,15 +139,46 @@ export class StorageService {
         .from(this.bucketName)
         .getPublicUrl(data.path);
 
-      this.logger.log(
-        `Uploaded avatar for user ${userId} to Supabase Storage: ${publicData.publicUrl}`,
-      );
       return publicData.publicUrl;
     } catch (err) {
       this.logger.warn(
         `Error processing avatar in storage: ${(err as Error).message}. Storing in DB directly.`,
       );
       return picture;
+    }
+  }
+
+  /**
+   * Deletes the person's uploaded pictures (`<userId>/` in the bucket) except the file `keep`
+   * links to: pass the picture now in use after a change, or nothing once the account is
+   * deleted. Failures are logged and never thrown.
+   */
+  async removeAvatars(userId: string, keep?: string | null): Promise<void> {
+    if (!this.supabase) return;
+
+    const folder = `${this.bucketName}/${userId}/`;
+    const keepName = keep?.includes(folder)
+      ? keep.slice(keep.indexOf(folder) + folder.length).split('?')[0]
+      : null;
+    const bucket = this.supabase.storage.from(this.bucketName);
+
+    try {
+      // Removing a page of names brings the next ones to the first page.
+      for (let page = 0; page < MAX_AVATAR_PAGES; page++) {
+        const { data, error } = await bucket.list(userId, { limit: AVATAR_PAGE_SIZE });
+        if (error) throw error;
+        const paths = data
+          .filter((file) => file.name !== keepName)
+          .map((file) => `${userId}/${file.name}`);
+        if (paths.length === 0) return;
+        const { error: removeError } = await bucket.remove(paths);
+        if (removeError) throw removeError;
+        if (data.length < AVATAR_PAGE_SIZE) return;
+      }
+    } catch (err) {
+      this.logger.warn(
+        `Could not delete old pictures of user ${userId}: ${(err as Error).message}`,
+      );
     }
   }
 }

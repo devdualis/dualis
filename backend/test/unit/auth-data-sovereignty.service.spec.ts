@@ -364,5 +364,37 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       expect(res.message).toContain('LGPD Art. 18, VI');
       expect(mockTxDelete).toHaveBeenCalled();
     });
+
+    it('deletes the uploaded pictures after the account row, never on a wrong password', async () => {
+      const storage = { removeAvatars: vi.fn().mockResolvedValue(undefined) };
+      authService = new AuthService(
+        mockDb,
+        mockJwtService as unknown as JwtService,
+        mockEncryptionService,
+        {} as any,
+        storage as any,
+      );
+      mockTxSelect.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue([mockUser]),
+          }),
+        }),
+      });
+
+      vi.spyOn(passwordUtil, 'verifyPassword').mockResolvedValue(false);
+      await expect(
+        authService.deleteUserAccount(mockUserId, { password: 'WrongPassword!' }),
+      ).rejects.toThrow(BadRequestException);
+      expect(storage.removeAvatars).not.toHaveBeenCalled();
+
+      vi.spyOn(passwordUtil, 'verifyPassword').mockResolvedValue(true);
+      await authService.deleteUserAccount(mockUserId, { password: 'ValidPassword123!' });
+
+      expect(storage.removeAvatars).toHaveBeenCalledWith(mockUserId);
+      expect(mockTxDelete.mock.invocationCallOrder[0]).toBeLessThan(
+        storage.removeAvatars.mock.invocationCallOrder[0],
+      );
+    });
   });
 });

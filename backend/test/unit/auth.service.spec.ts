@@ -390,6 +390,50 @@ describe('AuthService Unit Tests (AUTH-01 & LGPD Art. 11)', () => {
         UnauthorizedException,
       );
     });
+
+    describe('uploaded pictures', () => {
+      const oldUrl = `https://ref.supabase.co/storage/v1/object/public/avatars/${userId}/1.png`;
+      const newUrl = `https://ref.supabase.co/storage/v1/object/public/avatars/${userId}/2.png`;
+      const newPicture = `data:image/png;base64,${Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0]).toString('base64')}`;
+      let storage: { processAvatarImage: ReturnType<typeof vi.fn>; removeAvatars: ReturnType<typeof vi.fn> };
+
+      beforeEach(() => {
+        storage = {
+          processAvatarImage: vi.fn().mockResolvedValue(newUrl),
+          removeAvatars: vi.fn().mockResolvedValue(undefined),
+        };
+        authService = new AuthService(
+          mockDb,
+          mockJwtService as unknown as JwtService,
+          mockEncryptionService as any,
+          mockEmailService as any,
+          storage as any,
+        );
+      });
+
+      it('deletes the earlier uploads once the new picture is saved', async () => {
+        mockTxSelect.mockReturnValue(query([{ picture: oldUrl }]));
+        mockTxUpdate.mockReturnValue(query([updatedRecord(newUrl)]));
+
+        await authService.updateProfile(userId, { picture: newPicture });
+
+        expect(storage.processAvatarImage).toHaveBeenCalledWith(userId, newPicture);
+        expect(storage.removeAvatars).toHaveBeenCalledWith(userId, newUrl);
+      });
+
+      it('leaves storage alone when the picture did not change or the save failed', async () => {
+        mockTxSelect.mockReturnValue(query([{ picture: oldUrl }]));
+        mockTxUpdate.mockReturnValue(query([updatedRecord(oldUrl)]));
+        await authService.updateProfile(userId, { name: 'Carlos', picture: oldUrl });
+
+        mockTxUpdate.mockReturnValue(query([]));
+        await expect(authService.updateProfile(userId, { picture: newPicture })).rejects.toThrow(
+          UnauthorizedException,
+        );
+
+        expect(storage.removeAvatars).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('Scenario 7: Change Password', () => {

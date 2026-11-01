@@ -524,6 +524,8 @@ export class AuthService {
       );
       await tx.delete(users).where(eq(users.id, userId));
     });
+    // Uploaded pictures live in storage, outside the database: delete them too.
+    await this.storageService?.removeAvatars(userId);
 
     return {
       success: true,
@@ -585,6 +587,10 @@ export class AuthService {
 
     if (!updated) {
       throw new UnauthorizedException('Usuário não encontrado.');
+    }
+    // Only the picture now in use stays in storage; earlier uploads are deleted.
+    if (picture !== undefined) {
+      await this.storageService?.removeAvatars(userId, updated.picture);
     }
 
     return this.sanitize(updated);
