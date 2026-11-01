@@ -87,6 +87,11 @@ bool _profileUnknown(ActiveProfileState s) =>
 class HydrationController extends Notifier<HydrationState> {
   int _loadSession = 0;
 
+  /// Bumped by every settings change made here. A load that read the settings
+  /// before such a change keeps the newer choice and leaves the reminders to
+  /// updateSettings.
+  int _settingsEdits = 0;
+
   @override
   HydrationState build() {
     // Fresh state per signed-in user: logout (user -> null) resets hydration
@@ -128,6 +133,7 @@ class HydrationController extends Notifier<HydrationState> {
     final userId = _currentUserId;
     final activeProfileId = ref.read(activeProfileControllerProvider).activeProfile?.id;
     final session = ++_loadSession;
+    final settingsEdits = _settingsEdits;
     state = state.copyWith(isLoading: true);
     try {
       final settings = await _repository.getSettings();
@@ -147,13 +153,17 @@ class HydrationController extends Notifier<HydrationState> {
         return;
       }
 
+      // Changed here while this load ran: the settings read above are older,
+      // and updateSettings already set the reminders for the new choice.
+      final settingsChanged = _settingsEdits != settingsEdits;
       state = state.copyWith(
         isLoading: false,
-        settings: settings,
+        settings: settingsChanged ? null : settings,
         todayLogs: todayLogs,
         todayTotalMl: todayTotal,
         last30DaysTotals: last30Days,
       );
+      if (settingsChanged) return;
 
       final isGoalReached =
           todayTotal >= settings.dailyTargetMl && settings.dailyTargetMl > 0;
@@ -265,6 +275,7 @@ class HydrationController extends Notifier<HydrationState> {
   }
 
   Future<void> updateSettings(HydrationSettings newSettings) async {
+    _settingsEdits++;
     try {
       await _repository.saveSettings(newSettings);
       state = state.copyWith(settings: newSettings);

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -95,6 +97,9 @@ class FakeHydrationRepository implements HydrationRepository {
   List<WaterIntakeEntry> logs = [];
   int _nextId = 1;
 
+  /// When set, reading the day's logs waits for it (a slow network).
+  Completer<void>? logsGate;
+
   @override
   Future<HydrationSettings> getSettings() async => settings;
 
@@ -107,8 +112,10 @@ class FakeHydrationRepository implements HydrationRepository {
   Future<List<WaterIntakeEntry>> getLogsForDay({
     required String userId,
     required DateTime day,
-  }) async =>
-      List.unmodifiable(logs);
+  }) async {
+    await logsGate?.future;
+    return List.unmodifiable(logs);
+  }
 
   @override
   Future<Map<DateTime, int>> getDailyTotals({
@@ -309,6 +316,49 @@ void main() {
 
       expect(recorder.cancelAllCalls, 1);
       expect(recorder.scheduledWithGoalReached, isEmpty);
+    });
+
+    test('turning reminders on while a load runs is not undone by that load',
+        () async {
+      repository.settings = repository.settings.copyWith(reminderEnabled: false);
+      final controller = container.read(hydrationControllerProvider.notifier);
+      repository.logsGate = Completer<void>();
+      final loading = controller.loadData(); // read "off", now waits
+      await pumpEventQueue();
+
+      await controller.updateSettings(
+        repository.settings.copyWith(reminderEnabled: true),
+      );
+      repository.logsGate!.complete();
+      await loading;
+
+      expect(recorder.scheduledWithGoalReached, [false]);
+      expect(recorder.cancelAllCalls, 0);
+      expect(
+        container.read(hydrationControllerProvider).settings.reminderEnabled,
+        isTrue,
+      );
+    });
+
+    test('turning reminders off while a load runs is not undone by that load',
+        () async {
+      final controller = container.read(hydrationControllerProvider.notifier);
+      repository.logsGate = Completer<void>();
+      final loading = controller.loadData(); // read "on", now waits
+      await pumpEventQueue();
+
+      await controller.updateSettings(
+        repository.settings.copyWith(reminderEnabled: false),
+      );
+      repository.logsGate!.complete();
+      await loading;
+
+      expect(recorder.cancelAllCalls, 1);
+      expect(recorder.scheduledWithGoalReached, isEmpty);
+      expect(
+        container.read(hydrationControllerProvider).settings.reminderEnabled,
+        isFalse,
+      );
     });
 
     test(
