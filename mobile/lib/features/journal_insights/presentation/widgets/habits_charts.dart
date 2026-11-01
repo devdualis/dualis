@@ -5,6 +5,7 @@ import 'package:intl/intl.dart' show DateFormat;
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../habits/domain/models/habit_day.dart';
+import '../../domain/chart_data.dart' show inPeriod;
 import 'journal_overview_widgets.dart';
 
 /// Charts for daily habits (docs/bienestar/CONTRATO-JOURNAL-V2.md section 6).
@@ -83,11 +84,10 @@ class HabitsChartsSection extends StatelessWidget {
     DateTime start,
     int days,
   ) {
-    final end = start.add(Duration(days: days));
     return all.where((h) {
       final parsed = DateTime.tryParse(h.day);
       if (parsed == null) return false;
-      return !parsed.isBefore(start) && parsed.isBefore(end);
+      return inPeriod(parsed, start, days);
     }).toList();
   }
 }

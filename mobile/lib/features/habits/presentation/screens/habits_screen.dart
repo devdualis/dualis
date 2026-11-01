@@ -546,11 +546,11 @@ class _CycleSettingTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
+    return Material(
+      color: AppColors.surfaceLight,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.outlineLight),
+        side: const BorderSide(color: AppColors.outlineLight),
       ),
       child: SwitchListTile(
         key: const Key('habits_cycle_switch'),

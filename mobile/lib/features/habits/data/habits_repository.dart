@@ -14,6 +14,7 @@ abstract class HabitsRepository {
   Future<bool> getTrackMenstrualCycleSetting({String? profileId});
   Future<void> setTrackMenstrualCycleSetting(bool enabled, {String? profileId});
   Future<void> syncPending({String? profileId});
+  Future<Set<String>> getPendingDays({String? profileId});
 }
 
 class HabitsRepositoryImpl implements HabitsRepository {
@@ -95,6 +96,10 @@ class HabitsRepositoryImpl implements HabitsRepository {
       );
     } catch (_) {}
   }
+
+  @override
+  Future<Set<String>> getPendingDays({String? profileId}) =>
+      _readPending(_profileKey(profileId));
 
   @override
   Future<void> syncPending({String? profileId}) async {

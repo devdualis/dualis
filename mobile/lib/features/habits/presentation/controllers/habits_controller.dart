@@ -73,6 +73,7 @@ class HabitsState {
 
 class HabitsController extends Notifier<HabitsState> {
   int _loadSession = 0;
+  Future<void>? _pendingLoad;
 
   DateTime get _now {
     try {
@@ -102,7 +103,19 @@ class HabitsController extends Notifier<HabitsState> {
 
   HabitsRepository get _repository => ref.read(habitsRepositoryProvider);
 
-  Future<void> loadData() async {
+  Future<void> loadData() {
+    final existing = _pendingLoad;
+    if (existing != null) return existing;
+    final future = _performLoadData();
+    _pendingLoad = future;
+    return future.whenComplete(() {
+      if (identical(_pendingLoad, future)) {
+        _pendingLoad = null;
+      }
+    });
+  }
+
+  Future<void> _performLoadData() async {
     final session = ++_loadSession;
     state = state.copyWith(isLoading: true);
 
@@ -110,7 +123,7 @@ class HabitsController extends Notifier<HabitsState> {
       final days = await _repository.getHabits(days: 60);
       final trackCycle = await _repository.getTrackMenstrualCycleSetting();
 
-      if (session != _loadSession) return;
+      if (!ref.mounted || session != _loadSession) return;
 
       final todayStr = todayDayString;
       final yesterdayStr = yesterdayDayString;
@@ -132,7 +145,7 @@ class HabitsController extends Notifier<HabitsState> {
         trackMenstrualCycle: trackCycle,
       );
     } catch (e) {
-      if (session != _loadSession) return;
+      if (!ref.mounted || session != _loadSession) return;
       state = state.copyWith(
         isLoading: false,
         errorMessage: 'Erro ao carregar hábitos: $e',
@@ -211,6 +224,7 @@ class HabitsController extends Notifier<HabitsState> {
   }
 
   Future<void> setTrackMenstrualCycle(bool enabled) async {
+    ++_loadSession;
     state = state.copyWith(trackMenstrualCycle: enabled);
     try {
       await _repository.setTrackMenstrualCycleSetting(enabled);
