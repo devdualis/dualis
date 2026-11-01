@@ -4031,4 +4031,224 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get gxIntensityAxis => 'Intensidad informada';
+
+  @override
+  String get jv22PositiveQuestion =>
+      '¡Qué bien! ¿Quieres anotar qué hizo bueno tu día?';
+
+  @override
+  String get jv22JustSave => 'Solo registrar';
+
+  @override
+  String get jv22PositiveTimeHint =>
+      'Si quieres, cuenta con qué tiene que ver:';
+
+  @override
+  String get jv22BranchPassadoGratidao => 'Gratitud';
+
+  @override
+  String get jv22OptPassadoGratidaoAlguem => 'Agradecido(a) por alguien';
+
+  @override
+  String get jv22OptPassadoGratidaoAlgo => 'Agradecido(a) por algo que pasó';
+
+  @override
+  String get jv22BranchPassadoOrgulho => 'Orgullo';
+
+  @override
+  String get jv22OptPassadoOrgulhoConquista => 'Logré algo que quería';
+
+  @override
+  String get jv22OptPassadoOrgulhoResolvi => 'Resolví algo que me pesaba';
+
+  @override
+  String get jv22BranchPresenteCalma => 'Calma';
+
+  @override
+  String get jv22OptPresenteCalmaPaz => 'En paz, tranquilo(a)';
+
+  @override
+  String get jv22OptPresenteCalmaDescansado => 'Descansado(a), con energía';
+
+  @override
+  String get jv22BranchPresenteConexao => 'Conexión';
+
+  @override
+  String get jv22OptPresenteConexaoPessoas =>
+      'Bien con la gente a mi alrededor';
+
+  @override
+  String get jv22OptPresenteConexaoFoco => 'Enfocado(a) en lo que hago';
+
+  @override
+  String get jv22BranchFuturoAnimo => 'Ánimo';
+
+  @override
+  String get jv22OptFuturoAnimoPlanos => 'Ilusionado(a) con mis planes';
+
+  @override
+  String get jv22OptFuturoAnimoEsperanca => 'Con esperanza';
+
+  @override
+  String get jv22BranchFuturoConfianca => 'Confianza';
+
+  @override
+  String get jv22OptFuturoConfiancaConfiante => 'Confiado(a) en lo que viene';
+
+  @override
+  String get jv22OptFuturoConfiancaPreparado => 'Preparado(a)';
+
+  @override
+  String get jv22OptPassadoMemoriaVergonha =>
+      'Vergüenza por algo que hice o dije';
+
+  @override
+  String get jv22OptPresenteEnergiaConcentracao =>
+      'Me cuesta concentrarme o recordar cosas';
+
+  @override
+  String get jv22OptPresenteSobrecargaMuitaCoisa => 'Demasiadas cosas a la vez';
+
+  @override
+  String get jv22OptPresenteSobrecargaInquieto => 'Agitado(a), inquieto(a)';
+
+  @override
+  String get jv22BranchPresenteSolidao => 'Solo(a) o inseguro(a)';
+
+  @override
+  String get jv22OptPresenteSolidaoSozinho => 'Me siento solo(a)';
+
+  @override
+  String get jv22OptPresenteSolidaoMenos => 'Me siento menos que los demás';
+
+  @override
+  String get jv22OptFuturoMenteIndecisao => 'No logro decidir';
+
+  @override
+  String get jv22OptFuturoMedoEvitar =>
+      'Ganas de evitar o huir de una situación';
+
+  @override
+  String get jv22BranchCabecaRosto => 'Mareo, nariz, oído o mandíbula';
+
+  @override
+  String get jv22OptCabecaRostoTontura => 'Mareo';
+
+  @override
+  String get jv22OptCabecaRostoNariz => 'Nariz tapada o que gotea';
+
+  @override
+  String get jv22OptCabecaRostoOuvido => 'Molestia en el oído';
+
+  @override
+  String get jv22OptCabecaRostoMandibula => 'Mandíbula o dientes apretados';
+
+  @override
+  String get jv22OptBarrigaColicaMenstrual => 'Cólico menstrual';
+
+  @override
+  String get jv22BranchBarrigaIntestino => 'Intestino';
+
+  @override
+  String get jv22OptBarrigaIntestinoPreso => 'Estreñimiento';
+
+  @override
+  String get jv22OptBarrigaIntestinoSolto => 'Intestino suelto';
+
+  @override
+  String get jv22TriggerDinheiro => 'Dinero';
+
+  @override
+  String get jv22TriggerTelas => 'Pantallas o redes sociales';
+
+  @override
+  String get jv22TriggerCiclo => 'Ciclo menstrual';
+
+  @override
+  String get jv22CopingQuestion => '¿Cómo fue lidiar con esto?';
+
+  @override
+  String get jv22CopingConsegui => 'Pude manejarlo';
+
+  @override
+  String get jv22CopingEsperei => 'Esperé a que pasara';
+
+  @override
+  String get jv22CopingDificil => 'Fue difícil';
+
+  @override
+  String get jv22HelpersQuestion => '¿Qué te ayudó hoy?';
+
+  @override
+  String get jv22HelperMexerCorpo => 'Mover el cuerpo';
+
+  @override
+  String get jv22HelperConversar => 'Hablar con alguien';
+
+  @override
+  String get jv22HelperPausa => 'Una pausa para respirar';
+
+  @override
+  String get jv22HelperLazer => 'Música u ocio';
+
+  @override
+  String get jv22HelperDescansar => 'Descansar';
+
+  @override
+  String get jv22HelperNadaAinda => 'Nada todavía';
+
+  @override
+  String get jv22PhrasePositive1 => 'Qué bueno leer esto. ¿Qué va mejor?';
+
+  @override
+  String get jv22PhrasePositive2 => 'Guardemos este momento.';
+
+  @override
+  String get jv22PhrasePositive3 =>
+      'Gracias por contarlo. Anotemos lo que fue bueno.';
+
+  @override
+  String get jv22PhraseClosing1 => 'Último paso. Es opcional.';
+
+  @override
+  String get jv22PhraseClosing2 => 'Si quieres, marca lo que te ayudó.';
+
+  @override
+  String get jv22PhraseClosing3 => 'Gracias por registrar. Puedes omitir.';
+
+  @override
+  String get jv22GoodMomentsTitle => 'Momentos buenos';
+
+  @override
+  String get jv22GoodMomentsSubtitle => 'Días en que anotaste algo bueno.';
+
+  @override
+  String get jv22GoodMomentsMost => 'Más marcados';
+
+  @override
+  String get jv22GoodMoment => 'Momento bueno';
+
+  @override
+  String get jv22HelpedTitle => 'Lo que te ayudó';
+
+  @override
+  String jv22HelpedLine(String label, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count días',
+      one: '1 día',
+    );
+    return 'Marcaste “$label” en $_temp0';
+  }
+
+  @override
+  String jv22EntryCoping(String label) {
+    return 'Cómo fue lidiar: $label';
+  }
+
+  @override
+  String jv22EntryHelpers(String labels) {
+    return 'Lo que ayudó: $labels';
+  }
 }

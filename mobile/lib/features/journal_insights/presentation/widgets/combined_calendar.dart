@@ -54,17 +54,22 @@ class CombinedCalendar extends StatelessWidget {
           ),
           cellBuilder: (context, day) {
             final data = days[day];
+            final emotional = data?.emotional ?? const <RecordPoint>[];
+            final good = data?.positive ?? const <RecordPoint>[];
             return Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _VerticalRow(
-                  points: data?.emotional ?? const [],
-                  icon: (p, size) => HeadProfileIcon(
-                    size: size,
-                    color: ChartTokens.time(p.series),
+                if (emotional.isEmpty && good.isNotEmpty)
+                  _GoodMomentRow(count: good.length)
+                else
+                  _VerticalRow(
+                    points: emotional,
+                    icon: (p, size) => HeadProfileIcon(
+                      size: size,
+                      color: ChartTokens.time(p.series),
+                    ),
+                    color: (p) => ChartTokens.time(p.series),
                   ),
-                  color: (p) => ChartTokens.time(p.series),
-                ),
                 _VerticalRow(
                   points: data?.physical ?? const [],
                   icon: (p, size) =>
@@ -155,6 +160,45 @@ class _VerticalRow extends StatelessWidget {
   }
 }
 
+/// Day with good moments and no other emotional record: one star and how
+/// many were noted. Never an intensity.
+class _GoodMomentRow extends StatelessWidget {
+  final int count;
+
+  const _GoodMomentRow({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Semantics(
+      label: l10n.jv22GoodMoment,
+      excludeSemantics: true,
+      child: SizedBox(
+        height: 20,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.auto_awesome_rounded,
+                  size: 14, color: ChartTokens.good),
+              if (count > 1)
+                Text(
+                  '$count',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.w700,
+                    color: ChartTokens.good,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _WaterRow extends StatelessWidget {
   final int? ml;
   final String locale;
@@ -210,6 +254,11 @@ class _Legend extends StatelessWidget {
         dot(ChartTokens.passado, seriesLabel(l10n, 'passado')),
         dot(ChartTokens.presente, seriesLabel(l10n, 'presente')),
         dot(ChartTokens.futuro, seriesLabel(l10n, 'futuro')),
+        Row(mainAxisSize: MainAxisSize.min, children: [
+          const Icon(Icons.auto_awesome_rounded, size: 14, color: ChartTokens.good),
+          const SizedBox(width: 4),
+          Text(l10n.jv22GoodMoment, style: style),
+        ]),
         Row(mainAxisSize: MainAxisSize.min, children: [
           const BodyFigureIcon(size: 14, color: ChartTokens.body),
           const SizedBox(width: 4),
@@ -390,6 +439,12 @@ class CalendarDayView extends ConsumerWidget {
           Text(l10n.gxTabEmotions, style: title),
           const SizedBox(height: 8),
           for (final p in day.emotional) item(p, ChartTokens.time(p.series)),
+          const SizedBox(height: 8),
+        ],
+        if (day.positive.isNotEmpty) ...[
+          Text(l10n.jv22GoodMomentsTitle, style: title),
+          const SizedBox(height: 8),
+          for (final p in day.positive) item(p, ChartTokens.good),
           const SizedBox(height: 8),
         ],
         if (day.physical.isNotEmpty) ...[

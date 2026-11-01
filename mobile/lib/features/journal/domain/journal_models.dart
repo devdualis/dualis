@@ -109,6 +109,12 @@ class JournalEntry {
   final String? note;
   final List<String> transitionVariantIds;
   final List<JournalItem> items;
+
+  /// "Como foi lidar com isso?" (v2.2); null when skipped or on older entries.
+  final String? coping;
+
+  /// "O que te ajudou hoje?" (v2.2); empty when skipped or on older entries.
+  final List<String> helpers;
   final bool legacy;
 
   /// Saved on the device and waiting to reach the server.
@@ -125,6 +131,8 @@ class JournalEntry {
     this.note,
     this.transitionVariantIds = const [],
     this.items = const [],
+    this.coping,
+    this.helpers = const [],
     this.legacy = false,
     this.pendingSync = false,
   });
@@ -133,6 +141,8 @@ class JournalEntry {
       items.any((i) => i.kind == JournalKeys.kindPhysical);
   bool get hasEmotionalItem =>
       items.any((i) => i.kind == JournalKeys.kindEmotional);
+  bool get hasPositiveItem =>
+      items.any((i) => i.kind == JournalKeys.kindPositive);
 
   JournalEntry copyWith({String? id, bool? pendingSync}) => JournalEntry(
     id: id ?? this.id,
@@ -145,6 +155,8 @@ class JournalEntry {
     note: note,
     transitionVariantIds: transitionVariantIds,
     items: items,
+    coping: coping,
+    helpers: helpers,
     legacy: legacy,
     pendingSync: pendingSync ?? this.pendingSync,
   );
@@ -161,6 +173,8 @@ class JournalEntry {
     if (note != null && note!.isNotEmpty) 'note': note,
     'transitionVariantIds': transitionVariantIds,
     'items': [for (final i in items) i.toRequestJson()],
+    if (coping != null) 'coping': coping,
+    if (helpers.isNotEmpty) 'helpers': helpers,
   };
 
   Map<String, dynamic> toLocalJson() => {
@@ -184,6 +198,8 @@ class JournalEntry {
       for (final raw in (json['items'] as List? ?? const []))
         if (raw is Map) JournalItem.fromJson(Map<String, dynamic>.from(raw)),
     ],
+    coping: json['coping'] as String?,
+    helpers: _stringList(json['helpers']),
     legacy: json['legacy'] as bool? ?? false,
   );
 

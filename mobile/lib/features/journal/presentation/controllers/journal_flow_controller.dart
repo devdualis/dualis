@@ -58,8 +58,9 @@ class JournalFlowController extends Notifier<JournalFlowState> {
   // ---- Mood -------------------------------------------------------------
 
   /// Records the general mood for the axis picked on Home ([area]). Returns
-  /// true when the entry is ready to save right away (Bem). "Não tão bem"
-  /// goes straight to the first question of that axis.
+  /// true when the entry is ready to save right away (Bem on the physical
+  /// axis). Bem on the emotional axis offers "Só registrar" or good moments;
+  /// "Não tão bem" goes straight to the first question of that axis.
   bool chooseMood(String mood, {JournalArea area = JournalArea.emotional}) {
     if (mood == JournalKeys.moodNaoTaoBem) {
       _go(state.copyWith(
@@ -71,7 +72,44 @@ class JournalFlowController extends Notifier<JournalFlowState> {
       ));
       return false;
     }
+    if (area == JournalArea.emotional) {
+      _go(state.copyWith(
+        mood: mood,
+        area: area,
+        step: JournalStep.positiveStart,
+        items: const [],
+      ));
+      return false;
+    }
     state = state.copyWith(mood: mood, area: area);
+    return true;
+  }
+
+  // ---- Good moments (Bem, v2.2) ------------------------------------------
+
+  void choosePositiveTime(String time) {
+    _go(state.copyWith(
+      time: time,
+      clearBranch: true,
+      step: JournalStep.positiveBranch,
+    ));
+  }
+
+  /// Puts the good moments picked on screen in the entry. Returns true when
+  /// there is something to save.
+  bool confirmPositiveOptions() {
+    if (!state.hasOptionSelection || state.time == null) return false;
+    final time = state.time!;
+    state = state.copyWith(items: _capped([
+      for (final key in state.selectedOptions)
+        JournalItem(kind: JournalKeys.kindPositive, optionKey: key),
+      for (final label in state.customLabels)
+        JournalItem(
+          kind: JournalKeys.kindPositive,
+          optionKey: JournalKeys.customKey(time),
+          customLabel: label,
+        ),
+    ]));
     return true;
   }
 
@@ -107,9 +145,11 @@ class JournalFlowController extends Notifier<JournalFlowState> {
   void chooseBranch(String branch) {
     _go(state.copyWith(
       branch: branch,
-      step: state.step == JournalStep.regionBranch
-          ? JournalStep.regionOptions
-          : JournalStep.options,
+      step: switch (state.step) {
+        JournalStep.regionBranch => JournalStep.regionOptions,
+        JournalStep.positiveBranch => JournalStep.positiveOptions,
+        _ => JournalStep.options,
+      },
       selectedOptions: const {},
       customLabels: const [],
     ));
@@ -300,9 +340,41 @@ class JournalFlowController extends Notifier<JournalFlowState> {
 
   void confirmTriggers({bool skip = false}) {
     _go(state.copyWith(
-      step: JournalStep.note,
+      step: JournalStep.closing,
       triggers: skip ? const {} : state.triggers,
       triggerNote: skip ? '' : state.triggerNote,
+    ));
+  }
+
+  // ---- Closing questions (v2.2) ------------------------------------------
+
+  /// Single choice; tapping the chosen one again clears it.
+  void chooseCoping(String coping) {
+    state = state.coping == coping
+        ? state.copyWith(clearCoping: true)
+        : state.copyWith(coping: coping);
+  }
+
+  /// "Nada ainda" never goes with another helper: picking it clears the
+  /// others, and picking another one clears it.
+  void toggleHelper(String helper) {
+    final next = {...state.helpers};
+    if (!next.remove(helper)) {
+      if (helper == JournalKeys.helperNadaAinda) {
+        next.clear();
+      } else {
+        next.remove(JournalKeys.helperNadaAinda);
+      }
+      next.add(helper);
+    }
+    state = state.copyWith(helpers: next);
+  }
+
+  void confirmClosing({bool skip = false}) {
+    _go(state.copyWith(
+      step: JournalStep.note,
+      clearCoping: skip,
+      helpers: skip ? const {} : state.helpers,
     ));
   }
 
@@ -321,6 +393,9 @@ class JournalFlowController extends Notifier<JournalFlowState> {
         : [for (final t in offered) if (state.triggers.contains(t)) t];
     final note = state.note.trim();
     final triggerNote = state.triggerNote.trim();
+    final positive = quick && state.area == JournalArea.emotional
+        ? [for (final i in state.items) if (i.kind == JournalKeys.kindPositive) i]
+        : const <JournalItem>[];
     return JournalEntry(
       clientId: _clientId,
       recordedAt: now ?? DateTime.now(),
@@ -332,7 +407,11 @@ class JournalFlowController extends Notifier<JournalFlowState> {
           : null,
       note: quick || note.isEmpty ? null : note,
       transitionVariantIds: state.shownPhraseIds,
-      items: quick ? const [] : state.items,
+      items: quick ? positive : state.items,
+      coping: quick ? null : state.coping,
+      helpers: quick
+          ? const []
+          : [for (final h in JournalKeys.helpers) if (state.helpers.contains(h)) h],
     );
   }
 
@@ -395,6 +474,10 @@ class JournalFlowController extends Notifier<JournalFlowState> {
         return 'intensity';
       case JournalStep.triggers:
         return 'triggers';
+      case JournalStep.positiveBranch:
+        return 'positive';
+      case JournalStep.closing:
+        return 'closing';
       default:
         return null;
     }

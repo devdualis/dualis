@@ -41,6 +41,9 @@ class RecordPoint {
   /// `dor` / `incomodo` for physical items of journal v2.1.
   final String? sensation;
 
+  /// A good moment of a "Bem" entry (v2.2): no intensity is asked.
+  final bool positive;
+
   const RecordPoint({
     required this.id,
     required this.at,
@@ -52,6 +55,7 @@ class RecordPoint {
     required this.intensity,
     this.view,
     this.sensation,
+    this.positive = false,
   });
 
   DateTime get day => DateTime(at.year, at.month, at.day);
@@ -100,6 +104,7 @@ List<RecordPoint> _points(
         intensity: item.intensity,
         view: item.bodySide,
         sensation: item.sensation,
+        positive: kind == JournalKeys.kindPositive,
       ));
     }
   }
@@ -116,6 +121,16 @@ List<RecordPoint> emotionalPoints(
         kind: JournalKeys.kindEmotional,
         roots: JournalLabels.times,
         tree: JournalKeys.emotionalTree);
+
+/// Good moments of "Bem" entries (v2.2), oldest first.
+List<RecordPoint> positivePoints(
+  AppLocalizations l10n,
+  List<JournalEntryView> entries,
+) =>
+    _points(l10n, entries,
+        kind: JournalKeys.kindPositive,
+        roots: JournalLabels.times,
+        tree: JournalKeys.positiveTree);
 
 /// Physical marks (body regions and whole-body areas), oldest first.
 List<RecordPoint> physicalPoints(
@@ -267,6 +282,9 @@ class CalendarDay {
   final List<RecordPoint> emotional;
   final List<RecordPoint> physical;
 
+  /// Good moments of that day (v2.2).
+  final List<RecordPoint> positive;
+
   /// Sum of water events that day, null when there was none.
   final int? waterMl;
 
@@ -274,33 +292,40 @@ class CalendarDay {
     required this.day,
     this.emotional = const [],
     this.physical = const [],
+    this.positive = const [],
     this.waterMl,
   });
 
-  bool get isEmpty => emotional.isEmpty && physical.isEmpty && waterMl == null;
+  bool get isEmpty =>
+      emotional.isEmpty && physical.isEmpty && positive.isEmpty && waterMl == null;
 }
 
 Map<DateTime, CalendarDay> calendarDays({
   required List<RecordPoint> emotional,
   required List<RecordPoint> physical,
+  List<RecordPoint> positive = const [],
   required Map<DateTime, int> waterTotals,
 }) {
-  final emo = <DateTime, List<RecordPoint>>{};
-  final phy = <DateTime, List<RecordPoint>>{};
-  for (final p in emotional) {
-    emo.putIfAbsent(p.day, () => []).add(p);
+  Map<DateTime, List<RecordPoint>> byDay(List<RecordPoint> points) {
+    final result = <DateTime, List<RecordPoint>>{};
+    for (final p in points) {
+      result.putIfAbsent(p.day, () => []).add(p);
+    }
+    return result;
   }
-  for (final p in physical) {
-    phy.putIfAbsent(p.day, () => []).add(p);
-  }
+
+  final emo = byDay(emotional);
+  final phy = byDay(physical);
+  final good = byDay(positive);
   final water = normalizeWaterTotals(waterTotals);
-  final days = {...emo.keys, ...phy.keys, ...water.keys};
+  final days = {...emo.keys, ...phy.keys, ...good.keys, ...water.keys};
   return {
     for (final d in days)
       d: CalendarDay(
         day: d,
         emotional: emo[d] ?? const [],
         physical: phy[d] ?? const [],
+        positive: good[d] ?? const [],
         waterMl: water[d],
       ),
   };

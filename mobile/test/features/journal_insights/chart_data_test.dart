@@ -170,4 +170,37 @@ void main() {
     });
   });
 
+  group('v2.2 · momentos bons', () {
+    JournalItemView good(String key) =>
+        JournalItemView(kind: 'positive', optionKey: key);
+
+    test('good moments are their own points and never emotional ones', () {
+      final entries = [
+        e('a', at(1), [good('presente.calma.paz'), good('presente.conexao.foco')], mood: 'bem'),
+        e('b', at(2), [emo('futuro.mente.cobranca', 3)]),
+      ];
+      final positive = positivePoints(l10n, entries);
+      expect(positive.map((p) => p.answerKey), ['presente.calma.paz', 'presente.conexao.foco']);
+      expect(positive.every((p) => p.positive && p.intensity == null), isTrue);
+      expect(positive.first.branchKey, 'presente.calma');
+      expect(positive.first.answer, 'Em paz, tranquilo(a)');
+      expect(emotionalPoints(l10n, entries).map((p) => p.answerKey), ['futuro.mente.cobranca']);
+    });
+
+    test('calendar marks the day with good moments', () {
+      final entries = [
+        e('a', at(1), [good('passado.gratidao.alguem')], mood: 'bem'),
+      ];
+      final days = calendarDays(
+        emotional: emotionalPoints(l10n, entries),
+        physical: physicalPoints(l10n, entries),
+        positive: positivePoints(l10n, entries),
+        waterTotals: const {},
+      );
+      final day = days[DateTime(2026, 10, 1)]!;
+      expect(day.positive, hasLength(1));
+      expect(day.emotional, isEmpty);
+      expect(day.isEmpty, isFalse);
+    });
+  });
 }

@@ -220,9 +220,10 @@ String describeRecord(AppLocalizations l10n, String locale, RecordPoint p) {
     when,
     branch != null ? '$root · $branch' : root,
     '“${p.answer}”',
-    p.intensity != null
-        ? l10n.gxIntensityValue(p.intensity!)
-        : l10n.gxIntensityNotInformed,
+    if (!p.positive)
+      p.intensity != null
+          ? l10n.gxIntensityValue(p.intensity!)
+          : l10n.gxIntensityNotInformed,
   ];
   return lines.join('\n');
 }

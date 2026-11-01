@@ -66,11 +66,14 @@ void main() {
     expect(find.textContaining(pt.jv2GoodMorning), findsNothing);
   });
 
-  testWidgets('Bem saves right away and opens the summary', (tester) async {
+  testWidgets('Bem then "Só registrar" saves in one tap and opens the summary', (tester) async {
     final h = JournalHarness();
     await pumpJournalFlow(tester, h);
 
     await tapKey(tester, 'jv2_mood_bem');
+    expect(find.text(pt.jv22PositiveQuestion), findsOneWidget);
+    expect(h.remote.requestBodies, isEmpty);
+    await tapKey(tester, 'jv22_just_save');
 
     expect(find.textContaining('SUMMARY items=0 pending=false'), findsOneWidget);
     final body = h.remote.requestBodies.single;
@@ -79,6 +82,8 @@ void main() {
     expect(body['items'], isEmpty);
     expect(body['triggers'], isEmpty);
     expect(body['clientId'], isNotEmpty);
+    expect(body.containsKey('coping'), isFalse);
+    expect(body.containsKey('helpers'), isFalse);
     // Only the emotional axis is done on Home.
     final home = containerOf(tester).read(triggerCheckInProvider);
     expect(home.isEmotionalCompleted, isTrue);
@@ -139,6 +144,13 @@ void main() {
     await tester.pumpAndSettle();
     await tapKey(tester, 'jv2_continue');
 
+    // Closing questions (v2.2): one coping, several helpers.
+    expect(find.text(pt.jv22CopingQuestion), findsOneWidget);
+    await tapKey(tester, 'jv22_coping_esperei');
+    await tapKey(tester, 'jv22_helper_pausa');
+    await tapKey(tester, 'jv22_helper_conversar');
+    await tapKey(tester, 'jv2_continue');
+
     await tester.enterText(find.byKey(const Key('jv2_note_field')), 'Dia corrido');
     await tester.pumpAndSettle();
     await tapKey(tester, 'jv2_save');
@@ -149,6 +161,8 @@ void main() {
     expect(body['area'], 'emotional');
     expect(body['triggers'], ['trabalho', 'outro']);
     expect(body['triggerNote'], 'Reunião longa');
+    expect(body['coping'], 'esperei');
+    expect(body['helpers'], ['conversar', 'pausa']);
     expect(body['note'], 'Dia corrido');
     final items = (body['items'] as List).cast<Map<String, dynamic>>();
     expect(items.map((i) => i['optionKey']), [
@@ -238,6 +252,7 @@ void main() {
     }
     await tapKey(tester, 'jv2_trigger_esforco');
     await tapKey(tester, 'jv2_skip');
+    await tapKey(tester, 'jv22_closing_skip');
     await tapKey(tester, 'jv2_save');
 
     final body = h.remote.requestBodies.single;
@@ -278,6 +293,7 @@ void main() {
     await fillIntensity(tester, 1, 2);
     await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_skip');
+    await tapKey(tester, 'jv22_closing_skip');
     await tapKey(tester, 'jv2_save');
 
     final item = (h.remote.requestBodies.single['items'] as List).single as Map;
@@ -307,6 +323,7 @@ void main() {
     await fillIntensity(tester, 1, 3);
     await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_skip');
+    await tapKey(tester, 'jv22_closing_skip');
     await tapKey(tester, 'jv2_save');
 
     final item = (h.remote.requestBodies.single['items'] as List).single as Map;
@@ -359,6 +376,7 @@ void main() {
     await tapKey(tester, 'jv2_intensity_0_4');
     await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_skip');
+    await tapKey(tester, 'jv22_closing_skip');
     await tapKey(tester, 'jv2_save');
 
     final body = h.remote.requestBodies.single;
@@ -380,6 +398,7 @@ void main() {
     await fillIntensity(tester, 1, 3);
     await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_skip');
+    await tapKey(tester, 'jv22_closing_skip');
     await tapKey(tester, 'jv2_save');
 
     expect(find.textContaining('pending=true'), findsOneWidget);
@@ -418,6 +437,7 @@ void main() {
     expect(find.byType(AlertDialog), findsNothing);
     await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_skip');
+    await tapKey(tester, 'jv22_closing_skip');
 
     await tester.enterText(
       find.byKey(const Key('jv2_note_field')),
@@ -460,6 +480,7 @@ void main() {
     await fillIntensity(tester, 1, 2);
     await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_skip');
+    await tapKey(tester, 'jv22_closing_skip');
     await tapKey(tester, 'jv2_save');
     final items = (h.remote.requestBodies.single['items'] as List)
         .cast<Map<String, dynamic>>();
@@ -480,5 +501,236 @@ void main() {
     expect(chip.selected, isTrue);
     await tapKey(tester, 'jv2_back');
     expect(find.text(pt.jv2MoodQuestion), findsOneWidget);
+  });
+
+  group('v2.2', () {
+    /// Keys of the trigger chips, in screen order.
+    List<String> triggerKeysOnScreen(WidgetTester tester) => [
+          for (final chip in tester.widgetList<FilterChip>(find.byType(FilterChip)))
+            if ((chip.key as ValueKey<String>?)?.value.startsWith('jv2_trigger_') ?? false)
+              (chip.key as ValueKey<String>).value.substring('jv2_trigger_'.length),
+        ];
+
+    testWidgets('Bem then a good moment and a written one: positive items only, no AI',
+        (tester) async {
+      final h = JournalHarness();
+      h.remote.suggestedOptionKey = 'presente.calma.paz';
+      await pumpJournalFlow(tester, h);
+
+      await tapKey(tester, 'jv2_mood_bem');
+      await tapKey(tester, 'jv22_positive_time_presente');
+      expect(find.byKey(const Key('jv2_branch_presente.calma')), findsOneWidget);
+      expect(find.byKey(const Key('jv2_branch_presente.conexao')), findsOneWidget);
+      expect(find.byKey(const Key('jv2_branch_presente.energia')), findsNothing);
+      await tapKey(tester, 'jv2_branch_presente.calma');
+      expect(find.text(pt.jv22OptPresenteCalmaPaz), findsOneWidget);
+      await tapKey(tester, 'jv2_option_presente.calma.paz');
+      await tapKey(tester, 'jv2_write_mine');
+      await tester.enterText(find.byKey(const Key('jv2_custom_field')), 'Almoço com a avó');
+      await tapKey(tester, 'jv2_custom_add');
+      expect(h.remote.suggestRequests, isEmpty);
+      expect(find.byKey(const Key('jv2_suggest_dialog')), findsNothing);
+      await tapKey(tester, 'jv2_save');
+
+      expect(find.textContaining('SUMMARY items=2'), findsOneWidget);
+      final body = h.remote.requestBodies.single;
+      expect(body['mood'], 'bem');
+      expect(body['area'], 'emotional');
+      expect(body['triggers'], isEmpty);
+      expect(body.containsKey('coping'), isFalse);
+      expect(body.containsKey('helpers'), isFalse);
+      final items = (body['items'] as List).cast<Map<String, dynamic>>();
+      expect(items, [
+        {'kind': 'positive', 'optionKey': 'presente.calma.paz'},
+        {'kind': 'positive', 'optionKey': 'presente.custom', 'customLabel': 'Almoço com a avó'},
+      ]);
+      final home = containerOf(tester).read(triggerCheckInProvider);
+      expect(home.isEmotionalCompleted, isTrue);
+      expect(home.isPhysicalCompleted, isFalse);
+    });
+
+    testWidgets('back from the good-moments question returns to the mood screen', (tester) async {
+      final h = JournalHarness();
+      await pumpJournalFlow(tester, h);
+      await tapKey(tester, 'jv2_mood_bem');
+      await tapKey(tester, 'jv2_back');
+      expect(find.text(pt.jv2MoodQuestion), findsOneWidget);
+      expect(h.remote.requestBodies, isEmpty);
+    });
+
+    testWidgets('presente has 3 branches; new options appear, max 4 per screen', (tester) async {
+      final h = JournalHarness();
+      await pumpJournalFlow(tester, h);
+      await startNotSoGood(tester);
+      await tapKey(tester, 'jv2_time_presente');
+      for (final b in ['energia', 'sobrecarga', 'solidao']) {
+        expect(find.byKey(Key('jv2_branch_presente.$b')), findsOneWidget);
+      }
+      expect(find.text(pt.jv22BranchPresenteSolidao), findsOneWidget);
+      await tapKey(tester, 'jv2_branch_presente.sobrecarga');
+      expect(
+        find.byWidgetPredicate((w) =>
+            w.key is ValueKey<String> &&
+            (w.key as ValueKey<String>).value.startsWith('jv2_option_')),
+        findsNWidgets(4),
+      );
+      await tapKey(tester, 'jv2_back');
+      await tapKey(tester, 'jv2_branch_presente.solidao');
+      await tapKey(tester, 'jv2_option_presente.solidao.menos');
+      await tapKey(tester, 'jv2_continue');
+      await tapKey(tester, 'jv2_more_no');
+      await fillIntensity(tester, 1, 2);
+      await tapKey(tester, 'jv2_continue');
+
+      // Emotional entry: new triggers offered, in contract order.
+      expect(triggerKeysOnScreen(tester),
+          ['trabalho', 'familia', 'sono', 'dinheiro', 'telas', 'ciclo', 'nao_sei', 'outro']);
+      await tapKey(tester, 'jv2_trigger_telas');
+      await tapKey(tester, 'jv2_trigger_trabalho');
+      await tapKey(tester, 'jv2_continue');
+      await tapKey(tester, 'jv22_closing_skip');
+      await tapKey(tester, 'jv2_save');
+
+      final body = h.remote.requestBodies.single;
+      expect(body['triggers'], ['trabalho', 'telas']);
+      expect((body['items'] as List).single['optionKey'], 'presente.solidao.menos');
+    });
+
+    testWidgets('front head shows rosto, back head does not; barriga has the new branches',
+        (tester) async {
+      final h = JournalHarness();
+      await pumpJournalFlow(tester, h, args: physical);
+      await startNotSoGood(tester);
+      await tapKey(tester, 'jv2_region_cabeca');
+      await tapKey(tester, 'jv2_region_barriga');
+      await tapKey(tester, 'jv2_continue');
+
+      expect(find.byKey(const Key('jv2_branch_cabeca.rosto')), findsOneWidget);
+      expect(find.byKey(const Key('jv2_branch_cabeca.nuca')), findsNothing);
+      await tapKey(tester, 'jv2_sensation_incomodo');
+      await tapKey(tester, 'jv2_branch_cabeca.rosto');
+      for (final o in ['tontura', 'nariz', 'ouvido', 'mandibula']) {
+        expect(find.byKey(Key('jv2_option_cabeca.rosto.$o')), findsOneWidget);
+      }
+      await tapKey(tester, 'jv2_option_cabeca.rosto.tontura');
+      await tapKey(tester, 'jv2_continue');
+
+      expect(find.byKey(const Key('jv2_branch_barriga.intestino')), findsOneWidget);
+      await tapKey(tester, 'jv2_sensation_dor');
+      await tapKey(tester, 'jv2_branch_barriga.colica');
+      expect(find.text(pt.jv22OptBarrigaColicaMenstrual), findsOneWidget);
+      await tapKey(tester, 'jv2_option_barriga.colica.menstrual');
+      await tapKey(tester, 'jv2_continue');
+      await tapKey(tester, 'jv2_more_no');
+      await fillIntensity(tester, 2, 3);
+      await tapKey(tester, 'jv2_continue');
+
+      // Physical entry: every trigger, in contract order.
+      expect(triggerKeysOnScreen(tester), JournalKeys.triggers);
+      await tapKey(tester, 'jv2_trigger_ciclo');
+      await tapKey(tester, 'jv2_continue');
+      await tapKey(tester, 'jv22_closing_skip');
+      await tapKey(tester, 'jv2_save');
+
+      final body = h.remote.requestBodies.single;
+      expect(body['triggers'], ['ciclo']);
+      final items = (body['items'] as List).cast<Map<String, dynamic>>();
+      expect(items.map((i) => [i['optionKey'], i['bodySide']]), [
+        ['cabeca.rosto.tontura', 'front'],
+        ['barriga.colica.menstrual', 'front'],
+      ]);
+    });
+
+    testWidgets('back side head keeps pressão and nuca only', (tester) async {
+      final h = JournalHarness();
+      await pumpJournalFlow(tester, h, args: physical);
+      await startNotSoGood(tester);
+      await tapKey(tester, 'jv2_side_back');
+      await tapKey(tester, 'jv2_region_cabeca');
+      await tapKey(tester, 'jv2_continue');
+      expect(find.byKey(const Key('jv2_branch_cabeca.rosto')), findsNothing);
+    });
+
+    testWidgets('closing screen: nada_ainda is exclusive, coping is single choice', (tester) async {
+      final h = JournalHarness();
+      await pumpJournalFlow(tester, h);
+      await startNotSoGood(tester);
+      await tapKey(tester, 'jv2_time_futuro');
+      await tapKey(tester, 'jv2_branch_futuro.mente');
+      await tapKey(tester, 'jv2_option_futuro.mente.indecisao');
+      await tapKey(tester, 'jv2_continue');
+      await tapKey(tester, 'jv2_more_no');
+      await fillIntensity(tester, 1, 2);
+      await tapKey(tester, 'jv2_continue');
+      await tapKey(tester, 'jv2_skip');
+
+      expect(find.byKey(const Key('jv22_closing_skip')), findsOneWidget);
+      bool selected(String h) =>
+          tester.widget<FilterChip>(find.byKey(Key('jv22_helper_$h'))).selected;
+      await tapKey(tester, 'jv22_helper_lazer');
+      await tapKey(tester, 'jv22_helper_descansar');
+      await tapKey(tester, 'jv22_helper_nada_ainda');
+      expect(selected('nada_ainda'), isTrue);
+      expect(selected('lazer'), isFalse);
+      expect(selected('descansar'), isFalse);
+      await tapKey(tester, 'jv22_helper_mexer_corpo');
+      expect(selected('nada_ainda'), isFalse);
+      expect(selected('mexer_corpo'), isTrue);
+      // Coping is single choice; tapping it again clears it.
+      await tapKey(tester, 'jv22_coping_consegui');
+      await tapKey(tester, 'jv22_coping_dificil');
+      await tapKey(tester, 'jv22_coping_dificil');
+      await tapKey(tester, 'jv22_coping_consegui');
+
+      // Back from the note keeps the answers of the closing screen.
+      await tapKey(tester, 'jv22_closing_skip');
+      await tapKey(tester, 'jv2_back');
+      expect(selected('mexer_corpo'), isTrue);
+      await tapKey(tester, 'jv2_continue');
+      await tapKey(tester, 'jv2_save');
+      final body = h.remote.requestBodies.single;
+      expect(body['coping'], 'consegui');
+      expect(body['helpers'], ['mexer_corpo']);
+    });
+
+    testWidgets('closing skip sends no coping and no helpers', (tester) async {
+      final h = JournalHarness();
+      await pumpJournalFlow(tester, h);
+      await startNotSoGood(tester);
+      await tapKey(tester, 'jv2_time_passado');
+      await tapKey(tester, 'jv2_branch_passado.memoria');
+      await tapKey(tester, 'jv2_option_passado.memoria.vergonha');
+      await tapKey(tester, 'jv2_continue');
+      await tapKey(tester, 'jv2_more_no');
+      await fillIntensity(tester, 1, 2);
+      await tapKey(tester, 'jv2_continue');
+      await tapKey(tester, 'jv2_skip');
+      await tapKey(tester, 'jv22_helper_conversar');
+      await tapKey(tester, 'jv22_coping_esperei');
+      await tapKey(tester, 'jv22_closing_skip');
+      await tapKey(tester, 'jv2_save');
+      final body = h.remote.requestBodies.single;
+      expect(body.containsKey('coping'), isFalse);
+      expect(body.containsKey('helpers'), isFalse);
+    });
+
+    testWidgets('offline good moment goes to the outbox and syncs as is', (tester) async {
+      final h = JournalHarness(online: false);
+      await pumpJournalFlow(tester, h);
+      await tapKey(tester, 'jv2_mood_bem');
+      await tapKey(tester, 'jv22_positive_time_futuro');
+      await tapKey(tester, 'jv2_branch_futuro.animo');
+      await tapKey(tester, 'jv2_option_futuro.animo.planos');
+      await tapKey(tester, 'jv2_save');
+
+      expect(find.textContaining('pending=true'), findsOneWidget);
+      final queued = await h.local.pendingEntries();
+      expect(queued.single.items.single.kind, 'positive');
+      expect(queued.single.items.single.optionKey, 'futuro.animo.planos');
+      h.online = true;
+      expect(await h.repository.syncPending(), 1);
+      expect(h.remote.requestBodies.single['items'],
+          [{'kind': 'positive', 'optionKey': 'futuro.animo.planos'}]);
+    });
   });
 }
