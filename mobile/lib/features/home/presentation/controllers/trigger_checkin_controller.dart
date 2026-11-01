@@ -155,13 +155,6 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
 
       String naturalLanguageText = state.naturalLanguageText;
 
-      String? cleanNarrative(String? text) {
-        if (text == null) return null;
-        final trimmed = text.trim();
-        if (trimmed.isEmpty || int.tryParse(trimmed) != null) return null;
-        return trimmed;
-      }
-
       if (AxisIntensityResolver.isDailyCheckIn(latestLog)) {
         final answers = latestLog.stepAnswers;
         if (answers != null &&
@@ -171,8 +164,10 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
         }
       } else {
         // The most recent record today is a full clinical triage
-        final logNarrative = cleanNarrative(latestLog.narrative) ??
-            cleanNarrative(latestLog.stepAnswers?['naturalLanguageText'] as String?);
+        final logNarrative = cleanCheckInNarrative(latestLog.narrative) ??
+            cleanCheckInNarrative(
+              latestLog.stepAnswers?['naturalLanguageText'] as String?,
+            );
         if (logNarrative != null) {
           naturalLanguageText = logNarrative;
         }
@@ -217,15 +212,13 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
 
         if (rec != null &&
             (chk == null || !rec.recordedAt.isBefore(chk.recordedAt))) {
-          final declaredOnRec = declaredStatusOnLog(rec, axis);
           final code = AxisIntensityResolver.categoryCodeFor(rec, axis);
-          final status = declaredOnRec ??
-              (rec.intensity > 0
-                  ? triggerStatusFromIntensity(rec.intensity)
-                  : (chkStatus ?? TriggerStatus.goodNormal));
+          final status = rec.intensity > 0
+              ? triggerStatusFromIntensity(rec.intensity)
+              : chkStatus ?? TriggerStatus.goodNormal;
           final intensity = rec.intensity > 0
               ? rec.intensity
-              : (declaredOnRec ?? chkStatus)?.defaultIntensity;
+              : chkStatus?.defaultIntensity;
           return (
             status: status,
             intensity: intensity,
@@ -238,8 +231,10 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
             // axis's own record supplies it, and the record wins over local
             // state so an older triage's text never lingers.
             narrative: AxisIntensityResolver.primaryAxisOf(rec) == axis
-                ? cleanNarrative(rec.narrative) ??
-                    cleanNarrative(rec.stepAnswers?['naturalLanguageText'] as String?)
+                ? cleanCheckInNarrative(rec.narrative) ??
+                    cleanCheckInNarrative(
+                      rec.stepAnswers?['naturalLanguageText'] as String?,
+                    )
                 : null,
           );
         }
@@ -463,11 +458,8 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     final summary = outcome.categoryLabel.isNotEmpty ? outcome.categoryLabel : (isPhysical ? 'Registro físico' : 'Psicoemocional');
     // The AI's mapped lay term is never used here: it is not the user's text.
     final isSubmission = !identical(narrative, _keepNarrative);
-    final typed = isSubmission ? (narrative as String?)?.trim() : null;
     final cleanNarrative =
-        (typed != null && typed.isNotEmpty && int.tryParse(typed) == null)
-            ? typed
-            : null;
+        isSubmission ? cleanCheckInNarrative(narrative as String?) : null;
     final axisNarrative = isSubmission
         ? cleanNarrative
         : (isPhysical ? state.physicalNarrative : state.emotionalNarrative);
@@ -509,11 +501,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
   }) {
     final isPhysical = vertical == TriageVertical.fisica;
     final today = _getTodayDateString();
-    final cleanNarrative = (narrative != null &&
-            narrative.trim().isNotEmpty &&
-            int.tryParse(narrative.trim()) == null)
-        ? narrative.trim()
-        : null;
+    final cleanNarrative = cleanCheckInNarrative(narrative);
     final resolvedIntensity = intensity ?? status?.defaultIntensity;
     state = state.copyWith(
       isCompletedToday: true,

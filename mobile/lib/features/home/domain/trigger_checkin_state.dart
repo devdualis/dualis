@@ -33,15 +33,15 @@ extension TriggerStatusTierExtension on TriggerStatus {
   }
 }
 
-const Object _unset = Object();
-
-enum RoutingOutcome {
-  none,
-  wellnessConfirmation,
-  psicoEmocionalOnly,
-  fisicaOnly,
-  dualOrganicPrimacy,
+/// Trims a check-in narrative; blank and integer-only values become null.
+String? cleanCheckInNarrative(Object? value) {
+  if (value is! String) return null;
+  final trimmed = value.trim();
+  if (trimmed.isEmpty || int.tryParse(trimmed) != null) return null;
+  return trimmed;
 }
+
+const Object _unset = Object();
 
 @immutable
 class TriggerCheckInState {
@@ -92,8 +92,6 @@ class TriggerCheckInState {
     this.textTouched = false,
   });
 
-  bool get isReadyToSubmit => emotionalStatus != null && physicalStatus != null;
-
   /// Resolved Single-Source-of-Truth clinical tier for the emotional axis.
   ClinicalIntensityTier get resolvedEmotionalTier =>
       ClinicalIntensityTier.fromScore(emotionalIntensity ?? emotionalStatus?.defaultIntensity);
@@ -101,39 +99,6 @@ class TriggerCheckInState {
   /// Resolved Single-Source-of-Truth clinical tier for the physical axis.
   ClinicalIntensityTier get resolvedPhysicalTier =>
       ClinicalIntensityTier.fromScore(physicalIntensity ?? physicalStatus?.defaultIntensity);
-
-  /// When editing an already-completed check-in, only the axis the user
-  /// actually touched this session should drive routing — the other axis's
-  /// carried-over value must not pull it into a combined/dual outcome.
-  RoutingOutcome get routingOutcome {
-    if (!isReadyToSubmit) return RoutingOutcome.none;
-
-    final emotionalOk = emotionalStatus == TriggerStatus.goodNormal;
-    final physicalOk = physicalStatus == TriggerStatus.goodNormal;
-
-    if (emotionalOk && physicalOk) {
-      return RoutingOutcome.wellnessConfirmation;
-    }
-
-    if (isCompletedToday && emotionalTouched != physicalTouched) {
-      final touchedEmotional = emotionalTouched;
-      final touchedStatus = touchedEmotional ? emotionalStatus : physicalStatus;
-      if (touchedStatus == TriggerStatus.goodNormal) {
-        return RoutingOutcome.none;
-      }
-      return touchedEmotional
-          ? RoutingOutcome.psicoEmocionalOnly
-          : RoutingOutcome.fisicaOnly;
-    }
-
-    if (!emotionalOk && physicalOk) {
-      return RoutingOutcome.psicoEmocionalOnly;
-    }
-    if (emotionalOk && !physicalOk) {
-      return RoutingOutcome.fisicaOnly;
-    }
-    return RoutingOutcome.dualOrganicPrimacy;
-  }
 
   /// [emotionalNarrative] and [physicalNarrative] take an explicit `null` to
   /// clear a stage's description; omit them to keep the current value.
@@ -228,13 +193,6 @@ class TriggerCheckInState {
     final isEmotCompleted = (json['isEmotionalCompleted'] as bool?) ?? isCompleted;
     final isPhysCompleted = (json['isPhysicalCompleted'] as bool?) ?? isCompleted;
 
-    String? cleanNarrative(dynamic value) {
-      if (value is! String) return null;
-      final trimmed = value.trim();
-      if (trimmed.isEmpty || int.tryParse(trimmed) != null) return null;
-      return trimmed;
-    }
-
     final rawText = (json['naturalLanguageText'] as String?) ?? '';
     final sanitizedText = int.tryParse(rawText.trim()) != null ? '' : rawText;
 
@@ -250,8 +208,8 @@ class TriggerCheckInState {
       isPhysicalCompleted: isPhysCompleted,
       emotionalSummary: json['emotionalSummary'] as String?,
       physicalSummary: json['physicalSummary'] as String?,
-      emotionalNarrative: cleanNarrative(json['emotionalNarrative']),
-      physicalNarrative: cleanNarrative(json['physicalNarrative']),
+      emotionalNarrative: cleanCheckInNarrative(json['emotionalNarrative']),
+      physicalNarrative: cleanCheckInNarrative(json['physicalNarrative']),
       conditionsSummary: json['conditionsSummary'] as String?,
       completedAt: json['completedAt'] != null
           ? DateTime.tryParse(json['completedAt'] as String)
