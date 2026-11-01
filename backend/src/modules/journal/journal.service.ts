@@ -13,6 +13,8 @@ import { Lang, Localized, resolveLang } from '../../common/i18n/lang';
 import { JOURNAL_LIMITS } from './constants/journal-keys.constant';
 import {
   CreateJournalEntryDto,
+  journalEntryShapeError,
+  journalItemShapeError,
   JournalDaysQueryDto,
   JournalEntriesResponseDto,
   JournalEntryDto,
@@ -71,6 +73,8 @@ export class JournalService {
 
   async createEntry(userId: string, profileId: string, dto: CreateJournalEntryDto): Promise<JournalEntryDto> {
     this.assertIds(userId, profileId);
+    const shapeError = journalEntryShapeError(dto) ?? dto.items.map(journalItemShapeError).find(Boolean);
+    if (shapeError) throw new BadRequestException(shapeError);
     const recordedAt = new Date(dto.recordedAt);
     if (isNaN(recordedAt.getTime())) throw new BadRequestException('recordedAt inválido.');
 
@@ -93,6 +97,8 @@ export class JournalService {
           mood: dto.mood,
           area: dto.area ?? null,
           triggers: [...new Set(dto.triggers)],
+          coping: dto.coping ?? null,
+          helpers: dto.helpers ?? [],
           triggerNote: this.encryptOptional(dto.triggerNote),
           note: this.encryptOptional(dto.note),
           transitionVariantIds: dto.transitionVariantIds,
@@ -122,7 +128,7 @@ export class JournalService {
                 bodySide: item.kind === 'physical' ? (item.bodySide ?? null) : null,
                 sensation: item.kind === 'physical' ? (item.sensation ?? null) : null,
                 persistence: item.persistence ?? null,
-                intensity: item.intensity,
+                intensity: item.intensity ?? null,
               })),
             )
             .returning()
@@ -185,7 +191,7 @@ export class JournalService {
     return this.databaseService.withRls(userId, async (tx) => {
       // Only keys are read: no free text and no condition labels reach the summary.
       const entries = await tx
-        .select({ id: journalEntries.id, recordedAt: journalEntries.recordedAt, triggers: journalEntries.triggers })
+        .select({ id: journalEntries.id, recordedAt: journalEntries.recordedAt, triggers: journalEntries.triggers, coping: journalEntries.coping, helpers: journalEntries.helpers })
         .from(journalEntries)
         .where(and(eq(journalEntries.profileId, profileId), gte(journalEntries.recordedAt, cutoff)));
       const items = entries.length
@@ -202,7 +208,7 @@ export class JournalService {
         byEntry.set(item.entryId, list);
       }
       return buildJournalSummary(
-        entries.map((e) => ({ recordedAt: e.recordedAt, triggers: e.triggers, items: byEntry.get(e.id) ?? [] })),
+        entries.map((e) => ({ recordedAt: e.recordedAt, triggers: e.triggers, coping: e.coping, helpers: e.helpers, items: byEntry.get(e.id) ?? [] })),
         days,
         query.tzOffset ?? 0,
       );
@@ -329,6 +335,8 @@ export class JournalService {
       mood: entry.mood,
       area: entry.area ?? null,
       triggers: entry.triggers,
+      coping: entry.coping ?? null,
+      helpers: entry.helpers ?? [],
       triggerNote: this.decryptOptional(entry.triggerNote),
       note: this.decryptOptional(entry.note),
       transitionVariantIds: entry.transitionVariantIds,
