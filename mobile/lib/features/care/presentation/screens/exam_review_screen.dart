@@ -357,7 +357,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
               key: Key('exam_jump_$i'),
               contentPadding: EdgeInsets.zero,
               minTileHeight: 52,
-              title: Text(groups[i].title ?? '', style: careTitle(16)),
+              title: Text(groups[i].title ?? '', style: careTitle()),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.pop(ctx, i),
             ),
@@ -384,9 +384,9 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
       (ctx) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(index == null ? l10n.careExamAddRow : l10n.careExamFixTitle(row.item), style: careTitle(20)),
+          Text(index == null ? l10n.careExamAddRow : l10n.careExamFixTitle(row.item), style: careTitle(19)),
           const SizedBox(height: 4),
-          Text(l10n.careExamFixHint, style: careBody(16)),
+          Text(l10n.careExamFixHint, style: careBody()),
           const SizedBox(height: 14),
           CareField(fieldKey: const Key('row_item'), controller: item, label: l10n.careExamItem, maxLength: 120),
           const SizedBox(height: 10),
@@ -398,7 +398,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
           const SizedBox(height: 14),
           FilledButton(
             key: const Key('row_save'),
-            style: FilledButton.styleFrom(backgroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(56)),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(50)),
             onPressed: () {
               if (item.text.trim().isEmpty || value.text.trim().isEmpty) return;
               Navigator.pop(
@@ -413,16 +413,16 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                 ),
               );
             },
-            child: Text(l10n.careExamRowSave, style: careTitle(17).copyWith(color: Colors.white)),
+            child: Text(l10n.careExamRowSave),
           ),
           if (index != null) ...[
             const SizedBox(height: 8),
             TextButton.icon(
               key: const Key('row_remove'),
-              style: TextButton.styleFrom(foregroundColor: AppColors.emergencyDarkRed, minimumSize: const Size.fromHeight(48)),
+              style: TextButton.styleFrom(foregroundColor: AppColors.emergencyDarkRed, minimumSize: const Size.fromHeight(46)),
               onPressed: () => Navigator.pop(ctx, remove),
               icon: const Icon(Icons.delete_outline),
-              label: Text(l10n.careExamRowRemove, style: careTitle(16).copyWith(color: AppColors.emergencyDarkRed)),
+              label: Text(l10n.careExamRowRemove),
             ),
           ],
         ],
@@ -465,7 +465,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
         builder: (ctx, setSheet) => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(l10n.careExamDetails, style: careTitle(20)),
+            Text(l10n.careExamDetails, style: careTitle(19)),
             const SizedBox(height: 14),
             CareField(controller: title, label: l10n.careExamTitleField, maxLength: 120),
             const SizedBox(height: 10),
@@ -480,9 +480,9 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
             const SizedBox(height: 14),
             FilledButton(
               key: const Key('details_save'),
-              style: FilledButton.styleFrom(backgroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(56)),
+              style: FilledButton.styleFrom(backgroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(50)),
               onPressed: () => Navigator.pop(ctx, true),
-              child: Text(l10n.careExamRowSave, style: careTitle(17).copyWith(color: Colors.white)),
+              child: Text(l10n.careExamRowSave),
             ),
           ],
         ),
@@ -503,7 +503,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.careExamConfirmTitle(count), style: careTitle(19)),
-        content: Text(l10n.careExamConfirmBody, style: careBody(16)),
+        content: Text(l10n.careExamConfirmBody, style: careBody()),
         actions: [
           TextButton(key: const Key('exam_confirm_back'), onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.careExamConfirmBack)),
           FilledButton(
@@ -554,23 +554,17 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
     final info = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(printed, key: Key('row_value_$index'), style: careTitle(22).copyWith(color: AppColors.dualisNavy, height: 1.25)),
+        Text(printed, key: Key('row_value_$index'), style: careTitle().copyWith(color: AppColors.dualisNavy)),
         if (row.reference != null && row.reference!.isNotEmpty) _Reference(l10n.careExamReferenceLabel(row.reference!)),
       ],
     );
     if (!canEdit) return Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: info);
-    final fix = OutlinedButton.icon(
+    final fix = TextButton.icon(
       key: Key('row_fix_$index'),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.dualisNavy,
-        minimumSize: const Size(0, 48),
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        side: const BorderSide(color: Color(0xFFCBD5E1)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      ),
+      style: TextButton.styleFrom(foregroundColor: AppColors.dualisNavy, minimumSize: const Size(0, 40)),
       onPressed: () => _editRow(index),
-      icon: const Icon(Icons.edit_outlined, size: 18),
-      label: Text(l10n.careExamFix, style: careTitle(15).copyWith(color: AppColors.dualisNavy)),
+      icon: const Icon(Icons.edit_outlined, size: 16),
+      label: Text(l10n.careExamFix),
     );
     // With large system text the button goes under the value instead of squeezing it.
     final roomy = MediaQuery.textScalerOf(context).scale(10) <= 13;
@@ -596,14 +590,14 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (group.single)
-            Text(group.title!, key: Key('exam_group_$i'), style: careTitle(18))
+            Text(group.title!, key: Key('exam_group_$i'), style: careTitle())
           else if (group.section != null)
-            Text(group.section!.toUpperCase(), key: Key('exam_group_$i'), style: careTitle(13).copyWith(color: CareColors.slate, letterSpacing: 0.6)),
+            Text(group.section!.toUpperCase(), key: Key('exam_group_$i'), style: careTitle(12).copyWith(color: CareColors.slate, letterSpacing: 0.5)),
           for (var j = 0; j < group.items.length; j++) ...[
             if (j > 0) const Divider(height: 20),
             if (!group.single) ...[
               SizedBox(height: j == 0 && group.section != null ? 10 : 0),
-              Text(group.items[j].name, style: careTitle(17)),
+              Text(group.items[j].name, style: careTitle()),
             ],
             for (final r in group.items[j].rows) _result(r, canEdit),
           ],
@@ -660,7 +654,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                           valueListenable: _current,
                           builder: (_, i, _) {
                             final at = i.clamp(0, groups.length - 1);
-                            return Text(l10n.careExamProgress(at + 1, groups.length, groups[at].title ?? ''), style: careTitle(15));
+                            return Text(l10n.careExamProgress(at + 1, groups.length, groups[at].title ?? ''), style: careTitle(13));
                           },
                         ),
                       ),
@@ -683,20 +677,20 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(color: AppColors.brandBgLightBlue, borderRadius: BorderRadius.circular(18)),
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Text(l10n.careExamCompareTitle, style: careTitle(18)),
+                            Text(l10n.careExamCompareTitle, style: careTitle()),
                             const SizedBox(height: 6),
-                            Text(l10n.careExamCompareBody, style: careBody(16)),
+                            Text(l10n.careExamCompareBody, style: careBody()),
                             const SizedBox(height: 12),
                             OutlinedButton.icon(
                               key: const Key('exam_original'),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppColors.dualisNavy,
-                                minimumSize: const Size(0, 48),
+                                minimumSize: const Size(0, 44),
                                 side: const BorderSide(color: AppColors.dualisNavy),
                               ),
                               onPressed: () => openOriginalDocument(context, ref, doc),
                               icon: Icon(doc.isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined),
-                              label: Text(l10n.careExamSeeOriginal, style: careTitle(16).copyWith(color: AppColors.dualisNavy)),
+                              label: Text(l10n.careExamSeeOriginal),
                             ),
                           ]),
                         )
@@ -719,29 +713,29 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           Expanded(
                             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                              if (_title.text.trim().isNotEmpty) Text(_title.text.trim(), key: const Key('exam_title'), style: careTitle(17)),
-                              Text(details.isEmpty ? l10n.careExamDetailsMissing : details, style: careBody(15)),
-                              if (groups.isNotEmpty) Text(l10n.careExamSummary(groups.length, rows.length), style: careBody(15)),
+                              if (_title.text.trim().isNotEmpty) Text(_title.text.trim(), key: const Key('exam_title'), style: careTitle()),
+                              Text(details.isEmpty ? l10n.careExamDetailsMissing : details, style: careBody()),
+                              if (groups.isNotEmpty) Text(l10n.careExamSummary(groups.length, rows.length), style: careBody()),
                             ]),
                           ),
                           if (canEdit)
                             TextButton(
                               key: const Key('exam_details_fix'),
-                              style: TextButton.styleFrom(foregroundColor: AppColors.dualisNavy, minimumSize: const Size(0, 48)),
+                              style: TextButton.styleFrom(foregroundColor: AppColors.dualisNavy, minimumSize: const Size(0, 40)),
                               onPressed: _editDetails,
-                              child: Text(l10n.careExamFix, style: careTitle(15).copyWith(color: AppColors.dualisNavy)),
+                              child: Text(l10n.careExamFix),
                             ),
                         ]),
                         const SizedBox(height: 12),
                         for (var i = 0; i < groups.length; i++) _group(i, groups[i], canEdit),
-                        if (rows.isEmpty) Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Text(l10n.careExamNoRows, style: careBody(16))),
+                        if (rows.isEmpty) Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Text(l10n.careExamNoRows, style: careBody())),
                         if (canEdit)
                           OutlinedButton.icon(
                             key: const Key('exam_add_row'),
-                            style: OutlinedButton.styleFrom(foregroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(52)),
+                            style: OutlinedButton.styleFrom(foregroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(46)),
                             onPressed: () => _editRow(null),
                             icon: const Icon(Icons.add),
-                            label: Text(l10n.careExamAddRow, style: careTitle(16).copyWith(color: AppColors.dualisNavy)),
+                            label: Text(l10n.careExamAddRow),
                           ),
                         const SizedBox(height: 14),
                         CareNote(l10n.careExamNote),
@@ -763,14 +757,14 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                     child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                       FilledButton.icon(
                         key: const Key('exam_save'),
-                        style: FilledButton.styleFrom(backgroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(56)),
+                        style: FilledButton.styleFrom(backgroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(50)),
                         onPressed: _busy ? null : (confirm ? () => _confirmAll(rows.length) : _save),
                         icon: Icon(confirm ? Icons.check_circle_outline : Icons.save_outlined),
-                        label: Text(confirm ? l10n.careExamConfirmAll : l10n.careExamSaveChanges, style: careTitle(17).copyWith(color: Colors.white)),
+                        label: Text(confirm ? l10n.careExamConfirmAll : l10n.careExamSaveChanges),
                       ),
                       if (confirm) ...[
                         const SizedBox(height: 6),
-                        Text(l10n.careExamConfirmAllHint, style: careBody(14), textAlign: TextAlign.center),
+                        Text(l10n.careExamConfirmAllHint, style: careBody(12), textAlign: TextAlign.center),
                       ],
                     ]),
                   ),
@@ -799,7 +793,7 @@ class _ReferenceState extends State<_Reference> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final style = careBody(15);
+    final style = careBody(12);
     return LayoutBuilder(builder: (context, constraints) {
       final painter = TextPainter(
         text: TextSpan(text: widget.text, style: style),
@@ -814,9 +808,9 @@ class _ReferenceState extends State<_Reference> {
         if (long)
           TextButton(
             key: const Key('reference_more'),
-            style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 44), foregroundColor: AppColors.dualisNavy),
+            style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 36), foregroundColor: AppColors.dualisNavy),
             onPressed: () => setState(() => _open = !_open),
-            child: Text(_open ? l10n.careExamReferenceLess : l10n.careExamReferenceMore, style: careTitle(15).copyWith(color: AppColors.dualisNavy)),
+            child: Text(_open ? l10n.careExamReferenceLess : l10n.careExamReferenceMore, style: careTitle(12).copyWith(color: AppColors.dualisNavy)),
           ),
       ]);
     });
