@@ -1,6 +1,6 @@
 # Reporte Ejecutivo de Batería de Pruebas Multi-Agente
 
-**Fecha y Hora:** 2026-10-28T15:22:09.320Z  
+**Fecha y Hora:** 2026-11-01T02:46:25.523Z  
 **Orquestador:** orchestrator_agent  
 **Estado General:** **✅ APROBADO**
 
@@ -14,8 +14,8 @@
 | **Vocabulario vetado (textos de la app)** | wellness_vocabulary_test OK | 0 | ✅ Cumplido |
 | **Recursos de ayuda a ≤1 toque** | urgent_help_button_test OK | pasa | ✅ Cumplido |
 | **Contrato de Diario v2 (sin IA, marcadores, días locales)** | journal-contract.spec.ts OK | pasa | ✅ Cumplido |
-| **Pruebas Backend (Vitest)** | 210/210 pasadas | 100% | ✅ Pasaron |
-| **Pruebas Frontend (Flutter)** | 531 pasadas | 100% | ✅ Pasaron |
+| **Pruebas Backend (Vitest)** | 318/318 pasadas | 100% | ✅ Pasaron |
+| **Pruebas Frontend (Flutter)** | 628 pasadas | 100% | ✅ Pasaron |
 
 ---
 
@@ -40,5 +40,5 @@
 ## 3. Dictamen de los Agentes
 - **Agente Auditor de Seguridad de Contenido**: *Aprobado.* Recursos de ayuda: test OK; vocabulario vetado en casos: 0; en la app: test OK; la app no reacciona al contenido de lo escrito.
 - **Agente Revisor de Contrato**: *Aprobado.* Contrato de diario verificado: sin rutas de IA, sin evaluación de severidad, marcadores conformes y conteos por días locales.
-- **Agente Backend**: *Aprobado.* 210/210 pasadas.
-- **Agente Frontend**: *Aprobado.* 531 pasadas.
+- **Agente Backend**: *Aprobado.* 318/318 pasadas.
+- **Agente Frontend**: *Aprobado.* 628 pasadas.
