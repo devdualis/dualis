@@ -289,9 +289,9 @@ export class TriageOutcomeService {
 
     const { vertical, answers, narrative } = dto;
     const lang = resolveLang(dto.language);
-    const isZeroIndexed = answers[0] !== undefined || answers['0'] !== undefined;
-    const step1 = ((isZeroIndexed ? (answers[0] || answers['0']) : (answers[1] || answers['1'])) || '').toLowerCase();
-    const subPart = ((isZeroIndexed ? (answers[2] || answers['2']) : (answers[3] || answers['3'])) || '').toLowerCase();
+    const isZeroIndexed = answers[0] !== undefined;
+    const step1 = ((isZeroIndexed ? answers[0] : answers[1]) || '').toLowerCase();
+    const subPart = ((isZeroIndexed ? answers[2] : answers[3]) || '').toLowerCase();
     const isFeelingWell = step1 === 'normal' || step1 === 'bem_normal';
 
     const fallbackCode = vertical === 'physical' ? 'muscular_geral_sistemico' : 'estresse_burnout';
@@ -300,9 +300,9 @@ export class TriageOutcomeService {
     const mapping = this.describe(code, vertical, lang, subPartLabel);
 
     // Intensity is the person's own rating: step 3 (4-step wizard) or step 2 (legacy 3-step).
-    let intensityRaw = (answers[3] || answers['3'] || answers[2] || answers['2'] || '').toString();
-    const ans3 = (answers[3] ?? answers['3'] ?? '').toString();
-    const ans2 = (answers[2] ?? answers['2'] ?? '').toString();
+    let intensityRaw = (answers[3] || answers[2] || '').toString();
+    const ans3 = (answers[3] ?? '').toString();
+    const ans2 = (answers[2] ?? '').toString();
     const isIntensityAnswer = (v: string) =>
       /^[1-5]$/.test(v.trim()) || ['leve_controlavel', 'moderada', 'muito_forte', 'grave', 'crise'].includes(v.toLowerCase().trim());
     if (ans3 && isIntensityAnswer(ans3)) {

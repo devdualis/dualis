@@ -156,46 +156,26 @@ export class TriageHistoryService {
           physicalSummary['coluna_dor_dorsal'] = Math.max(physicalSummary['coluna_dor_dorsal'] || 0, row.intensity);
         }
 
-        if (key === 'membros_superiores' || key.startsWith('membros_superiores')) {
-          physicalSummary['membros_superiores'] = Math.max(physicalSummary['membros_superiores'] || 0, row.intensity);
+        for (const prefix of ['membros_superiores', 'membros_inferiores']) {
+          if (!key.startsWith(prefix)) continue;
+          physicalSummary[prefix] = Math.max(physicalSummary[prefix] || 0, row.intensity);
 
+          const rightKey = `${prefix}_d`;
+          const leftKey = `${prefix}_e`;
           const answersStr = JSON.stringify(log?.stepAnswers || row.stepAnswers || '').toLowerCase();
-          const isRight = answersStr.includes('direito') || key === 'membros_superiores_d';
-          const isLeft = answersStr.includes('esquerdo') || key === 'membros_superiores_e';
+          const isRight = answersStr.includes('direito') || key === rightKey;
+          const isLeft = answersStr.includes('esquerdo') || key === leftKey;
           const isBilateral = answersStr.includes('bilateral');
 
           if (isBilateral || (isRight && isLeft) || (!isRight && !isLeft)) {
             // Both limbs
-            physicalSummary['membros_superiores_d'] = Math.max(physicalSummary['membros_superiores_d'] || 0, row.intensity);
-            physicalSummary['membros_superiores_e'] = Math.max(physicalSummary['membros_superiores_e'] || 0, row.intensity);
+            physicalSummary[rightKey] = Math.max(physicalSummary[rightKey] || 0, row.intensity);
+            physicalSummary[leftKey] = Math.max(physicalSummary[leftKey] || 0, row.intensity);
           } else if (isRight) {
-            physicalSummary['membros_superiores_d'] = Math.max(physicalSummary['membros_superiores_d'] || 0, row.intensity);
+            physicalSummary[rightKey] = Math.max(physicalSummary[rightKey] || 0, row.intensity);
           } else if (isLeft) {
-            physicalSummary['membros_superiores_e'] = Math.max(physicalSummary['membros_superiores_e'] || 0, row.intensity);
+            physicalSummary[leftKey] = Math.max(physicalSummary[leftKey] || 0, row.intensity);
           }
-        }
-
-        if (key === 'membros_inferiores' || key.startsWith('membros_inferiores')) {
-          physicalSummary['membros_inferiores'] = Math.max(physicalSummary['membros_inferiores'] || 0, row.intensity);
-
-          const answersStr = JSON.stringify(log?.stepAnswers || row.stepAnswers || '').toLowerCase();
-          const isRightLeg = answersStr.includes('direito') || key === 'membros_inferiores_d';
-          const isLeftLeg = answersStr.includes('esquerdo') || key === 'membros_inferiores_e';
-          const isBilateralLeg = answersStr.includes('bilateral');
-
-          if (isBilateralLeg || (isRightLeg && isLeftLeg) || (!isRightLeg && !isLeftLeg)) {
-            // Both limbs
-            physicalSummary['membros_inferiores_d'] = Math.max(physicalSummary['membros_inferiores_d'] || 0, row.intensity);
-            physicalSummary['membros_inferiores_e'] = Math.max(physicalSummary['membros_inferiores_e'] || 0, row.intensity);
-          } else if (isRightLeg) {
-            physicalSummary['membros_inferiores_d'] = Math.max(physicalSummary['membros_inferiores_d'] || 0, row.intensity);
-          } else if (isLeftLeg) {
-            physicalSummary['membros_inferiores_e'] = Math.max(physicalSummary['membros_inferiores_e'] || 0, row.intensity);
-          }
-        }
-
-        if (key === 'muscular_geral_sistemico') {
-          physicalSummary['muscular_geral_sistemico'] = Math.max(physicalSummary['muscular_geral_sistemico'] || 0, row.intensity);
         }
       }
     }

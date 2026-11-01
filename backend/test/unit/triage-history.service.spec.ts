@@ -200,6 +200,45 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
     expect(result.physicalSummary.membros_inferiores_d).toBe(0);
   });
 
+  it.each([
+    ['membros_superiores', 'bilateral', { membros_superiores_d: 4, membros_superiores_e: 4 }],
+    ['membros_inferiores', 'bilateral', { membros_inferiores_d: 4, membros_inferiores_e: 4 }],
+    ['membros_superiores', null, { membros_superiores_d: 4, membros_superiores_e: 4 }],
+    ['membros_inferiores', null, { membros_inferiores_d: 4, membros_inferiores_e: 4 }],
+    ['membros_superiores', 'direito esquerdo', { membros_superiores_d: 4, membros_superiores_e: 4 }],
+    ['membros_inferiores', 'direito esquerdo', { membros_inferiores_d: 4, membros_inferiores_e: 4 }],
+    ['membros_superiores_d', null, { membros_superiores_d: 4, membros_superiores_e: 0 }],
+    ['membros_superiores_e', null, { membros_superiores_d: 0, membros_superiores_e: 4 }],
+    ['membros_inferiores_d', null, { membros_inferiores_d: 4, membros_inferiores_e: 0 }],
+    ['membros_inferiores_e', null, { membros_inferiores_d: 0, membros_inferiores_e: 4 }],
+    ['membros_superiores_d', 'esquerdo', { membros_superiores_d: 4, membros_superiores_e: 4 }],
+    ['membros_inferiores_e', 'direito', { membros_inferiores_d: 4, membros_inferiores_e: 4 }],
+    ['muscular_geral_sistemico', null, { muscular_geral_sistemico: 4 }],
+  ] as const)('preserves side selection and maxima for %s with %s', async (anatomicalSystem, side, expected) => {
+    const rows = [4, 2].map((intensity) => ({
+      id: `log-${intensity}`,
+      anatomicalSystem,
+      intensity,
+      emotionalDimension: null,
+      stepAnswers: side ? JSON.stringify({ side }) : null,
+      recordedAt: new Date(),
+    }));
+    mockDb.transaction.mockImplementation(async (callback: any) =>
+      callback({
+        execute: vi.fn().mockResolvedValue(true),
+        select: vi.fn().mockReturnValue({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({ orderBy: vi.fn().mockResolvedValue(rows) }),
+          }),
+        }),
+      }),
+    );
+
+    const result = await service.getHistory('usr-1', 'prof-usr-1', { days: 14 });
+
+    expect(result.physicalSummary).toMatchObject(expected);
+  });
+
   it('3. reports a descriptive journal pattern when a category was logged with high intensity twice (DASH-04)', async () => {
     const today = new Date();
     const mockRows = [
