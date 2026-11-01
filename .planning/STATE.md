@@ -5,10 +5,10 @@ current_phase: 11
 current_phase_name: multi-profile-legal-guardianship-consensual-sharing
 status: planning
 stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-10-31T02:11:40.243Z"
+last_updated: "2026-11-01T00:52:56.189Z"
 last_activity: 2026-10-30
 last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: c1bc8f181c7eded5e072530768c8b266df7a6dc2
+state_head: 3d3f804f7844dd448c2bd0c054b1a2abb8e0825f
 progress:
   total_phases: 15
   completed_phases: 10
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-10-30 - Completed quick task 261030-vao: Auth security fixes: rate limits, code caps, session revocation, anti-enumeration, picture and consent IP
+Last activity: 2026-10-31 - Completed quick task 261031-u8e: Security sweep fixes: old profile pictures deleted on change and on account deletion (no links in logs), safety-event calls capped with 429, Android build token read-only
 
 Progress: [██████████] 100%
 
@@ -133,6 +133,7 @@ None yet.
 | 261030-o69 | Real house ads (Premium, ZOC, e-BEF) and Premium promo on the care tab in the free build | 2026-10-30 | f6a1819 | [261030-o69-anuncios-reales-zoc-e-bef-premium-y-cora](./quick/261030-o69-anuncios-reales-zoc-e-bef-premium-y-cora/) |
 | 261030-vdx | Convites de compartilhamento familiar: códigos de 10 caracteres, limite de 5 tentativas erradas por conta a cada 15 min (429) e o titular vê quem aceitou (nome e e-mail) | 2026-10-30 | c1f3e68 | [261030-vdx-harden-family-sharing-invites-longer-cod](./quick/261030-vdx-harden-family-sharing-invites-longer-cod/) |
 | 261030-vao | Auth security fixes: rate limits, code caps, session revocation, anti-enumeration, picture and consent IP | 2026-10-30 | fd0a57a | [261030-vao-auth-security-fixes-rate-limits-code-cap](./quick/261030-vao-auth-security-fixes-rate-limits-code-cap/) |
+| 261031-u8e | Security sweep fixes: old profile pictures deleted on change and on account deletion (no links in logs), safety-event calls capped with 429, Android build token read-only | 2026-10-31 | 3d3f804 | [261031-u8e-security-sweep-fixes-delete-avatar-files](./quick/261031-u8e-security-sweep-fixes-delete-avatar-files/) |
 
 ## Deferred Items
 
