@@ -32,8 +32,10 @@ on:
         default: ''
         type: string
 
+# Read-only by default: the build runs third-party code (Gradle plugins, build_runner).
+# Only attach-to-release, which runs no build code, can write to the repository.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   test:
@@ -57,6 +59,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Keep the token out of .git/config while build code runs.
+          persist-credentials: false
 
       - name: Set up Java 17 (JDK)
         uses: actions/setup-java@v4
@@ -147,17 +152,6 @@ jobs:
           retention-days: 30
 
       # ------------------------------------------------------------------------
-      # Release Attachment (If triggered by a GitHub Release)
-      # ------------------------------------------------------------------------
-      - name: Upload APK to GitHub Release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: mobile/build/app/outputs/flutter-apk/*.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # ------------------------------------------------------------------------
       # Step Summary
       # ------------------------------------------------------------------------
       - name: APK Build Summary
@@ -176,3 +170,29 @@ jobs:
           done
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ **Artifact:** Downloadable from the GitHub Actions run summary under **Artifacts**." >> $GITHUB_STEP_SUMMARY
+
+  # ------------------------------------------------------------------------
+  # Release Attachment (If triggered by a GitHub Release)
+  # Its own job so the write token never meets build code: it only downloads
+  # the APK built above and attaches it to the release.
+  # ------------------------------------------------------------------------
+  attach-to-release:
+    name: Attach APK to GitHub Release
+    needs: build-apk
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download APK Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dualis-mobile-release-apk
+          path: apk
+
+      - name: Upload APK to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: apk/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
