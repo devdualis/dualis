@@ -60,15 +60,31 @@ class HabitsRepositoryImpl implements HabitsRepository {
   Profile? get _activeProfile =>
       _ref?.read(activeProfileControllerProvider).activeProfile;
 
-  String _profileKey(String? explicitProfileId) {
+  /// The profile a call works on, fixed when the call starts. Its local keys
+  /// and its requests both use it, so a profile switch in the middle of a call
+  /// cannot send one profile's answers to another.
+  String? _resolveProfileId(String? explicitProfileId) {
     final id = explicitProfileId ?? _activeProfile?.id;
-    return id != null && id.isNotEmpty ? id : 'primary';
+    return id != null && id.isNotEmpty ? id : null;
   }
 
-  String _storeKey(String profileKey) => 'dualis_habits_store_$profileKey';
-  String _pendingKey(String profileKey) => 'dualis_habits_pending_$profileKey';
-  String _cycleKey(String profileKey) =>
-      'dualis_habits_track_cycle_$profileKey';
+  String _profileKey(String? profileId) => profileId ?? 'primary';
+
+  static const _prefix = SecureStorageService.habitsKeyPrefix;
+  String _storeKey(String profileKey) => '${_prefix}store_$profileKey';
+  String _pendingKey(String profileKey) => '${_prefix}pending_$profileKey';
+  String _cycleKey(String profileKey) => '${_prefix}track_cycle_$profileKey';
+
+  /// Calls that read or write the local store run one at a time, in call
+  /// order. Two quick edits of a day reach the server in the order they were
+  /// made, and an older reply cannot overwrite a newer answer.
+  Future<void> _queue = Future<void>.value();
+
+  Future<T> _serialized<T>(Future<T> Function() action) {
+    final result = _queue.then((_) => action());
+    _queue = result.then<void>((_) {}, onError: (Object _) {});
+    return result;
+  }
 
   Future<Map<String, HabitDay>> _readLocalStore(String profileKey) async {
     try {
@@ -127,10 +143,15 @@ class HabitsRepositoryImpl implements HabitsRepository {
 
   @override
   Future<Set<String>> getPendingDays({String? profileId}) =>
-      _readPending(_profileKey(profileId));
+      _readPending(_profileKey(_resolveProfileId(profileId)));
 
   @override
-  Future<void> syncPending({String? profileId}) async {
+  Future<void> syncPending({String? profileId}) {
+    final resolved = _resolveProfileId(profileId);
+    return _serialized(() => _syncPending(resolved));
+  }
+
+  Future<void> _syncPending(String? profileId) async {
     final pk = _profileKey(profileId);
     final remote = _remoteDataSource;
     if (remote == null) return;
@@ -171,9 +192,14 @@ class HabitsRepositoryImpl implements HabitsRepository {
   }
 
   @override
-  Future<List<HabitDay>> getHabits({int days = 30, String? profileId}) async {
+  Future<List<HabitDay>> getHabits({int days = 30, String? profileId}) {
+    final resolved = _resolveProfileId(profileId);
+    return _serialized(() => _getHabits(days, resolved));
+  }
+
+  Future<List<HabitDay>> _getHabits(int days, String? profileId) async {
     final pk = _profileKey(profileId);
-    await syncPending(profileId: profileId);
+    await _syncPending(profileId);
 
     final remote = _remoteDataSource;
     if (remote != null) {
@@ -228,13 +254,18 @@ class HabitsRepositoryImpl implements HabitsRepository {
 
   @override
   Future<HabitDay?> getHabitForDay(String day, {String? profileId}) async {
-    final pk = _profileKey(profileId);
+    final pk = _profileKey(_resolveProfileId(profileId));
     final store = await _readLocalStore(pk);
     return store[day];
   }
 
   @override
-  Future<HabitDay> saveHabitDay(HabitDay habitDay, {String? profileId}) async {
+  Future<HabitDay> saveHabitDay(HabitDay habitDay, {String? profileId}) {
+    final resolved = _resolveProfileId(profileId);
+    return _serialized(() => _saveHabitDay(habitDay, resolved));
+  }
+
+  Future<HabitDay> _saveHabitDay(HabitDay habitDay, String? profileId) async {
     final pk = _profileKey(profileId);
     final store = await _readLocalStore(pk);
     final serverState = store[habitDay.day]; // previous state before this write
@@ -283,7 +314,12 @@ class HabitsRepositoryImpl implements HabitsRepository {
   }
 
   @override
-  Future<void> deleteHabitDay(String day, {String? profileId}) async {
+  Future<void> deleteHabitDay(String day, {String? profileId}) {
+    final resolved = _resolveProfileId(profileId);
+    return _serialized(() => _deleteHabitDay(day, resolved));
+  }
+
+  Future<void> _deleteHabitDay(String day, String? profileId) async {
     final pk = _profileKey(profileId);
     final store = await _readLocalStore(pk);
     store.remove(day);
@@ -302,7 +338,7 @@ class HabitsRepositoryImpl implements HabitsRepository {
 
   @override
   Future<bool> getTrackMenstrualCycleSetting({String? profileId}) async {
-    final pk = _profileKey(profileId);
+    final pk = _profileKey(_resolveProfileId(profileId));
     final val = await _storage.read(key: _cycleKey(pk));
     return val == '1' || val == 'true';
   }
@@ -312,7 +348,7 @@ class HabitsRepositoryImpl implements HabitsRepository {
     bool enabled, {
     String? profileId,
   }) async {
-    final pk = _profileKey(profileId);
+    final pk = _profileKey(_resolveProfileId(profileId));
     await _storage.write(key: _cycleKey(pk), value: enabled ? '1' : '0');
   }
 }

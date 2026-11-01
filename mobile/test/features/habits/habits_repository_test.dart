@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/habits/data/habits_remote_data_source.dart';
@@ -5,6 +7,7 @@ import 'package:dualis_mobile/features/habits/data/habits_repository.dart';
 import 'package:dualis_mobile/features/habits/domain/models/habit_day.dart';
 import 'package:dualis_mobile/features/home/domain/home_greeting.dart'
     show homeClockProvider;
+import 'package:dualis_mobile/features/profile/domain/models/profile.dart';
 import 'package:dualis_mobile/features/profile/presentation/controllers/active_profile_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,6 +33,33 @@ class _TestActiveProfileController extends ActiveProfileController {
 }
 
 final _testRefProvider = Provider((ref) => ref);
+
+const _profileA = Profile(
+  id: 'profile-a',
+  name: 'Ana',
+  profileType: ProfileType.primary,
+  ownership: ProfileOwnership.own,
+  accessLevel: ProfileAccessLevel.owner,
+);
+const _profileB = Profile(
+  id: 'profile-b',
+  name: 'Bia',
+  profileType: ProfileType.dependentMinor,
+  ownership: ProfileOwnership.dependent,
+  accessLevel: ProfileAccessLevel.owner,
+);
+
+/// Starts on profile A; [switchTo] changes the active profile like the
+/// profile picker does.
+class _SwitchableProfileController extends ActiveProfileController {
+  @override
+  ActiveProfileState build() => const ActiveProfileState(
+        profiles: [_profileA, _profileB],
+        activeProfileId: 'profile-a',
+      );
+
+  void switchTo(String id) => state = state.copyWith(activeProfileId: id);
+}
 
 void main() {
   late MockHabitsRemoteDataSource remoteDataSource;
@@ -357,6 +387,140 @@ void main() {
           reason: 'status $status',
         );
       }
+    });
+
+    group('profile switches mid-call', () {
+      late ProviderContainer profiles;
+      late HabitsRepositoryImpl repo;
+
+      setUp(() {
+        profiles = ProviderContainer(
+          overrides: [
+            homeClockProvider.overrideWithValue(() => fixedClock),
+            activeProfileControllerProvider.overrideWith(
+              _SwitchableProfileController.new,
+            ),
+          ],
+        );
+        repo = HabitsRepositoryImpl(
+          remoteDataSource: remoteDataSource,
+          storage: storage,
+          ref: profiles.read(_testRefProvider),
+          clock: () => fixedClock,
+        );
+      });
+
+      tearDown(() => profiles.dispose());
+
+      void switchToB() => (profiles.read(activeProfileControllerProvider.notifier)
+              as _SwitchableProfileController)
+          .switchTo('profile-b');
+
+      test('a save is sent and stored for the profile it was made on', () async {
+        when(
+          () => remoteDataSource.saveHabitDay(
+            any(),
+            any(),
+            profileId: any(named: 'profileId'),
+          ),
+        ).thenAnswer((inv) async => inv.positionalArguments[1] as HabitDay);
+
+        final saving = repo.saveHabitDay(
+          const HabitDay(day: '2026-10-31', moved: true),
+        );
+        switchToB();
+        await saving;
+
+        verify(
+          () => remoteDataSource.saveHabitDay(
+            '2026-10-31',
+            any(),
+            profileId: 'profile-a',
+          ),
+        ).called(1);
+        expect(
+          storage.values['dualis_habits_store_profile-a'],
+          contains('2026-10-31'),
+        );
+        expect(storage.values['dualis_habits_store_profile-b'], isNull);
+      });
+
+      test('unsent answers go up with the profile they were saved for', () async {
+        // Saved offline on profile A.
+        when(
+          () => remoteDataSource.saveHabitDay(
+            any(),
+            any(),
+            profileId: any(named: 'profileId'),
+          ),
+        ).thenAnswer((_) async => null);
+        await repo.saveHabitDay(const HabitDay(day: '2026-10-30', moved: true));
+        clearInteractions(remoteDataSource);
+
+        // Back online; the person switches to B while A's load runs.
+        when(
+          () => remoteDataSource.saveHabitDay(
+            any(),
+            any(),
+            profileId: any(named: 'profileId'),
+          ),
+        ).thenAnswer((inv) async => inv.positionalArguments[1] as HabitDay);
+        when(
+          () => remoteDataSource.getHabits(
+            days: any(named: 'days'),
+            profileId: any(named: 'profileId'),
+          ),
+        ).thenAnswer((_) async => []);
+
+        final loading = repo.getHabits(days: 30);
+        switchToB();
+        await loading;
+
+        verify(
+          () => remoteDataSource.saveHabitDay(
+            '2026-10-30',
+            any(),
+            profileId: 'profile-a',
+          ),
+        ).called(1);
+        verify(
+          () => remoteDataSource.getHabits(days: 30, profileId: 'profile-a'),
+        ).called(1);
+        expect(await repo.getPendingDays(profileId: 'profile-a'), isEmpty);
+      });
+    });
+
+    test('saves go out one at a time, so an older reply cannot win', () async {
+      final firstReply = Completer<HabitDay?>();
+      final sent = <String?>[];
+      when(() => remoteDataSource.saveHabitDay(any(), any())).thenAnswer((inv) {
+        final habit = inv.positionalArguments[1] as HabitDay;
+        sent.add(habit.sleepQuality);
+        return sent.length == 1 ? firstReply.future : Future.value(habit);
+      });
+
+      final first = repository.saveHabitDay(
+        const HabitDay(day: '2026-10-31', sleepQuality: HabitSleepQuality.bem),
+      );
+      final second = repository.saveHabitDay(
+        const HabitDay(day: '2026-10-31', sleepQuality: HabitSleepQuality.mal),
+      );
+      await Future<void>.delayed(Duration.zero);
+      // The newer answer waits until the older one is answered.
+      expect(sent, [HabitSleepQuality.bem]);
+
+      firstReply.complete(
+        const HabitDay(day: '2026-10-31', sleepQuality: HabitSleepQuality.bem),
+      );
+      await first;
+      final last = await second;
+
+      expect(sent, [HabitSleepQuality.bem, HabitSleepQuality.mal]);
+      expect(last.sleepQuality, HabitSleepQuality.mal);
+      expect(
+        (await repository.getHabitForDay('2026-10-31'))?.sleepQuality,
+        HabitSleepQuality.mal,
+      );
     });
 
     test('syncPending drops 4xx rejected day from pending queue', () async {

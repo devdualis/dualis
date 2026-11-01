@@ -72,8 +72,18 @@ class HabitsState {
 }
 
 class HabitsController extends Notifier<HabitsState> {
+  /// Bumped on every rebuild (sign-in, sign-out, profile switch). A load or a
+  /// save started for the previous user or profile never reaches this state.
+  int _generation = 0;
+  String? _profileId;
   int _loadSession = 0;
   Future<void>? _pendingLoad;
+
+  /// Number of the newest edit of each day. A save reply is shown only while
+  /// its edit is still the newest one of that day.
+  final Map<String, int> _latestEdit = {};
+  int _editCount = 0;
+  int _savesInFlight = 0;
 
   DateTime get _now {
     try {
@@ -90,7 +100,13 @@ class HabitsController extends Notifier<HabitsState> {
   @override
   HabitsState build() {
     ref.watch(authControllerProvider.select((auth) => auth.user?.id));
-    ref.watch(activeProfileControllerProvider.select((s) => s.activeProfile?.id));
+    _profileId = ref.watch(
+      activeProfileControllerProvider.select((s) => s.activeProfile?.id),
+    );
+    _generation++;
+    _pendingLoad = null;
+    _latestEdit.clear();
+    _savesInFlight = 0;
 
     Future.microtask(() => loadData());
 
@@ -102,6 +118,8 @@ class HabitsController extends Notifier<HabitsState> {
   }
 
   HabitsRepository get _repository => ref.read(habitsRepositoryProvider);
+
+  bool _isCurrent(int generation) => ref.mounted && generation == _generation;
 
   Future<void> loadData() {
     final existing = _pendingLoad;
@@ -116,14 +134,34 @@ class HabitsController extends Notifier<HabitsState> {
   }
 
   Future<void> _performLoadData() async {
+    final generation = _generation;
+    final profileId = _profileId;
+    final editsBefore = _editCount;
     final session = ++_loadSession;
     state = state.copyWith(isLoading: true);
 
     try {
-      final days = await _repository.getHabits(days: 60);
-      final trackCycle = await _repository.getTrackMenstrualCycleSetting();
+      final loaded = await _repository.getHabits(
+        days: 60,
+        profileId: profileId,
+      );
+      final trackCycle = await _repository.getTrackMenstrualCycleSetting(
+        profileId: profileId,
+      );
 
-      if (!ref.mounted || session != _loadSession) return;
+      if (!_isCurrent(generation) || session != _loadSession) return;
+
+      // A day edited while this load ran keeps its newer answer.
+      final editedDays = {
+        for (final edit in _latestEdit.entries)
+          if (edit.value > editsBefore) edit.key,
+      };
+      final days = [
+        for (final d in loaded)
+          if (!editedDays.contains(d.day)) d,
+        for (final d in state.recentDays)
+          if (editedDays.contains(d.day)) d,
+      ]..sort((a, b) => b.day.compareTo(a.day));
 
       final todayStr = todayDayString;
       final yesterdayStr = yesterdayDayString;
@@ -145,7 +183,7 @@ class HabitsController extends Notifier<HabitsState> {
         trackMenstrualCycle: trackCycle,
       );
     } catch (e) {
-      if (!ref.mounted || session != _loadSession) return;
+      if (!_isCurrent(generation) || session != _loadSession) return;
       state = state.copyWith(
         isLoading: false,
         errorMessage: 'Erro ao carregar hábitos: $e',
@@ -166,6 +204,11 @@ class HabitsController extends Notifier<HabitsState> {
     bool? period,
     bool clearPeriod = false,
   }) async {
+    final generation = _generation;
+    final profileId = _profileId;
+    final edit = ++_editCount;
+    _latestEdit[day] = edit;
+    _savesInFlight++;
     state = state.copyWith(isSaving: true);
 
     final current = day == todayDayString
@@ -195,12 +238,21 @@ class HabitsController extends Notifier<HabitsState> {
     _applyLocalDay(updated);
 
     try {
-      final saved = await _repository.saveHabitDay(updated);
-      _applyLocalDay(saved);
-      state = state.copyWith(isSaving: false);
+      // The repository sends saves one at a time, in tap order.
+      final saved = await _repository.saveHabitDay(
+        updated,
+        profileId: profileId,
+      );
+      if (!_isCurrent(generation)) return;
+      _savesInFlight--;
+      // A newer edit of this day is on its way: its reply wins.
+      if (_latestEdit[day] == edit) _applyLocalDay(saved);
+      state = state.copyWith(isSaving: _savesInFlight > 0);
     } catch (e) {
+      if (!_isCurrent(generation)) return;
+      _savesInFlight--;
       state = state.copyWith(
-        isSaving: false,
+        isSaving: _savesInFlight > 0,
         errorMessage: 'Erro ao salvar hábito: $e',
       );
     }
@@ -227,13 +279,20 @@ class HabitsController extends Notifier<HabitsState> {
     ++_loadSession;
     state = state.copyWith(trackMenstrualCycle: enabled);
     try {
-      await _repository.setTrackMenstrualCycleSetting(enabled);
+      await _repository.setTrackMenstrualCycleSetting(
+        enabled,
+        profileId: _profileId,
+      );
     } catch (_) {}
   }
 
   Future<void> deleteHabit(String day) async {
+    final generation = _generation;
+    final edit = ++_editCount;
+    _latestEdit[day] = edit;
     try {
-      await _repository.deleteHabitDay(day);
+      await _repository.deleteHabitDay(day, profileId: _profileId);
+      if (!_isCurrent(generation) || _latestEdit[day] != edit) return;
       final emptyDay = HabitDay(day: day);
       final list = state.recentDays.where((d) => d.day != day).toList();
       state = state.copyWith(
