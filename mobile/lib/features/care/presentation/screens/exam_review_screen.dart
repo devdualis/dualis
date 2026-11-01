@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -11,30 +14,98 @@ import '../care_providers.dart';
 import '../care_routes.dart';
 import '../widgets/care_widgets.dart';
 
-/// Shows the original document (photo inline; PDF through the system viewer).
+/// Shows the original document inside the app: the photo, or the PDF pages as
+/// images, with zoom. A PDF can also be shared from there.
 Future<void> openOriginalDocument(BuildContext context, WidgetRef ref, CareDocument doc) async {
   final l10n = AppLocalizations.of(context);
   try {
     final bytes = await ref.read(careDocumentFileProvider(doc.id).future);
     if (!context.mounted) return;
-    if (doc.isPdf) {
-      final box = context.findRenderObject() as RenderBox?;
-      await SharePlus.instance.share(ShareParams(
-        files: [XFile.fromData(bytes, mimeType: 'application/pdf', name: 'documento.pdf')],
-        sharePositionOrigin: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
-      ));
-      return;
-    }
     await Navigator.of(context).push(MaterialPageRoute<void>(
       fullscreenDialog: true,
-      builder: (_) => Scaffold(
-        backgroundColor: Colors.black,
-        appBar: AppBar(backgroundColor: Colors.black, foregroundColor: Colors.white),
-        body: InteractiveViewer(maxScale: 6, child: Center(child: Image.memory(bytes))),
-      ),
+      builder: (_) => OriginalDocumentScreen(bytes: bytes, isPdf: doc.isPdf),
     ));
   } catch (_) {
     if (context.mounted) careSnack(context, l10n.careLoadError);
+  }
+}
+
+class OriginalDocumentScreen extends StatefulWidget {
+  const OriginalDocumentScreen({super.key, required this.bytes, required this.isPdf});
+  final Uint8List bytes;
+  final bool isPdf;
+
+  @override
+  State<OriginalDocumentScreen> createState() => _OriginalDocumentScreenState();
+}
+
+class _OriginalDocumentScreenState extends State<OriginalDocumentScreen> {
+  final List<Uint8List> _pages = [];
+  bool _failed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isPdf) _load();
+  }
+
+  /// Pages arrive one by one; leaving the screen ends the loop (and the rendering).
+  Future<void> _load() async {
+    try {
+      // 150 dpi keeps small print readable when zoomed, without heavy memory use.
+      await for (final page in Printing.raster(widget.bytes, dpi: 150)) {
+        final png = await page.toPng();
+        if (!mounted) return;
+        setState(() => _pages.add(png));
+      }
+    } catch (_) {
+      if (mounted) setState(() => _failed = true);
+    }
+  }
+
+  Future<void> _share() async {
+    final box = context.findRenderObject() as RenderBox?;
+    await SharePlus.instance.share(ShareParams(
+      files: [XFile.fromData(widget.bytes, mimeType: 'application/pdf', name: 'exame.pdf')],
+      sharePositionOrigin: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+      backgroundColor: const Color(0xFF1F2937),
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        title: Text(l10n.careExamOriginalTitle),
+        actions: [
+          if (widget.isPdf)
+            TextButton.icon(
+              onPressed: _share,
+              style: TextButton.styleFrom(foregroundColor: Colors.white),
+              icon: const Icon(Icons.ios_share),
+              label: Text(l10n.careExamOriginalShare),
+            ),
+        ],
+      ),
+      body: !widget.isPdf
+          ? InteractiveViewer(maxScale: 6, child: Center(child: Image.memory(widget.bytes)))
+          : _failed
+              ? Center(child: Text(l10n.careLoadError, style: const TextStyle(color: Colors.white)))
+              : _pages.isEmpty
+                  ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                  : InteractiveViewer(
+                      maxScale: 6,
+                      child: ListView.separated(
+                        padding: const EdgeInsets.all(12),
+                        itemCount: _pages.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 12),
+                        itemBuilder: (_, i) => Image.memory(_pages[i], key: Key('original_page_$i')),
+                      ),
+                    ),
+    );
   }
 }
 
@@ -173,9 +244,39 @@ class PossibleDuplicateCard extends ConsumerWidget {
   }
 }
 
-/// Row-by-row check of a transcribed lab report. Values and references are the
-/// lab's; there are no colours, arrows or judgments, and saving needs every
-/// row confirmed.
+/// One exam of the document: its heading and its items, in printed order.
+class _Group {
+  _Group(this.section);
+  final String? section;
+  final List<_Item> items = [];
+
+  /// One item named like its exam ("Ferritina" under "FERRITINA"): the name is shown once.
+  bool get single => items.length == 1 && (section == null || items.first.name.toLowerCase() == section!.toLowerCase());
+  String? get title => single ? items.first.name : section;
+}
+
+/// One analyte and its results (for example % and /mm³), as indexes into the rows.
+class _Item {
+  _Item(this.name);
+  final String name;
+  final List<int> rows = [];
+}
+
+List<_Group> _groupsOf(List<ExamValue> rows) {
+  final groups = <_Group>[];
+  for (var i = 0; i < rows.length; i++) {
+    final row = rows[i];
+    if (groups.isEmpty || groups.last.section != row.section) groups.add(_Group(row.section));
+    final items = groups.last.items;
+    if (items.isEmpty || items.last.name.toLowerCase() != row.item.toLowerCase()) items.add(_Item(row.item));
+    items.last.rows.add(i);
+  }
+  return groups;
+}
+
+/// A transcribed lab report, checked against the original. Values and references are
+/// the lab's; there are no colours, arrows or judgments. The person compares, fixes what
+/// differs and confirms everything at once (every saved value is marked confirmed).
 class ExamReviewScreen extends ConsumerStatefulWidget {
   const ExamReviewScreen({super.key, required this.documentId});
   final String documentId;
@@ -192,13 +293,26 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
   bool _busy = false;
   /// The person answered "keep both" to the possible-duplicate question (saving clears it on the server).
   bool _keepBoth = false;
-  /// Section headings, to jump from the exam chips to each exam.
-  final _sectionKeys = <String, GlobalKey>{};
+  /// Something changed in an exam that was already confirmed.
+  bool _dirty = false;
+  final _scroll = ScrollController();
+  final _viewportKey = GlobalKey();
+  final _groupKeys = <GlobalKey>[];
+  /// The exam at the top of the screen, for the "Exame 2 de 11" bar.
+  final _current = ValueNotifier<int>(0);
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_trackCurrent);
+  }
 
   @override
   void dispose() {
     _title.dispose();
     _lab.dispose();
+    _scroll.dispose();
+    _current.dispose();
     super.dispose();
   }
 
@@ -217,6 +331,46 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
     _collected = DateTime.tryParse(doc.collectedOn ?? '');
   }
 
+  void _trackCurrent() {
+    final viewport = _viewportKey.currentContext?.findRenderObject() as RenderBox?;
+    if (viewport == null) return;
+    final top = viewport.localToGlobal(Offset.zero).dy + 48;
+    var current = 0;
+    for (var i = 0; i < _groupKeys.length; i++) {
+      final box = _groupKeys[i].currentContext?.findRenderObject() as RenderBox?;
+      if (box != null && box.attached && box.localToGlobal(Offset.zero).dy <= top) current = i;
+    }
+    _current.value = current;
+  }
+
+  Future<void> _chooseGroup(List<_Group> groups) async {
+    final l10n = AppLocalizations.of(context);
+    final picked = await showCareSheet<int>(
+      context,
+      (ctx) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l10n.careExamJumpTitle, style: careTitle(19)),
+          const SizedBox(height: 8),
+          for (var i = 0; i < groups.length; i++)
+            ListTile(
+              key: Key('exam_jump_$i'),
+              contentPadding: EdgeInsets.zero,
+              minTileHeight: 52,
+              title: Text(groups[i].title ?? '', style: careTitle(16)),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.pop(ctx, i),
+            ),
+        ],
+      ),
+    );
+    final target = picked == null ? null : _groupKeys[picked].currentContext;
+    if (target != null && target.mounted) {
+      await Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 300));
+    }
+  }
+
+  /// Fix ([index]) or add (null) one value. Values the person writes count as confirmed.
   Future<void> _editRow(int? index) async {
     final l10n = AppLocalizations.of(context);
     final row = index == null ? const ExamValue(item: '', value: '') : _rows![index];
@@ -224,25 +378,27 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
     final value = TextEditingController(text: row.value);
     final unit = TextEditingController(text: row.unit);
     final reference = TextEditingController(text: row.reference);
+    const remove = ExamValue(item: '', value: '');
     final result = await showCareSheet<ExamValue>(
       context,
       (ctx) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(index == null ? l10n.careExamAddRow : l10n.careExamEditRow, style: careTitle(19)),
-          const SizedBox(height: 12),
+          Text(index == null ? l10n.careExamAddRow : l10n.careExamFixTitle(row.item), style: careTitle(20)),
+          const SizedBox(height: 4),
+          Text(l10n.careExamFixHint, style: careBody(16)),
+          const SizedBox(height: 14),
           CareField(fieldKey: const Key('row_item'), controller: item, label: l10n.careExamItem, maxLength: 120),
           const SizedBox(height: 10),
-          Row(children: [
-            Expanded(child: CareField(fieldKey: const Key('row_value'), controller: value, label: l10n.careExamValue, maxLength: 60)),
-            const SizedBox(width: 10),
-            Expanded(child: CareField(controller: unit, label: l10n.careExamUnit, maxLength: 30)),
-          ]),
+          CareField(fieldKey: const Key('row_value'), controller: value, label: l10n.careExamValue, maxLength: 60),
           const SizedBox(height: 10),
-          CareField(controller: reference, label: l10n.careExamReference, maxLength: 200),
+          CareField(controller: unit, label: l10n.careExamUnit, maxLength: 30),
+          const SizedBox(height: 10),
+          CareField(controller: reference, label: l10n.careExamReference, maxLength: 200, maxLines: 3),
           const SizedBox(height: 14),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(50)),
+            key: const Key('row_save'),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(56)),
             onPressed: () {
               if (item.text.trim().isEmpty || value.text.trim().isEmpty) return;
               Navigator.pop(
@@ -257,20 +413,40 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                 ),
               );
             },
-            child: Text(l10n.careExamRowSave),
+            child: Text(l10n.careExamRowSave, style: careTitle(17).copyWith(color: Colors.white)),
           ),
           if (index != null) ...[
             const SizedBox(height: 8),
-            TextButton(onPressed: () => Navigator.pop(ctx, const ExamValue(item: '', value: '')), child: Text(l10n.careExamRowRemove)),
+            TextButton.icon(
+              key: const Key('row_remove'),
+              style: TextButton.styleFrom(foregroundColor: AppColors.emergencyDarkRed, minimumSize: const Size.fromHeight(48)),
+              onPressed: () => Navigator.pop(ctx, remove),
+              icon: const Icon(Icons.delete_outline),
+              label: Text(l10n.careExamRowRemove, style: careTitle(16).copyWith(color: AppColors.emergencyDarkRed)),
+            ),
           ],
         ],
       ),
     );
-    if (result == null) return;
+    if (result == null || !mounted) return;
+    if (identical(result, remove)) {
+      final removed = _rows!.removeAt(index!);
+      setState(() => _dirty = true);
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Text(l10n.careExamRowRemoved),
+          action: SnackBarAction(
+            key: const Key('row_undo'),
+            label: l10n.gxUndo,
+            onPressed: () => setState(() => _rows!.insert(index.clamp(0, _rows!.length), removed)),
+          ),
+        ));
+      return;
+    }
     setState(() {
-      if (result.item.isEmpty) {
-        _rows!.removeAt(index!);
-      } else if (index == null) {
+      _dirty = true;
+      if (index == null) {
         _rows!.add(result);
       } else {
         _rows![index] = result;
@@ -278,9 +454,69 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
     });
   }
 
-  /// Rows [a] and [b] are results of the same item in the same exam.
-  static bool _sameItem(List<ExamValue> rows, int a, int b) =>
-      b >= 0 && b < rows.length && rows[a].section == rows[b].section && rows[a].item.toLowerCase() == rows[b].item.toLowerCase();
+  Future<void> _editDetails() async {
+    final l10n = AppLocalizations.of(context);
+    final title = TextEditingController(text: _title.text);
+    final lab = TextEditingController(text: _lab.text);
+    var collected = _collected;
+    final saved = await showCareSheet<bool>(
+      context,
+      (ctx) => StatefulBuilder(
+        builder: (ctx, setSheet) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(l10n.careExamDetails, style: careTitle(20)),
+            const SizedBox(height: 14),
+            CareField(controller: title, label: l10n.careExamTitleField, maxLength: 120),
+            const SizedBox(height: 10),
+            CareField(controller: lab, label: l10n.careExamLab, maxLength: 120),
+            const SizedBox(height: 10),
+            CareDateField(
+              label: l10n.careExamCollected,
+              value: collected,
+              onChanged: (d) => setSheet(() => collected = d),
+              lastDate: DateTime.now(),
+            ),
+            const SizedBox(height: 14),
+            FilledButton(
+              key: const Key('details_save'),
+              style: FilledButton.styleFrom(backgroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(56)),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n.careExamRowSave, style: careTitle(17).copyWith(color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (saved != true || !mounted) return;
+    setState(() {
+      _title.text = title.text.trim();
+      _lab.text = lab.text.trim();
+      _collected = collected;
+      _dirty = true;
+    });
+  }
+
+  Future<void> _confirmAll(int count) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.careExamConfirmTitle(count), style: careTitle(19)),
+        content: Text(l10n.careExamConfirmBody, style: careBody(16)),
+        actions: [
+          TextButton(key: const Key('exam_confirm_back'), onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.careExamConfirmBack)),
+          FilledButton(
+            key: const Key('exam_confirm_yes'),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.dualisNavy),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.careExamConfirmYes),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) await _save();
+  }
 
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context);
@@ -290,7 +526,8 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
         if (_title.text.trim().isNotEmpty) 'title': _title.text.trim(),
         if (_lab.text.trim().isNotEmpty) 'labName': _lab.text.trim(),
         if (_collected != null) 'collectedOn': isoDay(_collected!),
-        'values': _rows!.map((r) => r.toJson()).toList(),
+        // Saving is the person's confirmation that every value matches the original.
+        'values': _rows!.map((r) => r.copyWith(confirmed: true).toJson()).toList(),
       });
       if (mounted) {
         careSnack(context, l10n.careExamSaved);
@@ -309,6 +546,72 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
     if (mounted) Navigator.of(context).pop();
   }
 
+  Widget _result(int index, bool canEdit) {
+    final l10n = AppLocalizations.of(context);
+    final row = _rows![index];
+    // Non-breaking spaces keep "1.938 /mm³" on one line.
+    final printed = [row.value, if (row.unit != null && row.unit!.isNotEmpty) row.unit!].join(' ').replaceAll(' ', ' ');
+    final info = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(printed, key: Key('row_value_$index'), style: careTitle(22).copyWith(color: AppColors.dualisNavy, height: 1.25)),
+        if (row.reference != null && row.reference!.isNotEmpty) _Reference(l10n.careExamReferenceLabel(row.reference!)),
+      ],
+    );
+    if (!canEdit) return Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: info);
+    final fix = OutlinedButton.icon(
+      key: Key('row_fix_$index'),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.dualisNavy,
+        minimumSize: const Size(0, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        side: const BorderSide(color: Color(0xFFCBD5E1)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      ),
+      onPressed: () => _editRow(index),
+      icon: const Icon(Icons.edit_outlined, size: 18),
+      label: Text(l10n.careExamFix, style: careTitle(15).copyWith(color: AppColors.dualisNavy)),
+    );
+    // With large system text the button goes under the value instead of squeezing it.
+    final roomy = MediaQuery.textScalerOf(context).scale(10) <= 13;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: roomy
+          ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Expanded(child: info), const SizedBox(width: 8), fix])
+          : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [info, const SizedBox(height: 6), fix]),
+    );
+  }
+
+  Widget _group(int i, _Group group, bool canEdit) {
+    return Container(
+      key: _groupKeys[i],
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (group.single)
+            Text(group.title!, key: Key('exam_group_$i'), style: careTitle(18))
+          else if (group.section != null)
+            Text(group.section!.toUpperCase(), key: Key('exam_group_$i'), style: careTitle(13).copyWith(color: CareColors.slate, letterSpacing: 0.6)),
+          for (var j = 0; j < group.items.length; j++) ...[
+            if (j > 0) const Divider(height: 20),
+            if (!group.single) ...[
+              SizedBox(height: j == 0 && group.section != null ? 10 : 0),
+              Text(group.items[j].name, style: careTitle(17)),
+            ],
+            for (final r in group.items[j].rows) _result(r, canEdit),
+          ],
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -317,7 +620,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: careAppBar(context, l10n.careExamReviewTitle, actions: [
-        if (canEdit) IconButton(onPressed: _delete, icon: const Icon(Icons.delete_outline)),
+        if (canEdit) IconButton(tooltip: l10n.careDelete, onPressed: _delete, icon: const Icon(Icons.delete_outline)),
       ]),
       body: CareAsync<CareDocument>(
         value: async,
@@ -325,141 +628,197 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
         data: (doc) {
           _init(doc);
           final rows = _rows!;
-          final pending = rows.where((r) => !r.confirmed).length;
+          final groups = _groupsOf(rows);
+          while (_groupKeys.length < groups.length) {
+            _groupKeys.add(GlobalKey());
+          }
           final archiveOnly = doc.status == DocumentStatus.archived;
+          final reading = doc.status == DocumentStatus.review || doc.status == DocumentStatus.failed;
+          final confirm = canEdit && !archiveOnly && reading && rows.isNotEmpty;
+          final saveChanges = canEdit && doc.status == DocumentStatus.ready && _dirty;
           // Asked only while the other document still exists.
           final otherExists = ref.watch(careDocumentsProvider).value?.any((d) => d.id == doc.possibleDuplicateOf) ?? false;
           final askDuplicate = canEdit && !_keepBoth && doc.status == DocumentStatus.review && otherExists;
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-            children: [
-              CareRow(
-                key: const Key('exam_original'),
-                leading: CareIconTile(doc.isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined,
-                    background: CareColors.slateBg, foreground: CareColors.slate),
-                title: l10n.careExamSeeOriginal,
-                subtitle: archiveOnly ? l10n.careExamArchivedHint : l10n.careExamCompareHint,
-                onTap: () => openOriginalDocument(context, ref, doc),
-              ),
-              if (doc.status == DocumentStatus.failed) ...[const SizedBox(height: 10), CareNote(l10n.careExamFailedHint)],
-              if (askDuplicate) ...[
-                const SizedBox(height: 10),
-                PossibleDuplicateCard(doc: doc, onKeep: () => setState(() => _keepBoth = true)),
-              ],
-              if (canEdit) ...[const SizedBox(height: 10), DocumentActions(doc: doc)],
-              if (!archiveOnly) ...[
-                const SizedBox(height: 12),
-                CareField(controller: _title, label: l10n.careExamTitleField, maxLength: 120),
-                const SizedBox(height: 10),
-                Row(children: [
-                  Expanded(child: CareField(controller: _lab, label: l10n.careExamLab, maxLength: 120)),
-                  const SizedBox(width: 10),
-                  Expanded(child: CareDateField(label: l10n.careExamCollected, value: _collected, onChanged: (d) => setState(() => _collected = d), lastDate: DateTime.now())),
-                ]),
-                if (doc.sections.length > 1) ...[
-                  const SizedBox(height: 14),
-                  Text(l10n.careExamSections(doc.sections.length), style: careTitle(13)),
-                  const SizedBox(height: 8),
-                  Wrap(spacing: 6, runSpacing: 6, children: [
-                    for (final section in doc.sections)
-                      ActionChip(
-                        label: Text(section, style: careBody(12).copyWith(color: AppColors.dualisNavy)),
-                        visualDensity: VisualDensity.compact,
-                        onPressed: () {
-                          final target = _sectionKeys[section]?.currentContext;
-                          if (target != null) Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 300));
-                        },
+          final details = [
+            if (_lab.text.trim().isNotEmpty) _lab.text.trim(),
+            if (_collected != null) l10n.careExamCollectedOn(careDate(context, _collected!)),
+          ].join(' · ');
+
+          return Column(children: [
+            if (!archiveOnly && groups.length > 1)
+              Material(
+                color: AppColors.surfaceLight,
+                child: InkWell(
+                  key: const Key('exam_progress'),
+                  onTap: () => _chooseGroup(groups),
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(16, 10, 12, 10),
+                    decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0)))),
+                    child: Row(children: [
+                      Expanded(
+                        child: ValueListenableBuilder<int>(
+                          valueListenable: _current,
+                          builder: (_, i, _) {
+                            final at = i.clamp(0, groups.length - 1);
+                            return Text(l10n.careExamProgress(at + 1, groups.length, groups[at].title ?? ''), style: careTitle(15));
+                          },
+                        ),
                       ),
-                  ]),
-                ],
-                const SizedBox(height: 12),
-                CareCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      const Icon(Icons.expand_more, color: AppColors.dualisNavy),
+                    ]),
+                  ),
+                ),
+              ),
+            Expanded(
+              child: KeyedSubtree(
+                key: _viewportKey,
+                child: SingleChildScrollView(
+                  controller: _scroll,
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Row(children: [
-                        Expanded(flex: 4, child: Text(l10n.careExamItem, style: careBody(11))),
-                        Expanded(flex: 3, child: Text(l10n.careExamValue, style: careBody(11))),
-                        Expanded(flex: 3, child: Text(l10n.careExamReferencePrinted, style: careBody(11))),
-                        const SizedBox(width: 40),
-                      ]),
-                      const Divider(),
-                      if (rows.isEmpty) Padding(padding: const EdgeInsets.all(12), child: Text(l10n.careExamNoRows, style: careBody())),
-                      for (var i = 0; i < rows.length; i++) ...[
-                        if (rows[i].section != null && (i == 0 || rows[i].section != rows[i - 1].section))
-                          Padding(
-                            // Only the first heading of a section gets the jump key (keys must be unique).
-                            key: rows.indexWhere((r) => r.section == rows[i].section) == i ? _sectionKeys.putIfAbsent(rows[i].section!, GlobalKey.new) : null,
-                            padding: const EdgeInsets.only(top: 12, bottom: 2),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(rows[i].section!, key: Key('exam_section_$i'), style: careTitle(12).copyWith(color: AppColors.dualisNavy)),
+                      if (confirm && doc.status == DocumentStatus.review)
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(color: AppColors.brandBgLightBlue, borderRadius: BorderRadius.circular(18)),
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text(l10n.careExamCompareTitle, style: careTitle(18)),
+                            const SizedBox(height: 6),
+                            Text(l10n.careExamCompareBody, style: careBody(16)),
+                            const SizedBox(height: 12),
+                            OutlinedButton.icon(
+                              key: const Key('exam_original'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.dualisNavy,
+                                minimumSize: const Size(0, 48),
+                                side: const BorderSide(color: AppColors.dualisNavy),
+                              ),
+                              onPressed: () => openOriginalDocument(context, ref, doc),
+                              icon: Icon(doc.isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined),
+                              label: Text(l10n.careExamSeeOriginal, style: careTitle(16).copyWith(color: AppColors.dualisNavy)),
                             ),
-                          ),
-                        if (_sameItem(rows, i, i + 1) && !_sameItem(rows, i, i - 1))
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Align(alignment: Alignment.centerLeft, child: Text(rows[i].item, key: Key('exam_item_$i'), style: careTitle(13))),
-                          ),
-                        InkWell(
-                          onTap: canEdit ? () => _editRow(i) : null,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Row(children: [
-                              Expanded(
-                                flex: 4,
-                                // Several results of one item (e.g. % and /mm³) share the name above;
-                                // each line can be removed to keep only the one the person wants.
-                                child: _sameItem(rows, i, i - 1) || _sameItem(rows, i, i + 1)
-                                    ? Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: canEdit
-                                            ? IconButton(
-                                                key: Key('row_remove_$i'),
-                                                tooltip: l10n.careExamRowRemove,
-                                                visualDensity: VisualDensity.compact,
-                                                icon: Icon(Icons.close, size: 16, color: CareColors.slate.withValues(alpha: 0.55)),
-                                                onPressed: () => setState(() => rows.removeAt(i)),
-                                              )
-                                            : const SizedBox.shrink(),
-                                      )
-                                    : Text(rows[i].item, style: careTitle(13)),
-                              ),
-                              Expanded(flex: 3, child: Text([rows[i].value, rows[i].unit].whereType<String>().join(' '), style: careBody(13).copyWith(color: AppColors.textPrimaryLight))),
-                              Expanded(flex: 3, child: Text(rows[i].reference ?? '—', style: careBody(12))),
-                              SizedBox(
-                                width: 40,
-                                child: Checkbox(
-                                  key: Key('row_confirm_$i'),
-                                  shape: const CircleBorder(),
-                                  value: rows[i].confirmed,
-                                  onChanged: canEdit ? (v) => setState(() => rows[i] = rows[i].copyWith(confirmed: v ?? false)) : null,
-                                ),
-                              ),
+                          ]),
+                        )
+                      else
+                        CareRow(
+                          key: const Key('exam_original'),
+                          leading: CareIconTile(doc.isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined,
+                              background: CareColors.slateBg, foreground: CareColors.slate),
+                          title: l10n.careExamSeeOriginal,
+                          subtitle: archiveOnly ? l10n.careExamArchivedHint : l10n.careExamCompareHint,
+                          onTap: () => openOriginalDocument(context, ref, doc),
+                        ),
+                      if (doc.status == DocumentStatus.failed) ...[const SizedBox(height: 10), CareNote(l10n.careExamFailedHint)],
+                      if (askDuplicate) ...[
+                        const SizedBox(height: 10),
+                        PossibleDuplicateCard(doc: doc, onKeep: () => setState(() => _keepBoth = true)),
+                      ],
+                      if (!archiveOnly) ...[
+                        const SizedBox(height: 16),
+                        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Expanded(
+                            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                              if (_title.text.trim().isNotEmpty) Text(_title.text.trim(), key: const Key('exam_title'), style: careTitle(17)),
+                              Text(details.isEmpty ? l10n.careExamDetailsMissing : details, style: careBody(15)),
+                              if (groups.isNotEmpty) Text(l10n.careExamSummary(groups.length, rows.length), style: careBody(15)),
                             ]),
                           ),
-                        ),
+                          if (canEdit)
+                            TextButton(
+                              key: const Key('exam_details_fix'),
+                              style: TextButton.styleFrom(foregroundColor: AppColors.dualisNavy, minimumSize: const Size(0, 48)),
+                              onPressed: _editDetails,
+                              child: Text(l10n.careExamFix, style: careTitle(15).copyWith(color: AppColors.dualisNavy)),
+                            ),
+                        ]),
+                        const SizedBox(height: 12),
+                        for (var i = 0; i < groups.length; i++) _group(i, groups[i], canEdit),
+                        if (rows.isEmpty) Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Text(l10n.careExamNoRows, style: careBody(16))),
+                        if (canEdit)
+                          OutlinedButton.icon(
+                            key: const Key('exam_add_row'),
+                            style: OutlinedButton.styleFrom(foregroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(52)),
+                            onPressed: () => _editRow(null),
+                            icon: const Icon(Icons.add),
+                            label: Text(l10n.careExamAddRow, style: careTitle(16).copyWith(color: AppColors.dualisNavy)),
+                          ),
+                        const SizedBox(height: 14),
+                        CareNote(l10n.careExamNote),
                       ],
-                      if (canEdit)
-                        TextButton.icon(onPressed: () => _editRow(null), icon: const Icon(Icons.add), label: Text(l10n.careExamAddRow)),
+                      if (canEdit) ...[const SizedBox(height: 14), DocumentActions(doc: doc)],
                     ],
                   ),
                 ),
-                const SizedBox(height: 10),
-                CareNote(l10n.careExamNote),
-                const SizedBox(height: 14),
-                if (canEdit)
-                  FilledButton(
-                    key: const Key('exam_save'),
-                    style: FilledButton.styleFrom(backgroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(52)),
-                    onPressed: _busy || pending > 0 ? null : _save,
-                    child: Text(pending > 0 ? l10n.careExamSavePending(pending) : l10n.careSave),
+              ),
+            ),
+            if (confirm || saveChanges)
+              Material(
+                color: AppColors.surfaceLight,
+                elevation: 8,
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+                    child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                      FilledButton.icon(
+                        key: const Key('exam_save'),
+                        style: FilledButton.styleFrom(backgroundColor: AppColors.dualisNavy, minimumSize: const Size.fromHeight(56)),
+                        onPressed: _busy ? null : (confirm ? () => _confirmAll(rows.length) : _save),
+                        icon: Icon(confirm ? Icons.check_circle_outline : Icons.save_outlined),
+                        label: Text(confirm ? l10n.careExamConfirmAll : l10n.careExamSaveChanges, style: careTitle(17).copyWith(color: Colors.white)),
+                      ),
+                      if (confirm) ...[
+                        const SizedBox(height: 6),
+                        Text(l10n.careExamConfirmAllHint, style: careBody(14), textAlign: TextAlign.center),
+                      ],
+                    ]),
                   ),
-              ],
-            ],
-          );
+                ),
+              ),
+          ]);
         },
       ),
     );
+  }
+}
+
+/// A printed reference: two lines, then "Ver referência completa" (some labs print
+/// a range for every age group).
+class _Reference extends StatefulWidget {
+  const _Reference(this.text);
+  final String text;
+
+  @override
+  State<_Reference> createState() => _ReferenceState();
+}
+
+class _ReferenceState extends State<_Reference> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final style = careBody(15);
+    return LayoutBuilder(builder: (context, constraints) {
+      final painter = TextPainter(
+        text: TextSpan(text: widget.text, style: style),
+        maxLines: 2,
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+      )..layout(maxWidth: constraints.maxWidth);
+      final long = painter.didExceedMaxLines;
+      painter.dispose();
+      return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(widget.text, style: style, maxLines: long && !_open ? 2 : null, overflow: long && !_open ? TextOverflow.ellipsis : null),
+        if (long)
+          TextButton(
+            key: const Key('reference_more'),
+            style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 44), foregroundColor: AppColors.dualisNavy),
+            onPressed: () => setState(() => _open = !_open),
+            child: Text(_open ? l10n.careExamReferenceLess : l10n.careExamReferenceMore, style: careTitle(15).copyWith(color: AppColors.dualisNavy)),
+          ),
+      ]);
+    });
   }
 }

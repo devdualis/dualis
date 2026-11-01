@@ -2264,9 +2264,39 @@
   "careExamChecked": "Conferido",
   "careExamReadFailed": "Não lido",
   "careExamArchived": "Arquivado",
-  "careExamReviewTitle": "Conferir valores",
-  "careExamSeeOriginal": "Ver documento original",
-  "careExamCompareHint": "Compare com o papel. Toque numa linha para corrigir.",
+  "careExamReviewTitle": "Conferir exame",
+  "careExamCompareTitle": "Abra o exame original e compare",
+  "careExamCompareBody": "O Dualis copiou os valores do seu exame. Compare cada valor com o original antes de salvar.",
+  "careExamSummary": "{exams, plural, =1{1 exame} other{{exams} exames}} · {values, plural, =1{1 valor} other{{values} valores}}",
+  "@careExamSummary": {"placeholders": {"exams": {"type": "int"}, "values": {"type": "int"}}},
+  "careExamDetailsMissing": "Laboratório e data da coleta não informados",
+  "careExamCollectedOn": "coleta em {date}",
+  "@careExamCollectedOn": {"placeholders": {"date": {"type": "String"}}},
+  "careExamDetails": "Dados do exame",
+  "careExamProgress": "Exame {index} de {total} · {name}",
+  "@careExamProgress": {"placeholders": {"index": {"type": "int"}, "total": {"type": "int"}, "name": {"type": "String"}}},
+  "careExamJumpTitle": "Ir para um exame",
+  "careExamFix": "Corrigir",
+  "careExamReferenceLabel": "Referência do laudo: {text}",
+  "@careExamReferenceLabel": {"placeholders": {"text": {"type": "String"}}},
+  "careExamReferenceMore": "Ver referência completa",
+  "careExamReferenceLess": "Ver menos",
+  "careExamFixTitle": "Corrigir {item}",
+  "@careExamFixTitle": {"placeholders": {"item": {"type": "String"}}},
+  "careExamFixHint": "Escreva igual ao que está no exame original.",
+  "careExamRowRemoved": "Valor apagado.",
+  "careExamConfirmAll": "Está tudo igual ao original",
+  "careExamConfirmAllHint": "Algo diferente? Toque em \"Corrigir\" no valor.",
+  "careExamConfirmTitle": "Você comparou {count, plural, =1{o valor} other{os {count} valores}} com o exame original?",
+  "@careExamConfirmTitle": {"placeholders": {"count": {"type": "int"}}},
+  "careExamConfirmBody": "Depois de salvar, eles aparecem no seu histórico de exames.",
+  "careExamConfirmYes": "Sim, salvar",
+  "careExamConfirmBack": "Voltar",
+  "careExamSaveChanges": "Salvar alterações",
+  "careExamOriginalTitle": "Exame original",
+  "careExamOriginalShare": "Compartilhar",
+  "careExamSeeOriginal": "Ver o exame original",
+  "careExamCompareHint": "Compare cada valor com o exame original.",
   "careExamArchivedHint": "Guardado sem leitura.",
   "careExamFailedHint": "Não conseguimos ler este arquivo. Você pode digitar os valores ou tentar outra foto, com boa luz e o papel inteiro.",
   "careExamDuplicateFile": "Este arquivo já foi enviado. Abrimos o que você já tem.",
@@ -2288,14 +2318,6 @@
       }
     }
   },
-  "careExamSections": "Exames neste documento ({count})",
-  "@careExamSections": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "careExamLab": "Laboratório",
   "careExamCollected": "Data da coleta",
   "careExamItem": "Item",
@@ -2304,19 +2326,10 @@
   "careExamDate": "Data",
   "careExamReference": "Referência impressa no laudo",
   "careExamReferencePrinted": "Referência impressa",
-  "careExamNoRows": "Nenhum valor lido. Adicione as linhas que quiser guardar.",
-  "careExamAddRow": "Adicionar linha",
-  "careExamEditRow": "Corrigir linha",
-  "careExamRowSave": "Confirmar linha",
-  "careExamRowRemove": "Remover linha",
-  "careExamSavePending": "Salvar (faltam {count, plural, =1{1 conferência} other{{count} conferências}})",
-  "@careExamSavePending": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "careExamNoRows": "Nenhum valor lido. Toque em \"Adicionar valor\" para digitar os valores do exame.",
+  "careExamAddRow": "Adicionar valor",
+  "careExamRowSave": "Salvar correção",
+  "careExamRowRemove": "Este valor não está no exame: apagar",
   "careExamSaved": "Valores guardados.",
   "careExamItemIntro": "Valores que você conferiu, do mais recente ao mais antigo. A referência é a que cada laboratório imprimiu.",
   "careReadConsentTitle": "Ler documentos com o Google",
@@ -2325,6 +2338,7 @@
   "careReadConsentDecline": "Agora não",
   "careRxTitle": "Conferir receita",
   "careRxCompareHint": "Compare com a receita. Toque num campo para corrigir.",
+  "careRxSeeOriginal": "Ver a receita original",
   "careRxNothingRead": "Nenhum medicamento lido.",
   "careRxMaybeExam": "Este arquivo é um exame, e não uma receita? Leia-o como exame.",
   "careReadAsExam": "Ler como exame",

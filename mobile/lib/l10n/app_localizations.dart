@@ -6199,19 +6199,163 @@ abstract class AppLocalizations {
   /// No description provided for @careExamReviewTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Conferir valores'**
+  /// **'Conferir exame'**
   String get careExamReviewTitle;
+
+  /// No description provided for @careExamCompareTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abra o exame original e compare'**
+  String get careExamCompareTitle;
+
+  /// No description provided for @careExamCompareBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'O Dualis copiou os valores do seu exame. Compare cada valor com o original antes de salvar.'**
+  String get careExamCompareBody;
+
+  /// No description provided for @careExamSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'{exams, plural, =1{1 exame} other{{exams} exames}} · {values, plural, =1{1 valor} other{{values} valores}}'**
+  String careExamSummary(int exams, int values);
+
+  /// No description provided for @careExamDetailsMissing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Laboratório e data da coleta não informados'**
+  String get careExamDetailsMissing;
+
+  /// No description provided for @careExamCollectedOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'coleta em {date}'**
+  String careExamCollectedOn(String date);
+
+  /// No description provided for @careExamDetails.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dados do exame'**
+  String get careExamDetails;
+
+  /// No description provided for @careExamProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exame {index} de {total} · {name}'**
+  String careExamProgress(int index, int total, String name);
+
+  /// No description provided for @careExamJumpTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ir para um exame'**
+  String get careExamJumpTitle;
+
+  /// No description provided for @careExamFix.
+  ///
+  /// In pt, this message translates to:
+  /// **'Corrigir'**
+  String get careExamFix;
+
+  /// No description provided for @careExamReferenceLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Referência do laudo: {text}'**
+  String careExamReferenceLabel(String text);
+
+  /// No description provided for @careExamReferenceMore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver referência completa'**
+  String get careExamReferenceMore;
+
+  /// No description provided for @careExamReferenceLess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver menos'**
+  String get careExamReferenceLess;
+
+  /// No description provided for @careExamFixTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Corrigir {item}'**
+  String careExamFixTitle(String item);
+
+  /// No description provided for @careExamFixHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva igual ao que está no exame original.'**
+  String get careExamFixHint;
+
+  /// No description provided for @careExamRowRemoved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor apagado.'**
+  String get careExamRowRemoved;
+
+  /// No description provided for @careExamConfirmAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Está tudo igual ao original'**
+  String get careExamConfirmAll;
+
+  /// No description provided for @careExamConfirmAllHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Algo diferente? Toque em \"Corrigir\" no valor.'**
+  String get careExamConfirmAllHint;
+
+  /// No description provided for @careExamConfirmTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você comparou {count, plural, =1{o valor} other{os {count} valores}} com o exame original?'**
+  String careExamConfirmTitle(int count);
+
+  /// No description provided for @careExamConfirmBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Depois de salvar, eles aparecem no seu histórico de exames.'**
+  String get careExamConfirmBody;
+
+  /// No description provided for @careExamConfirmYes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim, salvar'**
+  String get careExamConfirmYes;
+
+  /// No description provided for @careExamConfirmBack.
+  ///
+  /// In pt, this message translates to:
+  /// **'Voltar'**
+  String get careExamConfirmBack;
+
+  /// No description provided for @careExamSaveChanges.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar alterações'**
+  String get careExamSaveChanges;
+
+  /// No description provided for @careExamOriginalTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exame original'**
+  String get careExamOriginalTitle;
+
+  /// No description provided for @careExamOriginalShare.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhar'**
+  String get careExamOriginalShare;
 
   /// No description provided for @careExamSeeOriginal.
   ///
   /// In pt, this message translates to:
-  /// **'Ver documento original'**
+  /// **'Ver o exame original'**
   String get careExamSeeOriginal;
 
   /// No description provided for @careExamCompareHint.
   ///
   /// In pt, this message translates to:
-  /// **'Compare com o papel. Toque numa linha para corrigir.'**
+  /// **'Compare cada valor com o exame original.'**
   String get careExamCompareHint;
 
   /// No description provided for @careExamArchivedHint.
@@ -6280,12 +6424,6 @@ abstract class AppLocalizations {
   /// **'{first} + {count, plural, =1{1 exame} other{{count} exames}}'**
   String careExamTitleMany(String first, int count);
 
-  /// No description provided for @careExamSections.
-  ///
-  /// In pt, this message translates to:
-  /// **'Exames neste documento ({count})'**
-  String careExamSections(int count);
-
   /// No description provided for @careExamLab.
   ///
   /// In pt, this message translates to:
@@ -6337,38 +6475,26 @@ abstract class AppLocalizations {
   /// No description provided for @careExamNoRows.
   ///
   /// In pt, this message translates to:
-  /// **'Nenhum valor lido. Adicione as linhas que quiser guardar.'**
+  /// **'Nenhum valor lido. Toque em \"Adicionar valor\" para digitar os valores do exame.'**
   String get careExamNoRows;
 
   /// No description provided for @careExamAddRow.
   ///
   /// In pt, this message translates to:
-  /// **'Adicionar linha'**
+  /// **'Adicionar valor'**
   String get careExamAddRow;
-
-  /// No description provided for @careExamEditRow.
-  ///
-  /// In pt, this message translates to:
-  /// **'Corrigir linha'**
-  String get careExamEditRow;
 
   /// No description provided for @careExamRowSave.
   ///
   /// In pt, this message translates to:
-  /// **'Confirmar linha'**
+  /// **'Salvar correção'**
   String get careExamRowSave;
 
   /// No description provided for @careExamRowRemove.
   ///
   /// In pt, this message translates to:
-  /// **'Remover linha'**
+  /// **'Este valor não está no exame: apagar'**
   String get careExamRowRemove;
-
-  /// No description provided for @careExamSavePending.
-  ///
-  /// In pt, this message translates to:
-  /// **'Salvar (faltam {count, plural, =1{1 conferência} other{{count} conferências}})'**
-  String careExamSavePending(int count);
 
   /// No description provided for @careExamSaved.
   ///
@@ -6417,6 +6543,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Compare com a receita. Toque num campo para corrigir.'**
   String get careRxCompareHint;
+
+  /// No description provided for @careRxSeeOriginal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver a receita original'**
+  String get careRxSeeOriginal;
 
   /// No description provided for @careRxNothingRead.
   ///

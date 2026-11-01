@@ -3585,14 +3585,119 @@ class AppLocalizationsPt extends AppLocalizations {
   String get careExamArchived => 'Arquivado';
 
   @override
-  String get careExamReviewTitle => 'Conferir valores';
+  String get careExamReviewTitle => 'Conferir exame';
 
   @override
-  String get careExamSeeOriginal => 'Ver documento original';
+  String get careExamCompareTitle => 'Abra o exame original e compare';
 
   @override
-  String get careExamCompareHint =>
-      'Compare com o papel. Toque numa linha para corrigir.';
+  String get careExamCompareBody =>
+      'O Dualis copiou os valores do seu exame. Compare cada valor com o original antes de salvar.';
+
+  @override
+  String careExamSummary(int exams, int values) {
+    String _temp0 = intl.Intl.pluralLogic(
+      exams,
+      locale: localeName,
+      other: '$exams exames',
+      one: '1 exame',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      values,
+      locale: localeName,
+      other: '$values valores',
+      one: '1 valor',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get careExamDetailsMissing =>
+      'Laboratório e data da coleta não informados';
+
+  @override
+  String careExamCollectedOn(String date) {
+    return 'coleta em $date';
+  }
+
+  @override
+  String get careExamDetails => 'Dados do exame';
+
+  @override
+  String careExamProgress(int index, int total, String name) {
+    return 'Exame $index de $total · $name';
+  }
+
+  @override
+  String get careExamJumpTitle => 'Ir para um exame';
+
+  @override
+  String get careExamFix => 'Corrigir';
+
+  @override
+  String careExamReferenceLabel(String text) {
+    return 'Referência do laudo: $text';
+  }
+
+  @override
+  String get careExamReferenceMore => 'Ver referência completa';
+
+  @override
+  String get careExamReferenceLess => 'Ver menos';
+
+  @override
+  String careExamFixTitle(String item) {
+    return 'Corrigir $item';
+  }
+
+  @override
+  String get careExamFixHint => 'Escreva igual ao que está no exame original.';
+
+  @override
+  String get careExamRowRemoved => 'Valor apagado.';
+
+  @override
+  String get careExamConfirmAll => 'Está tudo igual ao original';
+
+  @override
+  String get careExamConfirmAllHint =>
+      'Algo diferente? Toque em \"Corrigir\" no valor.';
+
+  @override
+  String careExamConfirmTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'os $count valores',
+      one: 'o valor',
+    );
+    return 'Você comparou $_temp0 com o exame original?';
+  }
+
+  @override
+  String get careExamConfirmBody =>
+      'Depois de salvar, eles aparecem no seu histórico de exames.';
+
+  @override
+  String get careExamConfirmYes => 'Sim, salvar';
+
+  @override
+  String get careExamConfirmBack => 'Voltar';
+
+  @override
+  String get careExamSaveChanges => 'Salvar alterações';
+
+  @override
+  String get careExamOriginalTitle => 'Exame original';
+
+  @override
+  String get careExamOriginalShare => 'Compartilhar';
+
+  @override
+  String get careExamSeeOriginal => 'Ver o exame original';
+
+  @override
+  String get careExamCompareHint => 'Compare cada valor com o exame original.';
 
   @override
   String get careExamArchivedHint => 'Guardado sem leitura.';
@@ -3640,11 +3745,6 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String careExamSections(int count) {
-    return 'Exames neste documento ($count)';
-  }
-
-  @override
   String get careExamLab => 'Laboratório';
 
   @override
@@ -3670,30 +3770,16 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get careExamNoRows =>
-      'Nenhum valor lido. Adicione as linhas que quiser guardar.';
+      'Nenhum valor lido. Toque em \"Adicionar valor\" para digitar os valores do exame.';
 
   @override
-  String get careExamAddRow => 'Adicionar linha';
+  String get careExamAddRow => 'Adicionar valor';
 
   @override
-  String get careExamEditRow => 'Corrigir linha';
+  String get careExamRowSave => 'Salvar correção';
 
   @override
-  String get careExamRowSave => 'Confirmar linha';
-
-  @override
-  String get careExamRowRemove => 'Remover linha';
-
-  @override
-  String careExamSavePending(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count conferências',
-      one: '1 conferência',
-    );
-    return 'Salvar (faltam $_temp0)';
-  }
+  String get careExamRowRemove => 'Este valor não está no exame: apagar';
 
   @override
   String get careExamSaved => 'Valores guardados.';
@@ -3721,6 +3807,9 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get careRxCompareHint =>
       'Compare com a receita. Toque num campo para corrigir.';
+
+  @override
+  String get careRxSeeOriginal => 'Ver a receita original';
 
   @override
   String get careRxNothingRead => 'Nenhum medicamento lido.';

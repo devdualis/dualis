@@ -109,7 +109,7 @@ class _PrescriptionReviewScreenState extends ConsumerState<PrescriptionReviewScr
               CareRow(
                 leading: CareIconTile(doc.isPdf ? Icons.picture_as_pdf_outlined : Icons.image_outlined,
                     background: CareColors.slateBg, foreground: CareColors.slate),
-                title: l10n.careExamSeeOriginal,
+                title: l10n.careRxSeeOriginal,
                 subtitle: l10n.careRxCompareHint,
                 onTap: () => openOriginalDocument(context, ref, doc),
               ),

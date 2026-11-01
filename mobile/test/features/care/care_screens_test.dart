@@ -252,16 +252,19 @@ void main() {
     ));
     await pump(tester, const ExamReviewScreen(documentId: 'd1'), api: api);
 
-    FilledButton save() => tester.widget<FilledButton>(find.byKey(const Key('exam_save')));
-    expect(save().onPressed, isNull);
-    expect(find.text(pt.careExamSavePending(2)), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('row_confirm_0')));
-    await tester.tap(find.byKey(const Key('row_confirm_1')));
+    // One confirmation for the whole exam, asked once more before saving.
+    expect(find.text(pt.careExamConfirmAll), findsOneWidget);
+    expect(find.text(pt.careExamReferenceLabel('até 130')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('exam_save')));
     await tester.pumpAndSettle();
-    expect(save().onPressed, isNotNull);
+    expect(find.text(pt.careExamConfirmTitle(2)), findsOneWidget);
+    await tester.tap(find.byKey(const Key('exam_confirm_back')));
+    await tester.pumpAndSettle();
+    expect(api.reviews, isEmpty);
 
     await tester.tap(find.byKey(const Key('exam_save')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('exam_confirm_yes')));
     await tester.pumpAndSettle();
     final values = api.reviews.single['values'] as List;
     expect(values.every((v) => v['confirmed'] == true), isTrue);
@@ -286,21 +289,30 @@ void main() {
     ));
     await pump(tester, const ExamReviewScreen(documentId: 'd1'), api: api);
 
-    expect(find.byKey(const Key('exam_section_0')), findsOneWidget);
-    expect(find.byKey(const Key('exam_section_1')), findsNothing);
-    expect(find.byKey(const Key('exam_section_2')), findsOneWidget);
-    // Several exams: the title is suggested and each exam has a chip.
+    // One card per exam; an exam with one item named like it shows the name once.
+    expect(find.text('HEMOGRAMA COMPLETO'), findsOneWidget);
+    expect(find.byKey(const Key('exam_group_1')), findsOneWidget);
+    expect(find.text('Ferritina'), findsOneWidget);
+    // Several exams: the title is suggested and a bar says which exam is on screen.
     expect(find.text(pt.careExamTitleMany('Hemograma completo', 1)), findsOneWidget);
-    expect(find.text(pt.careExamSections(2)), findsOneWidget);
-    expect(find.widgetWithText(ActionChip, 'Ferritina'), findsOneWidget);
-    // % and /mm³ of one item: the name once, a remove button per result.
+    expect(find.text(pt.careExamProgress(1, 2, 'Hemograma completo')), findsOneWidget);
+    expect(find.text(pt.careExamSummary(2, 3)), findsOneWidget);
+    // % and /mm³ of one item: the name once, a "Corrigir" button per result.
     expect(find.text('Segmentados'), findsOneWidget);
-    expect(find.byKey(const Key('row_remove_0')), findsOneWidget);
-    expect(find.byKey(const Key('row_remove_1')), findsOneWidget);
-    expect(find.byKey(const Key('row_remove_2')), findsNothing);
+    for (final i in [0, 1, 2]) {
+      expect(find.byKey(Key('row_fix_$i')), findsOneWidget);
+    }
+    expect(find.text('1.938\u00A0/mm³'), findsOneWidget);
 
-    await tester.ensureVisible(find.byKey(const Key('exam_save')));
+    // The bar opens the list of exams.
+    await tester.tap(find.byKey(const Key('exam_progress')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('exam_jump_1')));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.byKey(const Key('exam_save')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('exam_confirm_yes')));
     await tester.pumpAndSettle();
     final values = api.reviews.single['values'] as List;
     expect(values.map((v) => v['section']), ['Hemograma completo', 'Hemograma completo', 'Ferritina']);
@@ -323,16 +335,63 @@ void main() {
       },
     ));
     await pump(tester, const ExamReviewScreen(documentId: 'd1'), api: api);
-    await tester.tap(find.byKey(const Key('row_remove_1')));
-    await tester.pumpAndSettle();
-    // A single result goes back to a plain row with the item name.
-    expect(find.byKey(const Key('row_remove_0')), findsNothing);
-    expect(find.text('Segmentados'), findsOneWidget);
+    Future<void> removeSecond() async {
+      await tester.tap(find.byKey(const Key('row_fix_1')));
+      await tester.pumpAndSettle();
+      expect(find.text(pt.careExamFixTitle('Segmentados')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('row_remove')));
+      await tester.pumpAndSettle();
+    }
 
+    // Deleting asks nothing but can be undone.
+    await removeSecond();
+    expect(find.byKey(const Key('row_fix_1')), findsNothing);
+    await tester.tap(find.text(pt.gxUndo));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('row_fix_1')), findsOneWidget);
+
+    await removeSecond();
+    expect(find.text('Segmentados'), findsOneWidget);
     await tester.tap(find.byKey(const Key('exam_save')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('exam_confirm_yes')));
     await tester.pumpAndSettle();
     final values = api.reviews.single['values'] as List;
     expect(values.map((v) => v['value']), ['38']);
+  });
+
+  testWidgets('a long printed reference shows two lines and opens on request', (tester) async {
+    final api = FakeCareApi();
+    final reference = List.generate(12, (i) => '${i + 1} a ${i + 3} anos: ${70 + i} a ${300 + i} U/L').join(' ');
+    api.docs.add(CareDocument(id: 'd1', kind: DocumentKind.lab, mime: 'application/pdf', status: DocumentStatus.ready, createdAt: DateTime(2026, 10, 28), data: {
+      'values': [
+        {'item': 'Fosfatase alcalina', 'value': '63', 'unit': 'U/L', 'reference': reference, 'confirmed': true},
+      ],
+    }));
+    await pump(tester, const ExamReviewScreen(documentId: 'd1'), api: api);
+    Text referenceText() => tester.widget<Text>(find.text(pt.careExamReferenceLabel(reference)));
+    expect(referenceText().maxLines, 2);
+    await tester.tap(find.byKey(const Key('reference_more')));
+    await tester.pumpAndSettle();
+    expect(referenceText().maxLines, isNull);
+    // A confirmed exam asks for nothing until something changes.
+    expect(find.byKey(const Key('exam_save')), findsNothing);
+  });
+
+  testWidgets('with very large system text the fix button goes under the value', (tester) async {
+    final api = FakeCareApi();
+    api.docs.add(CareDocument(id: 'd1', kind: DocumentKind.lab, mime: 'application/pdf', status: DocumentStatus.review, createdAt: DateTime(2026, 10, 28), data: {
+      'values': [
+        {'item': 'Leucócitos', 'value': '5.100', 'unit': '/mm³', 'reference': '3.600 a 12.000 /mm³', 'confirmed': false},
+      ],
+    }));
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await pump(tester, const ExamReviewScreen(documentId: 'd1'), api: api);
+    expect(tester.takeException(), isNull);
+    final value = tester.getBottomLeft(find.byKey(const Key('row_value_0')));
+    final fix = tester.getTopLeft(find.byKey(const Key('row_fix_0')));
+    expect(fix.dy, greaterThan(value.dy));
   });
 
   testWidgets('item history lists one unit at a time', (tester) async {

@@ -3579,14 +3579,119 @@ class AppLocalizationsEn extends AppLocalizations {
   String get careExamArchived => 'Stored';
 
   @override
-  String get careExamReviewTitle => 'Check values';
+  String get careExamReviewTitle => 'Check exam';
 
   @override
-  String get careExamSeeOriginal => 'See original document';
+  String get careExamCompareTitle => 'Open the original exam and compare';
+
+  @override
+  String get careExamCompareBody =>
+      'Dualis copied the values from your exam. Compare each value with the original before saving.';
+
+  @override
+  String careExamSummary(int exams, int values) {
+    String _temp0 = intl.Intl.pluralLogic(
+      exams,
+      locale: localeName,
+      other: '$exams exams',
+      one: '1 exam',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      values,
+      locale: localeName,
+      other: '$values values',
+      one: '1 value',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get careExamDetailsMissing => 'Lab and collection date not given';
+
+  @override
+  String careExamCollectedOn(String date) {
+    return 'collected on $date';
+  }
+
+  @override
+  String get careExamDetails => 'Exam details';
+
+  @override
+  String careExamProgress(int index, int total, String name) {
+    return 'Exam $index of $total · $name';
+  }
+
+  @override
+  String get careExamJumpTitle => 'Go to an exam';
+
+  @override
+  String get careExamFix => 'Fix';
+
+  @override
+  String careExamReferenceLabel(String text) {
+    return 'Lab reference: $text';
+  }
+
+  @override
+  String get careExamReferenceMore => 'See full reference';
+
+  @override
+  String get careExamReferenceLess => 'See less';
+
+  @override
+  String careExamFixTitle(String item) {
+    return 'Fix $item';
+  }
+
+  @override
+  String get careExamFixHint => 'Write it exactly as in the original exam.';
+
+  @override
+  String get careExamRowRemoved => 'Value deleted.';
+
+  @override
+  String get careExamConfirmAll => 'Everything matches the original';
+
+  @override
+  String get careExamConfirmAllHint =>
+      'Something different? Tap \"Fix\" on the value.';
+
+  @override
+  String careExamConfirmTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'the $count values',
+      one: 'the value',
+    );
+    return 'Did you compare $_temp0 with the original exam?';
+  }
+
+  @override
+  String get careExamConfirmBody =>
+      'After saving, they appear in your exam history.';
+
+  @override
+  String get careExamConfirmYes => 'Yes, save';
+
+  @override
+  String get careExamConfirmBack => 'Go back';
+
+  @override
+  String get careExamSaveChanges => 'Save changes';
+
+  @override
+  String get careExamOriginalTitle => 'Original exam';
+
+  @override
+  String get careExamOriginalShare => 'Share';
+
+  @override
+  String get careExamSeeOriginal => 'See the original exam';
 
   @override
   String get careExamCompareHint =>
-      'Compare with the paper. Tap a row to fix it.';
+      'Compare each value with the original exam.';
 
   @override
   String get careExamArchivedHint => 'Stored without reading.';
@@ -3634,11 +3739,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String careExamSections(int count) {
-    return 'Exams in this document ($count)';
-  }
-
-  @override
   String get careExamLab => 'Laboratory';
 
   @override
@@ -3663,30 +3763,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get careExamReferencePrinted => 'Printed reference';
 
   @override
-  String get careExamNoRows => 'No values read. Add the rows you want to keep.';
+  String get careExamNoRows =>
+      'No values read. Tap \"Add value\" to type the exam values.';
 
   @override
-  String get careExamAddRow => 'Add row';
+  String get careExamAddRow => 'Add value';
 
   @override
-  String get careExamEditRow => 'Fix row';
+  String get careExamRowSave => 'Save fix';
 
   @override
-  String get careExamRowSave => 'Confirm row';
-
-  @override
-  String get careExamRowRemove => 'Remove row';
-
-  @override
-  String careExamSavePending(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count checks left',
-      one: '1 check left',
-    );
-    return 'Save ($_temp0)';
-  }
+  String get careExamRowRemove => 'This value is not in the exam: delete';
 
   @override
   String get careExamSaved => 'Values saved.';
@@ -3714,6 +3801,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get careRxCompareHint =>
       'Compare with the prescription. Tap a field to fix it.';
+
+  @override
+  String get careRxSeeOriginal => 'See the original prescription';
 
   @override
   String get careRxNothingRead => 'No medicines read.';
