@@ -109,7 +109,6 @@ class CareDocument {
   final String mime;
   final DocumentStatus status;
   final Map<String, dynamic> data;
-  final String? error;
   final DateTime createdAt;
 
   /// Upload only: the same file was already stored for this profile and this is it.
@@ -122,7 +121,6 @@ class CareDocument {
     required this.status,
     required this.data,
     required this.createdAt,
-    this.error,
     this.duplicate = false,
   });
 
@@ -132,7 +130,6 @@ class CareDocument {
         mime: json['mime'] as String? ?? 'application/octet-stream',
         status: DocumentStatus.values.firstWhere((s) => s.name == json['status'], orElse: () => DocumentStatus.failed),
         data: Map<String, dynamic>.from(json['data'] as Map? ?? const {}),
-        error: json['error'] as String?,
         createdAt: DateTime.parse(json['createdAt'] as String),
         duplicate: json['duplicate'] == true,
       );

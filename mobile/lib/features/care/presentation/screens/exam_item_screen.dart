@@ -71,7 +71,6 @@ class _ExamItemScreenState extends ConsumerState<ExamItemScreen> {
               CareCard(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: Table(
-                  columnWidths: const {0: FlexColumnWidth(3), 1: FlexColumnWidth(3), 2: FlexColumnWidth(3), 3: FlexColumnWidth(3)},
                   children: [
                     TableRow(children: [
                       for (final h in [l10n.careExamDate, l10n.careExamValue, l10n.careExamReferencePrinted, l10n.careExamLab])
