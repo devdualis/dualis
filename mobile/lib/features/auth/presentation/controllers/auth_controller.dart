@@ -463,6 +463,7 @@ class AuthController extends Notifier<AuthState> {
         await _secureStorage.delete(
           key: SecureStorageService.keyHydrationSettingsPending,
         );
+        await _secureStorage.deleteHabitsData();
       }
       await _secureStorage.saveLocalDataOwnerId(userId);
     } catch (_) {}

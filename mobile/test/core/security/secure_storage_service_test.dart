@@ -154,4 +154,50 @@ void main() {
       verify(() => mockStorage.deleteAll()).called(1);
     });
   });
+
+  group('clearSession keeps what belongs to the device\'s last account', () {
+    test('keeps the daily habits and their unsent answers, drops the session',
+        () async {
+      FlutterSecureStorage.setMockInitialValues({
+        'dualis_access_token': 'access',
+        'dualis_refresh_token': 'refresh',
+        'dualis_local_data_owner': 'user-a',
+        '${SecureStorageService.habitsKeyPrefix}store_profile-a':
+            '{"2026-10-31":{"day":"2026-10-31","moved":true}}',
+        '${SecureStorageService.habitsKeyPrefix}pending_profile-a':
+            '["2026-10-31"]',
+        '${SecureStorageService.habitsKeyPrefix}track_cycle_profile-a': '1',
+      });
+      final service = SecureStorageService();
+
+      await service.clearSession();
+
+      expect(await service.getAccessToken(), isNull);
+      expect(await service.getRefreshToken(), isNull);
+      expect(await service.getLocalDataOwnerId(), 'user-a');
+      expect(
+        await service.read(
+          key: '${SecureStorageService.habitsKeyPrefix}pending_profile-a',
+        ),
+        '["2026-10-31"]',
+      );
+      expect(
+        await service.read(
+          key: '${SecureStorageService.habitsKeyPrefix}store_profile-a',
+        ),
+        contains('moved'),
+      );
+
+      // Another account signing in wipes every profile's habits.
+      await service.deleteHabitsData();
+      final left = await const FlutterSecureStorage().readAll();
+      expect(
+        left.keys.where(
+          (k) => k.startsWith(SecureStorageService.habitsKeyPrefix),
+        ),
+        isEmpty,
+      );
+      expect(await service.getLocalDataOwnerId(), 'user-a');
+    });
+  });
 }

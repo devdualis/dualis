@@ -77,6 +77,11 @@ class FakeSecureStorageService extends SecureStorageService {
 
   @override
   Future<void> clearSession() async {}
+
+  bool habitsDeleted = false;
+
+  @override
+  Future<void> deleteHabitsData() async => habitsDeleted = true;
 }
 
 Widget createTestWidget({
@@ -216,6 +221,8 @@ void main() {
 
       expect(mockRemoteDataSource.deleteCalled, isTrue);
       expect(mockRemoteDataSource.lastPassword, 'ValidPassword123!');
+      // The device keeps no daily habits of a deleted account.
+      expect(mockSecureStorage.habitsDeleted, isTrue);
     });
   });
 }

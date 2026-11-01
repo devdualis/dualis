@@ -27,6 +27,11 @@ class SecureStorageService {
   static const String keyHydrationSettingsPending =
       'dualis_hydration_settings_pending';
 
+  /// Daily habits of each profile: answers, the queue of answers not sent yet
+  /// and the cycle setting. Like the journal outbox, kept on logout for the
+  /// same account and wiped when another account signs in on this device.
+  static const String habitsKeyPrefix = 'dualis_habits_';
+
   final FlutterSecureStorage _storage;
 
   SecureStorageService({FlutterSecureStorage? storage})
@@ -180,8 +185,8 @@ class SecureStorageService {
   Future<void> clearAll() => _storage.deleteAll();
 
   /// Ends the session: wipes tokens and session data but keeps the local
-  /// data owner and the hydration settings, which belong to the device's
-  /// last account and are checked again on the next login.
+  /// data owner, the hydration settings and the daily habits, which belong to
+  /// the device's last account and are checked again on the next login.
   Future<void> clearSession() async {
     const kept = [
       _keyLocalDataOwner,
@@ -195,11 +200,25 @@ class SecureStorageService {
         if (value != null) saved[key] = value;
       } catch (_) {}
     }
+    try {
+      final all = await _storage.readAll();
+      for (final entry in all.entries) {
+        if (entry.key.startsWith(habitsKeyPrefix)) saved[entry.key] = entry.value;
+      }
+    } catch (_) {}
     await _storage.deleteAll();
     for (final entry in saved.entries) {
       try {
         await _storage.write(key: entry.key, value: entry.value);
       } catch (_) {}
+    }
+  }
+
+  /// Removes every profile's daily habits from this device.
+  Future<void> deleteHabitsData() async {
+    final all = await _storage.readAll();
+    for (final key in all.keys.toList()) {
+      if (key.startsWith(habitsKeyPrefix)) await _storage.delete(key: key);
     }
   }
 }

@@ -113,6 +113,9 @@ class PrivacyController extends Notifier<PrivacyState> {
         password: password,
       );
       await _db.wipeAllLocalData();
+      try {
+        await _secureStorage.deleteHabitsData();
+      } catch (_) {}
       await ref.read(authControllerProvider.notifier).logout();
       state = state.copyWith(
         isDeleting: false,

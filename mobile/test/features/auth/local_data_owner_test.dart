@@ -10,8 +10,8 @@ import 'package:mocktail/mocktail.dart';
 
 class _MockAuthRepository extends Mock implements AuthRepository {}
 
-/// In-memory storage; like the real one, clearSession keeps only the owner
-/// and the hydration settings.
+/// In-memory storage; like the real one, clearSession keeps only the owner,
+/// the hydration settings and the daily habits.
 class _MemoryStorage extends SecureStorageService {
   String? owner;
   final Map<String, String> values = {};
@@ -40,7 +40,13 @@ class _MemoryStorage extends SecureStorageService {
   Future<void> clearAll() async {}
   @override
   Future<void> clearSession() async => values.removeWhere(
-        (k, _) => k != SecureStorageService.keyHydrationSettings,
+        (k, _) =>
+            k != SecureStorageService.keyHydrationSettings &&
+            !k.startsWith(SecureStorageService.habitsKeyPrefix),
+      );
+  @override
+  Future<void> deleteHabitsData() async => values.removeWhere(
+        (k, _) => k.startsWith(SecureStorageService.habitsKeyPrefix),
       );
 }
 
@@ -109,6 +115,24 @@ void main() {
 
     await loginAs('user-a');
     expect(await db.select(db.journalOutbox).get(), hasLength(1));
+  });
+
+  test('unsent habit answers survive logout for the same person only', () async {
+    const pending = '${SecureStorageService.habitsKeyPrefix}pending_profile-a';
+    const answers = '${SecureStorageService.habitsKeyPrefix}store_profile-a';
+    await loginAs('user-a');
+    storage.values[pending] = '["2026-10-31"]';
+    storage.values[answers] = '{"2026-10-31":{"day":"2026-10-31","moved":true}}';
+    await container.read(authControllerProvider.notifier).logout();
+    expect(storage.values[pending], '["2026-10-31"]');
+
+    await loginAs('user-a');
+    expect(storage.values[answers], contains('moved'));
+
+    await container.read(authControllerProvider.notifier).logout();
+    await loginAs('user-b');
+    expect(storage.values.containsKey(pending), isFalse);
+    expect(storage.values.containsKey(answers), isFalse);
   });
 
   test('hydration settings survive logout for the same person only', () async {
