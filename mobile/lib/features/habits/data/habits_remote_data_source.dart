@@ -5,6 +5,15 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/security/secure_storage_service.dart';
 import '../domain/models/habit_day.dart';
 
+class HabitClientException implements Exception {
+  final int statusCode;
+  final dynamic data;
+  const HabitClientException(this.statusCode, [this.data]);
+
+  @override
+  String toString() => 'HabitClientException($statusCode): $data';
+}
+
 final habitsRemoteDataSourceProvider = Provider<HabitsRemoteDataSource>((ref) {
   final apiClient = ref.watch(apiClientProvider);
   final secureStorage = ref.watch(secureStorageServiceProvider);
@@ -78,6 +87,12 @@ class HabitsRemoteDataSource {
 
       if (response.data is Map<String, dynamic>) {
         return HabitDay.fromJson(response.data as Map<String, dynamic>);
+      }
+      return null;
+    } on DioException catch (e) {
+      final code = e.response?.statusCode;
+      if (code != null && code >= 400 && code < 500) {
+        throw HabitClientException(code, e.response?.data);
       }
       return null;
     } catch (_) {
