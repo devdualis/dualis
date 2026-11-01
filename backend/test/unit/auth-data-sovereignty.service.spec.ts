@@ -275,6 +275,8 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       expect(result.metadata.formatVersion).toBe('1.3');
       expect(result.journalEntries.map((e) => e.id)).toEqual(['entry-new', 'entry-old']);
       expect(result.journalEntries[0]).toEqual({
+        coping: null,
+        helpers: [],
         id: 'entry-new',
         clientId: 'client-entry-new',
         recordedAt: '2026-10-20T10:00:00.000Z',

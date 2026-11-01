@@ -82,6 +82,7 @@ class MockAuthService {
       ],
       safetyResourceEvents: [],
       waterIntakeLogs: [],
+      dailyHabits: [],
       journalEntries: [],
       userConditions: [],
       dependentProfiles: [
@@ -99,6 +100,7 @@ class MockAuthService {
           waterIntakeLogs: [
             { id: 'water-e2e-1', amountMl: 200, source: 'manual', recordedAt: '2026-02-02T08:00:00.000Z' },
           ],
+          dailyHabits: [],
           journalEntries: [],
           userConditions: [],
         },
