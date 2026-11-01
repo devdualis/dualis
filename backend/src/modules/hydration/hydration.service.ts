@@ -2,6 +2,8 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 import { and, desc, eq, gte, lt, lte } from 'drizzle-orm';
 import { DatabaseService } from '../../database/database.service';
 import { waterIntakeLogs } from '../../database/schema/water-intake-logs.schema';
+import { users } from '../../database/schema/users.schema';
+import { HydrationSettingsDto, HydrationSettingsResponseDto } from './dto/hydration-settings.dto';
 import { localDay } from '../../common/time/local-day';
 import { LogWaterDto } from './dto/log-water.dto';
 import {
@@ -30,6 +32,43 @@ export class HydrationService {
     @Inject(DatabaseService)
     private readonly databaseService: DatabaseService,
   ) {}
+
+  /** The caller's own water goal and reminder choices (account-level). */
+  async getSettings(userId: string): Promise<HydrationSettingsResponseDto> {
+    this.assertUserId(userId);
+    return this.databaseService.withRls(userId, async (tx) => {
+      const [row] = await tx
+        .select({ settings: users.hydrationSettings })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+      return { settings: (row?.settings as HydrationSettingsDto | null) ?? null };
+    });
+  }
+
+  async saveSettings(userId: string, dto: HydrationSettingsDto): Promise<HydrationSettingsResponseDto> {
+    this.assertUserId(userId);
+    const settings: HydrationSettingsDto = {
+      reminderEnabled: dto.reminderEnabled,
+      trackingEnabled: dto.trackingEnabled,
+      reminderSoundStyle: dto.reminderSoundStyle,
+      dailyTargetMl: dto.dailyTargetMl,
+      scheduledHours: [...new Set(dto.scheduledHours)].sort((a, b) => a - b),
+    };
+    return this.databaseService.withRls(userId, async (tx) => {
+      const updated = await tx
+        .update(users)
+        .set({ hydrationSettings: settings, updatedAt: new Date() })
+        .where(eq(users.id, userId))
+        .returning({ id: users.id });
+      if (updated.length === 0) throw new NotFoundException('Usuário não encontrado.');
+      return { settings };
+    });
+  }
+
+  private assertUserId(userId: string): void {
+    if (!userId) throw new BadRequestException('Usuário inválido.');
+  }
 
   async logWater(
     userId: string,

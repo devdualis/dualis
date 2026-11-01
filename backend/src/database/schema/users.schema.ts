@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, date, timestamp, pgPolicy, text, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, date, timestamp, pgPolicy, text, boolean, jsonb } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 export const users = pgTable(
@@ -13,6 +13,9 @@ export const users = pgTable(
     picture: text('picture'),
     isEmailVerified: boolean('is_email_verified').default(false).notNull(),
     emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true }),
+    // Water goal and reminder choices, so they follow the person to a new
+    // device or login. NULL until the app saves them once.
+    hydrationSettings: jsonb('hydration_settings'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },

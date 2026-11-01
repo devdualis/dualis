@@ -455,7 +455,7 @@ class AuthController extends Notifier<AuthState> {
   Future<void> logout() async {
     await _cancelLocalReminders();
     final ownerId = state.user?.id;
-    await _secureStorage.clearAll();
+    await _secureStorage.clearSession();
     // Unsent entries stay on the device for this person's next login; any
     // other account that signs in here wipes them first (_claimLocalData).
     if (ownerId != null && ownerId.isNotEmpty) {
@@ -476,6 +476,12 @@ class AuthController extends Notifier<AuthState> {
       final owner = await _secureStorage.getLocalDataOwnerId();
       if (owner != null && owner != userId) {
         await ref.read(appDatabaseProvider).wipeAllLocalData();
+        await _secureStorage.delete(
+          key: SecureStorageService.keyHydrationSettings,
+        );
+        await _secureStorage.delete(
+          key: SecureStorageService.keyHydrationSettingsPending,
+        );
       }
       await _secureStorage.saveLocalDataOwnerId(userId);
     } catch (_) {}

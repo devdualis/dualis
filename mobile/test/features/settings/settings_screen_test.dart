@@ -30,6 +30,9 @@ class FakeSecureStorageService extends SecureStorageService {
   Future<void> clearAll() async {}
 
   @override
+  Future<void> clearSession() async {}
+
+  @override
   Future<void> saveUserProfile(UserProfile user) async {}
 
   @override

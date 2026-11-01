@@ -80,6 +80,10 @@ class HydrationState {
   }
 }
 
+/// Profiles are still loading and none is known yet (right after login).
+bool _profileUnknown(ActiveProfileState s) =>
+    s.isLoading && s.activeProfile == null;
+
 class HydrationController extends Notifier<HydrationState> {
   int _loadSession = 0;
 
@@ -90,11 +94,18 @@ class HydrationController extends Notifier<HydrationState> {
     ref.watch(authControllerProvider.select((auth) => auth.user?.id));
     // Reload when active profile changes and clear previous data while loading.
     ref.watch(activeProfileControllerProvider.select((s) => s.activeProfile?.id));
+    // Right after login the profile is still loading: wait for it, so today's
+    // logs are read for the right profile instead of an empty guess.
+    final profileLoading = ref.watch(
+      activeProfileControllerProvider.select(_profileUnknown),
+    );
     // Pending reminders carry the language they were scheduled in.
     ref.listen<Locale>(localeProvider, (previous, next) {
       if (previous != next) _rescheduleRemindersForLocale();
     });
-    Future.microtask(() => loadData());
+    if (!(profileLoading && _isSignedIn)) {
+      Future.microtask(() => loadData());
+    }
     return const HydrationState(isLoading: true);
   }
 
@@ -110,6 +121,10 @@ class HydrationController extends Notifier<HydrationState> {
   bool get _isSignedIn => ref.read(authControllerProvider).isAuthenticated;
 
   Future<void> loadData() async {
+    if (_isSignedIn &&
+        _profileUnknown(ref.read(activeProfileControllerProvider))) {
+      return; // build() runs again when the profile is known.
+    }
     final userId = _currentUserId;
     final activeProfileId = ref.read(activeProfileControllerProvider).activeProfile?.id;
     final session = ++_loadSession;
@@ -167,6 +182,9 @@ class HydrationController extends Notifier<HydrationState> {
     if (amountMl <= 0) return false;
 
     try {
+      // A load in flight read today's logs before this one: reload instead
+      // of adding to a total that is not known yet.
+      final wasLoading = state.isLoading;
       final wasGoalReached = state.isGoalReached;
       final newLog = await _repository.logWaterIntake(
         userId: _currentUserId,
@@ -174,6 +192,11 @@ class HydrationController extends Notifier<HydrationState> {
         source: source,
         timestamp: timestamp,
       );
+
+      if (wasLoading) {
+        await loadData();
+        return true;
+      }
 
       final updatedLogs = [...state.todayLogs, newLog];
       final updatedTotal = state.todayTotalMl + amountMl;

@@ -9,9 +9,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../dashboard/presentation/screens/check_in_summary_screen.dart';
 import '../../../home/domain/home_greeting.dart' as greeting;
-import '../../../home/domain/trigger_checkin_state.dart';
 import '../../../home/presentation/controllers/trigger_checkin_controller.dart';
-import '../../../triage/domain/triage_vertical.dart';
 import '../../data/journal_repository.dart';
 import '../../domain/journal_keys.dart';
 import '../../domain/journal_models.dart';
@@ -98,55 +96,8 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
   }
 
   /// Marks today's check-in as done on Home, with the user's own words.
-  /// Only the axis of the entry is marked; entries without one (older
-  /// outbox items) keep marking both.
   void _updateHome(AppLocalizations l10n, JournalEntry entry) {
-    final home = ref.read(triggerCheckInProvider.notifier);
-    final axes = switch (entry.area) {
-      JournalKeys.areaEmotional => const [TriageVertical.psicoEmocional],
-      JournalKeys.areaPhysical => const [TriageVertical.fisica],
-      _ => TriageVertical.values,
-    };
-    if (entry.items.isEmpty) {
-      final summary = JournalLabels.mood(l10n, entry.mood);
-      for (final v in axes) {
-        home.completeStage(
-          vertical: v,
-          summary: summary,
-          status: TriggerStatus.goodNormal,
-          intensity: 0,
-        );
-      }
-      return;
-    }
-    void complete(TriageVertical vertical, Iterable<JournalItem> items) {
-      if (items.isEmpty || !axes.contains(vertical)) return;
-      home.completeStage(
-        vertical: vertical,
-        summary: items.map((i) => journalItemText(l10n, i)).join(' · '),
-        narrative: entry.note,
-        intensity: items
-            .map((i) => i.intensity ?? 0)
-            .reduce((a, b) => a > b ? a : b),
-      );
-    }
-
-    complete(
-      TriageVertical.fisica,
-      entry.items.where((i) => i.kind == JournalKeys.kindPhysical),
-    );
-    complete(
-      TriageVertical.psicoEmocional,
-      entry.items.where((i) => i.kind == JournalKeys.kindEmotional),
-    );
-    // Conditions get their own line on Home and never fill an axis.
-    final conditions =
-        entry.items.where((i) => i.kind == JournalKeys.kindCondition);
-    home.completeConditions(
-      conditions.isEmpty
-          ? null
-          : conditions.map((i) => journalItemText(l10n, i)).join(' · '),
-    );
+    ref.read(triggerCheckInProvider.notifier).applyJournalEntry(l10n, entry);
   }
 
   @override

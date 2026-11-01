@@ -38,9 +38,9 @@ class TriageHistoryRemoteDataSource {
           response.data as Map<String, dynamic>,
         );
       }
-      return TriageHistoryResponse.empty();
+      return TriageHistoryResponse.failed();
     } catch (_) {
-      return TriageHistoryResponse.empty();
+      return TriageHistoryResponse.failed();
     }
   }
 

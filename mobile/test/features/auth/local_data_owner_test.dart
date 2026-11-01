@@ -10,10 +10,18 @@ import 'package:mocktail/mocktail.dart';
 
 class _MockAuthRepository extends Mock implements AuthRepository {}
 
-/// In-memory storage; only the owner key survives clearAll (like the real one
-/// once logout writes it back).
+/// In-memory storage; like the real one, clearSession keeps only the owner
+/// and the hydration settings.
 class _MemoryStorage extends SecureStorageService {
   String? owner;
+  final Map<String, String> values = {};
+  @override
+  Future<String?> read({required String key}) async => values[key];
+  @override
+  Future<void> write({required String key, required String value}) async =>
+      values[key] = value;
+  @override
+  Future<void> delete({required String key}) async => values.remove(key);
   @override
   Future<String?> getLocalDataOwnerId() async => owner;
   @override
@@ -30,6 +38,10 @@ class _MemoryStorage extends SecureStorageService {
   Future<void> clearPendingVerificationEmail() async {}
   @override
   Future<void> clearAll() async {}
+  @override
+  Future<void> clearSession() async => values.removeWhere(
+        (k, _) => k != SecureStorageService.keyHydrationSettings,
+      );
 }
 
 UserProfile _user(String id) => UserProfile(
@@ -97,5 +109,21 @@ void main() {
 
     await loginAs('user-a');
     expect(await db.select(db.journalOutbox).get(), hasLength(1));
+  });
+
+  test('hydration settings survive logout for the same person only', () async {
+    const key = SecureStorageService.keyHydrationSettings;
+    await loginAs('user-a');
+    storage.values[key] = '{"dailyTargetMl":2600,"reminderEnabled":false}';
+    storage.values['other'] = 'x';
+    await container.read(authControllerProvider.notifier).logout();
+    expect(storage.values.containsKey('other'), isFalse);
+
+    await loginAs('user-a');
+    expect(storage.values[key], contains('2600'));
+
+    await container.read(authControllerProvider.notifier).logout();
+    await loginAs('user-b');
+    expect(storage.values.containsKey(key), isFalse);
   });
 }

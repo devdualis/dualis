@@ -7,10 +7,17 @@ import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/notifications/daily_checkin_notification_service.dart';
 import '../../../../core/security/secure_storage_service.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../l10n/locale_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../dashboard/data/triage_history_remote_data_source.dart';
 import '../../../dashboard/domain/models/triage_history_models.dart';
+import '../../../journal/data/journal_local_store.dart';
+import '../../../journal/data/journal_remote_data_source.dart';
+import '../../../journal/domain/journal_keys.dart';
+import '../../../journal/domain/journal_models.dart';
+import '../../../journal/presentation/journal_item_text.dart';
+import '../../../journal/presentation/journal_labels.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../../triage/domain/triage_vertical.dart';
 import '../../../triage_outcome/domain/triage_outcome_models.dart';
@@ -128,9 +135,11 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     } catch (_) {}
   }
 
-  Future<void> _syncTodayCheckInFromRemote([DateTime? now]) async {
+  Future<void> _syncTodayCheckInFromRemote(
+    TriageHistoryResponse history, [
+    DateTime? now,
+  ]) async {
     try {
-      final history = await _historyDataSource.fetchHistory(days: 1);
       if (history.logs.isEmpty) return;
 
       final todayStr = _getTodayDateString(now);
@@ -293,6 +302,10 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     } catch (_) {}
   }
 
+  /// Remote first, like a chat app: the server decides what today looks
+  /// like; the device's copy is shown while loading and used only when the
+  /// server does not answer. Entries still waiting in the outbox are added
+  /// on top, since the server does not have them yet.
   Future<void> loadTodayCheckIn([DateTime? now]) async {
     if (_isDisposed) return;
     // Abort only if the active profile changed mid-load; overlapping loads for
@@ -302,16 +315,35 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     if (_isDisposed || _scopedUserId('') != currentScope) {
       return;
     }
-    await _syncTodayCheckInFromRemote(now);
+    final history = await _historyDataSource.fetchHistory(days: 1);
+    final journal = await _fetchTodayJournal(now);
     if (_isDisposed || _scopedUserId('') != currentScope) {
       return;
     }
+
+    final remoteAnswered = !history.failed && journal.remoteOk;
+    // Choices made on Home and not saved yet are kept.
+    final hasLocalEdits = state.isModifiedAfterCompletion ||
+        (!state.isCompletedToday &&
+            (state.emotionalTouched ||
+                state.physicalTouched ||
+                state.textTouched));
+    final rebuildFromServer = remoteAnswered && !hasLocalEdits;
+    if (rebuildFromServer) {
+      state = const TriggerCheckInState();
+    }
+    if (!history.failed) {
+      await _syncTodayCheckInFromRemote(history, now);
+    }
+    _applyJournalEntries(journal.entries);
+    if (rebuildFromServer && !state.isCompletedToday) {
+      await _clearStorage();
+    }
+    if (_isDisposed) return;
     try {
-      if (!_isDisposed) {
-        await ref
-            .read(dailyCheckinNotificationServiceProvider)
-            .scheduleDailyCheckInReminders(isCompletedToday: state.isCompletedToday);
-      }
+      await ref
+          .read(dailyCheckinNotificationServiceProvider)
+          .scheduleDailyCheckInReminders(isCompletedToday: state.isCompletedToday);
     } catch (_) {}
   }
 
@@ -470,6 +502,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     String? narrative,
     int? intensity,
     TriggerStatus? status,
+    DateTime? at,
   }) {
     final isPhysical = vertical == TriageVertical.fisica;
     final today = _getTodayDateString();
@@ -491,7 +524,7 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       physicalIntensity: isPhysical ? resolvedIntensity : state.physicalIntensity,
       emotionalStatus: isPhysical ? state.emotionalStatus : (status ?? state.emotionalStatus),
       physicalStatus: isPhysical ? (status ?? state.physicalStatus) : state.physicalStatus,
-      completedAt: DateTime.now(),
+      completedAt: at ?? DateTime.now(),
       checkInDate: today,
       isModifiedAfterCompletion: false,
     );
@@ -499,14 +532,125 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     _syncCheckInReminders();
   }
 
+  /// Marks Home with a saved journal entry, in the user's own words. Only
+  /// the entry's axis is marked; entries without one (older outbox items)
+  /// mark both. Conditions get their own line and never fill an axis.
+  void applyJournalEntry(AppLocalizations l10n, JournalEntry entry) {
+    final at = entry.recordedAt;
+    final axes = switch (entry.area) {
+      JournalKeys.areaEmotional => const [TriageVertical.psicoEmocional],
+      JournalKeys.areaPhysical => const [TriageVertical.fisica],
+      _ => TriageVertical.values,
+    };
+    if (entry.items.isEmpty) {
+      final summary = JournalLabels.mood(l10n, entry.mood);
+      for (final v in axes) {
+        completeStage(
+          vertical: v,
+          summary: summary,
+          status: TriggerStatus.goodNormal,
+          intensity: 0,
+          at: at,
+        );
+      }
+      return;
+    }
+    void complete(TriageVertical vertical, Iterable<JournalItem> items) {
+      if (items.isEmpty || !axes.contains(vertical)) return;
+      completeStage(
+        vertical: vertical,
+        summary: items.map((i) => journalItemText(l10n, i)).join(' · '),
+        narrative: entry.note,
+        intensity: items
+            .map((i) => i.intensity ?? 0)
+            .reduce((a, b) => a > b ? a : b),
+        at: at,
+      );
+    }
+
+    complete(
+      TriageVertical.fisica,
+      entry.items.where((i) => i.kind == JournalKeys.kindPhysical),
+    );
+    complete(
+      TriageVertical.psicoEmocional,
+      entry.items.where((i) => i.kind == JournalKeys.kindEmotional),
+    );
+    final conditions =
+        entry.items.where((i) => i.kind == JournalKeys.kindCondition);
+    completeConditions(
+      conditions.isEmpty
+          ? null
+          : conditions.map((i) => journalItemText(l10n, i)).join(' · '),
+      at: at,
+    );
+  }
+
+  /// Today's journal entries: the server's list (null-safe: `remoteOk` is
+  /// false when it did not answer) plus entries still in the outbox.
+  Future<({List<JournalEntry> entries, bool remoteOk})> _fetchTodayJournal([
+    DateTime? now,
+  ]) async {
+    // No session, no journal: nothing to read for anyone.
+    try {
+      final token = await _storage.getAccessToken();
+      if (token == null || token.isEmpty) {
+        return (entries: const <JournalEntry>[], remoteOk: false);
+      }
+    } catch (_) {
+      return (entries: const <JournalEntry>[], remoteOk: false);
+    }
+    final profileId =
+        ref.read(activeProfileControllerProvider).activeProfile?.id;
+    var remoteOk = true;
+    var remote = const <JournalEntry>[];
+    try {
+      remote = await ref
+          .read(journalRemoteDataSourceProvider)
+          .listEntries(days: 1, profileId: profileId);
+    } catch (_) {
+      remoteOk = false;
+    }
+    var pending = const <JournalEntry>[];
+    try {
+      pending = await ref
+          .read(journalLocalStoreProvider)
+          .pendingEntries(profileId: profileId);
+    } catch (_) {}
+
+    final today = _getTodayDateString(now);
+    final byClientId = <String, JournalEntry>{};
+    for (final e in [...remote, ...pending]) {
+      // Legacy rows come from the triage history sync.
+      if (e.legacy) continue;
+      if (_getTodayDateString(e.recordedAt) != today) continue;
+      byClientId[e.clientId.isEmpty ? (e.id ?? '') : e.clientId] = e;
+    }
+    final entries = byClientId.values.toList()
+      ..sort((a, b) => a.recordedAt.compareTo(b.recordedAt));
+    return (entries: entries, remoteOk: remoteOk);
+  }
+
+  void _applyJournalEntries(List<JournalEntry> entries) {
+    if (entries.isEmpty || _isDisposed || state.isModifiedAfterCompletion) {
+      return;
+    }
+    try {
+      final l10n = lookupAppLocalizations(ref.read(localeProvider));
+      for (final e in entries) {
+        applyJournalEntry(l10n, e);
+      }
+    } catch (_) {}
+  }
+
   /// Records today's condition items on their own line of Home, without
   /// touching the emotional or physical axis.
-  void completeConditions(String? summary) {
+  void completeConditions(String? summary, {DateTime? at}) {
     state = state.copyWith(
       isCompletedToday: (summary != null && summary.isNotEmpty) ||
           state.isCompletedToday,
       conditionsSummary: summary,
-      completedAt: DateTime.now(),
+      completedAt: at ?? DateTime.now(),
       checkInDate: _getTodayDateString(),
       isModifiedAfterCompletion: false,
     );

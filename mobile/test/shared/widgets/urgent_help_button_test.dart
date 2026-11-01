@@ -35,6 +35,8 @@ class _Storage extends SecureStorageService {
   Future<String?> getUserId() async => null;
   @override
   Future<void> clearAll() async {}
+  @override
+  Future<void> clearSession() async {}
 }
 
 /// History is irrelevant here: calls never complete, screens stay loading.

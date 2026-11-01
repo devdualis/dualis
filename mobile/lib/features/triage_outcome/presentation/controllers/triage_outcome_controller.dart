@@ -65,8 +65,12 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
     } catch (_) {}
   }
 
+  /// Remote first: today's record on the server wins; the device's copy is
+  /// used only when the server does not answer or has nothing for today.
   Future<void> loadTodayOutcome() async {
     try {
+      if (await _syncTodayOutcomeFromRemote()) return;
+
       final userId = await _storage.getUserId() ?? 'anonymous';
       final saved = await _storage.getTodayTriageOutcome(userId);
       if (saved != null) {
@@ -76,22 +80,19 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
         if (recordedDate == todayStr) {
           state = state.copyWith(outcome: outcome);
           _syncWithTriggerCheckIn(outcome);
-          return;
         } else {
           await _storage.clearTodayTriageOutcome(userId);
         }
       }
-
-      // If local storage did not have today's outcome, try remote history
-      await _syncTodayOutcomeFromRemote();
     } catch (_) {}
   }
 
-  Future<void> _syncTodayOutcomeFromRemote() async {
+  /// True when the server had today's record and it was applied.
+  Future<bool> _syncTodayOutcomeFromRemote() async {
     try {
       final historyDataSource = ref.read(triageHistoryDataSourceProvider);
       final history = await historyDataSource.fetchHistory(days: 1);
-      if (history.logs.isEmpty) return;
+      if (history.logs.isEmpty) return false;
 
       final todayStr = _getTodayDateString();
       final todayLogs = history.logs.where((log) {
@@ -99,22 +100,24 @@ class TriageOutcomeNotifier extends Notifier<TriageOutcomeState> {
         return _getTodayDateString(localDate) == todayStr;
       }).toList();
 
-      if (todayLogs.isEmpty) return;
+      if (todayLogs.isEmpty) return false;
 
       todayLogs.sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
       final triageLogs = todayLogs
           .where((log) => !AxisIntensityResolver.isDailyCheckIn(log))
           .toList();
-      if (triageLogs.isEmpty) return;
+      if (triageLogs.isEmpty) return false;
 
       final targetLog = triageLogs.first;
       final outcome = _buildOutcomeFromHistoryEntry(targetLog, todayLogs);
-      if (outcome != null) {
-        state = state.copyWith(outcome: outcome);
-        await _persistOutcome(outcome);
-        _syncWithTriggerCheckIn(outcome);
-      }
-    } catch (_) {}
+      if (outcome == null) return false;
+      state = state.copyWith(outcome: outcome);
+      await _persistOutcome(outcome);
+      _syncWithTriggerCheckIn(outcome);
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   TriageOutcome? _buildOutcomeFromHistoryEntry(

@@ -134,7 +134,7 @@ class _FakeSecureStorage extends Fake implements SecureStorageService {
   @override
   Future<void> clearTodayTriageOutcome(String userId) async {}
   @override
-  Future<void> clearAll() async {
+  Future<void> clearSession() async {
     clearAllCalls++;
   }
 }

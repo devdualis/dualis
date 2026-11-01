@@ -183,6 +183,13 @@
       "when": 1790275174100,
       "tag": "0024_keep_records_of_deleted_authors",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1790361574100,
+      "tag": "0025_hydration_settings",
+      "breakpoints": true
     }
   ]
 }

@@ -193,6 +193,8 @@ class FakeSecureStorage extends Fake implements SecureStorageService {
   Future<String?> getAccessToken() async => 'token-123';
   @override
   Future<void> clearAll() async {}
+  @override
+  Future<void> clearSession() async {}
 }
 
 void main() {

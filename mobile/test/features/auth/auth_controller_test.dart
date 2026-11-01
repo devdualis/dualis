@@ -35,7 +35,7 @@ void main() {
     mockSecureStorage = MockSecureStorageService();
 
     when(() => mockSecureStorage.clearUserProfile()).thenAnswer((_) async {});
-    when(() => mockSecureStorage.clearAll()).thenAnswer((_) async {});
+    when(() => mockSecureStorage.clearSession()).thenAnswer((_) async {});
     when(() => mockSecureStorage.saveUserProfile(any())).thenAnswer((_) async {});
     when(() => mockSecureStorage.getRefreshToken()).thenAnswer((_) async => null);
 
@@ -93,7 +93,7 @@ void main() {
       expect(state.isAuthenticated, isTrue);
       expect(state.user, equals(testUser));
       // Storage should NEVER have been wiped on network error!
-      verifyNever(() => mockSecureStorage.clearAll());
+      verifyNever(() => mockSecureStorage.clearSession());
     });
 
     test('restoreSession logs out only when server returns 401 Unauthorized',
@@ -119,7 +119,7 @@ void main() {
       final state = container.read(authControllerProvider);
       expect(state.isAuthenticated, isFalse);
       expect(state.user, isNull);
-      verify(() => mockSecureStorage.clearAll()).called(1);
+      verify(() => mockSecureStorage.clearSession()).called(1);
     });
 
     test(
@@ -148,7 +148,7 @@ void main() {
       final state = container.read(authControllerProvider);
       expect(state.isAuthenticated, isTrue);
       expect(state.user, equals(testUser));
-      verifyNever(() => mockSecureStorage.clearAll());
+      verifyNever(() => mockSecureStorage.clearSession());
     });
 
     test('logout clears secure storage and resets auth state', () async {
@@ -158,7 +158,7 @@ void main() {
       final state = container.read(authControllerProvider);
       expect(state.isAuthenticated, isFalse);
       expect(state.user, isNull);
-      verify(() => mockSecureStorage.clearAll()).called(1);
+      verify(() => mockSecureStorage.clearSession()).called(1);
     });
   });
 

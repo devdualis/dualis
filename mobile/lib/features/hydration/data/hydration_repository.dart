@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/app_database.dart' hide WaterIntakeLog;
+import '../../../../core/database/app_database.dart' as local_db show WaterIntakeLog;
 import '../../../../core/security/secure_storage_service.dart';
 import '../../profile/domain/models/profile.dart';
 import '../../profile/presentation/controllers/active_profile_controller.dart';
@@ -47,7 +48,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
   final HydrationRemoteDataSource? _remoteDataSource;
   final Ref? _ref;
 
-  static const _settingsKey = 'dualis_hydration_settings';
+  static const _settingsKey = SecureStorageService.keyHydrationSettings;
 
   HydrationRepositoryImpl({
     required AppDatabase db,
@@ -142,6 +143,44 @@ class HydrationRepositoryImpl implements HydrationRepository {
     );
   }
 
+  /// Sends this profile's logs that never reached the server (saved while
+  /// offline) and stores the server id they get back.
+  Future<void> _pushPending(
+    String userId,
+    String? profileId,
+    bool isPrimary,
+  ) async {
+    final remote = _remoteDataSource;
+    if (remote == null) return;
+    try {
+      final since = DateTime.now().subtract(const Duration(days: 30));
+      final rows = await (_db.select(_db.waterIntakeLogs)
+            ..where((tbl) =>
+                tbl.userId.equals(userId) &
+                tbl.remoteId.isNull() &
+                _profileFilter(tbl, profileId, isPrimary) &
+                tbl.timestamp.isBiggerOrEqualValue(since))
+            ..orderBy([(tbl) => OrderingTerm(expression: tbl.timestamp)]))
+          .get();
+      for (final row in rows) {
+        final sent = await remote.logWater(
+          amountMl: row.amountMl,
+          source: row.source,
+          timestamp: row.timestamp,
+          profileId: row.profileId ?? profileId,
+        );
+        final remoteId = sent?.remoteId;
+        if (remoteId == null) return; // Still offline: try again next load.
+        await (_db.update(_db.waterIntakeLogs)
+              ..where((tbl) => tbl.id.equals(row.id)))
+            .write(WaterIntakeLogsCompanion(
+          remoteId: Value(remoteId),
+          profileId: Value(row.profileId ?? profileId),
+        ));
+      }
+    } catch (_) {}
+  }
+
   @override
   Future<List<WaterIntakeEntry>> getLogsForDay({
     required String userId,
@@ -154,8 +193,14 @@ class HydrationRepositoryImpl implements HydrationRepository {
     final effectiveProfileId = _resolveProfileId(profileId);
     final isPrimary = _resolveIsPrimary(effectiveProfileId, isPrimaryProfile);
 
+    // Server ids of this profile's logs for the day, when the server answered.
+    var serverIds = const <String>{};
+
     // Sync with remote database when user is authenticated
     if (_remoteDataSource != null && userId.isNotEmpty && userId != 'guest_user') {
+      // Water logged while offline goes up first, so the server's answer
+      // below already includes it.
+      await _pushPending(userId, effectiveProfileId, isPrimary);
       try {
         final remoteLogs = await _remoteDataSource.getTodayLogs(
           date: day,
@@ -174,6 +219,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
               .map((r) => r.remoteId)
               .whereType<String>()
               .toSet();
+          serverIds = remoteIdSet;
 
           // Purge local Drift records that were synced before but deleted on server
           for (final row in existingRows) {
@@ -184,19 +230,50 @@ class HydrationRepositoryImpl implements HydrationRepository {
             }
           }
 
-          // Insert or update entries from remoteLogs into Drift
-          final updatedExisting = await (_db.select(_db.waterIntakeLogs)
+          // Match server logs to local rows by remoteId across every profile
+          // of this user: a load that ran before the active profile was known
+          // (right after login) stores them without a profile, and must not
+          // be counted again next to the copy that has one.
+          final userDayRows = await (_db.select(_db.waterIntakeLogs)
                 ..where((tbl) =>
                     tbl.userId.equals(userId) &
-                    _profileFilter(tbl, effectiveProfileId, isPrimary) &
-                    tbl.timestamp.isBiggerOrEqualValue(startOfDay) &
-                    tbl.timestamp.isSmallerOrEqualValue(endOfDay)))
+                    tbl.remoteId.isNotNull() &
+                    tbl.timestamp.isBiggerOrEqualValue(
+                        startOfDay.subtract(const Duration(days: 1))) &
+                    tbl.timestamp.isSmallerOrEqualValue(
+                        endOfDay.add(const Duration(days: 1))))
+                ..orderBy([(tbl) => OrderingTerm(expression: tbl.id)]))
               .get();
 
-          final existingByRemoteId = {
-            for (final row in updatedExisting)
-              if (row.remoteId != null) row.remoteId!: row
-          };
+          final existingByRemoteId = <String, local_db.WaterIntakeLog>{};
+          for (final row in userDayRows) {
+            final rid = row.remoteId!;
+            if (!remoteIdSet.contains(rid)) continue;
+            final kept = existingByRemoteId[rid];
+            if (kept == null) {
+              existingByRemoteId[rid] = row;
+            } else {
+              // Prefer the copy that already carries the profile.
+              final keepRow = kept.profileId == null && row.profileId != null
+                  ? row
+                  : kept;
+              final dropRow = identical(keepRow, row) ? kept : row;
+              existingByRemoteId[rid] = keepRow;
+              await (_db.delete(_db.waterIntakeLogs)
+                    ..where((tbl) => tbl.id.equals(dropRow.id)))
+                  .go();
+            }
+          }
+          if (effectiveProfileId != null) {
+            for (final row in existingByRemoteId.values) {
+              if (row.profileId == null) {
+                await (_db.update(_db.waterIntakeLogs)
+                      ..where((tbl) => tbl.id.equals(row.id)))
+                    .write(WaterIntakeLogsCompanion(
+                        profileId: Value(effectiveProfileId)));
+              }
+            }
+          }
 
           for (final r in remoteLogs) {
             if (r.remoteId != null && existingByRemoteId.containsKey(r.remoteId)) {
@@ -219,7 +296,10 @@ class HydrationRepositoryImpl implements HydrationRepository {
     final query = _db.select(_db.waterIntakeLogs)
       ..where((tbl) =>
           tbl.userId.equals(userId) &
-          _profileFilter(tbl, effectiveProfileId, isPrimary) &
+          (serverIds.isEmpty
+              ? _profileFilter(tbl, effectiveProfileId, isPrimary)
+              : (_profileFilter(tbl, effectiveProfileId, isPrimary) |
+                  tbl.remoteId.isIn(serverIds))) &
           tbl.timestamp.isBiggerOrEqualValue(startOfDay) &
           tbl.timestamp.isSmallerOrEqualValue(endOfDay))
       ..orderBy([
@@ -335,24 +415,69 @@ class HydrationRepositoryImpl implements HydrationRepository {
     }
   }
 
+  /// Remote first: the account's settings on the server win. The device's
+  /// copy is used when the server does not answer, and a change saved while
+  /// offline is sent before reading so it is not overwritten.
   @override
   Future<HydrationSettings> getSettings() async {
+    final local = await _localSettings();
+    final remote = _remoteDataSource;
+    if (remote == null) return local ?? const HydrationSettings();
     try {
-      final raw = await _storage.read(key: _settingsKey);
-      if (raw == null || raw.isEmpty) {
-        return const HydrationSettings();
+      final pending =
+          await _storage.read(key: SecureStorageService.keyHydrationSettingsPending) == '1';
+      if (pending && local != null) {
+        if (await remote.saveSettings(local)) {
+          await _storage.delete(key: SecureStorageService.keyHydrationSettingsPending);
+        }
+        return local;
       }
-      final json = jsonDecode(raw) as Map<String, dynamic>;
-      return HydrationSettings.fromJson(json);
+      final answer = await remote.getSettings();
+      if (!answer.answered) return local ?? const HydrationSettings();
+      final server = answer.settings;
+      if (server == null) {
+        // Nothing on the server yet: keep this device's choices and send them.
+        if (local != null) await remote.saveSettings(local);
+        return local ?? const HydrationSettings();
+      }
+      await _writeLocalSettings(server);
+      return server;
     } catch (_) {
-      return const HydrationSettings();
+      return local ?? const HydrationSettings();
     }
   }
 
   @override
   Future<void> saveSettings(HydrationSettings settings) async {
-    final raw = jsonEncode(settings.toJson());
-    await _storage.write(key: _settingsKey, value: raw);
+    await _writeLocalSettings(settings);
+    var sent = false;
+    try {
+      sent = await _remoteDataSource?.saveSettings(settings) ?? false;
+    } catch (_) {}
+    if (sent) {
+      await _storage.delete(key: SecureStorageService.keyHydrationSettingsPending);
+    } else {
+      await _storage.write(
+        key: SecureStorageService.keyHydrationSettingsPending,
+        value: '1',
+      );
+    }
+  }
+
+  Future<HydrationSettings?> _localSettings() async {
+    try {
+      final raw = await _storage.read(key: _settingsKey);
+      if (raw == null || raw.isEmpty) return null;
+      return HydrationSettings.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _writeLocalSettings(HydrationSettings settings) async {
+    try {
+      await _storage.write(key: _settingsKey, value: jsonEncode(settings.toJson()));
+    } catch (_) {}
   }
 }
 

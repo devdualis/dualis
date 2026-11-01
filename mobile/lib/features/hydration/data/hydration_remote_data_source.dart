@@ -4,6 +4,7 @@ import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/security/secure_storage_service.dart';
 import '../../../../core/utils/local_day.dart';
+import '../domain/models/hydration_settings.dart';
 import '../domain/models/water_intake_log.dart';
 
 final hydrationRemoteDataSourceProvider = Provider<HydrationRemoteDataSource>((ref) {
@@ -174,6 +175,47 @@ class HydrationRemoteDataSource {
         options: Options(headers: headers),
       );
       return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// The account's saved settings. `answered` is false when the server did
+  /// not answer; `settings` is null when nothing was saved yet.
+  Future<({bool answered, HydrationSettings? settings})> getSettings() async {
+    try {
+      final token = await _secureStorage.getAccessToken();
+      if (token == null || token.isEmpty) {
+        return (answered: false, settings: null);
+      }
+      final response = await _apiClient.get(
+        ApiEndpoints.hydrationSettings,
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      final data = response.data;
+      if (data is! Map) return (answered: false, settings: null);
+      final raw = data['settings'];
+      return (
+        answered: true,
+        settings: raw is Map
+            ? HydrationSettings.fromJson(Map<String, dynamic>.from(raw))
+            : null,
+      );
+    } catch (_) {
+      return (answered: false, settings: null);
+    }
+  }
+
+  Future<bool> saveSettings(HydrationSettings settings) async {
+    try {
+      final token = await _secureStorage.getAccessToken();
+      if (token == null || token.isEmpty) return false;
+      await _apiClient.put(
+        ApiEndpoints.hydrationSettings,
+        data: settings.toJson(),
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      return true;
     } catch (_) {
       return false;
     }

@@ -134,11 +134,16 @@ class TriageHistoryResponse {
   final List<EmotionalDayData> emotionalSummary;
   final List<JournalPatternItem> journalPatterns;
 
+  /// True when the server did not answer (offline, timeout, error): callers
+  /// fall back to the device's copy instead of reading "no records".
+  final bool failed;
+
   const TriageHistoryResponse({
     required this.logs,
     required this.physicalSummary,
     required this.emotionalSummary,
     required this.journalPatterns,
+    this.failed = false,
   });
 
   factory TriageHistoryResponse.fromJson(Map<String, dynamic> json) {
@@ -193,6 +198,16 @@ class TriageHistoryResponse {
       physicalSummary: {},
       emotionalSummary: [],
       journalPatterns: [],
+    );
+  }
+
+  factory TriageHistoryResponse.failed() {
+    return const TriageHistoryResponse(
+      logs: [],
+      physicalSummary: {},
+      emotionalSummary: [],
+      journalPatterns: [],
+      failed: true,
     );
   }
 

@@ -60,7 +60,11 @@ class FakeJournalRemote implements JournalRemoteDataSource {
   }
 
   @override
-  Future<List<JournalEntry>> listEntries({int days = 30}) async => created;
+  Future<List<JournalEntry>> listEntries({
+    int days = 30,
+    String? profileId,
+  }) async =>
+      created;
 
   @override
   Future<void> deleteEntry(String id) async {}

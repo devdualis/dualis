@@ -107,7 +107,7 @@ class ApiClient {
       return newAccessToken;
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        await _secureStorage.clearAll();
+        await _secureStorage.clearSession();
       }
       return null;
     } catch (_) {

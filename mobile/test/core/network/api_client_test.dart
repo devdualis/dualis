@@ -57,7 +57,7 @@ void main() {
           refreshToken: any(named: 'refreshToken'),
           userId: any(named: 'userId'),
         )).thenAnswer((_) async {});
-    when(() => storage.clearAll()).thenAnswer((_) async {});
+    when(() => storage.clearSession()).thenAnswer((_) async {});
   });
 
   test('retries the original request with a refreshed token after a 401', () async {
@@ -167,7 +167,7 @@ void main() {
       throwsA(isA<DioException>().having((e) => e.response?.statusCode, 'statusCode', 401)),
     );
 
-    verify(() => storage.clearAll()).called(1);
+    verify(() => storage.clearSession()).called(1);
     verifyNever(() => storage.persistTokens(
           accessToken: any(named: 'accessToken'),
           refreshToken: any(named: 'refreshToken'),

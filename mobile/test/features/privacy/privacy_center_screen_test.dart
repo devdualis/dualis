@@ -74,6 +74,9 @@ class FakeSecureStorageService extends SecureStorageService {
 
   @override
   Future<void> clearAll() async {}
+
+  @override
+  Future<void> clearSession() async {}
 }
 
 Widget createTestWidget({

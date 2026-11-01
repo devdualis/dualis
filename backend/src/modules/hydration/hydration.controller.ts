@@ -9,6 +9,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
   Request,
   UseGuards,
@@ -29,6 +30,7 @@ import {
   HydrationTodayResponseDto,
   WaterIntakeLogItemDto,
 } from './dto/hydration-response.dto';
+import { HydrationSettingsDto, HydrationSettingsResponseDto } from './dto/hydration-settings.dto';
 import { HydrationService } from './hydration.service';
 
 @Controller({ path: 'hydration', version: '1' })
@@ -39,6 +41,32 @@ export class HydrationController {
     @Inject(HydrationService)
     private readonly hydrationService: HydrationService,
   ) {}
+
+  // Settings belong to the account, not to the profile being viewed.
+  @Get('settings')
+  @HttpCode(HttpStatus.OK)
+  async getSettings(@Request() req: any): Promise<HydrationSettingsResponseDto> {
+    const userId = req.user?.id || req.user?.userId || req.user?.sub;
+    return this.hydrationService.getSettings(userId);
+  }
+
+  @Put('settings')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      expectedType: HydrationSettingsDto,
+    }),
+  )
+  async saveSettings(
+    @Request() req: any,
+    @Body() dto: HydrationSettingsDto,
+  ): Promise<HydrationSettingsResponseDto> {
+    const userId = req.user?.id || req.user?.userId || req.user?.sub;
+    return this.hydrationService.saveSettings(userId, dto);
+  }
 
   @Post('log')
   @HttpCode(HttpStatus.CREATED)

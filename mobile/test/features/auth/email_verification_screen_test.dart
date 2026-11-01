@@ -47,6 +47,9 @@ class MockSecureStorageService extends SecureStorageService {
   @override
   Future<void> clearAll() async {}
 
+  @override
+  Future<void> clearSession() async {}
+
   String? pendingEmail;
 
   @override

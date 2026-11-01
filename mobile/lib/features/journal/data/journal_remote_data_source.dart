@@ -63,11 +63,14 @@ class JournalRemoteDataSource {
     return JournalEntry.fromJson(_map(response.data));
   }
 
-  Future<List<JournalEntry>> listEntries({int days = 30}) async {
+  Future<List<JournalEntry>> listEntries({
+    int days = 30,
+    String? profileId,
+  }) async {
     final response = await _apiClient.get(
       JournalEndpoints.entries,
       queryParameters: {'days': days},
-      options: await _options(),
+      options: await _options(profileId: profileId),
     );
     final raw = _map(response.data)['entries'] as List? ?? const [];
     return [

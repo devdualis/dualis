@@ -18,6 +18,15 @@ class SecureStorageService {
   static const String _prefixDailyCheckIn = 'dualis_daily_checkin_';
   static const String _keyLocalDataOwner = 'dualis_local_data_owner';
 
+  /// The person's water goal and reminder choices. Kept on logout for the
+  /// same account (it has no server copy); dropped when another account
+  /// signs in on this device.
+  static const String keyHydrationSettings = 'dualis_hydration_settings';
+
+  /// Set while a settings change has not reached the server yet.
+  static const String keyHydrationSettingsPending =
+      'dualis_hydration_settings_pending';
+
   final FlutterSecureStorage _storage;
 
   SecureStorageService({FlutterSecureStorage? storage})
@@ -175,4 +184,28 @@ class SecureStorageService {
   Future<void> delete({required String key}) => _storage.delete(key: key);
 
   Future<void> clearAll() => _storage.deleteAll();
+
+  /// Ends the session: wipes tokens and session data but keeps the local
+  /// data owner and the hydration settings, which belong to the device's
+  /// last account and are checked again on the next login.
+  Future<void> clearSession() async {
+    const kept = [
+      _keyLocalDataOwner,
+      keyHydrationSettings,
+      keyHydrationSettingsPending,
+    ];
+    final saved = <String, String>{};
+    for (final key in kept) {
+      try {
+        final value = await _storage.read(key: key);
+        if (value != null) saved[key] = value;
+      } catch (_) {}
+    }
+    await _storage.deleteAll();
+    for (final entry in saved.entries) {
+      try {
+        await _storage.write(key: entry.key, value: entry.value);
+      } catch (_) {}
+    }
+  }
 }

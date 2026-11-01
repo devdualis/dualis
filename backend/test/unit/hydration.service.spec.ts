@@ -178,4 +178,47 @@ describe('HydrationService Unit Tests', () => {
     expect(result.success).toBe(true);
     expect(result.id).toBe('log-1');
   });
+
+  it('5. saves the account hydration settings under the caller\'s RLS context', async () => {
+    const set = vi.fn().mockReturnValue({
+      where: vi.fn().mockReturnValue({
+        returning: vi.fn().mockResolvedValue([{ id: 'usr-1' }]),
+      }),
+    });
+    mockDatabaseService.withRls.mockImplementation(async (_u: string, cb: any) =>
+      cb({ update: vi.fn().mockReturnValue({ set }) }),
+    );
+
+    const result = await service.saveSettings('usr-1', {
+      reminderEnabled: false,
+      trackingEnabled: true,
+      reminderSoundStyle: 'phone_alarm',
+      dailyTargetMl: 2600,
+      scheduledHours: [20, 8, 8, 12],
+    });
+
+    expect(mockDatabaseService.withRls).toHaveBeenCalledWith('usr-1', expect.any(Function));
+    expect(result.settings?.scheduledHours).toEqual([8, 12, 20]);
+    expect(set).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hydrationSettings: expect.objectContaining({ dailyTargetMl: 2600, reminderEnabled: false }),
+      }),
+    );
+  });
+
+  it('6. returns null settings when nothing was saved yet', async () => {
+    mockDatabaseService.withRls.mockImplementation(async (_u: string, cb: any) =>
+      cb({
+        select: vi.fn().mockReturnValue({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue([{ settings: null }]),
+            }),
+          }),
+        }),
+      }),
+    );
+
+    await expect(service.getSettings('usr-1')).resolves.toEqual({ settings: null });
+  });
 });

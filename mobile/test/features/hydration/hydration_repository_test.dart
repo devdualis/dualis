@@ -1,17 +1,30 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dualis_mobile/features/profile/domain/models/profile.dart';
 import 'package:dualis_mobile/features/profile/presentation/controllers/active_profile_controller.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dualis_mobile/core/database/app_database.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/hydration/data/hydration_remote_data_source.dart';
 import 'package:dualis_mobile/features/hydration/data/hydration_repository.dart';
+import 'package:dualis_mobile/features/hydration/domain/models/hydration_settings.dart';
 import 'package:dualis_mobile/features/hydration/domain/models/water_intake_log.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockSecureStorageService extends Mock implements SecureStorageService {}
 class MockHydrationRemoteDataSource extends Mock implements HydrationRemoteDataSource {}
+
+class _MemStorage extends SecureStorageService {
+  final Map<String, String> values = {};
+  @override
+  Future<String?> read({required String key}) async => values[key];
+  @override
+  Future<void> write({required String key, required String value}) async =>
+      values[key] = value;
+  @override
+  Future<void> delete({required String key}) async => values.remove(key);
+}
 
 class _TestActiveProfileController extends ActiveProfileController {
   final ActiveProfileState _testState;
@@ -324,5 +337,165 @@ void main() {
       final primaryTotalAfter = await primaryRepo.getTodayTotalMl(userId: userId);
       expect(primaryTotalAfter, equals(500));
     });
+      test('re-login: server logs are not counted twice across profile loads', () async {
+      const userId = 'user-123';
+      final now = DateTime.now();
+      when(() => remoteDataSource.getTodayLogs(
+            date: any(named: 'date'),
+            profileId: any(named: 'profileId'),
+          )).thenAnswer((_) async => [
+            WaterIntakeEntry(
+              remoteId: 'r1',
+              userId: userId,
+              amountMl: 500,
+              timestamp: now,
+              source: 'manual',
+            ),
+          ]);
+      // Logged before logout, with the profile known.
+      await db.into(db.waterIntakeLogs).insert(WaterIntakeLogsCompanion.insert(
+            userId: userId,
+            amountMl: 500,
+            remoteId: const Value('r1'),
+            timestamp: Value(now),
+            profileId: const Value('prof-primary-1'),
+          ));
+      // Duplicate left by the old code (load before the profile was known).
+      await db.into(db.waterIntakeLogs).insert(WaterIntakeLogsCompanion.insert(
+            userId: userId,
+            amountMl: 500,
+            remoteId: const Value('r1'),
+            timestamp: Value(now),
+          ));
+
+      const primary = Profile(
+        id: 'prof-primary-1',
+        name: 'Primary User',
+        profileType: ProfileType.primary,
+        ownership: ProfileOwnership.own,
+        accessLevel: ProfileAccessLevel.owner,
+      );
+      Future<int> totalWith(ActiveProfileState s) async {
+        final c = ProviderContainer(overrides: [
+          appDatabaseProvider.overrideWithValue(db),
+          secureStorageServiceProvider.overrideWithValue(storage),
+          hydrationRemoteDataSourceProvider.overrideWithValue(remoteDataSource),
+          activeProfileControllerProvider
+              .overrideWith(() => _TestActiveProfileController(s)),
+        ]);
+        addTearDown(c.dispose);
+        return c.read(hydrationRepositoryProvider).getTodayTotalMl(userId: userId);
+      }
+
+      expect(await totalWith(const ActiveProfileState(isLoading: true)), 500);
+      expect(
+        await totalWith(const ActiveProfileState(
+          profiles: [primary],
+          activeProfileId: 'prof-primary-1',
+        )),
+        500,
+      );
+      final rows = await db.select(db.waterIntakeLogs).get();
+      expect(rows, hasLength(1));
+      expect(rows.single.profileId, 'prof-primary-1');
+    });
+  });
+
+  group('Hydration settings: server first', () {
+    late _MemStorage mem;
+    late HydrationRepositoryImpl repo;
+    const local = HydrationSettings(dailyTargetMl: 1800, reminderEnabled: true);
+    const server = HydrationSettings(dailyTargetMl: 2600, reminderEnabled: false);
+
+    setUpAll(() => registerFallbackValue(const HydrationSettings()));
+
+    setUp(() {
+      mem = _MemStorage();
+      repo = HydrationRepositoryImpl(
+        db: db,
+        storage: mem,
+        remoteDataSource: remoteDataSource,
+      );
+    });
+
+    test('the server copy wins and is cached on the device', () async {
+      await mem.write(
+        key: SecureStorageService.keyHydrationSettings,
+        value: '{"dailyTargetMl":1800}',
+      );
+      when(() => remoteDataSource.getSettings())
+          .thenAnswer((_) async => (answered: true, settings: server));
+
+      final got = await repo.getSettings();
+
+      expect(got.dailyTargetMl, 2600);
+      expect(got.reminderEnabled, isFalse);
+      expect(mem.values[SecureStorageService.keyHydrationSettings], contains('2600'));
+    });
+
+    test('offline: the device copy is used', () async {
+      when(() => remoteDataSource.getSettings())
+          .thenAnswer((_) async => (answered: false, settings: null));
+      when(() => remoteDataSource.saveSettings(any()))
+          .thenAnswer((_) async => false);
+      await repo.saveSettings(local);
+
+      expect((await repo.getSettings()).dailyTargetMl, 1800);
+    });
+
+    test('a change saved offline is sent before the server is read', () async {
+      when(() => remoteDataSource.saveSettings(any()))
+          .thenAnswer((_) async => false);
+      await repo.saveSettings(local);
+      expect(mem.values[SecureStorageService.keyHydrationSettingsPending], '1');
+
+      when(() => remoteDataSource.saveSettings(any()))
+          .thenAnswer((_) async => true);
+      when(() => remoteDataSource.getSettings())
+          .thenAnswer((_) async => (answered: true, settings: server));
+
+      expect((await repo.getSettings()).dailyTargetMl, 1800);
+      verify(() => remoteDataSource.saveSettings(any())).called(2);
+      expect(mem.values.containsKey(SecureStorageService.keyHydrationSettingsPending), isFalse);
+    });
+  });
+
+  test('water logged offline is sent to the server on the next load', () async {
+    const userId = 'user-123';
+    final now = DateTime.now();
+    await db.into(db.waterIntakeLogs).insert(WaterIntakeLogsCompanion.insert(
+          userId: userId,
+          amountMl: 300,
+          timestamp: Value(now),
+        ));
+    when(() => remoteDataSource.logWater(
+          amountMl: 300,
+          source: any(named: 'source'),
+          timestamp: any(named: 'timestamp'),
+          profileId: any(named: 'profileId'),
+        )).thenAnswer((_) async => WaterIntakeEntry(
+          remoteId: 'r-up',
+          userId: userId,
+          amountMl: 300,
+          timestamp: now,
+          source: 'manual',
+        ));
+    when(() => remoteDataSource.getTodayLogs(
+          date: any(named: 'date'),
+          profileId: any(named: 'profileId'),
+        )).thenAnswer((_) async => [
+          WaterIntakeEntry(
+            remoteId: 'r-up',
+            userId: userId,
+            amountMl: 300,
+            timestamp: now,
+            source: 'manual',
+          ),
+        ]);
+
+    final logs = await repository.getLogsForDay(userId: userId, day: now);
+
+    expect(logs, hasLength(1));
+    expect(logs.single.remoteId, 'r-up');
   });
 }
