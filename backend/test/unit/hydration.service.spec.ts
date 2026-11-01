@@ -48,6 +48,78 @@ describe('HydrationService Unit Tests', () => {
     );
   });
 
+  describe('retries carry a client id (no double counting)', () => {
+    const clientId = '0f5a3c2e-8d4b-4c1a-9e7f-6b2d1a0c9e8f';
+    const saved = {
+      id: clientId,
+      userId: 'usr-1',
+      profileId: 'prof-usr-1',
+      amountMl: 300,
+      source: 'manual',
+      recordedAt: new Date('2026-09-27T10:00:00Z'),
+      createdAt: new Date('2026-09-27T10:00:00Z'),
+    };
+
+    function txWith(insertedRows: unknown[], existingRows: unknown[]) {
+      const onConflictDoNothing = vi.fn().mockReturnValue({
+        returning: vi.fn().mockResolvedValue(insertedRows),
+      });
+      const values = vi.fn().mockReturnValue({
+        onConflictDoNothing,
+        returning: vi.fn().mockResolvedValue(insertedRows),
+      });
+      const where = vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(existingRows) });
+      const tx = {
+        insert: vi.fn().mockReturnValue({ values }),
+        select: vi.fn().mockReturnValue({ from: vi.fn().mockReturnValue({ where }) }),
+      };
+      mockDatabaseService.withRls.mockImplementation(async (_userId: string, callback: any) =>
+        callback(tx),
+      );
+      return { tx, values, onConflictDoNothing };
+    }
+
+    it('stores the client id as the log id and ignores a second insert of it', async () => {
+      const { tx, values, onConflictDoNothing } = txWith([saved], []);
+
+      const result = await service.logWater('usr-1', 'prof-usr-1', {
+        amountMl: 300,
+        clientId: clientId.toUpperCase(),
+      });
+
+      expect(values).toHaveBeenCalledWith(expect.objectContaining({ id: clientId }));
+      expect(onConflictDoNothing).toHaveBeenCalledWith({ target: expect.anything() });
+      expect(tx.select).not.toHaveBeenCalled();
+      expect(result.id).toBe(clientId);
+    });
+
+    it('answers a retry with the log already saved instead of a second one', async () => {
+      const { tx } = txWith([], [saved]);
+
+      const result = await service.logWater('usr-1', 'prof-usr-1', { amountMl: 300, clientId });
+
+      expect(tx.select).toHaveBeenCalled();
+      expect(result).toMatchObject({ id: clientId, amountMl: 300, profileId: 'prof-usr-1' });
+    });
+
+    it('refuses an id that belongs to another profile', async () => {
+      txWith([], []);
+
+      await expect(
+        service.logWater('usr-1', 'prof-usr-1', { amountMl: 300, clientId }),
+      ).rejects.toThrow('Este registro já existe.');
+    });
+
+    it('older app versions without a client id insert as before', async () => {
+      const { values, onConflictDoNothing } = txWith([saved], []);
+
+      await service.logWater('usr-1', 'prof-usr-1', { amountMl: 300 });
+
+      expect(values.mock.calls[0][0]).not.toHaveProperty('id');
+      expect(onConflictDoNothing).not.toHaveBeenCalled();
+    });
+  });
+
   it('rejects calls without an active profile', async () => {
     await expect(service.getTodayLogs('usr-1', '')).rejects.toThrow('Profile ID is required');
     expect(mockDatabaseService.withRls).not.toHaveBeenCalled();

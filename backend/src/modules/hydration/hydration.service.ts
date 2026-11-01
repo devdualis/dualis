@@ -1,6 +1,12 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { and, desc, eq, gte, lt, lte } from 'drizzle-orm';
-import { DatabaseService } from '../../database/database.service';
+import { DatabaseService, DrizzleTransaction } from '../../database/database.service';
 import { waterIntakeLogs } from '../../database/schema/water-intake-logs.schema';
 import { users } from '../../database/schema/users.schema';
 import { HydrationSettingsDto, HydrationSettingsResponseDto } from './dto/hydration-settings.dto';
@@ -80,27 +86,46 @@ export class HydrationService {
     const recordedAt = dto.recordedAt ? new Date(dto.recordedAt) : new Date();
 
     return this.databaseService.withRls(userId, async (tx) => {
-      const [inserted] = await tx
-        .insert(waterIntakeLogs)
-        .values({
-          userId,
-          profileId,
-          amountMl: dto.amountMl,
-          source: dto.source || 'manual',
-          recordedAt,
-        })
-        .returning();
+      const values = {
+        ...(dto.clientId ? { id: dto.clientId.toLowerCase() } : {}),
+        userId,
+        profileId,
+        amountMl: dto.amountMl,
+        source: dto.source || 'manual',
+        recordedAt,
+      };
+      const insert = tx.insert(waterIntakeLogs).values(values);
+      // A retry carries the id the first try saved: answer with that log, add nothing.
+      const [inserted] = dto.clientId
+        ? await insert.onConflictDoNothing({ target: waterIntakeLogs.id }).returning()
+        : await insert.returning();
+      const saved = inserted ?? (await this.findRetriedLog(tx, profileId, values.id!));
 
       return {
-        id: inserted.id,
-        userId,
-        profileId: inserted.profileId,
-        amountMl: inserted.amountMl,
-        source: inserted.source,
-        recordedAt: inserted.recordedAt.toISOString(),
-        createdAt: inserted.createdAt.toISOString(),
+        id: saved.id,
+        userId: saved.userId,
+        profileId: saved.profileId,
+        amountMl: saved.amountMl,
+        source: saved.source,
+        recordedAt: saved.recordedAt.toISOString(),
+        createdAt: saved.createdAt.toISOString(),
       };
     });
+  }
+
+  /** The log a retry already saved; any other row with that id is a conflict, not a match. */
+  private async findRetriedLog(
+    tx: DrizzleTransaction,
+    profileId: string,
+    id: string,
+  ): Promise<typeof waterIntakeLogs.$inferSelect> {
+    const [existing] = await tx
+      .select()
+      .from(waterIntakeLogs)
+      .where(and(eq(waterIntakeLogs.id, id), eq(waterIntakeLogs.profileId, profileId)))
+      .limit(1);
+    if (!existing) throw new ConflictException('Este registro já existe.');
+    return existing;
   }
 
   async getTodayLogs(

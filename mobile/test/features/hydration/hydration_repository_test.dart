@@ -63,6 +63,7 @@ void main() {
             amountMl: 250,
             source: 'manual',
             timestamp: now,
+            clientId: any(named: 'clientId'),
           )).thenAnswer((_) async => WaterIntakeEntry(
             remoteId: 'remote-uuid-1',
             userId: userId,
@@ -87,6 +88,7 @@ void main() {
             amountMl: 250,
             source: 'manual',
             timestamp: now,
+            clientId: any(named: 'clientId'),
           )).called(1);
 
       when(() => remoteDataSource.getTodayLogs(date: any(named: 'date')))
@@ -106,6 +108,7 @@ void main() {
             amountMl: any(named: 'amountMl'),
             source: any(named: 'source'),
             timestamp: any(named: 'timestamp'),
+            clientId: any(named: 'clientId'),
           )).thenAnswer((_) async => null);
       when(() => remoteDataSource.getTodayLogs(date: any(named: 'date')))
           .thenAnswer((_) async => null);
@@ -138,6 +141,7 @@ void main() {
             amountMl: any(named: 'amountMl'),
             source: any(named: 'source'),
             timestamp: any(named: 'timestamp'),
+            clientId: any(named: 'clientId'),
           )).thenAnswer((_) async => null);
       when(() => remoteDataSource.getHistoryTotals(
             days: 30,
@@ -172,6 +176,7 @@ void main() {
             amountMl: any(named: 'amountMl'),
             source: any(named: 'source'),
             timestamp: any(named: 'timestamp'),
+            clientId: any(named: 'clientId'),
           )).thenAnswer((_) async => null);
       when(() => remoteDataSource.deleteLog('rem-123')).thenAnswer((_) async => true);
 
@@ -195,6 +200,7 @@ void main() {
             amountMl: any(named: 'amountMl'),
             source: any(named: 'source'),
             timestamp: any(named: 'timestamp'),
+            clientId: any(named: 'clientId'),
           )).thenAnswer((_) async => WaterIntakeEntry(
             remoteId: 'uuid-to-delete',
             userId: userId,
@@ -227,6 +233,7 @@ void main() {
             amountMl: any(named: 'amountMl'),
             source: any(named: 'source'),
             timestamp: any(named: 'timestamp'),
+            clientId: any(named: 'clientId'),
           )).thenAnswer((_) async => WaterIntakeEntry(
             remoteId: 'uuid-server-1',
             userId: userId,
@@ -256,6 +263,7 @@ void main() {
             amountMl: any(named: 'amountMl'),
             source: any(named: 'source'),
             timestamp: any(named: 'timestamp'),
+            clientId: any(named: 'clientId'),
           )).thenAnswer((_) async => null);
       when(() => remoteDataSource.getTodayLogs(date: any(named: 'date')))
           .thenAnswer((_) async => null);
@@ -473,6 +481,7 @@ void main() {
           source: any(named: 'source'),
           timestamp: any(named: 'timestamp'),
           profileId: any(named: 'profileId'),
+          clientId: any(named: 'clientId'),
         )).thenAnswer((_) async => WaterIntakeEntry(
           remoteId: 'r-up',
           userId: userId,
@@ -497,5 +506,115 @@ void main() {
 
     expect(logs, hasLength(1));
     expect(logs.single.remoteId, 'r-up');
+  });
+
+  group('a lost answer never counts the same water twice', () {
+    const userId = 'user-123';
+
+    WaterIntakeEntry serverLog(String id, DateTime at) => WaterIntakeEntry(
+          remoteId: id,
+          userId: userId,
+          amountMl: 300,
+          timestamp: at,
+          source: 'manual',
+        );
+
+    test('the retry sends the same client id and the server log is kept once',
+        () async {
+      final now = DateTime.now();
+      final sentIds = <String?>[];
+      var serverSaved = false;
+      when(() => remoteDataSource.logWater(
+            amountMl: any(named: 'amountMl'),
+            source: any(named: 'source'),
+            timestamp: any(named: 'timestamp'),
+            profileId: any(named: 'profileId'),
+            clientId: any(named: 'clientId'),
+          )).thenAnswer((inv) async {
+        final id = inv.namedArguments[#clientId] as String?;
+        sentIds.add(id);
+        // The first try is saved on the server, but its answer is lost.
+        if (!serverSaved) {
+          serverSaved = true;
+          return null;
+        }
+        return serverLog(id!, now);
+      });
+
+      await repository.logWaterIntake(userId: userId, amountMl: 300, timestamp: now);
+      when(() => remoteDataSource.getTodayLogs(
+            date: any(named: 'date'),
+            profileId: any(named: 'profileId'),
+          )).thenAnswer((_) async => [serverLog(sentIds.first!, now)]);
+
+      final logs = await repository.getLogsForDay(userId: userId, day: now);
+
+      expect(sentIds, hasLength(2));
+      expect(sentIds.first, isNotNull);
+      expect(sentIds.last, sentIds.first);
+      expect(logs, hasLength(1));
+      expect(logs.single.remoteId, sentIds.first);
+      expect(await repository.getTodayTotalMl(userId: userId), 300);
+    });
+
+    test('a server log under a waiting row\'s client id is that row, not a new one',
+        () async {
+      final now = DateTime.now();
+      String? clientId;
+      when(() => remoteDataSource.logWater(
+            amountMl: any(named: 'amountMl'),
+            source: any(named: 'source'),
+            timestamp: any(named: 'timestamp'),
+            profileId: any(named: 'profileId'),
+            clientId: any(named: 'clientId'),
+          )).thenAnswer((inv) async {
+        clientId ??= inv.namedArguments[#clientId] as String?;
+        return null; // every answer is lost
+      });
+      await repository.logWaterIntake(userId: userId, amountMl: 300, timestamp: now);
+      when(() => remoteDataSource.getTodayLogs(
+            date: any(named: 'date'),
+            profileId: any(named: 'profileId'),
+          )).thenAnswer((_) async => [serverLog(clientId!, now)]);
+
+      final logs = await repository.getLogsForDay(userId: userId, day: now);
+
+      expect(logs, hasLength(1));
+      expect(logs.single.remoteId, clientId);
+      final rows = await db.select(db.waterIntakeLogs).get();
+      expect(rows, hasLength(1));
+      expect(rows.single.remoteId, clientId);
+    });
+
+    test('a log saved before client ids existed gets one and keeps it', () async {
+      final now = DateTime.now();
+      await db.into(db.waterIntakeLogs).insert(WaterIntakeLogsCompanion.insert(
+            userId: userId,
+            amountMl: 300,
+            timestamp: Value(now),
+          ));
+      final sentIds = <String?>[];
+      when(() => remoteDataSource.logWater(
+            amountMl: any(named: 'amountMl'),
+            source: any(named: 'source'),
+            timestamp: any(named: 'timestamp'),
+            profileId: any(named: 'profileId'),
+            clientId: any(named: 'clientId'),
+          )).thenAnswer((inv) async {
+        sentIds.add(inv.namedArguments[#clientId] as String?);
+        return null;
+      });
+      when(() => remoteDataSource.getTodayLogs(
+            date: any(named: 'date'),
+            profileId: any(named: 'profileId'),
+          )).thenAnswer((_) async => null);
+
+      await repository.getLogsForDay(userId: userId, day: now);
+      await repository.getLogsForDay(userId: userId, day: now);
+
+      final row = await db.select(db.waterIntakeLogs).getSingle();
+      expect(row.clientId, isNotNull);
+      expect(sentIds, [row.clientId, row.clientId]);
+    });
   });
 }

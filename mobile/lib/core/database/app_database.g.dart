@@ -1222,6 +1222,17 @@ class $WaterIntakeLogsTable extends WaterIntakeLogs
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _clientIdMeta = const VerificationMeta(
+    'clientId',
+  );
+  @override
+  late final GeneratedColumn<String> clientId = GeneratedColumn<String>(
+    'client_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1231,6 +1242,7 @@ class $WaterIntakeLogsTable extends WaterIntakeLogs
     timestamp,
     source,
     profileId,
+    clientId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1287,6 +1299,12 @@ class $WaterIntakeLogsTable extends WaterIntakeLogs
         profileId.isAcceptableOrUnknown(data['profile_id']!, _profileIdMeta),
       );
     }
+    if (data.containsKey('client_id')) {
+      context.handle(
+        _clientIdMeta,
+        clientId.isAcceptableOrUnknown(data['client_id']!, _clientIdMeta),
+      );
+    }
     return context;
   }
 
@@ -1329,6 +1347,10 @@ class $WaterIntakeLogsTable extends WaterIntakeLogs
         DriftSqlType.string,
         data['${effectivePrefix}profile_id'],
       ),
+      clientId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_id'],
+      ),
     );
   }
 
@@ -1346,6 +1368,10 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
   final DateTime timestamp;
   final String source;
   final String? profileId;
+
+  /// Idempotency key sent with the log; the server stores it as the log's
+  /// id. A retry after a lost answer returns that log instead of a second one.
+  final String? clientId;
   const WaterIntakeLog({
     required this.id,
     this.remoteId,
@@ -1354,6 +1380,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
     required this.timestamp,
     required this.source,
     this.profileId,
+    this.clientId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1368,6 +1395,9 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
     map['source'] = Variable<String>(source);
     if (!nullToAbsent || profileId != null) {
       map['profile_id'] = Variable<String>(profileId);
+    }
+    if (!nullToAbsent || clientId != null) {
+      map['client_id'] = Variable<String>(clientId);
     }
     return map;
   }
@@ -1387,6 +1417,10 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
           profileId == null && nullToAbsent
               ? const Value.absent()
               : Value(profileId),
+      clientId:
+          clientId == null && nullToAbsent
+              ? const Value.absent()
+              : Value(clientId),
     );
   }
 
@@ -1403,6 +1437,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
       timestamp: serializer.fromJson<DateTime>(json['timestamp']),
       source: serializer.fromJson<String>(json['source']),
       profileId: serializer.fromJson<String?>(json['profileId']),
+      clientId: serializer.fromJson<String?>(json['clientId']),
     );
   }
   @override
@@ -1416,6 +1451,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
       'timestamp': serializer.toJson<DateTime>(timestamp),
       'source': serializer.toJson<String>(source),
       'profileId': serializer.toJson<String?>(profileId),
+      'clientId': serializer.toJson<String?>(clientId),
     };
   }
 
@@ -1427,6 +1463,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
     DateTime? timestamp,
     String? source,
     Value<String?> profileId = const Value.absent(),
+    Value<String?> clientId = const Value.absent(),
   }) => WaterIntakeLog(
     id: id ?? this.id,
     remoteId: remoteId.present ? remoteId.value : this.remoteId,
@@ -1435,6 +1472,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
     timestamp: timestamp ?? this.timestamp,
     source: source ?? this.source,
     profileId: profileId.present ? profileId.value : this.profileId,
+    clientId: clientId.present ? clientId.value : this.clientId,
   );
   WaterIntakeLog copyWithCompanion(WaterIntakeLogsCompanion data) {
     return WaterIntakeLog(
@@ -1445,6 +1483,7 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
       source: data.source.present ? data.source.value : this.source,
       profileId: data.profileId.present ? data.profileId.value : this.profileId,
+      clientId: data.clientId.present ? data.clientId.value : this.clientId,
     );
   }
 
@@ -1457,14 +1496,23 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
           ..write('amountMl: $amountMl, ')
           ..write('timestamp: $timestamp, ')
           ..write('source: $source, ')
-          ..write('profileId: $profileId')
+          ..write('profileId: $profileId, ')
+          ..write('clientId: $clientId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, remoteId, userId, amountMl, timestamp, source, profileId);
+  int get hashCode => Object.hash(
+    id,
+    remoteId,
+    userId,
+    amountMl,
+    timestamp,
+    source,
+    profileId,
+    clientId,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1475,7 +1523,8 @@ class WaterIntakeLog extends DataClass implements Insertable<WaterIntakeLog> {
           other.amountMl == this.amountMl &&
           other.timestamp == this.timestamp &&
           other.source == this.source &&
-          other.profileId == this.profileId);
+          other.profileId == this.profileId &&
+          other.clientId == this.clientId);
 }
 
 class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
@@ -1486,6 +1535,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
   final Value<DateTime> timestamp;
   final Value<String> source;
   final Value<String?> profileId;
+  final Value<String?> clientId;
   const WaterIntakeLogsCompanion({
     this.id = const Value.absent(),
     this.remoteId = const Value.absent(),
@@ -1494,6 +1544,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
     this.timestamp = const Value.absent(),
     this.source = const Value.absent(),
     this.profileId = const Value.absent(),
+    this.clientId = const Value.absent(),
   });
   WaterIntakeLogsCompanion.insert({
     this.id = const Value.absent(),
@@ -1503,6 +1554,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
     this.timestamp = const Value.absent(),
     this.source = const Value.absent(),
     this.profileId = const Value.absent(),
+    this.clientId = const Value.absent(),
   }) : userId = Value(userId),
        amountMl = Value(amountMl);
   static Insertable<WaterIntakeLog> custom({
@@ -1513,6 +1565,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
     Expression<DateTime>? timestamp,
     Expression<String>? source,
     Expression<String>? profileId,
+    Expression<String>? clientId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1522,6 +1575,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
       if (timestamp != null) 'timestamp': timestamp,
       if (source != null) 'source': source,
       if (profileId != null) 'profile_id': profileId,
+      if (clientId != null) 'client_id': clientId,
     });
   }
 
@@ -1533,6 +1587,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
     Value<DateTime>? timestamp,
     Value<String>? source,
     Value<String?>? profileId,
+    Value<String?>? clientId,
   }) {
     return WaterIntakeLogsCompanion(
       id: id ?? this.id,
@@ -1542,6 +1597,7 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
       timestamp: timestamp ?? this.timestamp,
       source: source ?? this.source,
       profileId: profileId ?? this.profileId,
+      clientId: clientId ?? this.clientId,
     );
   }
 
@@ -1569,6 +1625,9 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
     if (profileId.present) {
       map['profile_id'] = Variable<String>(profileId.value);
     }
+    if (clientId.present) {
+      map['client_id'] = Variable<String>(clientId.value);
+    }
     return map;
   }
 
@@ -1581,7 +1640,8 @@ class WaterIntakeLogsCompanion extends UpdateCompanion<WaterIntakeLog> {
           ..write('amountMl: $amountMl, ')
           ..write('timestamp: $timestamp, ')
           ..write('source: $source, ')
-          ..write('profileId: $profileId')
+          ..write('profileId: $profileId, ')
+          ..write('clientId: $clientId')
           ..write(')'))
         .toString();
   }
@@ -3088,6 +3148,7 @@ typedef $$WaterIntakeLogsTableCreateCompanionBuilder =
       Value<DateTime> timestamp,
       Value<String> source,
       Value<String?> profileId,
+      Value<String?> clientId,
     });
 typedef $$WaterIntakeLogsTableUpdateCompanionBuilder =
     WaterIntakeLogsCompanion Function({
@@ -3098,6 +3159,7 @@ typedef $$WaterIntakeLogsTableUpdateCompanionBuilder =
       Value<DateTime> timestamp,
       Value<String> source,
       Value<String?> profileId,
+      Value<String?> clientId,
     });
 
 class $$WaterIntakeLogsTableFilterComposer
@@ -3141,6 +3203,11 @@ class $$WaterIntakeLogsTableFilterComposer
 
   ColumnFilters<String> get profileId => $composableBuilder(
     column: $table.profileId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get clientId => $composableBuilder(
+    column: $table.clientId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3188,6 +3255,11 @@ class $$WaterIntakeLogsTableOrderingComposer
     column: $table.profileId,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get clientId => $composableBuilder(
+    column: $table.clientId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$WaterIntakeLogsTableAnnotationComposer
@@ -3219,6 +3291,9 @@ class $$WaterIntakeLogsTableAnnotationComposer
 
   GeneratedColumn<String> get profileId =>
       $composableBuilder(column: $table.profileId, builder: (column) => column);
+
+  GeneratedColumn<String> get clientId =>
+      $composableBuilder(column: $table.clientId, builder: (column) => column);
 }
 
 class $$WaterIntakeLogsTableTableManager
@@ -3272,6 +3347,7 @@ class $$WaterIntakeLogsTableTableManager
                 Value<DateTime> timestamp = const Value.absent(),
                 Value<String> source = const Value.absent(),
                 Value<String?> profileId = const Value.absent(),
+                Value<String?> clientId = const Value.absent(),
               }) => WaterIntakeLogsCompanion(
                 id: id,
                 remoteId: remoteId,
@@ -3280,6 +3356,7 @@ class $$WaterIntakeLogsTableTableManager
                 timestamp: timestamp,
                 source: source,
                 profileId: profileId,
+                clientId: clientId,
               ),
           createCompanionCallback:
               ({
@@ -3290,6 +3367,7 @@ class $$WaterIntakeLogsTableTableManager
                 Value<DateTime> timestamp = const Value.absent(),
                 Value<String> source = const Value.absent(),
                 Value<String?> profileId = const Value.absent(),
+                Value<String?> clientId = const Value.absent(),
               }) => WaterIntakeLogsCompanion.insert(
                 id: id,
                 remoteId: remoteId,
@@ -3298,6 +3376,7 @@ class $$WaterIntakeLogsTableTableManager
                 timestamp: timestamp,
                 source: source,
                 profileId: profileId,
+                clientId: clientId,
               ),
           withReferenceMapper:
               (p0) =>

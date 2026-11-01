@@ -26,11 +26,14 @@ class HydrationRemoteDataSource {
   })  : _apiClient = apiClient ?? ApiClient(),
         _secureStorage = secureStorage ?? SecureStorageService();
 
+  /// [clientId] makes the call safe to repeat: the server keeps one log per
+  /// id and answers a repeat with the log it already saved.
   Future<WaterIntakeEntry?> logWater({
     required int amountMl,
     String source = 'manual',
     DateTime? timestamp,
     String? profileId,
+    String? clientId,
   }) async {
     try {
       final token = await _secureStorage.getAccessToken();
@@ -47,6 +50,7 @@ class HydrationRemoteDataSource {
           'amountMl': amountMl,
           'source': source,
           if (timestamp != null) 'recordedAt': timestamp.toIso8601String(),
+          if (clientId != null) 'clientId': clientId,
         },
         options: Options(headers: headers),
       );

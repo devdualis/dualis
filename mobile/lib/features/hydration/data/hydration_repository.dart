@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 import '../../../../core/database/app_database.dart' hide WaterIntakeLog;
 import '../../../../core/database/app_database.dart' as local_db show WaterIntakeLog;
 import '../../../../core/security/secure_storage_service.dart';
@@ -108,6 +109,10 @@ class HydrationRepositoryImpl implements HydrationRepository {
   }) async {
     final entryTime = timestamp ?? DateTime.now();
     final effectiveProfileId = _resolveProfileId(profileId);
+    // Kept with the log and sent again on every retry: if the server saved
+    // it but the answer was lost, the retry gets that log back instead of
+    // adding the same water twice.
+    final clientId = const Uuid().v4();
 
     String? remoteId;
     if (_remoteDataSource != null && userId.isNotEmpty && userId != 'guest_user') {
@@ -117,6 +122,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
           source: source,
           timestamp: entryTime,
           profileId: effectiveProfileId,
+          clientId: clientId,
         );
         remoteId = remoteEntry?.remoteId;
       } catch (_) {}
@@ -129,6 +135,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
       timestamp: Value(entryTime),
       source: Value(source),
       profileId: Value(effectiveProfileId),
+      clientId: Value(clientId),
     );
 
     final id = await _db.into(_db.waterIntakeLogs).insert(companion);
@@ -168,6 +175,7 @@ class HydrationRepositoryImpl implements HydrationRepository {
           source: row.source,
           timestamp: row.timestamp,
           profileId: row.profileId ?? profileId,
+          clientId: await _clientIdOf(row),
         );
         final remoteId = sent?.remoteId;
         if (remoteId == null) return; // Still offline: try again next load.
@@ -179,6 +187,21 @@ class HydrationRepositoryImpl implements HydrationRepository {
         ));
       }
     } catch (_) {}
+  }
+
+  /// The row's idempotency key. Logs saved before keys existed get one now,
+  /// stored before the first send; if two pushes race, both read the key
+  /// that was stored first.
+  Future<String> _clientIdOf(local_db.WaterIntakeLog row) async {
+    final existing = row.clientId;
+    if (existing != null && existing.isNotEmpty) return existing;
+    await (_db.update(_db.waterIntakeLogs)
+          ..where((tbl) => tbl.id.equals(row.id) & tbl.clientId.isNull()))
+        .write(WaterIntakeLogsCompanion(clientId: Value(const Uuid().v4())));
+    final stored = await (_db.select(_db.waterIntakeLogs)
+          ..where((tbl) => tbl.id.equals(row.id)))
+        .getSingle();
+    return stored.clientId!;
   }
 
   @override
@@ -262,6 +285,32 @@ class HydrationRepositoryImpl implements HydrationRepository {
               await (_db.delete(_db.waterIntakeLogs)
                     ..where((tbl) => tbl.id.equals(dropRow.id)))
                   .go();
+            }
+          }
+          // A log whose answer was lost is on the server under the client
+          // id of a row still waiting here: that row is the same log.
+          final unmatched = remoteIdSet
+              .where((rid) => !existingByRemoteId.containsKey(rid))
+              .toList();
+          if (unmatched.isNotEmpty) {
+            final waiting = await (_db.select(_db.waterIntakeLogs)
+                  ..where((tbl) =>
+                      tbl.userId.equals(userId) &
+                      tbl.remoteId.isNull() &
+                      tbl.clientId.isIn(unmatched)))
+                .get();
+            for (final row in waiting) {
+              final linked = row.copyWith(
+                remoteId: Value(row.clientId),
+                profileId: Value(row.profileId ?? effectiveProfileId),
+              );
+              await (_db.update(_db.waterIntakeLogs)
+                    ..where((tbl) => tbl.id.equals(row.id)))
+                  .write(WaterIntakeLogsCompanion(
+                remoteId: Value(linked.remoteId),
+                profileId: Value(linked.profileId),
+              ));
+              existingByRemoteId[row.clientId!] = linked;
             }
           }
           if (effectiveProfileId != null) {

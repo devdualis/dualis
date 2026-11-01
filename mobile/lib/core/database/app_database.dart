@@ -36,6 +36,10 @@ class WaterIntakeLogs extends Table {
   DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
   TextColumn get source => text().withDefault(const Constant('manual'))();
   TextColumn get profileId => text().nullable()();
+
+  /// Idempotency key sent with the log; the server stores it as the log's
+  /// id. A retry after a lost answer returns that log instead of a second one.
+  TextColumn get clientId => text().nullable()();
 }
 
 /// Journal v2 entries saved on the device until they reach the server.
@@ -75,7 +79,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration {
@@ -98,6 +102,9 @@ class AppDatabase extends _$AppDatabase {
         if (from < 5) {
           await m.createTable(journalOutbox);
           await m.createTable(localUserConditions);
+        }
+        if (from < 6) {
+          await m.addColumn(waterIntakeLogs, waterIntakeLogs.clientId);
         }
       },
     );
