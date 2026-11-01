@@ -114,20 +114,23 @@ class _ExamValuesListState extends State<ExamValuesList> {
 
   Widget _group(BuildContext context, AppLocalizations l10n, String group, List<_Item> items, {required bool showAll}) {
     final shown = showAll || items.length <= _rowsPerGroup + 1 ? items : items.take(_rowsPerGroup).toList();
+    // One item named like its exam ("Ferritina" in "Ferritina"): the row alone says it all.
+    final single = items.length == 1 && items.first.name.toLowerCase() == group.toLowerCase();
     return CareCard(
       padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            color: AppColors.brandBgLightBlue,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            child: Row(children: [
-              Expanded(child: Text(group, style: careTitle(13))),
-              Text(l10n.careExamValuesItemCount(items.length), style: careBody(11)),
-            ]),
-          ),
-          for (final item in shown) _row(context, item),
+          if (!single)
+            Container(
+              color: AppColors.brandBgLightBlue,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Row(children: [
+                Expanded(child: Text(group, style: careTitle(13))),
+                Text(l10n.careExamValuesItemCount(items.length), style: careBody(11)),
+              ]),
+            ),
+          for (final (i, item) in shown.indexed) _row(context, item, divider: i > 0 || !single),
           if (items.length > _rowsPerGroup + 1 && _query.trim().isEmpty)
             InkWell(
               onTap: () => setState(() => _expanded.contains(group) ? _expanded.remove(group) : _expanded.add(group)),
@@ -146,11 +149,11 @@ class _ExamValuesListState extends State<ExamValuesList> {
     );
   }
 
-  Widget _row(BuildContext context, _Item item) => InkWell(
+  Widget _row(BuildContext context, _Item item, {bool divider = true}) => InkWell(
         key: ValueKey((item.group.toLowerCase(), item.name.toLowerCase(), examUnitKey(item.latest.unit))),
         onTap: () => context.push(CarePaths.examItem, extra: ExamItemArgs(item: item.name, group: item.group, unit: examUnitKey(item.latest.unit))),
         child: Container(
-          decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.outlineLight))),
+          decoration: divider ? const BoxDecoration(border: Border(top: BorderSide(color: AppColors.outlineLight))) : null,
           padding: const EdgeInsets.fromLTRB(14, 9, 8, 9),
           child: Row(children: [
             Expanded(child: Text(item.name, style: careBody(13).copyWith(color: AppColors.textPrimaryLight))),

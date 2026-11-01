@@ -631,9 +631,17 @@ void main() {
         {'section': 'HEMOGRAMA COMPLETO', 'item': 'Hemoglobina', 'value': '15,7', 'unit': 'g/dL', 'confirmed': true},
       ],
     }));
+    api.docs.add(CareDocument(id: 'd0', kind: DocumentKind.lab, mime: 'application/pdf', status: DocumentStatus.ready, createdAt: DateTime(2026, 10, 27), data: const {
+      'values': [
+        {'section': 'FERRITINA', 'item': 'FERRITINA', 'value': '447,6', 'unit': 'ng/mL', 'confirmed': true},
+      ],
+    }));
     await pump(tester, const ExamsScreen(), api: api);
     expect(find.byType(ExamValuesList), findsOneWidget);
     expect(find.text(pt.careExamValuesHint), findsOneWidget);
+    // An exam with one item named like it shows the name once, without a header.
+    expect(find.text('Ferritina'), findsOneWidget);
+    expect(find.text('Hemograma completo'), findsOneWidget);
     expect(find.text('Hemograma'), findsNothing);
 
     await tester.tap(find.byKey(const Key('exams_tab_documents')));
