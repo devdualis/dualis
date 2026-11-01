@@ -29,10 +29,17 @@ class _EmptyStorage extends SecureStorageService {
 
 class _NoHistory extends TriageHistoryRemoteDataSource {
   final bool offline;
-  _NoHistory({this.offline = false});
+  final List<TriageHistoryEntry> logs;
+  _NoHistory({this.offline = false, this.logs = const []});
   @override
-  Future<TriageHistoryResponse> fetchHistory({int days = 14}) async =>
-      offline ? TriageHistoryResponse.failed() : TriageHistoryResponse.empty();
+  Future<TriageHistoryResponse> fetchHistory({int days = 14}) async => offline
+      ? TriageHistoryResponse.failed()
+      : TriageHistoryResponse(
+          logs: logs,
+          physicalSummary: const {},
+          emotionalSummary: const [],
+          journalPatterns: const [],
+        );
 }
 
 /// Device copy says today is done (e.g. an entry deleted on another device).
@@ -87,6 +94,7 @@ void main() {
     List<JournalEntry> remote, {
     SecureStorageService? storage,
     bool offline = false,
+    List<TriageHistoryEntry> history = const [],
   }) {
     final c = ProviderContainer(
       overrides: [
@@ -94,7 +102,7 @@ void main() {
           storage ?? _EmptyStorage(),
         ),
         triageHistoryDataSourceProvider.overrideWithValue(
-          _NoHistory(offline: offline),
+          _NoHistory(offline: offline, logs: history),
         ),
         journalRemoteDataSourceProvider.overrideWithValue(
           _FakeJournalRemote(remote, offline: offline),
@@ -197,5 +205,90 @@ void main() {
     await container.read(triggerCheckInProvider.notifier).loadTodayCheckIn();
 
     expect(container.read(triggerCheckInProvider).isCompletedToday, isTrue);
+  });
+
+  group('journal entries and check-ins merge by time on each axis', () {
+    // A daily check-in sent at 11:30 answered both axes.
+    TriageHistoryEntry checkIn(DateTime at) => TriageHistoryEntry(
+          id: 'h1',
+          intensity: 0,
+          stepAnswers: const {
+            'type': 'daily_checkin',
+            'emotionalStatus': 'goodNormal',
+            'physicalStatus': 'goodNormal',
+          },
+          recordedAt: at,
+        );
+
+    JournalEntry anxiousAt(DateTime at) => JournalEntry(
+          id: 'e-old',
+          clientId: 'c-old',
+          recordedAt: at,
+          mood: JournalKeys.moodNaoTaoBem,
+          area: JournalKeys.areaEmotional,
+          items: const [
+            JournalItem(
+              kind: JournalKeys.kindEmotional,
+              customLabel: 'ansioso',
+              intensity: 3,
+            ),
+          ],
+        );
+
+    test('an older entry does not replace a newer check-in; a newer one does',
+        () async {
+      final now = _middayToday();
+      final container = containerWith(
+        [
+          anxiousAt(now.subtract(const Duration(hours: 3))), // 09:00
+          JournalEntry(
+            id: 'e-new',
+            clientId: 'c-new',
+            recordedAt: now.subtract(const Duration(minutes: 15)), // 11:45
+            mood: JournalKeys.moodNaoTaoBem,
+            area: JournalKeys.areaPhysical,
+            items: const [
+              JournalItem(
+                kind: JournalKeys.kindPhysical,
+                customLabel: 'dor nas costas',
+                intensity: 2,
+              ),
+            ],
+          ),
+        ],
+        history: [checkIn(now.subtract(const Duration(minutes: 30)))],
+      );
+
+      await container
+          .read(triggerCheckInProvider.notifier)
+          .loadTodayCheckIn(now);
+
+      final state = container.read(triggerCheckInProvider);
+      // Emotional: the 11:30 check-in, not the 09:00 entry.
+      expect(state.emotionalSummary, isNot('ansioso'));
+      expect(state.emotionalIntensity, 0);
+      expect(state.emotionalStatus?.name, 'goodNormal');
+      // Physical: the 11:45 entry is newer than the check-in.
+      expect(state.physicalSummary, 'dor nas costas');
+      expect(state.physicalIntensity, 2);
+      expect(state.completedAt, now.subtract(const Duration(minutes: 15)));
+    });
+
+    test('the completion time stays on the newer check-in', () async {
+      final now = _middayToday();
+      final checkInAt = now.subtract(const Duration(minutes: 30));
+      final container = containerWith(
+        [anxiousAt(now.subtract(const Duration(hours: 3)))],
+        history: [checkIn(checkInAt)],
+      );
+
+      await container
+          .read(triggerCheckInProvider.notifier)
+          .loadTodayCheckIn(now);
+
+      final state = container.read(triggerCheckInProvider);
+      expect(state.emotionalSummary, isNot('ansioso'));
+      expect(state.completedAt, checkInAt);
+    });
   });
 }

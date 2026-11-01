@@ -335,7 +335,10 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     if (!history.failed) {
       await _syncTodayCheckInFromRemote(history, now);
     }
-    _applyJournalEntries(journal.entries);
+    _applyJournalEntries(
+      journal.entries,
+      historyAt: history.failed ? const {} : _historyAxisTimes(history, now),
+    );
     if (rebuildFromServer && !state.isCompletedToday) {
       await _clearStorage();
     }
@@ -535,13 +538,18 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
   /// Marks Home with a saved journal entry, in the user's own words. Only
   /// the entry's axis is marked; entries without one (older outbox items)
   /// mark both. Conditions get their own line and never fill an axis.
-  void applyJournalEntry(AppLocalizations l10n, JournalEntry entry) {
+  /// [keepAxes] were answered later elsewhere and keep that newer answer.
+  void applyJournalEntry(
+    AppLocalizations l10n,
+    JournalEntry entry, {
+    Set<TriageVertical> keepAxes = const {},
+  }) {
     final at = entry.recordedAt;
     final axes = switch (entry.area) {
       JournalKeys.areaEmotional => const [TriageVertical.psicoEmocional],
       JournalKeys.areaPhysical => const [TriageVertical.fisica],
       _ => TriageVertical.values,
-    };
+    }.where((v) => !keepAxes.contains(v)).toList();
     if (entry.items.isEmpty) {
       final summary = JournalLabels.mood(l10n, entry.mood);
       for (final v in axes) {
@@ -643,14 +651,68 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     return (entries: entries, remoteOk: remoteOk);
   }
 
-  void _applyJournalEntries(List<JournalEntry> entries) {
+  /// When each axis was last answered in today's triage history. Journal
+  /// entries and history records merge by time on each axis.
+  Map<TriageVertical, DateTime> _historyAxisTimes(
+    TriageHistoryResponse history, [
+    DateTime? now,
+  ]) {
+    final today = _getTodayDateString(now);
+    final todayLogs = history.logs
+        .where((l) => _getTodayDateString(l.recordedAt.toLocal()) == today)
+        .toList();
+    final times = <TriageVertical, DateTime>{};
+    for (final axis in CheckInAxis.values) {
+      final statusKey =
+          axis == CheckInAxis.emotional ? 'emotionalStatus' : 'physicalStatus';
+      var latest = AxisIntensityResolver.latestRecordFor(axis, todayLogs)
+          ?.recordedAt;
+      for (final log in todayLogs) {
+        if (!AxisIntensityResolver.isDailyCheckIn(log) ||
+            _parseTriggerStatus(log.stepAnswers?[statusKey]) == null) {
+          continue;
+        }
+        if (latest == null || log.recordedAt.isAfter(latest)) {
+          latest = log.recordedAt;
+        }
+      }
+      if (latest != null) {
+        times[axis == CheckInAxis.emotional
+            ? TriageVertical.psicoEmocional
+            : TriageVertical.fisica] = latest;
+      }
+    }
+    return times;
+  }
+
+  /// [historyAt]: when today's triage history last answered each axis. An
+  /// entry older than that leaves the axis (and the completion time) alone.
+  void _applyJournalEntries(
+    List<JournalEntry> entries, {
+    Map<TriageVertical, DateTime> historyAt = const {},
+  }) {
     if (entries.isEmpty || _isDisposed || state.isModifiedAfterCompletion) {
       return;
     }
     try {
       final l10n = lookupAppLocalizations(ref.read(localeProvider));
+      final completedBefore = state.completedAt;
       for (final e in entries) {
-        applyJournalEntry(l10n, e);
+        applyJournalEntry(
+          l10n,
+          e,
+          keepAxes: {
+            for (final h in historyAt.entries)
+              if (h.value.isAfter(e.recordedAt)) h.key,
+          },
+        );
+      }
+      final completedAt = state.completedAt;
+      if (completedBefore != null &&
+          completedAt != null &&
+          completedBefore.isAfter(completedAt)) {
+        state = state.copyWith(completedAt: completedBefore);
+        _persistCurrentState();
       }
     } catch (_) {}
   }
