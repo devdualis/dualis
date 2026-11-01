@@ -33,6 +33,9 @@ class JournalKeys {
   static const String kindPhysical = 'physical';
   static const String kindCondition = 'condition';
 
+  /// Good moments of a "Bem" entry (journal v2.2).
+  static const String kindPositive = 'positive';
+
   // Body side for physical items.
   static const String sideFront = 'front';
   static const String sideBack = 'back';
@@ -51,15 +54,33 @@ class JournalKeys {
   static const Map<String, Map<String, List<String>>> emotionalTree = {
     'passado': {
       'tristeza': ['culpa', 'saudade'],
-      'memoria': ['lembranca', 'magoa'],
+      'memoria': ['lembranca', 'magoa', 'vergonha'],
     },
     'presente': {
-      'energia': ['corpo', 'desligado'],
-      'sobrecarga': ['paciencia', 'aperto'],
+      'energia': ['corpo', 'desligado', 'concentracao'],
+      'sobrecarga': ['paciencia', 'aperto', 'muita_coisa', 'inquieto'],
+      'solidao': ['sozinho', 'menos'],
     },
     'futuro': {
-      'mente': ['antecipar', 'cobranca'],
-      'medo': ['julgamento', 'desanimo'],
+      'mente': ['antecipar', 'cobranca', 'indecisao'],
+      'medo': ['julgamento', 'desanimo', 'evitar'],
+    },
+  };
+
+  /// Good moments tree (journal v2.2): time -> branch -> options. Branch
+  /// names never repeat an emotional branch.
+  static const Map<String, Map<String, List<String>>> positiveTree = {
+    'passado': {
+      'gratidao': ['alguem', 'algo'],
+      'orgulho': ['conquista', 'resolvi'],
+    },
+    'presente': {
+      'calma': ['paz', 'descansado'],
+      'conexao': ['pessoas', 'foco'],
+    },
+    'futuro': {
+      'animo': ['planos', 'esperanca'],
+      'confianca': ['confiante', 'preparado'],
     },
   };
 
@@ -68,6 +89,7 @@ class JournalKeys {
     'cabeca': {
       'pressao': ['temporas', 'latejando'],
       'sentidos': ['garganta', 'olhos'],
+      'rosto': ['tontura', 'nariz', 'ouvido', 'mandibula'],
       'nuca': ['rigida', 'pontada'],
     },
     'peito': {
@@ -76,7 +98,8 @@ class JournalKeys {
     },
     'barriga': {
       'queimacao': ['subindo', 'enjoo'],
-      'colica': ['gases', 'pontadas'],
+      'colica': ['gases', 'pontadas', 'menstrual'],
+      'intestino': ['preso', 'solto'],
     },
     'costas': {
       'rigidez': ['ombros', 'lombar'],
@@ -106,7 +129,7 @@ class JournalKeys {
 
   /// Branches shown on one side only; every other branch shows on both.
   static const Map<String, Set<String>> frontOnlyBranches = {
-    'cabeca': {'sentidos'},
+    'cabeca': {'sentidos', 'rosto'},
   };
   static const Map<String, Set<String>> backOnlyBranches = {
     'cabeca': {'nuca'},
@@ -151,6 +174,9 @@ class JournalKeys {
   static const String triggerTrabalho = 'trabalho';
   static const String triggerFamilia = 'familia';
   static const String triggerSono = 'sono';
+  static const String triggerDinheiro = 'dinheiro';
+  static const String triggerTelas = 'telas';
+  static const String triggerCiclo = 'ciclo';
   static const String triggerAlimentacao = 'alimentacao';
   static const String triggerEsforco = 'esforco';
   static const String triggerQueda = 'queda';
@@ -159,10 +185,14 @@ class JournalKeys {
   static const String triggerNaoSei = 'nao_sei';
   static const String triggerOutro = 'outro';
 
+  /// Display order (v2.2).
   static const List<String> triggers = [
     triggerTrabalho,
     triggerFamilia,
     triggerSono,
+    triggerDinheiro,
+    triggerTelas,
+    triggerCiclo,
     triggerAlimentacao,
     triggerEsforco,
     triggerQueda,
@@ -186,6 +216,19 @@ class JournalKeys {
       if (hasPhysicalItem || !physicalOnlyTriggers.contains(t)) t,
   ];
 
+  // Closing questions of a "não tão bem" entry (v2.2, both optional).
+  static const List<String> copings = ['consegui', 'esperei', 'dificil'];
+  static const String helperNadaAinda = 'nada_ainda';
+  static const List<String> helpers = [
+    'mexer_corpo',
+    'conversar',
+    'pausa',
+    'lazer',
+    'descansar',
+    helperNadaAinda,
+  ];
+  static const int maxHelpers = 6;
+
   // Limits from the contract.
   static const int customLabelMaxLength = 80;
   static const int conditionLabelMaxLength = 40;
@@ -201,14 +244,20 @@ class JournalKeys {
   static const int intensityMin = 1;
   static const int intensityMax = 5;
 
-  /// Every valid option key, for validation and tests.
+  /// Every valid emotional and physical option key, for validation and tests.
   static Set<String> get allOptionKeys => {
-    for (final tree in [emotionalTree, physicalTree])
-      for (final root in tree.entries) ...[
-        customKey(root.key),
-        for (final branch in root.value.entries)
-          for (final option in branch.value)
-            optionKey(root.key, branch.key, option),
-      ],
+    for (final tree in [emotionalTree, physicalTree]) ..._keysOf(tree),
+  };
+
+  /// Every valid key of a positive item (`<time>.custom` included).
+  static Set<String> get positiveOptionKeys => _keysOf(positiveTree);
+
+  static Set<String> _keysOf(Map<String, Map<String, List<String>>> tree) => {
+    for (final root in tree.entries) ...[
+      customKey(root.key),
+      for (final branch in root.value.entries)
+        for (final option in branch.value)
+          optionKey(root.key, branch.key, option),
+    ],
   };
 }

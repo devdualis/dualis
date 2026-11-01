@@ -2552,5 +2552,97 @@
       }
     }
   },
-  "gxIntensityAxis": "Intensidade informada"
+  "gxIntensityAxis": "Intensidade informada",
+  "jv22PositiveQuestion": "Que bom! Quer anotar o que fez seu dia bom?",
+  "jv22JustSave": "Só registrar",
+  "jv22PositiveTimeHint": "Se quiser, conte com o que tem a ver:",
+  "jv22BranchPassadoGratidao": "Gratidão",
+  "jv22OptPassadoGratidaoAlguem": "Grato(a) por alguém",
+  "jv22OptPassadoGratidaoAlgo": "Grato(a) por algo que aconteceu",
+  "jv22BranchPassadoOrgulho": "Orgulho",
+  "jv22OptPassadoOrgulhoConquista": "Consegui algo que queria",
+  "jv22OptPassadoOrgulhoResolvi": "Resolvi algo que me pesava",
+  "jv22BranchPresenteCalma": "Calma",
+  "jv22OptPresenteCalmaPaz": "Em paz, tranquilo(a)",
+  "jv22OptPresenteCalmaDescansado": "Descansado(a), com energia",
+  "jv22BranchPresenteConexao": "Conexão",
+  "jv22OptPresenteConexaoPessoas": "Bem com as pessoas ao meu redor",
+  "jv22OptPresenteConexaoFoco": "Focado(a) no que estou fazendo",
+  "jv22BranchFuturoAnimo": "Ânimo",
+  "jv22OptFuturoAnimoPlanos": "Animado(a) com meus planos",
+  "jv22OptFuturoAnimoEsperanca": "Com esperança",
+  "jv22BranchFuturoConfianca": "Confiança",
+  "jv22OptFuturoConfiancaConfiante": "Confiante no que vem",
+  "jv22OptFuturoConfiancaPreparado": "Preparado(a)",
+  "jv22OptPassadoMemoriaVergonha": "Vergonha de algo que fiz ou disse",
+  "jv22OptPresenteEnergiaConcentracao": "Difícil me concentrar ou lembrar das coisas",
+  "jv22OptPresenteSobrecargaMuitaCoisa": "Muita coisa ao mesmo tempo",
+  "jv22OptPresenteSobrecargaInquieto": "Agitado(a), inquieto(a)",
+  "jv22BranchPresenteSolidao": "Sozinho(a) ou inseguro(a)",
+  "jv22OptPresenteSolidaoSozinho": "Me sinto sozinho(a)",
+  "jv22OptPresenteSolidaoMenos": "Me sinto menos que os outros",
+  "jv22OptFuturoMenteIndecisao": "Não consigo decidir",
+  "jv22OptFuturoMedoEvitar": "Vontade de evitar ou fugir de uma situação",
+  "jv22BranchCabecaRosto": "Tontura, nariz, ouvido ou mandíbula",
+  "jv22OptCabecaRostoTontura": "Tontura",
+  "jv22OptCabecaRostoNariz": "Nariz entupido ou escorrendo",
+  "jv22OptCabecaRostoOuvido": "Incômodo no ouvido",
+  "jv22OptCabecaRostoMandibula": "Mandíbula ou dentes travados",
+  "jv22OptBarrigaColicaMenstrual": "Cólica menstrual",
+  "jv22BranchBarrigaIntestino": "Intestino",
+  "jv22OptBarrigaIntestinoPreso": "Intestino preso",
+  "jv22OptBarrigaIntestinoSolto": "Intestino solto",
+  "jv22TriggerDinheiro": "Dinheiro",
+  "jv22TriggerTelas": "Telas ou redes sociais",
+  "jv22TriggerCiclo": "Ciclo menstrual",
+  "jv22CopingQuestion": "Como foi lidar com isso?",
+  "jv22CopingConsegui": "Consegui lidar",
+  "jv22CopingEsperei": "Esperei passar",
+  "jv22CopingDificil": "Foi difícil",
+  "jv22HelpersQuestion": "O que te ajudou hoje?",
+  "jv22HelperMexerCorpo": "Mexer o corpo",
+  "jv22HelperConversar": "Conversar com alguém",
+  "jv22HelperPausa": "Uma pausa para respirar",
+  "jv22HelperLazer": "Música ou lazer",
+  "jv22HelperDescansar": "Descansar",
+  "jv22HelperNadaAinda": "Nada ainda",
+  "jv22PhrasePositive1": "Que bom ler isso. O que combina mais?",
+  "jv22PhrasePositive2": "Vamos guardar esse momento.",
+  "jv22PhrasePositive3": "Obrigado por contar. Vamos anotar o que foi bom.",
+  "jv22PhraseClosing1": "Último passo. É opcional.",
+  "jv22PhraseClosing2": "Se quiser, marque o que te ajudou.",
+  "jv22PhraseClosing3": "Obrigado por registrar. Você pode pular.",
+  "jv22GoodMomentsTitle": "Momentos bons",
+  "jv22GoodMomentsSubtitle": "Dias em que você anotou algo bom.",
+  "jv22GoodMomentsMost": "Mais marcados",
+  "jv22GoodMoment": "Momento bom",
+  "jv22HelpedTitle": "O que te ajudou",
+  "jv22HelpedLine": "Você marcou “{label}” em {count, plural, =1{1 dia} other{{count} dias}}",
+  "@jv22HelpedLine": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "jv22InsightsEmpty": "Nada anotado neste período.",
+  "jv22EntryCoping": "Como foi lidar: {label}",
+  "@jv22EntryCoping": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "jv22EntryHelpers": "O que ajudou: {labels}",
+  "@jv22EntryHelpers": {
+    "placeholders": {
+      "labels": {
+        "type": "String"
+      }
+    }
+  }
 }

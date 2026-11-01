@@ -21,6 +21,9 @@ class JournalLabels {
     'trabalho',
     'familia',
     'sono',
+    'dinheiro',
+    'telas',
+    'ciclo',
     'alimentacao',
     'esforco',
     'queda',
@@ -135,6 +138,62 @@ class JournalLabels {
         return l10n.jv2OptHormoniosApetiteSede;
       case 'hormonios.apetite.fome':
         return l10n.jv2OptHormoniosApetiteFome;
+      // v2.2: new emotional and physical options.
+      case 'passado.memoria.vergonha':
+        return l10n.jv22OptPassadoMemoriaVergonha;
+      case 'presente.energia.concentracao':
+        return l10n.jv22OptPresenteEnergiaConcentracao;
+      case 'presente.sobrecarga.muita_coisa':
+        return l10n.jv22OptPresenteSobrecargaMuitaCoisa;
+      case 'presente.sobrecarga.inquieto':
+        return l10n.jv22OptPresenteSobrecargaInquieto;
+      case 'presente.solidao.sozinho':
+        return l10n.jv22OptPresenteSolidaoSozinho;
+      case 'presente.solidao.menos':
+        return l10n.jv22OptPresenteSolidaoMenos;
+      case 'futuro.mente.indecisao':
+        return l10n.jv22OptFuturoMenteIndecisao;
+      case 'futuro.medo.evitar':
+        return l10n.jv22OptFuturoMedoEvitar;
+      case 'cabeca.rosto.tontura':
+        return l10n.jv22OptCabecaRostoTontura;
+      case 'cabeca.rosto.nariz':
+        return l10n.jv22OptCabecaRostoNariz;
+      case 'cabeca.rosto.ouvido':
+        return l10n.jv22OptCabecaRostoOuvido;
+      case 'cabeca.rosto.mandibula':
+        return l10n.jv22OptCabecaRostoMandibula;
+      case 'barriga.colica.menstrual':
+        return l10n.jv22OptBarrigaColicaMenstrual;
+      case 'barriga.intestino.preso':
+        return l10n.jv22OptBarrigaIntestinoPreso;
+      case 'barriga.intestino.solto':
+        return l10n.jv22OptBarrigaIntestinoSolto;
+      // v2.2: good moments.
+      case 'passado.gratidao.alguem':
+        return l10n.jv22OptPassadoGratidaoAlguem;
+      case 'passado.gratidao.algo':
+        return l10n.jv22OptPassadoGratidaoAlgo;
+      case 'passado.orgulho.conquista':
+        return l10n.jv22OptPassadoOrgulhoConquista;
+      case 'passado.orgulho.resolvi':
+        return l10n.jv22OptPassadoOrgulhoResolvi;
+      case 'presente.calma.paz':
+        return l10n.jv22OptPresenteCalmaPaz;
+      case 'presente.calma.descansado':
+        return l10n.jv22OptPresenteCalmaDescansado;
+      case 'presente.conexao.pessoas':
+        return l10n.jv22OptPresenteConexaoPessoas;
+      case 'presente.conexao.foco':
+        return l10n.jv22OptPresenteConexaoFoco;
+      case 'futuro.animo.planos':
+        return l10n.jv22OptFuturoAnimoPlanos;
+      case 'futuro.animo.esperanca':
+        return l10n.jv22OptFuturoAnimoEsperanca;
+      case 'futuro.confianca.confiante':
+        return l10n.jv22OptFuturoConfiancaConfiante;
+      case 'futuro.confianca.preparado':
+        return l10n.jv22OptFuturoConfiancaPreparado;
       default:
         return key;
     }
@@ -194,6 +253,24 @@ class JournalLabels {
         return l10n.jv2BranchHormoniosTemperatura;
       case 'hormonios.apetite':
         return l10n.jv2BranchHormoniosApetite;
+      case 'presente.solidao':
+        return l10n.jv22BranchPresenteSolidao;
+      case 'cabeca.rosto':
+        return l10n.jv22BranchCabecaRosto;
+      case 'barriga.intestino':
+        return l10n.jv22BranchBarrigaIntestino;
+      case 'passado.gratidao':
+        return l10n.jv22BranchPassadoGratidao;
+      case 'passado.orgulho':
+        return l10n.jv22BranchPassadoOrgulho;
+      case 'presente.calma':
+        return l10n.jv22BranchPresenteCalma;
+      case 'presente.conexao':
+        return l10n.jv22BranchPresenteConexao;
+      case 'futuro.animo':
+        return l10n.jv22BranchFuturoAnimo;
+      case 'futuro.confianca':
+        return l10n.jv22BranchFuturoConfianca;
       default:
         return key;
     }
@@ -269,6 +346,12 @@ class JournalLabels {
         return l10n.jv2TriggerFamilia;
       case 'sono':
         return l10n.jv2TriggerSono;
+      case 'dinheiro':
+        return l10n.jv22TriggerDinheiro;
+      case 'telas':
+        return l10n.jv22TriggerTelas;
+      case 'ciclo':
+        return l10n.jv22TriggerCiclo;
       case 'alimentacao':
         return l10n.jv2TriggerAlimentacao;
       case 'esforco':
@@ -318,6 +401,25 @@ class JournalLabels {
         return key;
     }
   }
+
+  /// Text of a coping key ("Como foi lidar com isso?").
+  static String coping(AppLocalizations l10n, String key) => switch (key) {
+        'consegui' => l10n.jv22CopingConsegui,
+        'esperei' => l10n.jv22CopingEsperei,
+        'dificil' => l10n.jv22CopingDificil,
+        _ => key,
+      };
+
+  /// Text of a helper key ("O que te ajudou hoje?").
+  static String helper(AppLocalizations l10n, String key) => switch (key) {
+        'mexer_corpo' => l10n.jv22HelperMexerCorpo,
+        'conversar' => l10n.jv22HelperConversar,
+        'pausa' => l10n.jv22HelperPausa,
+        'lazer' => l10n.jv22HelperLazer,
+        'descansar' => l10n.jv22HelperDescansar,
+        'nada_ainda' => l10n.jv22HelperNadaAinda,
+        _ => key,
+      };
 
   /// Name of an entry axis (`emotional` / `physical`).
   static String axis(AppLocalizations l10n, String key) {
@@ -400,6 +502,18 @@ class JournalLabels {
         return l10n.jv2PhraseTriggers2;
       case 'triggers.3':
         return l10n.jv2PhraseTriggers3;
+      case 'positive.1':
+        return l10n.jv22PhrasePositive1;
+      case 'positive.2':
+        return l10n.jv22PhrasePositive2;
+      case 'positive.3':
+        return l10n.jv22PhrasePositive3;
+      case 'closing.1':
+        return l10n.jv22PhraseClosing1;
+      case 'closing.2':
+        return l10n.jv22PhraseClosing2;
+      case 'closing.3':
+        return l10n.jv22PhraseClosing3;
       default:
         return key;
     }
@@ -415,5 +529,7 @@ class JournalLabels {
     'region': 4,
     'intensity': 3,
     'triggers': 3,
+    'positive': 3,
+    'closing': 3,
   };
 }
