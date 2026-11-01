@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { Pool } from 'pg';
+import { randomUUID } from 'node:crypto';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as dotenv from 'dotenv';
 
@@ -9,6 +10,7 @@ describe('Security Regression: PostgreSQL Cross-Tenant RLS Isolation (SEC-01)', 
   let pool: Pool;
   let db: ReturnType<typeof drizzle>;
   let isDbAvailable = false;
+  const testSchema = `tenant_rls_${randomUUID().replace(/-/g, '')}`;
 
   // Deterministic Test UUIDs
   const userA_Id = '11111111-1111-1111-1111-111111111111';
@@ -45,6 +47,7 @@ describe('Security Regression: PostgreSQL Cross-Tenant RLS Isolation (SEC-01)', 
 
     pool = new Pool({
       connectionString: rawTestUrl,
+      options: `-c search_path=${testSchema},public`,
       max: 5,
       connectionTimeoutMillis: 3000,
     });
@@ -52,6 +55,9 @@ describe('Security Regression: PostgreSQL Cross-Tenant RLS Isolation (SEC-01)', 
     try {
       // Test basic connection
       await pool.query('SELECT 1');
+      // This regression exercises the original user-scoped tables, before profiles.
+      // Keep its fixtures separate from a database with all current migrations applied.
+      await pool.query(`CREATE SCHEMA ${testSchema}`);
       isDbAvailable = true;
       db = drizzle(pool);
 
@@ -101,8 +107,8 @@ describe('Security Regression: PostgreSQL Cross-Tenant RLS Isolation (SEC-01)', 
           USING (user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid)
           WITH CHECK (user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid);
 
-        GRANT USAGE ON SCHEMA public TO authenticated;
-        GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated;
+        GRANT USAGE ON SCHEMA ${testSchema} TO authenticated;
+        GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA ${testSchema} TO authenticated;
       `);
     } catch (err) {
       console.warn(
@@ -114,6 +120,7 @@ describe('Security Regression: PostgreSQL Cross-Tenant RLS Isolation (SEC-01)', 
 
   afterAll(async () => {
     if (pool) {
+      await pool.query(`DROP SCHEMA IF EXISTS ${testSchema} CASCADE`);
       await pool.end().catch(() => {});
     }
   });
