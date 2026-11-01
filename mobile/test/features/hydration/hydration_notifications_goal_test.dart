@@ -300,6 +300,17 @@ void main() {
       container.dispose();
     });
 
+    test('reminders turned off on another device stop ringing on this phone',
+        () async {
+      // The server copy of the settings says "off" (changed elsewhere).
+      repository.settings = repository.settings.copyWith(reminderEnabled: false);
+
+      await container.read(hydrationControllerProvider.notifier).loadData();
+
+      expect(recorder.cancelAllCalls, 1);
+      expect(recorder.scheduledWithGoalReached, isEmpty);
+    });
+
     test(
         'completing 2000 ml silences notifications; deleting logs restores them',
         () async {

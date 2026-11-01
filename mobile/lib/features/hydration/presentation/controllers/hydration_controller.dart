@@ -165,6 +165,10 @@ class HydrationController extends Notifier<HydrationState> {
           settings,
           isGoalReached: isGoalReached,
         );
+      } else if (!settings.reminderEnabled) {
+        // Turned off here or on another device (the setting comes from the
+        // server): reminders already set on this phone must stop ringing.
+        await _notificationService.cancelAllReminders();
       }
     } catch (e) {
       state = state.copyWith(
