@@ -57,7 +57,7 @@ class _FakeJournalRemote extends JournalRemoteDataSource {
   final List<JournalEntry> entries;
   final bool offline;
   _FakeJournalRemote(this.entries, {this.offline = false})
-      : super(apiClient: ApiClient(), secureStorage: _EmptyStorage());
+    : super(apiClient: ApiClient(), secureStorage: _EmptyStorage());
 
   @override
   Future<List<JournalEntry>> listEntries({
@@ -67,6 +67,13 @@ class _FakeJournalRemote extends JournalRemoteDataSource {
     if (offline) throw Exception('offline');
     return entries;
   }
+}
+
+/// Noon of the current day. Records made "minutes ago" from it stay on today
+/// even when the suite runs right after midnight.
+DateTime _middayToday() {
+  final d = DateTime.now();
+  return DateTime(d.year, d.month, d.day, 12);
 }
 
 void main() {
@@ -81,55 +88,69 @@ void main() {
     SecureStorageService? storage,
     bool offline = false,
   }) {
-    final c = ProviderContainer(overrides: [
-      secureStorageServiceProvider.overrideWithValue(storage ?? _EmptyStorage()),
-      triageHistoryDataSourceProvider
-          .overrideWithValue(_NoHistory(offline: offline)),
-      journalRemoteDataSourceProvider
-          .overrideWithValue(_FakeJournalRemote(remote, offline: offline)),
-      journalLocalStoreProvider.overrideWithValue(JournalLocalStore(db)),
-    ]);
+    final c = ProviderContainer(
+      overrides: [
+        secureStorageServiceProvider.overrideWithValue(
+          storage ?? _EmptyStorage(),
+        ),
+        triageHistoryDataSourceProvider.overrideWithValue(
+          _NoHistory(offline: offline),
+        ),
+        journalRemoteDataSourceProvider.overrideWithValue(
+          _FakeJournalRemote(remote, offline: offline),
+        ),
+        journalLocalStoreProvider.overrideWithValue(JournalLocalStore(db)),
+      ],
+    );
     addTearDown(c.dispose);
     return c;
   }
 
-  test('after a new login, today\'s journal entry marks Home as done', () async {
-    final now = DateTime.now();
-    final container = containerWith([
-      JournalEntry(
-        id: 'e1',
-        clientId: 'c1',
-        recordedAt: now.subtract(const Duration(minutes: 30)),
-        mood: JournalKeys.moodNaoTaoBem,
-        area: JournalKeys.areaPhysical,
-        items: const [
-          JournalItem(
-            kind: JournalKeys.kindPhysical,
-            customLabel: 'dor nas costas',
-            intensity: 3,
-          ),
-        ],
-      ),
-    ]);
+  test(
+    'after a new login, today\'s journal entry marks Home as done',
+    () async {
+      final now = _middayToday();
+      final container = containerWith([
+        JournalEntry(
+          id: 'e1',
+          clientId: 'c1',
+          recordedAt: now.subtract(const Duration(minutes: 30)),
+          mood: JournalKeys.moodNaoTaoBem,
+          area: JournalKeys.areaPhysical,
+          items: const [
+            JournalItem(
+              kind: JournalKeys.kindPhysical,
+              customLabel: 'dor nas costas',
+              intensity: 3,
+            ),
+          ],
+        ),
+      ]);
 
-    await container.read(triggerCheckInProvider.notifier).loadTodayCheckIn(now);
+      await container
+          .read(triggerCheckInProvider.notifier)
+          .loadTodayCheckIn(now);
 
-    final state = container.read(triggerCheckInProvider);
-    expect(state.isCompletedToday, isTrue);
-    expect(state.isPhysicalCompleted, isTrue);
-    expect(state.isEmotionalCompleted, isFalse);
-    expect(state.physicalSummary, 'dor nas costas');
-    expect(state.physicalIntensity, 3);
-  });
+      final state = container.read(triggerCheckInProvider);
+      expect(state.isCompletedToday, isTrue);
+      expect(state.isPhysicalCompleted, isTrue);
+      expect(state.isEmotionalCompleted, isFalse);
+      expect(state.physicalSummary, 'dor nas costas');
+      expect(state.physicalIntensity, 3);
+    },
+  );
 
   test('entries from yesterday do not mark today', () async {
-    final now = DateTime.now();
+    final now = _middayToday();
     final container = containerWith([
       JournalEntry(
         id: 'e0',
         clientId: 'c0',
-        recordedAt: DateTime(now.year, now.month, now.day)
-            .subtract(const Duration(hours: 2)),
+        recordedAt: DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).subtract(const Duration(hours: 2)),
         mood: JournalKeys.moodBem,
       ),
     ]);
@@ -140,14 +161,16 @@ void main() {
   });
 
   test('an entry still in the offline outbox also marks today', () async {
-    final now = DateTime.now();
+    final now = _middayToday();
     final container = containerWith(const []);
-    await JournalLocalStore(db).enqueue(JournalEntry(
-      clientId: 'c2',
-      recordedAt: now.subtract(const Duration(minutes: 5)),
-      mood: JournalKeys.moodBem,
-      area: JournalKeys.areaEmotional,
-    ));
+    await JournalLocalStore(db).enqueue(
+      JournalEntry(
+        clientId: 'c2',
+        recordedAt: now.subtract(const Duration(minutes: 5)),
+        mood: JournalKeys.moodBem,
+        area: JournalKeys.areaEmotional,
+      ),
+    );
 
     await container.read(triggerCheckInProvider.notifier).loadTodayCheckIn(now);
 

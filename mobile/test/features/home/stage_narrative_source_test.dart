@@ -60,38 +60,60 @@ TriageHistoryResponse _history(List<TriageHistoryEntry> logs) {
   );
 }
 
+/// Noon of the current day. Records made "minutes ago" from it stay on today
+/// even when the suite runs right after midnight.
+DateTime _middayToday() {
+  final d = DateTime.now();
+  return DateTime(d.year, d.month, d.day, 12);
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Stage description comes only from the text typed in that triage', () {
-    test('a new triage without description clears the previous one for that axis', () {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      final notifier = container.read(triggerCheckInProvider.notifier);
+    test(
+      'a new triage without description clears the previous one for that axis',
+      () {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+        final notifier = container.read(triggerCheckInProvider.notifier);
 
-      notifier.markCompletedWithOutcome(
-        _physicalOutcome(id: 'first', aiMappedLayTerm: 'dor de cabeça'),
-        narrative: 'dor de cabeça',
-      );
-      expect(container.read(triggerCheckInProvider).physicalNarrative, 'dor de cabeça');
+        notifier.markCompletedWithOutcome(
+          _physicalOutcome(id: 'first', aiMappedLayTerm: 'dor de cabeça'),
+          narrative: 'dor de cabeça',
+        );
+        expect(
+          container.read(triggerCheckInProvider).physicalNarrative,
+          'dor de cabeça',
+        );
 
-      // "Atualizar", then the wizard submits a triage with an empty description:
-      // setOutcome replays the outcome first, then the wizard passes the narrative.
-      notifier.resetStage(isPhysical: true);
-      final second = _physicalOutcome(id: 'second');
-      notifier.markCompletedWithOutcome(second);
-      notifier.markCompletedWithOutcome(second, narrative: null);
+        // "Atualizar", then the wizard submits a triage with an empty description:
+        // setOutcome replays the outcome first, then the wizard passes the narrative.
+        notifier.resetStage(isPhysical: true);
+        final second = _physicalOutcome(id: 'second');
+        notifier.markCompletedWithOutcome(second);
+        notifier.markCompletedWithOutcome(second, narrative: null);
 
-      expect(container.read(triggerCheckInProvider).physicalNarrative, isNull);
-    });
+        expect(
+          container.read(triggerCheckInProvider).physicalNarrative,
+          isNull,
+        );
+      },
+    );
 
     test('a stale description is cleared even without resetStage', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
       final notifier = container.read(triggerCheckInProvider.notifier);
 
-      notifier.markCompletedWithOutcome(_physicalOutcome(id: 'first'), narrative: 'dor de cabeça');
-      notifier.markCompletedWithOutcome(_physicalOutcome(id: 'second'), narrative: null);
+      notifier.markCompletedWithOutcome(
+        _physicalOutcome(id: 'first'),
+        narrative: 'dor de cabeça',
+      );
+      notifier.markCompletedWithOutcome(
+        _physicalOutcome(id: 'second'),
+        narrative: null,
+      );
 
       expect(container.read(triggerCheckInProvider).physicalNarrative, isNull);
     });
@@ -102,10 +124,16 @@ void main() {
       final notifier = container.read(triggerCheckInProvider.notifier);
       final outcome = _physicalOutcome();
 
-      notifier.markCompletedWithOutcome(outcome, narrative: 'tontura ao levantar');
+      notifier.markCompletedWithOutcome(
+        outcome,
+        narrative: 'tontura ao levantar',
+      );
       notifier.markCompletedWithOutcome(outcome);
 
-      expect(container.read(triggerCheckInProvider).physicalNarrative, 'tontura ao levantar');
+      expect(
+        container.read(triggerCheckInProvider).physicalNarrative,
+        'tontura ao levantar',
+      );
     });
 
     test('the AI mapped lay term is never used as the description', () {
@@ -140,110 +168,127 @@ void main() {
   });
 
   group('History sync: the record owns the description', () {
-    test('latest record without description replaces a stale local one', () async {
-      final now = DateTime.now();
-      final emotional = TriageHistoryEntry(
-        id: 'emo',
-        vertical: 'emotional',
-        intensity: 3,
-        anatomicalSystem: 'neurologico',
-        emotionalDimension: 'estresse_burnout',
-        narrative: 'dor de cabeça',
-        recordedAt: now.subtract(const Duration(minutes: 20)),
-      );
-      final physical = TriageHistoryEntry(
-        id: 'phys',
-        intensity: 2,
-        anatomicalSystem: 'neurologico',
-        recordedAt: now.subtract(const Duration(minutes: 5)),
-      );
+    test(
+      'latest record without description replaces a stale local one',
+      () async {
+        final now = _middayToday();
+        final emotional = TriageHistoryEntry(
+          id: 'emo',
+          vertical: 'emotional',
+          intensity: 3,
+          anatomicalSystem: 'neurologico',
+          emotionalDimension: 'estresse_burnout',
+          narrative: 'dor de cabeça',
+          recordedAt: now.subtract(const Duration(minutes: 20)),
+        );
+        final physical = TriageHistoryEntry(
+          id: 'phys',
+          intensity: 2,
+          anatomicalSystem: 'neurologico',
+          recordedAt: now.subtract(const Duration(minutes: 5)),
+        );
 
-      final container = ProviderContainer(
-        overrides: [
-          triageHistoryDataSourceProvider
-              .overrideWithValue(_FakeHistoryDataSource(_history([physical, emotional]))),
-        ],
-      );
-      addTearDown(container.dispose);
-      final notifier = container.read(triggerCheckInProvider.notifier);
+        final container = ProviderContainer(
+          overrides: [
+            triageHistoryDataSourceProvider.overrideWithValue(
+              _FakeHistoryDataSource(_history([physical, emotional])),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+        final notifier = container.read(triggerCheckInProvider.notifier);
 
-      notifier.markCompletedWithOutcome(_physicalOutcome(), narrative: 'dor de cabeça');
-      await notifier.loadTodayCheckIn(now);
+        notifier.markCompletedWithOutcome(
+          _physicalOutcome(),
+          narrative: 'dor de cabeça',
+        );
+        await notifier.loadTodayCheckIn(now);
 
-      final state = container.read(triggerCheckInProvider);
-      expect(state.physicalNarrative, isNull);
-      expect(state.emotionalNarrative, 'dor de cabeça');
-    });
+        final state = container.read(triggerCheckInProvider);
+        expect(state.physicalNarrative, isNull);
+        expect(state.emotionalNarrative, 'dor de cabeça');
+      },
+    );
 
-    test('a cross-vertical tag does not lend its description to the other axis', () async {
-      final now = DateTime.now();
-      final emotional = TriageHistoryEntry(
-        id: 'emo',
-        vertical: 'emotional',
-        intensity: 3,
-        anatomicalSystem: 'neurologico',
-        emotionalDimension: 'estresse_burnout',
-        narrative: 'dor de cabeça',
-        recordedAt: now.subtract(const Duration(minutes: 5)),
-      );
+    test(
+      'a cross-vertical tag does not lend its description to the other axis',
+      () async {
+        final now = _middayToday();
+        final emotional = TriageHistoryEntry(
+          id: 'emo',
+          vertical: 'emotional',
+          intensity: 3,
+          anatomicalSystem: 'neurologico',
+          emotionalDimension: 'estresse_burnout',
+          narrative: 'dor de cabeça',
+          recordedAt: now.subtract(const Duration(minutes: 5)),
+        );
 
-      final container = ProviderContainer(
-        overrides: [
-          triageHistoryDataSourceProvider
-              .overrideWithValue(_FakeHistoryDataSource(_history([emotional]))),
-        ],
-      );
-      addTearDown(container.dispose);
+        final container = ProviderContainer(
+          overrides: [
+            triageHistoryDataSourceProvider.overrideWithValue(
+              _FakeHistoryDataSource(_history([emotional])),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
 
-      await container.read(triggerCheckInProvider.notifier).loadTodayCheckIn(now);
+        await container
+            .read(triggerCheckInProvider.notifier)
+            .loadTodayCheckIn(now);
 
-      final state = container.read(triggerCheckInProvider);
-      expect(state.isPhysicalCompleted, isTrue);
-      expect(state.physicalNarrative, isNull);
-      expect(state.emotionalNarrative, 'dor de cabeça');
-    });
+        final state = container.read(triggerCheckInProvider);
+        expect(state.isPhysicalCompleted, isTrue);
+        expect(state.physicalNarrative, isNull);
+        expect(state.emotionalNarrative, 'dor de cabeça');
+      },
+    );
   });
 
-  testWidgets('card shows no quote when the stage has no description, even if the outcome has an AI lay term',
-      (tester) async {
-    final container = ProviderContainer(
-      overrides: [
-        triggerCheckInProvider.overrideWith(
-          () => _FakeTriggerCheckInNotifier(
-            const TriggerCheckInState(
-              isCompletedToday: true,
-              isPhysicalCompleted: true,
-              physicalStatus: TriggerStatus.soSo,
-              physicalIntensity: 2,
-              physicalSummary: 'Sistema Neurológico',
+  testWidgets(
+    'card shows no quote when the stage has no description, even if the outcome has an AI lay term',
+    (tester) async {
+      final container = ProviderContainer(
+        overrides: [
+          triggerCheckInProvider.overrideWith(
+            () => _FakeTriggerCheckInNotifier(
+              const TriggerCheckInState(
+                isCompletedToday: true,
+                isPhysicalCompleted: true,
+                physicalStatus: TriggerStatus.soSo,
+                physicalIntensity: 2,
+                physicalSummary: 'Sistema Neurológico',
+              ),
+            ),
+          ),
+          triageOutcomeProvider.overrideWith(
+            () => _FakeTriageOutcomeNotifier(
+              TriageOutcomeState(
+                outcome: _physicalOutcome(aiMappedLayTerm: 'dor de cabeça'),
+              ),
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
+            locale: Locale('pt', 'BR'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SingleChildScrollView(child: DualAxisTriggerCard()),
             ),
           ),
         ),
-        triageOutcomeProvider.overrideWith(
-          () => _FakeTriageOutcomeNotifier(
-            TriageOutcomeState(outcome: _physicalOutcome(aiMappedLayTerm: 'dor de cabeça')),
-          ),
-        ),
-      ],
-    );
-    addTearDown(container.dispose);
+      );
+      await tester.pumpAndSettle();
 
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: const MaterialApp(
-          locale: Locale('pt', 'BR'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: SingleChildScrollView(child: DualAxisTriggerCard()),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const Key('fisica_completed_card')), findsOneWidget);
-    expect(find.textContaining('“'), findsNothing);
-  });
+      expect(find.byKey(const Key('fisica_completed_card')), findsOneWidget);
+      expect(find.textContaining('“'), findsNothing);
+    },
+  );
 }
