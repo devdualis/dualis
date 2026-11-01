@@ -6118,11 +6118,23 @@ abstract class AppLocalizations {
   /// **'Outros arquivos'**
   String get careExamSectionOther;
 
-  /// No description provided for @careExamValuesOverTime.
+  /// No description provided for @careExamTabValues.
   ///
   /// In pt, this message translates to:
-  /// **'Meus valores ao longo do tempo'**
-  String get careExamValuesOverTime;
+  /// **'Meus valores'**
+  String get careExamTabValues;
+
+  /// No description provided for @careExamValuesHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'O último valor de cada item, dos exames que você conferiu. Toque num item para ver como ele mudou.'**
+  String get careExamValuesHint;
+
+  /// No description provided for @careExamValuesEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seus valores aparecem aqui depois que você conferir um exame.'**
+  String get careExamValuesEmpty;
 
   /// No description provided for @careExamValuesSearch.
   ///

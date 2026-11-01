@@ -3533,7 +3533,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get careExamSectionOther => 'Outros arquivos';
 
   @override
-  String get careExamValuesOverTime => 'Meus valores ao longo do tempo';
+  String get careExamTabValues => 'Meus valores';
+
+  @override
+  String get careExamValuesHint =>
+      'O último valor de cada item, dos exames que você conferiu. Toque num item para ver como ele mudou.';
+
+  @override
+  String get careExamValuesEmpty =>
+      'Seus valores aparecem aqui depois que você conferir um exame.';
 
   @override
   String get careExamValuesSearch => 'Buscar item (ex.: TSH)';

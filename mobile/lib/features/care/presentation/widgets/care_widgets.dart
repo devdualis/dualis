@@ -326,8 +326,9 @@ void careSnack(BuildContext context, String text) =>
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
 
 /// App bar used by the pushed "Meus cuidados" screens, with the help button.
-PreferredSizeWidget careAppBar(BuildContext context, String title, {List<Widget> actions = const []}) {
+PreferredSizeWidget careAppBar(BuildContext context, String title, {List<Widget> actions = const [], PreferredSizeWidget? bottom}) {
   return AppBar(
+    bottom: bottom,
     backgroundColor: AppColors.surfaceLight,
     elevation: 0,
     scrolledUnderElevation: 1,

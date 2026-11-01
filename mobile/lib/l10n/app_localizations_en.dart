@@ -3527,7 +3527,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get careExamSectionOther => 'Other files';
 
   @override
-  String get careExamValuesOverTime => 'My values over time';
+  String get careExamTabValues => 'My values';
+
+  @override
+  String get careExamValuesHint =>
+      'The latest value of each item from the exams you checked. Tap an item to see how it changed.';
+
+  @override
+  String get careExamValuesEmpty =>
+      'Your values show up here after you check an exam.';
 
   @override
   String get careExamValuesSearch => 'Search item (e.g. TSH)';

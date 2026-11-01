@@ -207,72 +207,112 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
           if (mounted) _syncPolling(docs);
         }));
 
-    return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      appBar: careAppBar(context, rxOnly ? l10n.careExamSectionPrescriptions : l10n.careExamsTitle),
-      floatingActionButton: canEdit
-          ? FloatingActionButton.extended(
-              key: const Key('exams_add'),
-              backgroundColor: AppColors.dualisNavy,
-              foregroundColor: Colors.white,
-              onPressed: _uploading ? null : _add,
-              icon: _uploading
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Icon(Icons.add_a_photo_outlined),
-              label: Text(rxOnly ? l10n.careRxListAdd : l10n.careExamAdd),
-            )
-          : null,
-      body: CareAsync<List<CareDocument>>(
-        value: async,
-        onRetry: () => ref.invalidate(careDocumentsProvider),
-        data: (all) {
-          final docs = all
-              .where((d) => !_removed.contains(d.id) && (d.kind == DocumentKind.prescription) == rxOnly)
-              .toList();
-          final processing = docs.where((d) => d.status == DocumentStatus.processing).toList();
-          final labs = docs.where((d) => d.kind == DocumentKind.lab && d.status != DocumentStatus.processing).toList();
-          final rx = docs.where((d) => d.kind == DocumentKind.prescription && d.status != DocumentStatus.processing).toList();
-          final other = docs.where((d) => d.kind == DocumentKind.other).toList();
-          final checked = labs.where((doc) => doc.status == DocumentStatus.ready && doc.values.isNotEmpty).toList();
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-            children: [
-              for (final d in processing) ...[
-                _swipeToDelete(
-                  d,
-                  canEdit,
-                  CareRow(
-                    color: AppColors.softIndigoLight,
-                    borderColor: const Color(0xFFC9DDF0),
-                    leading: const CareIconTile(Icons.sync, background: Colors.white, foreground: AppColors.dualisNavy),
-                    title: l10n.careExamReading,
-                    subtitle: l10n.careExamReadingHint,
-                  ),
-                ),
-                const SizedBox(height: 10),
-              ],
-              if (docs.isEmpty)
-                rxOnly
-                    ? CareEmpty(l10n.careRxListEmpty, icon: Icons.receipt_long_outlined)
-                    : CareEmpty(l10n.careExamEmpty, icon: Icons.science_outlined),
-              if (labs.isNotEmpty) CareSection(l10n.careExamSectionLabs),
-              for (final d in labs) ...[const SizedBox(height: 8), _swipeToDelete(d, canEdit, _DocRow(d, onTap: () => _open(d)))],
-              for (final d in rx) ...[const SizedBox(height: 8), _swipeToDelete(d, canEdit, _DocRow(d, onTap: () => _open(d)))],
-              if (other.isNotEmpty) CareSection(l10n.careExamSectionOther),
-              for (final d in other) ...[const SizedBox(height: 8), _swipeToDelete(d, canEdit, _DocRow(d, onTap: () => _open(d)))],
-              if (checked.isNotEmpty) ...[
-                CareSection(l10n.careExamValuesOverTime),
-                const SizedBox(height: 8),
-                ExamValuesList(checked),
-              ],
-              const SizedBox(height: 14),
-              CareNote(rxOnly ? l10n.careRxListNote : l10n.careExamNote),
+    final fab = canEdit
+        ? FloatingActionButton.extended(
+            key: const Key('exams_add'),
+            backgroundColor: AppColors.dualisNavy,
+            foregroundColor: Colors.white,
+            onPressed: _uploading ? null : _add,
+            icon: _uploading
+                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : const Icon(Icons.add_a_photo_outlined),
+            label: Text(rxOnly ? l10n.careRxListAdd : l10n.careExamAdd),
+          )
+        : null;
+
+    return async.when(
+      loading: () => _scaffold(l10n, rxOnly, fab, CareAsync<List<CareDocument>>(value: async, onRetry: _retry, data: (_) => const SizedBox())),
+      error: (_, _) => _scaffold(l10n, rxOnly, fab, CareAsync<List<CareDocument>>(value: async, onRetry: _retry, data: (_) => const SizedBox())),
+      data: (all) {
+        final docs = all.where((d) => !_removed.contains(d.id) && (d.kind == DocumentKind.prescription) == rxOnly).toList();
+        final processing = [
+          for (final d in docs.where((d) => d.status == DocumentStatus.processing)) ...[
+            _swipeToDelete(
+              d,
+              canEdit,
+              CareRow(
+                color: AppColors.softIndigoLight,
+                borderColor: const Color(0xFFC9DDF0),
+                leading: const CareIconTile(Icons.sync, background: Colors.white, foreground: AppColors.dualisNavy),
+                title: l10n.careExamReading,
+                subtitle: l10n.careExamReadingHint,
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ];
+        final labs = docs.where((d) => d.kind == DocumentKind.lab && d.status != DocumentStatus.processing).toList();
+        final rx = docs.where((d) => d.kind == DocumentKind.prescription && d.status != DocumentStatus.processing).toList();
+        final other = docs.where((d) => d.kind == DocumentKind.other).toList();
+        final documents = ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+          children: [
+            ...processing,
+            if (docs.isEmpty)
+              rxOnly
+                  ? CareEmpty(l10n.careRxListEmpty, icon: Icons.receipt_long_outlined)
+                  : CareEmpty(l10n.careExamEmpty, icon: Icons.science_outlined),
+            for (final d in labs) ...[const SizedBox(height: 8), _swipeToDelete(d, canEdit, _DocRow(d, onTap: () => _open(d)))],
+            for (final d in rx) ...[const SizedBox(height: 8), _swipeToDelete(d, canEdit, _DocRow(d, onTap: () => _open(d)))],
+            if (other.isNotEmpty) CareSection(l10n.careExamSectionOther),
+            for (final d in other) ...[const SizedBox(height: 8), _swipeToDelete(d, canEdit, _DocRow(d, onTap: () => _open(d)))],
+            const SizedBox(height: 14),
+            CareNote(rxOnly ? l10n.careRxListNote : l10n.careExamNote),
+          ],
+        );
+        if (rxOnly) return _scaffold(l10n, rxOnly, fab, documents);
+
+        // Exams: "Meus valores" (latest value of each item) and the list of documents, in two tabs.
+        final checked = labs.where((doc) => doc.status == DocumentStatus.ready && doc.values.isNotEmpty).toList();
+        final values = ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+          children: [
+            ...processing,
+            if (checked.isEmpty)
+              CareEmpty(l10n.careExamValuesEmpty, icon: Icons.show_chart)
+            else ...[
+              Text(l10n.careExamValuesHint, style: careBody()),
+              const SizedBox(height: 10),
+              ExamValuesList(checked),
             ],
-          );
-        },
-      ),
+            const SizedBox(height: 14),
+            CareNote(l10n.careExamNote),
+          ],
+        );
+        return DefaultTabController(
+          length: 2,
+          // Nothing confirmed yet: open on the documents, where the exams to check are.
+          initialIndex: checked.isEmpty && docs.isNotEmpty ? 1 : 0,
+          child: _scaffold(
+            l10n,
+            rxOnly,
+            fab,
+            TabBarView(children: [values, documents]),
+            tabs: TabBar(
+              labelColor: AppColors.dualisNavy,
+              unselectedLabelColor: CareColors.slate,
+              indicatorColor: AppColors.dualisNavy,
+              labelStyle: careTitle(14),
+              unselectedLabelStyle: careBody(14),
+              tabs: [
+                Tab(key: const Key('exams_tab_values'), text: l10n.careExamTabValues),
+                Tab(key: const Key('exams_tab_documents'), text: l10n.careExamSectionLabs),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
+
+  void _retry() => ref.invalidate(careDocumentsProvider);
+
+  Widget _scaffold(AppLocalizations l10n, bool rxOnly, Widget? fab, Widget body, {PreferredSizeWidget? tabs}) => Scaffold(
+        backgroundColor: AppColors.backgroundLight,
+        appBar: careAppBar(context, rxOnly ? l10n.careExamSectionPrescriptions : l10n.careExamsTitle, bottom: tabs),
+        floatingActionButton: fab,
+        body: body,
+      );
 }
 
 class _DocRow extends StatelessWidget {

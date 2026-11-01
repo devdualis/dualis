@@ -623,6 +623,32 @@ void main() {
     expect(find.byKey(const Key('exam_unit_mmol/l')), findsOneWidget);
   });
 
+  testWidgets('exams open on "Meus valores" with the documents in their own tab', (tester) async {
+    final api = FakeCareApi();
+    api.docs.add(CareDocument(id: 'd1', kind: DocumentKind.lab, mime: 'application/pdf', status: DocumentStatus.ready, createdAt: DateTime(2026, 10, 28), data: const {
+      'title': 'Hemograma',
+      'values': [
+        {'section': 'HEMOGRAMA COMPLETO', 'item': 'Hemoglobina', 'value': '15,7', 'unit': 'g/dL', 'confirmed': true},
+      ],
+    }));
+    await pump(tester, const ExamsScreen(), api: api);
+    expect(find.byType(ExamValuesList), findsOneWidget);
+    expect(find.text(pt.careExamValuesHint), findsOneWidget);
+    expect(find.text('Hemograma'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('exams_tab_documents')));
+    await tester.pumpAndSettle();
+    expect(find.text('Hemograma'), findsOneWidget);
+    expect(find.byType(ExamValuesList), findsNothing);
+
+    // Nothing confirmed yet: the documents tab opens first, where the exam to check is.
+    api.docs
+      ..clear()
+      ..add(CareDocument(id: 'd2', kind: DocumentKind.lab, mime: 'application/pdf', status: DocumentStatus.review, createdAt: DateTime(2026, 10, 28), data: const {'title': 'Ferritina'}));
+    await pump(tester, ExamsScreen(key: UniqueKey()), api: api);
+    expect(find.text('Ferritina'), findsOneWidget);
+  });
+
   testWidgets('prescriptions have their own list, apart from exams', (tester) async {
     final api = FakeCareApi();
     api.docs
