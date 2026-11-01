@@ -2552,5 +2552,67 @@
       }
     }
   },
-  "gxIntensityAxis": "Intensidade informada"
+  "gxIntensityAxis": "Intensidade informada",
+  "habitsTitleToday": "Hábitos de hoje",
+  "habitsTitleYesterday": "Hábitos de ontem",
+  "habitsTabToday": "Hoje",
+  "habitsTabYesterday": "Ontem",
+  "habitsRegisterAction": "Registrar",
+  "habitsNoRecordsToday": "Nenhum hábito registrado hoje",
+  "habitsSaved": "Salvo",
+  "habitsSleepQualityQuestion": "Como você dormiu?",
+  "habitsSleepQualityBem": "😴 Dormi bem",
+  "habitsSleepQualityRegular": "😐 Mais ou menos",
+  "habitsSleepQualityMal": "😫 Dormi mal",
+  "habitsSleepHoursQuestion": "Quantas horas, mais ou menos?",
+  "habitsSleepHoursMenos5": "Menos de 5 h",
+  "habitsSleepHours5To6": "5 a 6 h",
+  "habitsSleepHours7To8": "7 a 8 h",
+  "habitsSleepHours9Mais": "9 h ou mais",
+  "habitsMovedQuestion": "Mexeu o corpo hoje?",
+  "habitsMovedYes": "Sim",
+  "habitsMovedNo": "Não",
+  "habitsMovementMinutesQuestion": "Por quanto tempo?",
+  "habitsMovementMinutesAte15": "Até 15 min",
+  "habitsMovementMinutes15To30": "15 a 30 min",
+  "habitsMovementMinutes30To60": "30 a 60 min",
+  "habitsMovementMinutesMais60": "Mais de 1 h",
+  "habitsPeriodQuestion": "Menstruação hoje?",
+  "habitsPeriodYes": "Sim",
+  "habitsPeriodNo": "Não",
+  "habitsTrackMenstrualCycleSetting": "Acompanhar ciclo menstrual",
+  "habitsChartTitle": "Hábitos",
+  "habitsChartSleepQualityTitle": "Qualidade do sono",
+  "habitsChartSleepHoursTitle": "Horas de sono",
+  "habitsChartMovementTitle": "Movimento do corpo",
+  "habitsChartPeriodTitle": "Ciclo menstrual",
+  "habitsChartSleepBadCount": "Você dormiu mal em {count} dos últimos {days} dias",
+  "@habitsChartSleepBadCount": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          },
+          "days": {
+              "type": "int"
+          }
+      }
+  },
+  "habitsChartMovementCount": "Você se mexeu em {count} dias",
+  "@habitsChartMovementCount": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "habitsChartPeriodCount": "Dias com menstruação: {count}",
+  "@habitsChartPeriodCount": {
+      "placeholders": {
+          "count": {
+              "type": "int"
+          }
+      }
+  },
+  "habitsChartEmpty": "Sem registros no período",
+  "habitsPeriodLabel": "Menstruação"
 }

@@ -6867,6 +6867,234 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Intensidade informada'**
   String get gxIntensityAxis;
+
+  /// No description provided for @habitsTitleToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hábitos de hoje'**
+  String get habitsTitleToday;
+
+  /// No description provided for @habitsTitleYesterday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hábitos de ontem'**
+  String get habitsTitleYesterday;
+
+  /// No description provided for @habitsTabToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hoje'**
+  String get habitsTabToday;
+
+  /// No description provided for @habitsTabYesterday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ontem'**
+  String get habitsTabYesterday;
+
+  /// No description provided for @habitsRegisterAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar'**
+  String get habitsRegisterAction;
+
+  /// No description provided for @habitsNoRecordsToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum hábito registrado hoje'**
+  String get habitsNoRecordsToday;
+
+  /// No description provided for @habitsSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvo'**
+  String get habitsSaved;
+
+  /// No description provided for @habitsSleepQualityQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como você dormiu?'**
+  String get habitsSleepQualityQuestion;
+
+  /// No description provided for @habitsSleepQualityBem.
+  ///
+  /// In pt, this message translates to:
+  /// **'😴 Dormi bem'**
+  String get habitsSleepQualityBem;
+
+  /// No description provided for @habitsSleepQualityRegular.
+  ///
+  /// In pt, this message translates to:
+  /// **'😐 Mais ou menos'**
+  String get habitsSleepQualityRegular;
+
+  /// No description provided for @habitsSleepQualityMal.
+  ///
+  /// In pt, this message translates to:
+  /// **'😫 Dormi mal'**
+  String get habitsSleepQualityMal;
+
+  /// No description provided for @habitsSleepHoursQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quantas horas, mais ou menos?'**
+  String get habitsSleepHoursQuestion;
+
+  /// No description provided for @habitsSleepHoursMenos5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Menos de 5 h'**
+  String get habitsSleepHoursMenos5;
+
+  /// No description provided for @habitsSleepHours5To6.
+  ///
+  /// In pt, this message translates to:
+  /// **'5 a 6 h'**
+  String get habitsSleepHours5To6;
+
+  /// No description provided for @habitsSleepHours7To8.
+  ///
+  /// In pt, this message translates to:
+  /// **'7 a 8 h'**
+  String get habitsSleepHours7To8;
+
+  /// No description provided for @habitsSleepHours9Mais.
+  ///
+  /// In pt, this message translates to:
+  /// **'9 h ou mais'**
+  String get habitsSleepHours9Mais;
+
+  /// No description provided for @habitsMovedQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mexeu o corpo hoje?'**
+  String get habitsMovedQuestion;
+
+  /// No description provided for @habitsMovedYes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim'**
+  String get habitsMovedYes;
+
+  /// No description provided for @habitsMovedNo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não'**
+  String get habitsMovedNo;
+
+  /// No description provided for @habitsMovementMinutesQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Por quanto tempo?'**
+  String get habitsMovementMinutesQuestion;
+
+  /// No description provided for @habitsMovementMinutesAte15.
+  ///
+  /// In pt, this message translates to:
+  /// **'Até 15 min'**
+  String get habitsMovementMinutesAte15;
+
+  /// No description provided for @habitsMovementMinutes15To30.
+  ///
+  /// In pt, this message translates to:
+  /// **'15 a 30 min'**
+  String get habitsMovementMinutes15To30;
+
+  /// No description provided for @habitsMovementMinutes30To60.
+  ///
+  /// In pt, this message translates to:
+  /// **'30 a 60 min'**
+  String get habitsMovementMinutes30To60;
+
+  /// No description provided for @habitsMovementMinutesMais60.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais de 1 h'**
+  String get habitsMovementMinutesMais60;
+
+  /// No description provided for @habitsPeriodQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Menstruação hoje?'**
+  String get habitsPeriodQuestion;
+
+  /// No description provided for @habitsPeriodYes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim'**
+  String get habitsPeriodYes;
+
+  /// No description provided for @habitsPeriodNo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não'**
+  String get habitsPeriodNo;
+
+  /// No description provided for @habitsTrackMenstrualCycleSetting.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acompanhar ciclo menstrual'**
+  String get habitsTrackMenstrualCycleSetting;
+
+  /// No description provided for @habitsChartTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hábitos'**
+  String get habitsChartTitle;
+
+  /// No description provided for @habitsChartSleepQualityTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qualidade do sono'**
+  String get habitsChartSleepQualityTitle;
+
+  /// No description provided for @habitsChartSleepHoursTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Horas de sono'**
+  String get habitsChartSleepHoursTitle;
+
+  /// No description provided for @habitsChartMovementTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Movimento do corpo'**
+  String get habitsChartMovementTitle;
+
+  /// No description provided for @habitsChartPeriodTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ciclo menstrual'**
+  String get habitsChartPeriodTitle;
+
+  /// No description provided for @habitsChartSleepBadCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você dormiu mal em {count} dos últimos {days} dias'**
+  String habitsChartSleepBadCount(int count, int days);
+
+  /// No description provided for @habitsChartMovementCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você se mexeu em {count} dias'**
+  String habitsChartMovementCount(int count);
+
+  /// No description provided for @habitsChartPeriodCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dias com menstruação: {count}'**
+  String habitsChartPeriodCount(int count);
+
+  /// No description provided for @habitsChartEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem registros no período'**
+  String get habitsChartEmpty;
+
+  /// No description provided for @habitsPeriodLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Menstruação'**
+  String get habitsPeriodLabel;
 }
 
 class _AppLocalizationsDelegate

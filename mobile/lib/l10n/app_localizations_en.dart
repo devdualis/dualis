@@ -4016,4 +4016,124 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gxIntensityAxis => 'Reported intensity';
+
+  @override
+  String get habitsTitleToday => 'Today\'s habits';
+
+  @override
+  String get habitsTitleYesterday => 'Yesterday\'s habits';
+
+  @override
+  String get habitsTabToday => 'Today';
+
+  @override
+  String get habitsTabYesterday => 'Yesterday';
+
+  @override
+  String get habitsRegisterAction => 'Log';
+
+  @override
+  String get habitsNoRecordsToday => 'No habits logged today';
+
+  @override
+  String get habitsSaved => 'Saved';
+
+  @override
+  String get habitsSleepQualityQuestion => 'How did you sleep?';
+
+  @override
+  String get habitsSleepQualityBem => '😴 Slept well';
+
+  @override
+  String get habitsSleepQualityRegular => '😐 So-so';
+
+  @override
+  String get habitsSleepQualityMal => '😫 Slept badly';
+
+  @override
+  String get habitsSleepHoursQuestion => 'About how many hours?';
+
+  @override
+  String get habitsSleepHoursMenos5 => 'Under 5 h';
+
+  @override
+  String get habitsSleepHours5To6 => '5–6 h';
+
+  @override
+  String get habitsSleepHours7To8 => '7–8 h';
+
+  @override
+  String get habitsSleepHours9Mais => '9 h or more';
+
+  @override
+  String get habitsMovedQuestion => 'Did you move your body today?';
+
+  @override
+  String get habitsMovedYes => 'Yes';
+
+  @override
+  String get habitsMovedNo => 'No';
+
+  @override
+  String get habitsMovementMinutesQuestion => 'For how long?';
+
+  @override
+  String get habitsMovementMinutesAte15 => 'Up to 15 min';
+
+  @override
+  String get habitsMovementMinutes15To30 => '15–30 min';
+
+  @override
+  String get habitsMovementMinutes30To60 => '30–60 min';
+
+  @override
+  String get habitsMovementMinutesMais60 => 'Over 1 h';
+
+  @override
+  String get habitsPeriodQuestion => 'Period today?';
+
+  @override
+  String get habitsPeriodYes => 'Yes';
+
+  @override
+  String get habitsPeriodNo => 'No';
+
+  @override
+  String get habitsTrackMenstrualCycleSetting => 'Track menstrual cycle';
+
+  @override
+  String get habitsChartTitle => 'Habits';
+
+  @override
+  String get habitsChartSleepQualityTitle => 'Sleep quality';
+
+  @override
+  String get habitsChartSleepHoursTitle => 'Hours of sleep';
+
+  @override
+  String get habitsChartMovementTitle => 'Body movement';
+
+  @override
+  String get habitsChartPeriodTitle => 'Menstrual cycle';
+
+  @override
+  String habitsChartSleepBadCount(int count, int days) {
+    return 'You slept badly on $count of the last $days days';
+  }
+
+  @override
+  String habitsChartMovementCount(int count) {
+    return 'You moved your body on $count days';
+  }
+
+  @override
+  String habitsChartPeriodCount(int count) {
+    return 'Days with period: $count';
+  }
+
+  @override
+  String get habitsChartEmpty => 'No records in the period';
+
+  @override
+  String get habitsPeriodLabel => 'Period';
 }
