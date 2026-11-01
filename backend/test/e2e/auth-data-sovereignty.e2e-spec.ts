@@ -45,10 +45,11 @@ class MockAuthService {
     return {
       metadata: {
         exportDate: new Date().toISOString(),
-        formatVersion: '1.2',
+        formatVersion: '1.4',
         legalBasis: 'LGPD Art. 18, V (Portabilidade de Dados)',
         dataController: 'WGI (Brothers Baum Ltda.)',
         legacyFieldsNote: 'Os campos em "legacy" vêm de uma versão anterior do app e não são mais gravados.',
+        careDocumentsNote: 'Os arquivos originais (fotos e PDFs) não vão neste arquivo.',
       },
       profile: {
         id: testUserId,
@@ -84,6 +85,18 @@ class MockAuthService {
       waterIntakeLogs: [],
       journalEntries: [],
       userConditions: [],
+      careRecords: [
+        {
+          id: 'care-e2e-1',
+          kind: 'vaccine_dose',
+          parentId: null,
+          occursAt: '2026-03-10T00:00:00.000Z',
+          data: { vaccine: 'Influenza', appliedOn: '2026-03-10' },
+          createdAt: '2026-03-10T12:00:00.000Z',
+          updatedAt: '2026-03-10T12:00:00.000Z',
+        },
+      ],
+      careDocuments: [],
       dependentProfiles: [
         {
           profile: {
@@ -101,6 +114,8 @@ class MockAuthService {
           ],
           journalEntries: [],
           userConditions: [],
+          careRecords: [],
+          careDocuments: [],
         },
       ],
     };
@@ -196,6 +211,8 @@ describe('Auth LGPD Data Sovereignty E2E (SEC-03)', () => {
       expect(data.safetyResourceEvents).toEqual([]);
       expect(data.symptomLogs[0].legacy).toEqual({ disposition: 'autocuidado', organicPrimacyApplied: false });
       expect(data.symptomLogs[0]).not.toHaveProperty('disposition');
+      expect(data.careRecords[0]).toMatchObject({ kind: 'vaccine_dose', data: { vaccine: 'Influenza' } });
+      expect(data.careDocuments).toEqual([]);
       expect(data.dependentProfiles).toHaveLength(1);
       expect(data.dependentProfiles[0].profile.name).toBe('Lucas Oliveira');
       expect(data.dependentProfiles[0].waterIntakeLogs).toHaveLength(1);

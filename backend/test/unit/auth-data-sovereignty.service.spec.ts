@@ -272,7 +272,7 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
 
       const result = await authService.exportUserData(mockUserId);
 
-      expect(result.metadata.formatVersion).toBe('1.3');
+      expect(result.metadata.formatVersion).toBe('1.4');
       expect(result.journalEntries.map((e) => e.id)).toEqual(['entry-new', 'entry-old']);
       expect(result.journalEntries[0]).toEqual({
         id: 'entry-new',
@@ -299,6 +299,101 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       expect(JSON.stringify(result)).not.toMatch(/"v1:/);
     });
 
+    it('exports "Meus cuidados" records and documents per profile, decrypted, without loading files', async () => {
+      // Care data is encrypted JSON; 'v1:broken' stands for a value that no longer decrypts.
+      mockEncryptionService.decrypt.mockImplementation((val: string) => {
+        if (val === 'v1:broken') throw new Error('unsupported state or unable to authenticate data');
+        return val.startsWith('v1:json:') ? val.slice('v1:json:'.length) : `decrypted:${val}`;
+      });
+      const careRecord = (
+        id: string,
+        profileId: string,
+        kind: string,
+        occursAt: string | null,
+        data: string,
+        parentId: string | null = null,
+      ) => ({
+        id,
+        userId: mockUserId,
+        profileId,
+        kind,
+        parentId,
+        occursAt: occursAt ? new Date(occursAt) : null,
+        data,
+        createdAt: new Date('2026-10-01T10:00:00Z'),
+        updatedAt: new Date('2026-10-02T10:00:00Z'),
+      });
+      mockSelectSequence([
+        [mockUser],
+        [consent],
+        ownedProfiles,
+        [], // symptom logs
+        [], // safety events
+        [], // water
+        [], // journal entries (no items query)
+        [], // conditions
+        [
+          careRecord('vac-1', primaryProfileId, 'vaccine_dose', '2026-03-10T00:00:00Z', 'v1:json:{"vaccine":"Influenza","doseLabel":"Anual"}'),
+          careRecord('med-1', primaryProfileId, 'medication', null, 'v1:json:{"name":"Vitamina D","stockCount":20}'),
+          careRecord('intake-1', primaryProfileId, 'medication_intake', '2026-10-20T08:00:00Z', 'v1:json:{"action":"taken"}', 'med-1'),
+          careRecord('appt-lucas', dependentProfileId, 'appointment', '2026-11-05T14:00:00Z', 'v1:broken'),
+        ],
+        [
+          {
+            id: 'doc-1',
+            profileId: primaryProfileId,
+            kind: 'lab',
+            mime: 'application/pdf',
+            sizeBytes: 120000,
+            status: 'ready',
+            data: 'v1:json:{"title":"Exames de rotina","values":[{"item":"Glicose","value":"90","confirmed":true}]}',
+            createdAt: new Date('2026-10-10T10:00:00Z'),
+            updatedAt: new Date('2026-10-11T10:00:00Z'),
+          },
+        ],
+      ]);
+
+      const result = await authService.exportUserData(mockUserId);
+
+      expect(result.metadata.formatVersion).toBe('1.4');
+      expect(result.metadata.careDocumentsNote).toContain('arquivos originais');
+      // Newest first by date of the record (dose, intake, appointment), else by creation.
+      expect(result.careRecords.map((r) => r.id)).toEqual(['intake-1', 'med-1', 'vac-1']);
+      expect(result.careRecords[0]).toEqual({
+        id: 'intake-1',
+        kind: 'medication_intake',
+        parentId: 'med-1',
+        occursAt: '2026-10-20T08:00:00.000Z',
+        data: { action: 'taken' },
+        createdAt: '2026-10-01T10:00:00.000Z',
+        updatedAt: '2026-10-02T10:00:00.000Z',
+      });
+      expect(result.careRecords[1]).toMatchObject({ id: 'med-1', occursAt: null, data: { name: 'Vitamina D', stockCount: 20 } });
+      expect(result.careDocuments).toEqual([
+        {
+          id: 'doc-1',
+          kind: 'lab',
+          mime: 'application/pdf',
+          sizeBytes: 120000,
+          status: 'ready',
+          data: { title: 'Exames de rotina', values: [{ item: 'Glicose', value: '90', confirmed: true }] },
+          createdAt: '2026-10-10T10:00:00.000Z',
+          updatedAt: '2026-10-11T10:00:00.000Z',
+        },
+      ]);
+
+      const lucas = result.dependentProfiles[0];
+      expect(lucas.careRecords).toEqual([expect.objectContaining({ id: 'appt-lucas', kind: 'appointment', data: null })]);
+      expect(lucas.careDocuments).toEqual([]);
+      expect(JSON.stringify(result)).not.toMatch(/"v1:/);
+
+      // The document query lists its columns and never asks for the file bytes.
+      const documentColumns = Object.keys(mockTxSelect.mock.calls.at(-1)[0]);
+      expect(documentColumns).toEqual(expect.arrayContaining(['id', 'profileId', 'kind', 'mime', 'sizeBytes', 'status', 'data']));
+      expect(documentColumns).not.toContain('file');
+      expect(documentColumns).not.toContain('fileHmac');
+    });
+
     it('skips clinical queries when the account owns no profile yet', async () => {
       mockSelectSequence([[mockUser], [], []]);
 
@@ -310,6 +405,8 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       expect(result.waterIntakeLogs).toEqual([]);
       expect(result.journalEntries).toEqual([]);
       expect(result.userConditions).toEqual([]);
+      expect(result.careRecords).toEqual([]);
+      expect(result.careDocuments).toEqual([]);
       expect(result.dependentProfiles).toEqual([]);
     });
   });

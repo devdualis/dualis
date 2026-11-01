@@ -22,6 +22,8 @@ import {
   journalEntries,
   journalItems,
   userConditions,
+  careRecords,
+  careDocuments,
   emailVerifications,
   passwordResets,
 } from '../../database/schema';
@@ -42,6 +44,8 @@ import { DeleteAccountDto } from './dto/delete-account.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import {
+  ExportedCareDocumentDto,
+  ExportedCareRecordDto,
   ExportedJournalEntryDto,
   ExportedSymptomLogDto,
   ExportedUserConditionDto,
@@ -337,6 +341,31 @@ export class AuthService {
         : [];
       const conditionLabels = new Map(conditionRecords.map((c) => [c.id, this.decryptForExport(c.label)]));
 
+      // "Meus cuidados": vaccine doses, allergies, medications and their intakes, appointments,
+      // and documents. Document files are never loaded here (up to 10 MB each).
+      const careRecordRows = ownedProfileIds.length
+        ? await tx
+            .select()
+            .from(careRecords)
+            .where(inArray(careRecords.profileId, ownedProfileIds))
+        : [];
+      const careDocumentRows = ownedProfileIds.length
+        ? await tx
+            .select({
+              id: careDocuments.id,
+              profileId: careDocuments.profileId,
+              kind: careDocuments.kind,
+              mime: careDocuments.mime,
+              sizeBytes: careDocuments.sizeBytes,
+              status: careDocuments.status,
+              data: careDocuments.data,
+              createdAt: careDocuments.createdAt,
+              updatedAt: careDocuments.updatedAt,
+            })
+            .from(careDocuments)
+            .where(inArray(careDocuments.profileId, ownedProfileIds))
+        : [];
+
       const clinicalDataFor = (profileId: string | undefined) => ({
         symptomLogs: symptomRecords
           .filter((s) => s.profileId === profileId)
@@ -373,6 +402,35 @@ export class AuthService {
               archivedAt: c.archivedAt?.toISOString() ?? null,
             }),
           ),
+        careRecords: careRecordRows
+          .filter((r) => r.profileId === profileId)
+          .sort((a, b) => (b.occursAt ?? b.createdAt).getTime() - (a.occursAt ?? a.createdAt).getTime())
+          .map(
+            (r): ExportedCareRecordDto => ({
+              id: r.id,
+              kind: r.kind,
+              parentId: r.parentId,
+              occursAt: r.occursAt?.toISOString() ?? null,
+              data: this.decryptJsonForExport(r.data),
+              createdAt: r.createdAt.toISOString(),
+              updatedAt: r.updatedAt.toISOString(),
+            }),
+          ),
+        careDocuments: careDocumentRows
+          .filter((d) => d.profileId === profileId)
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+          .map(
+            (d): ExportedCareDocumentDto => ({
+              id: d.id,
+              kind: d.kind,
+              mime: d.mime,
+              sizeBytes: d.sizeBytes,
+              status: d.status,
+              data: this.decryptJsonForExport(d.data),
+              createdAt: d.createdAt.toISOString(),
+              updatedAt: d.updatedAt.toISOString(),
+            }),
+          ),
       });
 
       const primaryProfile = ownedProfiles.find((p) => p.profileType === 'primary');
@@ -383,11 +441,13 @@ export class AuthService {
       return {
         metadata: {
           exportDate: new Date().toISOString(),
-          formatVersion: '1.3',
+          formatVersion: '1.4',
           legalBasis: 'LGPD Art. 18, V (Portabilidade de Dados)',
           dataController: 'WGI (Brothers Baum Ltda.)',
           legacyFieldsNote:
             'Os campos em "legacy" vêm de uma versão anterior do app e não são mais gravados. Estão incluídos apenas para que você tenha acesso ao seu histórico completo.',
+          careDocumentsNote:
+            'Os documentos de "Meus cuidados" trazem os dados lidos e os valores que você confirmou. Os arquivos originais (fotos e PDFs) não vão neste arquivo, porque podem ser grandes: abra cada documento em Meus cuidados para ver o original.',
         },
         profile: {
           id: userRecord.id,
@@ -458,6 +518,17 @@ export class AuthService {
     if (!value.startsWith('v1:')) return value;
     try {
       return this.encryptionService.decrypt(value);
+    } catch {
+      return null;
+    }
+  }
+
+  /** Object stored as encrypted JSON (care data); null when empty or unreadable. */
+  private decryptJsonForExport(value: string | null): Record<string, unknown> | null {
+    const text = this.decryptForExport(value);
+    if (!text) return null;
+    try {
+      return JSON.parse(text);
     } catch {
       return null;
     }

@@ -5,10 +5,13 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
 import { join } from 'node:path';
 import * as dotenv from 'dotenv';
+import { JwtService } from '@nestjs/jwt';
 import * as schema from '../../src/database/schema';
 import { DatabaseService } from '../../src/database/database.service';
 import { EncryptionService } from '../../src/common/encryption/encryption.service';
+import { EmailService } from '../../src/common/email/email.service';
 import { CareService } from '../../src/modules/care/care.service';
+import { AuthService } from '../../src/modules/auth/auth.service';
 
 dotenv.config();
 
@@ -25,6 +28,7 @@ describe('Security Regression: 0021 premium care (care_records, care_documents R
   let adminPool: Pool;
   let appPool: Pool;
   let service: CareService;
+  let encryption: EncryptionService;
   let reader: { read: () => Promise<unknown> };
   let readerResult: unknown = { values: [{ item: 'Colesterol total', value: '212', unit: 'mg/dL', reference: 'até 190' }] };
   let isDbAvailable = false;
@@ -134,7 +138,7 @@ describe('Security Regression: 0021 premium care (care_records, care_documents R
     expect(role.rows[0]).toEqual({ rolsuper: false, rolbypassrls: false });
 
     const db = drizzle(appPool, { schema });
-    const encryption = new EncryptionService({ get: () => randomBytes(32).toString('hex') } as any);
+    encryption = new EncryptionService({ get: () => randomBytes(32).toString('hex') } as any);
     reader = { read: async () => readerResult };
     service = new CareService(new DatabaseService(db, appPool), encryption, reader as any);
     isDbAvailable = true;
@@ -268,6 +272,36 @@ describe('Security Regression: 0021 premium care (care_records, care_documents R
 
     const rows = (await adminPool.query(`SELECT count(*)::int AS n FROM care_documents WHERE profile_id = $1 AND file_hmac IS NOT NULL AND id = $2`, [primaryA, first.id])).rows[0];
     expect(rows.n).toBe(1);
+  });
+
+  it('the owner\'s data export carries the care data of every owned profile; grantees and strangers get none', async (ctx) => {
+    if (!isDbAvailable) return ctx.skip();
+    const auth = new AuthService(
+      drizzle(appPool, { schema }) as any,
+      new JwtService({ secret: randomBytes(32).toString('hex') }),
+      encryption,
+      new EmailService({ get: () => undefined } as any),
+    );
+
+    const exportA = await auth.exportUserData(ownerA);
+    expect(exportA.careRecords.map((r) => r.kind)).toEqual(expect.arrayContaining(['allergy', 'medication', 'medication_intake']));
+    expect(exportA.careRecords.find((r) => r.kind === 'allergy')?.data).toMatchObject({ name: 'Dipirona' });
+    const lab = exportA.careDocuments.find((d) => d.status === 'ready');
+    expect(lab).toMatchObject({ kind: 'lab', mime: 'application/pdf', data: { labName: 'Fleury' } });
+    expect(lab).not.toHaveProperty('file');
+    // What a co-manager wrote on the owner's dependent is part of the owner's export.
+    const lucas = exportA.dependentProfiles.find((p) => p.profile.id === dependentId)!;
+    expect(lucas.careRecords.map((r) => r.data)).toEqual([expect.objectContaining({ batch: 'DT2026A17' })]);
+    expect(lucas.careDocuments).toHaveLength(1);
+    expect(JSON.stringify(exportA)).not.toMatch(/"v1:/);
+
+    // Access to Lucas is not ownership: grantees export none of his data, nor does a stranger.
+    for (const other of [viewerB, coManagerC, strangerD]) {
+      const exported = await auth.exportUserData(other);
+      expect(exported.careRecords).toEqual([]);
+      expect(exported.careDocuments).toEqual([]);
+      expect(exported.dependentProfiles).toEqual([]);
+    }
   });
 
   it('check constraints reject unknown kinds even without the API', async (ctx) => {

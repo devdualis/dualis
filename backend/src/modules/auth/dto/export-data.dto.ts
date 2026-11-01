@@ -84,6 +84,36 @@ export interface ExportedUserConditionDto {
   archivedAt: string | null;
 }
 
+/**
+ * "Meus cuidados" record as the person entered it: vaccine_dose, allergy, medication,
+ * medication_intake or appointment. `data` holds the fields of that kind.
+ */
+export interface ExportedCareRecordDto {
+  id: string;
+  kind: string;
+  /** For medication_intake: the medication it belongs to. */
+  parentId: string | null;
+  occursAt: string | null;
+  data: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Exam, prescription or other document of "Meus cuidados": what was read and what the person
+ * confirmed (`data`). The original file is not part of the export.
+ */
+export interface ExportedCareDocumentDto {
+  id: string;
+  kind: string;
+  mime: string;
+  sizeBytes: number;
+  status: string;
+  data: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ExportedDependentProfileDto {
   id: string;
   name: string;
@@ -101,6 +131,8 @@ export interface ExportedDependentDataDto {
   waterIntakeLogs: ExportedWaterIntakeLogDto[];
   journalEntries: ExportedJournalEntryDto[];
   userConditions: ExportedUserConditionDto[];
+  careRecords: ExportedCareRecordDto[];
+  careDocuments: ExportedCareDocumentDto[];
 }
 
 export interface UserDataExportResponseDto {
@@ -111,6 +143,8 @@ export interface UserDataExportResponseDto {
     dataController: string;
     /** Explains the `legacy` block on symptom logs. */
     legacyFieldsNote: string;
+    /** Says the original document files are not in the export and where to open them. */
+    careDocumentsNote: string;
   };
   profile: ExportedProfileDto;
   consents: ExportedConsentDto[];
@@ -119,5 +153,7 @@ export interface UserDataExportResponseDto {
   waterIntakeLogs: ExportedWaterIntakeLogDto[];
   journalEntries: ExportedJournalEntryDto[];
   userConditions: ExportedUserConditionDto[];
+  careRecords: ExportedCareRecordDto[];
+  careDocuments: ExportedCareDocumentDto[];
   dependentProfiles: ExportedDependentDataDto[];
 }
