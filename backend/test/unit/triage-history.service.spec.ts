@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { EncryptionService } from '../../src/common/encryption/encryption.service';
 import { TriageHistoryService } from '../../src/modules/triage/services/triage-history.service';
 
 describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, SEC-01)', () => {
@@ -10,6 +11,76 @@ describe('TriageHistoryService Unit Tests (DASH-01, DASH-02, DASH-03, DASH-04, S
       transaction: vi.fn(),
     };
     service = new TriageHistoryService(mockDb);
+  });
+
+  describe('stored history decoding', () => {
+    const failure = new Error('corrupt ciphertext');
+
+    beforeEach(() => {
+      mockDb.transaction.mockResolvedValue([]);
+    });
+
+    it.each([
+      [null, null, null],
+      [undefined, undefined, null],
+      ['', '', null],
+      ['{"answer":"plain"}', 'plain narrative', { answer: 'plain' }],
+      ['invalid JSON', 'plain narrative', { raw: 'invalid JSON' }],
+      ['v2:answers', 'v2:narrative', { raw: 'v2:answers' }],
+    ])('passes through non-v1 or absent fields (%j, %j)', async (stepAnswers, encryptedNarrative, expectedAnswers) => {
+      const decrypt = vi.fn();
+      service = new TriageHistoryService(mockDb, { decrypt } as unknown as EncryptionService);
+      mockDb.transaction.mockResolvedValue([{
+        id: 'log-1', intensity: 2, recordedAt: new Date(), stepAnswers, encryptedNarrative,
+      }]);
+
+      const { logs } = await service.getHistory('usr-1', 'prof-usr-1');
+
+      expect(logs[0].stepAnswers).toEqual(expectedAnswers);
+      expect(logs[0].narrative).toBe(encryptedNarrative || null);
+      expect(decrypt).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['valid JSON', '{"answer":"decoded","_entryVertical":"physical"}', 'decoded narrative', { answer: 'decoded' }, 'decoded narrative', 'physical'],
+      ['empty strings', '', '', { raw: '' }, '', 'emotional'],
+      ['malformed JSON', 'not JSON', 'decoded narrative', { raw: 'not JSON' }, 'decoded narrative', 'emotional'],
+      ['both failures', failure, failure, { raw: 'v1:answers' }, 'v1:narrative', 'emotional'],
+      ['answers failure', failure, 'decoded narrative', { raw: 'v1:answers' }, 'decoded narrative', 'emotional'],
+      ['narrative failure', '{"answer":"decoded"}', failure, { answer: 'decoded' }, 'v1:narrative', 'emotional'],
+    ])('preserves decrypted values and independent fallbacks: %s', async (
+      _label, answersResult, narrativeResult, expectedAnswers, expectedNarrative, expectedVertical,
+    ) => {
+      const decrypt = vi.fn((value: string) => {
+        const result = value === 'v1:answers' ? answersResult : narrativeResult;
+        if (result instanceof Error) throw result;
+        return result;
+      });
+      service = new TriageHistoryService(mockDb, { decrypt } as unknown as EncryptionService);
+      mockDb.transaction.mockResolvedValue([{
+        id: 'log-1', intensity: 2, recordedAt: new Date(), organicPrimacyApplied: true,
+        stepAnswers: 'v1:answers', encryptedNarrative: 'v1:narrative',
+      }]);
+
+      const { logs } = await service.getHistory('usr-1', 'prof-usr-1');
+
+      expect(logs[0].stepAnswers).toEqual(expectedAnswers);
+      expect(logs[0].narrative).toBe(expectedNarrative);
+      expect(logs[0].vertical).toBe(expectedVertical);
+      expect(decrypt.mock.calls).toEqual([['v1:answers'], ['v1:narrative']]);
+    });
+
+    it('keeps ciphertext raw when the optional encryption service is absent', async () => {
+      mockDb.transaction.mockResolvedValue([{
+        id: 'log-1', intensity: 2, recordedAt: new Date(),
+        stepAnswers: 'v1:answers', encryptedNarrative: 'v1:narrative',
+      }]);
+
+      const { logs } = await service.getHistory('usr-1', 'prof-usr-1');
+
+      expect(logs[0].stepAnswers).toEqual({ raw: 'v1:answers' });
+      expect(logs[0].narrative).toBe('v1:narrative');
+    });
   });
 
   it('1. returns empty summaries when no logs exist in past 14 days', async () => {
