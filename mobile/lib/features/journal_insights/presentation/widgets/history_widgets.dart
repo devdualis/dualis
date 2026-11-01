@@ -47,7 +47,8 @@ class HistorySegmented<T> extends StatelessWidget {
                         BoxConstraints(minHeight: compact ? 36 : 44),
                     alignment: Alignment.center,
                     padding: EdgeInsets.symmetric(
-                        horizontal: compact ? 12 : 8, vertical: 6),
+                        horizontal: compact ? 12 : (options.length > 4 ? 4 : 8),
+                        vertical: 6),
                     decoration: BoxDecoration(
                       color: value == selected
                           ? AppColors.surfaceLight
@@ -65,8 +66,10 @@ class HistorySegmented<T> extends StatelessWidget {
                     ),
                     child: Text(
                       label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: compact ? 13 : 14,
+                        fontSize: compact ? 13 : (options.length > 4 ? 12 : 14),
                         fontWeight: value == selected
                             ? FontWeight.w700
                             : FontWeight.w600,

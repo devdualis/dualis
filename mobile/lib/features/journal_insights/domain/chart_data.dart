@@ -288,16 +288,24 @@ class CalendarDay {
   /// Sum of water events that day, null when there was none.
   final int? waterMl;
 
+  /// Period reported that day, null or bool.
+  final bool? period;
+
   const CalendarDay({
     required this.day,
     this.emotional = const [],
     this.physical = const [],
     this.positive = const [],
     this.waterMl,
+    this.period,
   });
 
   bool get isEmpty =>
-      emotional.isEmpty && physical.isEmpty && positive.isEmpty && waterMl == null;
+      emotional.isEmpty &&
+      physical.isEmpty &&
+      positive.isEmpty &&
+      waterMl == null &&
+      period != true;
 }
 
 Map<DateTime, CalendarDay> calendarDays({
@@ -305,6 +313,7 @@ Map<DateTime, CalendarDay> calendarDays({
   required List<RecordPoint> physical,
   List<RecordPoint> positive = const [],
   required Map<DateTime, int> waterTotals,
+  Map<DateTime, bool>? periodDays,
 }) {
   Map<DateTime, List<RecordPoint>> byDay(List<RecordPoint> points) {
     final result = <DateTime, List<RecordPoint>>{};
@@ -318,7 +327,14 @@ Map<DateTime, CalendarDay> calendarDays({
   final phy = byDay(physical);
   final good = byDay(positive);
   final water = normalizeWaterTotals(waterTotals);
-  final days = {...emo.keys, ...phy.keys, ...good.keys, ...water.keys};
+  final periods = periodDays ?? const {};
+  final days = {
+    ...emo.keys,
+    ...phy.keys,
+    ...good.keys,
+    ...water.keys,
+    ...periods.keys,
+  };
   return {
     for (final d in days)
       d: CalendarDay(
@@ -327,6 +343,7 @@ Map<DateTime, CalendarDay> calendarDays({
         physical: phy[d] ?? const [],
         positive: good[d] ?? const [],
         waterMl: water[d],
+        period: periods[d],
       ),
   };
 }

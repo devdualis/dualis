@@ -4251,4 +4251,124 @@ class AppLocalizationsEs extends AppLocalizations {
   String jv22EntryHelpers(String labels) {
     return 'Lo que ayudó: $labels';
   }
+
+  @override
+  String get habitsTitleToday => 'Hábitos de hoy';
+
+  @override
+  String get habitsTitleYesterday => 'Hábitos de ayer';
+
+  @override
+  String get habitsTabToday => 'Hoy';
+
+  @override
+  String get habitsTabYesterday => 'Ayer';
+
+  @override
+  String get habitsRegisterAction => 'Registrar';
+
+  @override
+  String get habitsNoRecordsToday => 'Ningún hábito registrado hoy';
+
+  @override
+  String get habitsSaved => 'Guardado';
+
+  @override
+  String get habitsSleepQualityQuestion => '¿Cómo dormiste?';
+
+  @override
+  String get habitsSleepQualityBem => '😴 Dormí bien';
+
+  @override
+  String get habitsSleepQualityRegular => '😐 Más o menos';
+
+  @override
+  String get habitsSleepQualityMal => '😫 Dormí mal';
+
+  @override
+  String get habitsSleepHoursQuestion => '¿Cuántas horas, más o menos?';
+
+  @override
+  String get habitsSleepHoursMenos5 => 'Menos de 5 h';
+
+  @override
+  String get habitsSleepHours5To6 => '5 a 6 h';
+
+  @override
+  String get habitsSleepHours7To8 => '7 a 8 h';
+
+  @override
+  String get habitsSleepHours9Mais => '9 h o más';
+
+  @override
+  String get habitsMovedQuestion => '¿Moviste el cuerpo hoy?';
+
+  @override
+  String get habitsMovedYes => 'Sí';
+
+  @override
+  String get habitsMovedNo => 'No';
+
+  @override
+  String get habitsMovementMinutesQuestion => '¿Cuánto tiempo?';
+
+  @override
+  String get habitsMovementMinutesAte15 => 'Hasta 15 min';
+
+  @override
+  String get habitsMovementMinutes15To30 => '15 a 30 min';
+
+  @override
+  String get habitsMovementMinutes30To60 => '30 a 60 min';
+
+  @override
+  String get habitsMovementMinutesMais60 => 'Más de 1 h';
+
+  @override
+  String get habitsPeriodQuestion => '¿Menstruación hoy?';
+
+  @override
+  String get habitsPeriodYes => 'Sí';
+
+  @override
+  String get habitsPeriodNo => 'No';
+
+  @override
+  String get habitsTrackMenstrualCycleSetting => 'Seguir ciclo menstrual';
+
+  @override
+  String get habitsChartTitle => 'Hábitos';
+
+  @override
+  String get habitsChartSleepQualityTitle => 'Calidad del sueño';
+
+  @override
+  String get habitsChartSleepHoursTitle => 'Horas de sueño';
+
+  @override
+  String get habitsChartMovementTitle => 'Movimiento corporal';
+
+  @override
+  String get habitsChartPeriodTitle => 'Ciclo menstrual';
+
+  @override
+  String habitsChartSleepBadCount(int count, int days) {
+    return 'Dormiste mal en $count de los últimos $days días';
+  }
+
+  @override
+  String habitsChartMovementCount(int count) {
+    return 'Moviste el cuerpo en $count días';
+  }
+
+  @override
+  String habitsChartPeriodCount(int count) {
+    return 'Días con menstruación: $count';
+  }
+
+  @override
+  String get habitsChartEmpty => 'Sin registros en el período';
+
+  @override
+  String get habitsPeriodLabel => 'Menstruación';
 }

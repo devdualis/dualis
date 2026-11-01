@@ -29,6 +29,8 @@ import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../hydration/presentation/hydration_reminder_offer.dart';
 import '../../../hydration/presentation/screens/hydration_dashboard_screen.dart';
 import '../../../hydration/presentation/widgets/water_intake_modal.dart';
+import '../../../habits/presentation/controllers/habits_controller.dart';
+import '../../../habits/presentation/widgets/today_habits_card.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
@@ -79,6 +81,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(triggerCheckInProvider.notifier).loadTodayCheckIn();
       ref.read(triageOutcomeProvider.notifier).loadTodayOutcome();
       ref.read(hydrationControllerProvider.notifier).loadData();
+      ref.read(habitsControllerProvider.notifier).loadData();
       if (mounted && ref.read(authControllerProvider).isAuthenticated) {
         await ref.read(hydrationReminderOfferProvider).maybeShow(context);
       }
@@ -103,6 +106,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if ((prev == null || !prev.isAuthenticated) && next.isAuthenticated) {
         ref.read(triggerCheckInProvider.notifier).loadTodayCheckIn();
         ref.read(hydrationControllerProvider.notifier).loadData();
+        ref.read(habitsControllerProvider.notifier).loadData();
         unawaited(ref.read(hydrationReminderOfferProvider).maybeShow(context));
       }
     });
@@ -492,6 +496,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 20),
 
               const DualAxisTriggerCard(),
+              const SizedBox(height: 16),
+              const TodayHabitsCard(),
               const SizedBox(height: 16),
             ],
           ),
