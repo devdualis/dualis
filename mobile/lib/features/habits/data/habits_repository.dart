@@ -30,10 +30,10 @@ class HabitsRepositoryImpl implements HabitsRepository {
     HabitsRemoteDataSource? remoteDataSource,
     Ref? ref,
     DateTime Function()? clock,
-  })  : _storage = storage,
-        _remoteDataSource = remoteDataSource,
-        _ref = ref,
-        _clock = clock;
+  }) : _storage = storage,
+       _remoteDataSource = remoteDataSource,
+       _ref = ref,
+       _clock = clock;
 
   DateTime get _now {
     if (_clock != null) return _clock();
@@ -52,7 +52,7 @@ class HabitsRepositoryImpl implements HabitsRepository {
     if (e is HabitClientException) return true;
     if (e is DioException) {
       final status = e.response?.statusCode;
-      return status != null && status >= 400 && status < 500;
+      return isPermanentHabitRejection(status);
     }
     return false;
   }
@@ -67,7 +67,8 @@ class HabitsRepositoryImpl implements HabitsRepository {
 
   String _storeKey(String profileKey) => 'dualis_habits_store_$profileKey';
   String _pendingKey(String profileKey) => 'dualis_habits_pending_$profileKey';
-  String _cycleKey(String profileKey) => 'dualis_habits_track_cycle_$profileKey';
+  String _cycleKey(String profileKey) =>
+      'dualis_habits_track_cycle_$profileKey';
 
   Future<Map<String, HabitDay>> _readLocalStore(String profileKey) async {
     try {
@@ -144,7 +145,11 @@ class HabitsRepositoryImpl implements HabitsRepository {
       final habit = store[day];
       if (habit != null) {
         try {
-          final saved = await remote.saveHabitDay(day, habit, profileId: profileId);
+          final saved = await remote.saveHabitDay(
+            day,
+            habit,
+            profileId: profileId,
+          );
           if (saved == null) {
             remaining.add(day);
           } else {
@@ -209,9 +214,14 @@ class HabitsRepositoryImpl implements HabitsRepository {
     final cutoffStr = _formatDay(cutoff);
     final todayStr = _formatDay(today);
 
-    final list = store.values
-        .where((h) => h.day.compareTo(cutoffStr) >= 0 && h.day.compareTo(todayStr) <= 0)
-        .toList();
+    final list =
+        store.values
+            .where(
+              (h) =>
+                  h.day.compareTo(cutoffStr) >= 0 &&
+                  h.day.compareTo(todayStr) <= 0,
+            )
+            .toList();
     list.sort((a, b) => b.day.compareTo(a.day)); // newest first
     return list;
   }

@@ -5,6 +5,15 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/security/secure_storage_service.dart';
 import '../domain/models/habit_day.dart';
 
+/// Answers that will never succeed on retry (the server rejected this write).
+/// 401, 408 and 429 are left out: the write stays pending and is sent again.
+bool isPermanentHabitRejection(int? status) =>
+    status == 400 ||
+    status == 403 ||
+    status == 404 ||
+    status == 409 ||
+    status == 422;
+
 class HabitClientException implements Exception {
   final int statusCode;
   final dynamic data;
@@ -30,20 +39,18 @@ class HabitsRemoteDataSource {
   HabitsRemoteDataSource({
     ApiClient? apiClient,
     SecureStorageService? secureStorage,
-  })  : _apiClient = apiClient ?? ApiClient(),
-        _secureStorage = secureStorage ?? SecureStorageService();
+  }) : _apiClient = apiClient ?? ApiClient(),
+       _secureStorage = secureStorage ?? SecureStorageService();
 
-  Future<List<HabitDay>?> getHabits({
-    int days = 30,
-    String? profileId,
-  }) async {
+  Future<List<HabitDay>?> getHabits({int days = 30, String? profileId}) async {
     try {
       final token = await _secureStorage.getAccessToken();
       if (token == null || token.isEmpty) return null;
 
       final headers = <String, dynamic>{
         'Authorization': 'Bearer $token',
-        if (profileId != null && profileId.isNotEmpty) 'X-Profile-Id': profileId,
+        if (profileId != null && profileId.isNotEmpty)
+          'X-Profile-Id': profileId,
       };
 
       final response = await _apiClient.get(
@@ -76,7 +83,8 @@ class HabitsRemoteDataSource {
 
       final headers = <String, dynamic>{
         'Authorization': 'Bearer $token',
-        if (profileId != null && profileId.isNotEmpty) 'X-Profile-Id': profileId,
+        if (profileId != null && profileId.isNotEmpty)
+          'X-Profile-Id': profileId,
       };
 
       final response = await _apiClient.put(
@@ -91,8 +99,8 @@ class HabitsRemoteDataSource {
       return null;
     } on DioException catch (e) {
       final code = e.response?.statusCode;
-      if (code != null && code >= 400 && code < 500) {
-        throw HabitClientException(code, e.response?.data);
+      if (isPermanentHabitRejection(code)) {
+        throw HabitClientException(code!, e.response?.data);
       }
       return null;
     } catch (_) {
@@ -100,17 +108,15 @@ class HabitsRemoteDataSource {
     }
   }
 
-  Future<bool> deleteHabitDay(
-    String day, {
-    String? profileId,
-  }) async {
+  Future<bool> deleteHabitDay(String day, {String? profileId}) async {
     try {
       final token = await _secureStorage.getAccessToken();
       if (token == null || token.isEmpty) return false;
 
       final headers = <String, dynamic>{
         'Authorization': 'Bearer $token',
-        if (profileId != null && profileId.isNotEmpty) 'X-Profile-Id': profileId,
+        if (profileId != null && profileId.isNotEmpty)
+          'X-Profile-Id': profileId,
       };
 
       final response = await _apiClient.delete(
