@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { Logger } from '@nestjs/common';
 import { SafetyEventsService } from '../../src/modules/safety/safety-events.service';
 
 describe('SafetyEventsService Unit Tests', () => {
@@ -69,6 +70,20 @@ describe('SafetyEventsService Unit Tests', () => {
     await service.recordSafetyEvent(dto, null, 'prof-dependent-1');
 
     expect(anonymousValues.mock.calls[0][0].profileId).toBeNull();
+  });
+
+  it('logs only the action: never who called, on which profile or which line', async () => {
+    const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    stubAuthenticatedInsert();
+
+    await service.recordSafetyEvent({ ...dto, channel: 'emotionalSupport_188' }, 'user-1', 'prof-dependent-1');
+    await service.recordSafetyEvent({ ...dto, channel: 'emotionalSupport_188' }, null);
+
+    expect(log.mock.calls.map(([message]) => message)).toEqual([
+      'Recorded safety resource event: action=call_started',
+      'Recorded safety resource event: action=call_started',
+    ]);
+    log.mockRestore();
   });
 
   it('stores no channel when none is sent', async () => {

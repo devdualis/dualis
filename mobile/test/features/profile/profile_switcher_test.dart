@@ -41,7 +41,6 @@ class FakeActiveProfileController extends ActiveProfileController {
           accessLevel: p.accessLevel,
           dateOfBirth: p.dateOfBirth,
           gender: p.gender,
-          avatarUrl: p.avatarUrl,
         );
       }
       return p;

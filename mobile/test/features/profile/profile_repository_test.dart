@@ -55,7 +55,6 @@ void main() {
     'accessLevel': 'OWNER',
     'dateOfBirth': '2018-03-09',
     'gender': 'feminino',
-    'avatarUrl': null,
   };
 
   setUp(() {
@@ -82,7 +81,6 @@ void main() {
         'accessLevel': 'CO_MANAGE',
         'dateOfBirth': null,
         'gender': null,
-        'avatarUrl': null,
       },
     ]);
 

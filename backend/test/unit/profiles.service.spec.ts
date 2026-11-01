@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BadRequestException, ForbiddenException, ValidationPipe } from '@nestjs/common';
 import { ProfilesService, ageInYears } from '../../src/modules/profiles/profiles.service';
 import { CreateDependentDto } from '../../src/modules/profiles/dto/create-dependent.dto';
+import { UpdateProfileDto } from '../../src/modules/profiles/dto/update-profile.dto';
 import { profiles } from '../../src/database/schema/profiles.schema';
 import { legalGuardianships } from '../../src/database/schema/legal-guardianships.schema';
 
@@ -153,7 +154,6 @@ describe('ProfilesService Unit Tests', () => {
         profileType: 'dependent_minor',
         dateOfBirth: '2018-06-01',
         gender: 'masculino',
-        avatarUrl: null,
         ownership: 'dependent',
         accessLevel: 'OWNER',
       });
@@ -202,6 +202,7 @@ describe('ProfilesService Unit Tests', () => {
         id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
         accountOwnerId: OTHER_USER_ID,
         name: 'Mariana',
+        avatarUrl: 'https://tracker.example/pixel.png',
       });
       const { tx } = createTx({
         select: [
@@ -221,6 +222,8 @@ describe('ProfilesService Unit Tests', () => {
         [dependent.id, 'dependent', 'OWNER'],
         [sharedProfile.id, 'shared', 'CO_MANAGE'],
       ]);
+      // A stored picture link is never served: the app would load it on every phone.
+      expect(result.every((p) => !('avatarUrl' in p))).toBe(true);
       expect(tx.insert).not.toHaveBeenCalled();
     });
 
@@ -275,6 +278,18 @@ describe('ProfilesService Unit Tests', () => {
       id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
       accountOwnerId: OTHER_USER_ID,
       profileType: 'dependent_minor',
+    });
+
+    it('rejects a picture link with 400 at the validation layer', async () => {
+      // Any https link used to be stored and then loaded by every phone showing the profile.
+      const pipe = new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true });
+
+      await expect(
+        pipe.transform({ avatarUrl: 'https://tracker.example/pixel.png' }, { type: 'body', metatype: UpdateProfileDto }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      await expect(
+        pipe.transform({ name: 'Novo nome' }, { type: 'body', metatype: UpdateProfileDto }),
+      ).resolves.toMatchObject({ name: 'Novo nome' });
     });
 
     it('returns 403 for a VIEW_ONLY grantee', async () => {

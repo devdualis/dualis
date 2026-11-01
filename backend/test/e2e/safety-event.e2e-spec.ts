@@ -158,24 +158,30 @@ describe('Safety resource events E2E (POST /v1/journal/safety-event + legacy /v1
       expect(recordedFor('dependent')?.profileId).toBe(TEST_PROFILES.dependent);
     });
 
-    it('VIEW_ONLY grant still records (201): reaching help is never blocked by a permission level', async () => {
-      const res = await post('/v1/journal/safety-event', safetyPayload('viewOnly'), {
-        authorization: `Bearer ${validAccessToken}`,
-        'x-profile-id': TEST_PROFILES.sharedViewOnly,
-      });
+    it('a profile shared by another account files the event on the caller\'s own primary profile', async () => {
+      // The event is about the person who tapped: it must never land in the sharer's records.
+      for (const [channel, profileId] of [
+        ['viewOnly', TEST_PROFILES.sharedViewOnly],
+        ['coManage', TEST_PROFILES.sharedCoManage],
+      ]) {
+        const res = await post('/v1/journal/safety-event', safetyPayload(channel, 'call_started'), {
+          authorization: `Bearer ${validAccessToken}`,
+          'x-profile-id': profileId,
+        });
 
-      expect(res.statusCode).toBe(201);
-      expect(recordedFor('viewOnly')).toMatchObject({ userId: mockUserId, profileId: TEST_PROFILES.sharedViewOnly });
+        expect(res.statusCode).toBe(201);
+        expect(recordedFor(channel)).toMatchObject({ userId: mockUserId, profileId: defaultPrimaryProfileId(mockUserId) });
+      }
     });
 
-    it('profile the caller cannot reach returns 403', async () => {
+    it('a profile the caller cannot reach is not refused: filed on the caller\'s primary profile', async () => {
       const res = await post('/v1/journal/safety-event', safetyPayload('foreign'), {
         authorization: `Bearer ${validAccessToken}`,
         'x-profile-id': TEST_PROFILES.foreign,
       });
 
-      expect(res.statusCode).toBe(403);
-      expect(recordedFor('foreign')).toBeUndefined();
+      expect(res.statusCode).toBe(201);
+      expect(recordedFor('foreign')).toMatchObject({ userId: mockUserId, profileId: defaultPrimaryProfileId(mockUserId) });
     });
 
     it('rejects an unknown action, an invalid timestamp and health fields with 400', async () => {
@@ -224,6 +230,16 @@ describe('Safety resource events E2E (POST /v1/journal/safety-event + legacy /v1
 
       expect(res.statusCode).toBe(201);
       expect(recordedFor('LEGACY_AUTH')).toMatchObject({ userId: mockUserId, profileId: TEST_PROFILES.dependent });
+    });
+
+    it('files an old-app event made on a shared profile on the caller\'s primary profile', async () => {
+      const res = await post('/v1/triage/emergency-event', legacyPayload('LEGACY_SHARED'), {
+        authorization: `Bearer ${validAccessToken}`,
+        'x-profile-id': TEST_PROFILES.sharedCoManage,
+      });
+
+      expect(res.statusCode).toBe(201);
+      expect(recordedFor('LEGACY_SHARED')).toMatchObject({ userId: mockUserId, profileId: defaultPrimaryProfileId(mockUserId) });
     });
 
     it('expired token is recorded as anonymous with 201', async () => {

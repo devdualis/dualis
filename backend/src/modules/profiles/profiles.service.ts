@@ -152,7 +152,6 @@ export class ProfilesService {
         changes.dateOfBirth = dto.dateOfBirth.slice(0, 10);
       }
       if (dto.gender !== undefined) changes.gender = dto.gender;
-      if (dto.avatarUrl !== undefined) changes.avatarUrl = dto.avatarUrl;
 
       if (Object.keys(changes).length === 0) {
         return this.toResponse(profile, userId, accessLevel);
@@ -276,7 +275,6 @@ export class ProfilesService {
       profileType: profile.profileType,
       dateOfBirth: profile.dateOfBirth ?? null,
       gender: profile.gender ?? null,
-      avatarUrl: profile.avatarUrl ?? null,
       ownership,
       accessLevel,
     };

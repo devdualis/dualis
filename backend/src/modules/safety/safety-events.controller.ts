@@ -23,15 +23,18 @@ import {
 } from '../profiles/profile-context';
 
 /**
- * Audit of the static help resources. Session and X-Profile-Id are optional, and read
- * access is enough: reaching help must never be blocked by a login or a permission level.
+ * Audit of the static help resources. Session and X-Profile-Id are optional: reaching help
+ * must never be blocked by a login or a permission level. The event is about the person who
+ * tapped, so it is filed on the active profile only when the caller owns it (their own or a
+ * dependent's), else on their primary profile: a call made while viewing a profile shared by
+ * another account never lands in that person's records.
  * Every call stores a row, so calls are capped (429): per account when signed in, per IP and
  * in total when anonymous. The app sends these events fire-and-forget, so a 429 never delays
  * the help screen or the call.
  */
 @Controller({ version: '1' })
 @UseGuards(OptionalJwtAuthGuard, ProfileContextGuard)
-@ProfileAccess('read', { allowAnonymous: true })
+@ProfileAccess('read', { allowAnonymous: true, ownProfilesOnly: true })
 export class SafetyEventsController {
   constructor(
     @Inject(SafetyEventsService)

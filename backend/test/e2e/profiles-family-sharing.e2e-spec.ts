@@ -42,7 +42,6 @@ type StoredProfile = {
   name: string;
   dateOfBirth: string | null;
   gender: string | null;
-  avatarUrl: string | null;
 };
 
 type StoredGrant = {
@@ -86,7 +85,6 @@ function ensurePrimary(userId: string, name: string): StoredProfile {
     name,
     dateOfBirth: '1990-01-01',
     gender: 'masculino',
-    avatarUrl: null,
   };
   e2eStore.profiles.set(profile.id, profile);
   return profile;
@@ -110,7 +108,6 @@ function toProfileResponse(
     profileType: profile.profileType,
     dateOfBirth: profile.dateOfBirth,
     gender: profile.gender,
-    avatarUrl: profile.avatarUrl,
     ownership,
     accessLevel,
   };
@@ -185,7 +182,6 @@ class E2EProfilesService {
       name: dto.name.trim(),
       dateOfBirth: dto.dateOfBirth.slice(0, 10),
       gender: dto.gender,
-      avatarUrl: null,
     };
     e2eStore.profiles.set(profile.id, profile);
     return toProfileResponse(profile, userId, 'OWNER');
@@ -213,7 +209,6 @@ class E2EProfilesService {
     if (dto.name !== undefined) profile.name = dto.name.trim();
     if (dto.dateOfBirth !== undefined) profile.dateOfBirth = dto.dateOfBirth.slice(0, 10);
     if (dto.gender !== undefined) profile.gender = dto.gender;
-    if (dto.avatarUrl !== undefined) profile.avatarUrl = dto.avatarUrl;
 
     return toProfileResponse(profile, userId, accessLevel);
   }

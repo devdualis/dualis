@@ -241,21 +241,15 @@ class ProfileSelectionSheet extends ConsumerWidget {
         leading: CircleAvatar(
           radius: 18,
           backgroundColor: avatarBgColor,
-          backgroundImage: (profile.avatarUrl != null &&
-                  profile.avatarUrl!.isNotEmpty)
-            ? NetworkImage(profile.avatarUrl!)
-            : null,
-        child: (profile.avatarUrl == null || profile.avatarUrl!.isEmpty)
-            ? Text(
-                initial,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              )
-            : null,
-      ),
+          child: Text(
+            initial,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
       title: Text(
         profile.name,
         style: GoogleFonts.plusJakartaSans(

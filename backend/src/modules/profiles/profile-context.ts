@@ -29,9 +29,16 @@ export type ProfileContext = {
 export interface ProfileAccessOptions {
   /**
    * Let unauthenticated requests through without a profile context (used behind
-   * OptionalJwtAuthGuard, e.g. anonymous emergency events). A header without a user is still 401.
+   * OptionalJwtAuthGuard, e.g. anonymous emergency events). A header without a user is ignored.
    */
   allowAnonymous?: boolean;
+  /**
+   * Use X-Profile-Id only when the caller owns that profile (primary or dependent). A profile
+   * shared by another account, revoked or unknown resolves to the caller's primary profile
+   * instead of being used or refused. For records about the person holding the phone, not
+   * the profile on screen (help-resource events).
+   */
+  ownProfilesOnly?: boolean;
 }
 
 const PROFILE_ACCESS_KEY = 'profileAccess';
@@ -55,6 +62,8 @@ export const ActiveProfile = createParamDecorator(
  * - No header: the caller's primary profile (created lazily), OWNER.
  * - Header: owner or ACCEPTED, non-revoked grantee, checked under RLS with the same
  *   SQL helpers the clinical table policies use. Anything else is 403.
+ * - ownProfilesOnly: a header naming a profile the caller does not own falls back to
+ *   the primary profile.
  * - 'write' mode rejects VIEW_ONLY.
  */
 @Injectable()
@@ -92,11 +101,12 @@ export class ProfileContextGuard implements CanActivate {
       requestedProfileId = rawHeader.trim().toLowerCase();
     }
 
-    const profileContext = await this.databaseService.withRls(userId, (tx) =>
-      requestedProfileId
-        ? this.resolveRequested(tx, requestedProfileId)
-        : this.resolvePrimary(tx, userId),
-    );
+    const profileContext = await this.databaseService.withRls(userId, (tx) => {
+      if (!requestedProfileId) return this.resolvePrimary(tx, userId);
+      return metadata?.ownProfilesOnly
+        ? this.resolveOwnedOrPrimary(tx, userId, requestedProfileId)
+        : this.resolveRequested(tx, requestedProfileId);
+    });
 
     if (mode === 'write' && profileContext.accessLevel === 'VIEW_ONLY') {
       throw new ForbiddenException('Acesso somente leitura a este perfil.');
@@ -119,6 +129,18 @@ export class ProfileContextGuard implements CanActivate {
     if (row?.can_read) return { profileId, accessLevel: 'VIEW_ONLY' };
     // Same answer for unknown and foreign profiles: no enumeration.
     throw new ForbiddenException('Sem acesso a este perfil.');
+  }
+
+  private async resolveOwnedOrPrimary(
+    tx: DrizzleTransaction,
+    userId: string,
+    profileId: string,
+  ): Promise<ProfileContext> {
+    const requested = await this.resolveRequested(tx, profileId).catch((err: unknown) => {
+      if (err instanceof ForbiddenException) return undefined;
+      throw err;
+    });
+    return requested?.accessLevel === 'OWNER' ? requested : this.resolvePrimary(tx, userId);
   }
 
   private async resolvePrimary(tx: DrizzleTransaction, userId: string): Promise<ProfileContext> {

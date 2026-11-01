@@ -45,7 +45,7 @@ export class SafetyEventsService {
     profileId?: string | null,
   ): Promise<SafetyEventRecord> {
     // Anonymous events (no session) have no profile; authenticated ones are filed
-    // under the active profile resolved by ProfileContextGuard.
+    // under the profile ProfileContextGuard resolved, always one the caller owns.
     const eventValues = {
       userId: userId ?? null,
       profileId: userId ? (profileId ?? null) : null,
@@ -70,9 +70,9 @@ export class SafetyEventsService {
       insertedRecord = anonymousRecord;
     }
 
-    this.logger.log(
-      `Recorded safety resource event: action=${eventValues.action}, channel=${eventValues.channel ?? 'NONE'}, userId=${userId ?? 'ANONYMOUS'}, profileId=${eventValues.profileId ?? 'NONE'}`,
-    );
+    // Only the action. Who called which line (e.g. CVV) stays in the database, where RLS
+    // guards it and account deletion removes it; logs have neither.
+    this.logger.log(`Recorded safety resource event: action=${eventValues.action}`);
 
     return {
       id: insertedRecord.id,

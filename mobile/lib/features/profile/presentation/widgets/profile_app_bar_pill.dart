@@ -85,21 +85,14 @@ class ProfileAppBarPill extends ConsumerWidget {
                 CircleAvatar(
                   radius: 11,
                   backgroundColor: borderColor,
-                  backgroundImage: (profile.avatarUrl != null &&
-                          profile.avatarUrl!.isNotEmpty)
-                      ? NetworkImage(profile.avatarUrl!)
-                      : null,
-                  child: (profile.avatarUrl == null ||
-                          profile.avatarUrl!.isEmpty)
-                      ? Text(
-                          initial,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        )
-                      : null,
+                  child: Text(
+                    initial,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 6),
                 Flexible(

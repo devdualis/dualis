@@ -207,6 +207,49 @@ describe('ProfileContextGuard', () => {
     });
   });
 
+  describe('ownProfilesOnly (help-resource events)', () => {
+    const ownOnly = { mode: 'read' as const, options: { allowAnonymous: true, ownProfilesOnly: true } };
+
+    it('keeps an owned dependent named in the header', async () => {
+      const s = setup({ access: { is_owner: true, can_read: false, can_co_manage: false } }, ownOnly);
+      const { ctx, request } = contextFor(s.handler, s.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
+
+      await s.guard.canActivate(ctx);
+      expect(request.profileContext).toEqual({ profileId: DEPENDENT_ID, accessLevel: 'OWNER' });
+      expect(s.tx.select).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the caller\'s primary profile for a profile shared by another account', async () => {
+      for (const access of [
+        { is_owner: false, can_read: true, can_co_manage: true },
+        { is_owner: false, can_read: true, can_co_manage: false },
+      ]) {
+        const s = setup({ access, select: [[{ id: PRIMARY_ID }]] }, ownOnly);
+        const { ctx, request } = contextFor(s.handler, s.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
+
+        await expect(s.guard.canActivate(ctx)).resolves.toBe(true);
+        expect(request.profileContext).toEqual({ profileId: PRIMARY_ID, accessLevel: 'OWNER' });
+      }
+    });
+
+    it('falls back to the primary profile instead of 403 for a profile the caller cannot reach', async () => {
+      const s = setup(
+        { access: { is_owner: false, can_read: false, can_co_manage: false }, select: [[{ id: PRIMARY_ID }]] },
+        ownOnly,
+      );
+      const { ctx, request } = contextFor(s.handler, s.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
+
+      await expect(s.guard.canActivate(ctx)).resolves.toBe(true);
+      expect(request.profileContext).toEqual({ profileId: PRIMARY_ID, accessLevel: 'OWNER' });
+    });
+
+    it('still rejects a malformed header with 400', async () => {
+      const s = setup({}, ownOnly);
+      const { ctx } = contextFor(s.handler, s.cls, authed({ [PROFILE_HEADER]: 'not-a-uuid' }));
+      await expect(s.guard.canActivate(ctx)).rejects.toBeInstanceOf(BadRequestException);
+    });
+  });
+
   describe('authentication', () => {
     it('throws 401 when no user is attached', async () => {
       const s = setup({}, { mode: 'read' });

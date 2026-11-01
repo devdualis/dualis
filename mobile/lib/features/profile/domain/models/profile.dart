@@ -14,7 +14,6 @@ class Profile {
   final ProfileAccessLevel accessLevel;
   final DateTime? dateOfBirth;
   final String? gender;
-  final String? avatarUrl;
 
   const Profile({
     required this.id,
@@ -24,7 +23,6 @@ class Profile {
     required this.accessLevel,
     this.dateOfBirth,
     this.gender,
-    this.avatarUrl,
   });
 
   factory Profile.fromJson(Map<String, dynamic> json) {
@@ -46,7 +44,6 @@ class Profile {
       // `yyyy-MM-dd` parses as a local calendar date (no timezone shift).
       dateOfBirth: dob is String ? DateTime.tryParse(dob) : null,
       gender: json['gender'] as String?,
-      avatarUrl: json['avatarUrl'] as String?,
     );
   }
 

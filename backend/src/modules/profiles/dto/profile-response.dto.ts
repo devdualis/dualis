@@ -9,7 +9,6 @@ export class ProfileResponseDto {
   profileType!: ProfileType;
   dateOfBirth!: string | null;
   gender!: string | null;
-  avatarUrl!: string | null;
   ownership!: ProfileOwnership;
   accessLevel!: ProfileAccessLevel;
 }
