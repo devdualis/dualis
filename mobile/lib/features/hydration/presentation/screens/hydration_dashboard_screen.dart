@@ -134,7 +134,7 @@ class _HydrationDashboardScreenState
 }
 
 /// Logs a quick amount, then confirms it with "Desfazer" (handoff H1).
-Future<void> _logWithUndo(BuildContext context, WidgetRef ref, int ml) async {
+Future<void> logWaterWithUndo(BuildContext context, WidgetRef ref, int ml) async {
   final notifier = ref.read(hydrationControllerProvider.notifier);
   final messenger = ScaffoldMessenger.of(context);
   final l10n = AppLocalizations.of(context);
@@ -321,7 +321,7 @@ class _TodayCard extends ConsumerWidget {
                     key: const Key('hydration_quick_add_200'),
                     emoji: '🥛',
                     label: '200 ml',
-                    onTap: () => _logWithUndo(context, ref, 200),
+                    onTap: () => logWaterWithUndo(context, ref, 200),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -330,7 +330,7 @@ class _TodayCard extends ConsumerWidget {
                     key: const Key('hydration_quick_add_500'),
                     emoji: '🍶',
                     label: '500 ml',
-                    onTap: () => _logWithUndo(context, ref, 500),
+                    onTap: () => logWaterWithUndo(context, ref, 500),
                   ),
                 ),
                 const SizedBox(width: 8),

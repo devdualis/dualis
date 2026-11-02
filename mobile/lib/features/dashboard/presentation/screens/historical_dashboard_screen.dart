@@ -155,7 +155,9 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
             (HistoryTab.emotions, l10n.gxTabEmotions),
             (HistoryTab.body, l10n.gxTabBody),
             (HistoryTab.water, l10n.gxTabWater),
-            (HistoryTab.habits, l10n.habitsChartTitle),
+            // Habits are Premium.
+            if (ref.watch(premiumProfilesEnabledProvider))
+              (HistoryTab.habits, l10n.habitsChartTitle),
             (HistoryTab.together, l10n.gxTabTogether),
           ],
           selected: _tab,
@@ -425,10 +427,12 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
     DateTime start,
   ) {
     final water = ref.watch(hydrationControllerProvider);
-    final habits = ref.watch(habitsControllerProvider);
     final today = ref.read(homeClockProvider)();
+    // Cycle days come from habits, a Premium feature.
     final periodMap = <DateTime, bool>{
-      for (final d in _periodDates(habits)) d: true,
+      if (ref.watch(premiumProfilesEnabledProvider))
+        for (final d in _periodDates(ref.watch(habitsControllerProvider)))
+          d: true,
     };
     return [
       InsightsCard(

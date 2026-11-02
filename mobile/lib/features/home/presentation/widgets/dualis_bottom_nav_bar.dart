@@ -13,6 +13,9 @@ class DualisBottomNavBar extends StatelessWidget {
   /// Free build: the care tab shows a "PRO" badge and opens the Premium promo.
   final bool careLocked;
 
+  /// Premium build: the water tab becomes "Hábitos" (water lives inside it).
+  final bool habitsTab;
+
   const DualisBottomNavBar({
     super.key,
     required this.currentIndex,
@@ -20,6 +23,7 @@ class DualisBottomNavBar extends StatelessWidget {
     required this.onEmergencyTap,
     this.showCare = false,
     this.careLocked = false,
+    this.habitsTab = false,
   });
 
   /// Index of the help button, always the last destination.
@@ -31,6 +35,7 @@ class DualisBottomNavBar extends StatelessWidget {
     final homeLabel = l10n?.navHome ?? 'Início';
     final historyLabel = l10n?.navHistory ?? 'Histórico & Mapa';
     final hydrationLabel = l10n?.navHydration ?? 'Água';
+    final habitsLabel = l10n?.habitsChartTitle ?? 'Hábitos';
     final emergencyLabel = l10n?.urgentHelpButton ?? 'Ajuda urgente';
     final careLabel = l10n?.careHubTitle ?? 'Meus cuidados';
 
@@ -74,13 +79,22 @@ class DualisBottomNavBar extends StatelessWidget {
             label: '',
             tooltip: historyLabel,
           ),
-          NavigationDestination(
-            key: const Key('nav_destination_hydration'),
-            icon: const Icon(Icons.water_drop_outlined, color: AppColors.textSecondaryLight),
-            selectedIcon: const Icon(Icons.water_drop_rounded, color: AppColors.clinicalTealDark),
-            label: '',
-            tooltip: hydrationLabel,
-          ),
+          if (habitsTab)
+            NavigationDestination(
+              key: const Key('nav_destination_habits'),
+              icon: const Icon(Icons.wb_twilight_outlined, color: AppColors.textSecondaryLight),
+              selectedIcon: const Icon(Icons.wb_twilight_rounded, color: AppColors.clinicalTealDark),
+              label: '',
+              tooltip: habitsLabel,
+            )
+          else
+            NavigationDestination(
+              key: const Key('nav_destination_hydration'),
+              icon: const Icon(Icons.water_drop_outlined, color: AppColors.textSecondaryLight),
+              selectedIcon: const Icon(Icons.water_drop_rounded, color: AppColors.clinicalTealDark),
+              label: '',
+              tooltip: hydrationLabel,
+            ),
           if (showCare)
             NavigationDestination(
               key: const Key('nav_destination_care'),

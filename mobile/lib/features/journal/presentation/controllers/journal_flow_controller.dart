@@ -455,9 +455,12 @@ class JournalFlowController extends Notifier<JournalFlowState> {
   // ---- Save -------------------------------------------------------------
 
   /// The entry exactly as the user recorded it.
-  JournalEntry buildEntry({DateTime? now}) {
+  JournalEntry buildEntry({DateTime? now, bool isMale = false}) {
     final quick = state.mood != JournalKeys.moodNaoTaoBem;
-    final offered = JournalKeys.triggersFor(hasPhysicalItem: state.hasPhysicalItem);
+    final offered = JournalKeys.triggersFor(
+      hasPhysicalItem: state.hasPhysicalItem,
+      isMale: isMale,
+    );
     final triggers = quick
         ? <String>[]
         : [for (final t in offered) if (state.triggers.contains(t)) t];
@@ -492,10 +495,10 @@ class JournalFlowController extends Notifier<JournalFlowState> {
     );
   }
 
-  Future<JournalEntry> save() async {
+  Future<JournalEntry> save({DateTime? now, bool isMale = false}) async {
     state = state.copyWith(isSaving: true);
     try {
-      return await ref.read(journalRepositoryProvider).saveEntry(buildEntry());
+      return await ref.read(journalRepositoryProvider).saveEntry(buildEntry(now: now, isMale: isMale));
     } finally {
       state = state.copyWith(isSaving: false);
     }

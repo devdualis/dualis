@@ -21,7 +21,7 @@ void main() {
         (k) => JournalKeys.regions.contains(JournalKeys.rootOf(k)) && !JournalKeys.isCustomKey(k),
       );
       expect(emotional, hasLength(20));
-      expect(physical, hasLength(48));
+      expect(physical, hasLength(50));
       expect(keys.where(JournalKeys.isCustomKey), hasLength(12));
       expect(keys, containsAll(['passado.tristeza.culpa', 'futuro.medo.desanimo', 'costas.fisgada.ao_mexer', 'membros.custom']));
       expect(keys, containsAll([
@@ -90,7 +90,7 @@ void main() {
       expect(JournalKeys.physicalTree['barriga']!['intestino'], ['preso', 'solto']);
       // v2.3: pelvis and lower belly, apart from barriga.
       expect(JournalKeys.physicalTree['pelve'], {
-        'urina': ['ardencia', 'vontade'],
+        'urina': ['ardencia', 'vontade', 'dificuldade', 'cor_odor'],
         'baixo_ventre': ['colica', 'peso', 'menstrual'],
         'intima': ['coceira', 'inchaco'],
       });
@@ -130,8 +130,12 @@ void main() {
           {for (final k in JournalKeys.positiveOptionKeys) if (!JournalKeys.isCustomKey(k)) k}), isEmpty);
       expect(JournalKeys.kindPositive, 'positive');
       expect(JournalKeys.copings, ['consegui', 'esperei', 'dificil']);
-      expect(JournalKeys.helpers,
+      expect(JournalKeys.emotionalHelpers,
           ['mexer_corpo', 'conversar', 'pausa', 'lazer', 'descansar', 'nada_ainda']);
+      expect(JournalKeys.helpers, containsAll([
+        'mexer_corpo', 'conversar', 'pausa', 'lazer', 'descansar', 'nada_ainda',
+        'beber_agua', 'remedio', 'repouso', 'compressa', 'alimentacao_leve', 'consulta_medica',
+      ]));
       expect(JournalKeys.helperNadaAinda, 'nada_ainda');
       expect(JournalKeys.maxHelpers, 6);
     });

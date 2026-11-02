@@ -203,6 +203,13 @@ GoRouter createRouter({
       GoRoute(
         path: RoutePaths.habits,
         name: 'habits',
+        // Premium: a Free build opens the Premium promo instead.
+        redirect: (context, state) => ProviderScope.containerOf(
+              context,
+              listen: false,
+            ).read(premiumProfilesEnabledProvider)
+            ? null
+            : RoutePaths.premiumPromo,
         builder: (context, state) => const HabitsScreen(),
       ),
       GoRoute(

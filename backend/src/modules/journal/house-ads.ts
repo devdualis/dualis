@@ -32,14 +32,14 @@ const HOUSE_ADS: LocalizedAd[] = [
     assetKey: 'house_ad_dualis_premium',
     url: 'https://dualischeckup.com/#pricing',
     title: {
-      pt: 'Meus cuidados, organizados num só lugar',
-      en: 'My care, organised in one place',
-      es: 'Mis cuidados, organizados en un solo lugar',
+      pt: 'Hábitos e cuidados, num só lugar',
+      en: 'Habits and care, in one place',
+      es: 'Hábitos y cuidados, en un solo lugar',
     },
     body: {
-      pt: 'Vacinas, alergias, lembretes de medicamentos, consultas e exames. Sem anúncios.',
-      en: 'Vaccines, allergies, medication reminders, appointments and exams. No ads.',
-      es: 'Vacunas, alergias, recordatorios de medicamentos, citas y exámenes. Sin anuncios.',
+      pt: 'Sono, movimento e ciclo, mais vacinas, alergias, lembretes de medicamentos, consultas e exames. Sem anúncios.',
+      en: 'Sleep, movement and cycle, plus vaccines, allergies, medication reminders, appointments and exams. No ads.',
+      es: 'Sueño, movimiento y ciclo, además de vacunas, alergias, recordatorios de medicamentos, citas y exámenes. Sin anuncios.',
     },
   },
   {

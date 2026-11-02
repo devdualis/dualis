@@ -176,6 +176,7 @@ Future<GoRouter> pumpJournalFlow(
   WidgetTester tester,
   JournalHarness harness, {
   JournalFlowArgs args = const JournalFlowArgs(),
+  List<Override> extraOverrides = const [],
 }) async {
   tester.view.physicalSize = const Size(1000, 3200);
   tester.view.devicePixelRatio = 1.0;
@@ -215,7 +216,7 @@ Future<GoRouter> pumpJournalFlow(
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: harness.overrides,
+      overrides: [...harness.overrides, ...extraOverrides],
       child: MaterialApp.router(
         theme: AppTheme.lightTheme,
         routerConfig: router,

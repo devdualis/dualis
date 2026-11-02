@@ -118,6 +118,8 @@ export const OPTION_TEXT_PT: Record<string, string> = {
   'barriga.colica.pontadas': 'Cólica ou pontadas',
   'pelve.urina.ardencia': 'Arde ou dói ao fazer xixi',
   'pelve.urina.vontade': 'Vontade de fazer xixi toda hora',
+  'pelve.urina.dificuldade': 'Dificuldade ou fluxo fraco ao fazer xixi',
+  'pelve.urina.cor_odor': 'Urina escura ou com cheiro forte',
   'pelve.baixo_ventre.colica': 'Cólica no baixo ventre',
   'pelve.baixo_ventre.peso': 'Peso ou pressão embaixo',
   'pelve.baixo_ventre.menstrual': 'Cólica menstrual',

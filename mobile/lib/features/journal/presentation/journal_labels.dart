@@ -160,6 +160,10 @@ class JournalLabels {
         return l10n.jv23OptPelveUrinaArdencia;
       case 'pelve.urina.vontade':
         return l10n.jv23OptPelveUrinaVontade;
+      case 'pelve.urina.dificuldade':
+        return l10n.jv23OptPelveUrinaDificuldade;
+      case 'pelve.urina.cor_odor':
+        return l10n.jv23OptPelveUrinaCorOdor;
       case 'pelve.baixo_ventre.colica':
         return l10n.jv23OptPelveBaixoVentreColica;
       case 'pelve.baixo_ventre.peso':
@@ -399,6 +403,12 @@ class JournalLabels {
         'pausa' => l10n.jv22HelperPausa,
         'lazer' => l10n.jv22HelperLazer,
         'descansar' => l10n.jv22HelperDescansar,
+        'beber_agua' => l10n.jv22HelperBeberAgua,
+        'remedio' => l10n.jv22HelperRemedio,
+        'repouso' => l10n.jv22HelperRepouso,
+        'compressa' => l10n.jv22HelperCompressa,
+        'alimentacao_leve' => l10n.jv22HelperAlimentacaoLeve,
+        'consulta_medica' => l10n.jv22HelperConsultaMedica,
         'nada_ainda' => l10n.jv22HelperNadaAinda,
         _ => key,
       };

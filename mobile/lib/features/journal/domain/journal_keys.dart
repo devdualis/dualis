@@ -103,7 +103,7 @@ class JournalKeys {
     },
     // Pelvis and lower belly, front only (v2.3). Kept apart from barriga.
     'pelve': {
-      'urina': ['ardencia', 'vontade'],
+      'urina': ['ardencia', 'vontade', 'dificuldade', 'cor_odor'],
       'baixo_ventre': ['colica', 'peso', 'menstrual'],
       'intima': ['coceira', 'inchaco'],
     },
@@ -144,7 +144,11 @@ class JournalKeys {
   static bool isWholeBody(String region) => wholeBodyAreas.contains(region);
 
   /// Branches of [region] for the side it was marked on (`null` = whole body).
-  static Map<String, List<String>> branchesFor(String region, String? side) {
+  static Map<String, List<String>> branchesFor(
+    String region,
+    String? side, {
+    bool isMale = false,
+  }) {
     final hidden = side == sideBack
         ? frontOnlyBranches[region] ?? const <String>{}
         : side == sideFront
@@ -152,7 +156,11 @@ class JournalKeys {
             : const <String>{};
     return {
       for (final e in physicalTree[region]!.entries)
-        if (!hidden.contains(e.key)) e.key: e.value,
+        if (!hidden.contains(e.key))
+          e.key: [
+            for (final opt in e.value)
+              if (!isMale || opt != 'menstrual') opt,
+          ],
     };
   }
 
@@ -225,15 +233,27 @@ class JournalKeys {
     triggerClima,
   };
 
-  static List<String> triggersFor({required bool hasPhysicalItem}) => [
+  static List<String> triggersFor({
+    required bool hasPhysicalItem,
+    bool isMale = false,
+  }) => [
     for (final t in triggers)
-      if (hasPhysicalItem || !physicalOnlyTriggers.contains(t)) t,
+      if ((hasPhysicalItem || !physicalOnlyTriggers.contains(t)) &&
+          (!isMale || t != triggerCiclo))
+        t,
   ];
 
   // Closing questions of a "não tão bem" entry (v2.2, both optional).
   static const List<String> copings = ['consegui', 'esperei', 'dificil'];
   static const String helperNadaAinda = 'nada_ainda';
-  static const List<String> helpers = [
+  static const String helperBeberAgua = 'beber_agua';
+  static const String helperRemedio = 'remedio';
+  static const String helperRepouso = 'repouso';
+  static const String helperCompressa = 'compressa';
+  static const String helperAlimentacaoLeve = 'alimentacao_leve';
+  static const String helperConsultaMedica = 'consulta_medica';
+
+  static const List<String> emotionalHelpers = [
     'mexer_corpo',
     'conversar',
     'pausa',
@@ -241,6 +261,31 @@ class JournalKeys {
     'descansar',
     helperNadaAinda,
   ];
+  static const List<String> physicalHelpers = [
+    helperBeberAgua,
+    helperRemedio,
+    helperRepouso,
+    helperCompressa,
+    helperAlimentacaoLeve,
+    helperConsultaMedica,
+    helperNadaAinda,
+  ];
+  static const List<String> helpers = [
+    'mexer_corpo',
+    'conversar',
+    'pausa',
+    'lazer',
+    'descansar',
+    helperBeberAgua,
+    helperRemedio,
+    helperRepouso,
+    helperCompressa,
+    helperAlimentacaoLeve,
+    helperConsultaMedica,
+    helperNadaAinda,
+  ];
+  static List<String> helpersFor({required bool isPhysical}) =>
+      isPhysical ? physicalHelpers : emotionalHelpers;
   static const int maxHelpers = 6;
 
   // Self-reported readings on a condition (v2.4, Premium). The person

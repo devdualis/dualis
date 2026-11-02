@@ -42,9 +42,9 @@ const withItem = (item: Record<string, unknown>, extra: Record<string, unknown> 
   errorsOf({ ...baseEntry, ...extra, items: [item] });
 
 describe('Journal v2 keys', () => {
-  it('match the contract tables: 20 emotional + 3 custom, 48 physical + 9 custom', () => {
+  it('match the contract tables: 20 emotional + 3 custom, 50 physical + 9 custom', () => {
     expect(EMOTIONAL_OPTION_KEYS).toHaveLength(23);
-    expect(PHYSICAL_OPTION_KEYS).toHaveLength(57);
+    expect(PHYSICAL_OPTION_KEYS).toHaveLength(59);
     expect(EMOTIONAL_OPTION_KEYS).toContain('passado.memoria.magoa');
     expect(EMOTIONAL_OPTION_KEYS).toContain('presente.custom');
     expect(PHYSICAL_OPTION_KEYS).toContain('costas.fisgada.ao_mexer');

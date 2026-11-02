@@ -747,6 +747,21 @@ void main() {
     expect(api.records[CareKind.allergy]!.first.data.containsKey('placeLat'), isFalse);
   });
 
+  testWidgets('premium nav bar swaps the water tab for Hábitos', (tester) async {
+    var tapped = -1;
+    await tester.pumpWidget(MaterialApp(
+      locale: const Locale('pt'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(
+        bottomNavigationBar: DualisBottomNavBar(currentIndex: 0, showCare: true, habitsTab: true, onTap: (i) => tapped = i, onEmergencyTap: () {}),
+      ),
+    ));
+    expect(find.byKey(const Key('nav_destination_hydration')), findsNothing);
+    await tester.tap(find.byKey(const Key('nav_destination_habits')));
+    expect(tapped, 2);
+  });
+
   testWidgets('premium nav bar adds the care tab before the help button', (tester) async {
     var tapped = -1;
     var help = false;
@@ -789,8 +804,8 @@ void main() {
       home: Scaffold(body: PremiumPromoScreen()),
     ));
     await tester.pumpAndSettle();
-    expect(find.text('Seus cuidados, organizados num só lugar'), findsOneWidget);
-    for (final feature in ['Vacinas', 'Alergias', 'Medicamentos', 'Consultas', 'Exames', 'Resumo em PDF']) {
+    expect(find.text('Seus hábitos e cuidados, num só lugar'), findsOneWidget);
+    for (final feature in ['Hábitos', 'Vacinas', 'Alergias', 'Medicamentos', 'Consultas', 'Exames', 'Resumo em PDF']) {
       expect(find.text(feature), findsOneWidget);
     }
     expect(find.byKey(const Key('premium_promo_subscribe')), findsOneWidget);

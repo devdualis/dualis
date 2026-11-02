@@ -5,6 +5,8 @@ import 'package:dualis_mobile/features/journal/presentation/controllers/journal_
 import 'package:dualis_mobile/features/journal/presentation/journal_labels.dart';
 import 'package:dualis_mobile/features/journal/presentation/screens/journal_flow_screen.dart';
 import 'package:dualis_mobile/features/journal/presentation/widgets/body_region_map.dart';
+import 'package:dualis_mobile/features/profile/domain/models/profile.dart';
+import 'package:dualis_mobile/features/profile/presentation/controllers/active_profile_controller.dart';
 import 'package:dualis_mobile/l10n/app_localizations_pt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -972,4 +974,97 @@ void main() {
       expect(find.text(pt.jv2TriggersQuestion), findsOneWidget);
     });
   });
+
+
+  group('Gender filtering and contextual closing', () {
+    testWidgets('Male profile does not see menstrual options or ciclo trigger, and physical closing shows physical helpers', (tester) async {
+      final h = JournalHarness();
+      await pumpJournalFlow(
+        tester,
+        h,
+        args: physical,
+        extraOverrides: [
+          activeProfileControllerProvider.overrideWith(_MaleActiveProfileNotifier.new),
+        ],
+      );
+      await startNotSoGood(tester);
+
+      await tapKey(tester, 'jv2_region_barriga');
+      await tapKey(tester, 'jv2_region_pelve');
+      await tapKey(tester, 'jv2_continue');
+
+      // Region 1: barriga
+      await tapKey(tester, 'jv2_sensation_dor');
+      await tapKey(tester, 'jv2_branch_barriga.colica');
+      expect(find.byKey(const Key('jv2_option_barriga.colica.menstrual')), findsNothing);
+      expect(find.byKey(const Key('jv2_option_barriga.colica.gases')), findsOneWidget);
+      await tapKey(tester, 'jv2_option_barriga.colica.gases');
+      await tapKey(tester, 'jv2_continue');
+
+      // Region 2: pelve
+      await tapKey(tester, 'jv2_sensation_incomodo');
+      await tapKey(tester, 'jv2_branch_pelve.urina');
+      expect(find.byKey(const Key('jv2_option_pelve.urina.dificuldade')), findsOneWidget);
+      expect(find.byKey(const Key('jv2_option_pelve.urina.cor_odor')), findsOneWidget);
+      await tapKey(tester, 'jv2_option_pelve.urina.dificuldade');
+      await tapKey(tester, 'jv2_continue');
+
+      // Intensity
+      await fillIntensity(tester, 2, 3);
+      await tapKey(tester, 'jv2_continue');
+
+      // Triggers: ciclo is NOT offered
+      expect(find.byKey(const Key('jv2_trigger_ciclo')), findsNothing);
+      await tapKey(tester, 'jv2_skip');
+
+      // Closing: physical helpers
+      expect(find.byKey(const Key('jv22_helper_beber_agua')), findsOneWidget);
+      expect(find.byKey(const Key('jv22_helper_remedio')), findsOneWidget);
+      expect(find.byKey(const Key('jv22_helper_repouso')), findsOneWidget);
+      expect(find.byKey(const Key('jv22_helper_mexer_corpo')), findsNothing);
+      expect(find.byKey(const Key('jv22_helper_conversar')), findsNothing);
+
+      await tapKey(tester, 'jv22_helper_beber_agua');
+      await tapKey(tester, 'jv22_coping_consegui');
+      await tapKey(tester, 'jv2_continue');
+      await tapKey(tester, 'jv2_save');
+
+      final body = h.remote.requestBodies.single;
+      expect(body['coping'], 'consegui');
+      expect(body['helpers'], ['beber_agua']);
+    });
+
+    testWidgets('Emotional check-in closing shows emotional helpers and not physical helpers', (tester) async {
+      final h = JournalHarness();
+      await pumpJournalFlow(tester, h);
+      await startNotSoGood(tester);
+      await tapKey(tester, 'jv2_branch_passado.tristeza');
+      await tapKey(tester, 'jv2_option_passado.tristeza.culpa');
+      await tapKey(tester, 'jv2_continue');
+      await fillIntensity(tester, 1, 2);
+      await tapKey(tester, 'jv2_continue');
+      await tapKey(tester, 'jv2_skip');
+
+      expect(find.byKey(const Key('jv22_helper_mexer_corpo')), findsOneWidget);
+      expect(find.byKey(const Key('jv22_helper_conversar')), findsOneWidget);
+      expect(find.byKey(const Key('jv22_helper_beber_agua')), findsNothing);
+      expect(find.byKey(const Key('jv22_helper_remedio')), findsNothing);
+    });
+  });
+}
+
+class _MaleActiveProfileNotifier extends ActiveProfileController {
+  @override
+  ActiveProfileState build() => const ActiveProfileState(
+        profiles: [
+          Profile(
+            id: 'p-male',
+            name: 'Carlos',
+            profileType: ProfileType.primary,
+            ownership: ProfileOwnership.own,
+            accessLevel: ProfileAccessLevel.owner,
+            gender: 'masculino',
+          ),
+        ],
+      );
 }

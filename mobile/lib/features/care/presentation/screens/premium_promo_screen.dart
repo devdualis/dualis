@@ -45,6 +45,13 @@ class PremiumPromoScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final features = [
       (
+        Icons.wb_twilight_rounded,
+        const Color(0xFFEEF0FF),
+        const Color(0xFF4F46E5),
+        l10n.premiumPromoHabits,
+        l10n.premiumPromoHabitsDesc,
+      ),
+      (
         Icons.vaccines_outlined,
         AppColors.clinicalTealLight,
         AppColors.clinicalTealDark,

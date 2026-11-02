@@ -43,7 +43,7 @@ export const PHYSICAL_TREE = {
   },
   // Pelvis and lower belly, front only (v2.3). Kept apart from barriga.
   pelve: {
-    urina: ['ardencia', 'vontade'],
+    urina: ['ardencia', 'vontade', 'dificuldade', 'cor_odor'],
     baixo_ventre: ['colica', 'peso', 'menstrual'],
     intima: ['coceira', 'inchaco'],
   },
@@ -102,7 +102,37 @@ export const POSITIVE_TREE = {
 } as const;
 export const POSITIVE_OPTION_KEYS: readonly string[] = flatten(POSITIVE_TREE);
 export const COPING_KEYS = ['consegui', 'esperei', 'dificil'] as const;
-export const HELPER_KEYS = ['mexer_corpo', 'conversar', 'pausa', 'lazer', 'descansar', 'nada_ainda'] as const;
+export const EMOTIONAL_HELPER_KEYS = [
+  'mexer_corpo',
+  'conversar',
+  'pausa',
+  'lazer',
+  'descansar',
+  'nada_ainda',
+] as const;
+export const PHYSICAL_HELPER_KEYS = [
+  'beber_agua',
+  'remedio',
+  'repouso',
+  'compressa',
+  'alimentacao_leve',
+  'consulta_medica',
+  'nada_ainda',
+] as const;
+export const HELPER_KEYS = [
+  'mexer_corpo',
+  'conversar',
+  'pausa',
+  'lazer',
+  'descansar',
+  'beber_agua',
+  'remedio',
+  'repouso',
+  'compressa',
+  'alimentacao_leve',
+  'consulta_medica',
+  'nada_ainda',
+] as const;
 
 export const ITEM_KINDS = ['emotional', 'physical', 'condition', 'positive'] as const;
 export type JournalItemKind = (typeof ITEM_KINDS)[number];
@@ -219,16 +249,15 @@ export const JOURNAL_LIMITS = {
   maxDays: 365,
 } as const;
 
-/** First segment of an optionKey: the time (emotional) or the region (physical). */
 export function optionKeyRoot(optionKey: string): string {
   return optionKey.split('.')[0];
 }
 
-/** First two segments of an optionKey: `<time>.<branch>` or `<region>.<branch>`. */
 export function optionKeyBranch(optionKey: string): string {
-  return optionKey.split('.').slice(0, 2).join('.');
+  const parts = optionKey.split('.');
+  return `${parts[0]}.${parts[1]}`;
 }
 
 export function isCustomOptionKey(optionKey: string): boolean {
-  return optionKey.split('.')[1] === CUSTOM_SUFFIX;
+  return optionKey.endsWith(`.${CUSTOM_SUFFIX}`);
 }

@@ -5,8 +5,12 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/load_error_view.dart';
+import '../../../auth/domain/user_profile.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../controllers/habits_controller.dart';
+import '../widgets/habits_water_summary_card.dart';
 import '../../domain/models/habit_day.dart';
 
 /// Screen "Hábitos de hoje" (docs/bienestar/CONTRATO-JOURNAL-V2.md section 6).
@@ -15,7 +19,10 @@ import '../../domain/models/habit_day.dart';
 /// Supports editing yesterday via Hoje/Ontem switch.
 /// Saves each answer at once.
 class HabitsScreen extends ConsumerStatefulWidget {
-  const HabitsScreen({super.key});
+  /// True inside the Premium "Hábitos" tab: no app bar, water summary on top.
+  final bool isEmbedded;
+
+  const HabitsScreen({super.key, this.isEmbedded = false});
 
   @override
   ConsumerState<HabitsScreen> createState() => _HabitsScreenState();
@@ -30,6 +37,9 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
     final state = ref.watch(habitsControllerProvider);
     final controller = ref.read(habitsControllerProvider.notifier);
     final viewOnly = activeProfileIsViewOnly(ref);
+    final activeProfile = ref.watch(activeProfileControllerProvider).activeProfile;
+    final user = ref.watch(authControllerProvider).user;
+    final isMale = (activeProfile?.gender ?? user?.gender.value)?.toLowerCase() == 'masculino';
     ref.listen<Object?>(habitsControllerProvider.select((s) => s.saveError),
         (_, error) {
       if (error != null) showSaveFailedSnackBar(context);
@@ -41,27 +51,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
             : controller.todayDayString;
     final activeHabit = _isYesterday ? state.yesterdayHabit : state.todayHabit;
 
-    return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      appBar: AppBar(
-        title: Text(
-          _isYesterday ? l10n.habitsTitleYesterday : l10n.habitsTitleToday,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimaryLight,
-          ),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimaryLight,
-        actions: const [
-          // Space for the global urgent-help button (UrgentHelpOverlay).
-          SizedBox(width: 56),
-        ],
-      ),
-      body:
+    final body =
           state.isLoading
               ? const Center(child: CircularProgressIndicator())
               : state.loadError != null
@@ -83,7 +73,6 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
                       const ActiveProfileBanner(),
                       if (viewOnly) const ActiveProfileReadOnlyNote(),
                       const SizedBox(height: 8),
-
                       // Day switcher: Hoje / Ontem
                       _DaySwitcher(
                         isYesterday: _isYesterday,
@@ -115,36 +104,68 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Setting: Track Menstrual Cycle switch
-                      _CycleSettingTile(
-                        enabled: state.trackMenstrualCycle,
-                        title: l10n.habitsTrackMenstrualCycleSetting,
-                        onChanged:
-                            viewOnly
-                                ? null
-                                : (val) =>
-                                    controller.setTrackMenstrualCycle(val),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Card 3: Menstrual Cycle (Period)
-                      // Shown only when setting is on OR period = true in last 60 days
-                      if (state.showPeriodCard) ...[
-                        _PeriodCard(
-                          dayString: activeDayString,
-                          habit: activeHabit,
-                          controller: controller,
-                          l10n: l10n,
-                          viewOnly: viewOnly,
+                      if (!isMale) ...[
+                        // Setting: Track Menstrual Cycle switch
+                        _CycleSettingTile(
+                          enabled: state.trackMenstrualCycle,
+                          title: l10n.habitsTrackMenstrualCycleSetting,
+                          onChanged:
+                              viewOnly
+                                  ? null
+                                  : (val) =>
+                                      controller.setTrackMenstrualCycle(val),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
+
+                        // Card 3: Menstrual Cycle (Period)
+                        // Shown only when setting is on OR period = true in last 60 days
+                        if (state.showPeriodCard) ...[
+                          _PeriodCard(
+                            dayString: activeDayString,
+                            habit: activeHabit,
+                            controller: controller,
+                            l10n: l10n,
+                            viewOnly: viewOnly,
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                      ],
+
+                      // Premium tab: water lives here too (today only).
+                      if (widget.isEmbedded && !_isYesterday) ...[
+                        const HabitsWaterSummaryCard(),
+                        const SizedBox(height: 16),
                       ],
 
                       const SizedBox(height: 32),
                     ],
                   ),
                 ),
-              ),
+              );
+
+    if (widget.isEmbedded) return body;
+
+    return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
+      appBar: AppBar(
+        title: Text(
+          _isYesterday ? l10n.habitsTitleYesterday : l10n.habitsTitleToday,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimaryLight,
+          ),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: AppColors.textPrimaryLight,
+        actions: const [
+          // Space for the global urgent-help button (UrgentHelpOverlay).
+          SizedBox(width: 56),
+        ],
+      ),
+      body: body,
     );
   }
 }
@@ -252,8 +273,12 @@ class _SleepCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _QuestionCard(
-      title: l10n.habitsSleepQualityQuestion,
+      title: dayString == controller.yesterdayDayString
+          ? l10n.habitsSleepQualityQuestionYesterday
+          : l10n.habitsSleepQualityQuestion,
       titleKey: const Key('habits_sleep_question'),
+      saved: habit.sleepQuality != null,
+      savedLabel: l10n.habitsSaved,
       children: [
         // 3 Big Emoji buttons, same height even when a label wraps.
         IntrinsicHeight(
@@ -397,8 +422,12 @@ class _MovementCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _QuestionCard(
-      title: l10n.habitsMovedQuestion,
+      title: dayString == controller.yesterdayDayString
+          ? l10n.habitsMovedQuestionYesterday
+          : l10n.habitsMovedQuestion,
       titleKey: const Key('habits_moved_question'),
+      saved: habit.moved != null,
+      savedLabel: l10n.habitsSaved,
       children: [
         Row(
           children: [
@@ -524,8 +553,12 @@ class _PeriodCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return _QuestionCard(
       key: const Key('habits_period_card'),
-      title: l10n.habitsPeriodQuestion,
+      title: dayString == controller.yesterdayDayString
+          ? l10n.habitsPeriodQuestionYesterday
+          : l10n.habitsPeriodQuestion,
       titleKey: const Key('habits_period_question'),
+      saved: habit.period != null,
+      savedLabel: l10n.habitsSaved,
       children: [
         Row(
           children: [
@@ -605,12 +638,16 @@ class _QuestionCard extends StatelessWidget {
   final String title;
   final Key? titleKey;
   final List<Widget> children;
+  final bool saved;
+  final String savedLabel;
 
   const _QuestionCard({
     super.key,
     required this.title,
     this.titleKey,
     required this.children,
+    this.saved = false,
+    this.savedLabel = '',
   });
 
   @override
@@ -632,14 +669,43 @@ class _QuestionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            title,
-            key: titleKey,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimaryLight,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  key: titleKey,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimaryLight,
+                  ),
+                ),
+              ),
+              if (saved) ...[
+                const SizedBox(width: 8),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      size: 16,
+                      color: Color(0xFF2E7D32),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      savedLabel,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF2E7D32),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
           ),
           const SizedBox(height: 14),
           ...children,

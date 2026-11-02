@@ -153,6 +153,8 @@ void main() {
       expect(find.byKey(const Key('history_period_30')), findsOneWidget);
       // Free shows up to 30 days (handoff v2.0).
       expect(find.byKey(const Key('history_period_90')), findsNothing);
+      // Habits are Premium: the Free build has no Hábitos tab.
+      expect(find.byKey(const Key('history_tab_HistoryTab.habits')), findsNothing);
     });
 
     testWidgets('Emoções: pie counts records per time, lines one per time',

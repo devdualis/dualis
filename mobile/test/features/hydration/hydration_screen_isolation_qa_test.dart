@@ -175,14 +175,20 @@ void main() {
       // Bottom navigation bar has hydration destination with hidden text label for clean look
       final bottomNavButton = find.byKey(const Key('nav_destination_hydration'));
       expect(bottomNavButton, findsOneWidget);
-      expect(find.text('Água'), findsNothing);
+      expect(
+        find.descendant(of: find.byType(NavigationBar), matching: find.text('Água')),
+        findsNothing,
+      );
 
       // Tapping bottom navigation bar tab opens HydrationDashboardScreen
       await tester.tap(bottomNavButton);
       await tester.pumpAndSettle();
 
       expect(find.byType(HydrationDashboardScreen), findsOneWidget);
-      expect(find.text('Controle de Hidratação 💧'), findsOneWidget);
+      expect(
+        find.descendant(of: find.byType(AppBar), matching: find.text('Água')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('QA 2.5: HydrationDashboardScreen allows quick-adding water and updates total',
