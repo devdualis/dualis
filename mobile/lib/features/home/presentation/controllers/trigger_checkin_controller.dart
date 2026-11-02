@@ -596,6 +596,21 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
         at: at,
       );
     }
+    // "Bem" with condition readings only (v2.4): the axis is done, as a
+    // plain "Bem" is; the readings show with the conditions.
+    if (entry.mood == JournalKeys.moodBem &&
+        entry.items.every((i) => i.kind == JournalKeys.kindCondition)) {
+      final summary = JournalLabels.mood(l10n, entry.mood);
+      for (final v in axes) {
+        completeStage(
+          vertical: v,
+          summary: summary,
+          status: TriggerStatus.goodNormal,
+          intensity: 0,
+          at: at,
+        );
+      }
+    }
     final conditions =
         entry.items.where((i) => i.kind == JournalKeys.kindCondition);
     completeConditions(

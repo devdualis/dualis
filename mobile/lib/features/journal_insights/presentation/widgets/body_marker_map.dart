@@ -199,7 +199,8 @@ class _MarkedSilhouette extends StatelessWidget {
   static Offset anchor(String region, String side) => switch (region) {
         'cabeca' => const Offset(0.5, 0.075),
         'peito' => const Offset(0.5, 0.26),
-        'barriga' => const Offset(0.5, 0.43),
+        'barriga' => const Offset(0.5, 0.40),
+        'pelve' => const Offset(0.5, 0.53),
         'costas' => const Offset(0.5, 0.33),
         _ => const Offset(0.6, 0.76),
       };

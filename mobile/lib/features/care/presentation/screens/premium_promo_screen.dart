@@ -5,6 +5,27 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../house_ads/domain/house_ad.dart';
 
+/// The promo as its own screen (`/premium-promo`), opened from features a
+/// Free build does not have. A go_router route, so the urgent-help button
+/// (UrgentHelpOverlay) stays on screen.
+class PremiumPromoPage extends StatelessWidget {
+  const PremiumPromoPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          l10n.chronicTrackPromoScreenTitle,
+          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
+        ),
+      ),
+      body: const SafeArea(child: PremiumPromoScreen()),
+    );
+  }
+}
+
 /// Free build: the "Meus cuidados" tab shows what Premium adds and links to
 /// the plans on the Dualis site (approved mockup, option 2).
 class PremiumPromoScreen extends StatelessWidget {
@@ -64,6 +85,13 @@ class PremiumPromoScreen extends StatelessWidget {
         AppColors.clinicalTealDark,
         l10n.premiumPromoPdf,
         l10n.premiumPromoPdfDesc,
+      ),
+      (
+        Icons.monitor_heart_outlined,
+        AppColors.softIndigoLight,
+        AppColors.dualisNavy,
+        l10n.chronicTrackPromoTitle,
+        l10n.chronicTrackPromoDesc,
       ),
     ];
 

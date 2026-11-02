@@ -266,13 +266,21 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
           { id: 'item-3', entryId: 'entry-lucas', kind: 'emotional', optionKey: 'futuro.mente.antecipar', customLabel: null, conditionId: null, bodySide: null, persistence: 'hoje', intensity: 2 },
         ],
         [
-          { id: 'cond-1', userId: mockUserId, profileId: primaryProfileId, label: 'v1:Enxaqueca', createdAt: new Date('2026-09-01T10:00:00Z'), archivedAt: new Date('2026-10-25T10:00:00Z') },
+          { id: 'cond-1', userId: mockUserId, profileId: primaryProfileId, label: 'v1:Enxaqueca', tracking: ['blood_pressure'], createdAt: new Date('2026-09-01T10:00:00Z'), archivedAt: new Date('2026-10-25T10:00:00Z') },
+        ],
+        [], // daily habits
+        [
+          { id: 'reading-1', userId: mockUserId, profileId: primaryProfileId, entryId: 'entry-new', conditionId: 'cond-1', kind: 'blood_pressure', measuredAt: new Date('2026-10-20T09:00:00Z'), data: 'v1:json', createdAt: new Date('2026-10-20T10:00:00Z') },
+          { id: 'reading-2', userId: mockUserId, profileId: primaryProfileId, entryId: 'entry-new', conditionId: 'cond-1', kind: 'blood_pressure', measuredAt: new Date('2026-10-20T09:30:00Z'), data: 'v1:json', createdAt: new Date('2026-10-20T10:00:00Z') },
         ],
       ]);
+      mockEncryptionService.decrypt.mockImplementation((val: string) =>
+        val === 'v1:json' ? '{"systolic":130,"diastolic":85,"pulse":null}' : `decrypted:${val}`,
+      );
 
       const result = await authService.exportUserData(mockUserId);
 
-      expect(result.metadata.formatVersion).toBe('1.4');
+      expect(result.metadata.formatVersion).toBe('1.5');
       expect(result.journalEntries.map((e) => e.id)).toEqual(['entry-new', 'entry-old']);
       expect(result.journalEntries[0]).toEqual({
         coping: null,
@@ -292,12 +300,25 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       });
       expect(result.journalEntries[1].items).toEqual([]);
       expect(result.userConditions).toEqual([
-        { id: 'cond-1', label: 'decrypted:v1:Enxaqueca', createdAt: '2026-09-01T10:00:00.000Z', archivedAt: '2026-10-25T10:00:00.000Z' },
+        { id: 'cond-1', label: 'decrypted:v1:Enxaqueca', tracking: ['blood_pressure'], createdAt: '2026-09-01T10:00:00.000Z', archivedAt: '2026-10-25T10:00:00.000Z' },
       ]);
+      // Readings as typed, newest first, with the condition's name.
+      expect(result.conditionReadings.map((r) => r.id)).toEqual(['reading-2', 'reading-1']);
+      expect(result.conditionReadings[1]).toEqual({
+        id: 'reading-1',
+        entryId: 'entry-new',
+        conditionId: 'cond-1',
+        conditionLabel: 'decrypted:v1:Enxaqueca',
+        kind: 'blood_pressure',
+        measuredAt: '2026-10-20T09:00:00.000Z',
+        values: { systolic: 130, diastolic: 85, pulse: null },
+        createdAt: '2026-10-20T10:00:00.000Z',
+      });
       const lucas = result.dependentProfiles[0];
       expect(lucas.journalEntries.map((e) => e.id)).toEqual(['entry-lucas']);
       expect(lucas.journalEntries[0].items.map((i) => i.optionKey)).toEqual(['futuro.mente.antecipar']);
       expect(lucas.userConditions).toEqual([]);
+      expect(lucas.conditionReadings).toEqual([]);
       expect(JSON.stringify(result)).not.toMatch(/"v1:/);
     });
 
@@ -335,6 +356,7 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
         [], // journal entries (no items query)
         [], // conditions
         [], // daily habits
+        [], // condition readings
         [
           careRecord('vac-1', primaryProfileId, 'vaccine_dose', '2026-03-10T00:00:00Z', 'v1:json:{"vaccine":"Influenza","doseLabel":"Anual"}'),
           careRecord('med-1', primaryProfileId, 'medication', null, 'v1:json:{"name":"Vitamina D","stockCount":20}'),
@@ -358,7 +380,7 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
 
       const result = await authService.exportUserData(mockUserId);
 
-      expect(result.metadata.formatVersion).toBe('1.4');
+      expect(result.metadata.formatVersion).toBe('1.5');
       expect(result.metadata.careDocumentsNote).toContain('arquivos originais');
       // Newest first by date of the record (dose, intake, appointment), else by creation.
       expect(result.careRecords.map((r) => r.id)).toEqual(['intake-1', 'med-1', 'vac-1']);

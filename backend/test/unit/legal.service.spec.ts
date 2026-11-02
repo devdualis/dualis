@@ -146,9 +146,20 @@ describe('LegalService - SaaS Legal Foundations', () => {
       expect(disclaimer.emergencyContacts.some((c) => c.phone === '188')).toBe(true);
     });
 
-    it('defaults the disclaimer version to the bumped 2026.3 so every user re-consents', () => {
-      expect(LEGAL_DOCUMENTS_VERSION).toBe('2026.3');
-      expect(service.getMedicalDisclaimer('pt-BR').version).toBe('2026.3');
+    it('defaults the disclaimer version to the bumped 2026.4 so every user re-consents', () => {
+      expect(LEGAL_DOCUMENTS_VERSION).toBe('2026.4');
+      expect(service.getMedicalDisclaimer('pt-BR').version).toBe('2026.4');
+    });
+
+    it.each([
+      ['pt-BR', /condições que você informar/, /medições que você registrar \(pressão, glicose, peso\)/],
+      ['es', /condiciones que usted informe/, /mediciones que usted anote \(tensión arterial, glucosa, peso\)/],
+      ['en', /conditions you tell us about/, /readings you record \(blood pressure, glucose, weight\)/],
+    ])('privacy policy names conditions and readings (%s)', (lang, conditions, readings) => {
+      const text = JSON.stringify(service.getPrivacyPolicy(lang));
+      expect(text).toMatch(conditions);
+      expect(text).toMatch(readings);
+      expect(text).not.toMatch(/\b(normal|alto|alta|high|low|elevad)/i);
     });
   });
 });

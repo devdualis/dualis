@@ -9,6 +9,9 @@ class RoutePaths {
   static const String emergency = '/emergency';
   static const String journal = '/journal';
   static const String myConditions = '/my-conditions';
+  static const String conditionReadings = '/conditions/:id/readings';
+  static String conditionReadingsOf(String id) => '/conditions/$id/readings';
+  static const String premiumPromo = '/premium-promo';
   static const String checkInSummary = '/check-in-summary';
   static const String history = '/history';
   static const String privacyCenter = '/privacy-center';

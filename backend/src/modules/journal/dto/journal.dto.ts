@@ -7,6 +7,7 @@ import {
   IsIn,
   IsInt,
   IsISO8601,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
@@ -24,6 +25,11 @@ import {
 import {
   BODY_SIDES,
   COPING_KEYS,
+  GLUCOSE_MOMENTS,
+  GlucoseMoment,
+  READING_INPUT_LIMITS,
+  TRACKING_KINDS,
+  TrackingKind,
   HELPER_KEYS,
   POSITIVE_OPTION_KEYS,
   BodySide,
@@ -59,8 +65,12 @@ export function journalItemShapeError(item: Partial<JournalItemInputDto>): strin
       if (item.optionKey || item.customLabel !== undefined || item.bodySide || item.sensation) {
         return 'Itens de condição não aceitam optionKey, customLabel, bodySide nem sensation.';
       }
+      if (item.intensity == null && !item.readings?.length) {
+        return 'intensity é obrigatório em itens de condição sem readings.';
+      }
       return null;
     case 'positive':
+      if (item.readings !== undefined) return 'readings só é aceito em itens de condição.';
       if (!item.optionKey || !POSITIVE_OPTION_KEYS.includes(item.optionKey)) return 'optionKey inválido para positive.';
       if ([item.intensity, item.persistence, item.bodySide, item.sensation, item.conditionId].some((v) => v != null)) {
         return 'Itens positive não aceitam intensity, persistence, bodySide, sensation nem conditionId.';
@@ -71,6 +81,7 @@ export function journalItemShapeError(item: Partial<JournalItemInputDto>): strin
     case 'physical': {
       const keys = item.kind === 'emotional' ? EMOTIONAL_OPTION_KEYS : PHYSICAL_OPTION_KEYS;
       if (!item.optionKey || !keys.includes(item.optionKey)) return `optionKey inválido para ${item.kind}.`;
+      if (item.readings !== undefined) return 'readings só é aceito em itens de condição.';
       if (item.conditionId) return 'conditionId só é aceito em itens de condição.';
       if (!item.persistence) return 'persistence é obrigatório.';
       if (isCustomOptionKey(item.optionKey) !== hasText) {
@@ -93,6 +104,42 @@ export function journalItemShapeError(item: Partial<JournalItemInputDto>): strin
   }
 }
 
+const READING_FIELDS: Record<TrackingKind, readonly string[]> = {
+  blood_pressure: ['systolic', 'diastolic', 'pulse'],
+  glucose: ['mgdl', 'moment'],
+  weight: ['kg'],
+};
+const ALL_READING_FIELDS = Object.values(READING_FIELDS).flat();
+
+/** Returns why a reading carries fields of another kind, or null when it is valid. */
+export function conditionReadingShapeError(reading: Partial<ConditionReadingInputDto>): string | null {
+  const own = READING_FIELDS[reading.kind as TrackingKind];
+  if (!own) return null; // reported by @IsIn on kind
+  const foreign = ALL_READING_FIELDS.filter((f) => !own.includes(f) && (reading as Record<string, unknown>)[f] !== undefined);
+  return foreign.length ? `Leituras ${reading.kind} não aceitam ${foreign.join(', ')}.` : null;
+}
+
+/**
+ * measuredAt must sit between maxDaysBeforeRecorded days before the entry's recordedAt and
+ * maxMinutesAfterRecorded minutes after it. Only catches a wrong date; nothing else.
+ */
+function readingTimeError(items: Array<Partial<JournalItemInputDto>>, recordedAt?: string): string | null {
+  const recorded = recordedAt ? Date.parse(recordedAt) : NaN;
+  if (isNaN(recorded)) return null; // reported by @IsISO8601 on recordedAt
+  const earliest = recorded - READING_INPUT_LIMITS.maxDaysBeforeRecorded * 24 * 60 * 60 * 1000;
+  const latest = recorded + READING_INPUT_LIMITS.maxMinutesAfterRecorded * 60 * 1000;
+  for (const item of items) {
+    for (const reading of Array.isArray(item?.readings) ? item.readings : []) {
+      const measured = typeof reading?.measuredAt === 'string' ? Date.parse(reading.measuredAt) : NaN;
+      if (isNaN(measured)) continue; // reported by @IsISO8601 on measuredAt
+      if (measured < earliest || measured > latest) {
+        return `measuredAt deve ficar entre ${READING_INPUT_LIMITS.maxDaysBeforeRecorded} dias antes e ${READING_INPUT_LIMITS.maxMinutesAfterRecorded} minutos depois de recordedAt.`;
+      }
+    }
+  }
+  return null;
+}
+
 /**
  * Entry-level rules of journal v2.1. Entries with `area` come from v2.1 apps: one axis per
  * entry, mood `bem` or `nao_tao_bem`, a sensation on every physical item and each sided
@@ -109,6 +156,8 @@ export function journalEntryShapeError(entry: Partial<CreateJournalEntryDto>): s
     return 'coping e helpers só são aceitos com mood nao_tao_bem.';
   }
   if (helpers.includes('nada_ainda') && helpers.length > 1) return 'nada_ainda não pode ser combinado.';
+  const timeError = readingTimeError(items, entry.recordedAt);
+  if (timeError) return timeError;
   if (items.some((i) => i?.kind === 'positive')) {
     if (entry.mood !== 'bem' || entry.area !== 'emotional') return 'Itens positive exigem mood bem e area emotional.';
     if (items.some((i) => i?.kind === 'emotional' || i?.kind === 'physical')) return 'Itens positive não podem ser misturados com emotional ou physical.';
@@ -151,6 +200,16 @@ class JournalItemShapeConstraint implements ValidatorConstraintInterface {
   }
 }
 
+@ValidatorConstraint({ name: 'conditionReadingShape', async: false })
+class ConditionReadingShapeConstraint implements ValidatorConstraintInterface {
+  validate(_value: unknown, args: ValidationArguments): boolean {
+    return conditionReadingShapeError(args.object as ConditionReadingInputDto) === null;
+  }
+  defaultMessage(args: ValidationArguments): string {
+    return conditionReadingShapeError(args.object as ConditionReadingInputDto) ?? 'Leitura inválida.';
+  }
+}
+
 @ValidatorConstraint({ name: 'physicalOnlyTriggers', async: false })
 class PhysicalOnlyTriggersConstraint implements ValidatorConstraintInterface {
   validate(triggers: unknown, args: ValidationArguments): boolean {
@@ -162,6 +221,55 @@ class PhysicalOnlyTriggersConstraint implements ValidatorConstraintInterface {
   defaultMessage(): string {
     return `${PHYSICAL_ONLY_TRIGGER_KEYS.join(', ')} só são aceitos quando o registro tem um item físico.`;
   }
+}
+
+const isBloodPressure = (r: ConditionReadingInputDto) => r.kind === 'blood_pressure';
+
+/**
+ * One reading the person typed on a tracked condition, with its own time. Values are kept
+ * as typed; limits only catch typing slips.
+ */
+export class ConditionReadingInputDto {
+  @IsIn(TRACKING_KINDS)
+  @Validate(ConditionReadingShapeConstraint)
+  kind!: TrackingKind;
+
+  @IsISO8601()
+  measuredAt!: string;
+
+  @ValidateIf(isBloodPressure)
+  @IsInt()
+  @Min(READING_INPUT_LIMITS.systolic.min)
+  @Max(READING_INPUT_LIMITS.systolic.max)
+  systolic?: number;
+
+  @ValidateIf(isBloodPressure)
+  @IsInt()
+  @Min(READING_INPUT_LIMITS.diastolic.min)
+  @Max(READING_INPUT_LIMITS.diastolic.max)
+  diastolic?: number;
+
+  @ValidateIf((r) => isBloodPressure(r) && r.pulse != null)
+  @IsInt()
+  @Min(READING_INPUT_LIMITS.pulse.min)
+  @Max(READING_INPUT_LIMITS.pulse.max)
+  pulse?: number | null;
+
+  @ValidateIf((r) => r.kind === 'glucose')
+  @IsInt()
+  @Min(READING_INPUT_LIMITS.mgdl.min)
+  @Max(READING_INPUT_LIMITS.mgdl.max)
+  mgdl?: number;
+
+  @ValidateIf((r) => r.kind === 'glucose')
+  @IsIn(GLUCOSE_MOMENTS)
+  moment?: GlucoseMoment;
+
+  @ValidateIf((r) => r.kind === 'weight')
+  @IsNumber({ allowNaN: false, allowInfinity: false, maxDecimalPlaces: READING_INPUT_LIMITS.kg.decimals })
+  @Min(READING_INPUT_LIMITS.kg.min)
+  @Max(READING_INPUT_LIMITS.kg.max)
+  kg?: number;
 }
 
 export class JournalItemInputDto {
@@ -195,11 +303,22 @@ export class JournalItemInputDto {
   @IsIn(PERSISTENCE_KEYS)
   persistence?: (typeof PERSISTENCE_KEYS)[number];
 
-  @ValidateIf((item) => item.kind !== 'positive' || item.intensity != null)
+  // Optional on positive items and on condition items that carry readings.
+  @ValidateIf(
+    (item) => item.intensity != null || !(item.kind === 'positive' || (item.kind === 'condition' && item.readings?.length)),
+  )
   @IsInt()
   @Min(INTENSITY_MIN)
   @Max(INTENSITY_MAX)
   intensity?: number | null;
+
+  /** Condition items only (v2.4). */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(READING_INPUT_LIMITS.maxPerItem)
+  @ValidateNested({ each: true })
+  @Type(() => ConditionReadingInputDto)
+  readings?: ConditionReadingInputDto[];
 }
 
 export class CreateJournalEntryDto {
@@ -283,6 +402,39 @@ export class CreateConditionDto {
   @Matches(/\S/, { message: 'label não pode ser vazio.' })
   @MaxLength(JOURNAL_LIMITS.conditionLabelMax)
   label!: string;
+
+  /** Readings the person chose to note (v2.4). Default: none. */
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @ArrayMaxSize(TRACKING_KINDS.length)
+  @IsIn(TRACKING_KINDS, { each: true })
+  tracking?: TrackingKind[];
+}
+
+/** PATCH /v1/journal/conditions/:id. Absent fields stay as they are. */
+export class UpdateConditionDto {
+  @IsOptional()
+  @IsString()
+  @Matches(/\S/, { message: 'label não pode ser vazio.' })
+  @MaxLength(JOURNAL_LIMITS.conditionLabelMax)
+  label?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @ArrayMaxSize(TRACKING_KINDS.length)
+  @IsIn(TRACKING_KINDS, { each: true })
+  tracking?: TrackingKind[];
+}
+
+export class ConditionReadingsQueryDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(JOURNAL_LIMITS.maxDays)
+  days?: number;
 }
 
 export interface JournalItemDto {
@@ -298,7 +450,21 @@ export interface JournalItemDto {
   sensation: string | null;
   persistence: string | null;
   intensity: number | null;
+  /** Readings on a condition item (v2.4), as typed; empty on every other item. */
+  readings: ConditionReadingDto[];
 }
+
+/** A stored reading, decrypted. Only the fields of its kind are present. */
+export type ConditionReadingDto = {
+  id: string;
+  entryId: string;
+  conditionId: string;
+  measuredAt: string;
+} & (
+  | { kind: 'blood_pressure'; systolic: number; diastolic: number; pulse: number | null }
+  | { kind: 'glucose'; mgdl: number; moment: GlucoseMoment }
+  | { kind: 'weight'; kg: number }
+);
 
 export interface LegacyJournalItemDto {
   kind: 'emotional' | 'physical';
@@ -340,6 +506,8 @@ export interface JournalEntriesResponseDto {
 export interface UserConditionDto {
   id: string;
   label: string;
+  /** Readings the person chose to note (v2.4); [] when none. */
+  tracking: TrackingKind[];
   createdAt: string;
 }
 

@@ -7659,6 +7659,558 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Menstruação'**
   String get habitsPeriodLabel;
+
+  /// No description provided for @jv23RegionPelve.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pelve e baixo ventre'**
+  String get jv23RegionPelve;
+
+  /// No description provided for @jv23BranchPelveUrina.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ao fazer xixi'**
+  String get jv23BranchPelveUrina;
+
+  /// No description provided for @jv23BranchPelveBaixoVentre.
+  ///
+  /// In pt, this message translates to:
+  /// **'Baixo ventre'**
+  String get jv23BranchPelveBaixoVentre;
+
+  /// No description provided for @jv23BranchPelveIntima.
+  ///
+  /// In pt, this message translates to:
+  /// **'Região íntima'**
+  String get jv23BranchPelveIntima;
+
+  /// No description provided for @jv23OptPelveUrinaArdencia.
+  ///
+  /// In pt, this message translates to:
+  /// **'Arde ou dói ao fazer xixi'**
+  String get jv23OptPelveUrinaArdencia;
+
+  /// No description provided for @jv23OptPelveUrinaVontade.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vontade de fazer xixi toda hora'**
+  String get jv23OptPelveUrinaVontade;
+
+  /// No description provided for @jv23OptPelveBaixoVentreColica.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cólica no baixo ventre'**
+  String get jv23OptPelveBaixoVentreColica;
+
+  /// No description provided for @jv23OptPelveBaixoVentrePeso.
+  ///
+  /// In pt, this message translates to:
+  /// **'Peso ou pressão embaixo'**
+  String get jv23OptPelveBaixoVentrePeso;
+
+  /// No description provided for @jv23OptPelveBaixoVentreMenstrual.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cólica menstrual'**
+  String get jv23OptPelveBaixoVentreMenstrual;
+
+  /// No description provided for @jv23OptPelveIntimaCoceira.
+  ///
+  /// In pt, this message translates to:
+  /// **'Coceira ou ardência'**
+  String get jv23OptPelveIntimaCoceira;
+
+  /// No description provided for @jv23OptPelveIntimaInchaco.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sensibilidade ou inchaço'**
+  String get jv23OptPelveIntimaInchaco;
+
+  /// No description provided for @jv23BodyMapHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque direto no desenho.'**
+  String get jv23BodyMapHint;
+
+  /// No description provided for @jv23BodyMarked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcado:'**
+  String get jv23BodyMarked;
+
+  /// No description provided for @jv23BodyRemove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tirar {part}'**
+  String jv23BodyRemove(String part);
+
+  /// No description provided for @jv23WholeBodyHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pele, músculos, hormônios'**
+  String get jv23WholeBodyHint;
+
+  /// No description provided for @jv23ConditionsEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicione uma condição que você acompanha'**
+  String get jv23ConditionsEmpty;
+
+  /// No description provided for @jv23TriggersHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Opcional. Toque nos que combinam com hoje.'**
+  String get jv23TriggersHint;
+
+  /// No description provided for @jv23TriggerTopicDia.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu dia'**
+  String get jv23TriggerTopicDia;
+
+  /// No description provided for @jv23TriggerTopicPessoas.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pessoas e dinheiro'**
+  String get jv23TriggerTopicPessoas;
+
+  /// No description provided for @jv23TriggerTopicCorpo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu corpo e o ambiente'**
+  String get jv23TriggerTopicCorpo;
+
+  /// No description provided for @jv23TopicMarked.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} marcado(s)'**
+  String jv23TopicMarked(int count);
+
+  /// No description provided for @chronicTrackBemBanner.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como você está bem, pode só registrar suas medições do dia ou salvar sem elas.'**
+  String get chronicTrackBemBanner;
+
+  /// No description provided for @chronicTrackJustLog.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só registrar medições'**
+  String get chronicTrackJustLog;
+
+  /// No description provided for @chronicTrackSaveWithout.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar sem medições'**
+  String get chronicTrackSaveWithout;
+
+  /// No description provided for @chronicTrackKindBloodPressure.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pressão arterial'**
+  String get chronicTrackKindBloodPressure;
+
+  /// No description provided for @chronicTrackKindGlucose.
+  ///
+  /// In pt, this message translates to:
+  /// **'Glicose'**
+  String get chronicTrackKindGlucose;
+
+  /// No description provided for @chronicTrackKindWeight.
+  ///
+  /// In pt, this message translates to:
+  /// **'Peso'**
+  String get chronicTrackKindWeight;
+
+  /// No description provided for @chronicTrackKindBloodPressureLong.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pressão arterial (sistólica / diastólica / pulso)'**
+  String get chronicTrackKindBloodPressureLong;
+
+  /// No description provided for @chronicTrackKindGlucoseLong.
+  ///
+  /// In pt, this message translates to:
+  /// **'Glicose (mg/dL e momento)'**
+  String get chronicTrackKindGlucoseLong;
+
+  /// No description provided for @chronicTrackKindWeightLong.
+  ///
+  /// In pt, this message translates to:
+  /// **'Peso (kg)'**
+  String get chronicTrackKindWeightLong;
+
+  /// No description provided for @chronicTrackSystolic.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sistólica'**
+  String get chronicTrackSystolic;
+
+  /// No description provided for @chronicTrackDiastolic.
+  ///
+  /// In pt, this message translates to:
+  /// **'Diastólica'**
+  String get chronicTrackDiastolic;
+
+  /// No description provided for @chronicTrackPulse.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pulso (opcional)'**
+  String get chronicTrackPulse;
+
+  /// No description provided for @chronicTrackMoment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Momento da medição'**
+  String get chronicTrackMoment;
+
+  /// No description provided for @chronicTrackMomentJejum.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jejum'**
+  String get chronicTrackMomentJejum;
+
+  /// No description provided for @chronicTrackMomentPreRefeicao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pré-refeição'**
+  String get chronicTrackMomentPreRefeicao;
+
+  /// No description provided for @chronicTrackMomentPosRefeicao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pós-refeição'**
+  String get chronicTrackMomentPosRefeicao;
+
+  /// No description provided for @chronicTrackMomentDormir.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ao dormir'**
+  String get chronicTrackMomentDormir;
+
+  /// No description provided for @chronicTrackTime.
+  ///
+  /// In pt, this message translates to:
+  /// **'Horário'**
+  String get chronicTrackTime;
+
+  /// No description provided for @chronicTrackAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'+ Adicionar medição'**
+  String get chronicTrackAdd;
+
+  /// No description provided for @chronicTrackAddAnother.
+  ///
+  /// In pt, this message translates to:
+  /// **'+ Adicionar outra medição'**
+  String get chronicTrackAddAnother;
+
+  /// No description provided for @chronicTrackRemove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover medição'**
+  String get chronicTrackRemove;
+
+  /// No description provided for @chronicTrackPickKind.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual medição?'**
+  String get chronicTrackPickKind;
+
+  /// No description provided for @chronicTrackCheckValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confira o valor digitado'**
+  String get chronicTrackCheckValue;
+
+  /// No description provided for @chronicTrackTapToLog.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque para registrar medições'**
+  String get chronicTrackTapToLog;
+
+  /// No description provided for @chronicTrackReadingsCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 medição} other{{count} medições}}'**
+  String chronicTrackReadingsCount(int count);
+
+  /// No description provided for @chronicTrackToggle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Precisa de registro (condição crônica)'**
+  String get chronicTrackToggle;
+
+  /// No description provided for @chronicTrackPremiumBadge.
+  ///
+  /// In pt, this message translates to:
+  /// **'PREMIUM'**
+  String get chronicTrackPremiumBadge;
+
+  /// No description provided for @chronicTrackEdit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar condição'**
+  String get chronicTrackEdit;
+
+  /// No description provided for @chronicTrackSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar'**
+  String get chronicTrackSave;
+
+  /// No description provided for @chronicTrackViewReadings.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver medições'**
+  String get chronicTrackViewReadings;
+
+  /// No description provided for @chronicTrackPromoTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Medições das suas condições'**
+  String get chronicTrackPromoTitle;
+
+  /// No description provided for @chronicTrackPromoDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pressão, glicose e peso no seu registro físico, com histórico.'**
+  String get chronicTrackPromoDesc;
+
+  /// No description provided for @chronicTrackPromoScreenTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dualis Premium'**
+  String get chronicTrackPromoScreenTitle;
+
+  /// No description provided for @chronicHistoryTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Histórico de medições'**
+  String get chronicHistoryTitle;
+
+  /// No description provided for @chronicHistoryProfile.
+  ///
+  /// In pt, this message translates to:
+  /// **'Perfil: {name}'**
+  String chronicHistoryProfile(String name);
+
+  /// No description provided for @chronicHistoryDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{days} dias'**
+  String chronicHistoryDays(int days);
+
+  /// No description provided for @chronicHistoryEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma medição registrada nos últimos {days} dias.'**
+  String chronicHistoryEmpty(int days);
+
+  /// No description provided for @chronicHistoryOffline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem conexão. Mostrando só as medições salvas neste aparelho.'**
+  String get chronicHistoryOffline;
+
+  /// No description provided for @chronicHistoryPending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aguardando envio'**
+  String get chronicHistoryPending;
+
+  /// No description provided for @chronicHistoryError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar as medições.'**
+  String get chronicHistoryError;
+
+  /// No description provided for @chronicHistoryRetry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tentar de novo'**
+  String get chronicHistoryRetry;
+
+  /// No description provided for @chronicHistoryToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hoje, {date}'**
+  String chronicHistoryToday(String date);
+
+  /// No description provided for @chronicHistoryYesterday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ontem, {date}'**
+  String chronicHistoryYesterday(String date);
+
+  /// No description provided for @chronicHistoryChartHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cada ponto é uma medição, do jeito que você registrou. Toque em um ponto para ver o valor.'**
+  String get chronicHistoryChartHint;
+
+  /// No description provided for @chronicHistoryCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 medição} other{{count} medições}}'**
+  String chronicHistoryCount(int count);
+
+  /// No description provided for @chronicHistoryKindBloodPressure.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pressão arterial'**
+  String get chronicHistoryKindBloodPressure;
+
+  /// No description provided for @chronicHistoryKindGlucose.
+  ///
+  /// In pt, this message translates to:
+  /// **'Glicose'**
+  String get chronicHistoryKindGlucose;
+
+  /// No description provided for @chronicHistoryKindWeight.
+  ///
+  /// In pt, this message translates to:
+  /// **'Peso'**
+  String get chronicHistoryKindWeight;
+
+  /// No description provided for @chronicHistorySystolic.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sistólica'**
+  String get chronicHistorySystolic;
+
+  /// No description provided for @chronicHistoryDiastolic.
+  ///
+  /// In pt, this message translates to:
+  /// **'Diastólica'**
+  String get chronicHistoryDiastolic;
+
+  /// No description provided for @chronicHistoryMomentJejum.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jejum'**
+  String get chronicHistoryMomentJejum;
+
+  /// No description provided for @chronicHistoryMomentPreRefeicao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pré-refeição'**
+  String get chronicHistoryMomentPreRefeicao;
+
+  /// No description provided for @chronicHistoryMomentPosRefeicao.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pós-refeição'**
+  String get chronicHistoryMomentPosRefeicao;
+
+  /// No description provided for @chronicHistoryMomentDormir.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ao dormir'**
+  String get chronicHistoryMomentDormir;
+
+  /// No description provided for @chronicHistoryValueBp.
+  ///
+  /// In pt, this message translates to:
+  /// **'{systolic}/{diastolic} mmHg'**
+  String chronicHistoryValueBp(int systolic, int diastolic);
+
+  /// No description provided for @chronicHistoryValuePulse.
+  ///
+  /// In pt, this message translates to:
+  /// **'pulso {pulse} bpm'**
+  String chronicHistoryValuePulse(int pulse);
+
+  /// No description provided for @chronicHistoryValueGlucose.
+  ///
+  /// In pt, this message translates to:
+  /// **'{mgdl} mg/dL'**
+  String chronicHistoryValueGlucose(int mgdl);
+
+  /// No description provided for @chronicHistoryValueWeight.
+  ///
+  /// In pt, this message translates to:
+  /// **'{kg} kg'**
+  String chronicHistoryValueWeight(String kg);
+
+  /// No description provided for @chronicHistorySummarySection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Medições'**
+  String get chronicHistorySummarySection;
+
+  /// No description provided for @chronicHistorySummaryTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Medições registradas'**
+  String get chronicHistorySummaryTitle;
+
+  /// No description provided for @jv23MoreEmotional.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar outra coisa'**
+  String get jv23MoreEmotional;
+
+  /// No description provided for @jv23MoreBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar outra parte do corpo'**
+  String get jv23MoreBody;
+
+  /// No description provided for @jv23TapOneHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque em uma opção.'**
+  String get jv23TapOneHint;
+
+  /// No description provided for @jv23WhatWeighsQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que pesa mais agora?'**
+  String get jv23WhatWeighsQuestion;
+
+  /// No description provided for @jv23WhereExactly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Onde exatamente?'**
+  String get jv23WhereExactly;
+
+  /// No description provided for @jv23HowMuchLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quanto pesa no seu dia?'**
+  String get jv23HowMuchLabel;
+
+  /// No description provided for @jv23IntensityPickHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque em um número. A frase dele aparece aqui.'**
+  String get jv23IntensityPickHint;
+
+  /// No description provided for @jv23ClosingTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para fechar'**
+  String get jv23ClosingTitle;
+
+  /// No description provided for @jv23ClosingHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'As duas perguntas são opcionais.'**
+  String get jv23ClosingHint;
+
+  /// No description provided for @jv23StepOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'{current} de {total}'**
+  String jv23StepOf(int current, int total);
+
+  /// No description provided for @chronicTrackConditionsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informadas por você. Escreva com suas palavras. As que precisam de registro recebem suas medições no registro diário; as outras usam a escala de 1 a 5.'**
+  String get chronicTrackConditionsSubtitle;
 }
 
 class _AppLocalizationsDelegate

@@ -41,6 +41,12 @@ export const PHYSICAL_TREE = {
     colica: ['gases', 'pontadas', 'menstrual'],
     intestino: ['preso', 'solto'],
   },
+  // Pelvis and lower belly, front only (v2.3). Kept apart from barriga.
+  pelve: {
+    urina: ['ardencia', 'vontade'],
+    baixo_ventre: ['colica', 'peso', 'menstrual'],
+    intima: ['coceira', 'inchaco'],
+  },
   costas: {
     rigidez: ['ombros', 'lombar'],
     fisgada: ['irradia', 'ao_mexer'],
@@ -113,6 +119,7 @@ export const PHYSICAL_SIDE_BRANCHES: Record<BodySide, Partial<Record<PhysicalReg
     cabeca: ['pressao', 'sentidos', 'rosto'],
     peito: Object.keys(PHYSICAL_TREE.peito),
     barriga: Object.keys(PHYSICAL_TREE.barriga),
+    pelve: Object.keys(PHYSICAL_TREE.pelve),
     membros: Object.keys(PHYSICAL_TREE.membros),
   },
   back: {
@@ -168,6 +175,35 @@ export const PHYSICAL_ONLY_TRIGGER_KEYS = ['alimentacao', 'esforco', 'queda', 'm
 
 export const INTENSITY_MIN = 1;
 export const INTENSITY_MAX = 5;
+
+/**
+ * Readings a person can choose to note on one of their conditions (v2.4). Chosen by the
+ * person, never derived from the condition label.
+ */
+export const TRACKING_KINDS = ['blood_pressure', 'glucose', 'weight'] as const;
+export type TrackingKind = (typeof TRACKING_KINDS)[number];
+
+/** When a glucose reading was taken, as the person says it. */
+export const GLUCOSE_MOMENTS = ['jejum', 'pre_refeicao', 'pos_refeicao', 'dormir'] as const;
+export type GlucoseMoment = (typeof GLUCOSE_MOMENTS)[number];
+
+/**
+ * Input limits for readings. Wide on purpose: they only catch typing slips (1300 for 130).
+ * They are not shown as a band and say nothing about the value.
+ */
+export const READING_INPUT_LIMITS = {
+  systolic: { min: 50, max: 300 },
+  diastolic: { min: 30, max: 200 },
+  pulse: { min: 30, max: 250 },
+  mgdl: { min: 20, max: 1000 },
+  kg: { min: 10, max: 500, decimals: 2 },
+  maxPerItem: 10,
+  /** measuredAt may be up to this many minutes after the entry's recordedAt (clock slips). */
+  maxMinutesAfterRecorded: 10,
+  /** measuredAt may be up to this many days before the entry's recordedAt. */
+  maxDaysBeforeRecorded: 7,
+  defaultHistoryDays: 90,
+} as const;
 
 export const JOURNAL_LIMITS = {
   maxItems: 12,

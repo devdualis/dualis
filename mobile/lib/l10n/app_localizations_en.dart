@@ -4472,4 +4472,327 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get habitsPeriodLabel => 'Period';
+
+  @override
+  String get jv23RegionPelve => 'Pelvis and lower belly';
+
+  @override
+  String get jv23BranchPelveUrina => 'When peeing';
+
+  @override
+  String get jv23BranchPelveBaixoVentre => 'Lower belly';
+
+  @override
+  String get jv23BranchPelveIntima => 'Intimate area';
+
+  @override
+  String get jv23OptPelveUrinaArdencia => 'It burns or hurts when I pee';
+
+  @override
+  String get jv23OptPelveUrinaVontade => 'I need to pee all the time';
+
+  @override
+  String get jv23OptPelveBaixoVentreColica => 'Cramps low in the belly';
+
+  @override
+  String get jv23OptPelveBaixoVentrePeso => 'Heaviness or pressure down low';
+
+  @override
+  String get jv23OptPelveBaixoVentreMenstrual => 'Period cramps';
+
+  @override
+  String get jv23OptPelveIntimaCoceira => 'Itching or burning';
+
+  @override
+  String get jv23OptPelveIntimaInchaco => 'Tenderness or swelling';
+
+  @override
+  String get jv23BodyMapHint => 'Tap right on the drawing.';
+
+  @override
+  String get jv23BodyMarked => 'Marked:';
+
+  @override
+  String jv23BodyRemove(String part) {
+    return 'Remove $part';
+  }
+
+  @override
+  String get jv23WholeBodyHint => 'Skin, muscles, hormones';
+
+  @override
+  String get jv23ConditionsEmpty => 'Add a condition you keep track of';
+
+  @override
+  String get jv23TriggersHint => 'Optional. Tap the ones that fit today.';
+
+  @override
+  String get jv23TriggerTopicDia => 'Your day';
+
+  @override
+  String get jv23TriggerTopicPessoas => 'People and money';
+
+  @override
+  String get jv23TriggerTopicCorpo => 'Your body and surroundings';
+
+  @override
+  String jv23TopicMarked(int count) {
+    return '$count marked';
+  }
+
+  @override
+  String get chronicTrackBemBanner =>
+      'Since you feel good, you can just log today\'s measurements or save without them.';
+
+  @override
+  String get chronicTrackJustLog => 'Just log measurements';
+
+  @override
+  String get chronicTrackSaveWithout => 'Save without measurements';
+
+  @override
+  String get chronicTrackKindBloodPressure => 'Blood pressure';
+
+  @override
+  String get chronicTrackKindGlucose => 'Glucose';
+
+  @override
+  String get chronicTrackKindWeight => 'Weight';
+
+  @override
+  String get chronicTrackKindBloodPressureLong =>
+      'Blood pressure (systolic / diastolic / pulse)';
+
+  @override
+  String get chronicTrackKindGlucoseLong => 'Glucose (mg/dL and moment)';
+
+  @override
+  String get chronicTrackKindWeightLong => 'Weight (kg)';
+
+  @override
+  String get chronicTrackSystolic => 'Systolic';
+
+  @override
+  String get chronicTrackDiastolic => 'Diastolic';
+
+  @override
+  String get chronicTrackPulse => 'Pulse (optional)';
+
+  @override
+  String get chronicTrackMoment => 'When you measured';
+
+  @override
+  String get chronicTrackMomentJejum => 'Fasting';
+
+  @override
+  String get chronicTrackMomentPreRefeicao => 'Before meal';
+
+  @override
+  String get chronicTrackMomentPosRefeicao => 'After meal';
+
+  @override
+  String get chronicTrackMomentDormir => 'Bedtime';
+
+  @override
+  String get chronicTrackTime => 'Time';
+
+  @override
+  String get chronicTrackAdd => '+ Add measurement';
+
+  @override
+  String get chronicTrackAddAnother => '+ Add another measurement';
+
+  @override
+  String get chronicTrackRemove => 'Remove measurement';
+
+  @override
+  String get chronicTrackPickKind => 'Which measurement?';
+
+  @override
+  String get chronicTrackCheckValue => 'Check the number you typed';
+
+  @override
+  String get chronicTrackTapToLog => 'Tap to log measurements';
+
+  @override
+  String chronicTrackReadingsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count measurements',
+      one: '1 measurement',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chronicTrackToggle => 'Needs tracking (chronic condition)';
+
+  @override
+  String get chronicTrackPremiumBadge => 'PREMIUM';
+
+  @override
+  String get chronicTrackEdit => 'Edit condition';
+
+  @override
+  String get chronicTrackSave => 'Save';
+
+  @override
+  String get chronicTrackViewReadings => 'View measurements';
+
+  @override
+  String get chronicTrackPromoTitle => 'Measurements for your conditions';
+
+  @override
+  String get chronicTrackPromoDesc =>
+      'Blood pressure, glucose and weight in your physical check-in, with history.';
+
+  @override
+  String get chronicTrackPromoScreenTitle => 'Dualis Premium';
+
+  @override
+  String get chronicHistoryTitle => 'Readings history';
+
+  @override
+  String chronicHistoryProfile(String name) {
+    return 'Profile: $name';
+  }
+
+  @override
+  String chronicHistoryDays(int days) {
+    return '$days days';
+  }
+
+  @override
+  String chronicHistoryEmpty(int days) {
+    return 'No readings logged in the last $days days.';
+  }
+
+  @override
+  String get chronicHistoryOffline =>
+      'Offline. Showing only the readings saved on this device.';
+
+  @override
+  String get chronicHistoryPending => 'Waiting to sync';
+
+  @override
+  String get chronicHistoryError => 'Couldn\'t load the readings.';
+
+  @override
+  String get chronicHistoryRetry => 'Try again';
+
+  @override
+  String chronicHistoryToday(String date) {
+    return 'Today, $date';
+  }
+
+  @override
+  String chronicHistoryYesterday(String date) {
+    return 'Yesterday, $date';
+  }
+
+  @override
+  String get chronicHistoryChartHint =>
+      'Each dot is one reading, as you logged it. Tap a dot to see the value.';
+
+  @override
+  String chronicHistoryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count readings',
+      one: '1 reading',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chronicHistoryKindBloodPressure => 'Blood pressure';
+
+  @override
+  String get chronicHistoryKindGlucose => 'Glucose';
+
+  @override
+  String get chronicHistoryKindWeight => 'Weight';
+
+  @override
+  String get chronicHistorySystolic => 'Systolic';
+
+  @override
+  String get chronicHistoryDiastolic => 'Diastolic';
+
+  @override
+  String get chronicHistoryMomentJejum => 'Fasting';
+
+  @override
+  String get chronicHistoryMomentPreRefeicao => 'Before meal';
+
+  @override
+  String get chronicHistoryMomentPosRefeicao => 'After meal';
+
+  @override
+  String get chronicHistoryMomentDormir => 'Bedtime';
+
+  @override
+  String chronicHistoryValueBp(int systolic, int diastolic) {
+    return '$systolic/$diastolic mmHg';
+  }
+
+  @override
+  String chronicHistoryValuePulse(int pulse) {
+    return 'pulse $pulse bpm';
+  }
+
+  @override
+  String chronicHistoryValueGlucose(int mgdl) {
+    return '$mgdl mg/dL';
+  }
+
+  @override
+  String chronicHistoryValueWeight(String kg) {
+    return '$kg kg';
+  }
+
+  @override
+  String get chronicHistorySummarySection => 'Readings';
+
+  @override
+  String get chronicHistorySummaryTitle => 'Logged readings';
+
+  @override
+  String get jv23MoreEmotional => 'Record something else';
+
+  @override
+  String get jv23MoreBody => 'Mark another part of the body';
+
+  @override
+  String get jv23TapOneHint => 'Tap one option.';
+
+  @override
+  String get jv23WhatWeighsQuestion => 'What weighs on you most right now?';
+
+  @override
+  String get jv23WhereExactly => 'Where exactly?';
+
+  @override
+  String get jv23HowMuchLabel => 'How much does it weigh on your day?';
+
+  @override
+  String get jv23IntensityPickHint =>
+      'Tap a number. What it means shows up here.';
+
+  @override
+  String get jv23ClosingTitle => 'To wrap up';
+
+  @override
+  String get jv23ClosingHint => 'Both questions are optional.';
+
+  @override
+  String jv23StepOf(int current, int total) {
+    return '$current of $total';
+  }
+
+  @override
+  String get chronicTrackConditionsSubtitle =>
+      'Added by you. Write them in your own words. Those that need records take your readings in the daily entry; the others use the 1 to 5 scale.';
 }

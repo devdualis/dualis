@@ -9,6 +9,7 @@ Shared contract between backend and mobile for the new daily journal. Source of 
 - No content, ad or notice depends on what the user recorded.
 - Intensity is always self-reported, integer 1..5.
 - Condition names (`userConditions.label`) and journal notes are never sent to an AI: AI tagging is removed from the product.
+- Readings (v2.4) are stored and shown exactly as typed: no reference values, no labels on a value, no colours by value, no averages, no direction words, no alerts. They are never sent to an AI.
 
 ## Keys
 
@@ -110,7 +111,9 @@ Never a disorder, grouping or organ-system name as a label ("endócrino" is bann
 
 `journal_items`: `id uuid pk`, `entry_id fk cascade`, `kind text`, `option_key text null`, `custom_label text null` (max 80, encrypted), `condition_id uuid null fk`, `body_side text null`, `sensation text null` (`dor` | `incomodo`, physical items only, v2.1, migration 0020), `persistence text null`, `intensity smallint 1..5 null` (null only when mood is bem/normal and there are no items, so in practice items always have intensity).
 
-`user_conditions`: `id uuid pk`, `profile_id`, `user_id`, `label text` (max 40, encrypted), `created_at`, `archived_at null`.
+`user_conditions`: `id uuid pk`, `profile_id`, `user_id`, `label text` (max 40, encrypted), `tracking text[]` (v2.4, default `{}`), `created_at`, `archived_at null`.
+
+`condition_readings` (v2.4): see the v2.4 section.
 
 Old `symptom_logs` rows stay as they are and are returned by history as `legacy: true` items.
 
@@ -119,8 +122,10 @@ Old `symptom_logs` rows stay as they are and are returned by history as `legacy:
 - `POST /v1/journal/entries` → 201 `JournalEntryDto`. Body: `{ clientId, recordedAt, mood, area?, triggers[], triggerNote?, note?, transitionVariantIds[], items: [{ kind, optionKey?, customLabel?, conditionId?, bodySide?, sensation?, persistence?, intensity }] }`. Validation: keys from the tables above only; max 12 items; with `area`: one axis, mood `bem`/`nao_tao_bem`, `sensation` on physical items, side rules.
 - `GET /v1/journal/entries?days=30` (max 365; Free UI uses 30) → `{ entries: JournalEntryDto[] }` newest first, including legacy rows mapped to `{ legacy: true, items: [{ kind, legacyLabel, intensity }] }`.
 - `DELETE /v1/journal/entries/:id` → 204.
-- `GET /v1/journal/conditions` → `{ conditions: [{ id, label, createdAt }] }`.
-- `POST /v1/journal/conditions` `{ label }` → 201. Max 10 active per profile.
+- `GET /v1/journal/conditions` → `{ conditions: [{ id, label, tracking, createdAt }] }`.
+- `POST /v1/journal/conditions` `{ label, tracking? }` → 201. Max 10 active per profile.
+- `PATCH /v1/journal/conditions/:id` `{ label?, tracking? }` → 200 condition (v2.4).
+- `GET /v1/journal/conditions/:id/readings?days=90` → readings array (v2.4).
 - `DELETE /v1/journal/conditions/:id` → 204 (soft archive; past items keep the label).
 - `GET /v1/journal/summary?days=30&tzOffset=0` → counts only: `{ byTime: {passado,presente,futuro}, byRegion: {cabeca,…}, byOptionKey: {…}, byTrigger: {…}, cooccurrence: [{ a, b, days }] }`. No labels, no text, no interpretation.
   - **Summary markers**: option `<root>.<branch>.<option>`, branch `<root>.<branch>`, region bare (`cabeca`), time bare (`futuro`), trigger `trigger:<key>`. The client resolves all of these to labels, branches included.
@@ -235,6 +240,56 @@ Charts (Free, 30 days): sleep quality per day + hours, days with movement, perio
 
 ### 7. Summary additions (`GET /v1/journal/summary`)
 Same distinct-local-day counting. New fields: `positive: { byTime: {passado,presente,futuro}, byOptionKey: {…} }` (positive items only; never mixed into `byTime`/`byOptionKey`), `byCoping: { consegui, esperei, dificil }`, `byHelper: { mexer_corpo, … }`. Positive items do not enter `cooccurrence`. New trigger keys appear in `byTrigger` like the others.
+
+## v2.3: pelvis and lower belly (2026-11-01)
+
+`barriga` is the upper belly only. The pelvis and lower belly are a separate region, `pelve`, front side only, for everyone (pain when peeing, lower-belly cramps, intimate area). On the back, the lower back stays `costas`. Every `barriga` key stays valid; `barriga.colica.menstrual` is still offered. Custom: `pelve.custom`. The summary `byRegion` gains `pelve`.
+
+| key | side | pt | en | es |
+|---|---|---|---|---|
+| `pelve` (region) | front | Pelve e baixo ventre | Pelvis and lower belly | Pelvis y bajo vientre |
+| `pelve.urina` (branch) | front | Ao fazer xixi | When peeing | Al orinar |
+| `pelve.urina.ardencia` | front | Arde ou dói ao fazer xixi | It burns or hurts when I pee | Arde o duele al orinar |
+| `pelve.urina.vontade` | front | Vontade de fazer xixi toda hora | I need to pee all the time | Ganas de orinar a cada rato |
+| `pelve.baixo_ventre` (branch) | front | Baixo ventre | Lower belly | Bajo vientre |
+| `pelve.baixo_ventre.colica` | front | Cólica no baixo ventre | Cramps low in the belly | Cólico en el bajo vientre |
+| `pelve.baixo_ventre.peso` | front | Peso ou pressão embaixo | Heaviness or pressure down low | Peso o presión abajo |
+| `pelve.baixo_ventre.menstrual` | front | Cólica menstrual | Period cramps | Cólico menstrual |
+| `pelve.intima` (branch) | front | Região íntima | Intimate area | Zona íntima |
+| `pelve.intima.coceira` | front | Coceira ou ardência | Itching or burning | Picor o ardor |
+| `pelve.intima.inchaco` | front | Sensibilidade ou inchaço | Tenderness or swelling | Sensibilidad o hinchazón |
+
+Backend source: `PHYSICAL_TREE.pelve` and `PHYSICAL_SIDE_BRANCHES.front.pelve` in `journal-keys.constant.ts`.
+
+## v2.4: readings on a condition (2026-11-01, Premium in the app)
+
+A person can mark one of their conditions "Precisa de registro (condição crônica)" and choose which readings to note. The app never picks them from the condition name. Readings are part of a physical check-in: they ride on the condition item of `POST /v1/journal/entries`, so the outbox and `clientId` replay carry them with no extra call. Premium is gated in the app only; the backend accepts readings from any caller with write access to the profile.
+
+### Tracking (`user_conditions.tracking`)
+Subset of `blood_pressure` | `glucose` | `weight`, no repeats; `[]` = plain condition (1..5 card). Set with `POST` (`tracking?`, default `[]`) or `PATCH /v1/journal/conditions/:id` `{ tracking?, label? }` → 200 `{ id, label, tracking, createdAt }`; 404 when archived or on another profile. Readings already stored are kept when tracking changes. The server does not reject a reading whose kind is no longer tracked (an outbox record queued before the change must still sync).
+
+### Readings on a condition item
+```jsonc
+{ "kind": "condition", "conditionId": "<uuid>", "intensity": null,
+  "readings": [
+    { "kind": "blood_pressure", "measuredAt": "2026-11-01T11:10:00Z", "systolic": 130, "diastolic": 85, "pulse": 72 },
+    { "kind": "glucose", "measuredAt": "2026-11-01T11:12:00Z", "mgdl": 98, "moment": "jejum" },
+    { "kind": "weight", "measuredAt": "2026-11-01T11:15:00Z", "kg": 72.5 }
+  ] }
+```
+- `readings` only on `kind = condition` items; max 10 per item. Each reading has its own `measuredAt`.
+- `intensity` may be null on a condition item with at least one reading; a condition item without readings still needs 1..5.
+- Fields per kind (other kinds' fields are rejected): `blood_pressure`: `systolic`, `diastolic` (integers), `pulse` (integer, optional or null). `glucose`: `mgdl` (integer, mg/dL) and `moment` = `jejum` | `pre_refeicao` | `pos_refeicao` | `dormir`. `weight`: `kg` (number, up to 2 decimals; the app turns "72,5" into 72.5).
+- Input limits, only to catch typing slips (never shown as a band, never a comment on the value): systolic 50..300, diastolic 30..200, pulse 30..250, glucose 20..1000, weight 10..500. `measuredAt` from 7 days before to 10 minutes after the entry's `recordedAt`. Out of limits → 400; the app says "Confira o valor digitado".
+
+### Responses
+- `JournalEntryDto.items[].readings`: every item carries `readings` (`[]` except on condition items with readings), oldest first, decrypted, each with `id`.
+- `GET /v1/journal/conditions/:id/readings?days=90` (`days` 1..365, default 90; read access) → array, newest first: `[{ id, entryId, conditionId, kind, measuredAt, ...values }]` where values are `systolic, diastolic, pulse` (pulse null when not typed), `mgdl, moment`, or `kg`. Works for archived conditions; another profile's condition → 404.
+- Reading shape (both places): `{ id, entryId, conditionId, kind, measuredAt, systolic?, diastolic?, pulse?, mgdl?, moment?, kg? }` with only the fields of its kind.
+- `/v1/journal/summary` stays counts only and does not read readings. `/v1/journal/suggest-option` never receives readings or condition names.
+
+### Storage (`condition_readings`, migration 0027)
+`id uuid pk`, `user_id` (author, null after account delete), `profile_id` (subject, cascade), `entry_id` (cascade with the entry), `condition_id` (cascade), `kind text` (`blood_pressure` | `glucose` | `weight`), `measured_at timestamptz`, `data text` (AES-256-GCM JSON of the values only), `created_at`. Index `(profile_id, condition_id, measured_at desc)` and `(entry_id)`. RLS forced: read with `app_can_read_profile`, write with `app_can_write_profile`; insert pins the author to the caller; insert and update require the entry and the condition to belong to the same profile. Included in the LGPD export (`conditionReadings` per profile, `formatVersion` 1.5; conditions export `tracking`); removed with the entry, the condition, the profile or the owner's account. Migration 0027 is idempotent and is applied to production by hand.
 
 ## Removed
 - Mobile: `RedFlagEvaluator`, `SafetyNoticeKind`, inline safety notice banner, any conditional emergency UI, `SymptomClassification*`, `ApiEndpoints.tagEntry`.

@@ -293,8 +293,10 @@ Plans:
 Plans:  
 **Wave 1**  
 - [ ] 11-01: Multi-profile database schema (dependents, guardianships, shared_access_grants) and PostgreSQL RLS proxy isolation policies  
+
 **Wave 2**  
 - [ ] 11-02: Mobile profile switcher, legal guardian registration modal (LGPD Art. 14 consent), and optional access grant/revocation management screen  
+
 **Wave 3**  
 - [ ] 11-03: Live Flutter e2e on a running app (integration_test + Dart driver session) for consent, profile switch, view-only share, and instant revoke  
 
@@ -345,6 +347,30 @@ Plans:
   3. Direct integration and link with official ANVISA Bulário Eletrônico for user access to official medication leaflets.  
 
 **Plans**: 2 plans
+
+### Phase 16: Premium Chronic-Condition Tracking & Self-Reported Measurements
+
+**Goal:** People who live with a chronic condition can record their own readings (blood pressure, glucose, weight) inside the physical check-in, tied to the condition they named, and see the history. Premium only.
+**Mode:** mvp
+**UI hint**: yes
+**Requirements**: TBD
+**Depends on:** Phase 4 (journal v2 conditions); uses the existing premium gate (`premiumProfilesEnabledProvider`), not Phase 15 billing
+**Success Criteria** (what must be TRUE):
+  1. In the physical check-in, the person's own conditions show first, as a tappable list above the body map (not chips).
+  2. When adding or editing a condition, a Premium person can switch on "Precisa de registro (condição crônica)" and pick the readings to track: blood pressure (systolic/diastolic, optional pulse), glucose (mg/dL plus moment: fasting, before/after a meal, bedtime), weight (kg). The app never infers tracking from the condition name. Conditions without tracking (for example depression) keep today's 1-5 card.
+  3. Tapping a tracked condition in the check-in opens its card with the reading fields. Each saved check-in stores one or more readings with their own time, so three blood-pressure readings in a day are three readings in the history.
+  4. Each tracked condition has a history: readings listed by day and a chart of the raw values. Readings join the exportable summary.
+  5. Readings save offline and sync through the existing Drift outbox.
+  6. Free people keep plain conditions; the tracking switch and readings open the Premium promo. Decision (2026-11-01): the gate lives in the app only (same as "Meus cuidados"); server-side entitlement checks arrive with Phase 15 billing.
+  7. Guardrails (ESTRATEGIA §18.4, ANEXO Phase 14): no reference ranges, no normal/high labels or colours, no alerts, no trend wording. Readings are encrypted at rest, never sent to AI, isolated by RLS per profile, included in LGPD export and deletion. Privacy policy adds "medições que você registrar". Validation bounds only catch typos.
+  8. New migration is written for manual production apply. Copy in pt, es, en.
+**Plans:** 4 plans
+
+Plans:
+- [x] 16-01: Backend Database Schema, Migration 0027, RLS, DTOs & Service (Wave 1)
+- [x] 16-02: Mobile Domain, Drift Schema v7 & Offline Serialization (Wave 2)
+- [x] 16-03: Mobile UI: Conditions List, "Bem" Flow & Reading Input Cards (Wave 3)
+- [x] 16-04: Per-Condition History, Raw Chart, Summary PDF & Live E2E Sign-Off (Wave 4)
 
 ---
 

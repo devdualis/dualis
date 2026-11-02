@@ -9,11 +9,12 @@ import 'journal_insights_models.dart';
 /// places what the person recorded; nothing scores, averages intensities or
 /// infers a cause.
 
-/// The five regions drawn on the body map (F1), in display order.
+/// The regions drawn on the body map (F1), in display order.
 const List<String> mapRegions = [
   'cabeca',
   'peito',
   'barriga',
+  'pelve',
   'costas',
   'membros',
 ];

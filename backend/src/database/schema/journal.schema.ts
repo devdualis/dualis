@@ -18,11 +18,15 @@ export const userConditions = pgTable(
       .notNull()
       .references(() => profiles.id, { onDelete: 'cascade' }), // subject
     label: text('label').notNull(), // encrypted, the person's own words (max 40 chars)
+    // Readings the person chose to note for this condition (v2.4): blood_pressure, glucose, weight.
+    // Set only by the person, never derived from the label.
+    tracking: text('tracking').array().default(sql`'{}'::text[]`).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     archivedAt: timestamp('archived_at', { withTimezone: true }),
   },
   (table) => [
     index('idx_user_conditions_profile_created').on(table.profileId, table.createdAt),
+    check('user_conditions_tracking_check', sql`${table.tracking} <@ ARRAY['blood_pressure', 'glucose', 'weight']::text[]`),
     pgPolicy('user_conditions_profile_select', {
       for: 'select',
       using: sql`app_can_read_profile(profile_id)`,
@@ -147,6 +151,59 @@ export const journalItems = pgTable(
     pgPolicy('journal_items_profile_delete', {
       for: 'delete',
       using: sql`EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = entry_id AND app_can_write_profile(e.profile_id))`,
+    }),
+  ],
+);
+
+/**
+ * Self-reported readings on a condition item (v2.4): one row per reading, each with its own
+ * time. `data` is AES-256-GCM ciphertext of the JSON values of that kind
+ * (blood_pressure: systolic, diastolic, pulse?; glucose: mgdl, moment; weight: kg).
+ * Stored as typed, never compared, labelled or averaged.
+ */
+export const conditionReadings = pgTable(
+  'condition_readings',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }), // author (the caller); NULL once they delete their account
+    profileId: uuid('profile_id')
+      .notNull()
+      .references(() => profiles.id, { onDelete: 'cascade' }), // subject
+    entryId: uuid('entry_id')
+      .notNull()
+      .references(() => journalEntries.id, { onDelete: 'cascade' }),
+    conditionId: uuid('condition_id')
+      .notNull()
+      .references(() => userConditions.id, { onDelete: 'cascade' }),
+    kind: text('kind').notNull(),
+    measuredAt: timestamp('measured_at', { withTimezone: true }).notNull(),
+    data: text('data').notNull(), // encrypted JSON of the values
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_condition_readings_condition_measured').on(table.profileId, table.conditionId, table.measuredAt.desc()),
+    index('idx_condition_readings_entry').on(table.entryId),
+    check('condition_readings_kind_check', sql`${table.kind} IN ('blood_pressure', 'glucose', 'weight')`),
+    pgPolicy('condition_readings_profile_select', {
+      for: 'select',
+      using: sql`app_can_read_profile(profile_id)`,
+    }),
+    pgPolicy('condition_readings_profile_insert', {
+      for: 'insert',
+      withCheck: sql`app_can_write_profile(profile_id) AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+        AND EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = condition_readings.entry_id AND e.profile_id = condition_readings.profile_id)
+        AND EXISTS (SELECT 1 FROM user_conditions c WHERE c.id = condition_readings.condition_id AND c.profile_id = condition_readings.profile_id)`,
+    }),
+    pgPolicy('condition_readings_profile_update', {
+      for: 'update',
+      using: sql`app_can_write_profile(profile_id)`,
+      withCheck: sql`app_can_write_profile(profile_id)
+        AND EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = condition_readings.entry_id AND e.profile_id = condition_readings.profile_id)
+        AND EXISTS (SELECT 1 FROM user_conditions c WHERE c.id = condition_readings.condition_id AND c.profile_id = condition_readings.profile_id)`,
+    }),
+    pgPolicy('condition_readings_profile_delete', {
+      for: 'delete',
+      using: sql`app_can_write_profile(profile_id)`,
     }),
   ],
 );

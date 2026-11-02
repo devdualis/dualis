@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { getTableConfig } from 'drizzle-orm/pg-core';
 import { AppModule } from '../../src/app.module';
-import { dailyHabits, journalEntries, journalItems, userConditions } from '../../src/database/schema';
+import { conditionReadings, dailyHabits, journalEntries, journalItems, userConditions } from '../../src/database/schema';
 import { JournalService } from '../../src/modules/journal/journal.service';
 import { buildJournalSummary, dayMarkers } from '../../src/modules/journal/journal-summary';
 import { houseAdsFor } from '../../src/modules/journal/house-ads';
@@ -21,6 +21,7 @@ const CONTRACT_FILES = [
   'database/schema/journal.schema.ts',
   'database/schema/daily-habits.schema.ts',
   'database/migrations/0026_journal_v2_2_wellness.sql',
+  'database/migrations/0027_condition_readings.sql',
   'modules/habits/dto/habits.dto.ts',
   'modules/habits/habits.service.ts',
   'modules/habits/habits.controller.ts',
@@ -64,7 +65,11 @@ describe('Journal v2 contract: no grouping, assessment or disorder names', () =>
       ['body_side', 'condition_id', 'custom_label', 'entry_id', 'id', 'intensity', 'kind', 'option_key', 'persistence', 'sensation'].sort(),
     );
     expect(columns(dailyHabits)).toEqual(['id', 'user_id', 'profile_id', 'day', 'sleep_quality', 'sleep_hours', 'moved', 'movement_minutes', 'period', 'created_at', 'updated_at'].sort());
-    expect(columns(userConditions)).toEqual(['archived_at', 'created_at', 'id', 'label', 'profile_id', 'user_id'].sort());
+    expect(columns(userConditions)).toEqual(['archived_at', 'created_at', 'id', 'label', 'profile_id', 'tracking', 'user_id'].sort());
+    // Values live only in the encrypted `data`: no numeric column a query could compare or average.
+    expect(columns(conditionReadings)).toEqual(
+      ['condition_id', 'created_at', 'data', 'entry_id', 'id', 'kind', 'measured_at', 'profile_id', 'user_id'].sort(),
+    );
   });
 
   it.each(CONTRACT_FILES)('%s contains no banned identifier or word', (file) => {
@@ -110,7 +115,27 @@ describe('Journal v2 contract: no grouping, assessment or disorder names', () =>
     });
     expectCleanResponse(legacy);
 
-    expectCleanResponse(service.toConditionDto({ id: 'k1', label: 'v1:Diabetes', createdAt: now }));
+    expectCleanResponse(service.toConditionDto({ id: 'k1', label: 'v1:Diabetes', tracking: ['blood_pressure', 'glucose', 'weight'], createdAt: now }));
+    const reading = (kind: string, values: Record<string, unknown>) => ({
+      id: `r-${kind}`, userId: 'u1', profileId: 'p1', entryId: 'e1', conditionId: 'k1', kind,
+      measuredAt: now, data: `v1:${JSON.stringify(values)}`, createdAt: now,
+    });
+    const withReadings = service.toEntryDto(
+      { id: 'e1', userId: 'u1', profileId: 'p1', clientId: 'c2', recordedAt: now, createdAt: now, mood: 'bem', area: 'physical', triggers: [], triggerNote: null, note: null, transitionVariantIds: [] },
+      [{ id: 'i3', entryId: 'e1', kind: 'condition', optionKey: null, customLabel: null, conditionId: 'k1', bodySide: null, persistence: null, intensity: null }],
+      new Map([['k1', 'Pressão']]),
+      [
+        reading('blood_pressure', { systolic: 130, diastolic: 85, pulse: 72 }),
+        reading('glucose', { mgdl: 98, moment: 'jejum' }),
+        reading('weight', { kg: 72.5 }),
+      ],
+    );
+    expect(withReadings.items[0].readings).toHaveLength(3);
+    expectCleanResponse(withReadings);
+    // Raw values only: no band, label, status, average or direction next to them.
+    for (const key of collectKeys(withReadings)) {
+      expect(key).not.toMatch(/normal|range|reference|status|level|average|mean|trend|alert|flag|high|low|target|goal/i);
+    }
     expectCleanResponse(
       buildJournalSummary([{ recordedAt: now, triggers: ['sono'], items: [{ kind: 'emotional', optionKey: 'futuro.mente.antecipar' }] }], 30),
     );

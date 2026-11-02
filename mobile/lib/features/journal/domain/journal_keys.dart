@@ -101,6 +101,12 @@ class JournalKeys {
       'colica': ['gases', 'pontadas', 'menstrual'],
       'intestino': ['preso', 'solto'],
     },
+    // Pelvis and lower belly, front only (v2.3). Kept apart from barriga.
+    'pelve': {
+      'urina': ['ardencia', 'vontade'],
+      'baixo_ventre': ['colica', 'peso', 'menstrual'],
+      'intima': ['coceira', 'inchaco'],
+    },
     'costas': {
       'rigidez': ['ombros', 'lombar'],
       'fisgada': ['irradia', 'ao_mexer'],
@@ -202,6 +208,14 @@ class JournalKeys {
     triggerOutro,
   ];
 
+  /// Topics of the triggers screen (v2.3), in screen order. "Não sei" and
+  /// "Outro" stay outside the topics. Order inside a topic follows [triggers].
+  static const Map<String, List<String>> triggerTopics = {
+    'dia': [triggerTrabalho, triggerSono, triggerTelas, triggerAlimentacao],
+    'pessoas': [triggerFamilia, triggerDinheiro],
+    'corpo': [triggerCiclo, triggerEsforco, triggerQueda, triggerMedicamento, triggerClima],
+  };
+
   /// Only offered when the entry has a physical item.
   static const Set<String> physicalOnlyTriggers = {
     triggerAlimentacao,
@@ -228,6 +242,49 @@ class JournalKeys {
     helperNadaAinda,
   ];
   static const int maxHelpers = 6;
+
+  // Self-reported readings on a condition (v2.4, Premium). The person
+  // chooses what a condition tracks; nothing is inferred from its name.
+  static const String trackingBloodPressure = 'blood_pressure';
+  static const String trackingGlucose = 'glucose';
+  static const String trackingWeight = 'weight';
+
+  /// Display and request order of reading kinds.
+  static const List<String> trackingKinds = [
+    trackingBloodPressure,
+    trackingGlucose,
+    trackingWeight,
+  ];
+
+  /// Moment of a glucose reading, chosen by the person.
+  static const String momentJejum = 'jejum';
+  static const String momentPreRefeicao = 'pre_refeicao';
+  static const String momentPosRefeicao = 'pos_refeicao';
+  static const String momentDormir = 'dormir';
+  static const List<String> glucoseMoments = [
+    momentJejum,
+    momentPreRefeicao,
+    momentPosRefeicao,
+    momentDormir,
+  ];
+
+  /// Input limits of reading values. Wide on purpose: they only catch typos
+  /// (1300 instead of 130) and are never shown as a range or used to judge a
+  /// value.
+  static const ReadingInputLimit systolicLimit = ReadingInputLimit(50, 300);
+  static const ReadingInputLimit diastolicLimit = ReadingInputLimit(30, 200);
+  static const ReadingInputLimit pulseLimit = ReadingInputLimit(30, 250);
+  static const ReadingInputLimit mgdlLimit = ReadingInputLimit(20, 1000);
+  static const ReadingInputLimit kgLimit = ReadingInputLimit(10, 500);
+
+  /// Decimal places kept on a weight value.
+  static const int kgDecimals = 2;
+
+  /// A reading time may be at most this far after now (clock drift) ...
+  static const Duration readingMaxAhead = Duration(minutes: 10);
+
+  /// ... and at most this far before the entry time.
+  static const Duration readingMaxBefore = Duration(days: 7);
 
   // Limits from the contract.
   static const int customLabelMaxLength = 80;
@@ -260,4 +317,14 @@ class JournalKeys {
           optionKey(root.key, branch.key, option),
     ],
   };
+}
+
+/// Lowest and highest value a reading field accepts (typo guard only).
+@immutable
+class ReadingInputLimit {
+  final num min;
+  final num max;
+  const ReadingInputLimit(this.min, this.max);
+
+  bool accepts(num value) => value >= min && value <= max;
 }

@@ -22,6 +22,7 @@ class ChartTokens {
     'cabeca': Color(0xFF537FB8),
     'peito': Color(0xFFA17BB1),
     'barriga': Color(0xFFD69A44),
+    'pelve': Color(0xFFB0705A),
     'costas': Color(0xFF268E82),
     'membros': Color(0xFF7F8F54),
     // Whole-body areas are not in the handoff; muted, distinct hues.

@@ -197,6 +197,13 @@
       "when": 1790361574101,
       "tag": "0026_journal_v2_2_wellness",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1790361574102,
+      "tag": "0027_condition_readings",
+      "breakpoints": true
     }
   ]
 }

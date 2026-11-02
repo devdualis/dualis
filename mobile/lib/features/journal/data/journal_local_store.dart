@@ -151,8 +151,22 @@ class JournalLocalStore {
             .get();
     return [
       for (final r in rows)
-        UserCondition(id: r.id, label: r.label, createdAt: r.createdAt),
+        UserCondition(
+          id: r.id,
+          label: r.label,
+          createdAt: r.createdAt,
+          tracking: _decodeTracking(r.tracking),
+        ),
     ];
+  }
+
+  static List<String> _decodeTracking(String raw) {
+    try {
+      final decoded = jsonDecode(raw);
+      return decoded is List ? UserCondition.cleanTracking(decoded) : const [];
+    } on FormatException {
+      return const [];
+    }
   }
 
   Future<void> replaceConditions(
@@ -171,6 +185,7 @@ class JournalLocalStore {
               label: c.label,
               profileId: Value(key),
               createdAt: Value(c.createdAt),
+              tracking: Value(jsonEncode(c.tracking)),
             ),
         ]);
       });

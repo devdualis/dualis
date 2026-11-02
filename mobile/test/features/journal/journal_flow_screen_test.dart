@@ -24,6 +24,37 @@ void main() {
   ProviderContainer containerOf(WidgetTester tester) =>
       ProviderScope.containerOf(tester.element(find.byType(MaterialApp)));
 
+  bool isCardSelected(WidgetTester tester, String key) => find
+      .descendant(
+        of: find.byKey(Key(key)),
+        matching: find.byIcon(Icons.check_circle_rounded),
+      )
+      .evaluate()
+      .isNotEmpty;
+
+  /// Keys of the trigger options, in screen order.
+  List<String> triggerKeysOnScreen(WidgetTester tester) => [
+        for (final w in tester.widgetList(find.byWidgetPredicate((w) =>
+            (w.key is ValueKey<String>) &&
+            (w.key as ValueKey<String>).value.startsWith('jv2_trigger_'))))
+          (w.key as ValueKey<String>).value.substring('jv2_trigger_'.length),
+      ];
+
+  /// Every trigger, tab by tab, then "Não sei" and "Outro". Leaves the last
+  /// tab open.
+  Future<List<String>> allTriggerKeys(WidgetTester tester) async {
+    final keys = <String>[];
+    for (final topic in JournalKeys.triggerTopics.keys) {
+      if (find.byKey(Key('jv2_topic_$topic')).evaluate().isEmpty) continue;
+      await tapKey(tester, 'jv2_topic_$topic');
+      keys.addAll(triggerKeysOnScreen(tester).where((k) => k != 'nao_sei' && k != 'outro'));
+    }
+    return [...keys, 'nao_sei', 'outro'];
+  }
+
+  bool isMarked(WidgetTester tester, String region) =>
+      find.byKey(Key('jv2_marked_$region')).evaluate().isNotEmpty;
+
   /// Persistence "hoje" + intensity [level] for every row on the screen.
   Future<void> fillIntensity(WidgetTester tester, int count, int level) async {
     for (var i = 0; i < count; i++) {
@@ -107,9 +138,8 @@ void main() {
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
 
-    // Straight to the time question: no "what to record" screen.
-    expect(find.text(pt.jv2TimeQuestion), findsOneWidget);
-    await tapKey(tester, 'jv2_time_futuro');
+    // Straight to the feelings, grouped by time, on one screen (v2.3).
+    expect(find.text(pt.jv23WhatWeighsQuestion), findsOneWidget);
     expect(find.text(pt.jv2BranchFuturoMente), findsOneWidget);
     await tapKey(tester, 'jv2_branch_futuro.mente');
 
@@ -120,9 +150,6 @@ void main() {
     await tapKey(tester, 'jv2_custom_add');
     expect(find.byKey(const Key('jv2_custom_chip_Cansaço do trânsito')), findsOneWidget);
     await tapKey(tester, 'jv2_continue');
-
-    expect(find.text(pt.jv2MoreQuestion), findsOneWidget);
-    await tapKey(tester, 'jv2_more_no');
 
     // Compact screen: one row per item.
     expect(find.text(pt.jv2IntensityCompactQuestion), findsOneWidget);
@@ -182,22 +209,18 @@ void main() {
     }
   });
 
-  testWidgets('"Quer registrar mais alguma coisa?" goes back to the time screen', (tester) async {
+  testWidgets('"+ Registrar outra coisa" goes back to the feelings screen', (tester) async {
     final h = JournalHarness();
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
-    await tapKey(tester, 'jv2_time_passado');
     await tapKey(tester, 'jv2_branch_passado.tristeza');
     await tapKey(tester, 'jv2_option_passado.tristeza.saudade');
-    await tapKey(tester, 'jv2_continue');
-    await tapKey(tester, 'jv2_more_yes');
+    await tapKey(tester, 'jv23_more');
 
-    expect(find.text(pt.jv2TimeQuestion), findsOneWidget);
-    await tapKey(tester, 'jv2_time_presente');
+    expect(find.text(pt.jv23WhatWeighsQuestion), findsOneWidget);
     await tapKey(tester, 'jv2_branch_presente.energia');
     await tapKey(tester, 'jv2_option_presente.energia.corpo');
     await tapKey(tester, 'jv2_continue');
-    await tapKey(tester, 'jv2_more_no');
 
     expect(find.byKey(const Key('jv2_item_row_1')), findsOneWidget);
   });
@@ -239,17 +262,12 @@ void main() {
     await tapKey(tester, 'jv2_custom_add');
     await tapKey(tester, 'jv2_continue');
 
-    expect(find.text(pt.jv2MoreBodyQuestion), findsOneWidget);
-    await tapKey(tester, 'jv2_more_no');
-
     expect(find.textContaining(pt.jv2RegionCostas), findsWidgets);
     await fillIntensity(tester, 3, 2);
     await tapKey(tester, 'jv2_continue');
 
     // Physical item present: every trigger is offered. Skip clears choices.
-    for (final t in JournalKeys.triggers) {
-      expect(find.byKey(Key('jv2_trigger_$t')), findsOneWidget);
-    }
+    expect((await allTriggerKeys(tester)).toSet(), JournalKeys.triggers.toSet());
     await tapKey(tester, 'jv2_trigger_esforco');
     await tapKey(tester, 'jv2_skip');
     await tapKey(tester, 'jv22_closing_skip');
@@ -289,7 +307,6 @@ void main() {
     expect(find.text(pt.jv2OptCabecaNucaPontada), findsOneWidget);
     await tapKey(tester, 'jv2_option_cabeca.nuca.rigida');
     await tapKey(tester, 'jv2_continue');
-    await tapKey(tester, 'jv2_more_no');
     await fillIntensity(tester, 1, 2);
     await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_skip');
@@ -308,6 +325,8 @@ void main() {
     await startNotSoGood(tester);
 
     expect(find.text(pt.jv2WholeBody), findsOneWidget);
+    expect(find.byKey(const Key('jv2_region_pele')), findsNothing);
+    await tapKey(tester, 'jv2_topic_whole_body');
     for (final area in JournalKeys.wholeBodyAreas) {
       expect(find.byKey(Key('jv2_region_$area')), findsOneWidget);
     }
@@ -319,7 +338,6 @@ void main() {
     await tapKey(tester, 'jv2_branch_hormonios.temperatura');
     await tapKey(tester, 'jv2_option_hormonios.temperatura.calorao');
     await tapKey(tester, 'jv2_continue');
-    await tapKey(tester, 'jv2_more_no');
     await fillIntensity(tester, 1, 3);
     await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_skip');
@@ -346,11 +364,13 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    final chip = tester.widget<FilterChip>(find.byKey(const Key('jv2_region_cabeca')));
-    expect(chip.selected, isTrue);
+    expect(isMarked(tester, 'cabeca'), isTrue);
+    // The "Marcado" pill takes it off again.
+    await tapKey(tester, 'jv2_marked_cabeca');
+    expect(isMarked(tester, 'cabeca'), isFalse);
   });
 
-  testWidgets('a condition is a chip on the body screen and uses the full intensity screen',
+  testWidgets('conditions are a list above the body map and use the full intensity screen',
       (tester) async {
     final h = JournalHarness(
       conditions: const [UserCondition(id: 'c1', label: 'Enxaqueca')],
@@ -360,20 +380,30 @@ void main() {
 
     expect(find.text(pt.jv2AreaConditions), findsOneWidget);
     expect(find.byKey(const Key('jv2_condition_add')), findsOneWidget);
+    // First on the screen, above the map (Phase 16).
     expect(
-      tester.widget<FilterChip>(find.byKey(const Key('jv2_condition_c1'))).label,
-      isA<Text>().having((t) => t.data, 'data', 'Enxaqueca'),
+      tester.getTopLeft(find.byKey(const Key('jv2_condition_c1'))).dy,
+      lessThan(tester.getTopLeft(find.byType(BodyRegionMap)).dy),
+    );
+    expect(find.byType(FilterChip), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('jv2_condition_c1')),
+        matching: find.text('Enxaqueca'),
+      ),
+      findsOneWidget,
     );
     final cont = find.byKey(const Key('jv2_continue'));
     expect(tester.widget<FilledButton>(cont).onPressed, isNull);
     await tapKey(tester, 'jv2_condition_c1');
     await tapKey(tester, 'jv2_continue');
 
-    // Single item: full §8 scale with every level described.
+    // Single item: big 1-5 scale; the chosen level's §8 text shows below.
     expect(find.text(pt.jv2ConditionCardQuestion('Enxaqueca')), findsOneWidget);
-    expect(find.text(pt.jv2IntensityEmotional5), findsOneWidget);
+    expect(find.text(pt.jv23IntensityPickHint), findsOneWidget);
     expect(find.text(pt.jv2PersistenceOptional), findsOneWidget);
     await tapKey(tester, 'jv2_intensity_0_4');
+    expect(find.text('4 · ${pt.jv2IntensityEmotional4}'), findsOneWidget);
     await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_skip');
     await tapKey(tester, 'jv22_closing_skip');
@@ -390,11 +420,9 @@ void main() {
     final h = JournalHarness(online: false);
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
-    await tapKey(tester, 'jv2_time_presente');
     await tapKey(tester, 'jv2_branch_presente.sobrecarga');
     await tapKey(tester, 'jv2_option_presente.sobrecarga.paciencia');
     await tapKey(tester, 'jv2_continue');
-    await tapKey(tester, 'jv2_more_no');
     await fillIntensity(tester, 1, 3);
     await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_skip');
@@ -418,11 +446,9 @@ void main() {
     final h = JournalHarness();
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
-    await tapKey(tester, 'jv2_time_presente');
     await tapKey(tester, 'jv2_branch_presente.sobrecarga');
     await tapKey(tester, 'jv2_option_presente.sobrecarga.aperto');
     await tapKey(tester, 'jv2_continue');
-    await tapKey(tester, 'jv2_more_no');
 
     final line = find.byKey(const Key('jv2_emergency_line'));
     expect(line, findsOneWidget);
@@ -457,7 +483,6 @@ void main() {
     h.remote.suggestedOptionKey = 'futuro.mente.antecipar';
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
-    await tapKey(tester, 'jv2_time_futuro');
     await tapKey(tester, 'jv2_branch_futuro.mente');
     await tapKey(tester, 'jv2_write_mine');
     await tester.enterText(
@@ -476,7 +501,6 @@ void main() {
         tester.widget(find.byKey(const Key('jv2_option_futuro.mente.antecipar')));
     expect(chosen.selected, isTrue);
     await tapKey(tester, 'jv2_continue');
-    await tapKey(tester, 'jv2_more_no');
     await fillIntensity(tester, 1, 2);
     await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_skip');
@@ -497,20 +521,12 @@ void main() {
     await tapKey(tester, 'jv2_back');
 
     expect(find.text(pt.jv2BodyQuestion), findsOneWidget);
-    final chip = tester.widget<FilterChip>(find.byKey(const Key('jv2_region_cabeca')));
-    expect(chip.selected, isTrue);
+    expect(isMarked(tester, 'cabeca'), isTrue);
     await tapKey(tester, 'jv2_back');
     expect(find.text(pt.jv2MoodQuestion), findsOneWidget);
   });
 
   group('v2.2', () {
-    /// Keys of the trigger chips, in screen order.
-    List<String> triggerKeysOnScreen(WidgetTester tester) => [
-          for (final chip in tester.widgetList<FilterChip>(find.byType(FilterChip)))
-            if ((chip.key as ValueKey<String>?)?.value.startsWith('jv2_trigger_') ?? false)
-              (chip.key as ValueKey<String>).value.substring('jv2_trigger_'.length),
-        ];
-
     testWidgets('Bem then a good moment and a written one: positive items only, no AI',
         (tester) async {
       final h = JournalHarness();
@@ -518,7 +534,6 @@ void main() {
       await pumpJournalFlow(tester, h);
 
       await tapKey(tester, 'jv2_mood_bem');
-      await tapKey(tester, 'jv22_positive_time_presente');
       expect(find.byKey(const Key('jv2_branch_presente.calma')), findsOneWidget);
       expect(find.byKey(const Key('jv2_branch_presente.conexao')), findsOneWidget);
       expect(find.byKey(const Key('jv2_branch_presente.energia')), findsNothing);
@@ -562,7 +577,6 @@ void main() {
       final h = JournalHarness();
       await pumpJournalFlow(tester, h);
       await startNotSoGood(tester);
-      await tapKey(tester, 'jv2_time_presente');
       for (final b in ['energia', 'sobrecarga', 'solidao']) {
         expect(find.byKey(Key('jv2_branch_presente.$b')), findsOneWidget);
       }
@@ -578,13 +592,13 @@ void main() {
       await tapKey(tester, 'jv2_branch_presente.solidao');
       await tapKey(tester, 'jv2_option_presente.solidao.menos');
       await tapKey(tester, 'jv2_continue');
-      await tapKey(tester, 'jv2_more_no');
       await fillIntensity(tester, 1, 2);
       await tapKey(tester, 'jv2_continue');
 
-      // Emotional entry: new triggers offered, in contract order.
-      expect(triggerKeysOnScreen(tester),
-          ['trabalho', 'familia', 'sono', 'dinheiro', 'telas', 'ciclo', 'nao_sei', 'outro']);
+      // Emotional entry: new triggers offered, in topic order.
+      expect(await allTriggerKeys(tester),
+          ['trabalho', 'sono', 'telas', 'familia', 'dinheiro', 'ciclo', 'nao_sei', 'outro']);
+      await tapKey(tester, 'jv2_topic_dia');
       await tapKey(tester, 'jv2_trigger_telas');
       await tapKey(tester, 'jv2_trigger_trabalho');
       await tapKey(tester, 'jv2_continue');
@@ -621,12 +635,15 @@ void main() {
       expect(find.text(pt.jv22OptBarrigaColicaMenstrual), findsOneWidget);
       await tapKey(tester, 'jv2_option_barriga.colica.menstrual');
       await tapKey(tester, 'jv2_continue');
-      await tapKey(tester, 'jv2_more_no');
       await fillIntensity(tester, 2, 3);
       await tapKey(tester, 'jv2_continue');
 
-      // Physical entry: every trigger, in contract order.
-      expect(triggerKeysOnScreen(tester), JournalKeys.triggers);
+      // Physical entry: every trigger, in topic order.
+      expect(await allTriggerKeys(tester), [
+        ...JournalKeys.triggerTopics.values.expand((t) => t),
+        'nao_sei',
+        'outro',
+      ]);
       await tapKey(tester, 'jv2_trigger_ciclo');
       await tapKey(tester, 'jv2_continue');
       await tapKey(tester, 'jv22_closing_skip');
@@ -655,18 +672,16 @@ void main() {
       final h = JournalHarness();
       await pumpJournalFlow(tester, h);
       await startNotSoGood(tester);
-      await tapKey(tester, 'jv2_time_futuro');
       await tapKey(tester, 'jv2_branch_futuro.mente');
       await tapKey(tester, 'jv2_option_futuro.mente.indecisao');
       await tapKey(tester, 'jv2_continue');
-      await tapKey(tester, 'jv2_more_no');
       await fillIntensity(tester, 1, 2);
       await tapKey(tester, 'jv2_continue');
       await tapKey(tester, 'jv2_skip');
 
       expect(find.byKey(const Key('jv22_closing_skip')), findsOneWidget);
       bool selected(String h) =>
-          tester.widget<FilterChip>(find.byKey(Key('jv22_helper_$h'))).selected;
+          isCardSelected(tester, 'jv22_helper_$h');
       await tapKey(tester, 'jv22_helper_lazer');
       await tapKey(tester, 'jv22_helper_descansar');
       await tapKey(tester, 'jv22_helper_nada_ainda');
@@ -697,11 +712,9 @@ void main() {
       final h = JournalHarness();
       await pumpJournalFlow(tester, h);
       await startNotSoGood(tester);
-      await tapKey(tester, 'jv2_time_passado');
       await tapKey(tester, 'jv2_branch_passado.memoria');
       await tapKey(tester, 'jv2_option_passado.memoria.vergonha');
       await tapKey(tester, 'jv2_continue');
-      await tapKey(tester, 'jv2_more_no');
       await fillIntensity(tester, 1, 2);
       await tapKey(tester, 'jv2_continue');
       await tapKey(tester, 'jv2_skip');
@@ -718,7 +731,6 @@ void main() {
       final h = JournalHarness(online: false);
       await pumpJournalFlow(tester, h);
       await tapKey(tester, 'jv2_mood_bem');
-      await tapKey(tester, 'jv22_positive_time_futuro');
       await tapKey(tester, 'jv2_branch_futuro.animo');
       await tapKey(tester, 'jv2_option_futuro.animo.planos');
       await tapKey(tester, 'jv2_save');
@@ -731,6 +743,223 @@ void main() {
       expect(await h.repository.syncPending(), 1);
       expect(h.remote.requestBodies.single['items'],
           [{'kind': 'positive', 'optionKey': 'futuro.animo.planos'}]);
+    });
+  });
+
+  group('v2.3', () {
+    testWidgets('barriga and pelve are separate parts of the map, for everyone',
+        (tester) async {
+      final h = JournalHarness();
+      await pumpJournalFlow(tester, h, args: physical);
+      await startNotSoGood(tester);
+
+      // No region chips under the map any more.
+      expect(find.byType(FilterChip), findsNothing);
+      await tapKey(tester, 'jv2_region_barriga');
+      expect(isMarked(tester, 'barriga'), isTrue);
+      expect(isMarked(tester, 'pelve'), isFalse);
+      await tapKey(tester, 'jv2_region_pelve');
+      expect(isMarked(tester, 'pelve'), isTrue);
+      await tapKey(tester, 'jv2_region_barriga');
+      expect(isMarked(tester, 'barriga'), isFalse);
+      // Pelvis is front only.
+      await tapKey(tester, 'jv2_side_back');
+      expect(find.byKey(const Key('jv2_region_pelve')), findsNothing);
+      await tapKey(tester, 'jv2_side_front');
+      await tapKey(tester, 'jv2_continue');
+
+      expect(find.text('${pt.jv23RegionPelve} · ${pt.jv2BodyFront}'), findsOneWidget);
+      for (final b in ['urina', 'baixo_ventre', 'intima']) {
+        expect(find.byKey(Key('jv2_branch_pelve.$b')), findsOneWidget);
+      }
+      await tapKey(tester, 'jv2_sensation_dor');
+      await tapKey(tester, 'jv2_branch_pelve.urina');
+      expect(find.text(pt.jv23OptPelveUrinaArdencia), findsOneWidget);
+      await tapKey(tester, 'jv2_option_pelve.urina.ardencia');
+      await tapKey(tester, 'jv2_continue');
+      await fillIntensity(tester, 1, 2);
+      await tapKey(tester, 'jv2_continue');
+      await tapKey(tester, 'jv2_skip');
+      await tapKey(tester, 'jv22_closing_skip');
+      await tapKey(tester, 'jv2_save');
+
+      final item = (h.remote.requestBodies.single['items'] as List).single as Map;
+      expect(item['optionKey'], 'pelve.urina.ardencia');
+      expect(item['bodySide'], 'front');
+      expect(item['sensation'], 'dor');
+    });
+
+    testWidgets('triggers: tabs keep their answers, Não sei goes alone', (tester) async {
+      final h = JournalHarness();
+      await pumpJournalFlow(tester, h);
+      await startNotSoGood(tester);
+      await tapKey(tester, 'jv2_branch_futuro.mente');
+      await tapKey(tester, 'jv2_option_futuro.mente.indecisao');
+      await tapKey(tester, 'jv2_continue');
+      await fillIntensity(tester, 1, 2);
+      await tapKey(tester, 'jv2_continue');
+
+      expect(find.text(pt.jv23TriggerTopicDia), findsOneWidget);
+      expect(find.byKey(const Key('jv2_trigger_trabalho')), findsOneWidget);
+      expect(find.byKey(const Key('jv2_trigger_familia')), findsNothing);
+      await tapKey(tester, 'jv2_trigger_trabalho');
+      await tapKey(tester, 'jv2_topic_pessoas');
+      expect(find.byKey(const Key('jv2_trigger_trabalho')), findsNothing);
+      await tapKey(tester, 'jv2_trigger_familia');
+      // Back on the first tab, its answer is still marked.
+      await tapKey(tester, 'jv2_topic_dia');
+      expect(isCardSelected(tester, 'jv2_trigger_trabalho'), isTrue);
+
+      await tapKey(tester, 'jv2_trigger_nao_sei');
+      expect(isCardSelected(tester, 'jv2_trigger_trabalho'), isFalse);
+      await tapKey(tester, 'jv2_trigger_sono');
+      await tapKey(tester, 'jv2_trigger_nao_sei');
+      await tapKey(tester, 'jv2_continue');
+      await tapKey(tester, 'jv22_closing_skip');
+      await tapKey(tester, 'jv2_save');
+
+      expect(h.remote.requestBodies.single['triggers'], ['nao_sei']);
+    });
+  });
+
+  group('Phase 16 readings', () {
+    const bp = UserCondition(
+      id: 'c1',
+      label: 'Hipertensão',
+      tracking: [JournalKeys.trackingBloodPressure],
+    );
+    const weight = UserCondition(
+      id: 'c2',
+      label: 'Peso',
+      tracking: [JournalKeys.trackingWeight],
+    );
+
+    testWidgets('Premium: Bem with a tracked condition opens the readings list; '
+        '"Só registrar medições" saves them', (tester) async {
+      final h = JournalHarness(conditions: const [bp])..premium = true;
+      await pumpJournalFlow(tester, h, args: physical);
+      await tapKey(tester, 'jv2_mood_bem');
+
+      expect(h.remote.requestBodies, isEmpty);
+      expect(find.byKey(const Key('chronicTrack_bem_banner')), findsOneWidget);
+      expect(find.text(pt.chronicTrackBemBanner), findsOneWidget);
+      expect(find.byType(BodyRegionMap), findsNothing);
+      final justLog = find.descendant(
+        of: find.byKey(const Key('chronicTrack_just_log')),
+        matching: find.byType(FilledButton),
+      );
+      expect(tester.widget<FilledButton>(justLog).onPressed, isNull);
+
+      // The card starts open.
+      await tester.enterText(find.byKey(const Key('chronicTrack_c1_0_systolic')), '120');
+      await tester.enterText(find.byKey(const Key('chronicTrack_c1_0_diastolic')), '80');
+      await tester.pumpAndSettle();
+      expect(find.text(pt.chronicTrackReadingsCount(1)), findsOneWidget);
+      await tapKey(tester, 'chronicTrack_just_log');
+
+      expect(find.textContaining('SUMMARY items=1'), findsOneWidget);
+      final body = h.remote.requestBodies.single;
+      expect(body['mood'], 'bem');
+      expect(body['area'], 'physical');
+      expect(body['triggers'], isEmpty);
+      final item = (body['items'] as List).single as Map<String, dynamic>;
+      expect(item['kind'], 'condition');
+      expect(item['conditionId'], 'c1');
+      expect(item.containsKey('intensity'), isFalse);
+      final reading = (item['readings'] as List).single as Map<String, dynamic>;
+      expect(reading['kind'], JournalKeys.trackingBloodPressure);
+      expect(reading['systolic'], 120);
+      expect(reading['diastolic'], 80);
+      expect(reading['measuredAt'], isA<String>());
+      expect(body.toString(), isNot(contains('Hipertensão')));
+      final home = containerOf(tester).read(triggerCheckInProvider);
+      expect(home.isPhysicalCompleted, isTrue);
+    });
+
+    testWidgets('Premium: "Salvar sem medições" saves Bem with no items', (tester) async {
+      final h = JournalHarness(conditions: const [bp])..premium = true;
+      await pumpJournalFlow(tester, h, args: physical);
+      await tapKey(tester, 'jv2_mood_bem');
+      await tester.enterText(find.byKey(const Key('chronicTrack_c1_0_systolic')), '120');
+      await tester.enterText(find.byKey(const Key('chronicTrack_c1_0_diastolic')), '80');
+      await tester.pumpAndSettle();
+      await tapKey(tester, 'chronicTrack_save_without');
+
+      final body = h.remote.requestBodies.single;
+      expect(body['mood'], 'bem');
+      expect(body['items'], isEmpty);
+    });
+
+    testWidgets('Premium: Bem without tracked conditions still saves at once', (tester) async {
+      final h = JournalHarness(conditions: const [UserCondition(id: 'c9', label: 'Asma')])
+        ..premium = true;
+      await pumpJournalFlow(tester, h, args: physical);
+      await tapKey(tester, 'jv2_mood_bem');
+      expect(h.remote.requestBodies.single['items'], isEmpty);
+    });
+
+    testWidgets('Free: Bem saves at once even with a tracked condition', (tester) async {
+      final h = JournalHarness(conditions: const [bp]);
+      await pumpJournalFlow(tester, h, args: physical);
+      await tapKey(tester, 'jv2_mood_bem');
+      expect(h.remote.requestBodies.single['items'], isEmpty);
+    });
+
+    testWidgets('Free: a tracked condition uses the 1-5 card', (tester) async {
+      final h2 = JournalHarness(conditions: const [bp]);
+      await pumpJournalFlow(tester, h2, args: physical);
+      await startNotSoGood(tester);
+      await tapKey(tester, 'jv2_condition_c1');
+      expect(find.byKey(const Key('chronicTrack_c1_card')), findsNothing);
+      await tapKey(tester, 'jv2_continue');
+      expect(find.text(pt.jv2ConditionCardQuestion('Hipertensão')), findsOneWidget);
+    });
+
+    testWidgets('Premium: Não tão bem, a tracked condition opens its card; readings skip '
+        'the 1-5 step and an untracked one keeps it', (tester) async {
+      final h = JournalHarness(conditions: const [
+        weight,
+        UserCondition(id: 'c3', label: 'Enxaqueca'),
+      ])..premium = true;
+      await pumpJournalFlow(tester, h, args: physical);
+      await startNotSoGood(tester);
+
+      expect(find.byKey(const Key('chronicTrack_c2_card')), findsNothing);
+      expect(find.text(pt.chronicTrackTapToLog), findsOneWidget);
+      await tapKey(tester, 'jv2_condition_c2');
+      expect(find.byKey(const Key('chronicTrack_c2_card')), findsOneWidget);
+      await tester.enterText(find.byKey(const Key('chronicTrack_c2_0_kg')), '72,5');
+      await tester.pumpAndSettle();
+      await tapKey(tester, 'jv2_condition_c3');
+      await tapKey(tester, 'jv2_continue');
+
+      // Only the untracked condition is asked for 1-5.
+      expect(find.text(pt.jv2ConditionCardQuestion('Enxaqueca')), findsOneWidget);
+      expect(find.text(pt.jv2ConditionCardQuestion('Peso')), findsNothing);
+      await tapKey(tester, 'jv2_intensity_0_3');
+      await tapKey(tester, 'jv2_continue');
+      await tapKey(tester, 'jv2_skip');
+      await tapKey(tester, 'jv22_closing_skip');
+      await tapKey(tester, 'jv2_save');
+
+      final items = (h.remote.requestBodies.single['items'] as List).cast<Map<String, dynamic>>();
+      final tracked = items.firstWhere((i) => i['conditionId'] == 'c2');
+      expect(tracked.containsKey('intensity'), isFalse);
+      expect((tracked['readings'] as List).single['kg'], 72.5);
+      final plain = items.firstWhere((i) => i['conditionId'] == 'c3');
+      expect(plain['intensity'], 3);
+      expect(plain.containsKey('readings'), isFalse);
+    });
+
+    testWidgets('Premium: readings only go straight past the 1-5 step', (tester) async {
+      final h = JournalHarness(conditions: const [weight])..premium = true;
+      await pumpJournalFlow(tester, h, args: physical);
+      await startNotSoGood(tester);
+      await tapKey(tester, 'jv2_condition_c2');
+      await tester.enterText(find.byKey(const Key('chronicTrack_c2_0_kg')), '80');
+      await tester.pumpAndSettle();
+      await tapKey(tester, 'jv2_continue');
+      expect(find.text(pt.jv2TriggersQuestion), findsOneWidget);
     });
   });
 }

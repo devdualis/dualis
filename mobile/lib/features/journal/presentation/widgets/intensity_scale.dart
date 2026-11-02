@@ -39,7 +39,9 @@ String intensityText(AppLocalizations l10n, int level, {required bool physical})
   }
 }
 
-/// Full 1-5 scale with the description of every level (single item).
+/// Big 1-5 scale (single item, v2.3): five numbers, and the description of
+/// the chosen level in a box underneath. Before a choice, the box says how
+/// the scale works.
 class IntensityScaleFull extends StatelessWidget {
   final int? value;
   final bool physical;
@@ -60,47 +62,50 @@ class IntensityScaleFull extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (var level = 1; level <= 5; level++)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Semantics(
-              selected: value == level,
-              button: true,
-              child: InkWell(
-                key: Key('${keyPrefix}_$level'),
-                borderRadius: BorderRadius.circular(14),
-                onTap: () => onChanged(level),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: value == level
-                        ? intensityShade(level).withValues(alpha: 0.25)
-                        : Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: value == level
-                          ? AppColors.dualisSymbolBlue
-                          : AppColors.outlineLight,
-                      width: value == level ? 2 : 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      _LevelDot(level: level),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          intensityText(l10n, level, physical: physical),
-                          style: GoogleFonts.plusJakartaSans(fontSize: 14, height: 1.3),
-                        ),
-                      ),
-                    ],
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            for (var level = 1; level <= 5; level++)
+              Semantics(
+                selected: value == level,
+                button: true,
+                label: '${l10n.jv2IntensityLevel(level)}: ${intensityText(l10n, level, physical: physical)}',
+                excludeSemantics: true,
+                child: InkWell(
+                  key: Key('${keyPrefix}_$level'),
+                  customBorder: const CircleBorder(),
+                  onTap: () => onChanged(level),
+                  child: Padding(
+                    padding: const EdgeInsets.all(2),
+                    child: _LevelDot(level: level, selected: value == level, size: 54),
                   ),
                 ),
               ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        AnimatedContainer(
+          key: Key('${keyPrefix}_text'),
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: value == null
+                ? AppColors.backgroundLight
+                : AppColors.dualisSymbolBlue.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Text(
+            value == null
+                ? l10n.jv23IntensityPickHint
+                : '$value · ${intensityText(l10n, value!, physical: physical)}',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14.5,
+              fontWeight: value == null ? FontWeight.w500 : FontWeight.w600,
+              color: value == null ? AppColors.textSecondaryLight : AppColors.dualisNavy,
+              height: 1.3,
             ),
           ),
+        ),
       ],
     );
   }
@@ -148,12 +153,21 @@ class IntensityScaleCompact extends StatelessWidget {
           ],
         ),
         if (value != null) ...[
-          const SizedBox(height: 6),
-          Text(
-            intensityText(l10n, value!, physical: physical),
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              color: AppColors.textSecondaryLight,
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.dualisSymbolBlue.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              '$value · ${intensityText(l10n, value!, physical: physical)}',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.dualisNavy,
+              ),
             ),
           ),
         ],

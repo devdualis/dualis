@@ -23,6 +23,7 @@ import {
   journalEntries,
   journalItems,
   userConditions,
+  conditionReadings,
   careRecords,
   careDocuments,
   emailVerifications,
@@ -46,6 +47,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import {
   ExportedCareDocumentDto,
+  ExportedConditionReadingDto,
   ExportedCareRecordDto,
   ExportedJournalEntryDto,
   ExportedSymptomLogDto,
@@ -343,6 +345,13 @@ export class AuthService {
       const habitRecords = ownedProfileIds.length
         ? await tx.select().from(dailyHabits).where(inArray(dailyHabits.profileId, ownedProfileIds))
         : [];
+      // Readings the person noted on their conditions (v2.4), decrypted, as typed.
+      const readingRows = ownedProfileIds.length
+        ? await tx
+            .select()
+            .from(conditionReadings)
+            .where(inArray(conditionReadings.profileId, ownedProfileIds))
+        : [];
       const conditionLabels = new Map(conditionRecords.map((c) => [c.id, this.decryptForExport(c.label)]));
 
       // "Meus cuidados": vaccine doses, allergies, medications and their intakes, appointments,
@@ -409,8 +418,24 @@ export class AuthService {
             (c): ExportedUserConditionDto => ({
               id: c.id,
               label: conditionLabels.get(c.id) ?? null,
+              tracking: c.tracking ?? [],
               createdAt: c.createdAt.toISOString(),
               archivedAt: c.archivedAt?.toISOString() ?? null,
+            }),
+          ),
+        conditionReadings: readingRows
+          .filter((r) => r.profileId === profileId)
+          .sort((a, b) => b.measuredAt.getTime() - a.measuredAt.getTime())
+          .map(
+            (r): ExportedConditionReadingDto => ({
+              id: r.id,
+              entryId: r.entryId,
+              conditionId: r.conditionId,
+              conditionLabel: conditionLabels.get(r.conditionId) ?? null,
+              kind: r.kind,
+              measuredAt: r.measuredAt.toISOString(),
+              values: this.decryptJsonForExport(r.data),
+              createdAt: r.createdAt.toISOString(),
             }),
           ),
         careRecords: careRecordRows
@@ -452,7 +477,7 @@ export class AuthService {
       return {
         metadata: {
           exportDate: new Date().toISOString(),
-          formatVersion: '1.4',
+          formatVersion: '1.5',
           legalBasis: 'LGPD Art. 18, V (Portabilidade de Dados)',
           dataController: 'WGI (Brothers Baum Ltda.)',
           legacyFieldsNote:

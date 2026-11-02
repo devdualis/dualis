@@ -64,6 +64,10 @@ class LocalUserConditions extends Table {
   TextColumn get profileId => text().withDefault(const Constant(''))();
   DateTimeColumn get createdAt => dateTime().nullable()();
 
+  /// JSON list of the reading kinds the person chose for this condition
+  /// (schema v7). `[]` = not tracked.
+  TextColumn get tracking => text().withDefault(const Constant('[]'))();
+
   @override
   Set<Column> get primaryKey => {id, profileId};
 }
@@ -79,7 +83,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration {
@@ -105,6 +109,9 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 6) {
           await m.addColumn(waterIntakeLogs, waterIntakeLogs.clientId);
+        }
+        if (from < 7) {
+          await m.addColumn(localUserConditions, localUserConditions.tracking);
         }
       },
     );

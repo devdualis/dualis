@@ -7,19 +7,22 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../journal/data/journal_remote_data_source.dart';
+import '../../../journal/domain/journal_keys.dart';
 import '../../../journal/domain/journal_models.dart';
 import '../../../journal/presentation/journal_item_text.dart';
 import '../../../journal/presentation/journal_labels.dart';
+import '../../../journal/presentation/widgets/readings_chart.dart' show readingValueText;
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../data/care_api.dart';
 import '../../domain/care_models.dart';
 import '../../domain/pni_calendar.dart';
 import '../widgets/care_widgets.dart';
 
-enum SummarySection { journal, conditions, medications, allergies, vaccines, exams, notes }
+enum SummarySection { journal, conditions, readings, medications, allergies, vaccines, exams, notes }
 
 /// One line group of the summary; the same content goes to the screen and the PDF.
 class SummaryBlock {
@@ -53,9 +56,13 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
   int _loadId = 0;
   bool _sharing = false;
 
+  /// Readings of tracked conditions are Premium; a Free build leaves them out.
+  bool get _premium => ref.read(premiumProfilesEnabledProvider);
+
   @override
   void initState() {
     super.initState();
+    if (_premium) _sections.add(SummarySection.readings);
     WidgetsBinding.instance.addPostFrameCallback((_) => _reload());
   }
 
@@ -107,6 +114,22 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
       intakeCounts[m.id] = (taken, marked);
     }
 
+    // Every reading as typed, oldest first: condition, date, time, values.
+    final conditionNames = {for (final c in conditions) c.id: c.label};
+    final hm = DateFormat.Hm(localeTag);
+    final readingLines = [
+      if (_premium)
+        for (final e in entries)
+          for (final i in e.items)
+            if (i.kind == JournalKeys.kindCondition)
+              for (final r in [...i.readings]..sort((a, b) => a.measuredAt.compareTo(b.measuredAt)))
+                [
+                  conditionNames[i.conditionId] ?? journalItemTitle(l10n, i),
+                  '${df.format(r.measuredAt.toLocal())} ${hm.format(r.measuredAt.toLocal())}',
+                  readingValueText(l10n, localeTag, r),
+                ].where((s) => s.isNotEmpty).join(' · '),
+    ];
+
     String item(JournalItem i) =>
         [journalItemTitle(l10n, i), if (i.intensity != null) l10n.careSummaryIntensity(i.intensity!)].join(' · ');
 
@@ -121,6 +144,7 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
       SummaryBlock(SummarySection.conditions, l10n.careSummaryConditions, [
         for (final c in conditions) c.label,
       ]),
+      if (_premium) SummaryBlock(SummarySection.readings, l10n.chronicHistorySummaryTitle, readingLines),
       SummaryBlock(SummarySection.medications, l10n.careSummaryMedications, [
         for (final m in meds.where((m) => m.active))
           [
@@ -224,6 +248,7 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
     final labels = {
       SummarySection.journal: l10n.careSectionJournal,
       SummarySection.conditions: l10n.careSectionConditions,
+      SummarySection.readings: l10n.chronicHistorySummarySection,
       SummarySection.medications: l10n.careSectionMedications,
       SummarySection.allergies: l10n.careSectionAllergies,
       SummarySection.vaccines: l10n.careSectionVaccines,
@@ -260,11 +285,13 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
                 runSpacing: 8,
                 children: [
                   for (final s in SummarySection.values)
-                    FilterChip(
-                      label: Text(labels[s]!),
-                      selected: _sections.contains(s),
-                      onSelected: (on) => setState(() => on ? _sections.add(s) : _sections.remove(s)),
-                    ),
+                    if (s != SummarySection.readings || _premium)
+                      FilterChip(
+                        key: Key('summary_section_${s.name}'),
+                        label: Text(labels[s]!),
+                        selected: _sections.contains(s),
+                        onSelected: (on) => setState(() => on ? _sections.add(s) : _sections.remove(s)),
+                      ),
                 ],
               ),
               const SizedBox(height: 14),

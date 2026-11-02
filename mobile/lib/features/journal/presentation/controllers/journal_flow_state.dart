@@ -8,18 +8,20 @@ import '../../domain/journal_models.dart';
 enum JournalStep {
   mood,
 
-  /// "Bem": "Só registrar" or the three times (good moments, v2.2).
+  /// "Bem": "Só registrar" or a good moment (v2.2).
   positiveStart,
-  positiveBranch,
   positiveOptions,
+
+  /// Time and branch on one screen (v2.3).
   time,
-  branch,
   options,
-  moreEmotional,
   body,
+
+  /// "Bem" on the physical axis with tracked conditions (v2.4, Premium):
+  /// readings only, then "Só registrar medições".
+  conditions,
   regionBranch,
   regionOptions,
-  moreBody,
   intensity,
   triggers,
 
@@ -65,6 +67,9 @@ class JournalFlowState {
   final Set<String> selectedConditionIds;
   final List<UserCondition> conditions;
 
+  /// Readings typed for tracked conditions, by condition id (v2.4).
+  final Map<String, List<ConditionReading>> conditionReadings;
+
   // Emotional path.
   final String? time;
   final String? branch;
@@ -103,6 +108,7 @@ class JournalFlowState {
     this.area = JournalArea.emotional,
     this.selectedConditionIds = const {},
     this.conditions = const [],
+    this.conditionReadings = const {},
     this.time,
     this.branch,
     this.bodySide = 'front',
@@ -129,16 +135,28 @@ class JournalFlowState {
   bool get hasPhysicalItem => items.any((i) => i.kind == 'physical');
 
   /// Every item has an intensity, and a persistence unless it is a condition
-  /// (optional there).
+  /// (optional there). A condition item with at least one reading is ready
+  /// without an intensity (tracked conditions, v2.4).
   bool get allItemsReady => items.every(
         (i) =>
-            i.intensity != null &&
-            (i.kind == 'condition' || i.persistence != null),
+            (i.kind == JournalKeys.kindCondition && i.readings.isNotEmpty) ||
+            (i.intensity != null &&
+                (i.kind == JournalKeys.kindCondition || i.persistence != null)),
       );
 
-  /// Body screen: a region or a condition is enough to continue.
+  /// Body screen: a region, a condition or a reading is enough to continue.
   bool get hasBodySelection =>
-      selectedRegions.isNotEmpty || selectedConditionIds.isNotEmpty;
+      selectedRegions.isNotEmpty || selectedConditionIds.isNotEmpty || hasReadings;
+
+  /// At least one complete reading was typed.
+  bool get hasReadings => conditionReadings.values.any((r) => r.isNotEmpty);
+
+  /// Items asked on the intensity screen: all but a condition with readings
+  /// (tracked conditions have no 1-5 answer).
+  List<JournalItem> get itemsNeedingIntensity => [
+        for (final i in items)
+          if (!(i.kind == JournalKeys.kindCondition && i.readings.isNotEmpty)) i,
+      ];
 
   bool get hasOptionSelection =>
       selectedOptions.isNotEmpty || customLabels.isNotEmpty;
@@ -149,6 +167,7 @@ class JournalFlowState {
     JournalArea? area,
     Set<String>? selectedConditionIds,
     List<UserCondition>? conditions,
+    Map<String, List<ConditionReading>>? conditionReadings,
     String? time,
     String? branch,
     bool clearBranch = false,
@@ -178,6 +197,7 @@ class JournalFlowState {
       area: area ?? this.area,
       selectedConditionIds: selectedConditionIds ?? this.selectedConditionIds,
       conditions: conditions ?? this.conditions,
+      conditionReadings: conditionReadings ?? this.conditionReadings,
       time: time ?? this.time,
       branch: clearBranch ? null : (branch ?? this.branch),
       bodySide: bodySide ?? this.bodySide,

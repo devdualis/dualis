@@ -82,18 +82,98 @@ class JournalRepository {
     }
   }
 
-  Future<UserCondition> addCondition(String label) async {
+  /// Creates a condition. With [tracking], the kinds are set right after
+  /// with `PATCH` (the create body carries the label only).
+  Future<UserCondition> addCondition(
+    String label, {
+    List<String> tracking = const [],
+  }) async {
     final clean = label.trim();
     final current = await conditions();
     if (current.length >= JournalKeys.maxActiveConditions) {
       throw const JournalConditionLimitException();
     }
     if (!await _isOnline()) throw const JournalOfflineException();
-    final created = await _remote.createCondition(
+    var created = await _remote.createCondition(
       JournalKeys.limitChars(clean, JournalKeys.conditionLabelMaxLength),
     );
+    final kinds = UserCondition.cleanTracking(tracking);
+    if (kinds.isNotEmpty) {
+      created = await _remote.patchCondition(
+        created.id,
+        tracking: kinds,
+        profileId: _activeProfileId(),
+      );
+    }
     await _local.replaceConditions(_activeProfileId(), [...current, created]);
     return created;
+  }
+
+  /// Changes what a condition tracks and/or its name. Online only, like
+  /// creating and archiving.
+  Future<UserCondition> updateCondition(
+    String id, {
+    List<String>? tracking,
+    String? label,
+  }) async {
+    if (!await _isOnline()) throw const JournalOfflineException();
+    final profileId = _activeProfileId();
+    final updated = await _remote.patchCondition(
+      id,
+      tracking: tracking == null ? null : UserCondition.cleanTracking(tracking),
+      label: label == null
+          ? null
+          : JournalKeys.limitChars(
+              label.trim(),
+              JournalKeys.conditionLabelMaxLength,
+            ),
+      profileId: profileId,
+    );
+    final current = await _local.cachedConditions(profileId);
+    await _local.replaceConditions(profileId, [
+      for (final c in current) c.id == id ? updated : c,
+    ]);
+    return updated;
+  }
+
+  /// Readings of one condition in the last [days] days, newest first. Adds
+  /// the readings still waiting in the outbox; when the server cannot be
+  /// reached, returns those alone with `complete: false`.
+  Future<ConditionReadingsHistory> conditionReadings(
+    String conditionId, {
+    int days = 90,
+    DateTime? now,
+  }) async {
+    final profileId = _activeProfileId();
+    final since = (now ?? DateTime.now()).subtract(Duration(days: days));
+    final pending = [
+      for (final entry in await _local.pendingEntries(profileId: profileId))
+        for (final item in entry.items)
+          if (item.kind == JournalKeys.kindCondition &&
+              item.conditionId == conditionId)
+            for (final r in item.readings)
+              if (!r.measuredAt.isBefore(since))
+                r.copyWith(conditionId: conditionId, pendingSync: true),
+    ];
+    List<ConditionReading>? remote;
+    if (await _isOnline()) {
+      try {
+        remote = await _remote.getConditionReadings(
+          conditionId,
+          days: days,
+          profileId: profileId,
+        );
+      } catch (_) {
+        remote = null;
+      }
+    }
+    final merged = [
+      ...?remote,
+      // An entry being sent may already be on the server: show it once.
+      for (final p in pending)
+        if (remote == null || !remote.any(p.sameReadingAs)) p,
+    ]..sort((a, b) => b.measuredAt.compareTo(a.measuredAt));
+    return ConditionReadingsHistory(readings: merged, complete: remote != null);
   }
 
   Future<void> archiveCondition(String id) async {

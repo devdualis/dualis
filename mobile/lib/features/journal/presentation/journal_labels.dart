@@ -11,6 +11,7 @@ class JournalLabels {
     'cabeca',
     'peito',
     'barriga',
+    'pelve',
     'costas',
     'membros',
     'pele',
@@ -169,6 +170,21 @@ class JournalLabels {
         return l10n.jv22OptBarrigaIntestinoPreso;
       case 'barriga.intestino.solto':
         return l10n.jv22OptBarrigaIntestinoSolto;
+      // v2.3: pelvis and lower belly.
+      case 'pelve.urina.ardencia':
+        return l10n.jv23OptPelveUrinaArdencia;
+      case 'pelve.urina.vontade':
+        return l10n.jv23OptPelveUrinaVontade;
+      case 'pelve.baixo_ventre.colica':
+        return l10n.jv23OptPelveBaixoVentreColica;
+      case 'pelve.baixo_ventre.peso':
+        return l10n.jv23OptPelveBaixoVentrePeso;
+      case 'pelve.baixo_ventre.menstrual':
+        return l10n.jv23OptPelveBaixoVentreMenstrual;
+      case 'pelve.intima.coceira':
+        return l10n.jv23OptPelveIntimaCoceira;
+      case 'pelve.intima.inchaco':
+        return l10n.jv23OptPelveIntimaInchaco;
       // v2.2: good moments.
       case 'passado.gratidao.alguem':
         return l10n.jv22OptPassadoGratidaoAlguem;
@@ -259,6 +275,12 @@ class JournalLabels {
         return l10n.jv22BranchCabecaRosto;
       case 'barriga.intestino':
         return l10n.jv22BranchBarrigaIntestino;
+      case 'pelve.urina':
+        return l10n.jv23BranchPelveUrina;
+      case 'pelve.baixo_ventre':
+        return l10n.jv23BranchPelveBaixoVentre;
+      case 'pelve.intima':
+        return l10n.jv23BranchPelveIntima;
       case 'passado.gratidao':
         return l10n.jv22BranchPassadoGratidao;
       case 'passado.orgulho':
@@ -296,6 +318,8 @@ class JournalLabels {
         return l10n.jv2RegionPeito;
       case 'barriga':
         return l10n.jv2RegionBarriga;
+      case 'pelve':
+        return l10n.jv23RegionPelve;
       case 'costas':
         return l10n.jv2RegionCostas;
       case 'membros':
@@ -315,6 +339,7 @@ class JournalLabels {
         'cabeca' => l10n.jv2RegionCabeca,
         'peito' => l10n.jv2RegionPeito,
         'barriga' => l10n.jv2RegionBarriga,
+        'pelve' => l10n.jv23RegionPelve,
         'costas' => l10n.jv2RegionCostas,
         'membros' => l10n.jv2RegionMembros,
         'pele' => l10n.jv2RegionPele,

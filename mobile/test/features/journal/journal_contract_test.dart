@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// Mirrors `docs/bienestar/CONTRATO-JOURNAL-V2.md`.
 void main() {
   group('keys mirror the contract', () {
-    test('20 emotional and 41 physical options (v2.2), plus one custom key per root', () {
+    test('20 emotional and 48 physical options (v2.3), plus one custom key per root', () {
       final keys = JournalKeys.allOptionKeys;
       final emotional = keys.where(
         (k) => JournalKeys.times.contains(JournalKeys.rootOf(k)) && !JournalKeys.isCustomKey(k),
@@ -21,8 +21,8 @@ void main() {
         (k) => JournalKeys.regions.contains(JournalKeys.rootOf(k)) && !JournalKeys.isCustomKey(k),
       );
       expect(emotional, hasLength(20));
-      expect(physical, hasLength(41));
-      expect(keys.where(JournalKeys.isCustomKey), hasLength(11));
+      expect(physical, hasLength(48));
+      expect(keys.where(JournalKeys.isCustomKey), hasLength(12));
       expect(keys, containsAll(['passado.tristeza.culpa', 'futuro.medo.desanimo', 'costas.fisgada.ao_mexer', 'membros.custom']));
       expect(keys, containsAll([
         'cabeca.nuca.rigida', 'cabeca.nuca.pontada',
@@ -38,6 +38,7 @@ void main() {
           JournalKeys.branchesFor(region, side).keys.toSet();
       expect(b('cabeca', 'front'), {'pressao', 'sentidos', 'rosto'});
       expect(b('barriga', 'front'), {'queimacao', 'colica', 'intestino'});
+      expect(b('pelve', 'front'), {'urina', 'baixo_ventre', 'intima'});
       expect(b('cabeca', 'back'), {'pressao', 'nuca'});
       expect(b('costas', 'back'), {'rigidez', 'fisgada'});
       expect(b('membros', 'front'), {'cansaco', 'formigamento'});
@@ -45,7 +46,7 @@ void main() {
       expect(b('musculos', null), {'tensao', 'cansaco'});
       expect(b('hormonios', null), {'temperatura', 'apetite'});
       expect(JournalKeys.wholeBodyAreas, ['pele', 'musculos', 'hormonios']);
-      expect(JournalKeys.bodyRegions, ['cabeca', 'peito', 'barriga', 'costas', 'membros']);
+      expect(JournalKeys.bodyRegions, ['cabeca', 'peito', 'barriga', 'pelve', 'costas', 'membros']);
     });
 
     test('moods, persistence and triggers', () {
@@ -61,6 +62,10 @@ void main() {
           {'alimentacao', 'esforco', 'queda', 'medicamento', 'clima'});
       expect(JournalKeys.triggersFor(hasPhysicalItem: false),
           ['trabalho', 'familia', 'sono', 'dinheiro', 'telas', 'ciclo', 'nao_sei', 'outro']);
+      // v2.3 topics: every trigger once, "Não sei" and "Outro" outside them.
+      final inTopics = [for (final t in JournalKeys.triggerTopics.values) ...t];
+      expect(inTopics.toSet(), hasLength(inTopics.length));
+      expect({...inTopics, 'nao_sei', 'outro'}, JournalKeys.triggers.toSet());
     });
 
     test('v2.2 emotional tree, positive tree and closing keys match the contract', () {
@@ -83,6 +88,12 @@ void main() {
           ['tontura', 'nariz', 'ouvido', 'mandibula']);
       expect(JournalKeys.physicalTree['barriga']!['colica'], ['gases', 'pontadas', 'menstrual']);
       expect(JournalKeys.physicalTree['barriga']!['intestino'], ['preso', 'solto']);
+      // v2.3: pelvis and lower belly, apart from barriga.
+      expect(JournalKeys.physicalTree['pelve'], {
+        'urina': ['ardencia', 'vontade'],
+        'baixo_ventre': ['colica', 'peso', 'menstrual'],
+        'intima': ['coceira', 'inchaco'],
+      });
       expect(JournalKeys.positiveTree, {
         'passado': {
           'gratidao': ['alguem', 'algo'],

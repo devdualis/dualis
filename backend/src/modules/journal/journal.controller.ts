@@ -9,6 +9,7 @@ import {
   Inject,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
   Request,
@@ -25,6 +26,8 @@ import {
 } from '../profiles/profile-context';
 import { resolveLang } from '../../common/i18n/lang';
 import {
+  ConditionReadingDto,
+  ConditionReadingsQueryDto,
   CreateConditionDto,
   CreateJournalEntryDto,
   JournalDaysQueryDto,
@@ -33,6 +36,7 @@ import {
   JournalSummaryDto,
   SuggestJournalOptionDto,
   SuggestJournalOptionResponseDto,
+  UpdateConditionDto,
   UserConditionDto,
   UserConditionsResponseDto,
 } from './dto/journal.dto';
@@ -43,8 +47,9 @@ import { JournalSuggestService } from './journal-suggest.service';
 const userIdOf = (req: any): string => req.user?.id || req.user?.userId || req.user?.sub;
 
 // expectedType: the test build does not emit decorator metadata (same as the other controllers).
-const validate = (expectedType: new () => object) =>
-  UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true, expectedType }));
+const validationPipe = (expectedType: new () => object) =>
+  new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true, expectedType });
+const validate = (expectedType: new () => object) => UsePipes(validationPipe(expectedType));
 
 /** Journal v2 (docs/bienestar/CONTRATO-JOURNAL-V2.md). Legacy /journal routes live in TriageController. */
 @Controller({ path: 'journal', version: '1' })
@@ -130,7 +135,30 @@ export class JournalController {
     @ActiveProfile() profile: ProfileContext,
     @Body() dto: CreateConditionDto,
   ): Promise<UserConditionDto> {
-    return this.journalService.createCondition(userIdOf(req), profile.profileId, dto.label);
+    return this.journalService.createCondition(userIdOf(req), profile.profileId, dto.label, dto.tracking);
+  }
+
+  @Patch('conditions/:id')
+  @ProfileAccess('write')
+  updateCondition(
+    @Request() req: any,
+    @ActiveProfile() profile: ProfileContext,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body(validationPipe(UpdateConditionDto)) dto: UpdateConditionDto,
+  ): Promise<UserConditionDto> {
+    return this.journalService.updateCondition(userIdOf(req), profile.profileId, id, dto);
+  }
+
+  /** Readings of one condition, newest first, as typed (v2.4). Not sent anywhere else. */
+  @Get('conditions/:id/readings')
+  @ProfileAccess('read')
+  listConditionReadings(
+    @Request() req: any,
+    @ActiveProfile() profile: ProfileContext,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Query(validationPipe(ConditionReadingsQueryDto)) query: ConditionReadingsQueryDto,
+  ): Promise<ConditionReadingDto[]> {
+    return this.journalService.listConditionReadings(userIdOf(req), profile.profileId, id, query);
   }
 
   @Delete('conditions/:id')

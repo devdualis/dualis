@@ -82,8 +82,26 @@ export interface ExportedJournalEntryDto {
 export interface ExportedUserConditionDto {
   id: string;
   label: string | null;
+  /** Readings the person chose to note: blood_pressure, glucose, weight. */
+  tracking: string[];
   createdAt: string;
   archivedAt: string | null;
+}
+
+/**
+ * A reading the person noted on one of their conditions, as typed. `values` holds the
+ * fields of that kind (blood_pressure: systolic, diastolic, pulse; glucose: mgdl, moment;
+ * weight: kg).
+ */
+export interface ExportedConditionReadingDto {
+  id: string;
+  entryId: string;
+  conditionId: string;
+  conditionLabel: string | null;
+  kind: string;
+  measuredAt: string;
+  values: Record<string, unknown> | null;
+  createdAt: string;
 }
 
 /**
@@ -134,6 +152,7 @@ export interface ExportedDependentDataDto {
   dailyHabits: ExportedHabitDayDto[];
   journalEntries: ExportedJournalEntryDto[];
   userConditions: ExportedUserConditionDto[];
+  conditionReadings: ExportedConditionReadingDto[];
   careRecords: ExportedCareRecordDto[];
   careDocuments: ExportedCareDocumentDto[];
 }
@@ -157,6 +176,7 @@ export interface UserDataExportResponseDto {
   dailyHabits: ExportedHabitDayDto[];
   journalEntries: ExportedJournalEntryDto[];
   userConditions: ExportedUserConditionDto[];
+  conditionReadings: ExportedConditionReadingDto[];
   careRecords: ExportedCareRecordDto[];
   careDocuments: ExportedCareDocumentDto[];
   dependentProfiles: ExportedDependentDataDto[];

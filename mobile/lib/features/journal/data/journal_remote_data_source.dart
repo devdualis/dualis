@@ -13,6 +13,8 @@ class JournalEndpoints {
   static String entry(String id) => '/v1/journal/entries/$id';
   static const String conditions = '/v1/journal/conditions';
   static String condition(String id) => '/v1/journal/conditions/$id';
+  static String conditionReadings(String id) =>
+      '/v1/journal/conditions/$id/readings';
   static const String suggestOption = '/v1/journal/suggest-option';
 }
 
@@ -112,6 +114,46 @@ class JournalRemoteDataSource {
       JournalEndpoints.condition(id),
       options: await _options(),
     );
+  }
+
+  /// Changes what a condition tracks and/or its name. Returns the condition.
+  Future<UserCondition> patchCondition(
+    String id, {
+    List<String>? tracking,
+    String? label,
+    String? profileId,
+  }) async {
+    final response = await _apiClient.patch(
+      JournalEndpoints.condition(id),
+      data: {
+        if (tracking != null) 'tracking': tracking,
+        if (label != null) 'label': label,
+      },
+      options: await _options(profileId: profileId),
+    );
+    return UserCondition.fromJson(_map(response.data));
+  }
+
+  /// Readings of one condition in the last [days] days, newest first.
+  Future<List<ConditionReading>> getConditionReadings(
+    String conditionId, {
+    int days = 90,
+    String? profileId,
+  }) async {
+    final response = await _apiClient.get(
+      JournalEndpoints.conditionReadings(conditionId),
+      queryParameters: {'days': days},
+      options: await _options(profileId: profileId),
+    );
+    final data = response.data;
+    final raw = data is List
+        ? data
+        : (_map(data)['readings'] as List? ?? const []);
+    return [
+      for (final r in raw)
+        if (r is Map)
+          ConditionReading.fromJson(Map<String, dynamic>.from(r)),
+    ];
   }
 
   /// Maps free text onto one existing chip, or null. The person confirms.

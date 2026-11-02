@@ -19,13 +19,15 @@ export type SupportedLanguage = 'pt-BR' | 'es' | 'en';
  * 2026.2 = wellness repositioning: the app is no longer described as a triage
  * tool. 2026.3 = premium "Meus cuidados" (vaccines, allergies, medications,
  * appointments, exam and prescription reading with Google Cloud Vision) and
- * users outside Brazil. Bumping it forces every user to accept the new texts again.
+ * users outside Brazil. 2026.4 = conditions the person names and the readings they
+ * note on them (blood pressure, glucose, weight) in the privacy policy.
+ * Bumping it forces every user to accept the new texts again.
  * Env overrides (TERMS_VERSION, PRIVACY_VERSION, DISCLAIMER_VERSION) still win.
  */
-export const LEGAL_DOCUMENTS_VERSION = '2026.3';
+export const LEGAL_DOCUMENTS_VERSION = '2026.4';
 
 const LEGAL_DOCUMENTS_EFFECTIVE_DATE = '2026-10-16';
-const LEGAL_DOCUMENTS_LAST_UPDATED = '2026-10-30';
+const LEGAL_DOCUMENTS_LAST_UPDATED = '2026-11-01';
 
 /** Canonical intended-use statement (plan §1.1). Must stay identical everywhere. */
 export const INTENDED_USE_STATEMENT: Record<SupportedLanguage, string> = {
@@ -287,6 +289,7 @@ export class LegalService {
             bullets: [
               'Datos de registro: Nombre, correo electrónico, fecha de nacimiento, sexo biológico.',
               'Datos sensibles de salud: Anotaciones diarias sobre cómo se siente física y emocionalmente, la intensidad que usted informa, consumo de agua y otros hábitos.',
+              'Las condiciones que usted informe y, si usa el registro de mediciones (Premium), las mediciones que usted anote (tensión arterial, glucosa, peso), tal como las escribe. La app no las interpreta ni las compara con valores de referencia.',
               'Si usa "Meus cuidados" (Premium): vacunas, alergias, medicamentos y recordatorios, consultas (con el lugar y, si lo elige en el mapa, el punto exacto), y los documentos de exámenes y recetas que usted sube, con los valores que usted confirma.',
               'Datos técnicos de seguridad: Dirección IP anonimizada, registros de auditoría de acceso, versión del dispositivo.',
             ],
@@ -368,6 +371,7 @@ export class LegalService {
             bullets: [
               'Account info: Name, email address, date of birth, biological sex.',
               'Sensitive health data: Daily notes on how you feel physically and emotionally, the intensity you report, water intake and other habits.',
+              'The conditions you tell us about and, if you use readings (Premium), the readings you record (blood pressure, glucose, weight), exactly as you type them. The app does not interpret them or compare them with reference values.',
               'If you use "Meus cuidados" (Premium): vaccines, allergies, medications and reminders, appointments (with the place and, if you pick it on the map, its exact point), and the exam and prescription documents you upload, with the values you confirm.',
               'Security logs: Anonymized IP addresses, session telemetry, audit hashes.',
             ],
@@ -450,6 +454,7 @@ export class LegalService {
           bullets: [
             'Dados Cadastrais: Nome completo, endereço de e-mail autenticado, data de nascimento e sexo biológico.',
             'Dados Sensíveis de Saúde: Anotações diárias sobre como você se sente física e emocionalmente, intensidade informada por você, registros de hidratação e de outros hábitos.',
+            'As condições que você informar e, se você usar o registro de medições (Premium), as medições que você registrar (pressão, glicose, peso), do jeito que você digitar. O app não interpreta nem compara esses valores com valores de referência.',
             'Se você usar "Meus cuidados" (Premium): vacinas, alergias, medicamentos e lembretes, consultas (com o local e, se você o escolher no mapa, o ponto exato), e os documentos de exames e receitas que você enviar, com os valores que você confirmar.',
             'Dados de Acesso e Metadados: Endereço IP mascarado, registros cronológicos de login, hashes de integridade do histórico.',
           ],

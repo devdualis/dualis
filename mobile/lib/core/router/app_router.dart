@@ -12,6 +12,9 @@ import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/emergency/presentation/screens/emergency_screen.dart';
 import '../../features/journal/presentation/screens/journal_flow_screen.dart';
 import '../../features/journal/presentation/screens/my_conditions_screen.dart';
+import '../../features/care/presentation/screens/premium_promo_screen.dart';
+import '../../features/journal/presentation/screens/condition_readings_screen.dart';
+import '../config/feature_flags.dart';
 import '../../features/dashboard/presentation/screens/check_in_summary_screen.dart';
 import '../../features/dashboard/presentation/screens/historical_dashboard_screen.dart';
 import '../../features/privacy/presentation/screens/privacy_center_screen.dart';
@@ -148,6 +151,26 @@ GoRouter createRouter({
         path: RoutePaths.myConditions,
         name: 'myConditions',
         builder: (context, state) => const MyConditionsScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.conditionReadings,
+        name: 'conditionReadings',
+        // Premium: a Free build opens the Premium promo instead.
+        redirect: (context, state) => ProviderScope.containerOf(
+              context,
+              listen: false,
+            ).read(premiumProfilesEnabledProvider)
+            ? null
+            : RoutePaths.premiumPromo,
+        builder: (context, state) => ConditionReadingsScreen(
+          conditionId: state.pathParameters['id']!,
+          label: state.extra as String?,
+        ),
+      ),
+      GoRoute(
+        path: RoutePaths.premiumPromo,
+        name: 'premiumPromo',
+        builder: (context, state) => const PremiumPromoPage(),
       ),
       GoRoute(
         path: RoutePaths.checkInSummary,

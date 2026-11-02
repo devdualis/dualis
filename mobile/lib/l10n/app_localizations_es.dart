@@ -4486,4 +4486,326 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get habitsPeriodLabel => 'Menstruación';
+
+  @override
+  String get jv23RegionPelve => 'Pelvis y bajo vientre';
+
+  @override
+  String get jv23BranchPelveUrina => 'Al orinar';
+
+  @override
+  String get jv23BranchPelveBaixoVentre => 'Bajo vientre';
+
+  @override
+  String get jv23BranchPelveIntima => 'Zona íntima';
+
+  @override
+  String get jv23OptPelveUrinaArdencia => 'Arde o duele al orinar';
+
+  @override
+  String get jv23OptPelveUrinaVontade => 'Ganas de orinar a cada rato';
+
+  @override
+  String get jv23OptPelveBaixoVentreColica => 'Cólico en el bajo vientre';
+
+  @override
+  String get jv23OptPelveBaixoVentrePeso => 'Peso o presión abajo';
+
+  @override
+  String get jv23OptPelveBaixoVentreMenstrual => 'Cólico menstrual';
+
+  @override
+  String get jv23OptPelveIntimaCoceira => 'Picor o ardor';
+
+  @override
+  String get jv23OptPelveIntimaInchaco => 'Sensibilidad o hinchazón';
+
+  @override
+  String get jv23BodyMapHint => 'Toca directamente en el dibujo.';
+
+  @override
+  String get jv23BodyMarked => 'Marcado:';
+
+  @override
+  String jv23BodyRemove(String part) {
+    return 'Quitar $part';
+  }
+
+  @override
+  String get jv23WholeBodyHint => 'Piel, músculos, hormonas';
+
+  @override
+  String get jv23ConditionsEmpty => 'Agrega una condición que sigues';
+
+  @override
+  String get jv23TriggersHint => 'Opcional. Toca los que encajan con hoy.';
+
+  @override
+  String get jv23TriggerTopicDia => 'Tu día';
+
+  @override
+  String get jv23TriggerTopicPessoas => 'Personas y dinero';
+
+  @override
+  String get jv23TriggerTopicCorpo => 'Tu cuerpo y el entorno';
+
+  @override
+  String jv23TopicMarked(int count) {
+    return '$count marcado(s)';
+  }
+
+  @override
+  String get chronicTrackBemBanner =>
+      'Como estás bien, puedes solo registrar tus mediciones del día o guardar sin ellas.';
+
+  @override
+  String get chronicTrackJustLog => 'Solo registrar mediciones';
+
+  @override
+  String get chronicTrackSaveWithout => 'Guardar sin mediciones';
+
+  @override
+  String get chronicTrackKindBloodPressure => 'Presión arterial';
+
+  @override
+  String get chronicTrackKindGlucose => 'Glucosa';
+
+  @override
+  String get chronicTrackKindWeight => 'Peso';
+
+  @override
+  String get chronicTrackKindBloodPressureLong =>
+      'Presión arterial (sistólica / diastólica / pulso)';
+
+  @override
+  String get chronicTrackKindGlucoseLong => 'Glucosa (mg/dL y momento)';
+
+  @override
+  String get chronicTrackKindWeightLong => 'Peso (kg)';
+
+  @override
+  String get chronicTrackSystolic => 'Sistólica';
+
+  @override
+  String get chronicTrackDiastolic => 'Diastólica';
+
+  @override
+  String get chronicTrackPulse => 'Pulso (opcional)';
+
+  @override
+  String get chronicTrackMoment => 'Momento de la medición';
+
+  @override
+  String get chronicTrackMomentJejum => 'Ayunas';
+
+  @override
+  String get chronicTrackMomentPreRefeicao => 'Antes de comer';
+
+  @override
+  String get chronicTrackMomentPosRefeicao => 'Después de comer';
+
+  @override
+  String get chronicTrackMomentDormir => 'Al acostarse';
+
+  @override
+  String get chronicTrackTime => 'Hora';
+
+  @override
+  String get chronicTrackAdd => '+ Agregar medición';
+
+  @override
+  String get chronicTrackAddAnother => '+ Agregar otra medición';
+
+  @override
+  String get chronicTrackRemove => 'Quitar medición';
+
+  @override
+  String get chronicTrackPickKind => '¿Qué medición?';
+
+  @override
+  String get chronicTrackCheckValue => 'Verifique el valor ingresado';
+
+  @override
+  String get chronicTrackTapToLog => 'Toca para registrar mediciones';
+
+  @override
+  String chronicTrackReadingsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mediciones',
+      one: '1 medición',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chronicTrackToggle => 'Requiere registro (condición crónica)';
+
+  @override
+  String get chronicTrackPremiumBadge => 'PREMIUM';
+
+  @override
+  String get chronicTrackEdit => 'Editar condición';
+
+  @override
+  String get chronicTrackSave => 'Guardar';
+
+  @override
+  String get chronicTrackViewReadings => 'Ver mediciones';
+
+  @override
+  String get chronicTrackPromoTitle => 'Mediciones de tus condiciones';
+
+  @override
+  String get chronicTrackPromoDesc =>
+      'Presión, glucosa y peso en tu registro físico, con historial.';
+
+  @override
+  String get chronicTrackPromoScreenTitle => 'Dualis Premium';
+
+  @override
+  String get chronicHistoryTitle => 'Historial de mediciones';
+
+  @override
+  String chronicHistoryProfile(String name) {
+    return 'Perfil: $name';
+  }
+
+  @override
+  String chronicHistoryDays(int days) {
+    return '$days días';
+  }
+
+  @override
+  String chronicHistoryEmpty(int days) {
+    return 'No hay mediciones registradas en los últimos $days días.';
+  }
+
+  @override
+  String get chronicHistoryOffline =>
+      'Sin conexión. Solo se muestran las mediciones guardadas en este dispositivo.';
+
+  @override
+  String get chronicHistoryPending => 'Pendiente de envío';
+
+  @override
+  String get chronicHistoryError => 'No se pudieron cargar las mediciones.';
+
+  @override
+  String get chronicHistoryRetry => 'Intentar de nuevo';
+
+  @override
+  String chronicHistoryToday(String date) {
+    return 'Hoy, $date';
+  }
+
+  @override
+  String chronicHistoryYesterday(String date) {
+    return 'Ayer, $date';
+  }
+
+  @override
+  String get chronicHistoryChartHint =>
+      'Cada punto es una medición, tal como la registraste. Toca un punto para ver el valor.';
+
+  @override
+  String chronicHistoryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mediciones',
+      one: '1 medición',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chronicHistoryKindBloodPressure => 'Presión arterial';
+
+  @override
+  String get chronicHistoryKindGlucose => 'Glucosa';
+
+  @override
+  String get chronicHistoryKindWeight => 'Peso';
+
+  @override
+  String get chronicHistorySystolic => 'Sistólica';
+
+  @override
+  String get chronicHistoryDiastolic => 'Diastólica';
+
+  @override
+  String get chronicHistoryMomentJejum => 'Ayunas';
+
+  @override
+  String get chronicHistoryMomentPreRefeicao => 'Antes de comer';
+
+  @override
+  String get chronicHistoryMomentPosRefeicao => 'Después de comer';
+
+  @override
+  String get chronicHistoryMomentDormir => 'Al acostarse';
+
+  @override
+  String chronicHistoryValueBp(int systolic, int diastolic) {
+    return '$systolic/$diastolic mmHg';
+  }
+
+  @override
+  String chronicHistoryValuePulse(int pulse) {
+    return 'pulso $pulse lpm';
+  }
+
+  @override
+  String chronicHistoryValueGlucose(int mgdl) {
+    return '$mgdl mg/dL';
+  }
+
+  @override
+  String chronicHistoryValueWeight(String kg) {
+    return '$kg kg';
+  }
+
+  @override
+  String get chronicHistorySummarySection => 'Mediciones';
+
+  @override
+  String get chronicHistorySummaryTitle => 'Mediciones registradas';
+
+  @override
+  String get jv23MoreEmotional => 'Registrar otra cosa';
+
+  @override
+  String get jv23MoreBody => 'Marcar otra parte del cuerpo';
+
+  @override
+  String get jv23TapOneHint => 'Toca una opción.';
+
+  @override
+  String get jv23WhatWeighsQuestion => '¿Qué pesa más ahora?';
+
+  @override
+  String get jv23WhereExactly => '¿Dónde exactamente?';
+
+  @override
+  String get jv23HowMuchLabel => '¿Cuánto pesa en tu día?';
+
+  @override
+  String get jv23IntensityPickHint => 'Toca un número. Su frase aparece aquí.';
+
+  @override
+  String get jv23ClosingTitle => 'Para cerrar';
+
+  @override
+  String get jv23ClosingHint => 'Las dos preguntas son opcionales.';
+
+  @override
+  String jv23StepOf(int current, int total) {
+    return '$current de $total';
+  }
+
+  @override
+  String get chronicTrackConditionsSubtitle =>
+      'Informadas por ti. Escríbelas con tus palabras. Las que necesitan registro reciben tus mediciones en el registro diario; las demás usan la escala de 1 a 5.';
 }

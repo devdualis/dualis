@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:dualis_mobile/features/home/domain/home_greeting.dart';
+import 'package:dualis_mobile/core/config/feature_flags.dart';
 import 'package:dualis_mobile/core/database/app_database.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/core/theme/app_theme.dart';
@@ -89,6 +90,40 @@ class FakeJournalRemote implements JournalRemoteDataSource {
     conditions = [for (final c in conditions) if (c.id != id) c];
   }
 
+  final List<Map<String, dynamic>> patchRequests = [];
+  List<ConditionReading> readings = const [];
+  final List<Map<String, Object?>> readingRequests = [];
+
+  @override
+  Future<UserCondition> patchCondition(
+    String id, {
+    List<String>? tracking,
+    String? label,
+    String? profileId,
+  }) async {
+    if (fail) throw _offline();
+    patchRequests.add({
+      'id': id,
+      if (tracking != null) 'tracking': tracking,
+      if (label != null) 'label': label,
+    });
+    final current = conditions.firstWhere((c) => c.id == id);
+    final updated = current.copyWith(label: label, tracking: tracking);
+    conditions = [for (final c in conditions) c.id == id ? updated : c];
+    return updated;
+  }
+
+  @override
+  Future<List<ConditionReading>> getConditionReadings(
+    String conditionId, {
+    int days = 90,
+    String? profileId,
+  }) async {
+    if (fail) throw _offline();
+    readingRequests.add({'conditionId': conditionId, 'days': days, 'profileId': profileId});
+    return [for (final r in readings) if (r.conditionId == conditionId) r];
+  }
+
   @override
   Future<String?> suggestOption({
     required String text,
@@ -107,6 +142,10 @@ class JournalHarness {
   final JournalLocalStore local;
   bool online;
   DateTime Function()? clock;
+
+  /// Premium build (`premiumProfilesEnabledProvider`) when set; null keeps
+  /// the compile-time flag (Free in tests) and adds no override.
+  bool? premium;
   late final JournalRepository repository;
 
   JournalHarness({List<UserCondition> conditions = const [], bool online = true})
@@ -128,6 +167,7 @@ class JournalHarness {
         journalRepositoryProvider.overrideWithValue(repository),
         journalRandomProvider.overrideWithValue(Random(7)),
         if (clock != null) homeClockProvider.overrideWithValue(clock!),
+        if (premium != null) premiumProfilesEnabledProvider.overrideWithValue(premium!),
       ];
 }
 

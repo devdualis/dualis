@@ -2254,8 +2254,26 @@ class $LocalUserConditionsTable extends LocalUserConditions
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _trackingMeta = const VerificationMeta(
+    'tracking',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, label, profileId, createdAt];
+  late final GeneratedColumn<String> tracking = GeneratedColumn<String>(
+    'tracking',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    label,
+    profileId,
+    createdAt,
+    tracking,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2293,6 +2311,12 @@ class $LocalUserConditionsTable extends LocalUserConditions
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('tracking')) {
+      context.handle(
+        _trackingMeta,
+        tracking.isAcceptableOrUnknown(data['tracking']!, _trackingMeta),
+      );
+    }
     return context;
   }
 
@@ -2321,6 +2345,11 @@ class $LocalUserConditionsTable extends LocalUserConditions
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       ),
+      tracking:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}tracking'],
+          )!,
     );
   }
 
@@ -2336,11 +2365,16 @@ class LocalUserCondition extends DataClass
   final String label;
   final String profileId;
   final DateTime? createdAt;
+
+  /// JSON list of the reading kinds the person chose for this condition
+  /// (schema v7). `[]` = not tracked.
+  final String tracking;
   const LocalUserCondition({
     required this.id,
     required this.label,
     required this.profileId,
     this.createdAt,
+    required this.tracking,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2351,6 +2385,7 @@ class LocalUserCondition extends DataClass
     if (!nullToAbsent || createdAt != null) {
       map['created_at'] = Variable<DateTime>(createdAt);
     }
+    map['tracking'] = Variable<String>(tracking);
     return map;
   }
 
@@ -2363,6 +2398,7 @@ class LocalUserCondition extends DataClass
           createdAt == null && nullToAbsent
               ? const Value.absent()
               : Value(createdAt),
+      tracking: Value(tracking),
     );
   }
 
@@ -2376,6 +2412,7 @@ class LocalUserCondition extends DataClass
       label: serializer.fromJson<String>(json['label']),
       profileId: serializer.fromJson<String>(json['profileId']),
       createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
+      tracking: serializer.fromJson<String>(json['tracking']),
     );
   }
   @override
@@ -2386,6 +2423,7 @@ class LocalUserCondition extends DataClass
       'label': serializer.toJson<String>(label),
       'profileId': serializer.toJson<String>(profileId),
       'createdAt': serializer.toJson<DateTime?>(createdAt),
+      'tracking': serializer.toJson<String>(tracking),
     };
   }
 
@@ -2394,11 +2432,13 @@ class LocalUserCondition extends DataClass
     String? label,
     String? profileId,
     Value<DateTime?> createdAt = const Value.absent(),
+    String? tracking,
   }) => LocalUserCondition(
     id: id ?? this.id,
     label: label ?? this.label,
     profileId: profileId ?? this.profileId,
     createdAt: createdAt.present ? createdAt.value : this.createdAt,
+    tracking: tracking ?? this.tracking,
   );
   LocalUserCondition copyWithCompanion(LocalUserConditionsCompanion data) {
     return LocalUserCondition(
@@ -2406,6 +2446,7 @@ class LocalUserCondition extends DataClass
       label: data.label.present ? data.label.value : this.label,
       profileId: data.profileId.present ? data.profileId.value : this.profileId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      tracking: data.tracking.present ? data.tracking.value : this.tracking,
     );
   }
 
@@ -2415,13 +2456,14 @@ class LocalUserCondition extends DataClass
           ..write('id: $id, ')
           ..write('label: $label, ')
           ..write('profileId: $profileId, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('tracking: $tracking')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, label, profileId, createdAt);
+  int get hashCode => Object.hash(id, label, profileId, createdAt, tracking);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2429,7 +2471,8 @@ class LocalUserCondition extends DataClass
           other.id == this.id &&
           other.label == this.label &&
           other.profileId == this.profileId &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.tracking == this.tracking);
 }
 
 class LocalUserConditionsCompanion extends UpdateCompanion<LocalUserCondition> {
@@ -2437,12 +2480,14 @@ class LocalUserConditionsCompanion extends UpdateCompanion<LocalUserCondition> {
   final Value<String> label;
   final Value<String> profileId;
   final Value<DateTime?> createdAt;
+  final Value<String> tracking;
   final Value<int> rowid;
   const LocalUserConditionsCompanion({
     this.id = const Value.absent(),
     this.label = const Value.absent(),
     this.profileId = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.tracking = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LocalUserConditionsCompanion.insert({
@@ -2450,6 +2495,7 @@ class LocalUserConditionsCompanion extends UpdateCompanion<LocalUserCondition> {
     required String label,
     this.profileId = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.tracking = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        label = Value(label);
@@ -2458,6 +2504,7 @@ class LocalUserConditionsCompanion extends UpdateCompanion<LocalUserCondition> {
     Expression<String>? label,
     Expression<String>? profileId,
     Expression<DateTime>? createdAt,
+    Expression<String>? tracking,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2465,6 +2512,7 @@ class LocalUserConditionsCompanion extends UpdateCompanion<LocalUserCondition> {
       if (label != null) 'label': label,
       if (profileId != null) 'profile_id': profileId,
       if (createdAt != null) 'created_at': createdAt,
+      if (tracking != null) 'tracking': tracking,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2474,6 +2522,7 @@ class LocalUserConditionsCompanion extends UpdateCompanion<LocalUserCondition> {
     Value<String>? label,
     Value<String>? profileId,
     Value<DateTime?>? createdAt,
+    Value<String>? tracking,
     Value<int>? rowid,
   }) {
     return LocalUserConditionsCompanion(
@@ -2481,6 +2530,7 @@ class LocalUserConditionsCompanion extends UpdateCompanion<LocalUserCondition> {
       label: label ?? this.label,
       profileId: profileId ?? this.profileId,
       createdAt: createdAt ?? this.createdAt,
+      tracking: tracking ?? this.tracking,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2500,6 +2550,9 @@ class LocalUserConditionsCompanion extends UpdateCompanion<LocalUserCondition> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (tracking.present) {
+      map['tracking'] = Variable<String>(tracking.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2513,6 +2566,7 @@ class LocalUserConditionsCompanion extends UpdateCompanion<LocalUserCondition> {
           ..write('label: $label, ')
           ..write('profileId: $profileId, ')
           ..write('createdAt: $createdAt, ')
+          ..write('tracking: $tracking, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3715,6 +3769,7 @@ typedef $$LocalUserConditionsTableCreateCompanionBuilder =
       required String label,
       Value<String> profileId,
       Value<DateTime?> createdAt,
+      Value<String> tracking,
       Value<int> rowid,
     });
 typedef $$LocalUserConditionsTableUpdateCompanionBuilder =
@@ -3723,6 +3778,7 @@ typedef $$LocalUserConditionsTableUpdateCompanionBuilder =
       Value<String> label,
       Value<String> profileId,
       Value<DateTime?> createdAt,
+      Value<String> tracking,
       Value<int> rowid,
     });
 
@@ -3752,6 +3808,11 @@ class $$LocalUserConditionsTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tracking => $composableBuilder(
+    column: $table.tracking,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3784,6 +3845,11 @@ class $$LocalUserConditionsTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get tracking => $composableBuilder(
+    column: $table.tracking,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$LocalUserConditionsTableAnnotationComposer
@@ -3806,6 +3872,9 @@ class $$LocalUserConditionsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get tracking =>
+      $composableBuilder(column: $table.tracking, builder: (column) => column);
 }
 
 class $$LocalUserConditionsTableTableManager
@@ -3858,12 +3927,14 @@ class $$LocalUserConditionsTableTableManager
                 Value<String> label = const Value.absent(),
                 Value<String> profileId = const Value.absent(),
                 Value<DateTime?> createdAt = const Value.absent(),
+                Value<String> tracking = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LocalUserConditionsCompanion(
                 id: id,
                 label: label,
                 profileId: profileId,
                 createdAt: createdAt,
+                tracking: tracking,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3872,12 +3943,14 @@ class $$LocalUserConditionsTableTableManager
                 required String label,
                 Value<String> profileId = const Value.absent(),
                 Value<DateTime?> createdAt = const Value.absent(),
+                Value<String> tracking = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LocalUserConditionsCompanion.insert(
                 id: id,
                 label: label,
                 profileId: profileId,
                 createdAt: createdAt,
+                tracking: tracking,
                 rowid: rowid,
               ),
           withReferenceMapper:

@@ -18,6 +18,7 @@ import '../controllers/journal_flow_state.dart';
 import '../journal_item_text.dart';
 import '../journal_labels.dart';
 import '../widgets/body_region_map.dart';
+import '../widgets/condition_readings_card.dart';
 import '../widgets/intensity_scale.dart';
 
 /// Starting point when the flow is opened from a Home card.
@@ -46,6 +47,10 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
   final _noteController = TextEditingController();
   bool _writingCustom = false;
   bool _suggestingCustom = false;
+
+  /// Tracked conditions whose reading card is open.
+  final Set<String> _openConditions = {};
+  String _triggerTab = 'dia';
 
   JournalFlowController get _controller =>
       ref.read(journalFlowControllerProvider.notifier);
@@ -162,9 +167,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         return _moodStep(l10n, state);
       case JournalStep.positiveStart:
         return _positiveStartStep(l10n, state);
-      case JournalStep.positiveBranch:
-        return _branchStep(l10n, state, JournalKeys.positiveTree[state.time]!,
-            state.time!);
       case JournalStep.positiveOptions:
         return _optionsStep(
           l10n,
@@ -179,9 +181,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         );
       case JournalStep.time:
         return _timeStep(l10n, state);
-      case JournalStep.branch:
-        return _branchStep(l10n, state, JournalKeys.emotionalTree[state.time]!,
-            state.time!);
       case JournalStep.options:
         return _optionsStep(
           l10n,
@@ -189,26 +188,27 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           JournalKeys.emotionalTree[state.time]![state.branch]!,
           '${state.time}.${state.branch}',
           _controller.confirmEmotionalOptions,
+          moreLabel: l10n.jv23MoreEmotional,
+          onMore: () => _controller.confirmEmotionalOptions(more: true),
         );
-      case JournalStep.moreEmotional:
-        return _moreStep(l10n, state, l10n.jv2MoreQuestion,
-            _controller.answerMoreEmotional);
       case JournalStep.body:
         return _bodyStep(l10n, state, conditions);
+      case JournalStep.conditions:
+        return _bemConditionsStep(l10n, state, conditions);
       case JournalStep.regionBranch:
         return _regionBranchStep(l10n, state);
       case JournalStep.regionOptions:
         final region = state.currentRegion!.region;
+        final lastRegion = state.regionIndex == state.selectedRegions.length - 1;
         return _optionsStep(
           l10n,
           state,
           JournalKeys.physicalTree[region]![state.branch]!,
           '$region.${state.branch}',
           _controller.confirmPhysicalOptions,
+          moreLabel: lastRegion ? l10n.jv23MoreBody : null,
+          onMore: () => _controller.confirmPhysicalOptions(more: true),
         );
-      case JournalStep.moreBody:
-        return _moreStep(l10n, state, l10n.jv2MoreBodyQuestion,
-            _controller.answerMoreBody);
       case JournalStep.intensity:
         return _intensityStep(l10n, state);
       case JournalStep.triggers:
@@ -218,6 +218,41 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       case JournalStep.note:
         return _noteStep(l10n, state);
     }
+  }
+
+  /// Screen number and screen count of the path (v2.3 progress bar).
+  (int, int) _progress(JournalFlowState state) {
+    if (_area == JournalArea.physical) {
+      final index = switch (state.step) {
+        JournalStep.mood => 1,
+        JournalStep.body || JournalStep.conditions => 2,
+        JournalStep.regionBranch => 3,
+        JournalStep.regionOptions => 4,
+        JournalStep.intensity => 5,
+        JournalStep.triggers => 6,
+        JournalStep.closing => 7,
+        _ => 8,
+      };
+      return (index, 8);
+    }
+    if (state.mood == JournalKeys.moodBem) {
+      final index = switch (state.step) {
+        JournalStep.mood => 1,
+        JournalStep.positiveStart => 2,
+        _ => 3,
+      };
+      return (index, 3);
+    }
+    final index = switch (state.step) {
+      JournalStep.mood => 1,
+      JournalStep.time => 2,
+      JournalStep.options => 3,
+      JournalStep.intensity => 4,
+      JournalStep.triggers => 5,
+      JournalStep.closing => 6,
+      _ => 7,
+    };
+    return (index, 7);
   }
 
   // ---- Steps ------------------------------------------------------------
@@ -234,22 +269,28 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     final hello = firstName.isEmpty ? l10n.jv2Hello : l10n.jv2HelloName(firstName);
     final emotional = _area == JournalArea.emotional;
     return _StepLayout(
+      progress: _progress(state),
       lead: '$hello $dayPart',
       axisLabel: JournalLabels.axis(l10n, _area.key),
       axisColor: emotional ? AppColors.dualisSymbolGreen : AppColors.dualisSymbolBlue,
       question: l10n.jv2MoodQuestion,
+      hint: l10n.jv23TapOneHint,
       children: [
-        for (final mood in JournalKeys.newEntryMoods)
-          _ChoiceTile(
-            key: Key('jv2_mood_$mood'),
-            leading: _MoodIcon(mood),
-            label: JournalLabels.mood(l10n, mood),
-            large: true,
-            enabled: !state.isSaving,
-            onTap: () {
-              if (_controller.chooseMood(mood, area: _area)) _save();
-            },
-          ),
+        _CardGrid(
+          columns: 2,
+          children: [
+            for (final mood in JournalKeys.newEntryMoods)
+              _ChoiceCard(
+                key: Key('jv2_mood_$mood'),
+                leading: _MoodIcon(mood),
+                label: JournalLabels.mood(l10n, mood),
+                large: true,
+                showCheck: false,
+                enabled: !state.isSaving,
+                onTap: () => _chooseMood(mood),
+              ),
+          ],
+        ),
         if (state.isSaving)
           const Padding(
             padding: EdgeInsets.all(16),
@@ -259,9 +300,154 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     );
   }
 
-  /// "Bem": "Só registrar" saves at once; a time opens the good moments.
+  /// Branches of a tree under the label of their time: one tap picks both.
+  List<Widget> _branchRows(
+    AppLocalizations l10n,
+    Map<String, Map<String, List<String>>> tree, {
+    bool enabled = true,
+  }) =>
+      [
+        for (final time in tree.keys) ...[
+          _CapsLabel(JournalLabels.root(l10n, time)),
+          for (final branch in tree[time]!.keys)
+            _ChoiceTile(
+              key: Key('jv2_branch_$time.$branch'),
+              emoji: journalEmojis['$time.$branch'],
+              label: JournalLabels.branch(l10n, '$time.$branch'),
+              dense: true,
+              enabled: enabled,
+              onTap: () => _controller.chooseTimeBranch(time, branch),
+            ),
+        ],
+      ];
+
+  void _chooseMood(String mood) {
+    final conditions = ref.read(userConditionsProvider).value ?? const <UserCondition>[];
+    if (_controller.chooseMood(mood, area: _area, conditions: conditions)) {
+      _save();
+      return;
+    }
+    if (ref.read(journalFlowControllerProvider).step == JournalStep.conditions) {
+      // Bem with tracked conditions: every reading card starts open.
+      setState(() => _openConditions.addAll([
+            for (final c in conditions)
+              if (_controller.tracksReadings(c)) c.id,
+          ]));
+    }
+  }
+
+  /// Bem on the physical axis with tracked conditions (v2.4, Premium): the
+  /// reading cards, "Só registrar medições" and "Salvar sem medições".
+  Widget _bemConditionsStep(
+    AppLocalizations l10n,
+    JournalFlowState state,
+    List<UserCondition> conditions,
+  ) {
+    return _StepLayout(
+      progress: _progress(state),
+      question: l10n.jv2AreaConditions,
+      bottom: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _ContinueButton(
+            key: const Key('chronicTrack_just_log'),
+            label: l10n.chronicTrackJustLog,
+            busy: state.isSaving,
+            onPressed: state.hasReadings && !state.isSaving
+                ? () {
+                    if (_controller.confirmReadingsOnly(conditions: conditions)) _save();
+                  }
+                : null,
+          ),
+          const SizedBox(height: 4),
+          TextButton(
+            key: const Key('chronicTrack_save_without'),
+            style: TextButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+            onPressed: state.isSaving
+                ? null
+                : () {
+                    _controller.clearReadingsForSave();
+                    _save();
+                  },
+            child: Text(
+              l10n.chronicTrackSaveWithout,
+              style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+      children: [
+        Container(
+          key: const Key('chronicTrack_bem_banner'),
+          padding: const EdgeInsets.all(14),
+          margin: const EdgeInsets.only(bottom: 14),
+          decoration: BoxDecoration(
+            color: AppColors.dualisSymbolBlue.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Text(
+            l10n.chronicTrackBemBanner,
+            style: GoogleFonts.plusJakartaSans(fontSize: 14, height: 1.4),
+          ),
+        ),
+        ..._conditionTiles(l10n, state, conditions, trackedOnly: true),
+      ],
+    );
+  }
+
+  /// "Minhas condições" as a list: an untracked condition is picked for the
+  /// 1-5 card; a tracked one (Premium) opens its reading card.
+  List<Widget> _conditionTiles(
+    AppLocalizations l10n,
+    JournalFlowState state,
+    List<UserCondition> conditions, {
+    bool trackedOnly = false,
+  }) {
+    return [
+      for (final c in conditions)
+        if (_controller.tracksReadings(c))
+          _ConditionTile(
+            key: Key('jv2_condition_${c.id}'),
+            label: c.label,
+            subtitle: (state.conditionReadings[c.id] ?? const []).isEmpty
+                ? l10n.chronicTrackTapToLog
+                : l10n.chronicTrackReadingsCount(state.conditionReadings[c.id]!.length),
+            selected: (state.conditionReadings[c.id] ?? const []).isNotEmpty,
+            expandable: true,
+            open: _openConditions.contains(c.id),
+            onTap: () => setState(() {
+              if (!_openConditions.remove(c.id)) _openConditions.add(c.id);
+            }),
+            child: ConditionReadingsCard(
+              keyPrefix: 'chronicTrack_${c.id}',
+              tracking: c.tracking,
+              initialReadings: state.conditionReadings[c.id] ?? const [],
+              onChanged: (readings) => _controller.setConditionReadings(c.id, readings),
+            ),
+          )
+        else if (!trackedOnly)
+          _ConditionTile(
+            key: Key('jv2_condition_${c.id}'),
+            label: c.label,
+            selected: state.selectedConditionIds.contains(c.id),
+            onTap: () => _controller.toggleCondition(c.id),
+          ),
+      if (!trackedOnly)
+        _ConditionTile(
+          key: const Key('jv2_condition_add'),
+          icon: Icons.add_rounded,
+          label: l10n.jv2ConditionsAdd,
+          selected: false,
+          onTap: _addCondition,
+        ),
+    ];
+  }
+
+  /// "Bem": "Só registrar" saves at once; a good moment opens its options.
   Widget _positiveStartStep(AppLocalizations l10n, JournalFlowState state) {
     return _StepLayout(
+      progress: _progress(state),
       question: l10n.jv22PositiveQuestion,
       children: [
         _ContinueButton(
@@ -270,57 +456,28 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           busy: state.isSaving,
           onPressed: state.isSaving ? null : _save,
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
         _SectionLabel(l10n.jv22PositiveTimeHint),
-        for (final time in JournalKeys.positiveTree.keys)
-          _ChoiceTile(
-            key: Key('jv22_positive_time_$time'),
-            emoji: journalEmojis[time],
-            label: JournalLabels.root(l10n, time),
-            enabled: !state.isSaving,
-            onTap: () => _controller.choosePositiveTime(time),
-          ),
+        ..._branchRows(l10n, JournalKeys.positiveTree, enabled: !state.isSaving),
       ],
     );
   }
 
+  /// Time and branch on one screen (v2.3).
   Widget _timeStep(AppLocalizations l10n, JournalFlowState state) {
     return _StepLayout(
+      progress: _progress(state),
       lead: _phrase(l10n, state),
-      question: l10n.jv2TimeQuestion,
-      children: [
-        for (final time in JournalKeys.times)
-          _ChoiceTile(
-            key: Key('jv2_time_$time'),
-            emoji: journalEmojis[time],
-            label: JournalLabels.root(l10n, time),
-            onTap: () => _controller.chooseTime(time),
-          ),
-      ],
+      question: l10n.jv23WhatWeighsQuestion,
+      hint: l10n.jv23TapOneHint,
+      children: _branchRows(l10n, JournalKeys.emotionalTree),
     );
   }
 
-  Widget _branchStep(
-    AppLocalizations l10n,
-    JournalFlowState state,
-    Map<String, List<String>> branches,
-    String root,
-  ) {
-    return _StepLayout(
-      eyebrow: JournalLabels.root(l10n, root),
-      lead: _phrase(l10n, state),
-      question: l10n.jv2BranchQuestion,
-      children: [
-        for (final branch in branches.keys)
-          _ChoiceTile(
-            key: Key('jv2_branch_$root.$branch'),
-            emoji: journalEmojis['$root.$branch'],
-            label: JournalLabels.branch(l10n, '$root.$branch'),
-            onTap: () => _controller.chooseBranch(branch),
-          ),
-      ],
-    );
-  }
+  static const Map<String, String> _sensationEmojis = {
+    JournalKeys.sensationDor: '⚡',
+    JournalKeys.sensationIncomodo: '〰️',
+  };
 
   /// "É dor ou incômodo?" (required) and the branches of the region, for
   /// the side it was marked on.
@@ -335,24 +492,31 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     final branches = JournalKeys.branchesFor(region, side);
     final hasSensation = state.sensation != null;
     return _StepLayout(
+      progress: _progress(state),
       eyebrow: sideLabel == null ? rootLabel : '$rootLabel · $sideLabel',
       lead: _phrase(l10n, state),
       question: l10n.jv2SensationQuestion,
       children: [
-        for (final sensation in JournalKeys.sensations)
-          _ChoiceTile(
-            key: Key('jv2_sensation_$sensation'),
-            label: JournalLabels.sensation(l10n, sensation),
-            selected: state.sensation == sensation,
-            onTap: () => _controller.chooseSensation(sensation),
-          ),
-        const SizedBox(height: 8),
-        _SectionLabel(l10n.jv2BranchQuestion, strong: true),
+        _CardGrid(
+          columns: 2,
+          children: [
+            for (final sensation in JournalKeys.sensations)
+              _ChoiceCard(
+                key: Key('jv2_sensation_$sensation'),
+                emoji: _sensationEmojis[sensation],
+                label: JournalLabels.sensation(l10n, sensation),
+                selected: state.sensation == sensation,
+                onTap: () => _controller.chooseSensation(sensation),
+              ),
+          ],
+        ),
+        _CapsLabel(l10n.jv23WhereExactly),
         for (final branch in branches.keys)
           _ChoiceTile(
             key: Key('jv2_branch_$region.$branch'),
             emoji: journalEmojis['$region.$branch'],
             label: JournalLabels.branch(l10n, '$region.$branch'),
+            dense: true,
             enabled: hasSensation,
             onTap: () => _controller.chooseBranch(branch),
           ),
@@ -368,16 +532,40 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     VoidCallback onConfirm, {
     Key? confirmKey,
     String? confirmLabel,
+    String? moreLabel,
+    VoidCallback? onMore,
   }) {
+    final canConfirm = state.hasOptionSelection && !state.isSaving;
+    final showMore = moreLabel != null && onMore != null && !state.itemLimitReached;
     return _StepLayout(
+      progress: _progress(state),
       eyebrow: JournalLabels.branch(l10n, prefix),
+      lead: _phrase(l10n, state),
       question: l10n.jv2OptionsQuestion,
       hint: l10n.jv2MultiSelectHint,
-      bottom: _ContinueButton(
-        key: confirmKey,
-        label: confirmLabel ?? l10n.jv2Continue,
-        busy: state.isSaving,
-        onPressed: state.hasOptionSelection && !state.isSaving ? onConfirm : null,
+      bottom: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (showMore)
+            TextButton(
+              key: const Key('jv23_more'),
+              onPressed: canConfirm ? onMore : null,
+              child: Text(
+                '+ $moreLabel',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          _ContinueButton(
+            key: confirmKey,
+            label: confirmLabel ?? l10n.jv2Continue,
+            busy: state.isSaving,
+            onPressed: canConfirm ? onConfirm : null,
+          ),
+        ],
       ),
       children: [
         for (final option in options)
@@ -389,20 +577,16 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             multi: true,
             onTap: () => _controller.toggleOption('$prefix.$option'),
           ),
-        if (state.customLabels.isNotEmpty)
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final label in state.customLabels)
-                InputChip(
-                  key: Key('jv2_custom_chip_$label'),
-                  label: Text(label),
-                  selected: true,
-                  onDeleted: () => _controller.removeCustomLabel(label),
-                  deleteButtonTooltipMessage: l10n.jv2Remove,
-                ),
-            ],
+        // What the person wrote: a row like the others; tapping removes it.
+        for (final label in state.customLabels)
+          _ChoiceTile(
+            key: Key('jv2_custom_chip_$label'),
+            emoji: '✏️',
+            label: label,
+            selected: true,
+            multi: true,
+            semanticsHint: l10n.jv2Remove,
+            onTap: () => _controller.removeCustomLabel(label),
           ),
         const SizedBox(height: 8),
         if (_writingCustom)
@@ -429,11 +613,12 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             ],
           )
         else
-          OutlinedButton.icon(
+          _ChoiceTile(
             key: const Key('jv2_write_mine'),
-            onPressed: () => setState(() => _writingCustom = true),
-            icon: const Text('✏️'),
-            label: Text(l10n.jv2WriteMine),
+            emoji: '✏️',
+            label: l10n.jv2WriteMine,
+            accent: true,
+            onTap: () => setState(() => _writingCustom = true),
           ),
       ],
     );
@@ -510,45 +695,22 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     setState(() => _writingCustom = false);
   }
 
-  Widget _moreStep(
-    AppLocalizations l10n,
-    JournalFlowState state,
-    String question,
-    ValueChanged<bool> onAnswer,
-  ) {
-    return _StepLayout(
-      question: question,
-      children: [
-        if (state.itemLimitReached)
-          _SectionLabel(l10n.jv2ItemLimit(JournalKeys.maxItems)),
-        _ChoiceTile(
-          key: const Key('jv2_more_yes'),
-          emoji: '➕',
-          label: l10n.jv2Yes,
-          enabled: !state.itemLimitReached,
-          onTap: () => onAnswer(true),
-        ),
-        _ChoiceTile(
-          key: const Key('jv2_more_no'),
-          emoji: '➡️',
-          label: l10n.jv2No,
-          onTap: () => onAnswer(false),
-        ),
-      ],
-    );
-  }
-
   Widget _bodyStep(
     AppLocalizations l10n,
     JournalFlowState state,
     List<UserCondition> conditions,
   ) {
     final selected = {for (final r in state.selectedRegions) r.region};
-    final visible = BodyRegionMap.regionsFor(state.bodySide);
+    final onMap = [
+      for (final r in state.selectedRegions)
+        if (!JournalKeys.isWholeBody(r.region)) r,
+    ];
+    final wholeCount = JournalKeys.wholeBodyAreas.where(selected.contains).length;
     return _StepLayout(
+      progress: _progress(state),
       lead: _phrase(l10n, state),
       question: l10n.jv2BodyQuestion,
-      hint: l10n.jv2BodyHint,
+      hint: l10n.jv23BodyMapHint,
       bottom: _ContinueButton(
         label: l10n.jv2Continue,
         onPressed: state.hasBodySelection
@@ -556,6 +718,20 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             : null,
       ),
       children: [
+        _SectionLabel(l10n.jv2AreaConditions, strong: true),
+        if (conditions.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              l10n.jv23ConditionsEmpty,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                color: AppColors.textSecondaryLight,
+              ),
+            ),
+          ),
+        ..._conditionTiles(l10n, state, conditions),
+        const SizedBox(height: 16),
         Center(
           child: SegmentedButton<String>(
             segments: [
@@ -575,64 +751,62 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         const SizedBox(height: 12),
         Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 280),
+            constraints: const BoxConstraints(maxHeight: 340),
             child: BodyRegionMap(
               side: state.bodySide,
               selected: selected,
               onToggle: _controller.toggleRegion,
+              labelOf: (region) => JournalLabels.root(l10n, region),
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          alignment: WrapAlignment.center,
-          children: [
-            for (final region in JournalKeys.bodyRegions)
-              if (visible.contains(region) || selected.contains(region))
-                FilterChip(
-                  key: Key('jv2_region_$region'),
-                  label: Text(JournalLabels.root(l10n, region)),
-                  selected: selected.contains(region),
-                  onSelected: (_) => _controller.toggleRegion(region),
+        if (onMap.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Wrap(
+            key: const Key('jv2_marked'),
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              Text(
+                l10n.jv23BodyMarked,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondaryLight,
                 ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        _SectionLabel(l10n.jv2WholeBody),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final region in JournalKeys.wholeBodyAreas)
-              FilterChip(
-                key: Key('jv2_region_$region'),
-                label: Text(JournalLabels.root(l10n, region)),
-                selected: selected.contains(region),
-                onSelected: (_) => _controller.toggleRegion(region),
               ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        _SectionLabel(l10n.jv2AreaConditions),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
+              for (final r in onMap)
+                _MarkedPill(
+                  key: Key('jv2_marked_${r.region}'),
+                  label: r.side == JournalKeys.sideBack && r.region != 'costas'
+                      ? '${JournalLabels.root(l10n, r.region)} · ${l10n.jv2BodyBack}'
+                      : JournalLabels.root(l10n, r.region),
+                  removeLabel: l10n.jv23BodyRemove(JournalLabels.root(l10n, r.region)),
+                  onRemove: () => _controller.toggleRegion(r.region),
+                ),
+            ],
+          ),
+        ],
+        const SizedBox(height: 20),
+        _TopicCard(
+          headerKey: const Key('jv2_topic_whole_body'),
+          emoji: '✨',
+          title: l10n.jv2WholeBody,
+          subtitle: l10n.jv23WholeBodyHint,
+          count: wholeCount,
+          countLabel: l10n.jv23TopicMarked(wholeCount),
+          initiallyOpen: wholeCount > 0,
           children: [
-            for (final c in conditions)
-              FilterChip(
-                key: Key('jv2_condition_${c.id}'),
-                label: Text(c.label),
-                selected: state.selectedConditionIds.contains(c.id),
-                onSelected: (_) => _controller.toggleCondition(c.id),
+            for (final area in JournalKeys.wholeBodyAreas)
+              _OptionCell(
+                key: Key('jv2_region_$area'),
+                emoji: _wholeBodyEmojis[area],
+                label: JournalLabels.root(l10n, area),
+                selected: selected.contains(area),
+                onTap: () => _controller.toggleRegion(area),
               ),
-            ActionChip(
-              key: const Key('jv2_condition_add'),
-              avatar: const Icon(Icons.add_rounded, size: 18),
-              label: Text(l10n.jv2ConditionsAdd),
-              onPressed: _addCondition,
-            ),
           ],
         ),
       ],
@@ -647,9 +821,10 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
   }
 
   Widget _intensityStep(AppLocalizations l10n, JournalFlowState state) {
-    final items = state.items;
+    final items = state.itemsNeedingIntensity;
     final single = items.length == 1;
     return _StepLayout(
+      progress: _progress(state),
       lead: _phrase(l10n, state),
       question: single
           ? (items.first.kind == JournalKeys.kindCondition
@@ -676,19 +851,82 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     );
   }
 
-  Widget _persistenceChips(AppLocalizations l10n, JournalItem item, int index) {
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
-      children: [
-        for (final p in JournalKeys.persistences)
-          ChoiceChip(
-            key: Key('jv2_persistence_${index}_$p'),
-            label: Text('${journalEmojis[p]} ${JournalLabels.persistence(l10n, p)}'),
-            selected: item.persistence == p,
-            onSelected: (_) => _controller.setPersistence(item.draftId, p),
-          ),
-      ],
+  static const Map<String, String> _persistenceShortEmojis = {
+    JournalKeys.persistenceHoje: '⏱️',
+    JournalKeys.persistenceDiasSemanas: '⏳',
+    JournalKeys.persistenceMesesAnos: '🔄',
+  };
+
+  /// "Há quanto tempo?": three cards (one item) or a compact row (several).
+  Widget _persistencePicker(
+    AppLocalizations l10n,
+    JournalItem item,
+    int index, {
+    required bool compact,
+  }) {
+    if (!compact) {
+      return _CardGrid(
+        columns: 3,
+        children: [
+          for (final p in JournalKeys.persistences)
+            _ChoiceCard(
+              key: Key('jv2_persistence_${index}_$p'),
+              emoji: _persistenceShortEmojis[p],
+              label: JournalLabels.persistence(l10n, p),
+              selected: item.persistence == p,
+              onTap: () => _controller.setPersistence(item.draftId, p),
+            ),
+        ],
+      );
+    }
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundLight,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          for (final p in JournalKeys.persistences)
+            Expanded(
+              child: Semantics(
+                button: true,
+                selected: item.persistence == p,
+                child: InkWell(
+                  key: Key('jv2_persistence_${index}_$p'),
+                  borderRadius: BorderRadius.circular(11),
+                  onTap: () => _controller.setPersistence(item.draftId, p),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    constraints: const BoxConstraints(minHeight: 44),
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: item.persistence == p ? Colors.white : Colors.transparent,
+                      borderRadius: BorderRadius.circular(11),
+                      border: Border.all(
+                        color: item.persistence == p
+                            ? AppColors.dualisSymbolBlue
+                            : Colors.transparent,
+                      ),
+                    ),
+                    child: Text(
+                      JournalLabels.persistence(l10n, p),
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: item.persistence == p
+                            ? AppColors.dualisNavy
+                            : AppColors.textSecondaryLight,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -698,12 +936,11 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (!isCondition) _SectionLabel(journalItemTitle(l10n, item)),
-        _SectionLabel(
+        _CapsLabel(
           isCondition ? l10n.jv2PersistenceOptional : l10n.jv2PersistenceQuestion,
         ),
-        _persistenceChips(l10n, item, 0),
-        const SizedBox(height: 16),
-        if (!isCondition) _SectionLabel(l10n.jv2IntensityQuestion, strong: true),
+        _persistencePicker(l10n, item, 0, compact: false),
+        _CapsLabel(l10n.jv23HowMuchLabel),
         IntensityScaleFull(
           keyPrefix: 'jv2_intensity_0',
           value: item.intensity,
@@ -716,60 +953,78 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
 
   Widget _compactItemRow(AppLocalizations l10n, JournalItem item, int index) {
     final isCondition = item.kind == JournalKeys.kindCondition;
-    return Card(
+    return Container(
       key: Key('jv2_item_row_$index'),
-      elevation: 0,
       margin: const EdgeInsets.only(bottom: 10),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: AppColors.outlineLight),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.outlineLight),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              isCondition
-                  ? l10n.jv2ConditionCardQuestion(item.conditionLabel ?? '')
-                  : journalItemTitle(l10n, item),
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            isCondition
+                ? l10n.jv2ConditionCardQuestion(item.conditionLabel ?? '')
+                : journalItemTitle(l10n, item),
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
             ),
-            const SizedBox(height: 8),
-            if (isCondition)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  l10n.jv2PersistenceOptional,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    color: AppColors.textSecondaryLight,
-                  ),
+          ),
+          const SizedBox(height: 8),
+          if (isCondition)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                l10n.jv2PersistenceOptional,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  color: AppColors.textSecondaryLight,
                 ),
               ),
-            _persistenceChips(l10n, item, index),
-            const SizedBox(height: 8),
-            IntensityScaleCompact(
-              keyPrefix: 'jv2_intensity_$index',
-              value: item.intensity,
-              physical: item.kind == JournalKeys.kindPhysical,
-              onChanged: (v) => _controller.setIntensity(item.draftId, v),
             ),
-          ],
-        ),
+          _persistencePicker(l10n, item, index, compact: true),
+          const SizedBox(height: 10),
+          IntensityScaleCompact(
+            keyPrefix: 'jv2_intensity_$index',
+            value: item.intensity,
+            physical: item.kind == JournalKeys.kindPhysical,
+            onChanged: (v) => _controller.setIntensity(item.draftId, v),
+          ),
+        ],
       ),
     );
   }
 
+  String _triggerTopicTitle(AppLocalizations l10n, String topic) => switch (topic) {
+        'dia' => l10n.jv23TriggerTopicDia,
+        'pessoas' => l10n.jv23TriggerTopicPessoas,
+        _ => l10n.jv23TriggerTopicCorpo,
+      };
+
+  static const Map<String, String> _wholeBodyEmojis = {
+    'pele': '🖐️',
+    'musculos': '💪',
+    'hormonios': '🌡️',
+  };
+
+  /// Triggers in three tabs of icon cards (v2.3). "Não sei" and "Outro"
+  /// sit below the tabs.
   Widget _triggersStep(AppLocalizations l10n, JournalFlowState state) {
     final offered = JournalKeys.triggersFor(hasPhysicalItem: state.hasPhysicalItem);
+    final topics = [
+      for (final e in JournalKeys.triggerTopics.entries)
+        (e.key, [for (final t in e.value) if (offered.contains(t)) t]),
+    ].where((t) => t.$2.isNotEmpty).toList();
+    final tab = topics.any((t) => t.$1 == _triggerTab) ? _triggerTab : topics.first.$1;
+    final shown = topics.firstWhere((t) => t.$1 == tab).$2;
     return _StepLayout(
+      progress: _progress(state),
       lead: _phrase(l10n, state),
       question: l10n.jv2TriggersQuestion,
-      hint: l10n.jv2MultiSelectHint,
+      hint: l10n.jv23TriggersHint,
       bottom: _skipOrContinue(
         l10n,
         skipKey: const Key('jv2_skip'),
@@ -780,21 +1035,52 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         onContinue: () => _controller.confirmTriggers(),
       ),
       children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        _TopicTabs(
+          tabs: [
+            for (final (topic, triggers) in topics)
+              (
+                key: Key('jv2_topic_$topic'),
+                label: _triggerTopicTitle(l10n, topic),
+                count: triggers.where(state.triggers.contains).length,
+                countLabel: l10n.jv23TopicMarked(
+                  triggers.where(state.triggers.contains).length,
+                ),
+                selected: topic == tab,
+                onTap: () => setState(() => _triggerTab = topic),
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _CardGrid(
+          columns: 3,
           children: [
-            for (final t in offered)
-              FilterChip(
+            for (final t in shown)
+              _ChoiceCard(
                 key: Key('jv2_trigger_$t'),
-                label: Text('${journalEmojis[t]} ${JournalLabels.trigger(l10n, t)}'),
+                emoji: journalEmojis[t],
+                label: JournalLabels.trigger(l10n, t),
                 selected: state.triggers.contains(t),
-                onSelected: (_) => _controller.toggleTrigger(t),
+                onTap: () => _controller.toggleTrigger(t),
+              ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        _CardGrid(
+          columns: 2,
+          children: [
+            for (final t in [JournalKeys.triggerNaoSei, JournalKeys.triggerOutro])
+              _ChoiceCard(
+                key: Key('jv2_trigger_$t'),
+                emoji: journalEmojis[t],
+                label: JournalLabels.trigger(l10n, t),
+                selected: state.triggers.contains(t),
+                wide: true,
+                onTap: () => _controller.toggleTrigger(t),
               ),
           ],
         ),
         if (state.triggers.contains(JournalKeys.triggerOutro)) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 4),
           TextField(
             key: const Key('jv2_trigger_note'),
             controller: _triggerNoteController,
@@ -831,11 +1117,14 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     );
   }
 
-  /// Optional closing questions; "Pular" stays visible.
+  /// Optional closing questions; "Pular" stays visible. Both questions use
+  /// the same card (v2.3).
   Widget _closingStep(AppLocalizations l10n, JournalFlowState state) {
     return _StepLayout(
+      progress: _progress(state),
       lead: _phrase(l10n, state),
-      question: l10n.jv22CopingQuestion,
+      question: l10n.jv23ClosingTitle,
+      hint: l10n.jv23ClosingHint,
       bottom: _skipOrContinue(
         l10n,
         skipKey: const Key('jv22_closing_skip'),
@@ -843,27 +1132,31 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         onContinue: () => _controller.confirmClosing(),
       ),
       children: [
-        for (final c in JournalKeys.copings)
-          _ChoiceTile(
-            key: Key('jv22_coping_$c'),
-            emoji: journalEmojis[c],
-            label: JournalLabels.coping(l10n, c),
-            selected: state.coping == c,
-            onTap: () => _controller.chooseCoping(c),
-          ),
-        const SizedBox(height: 8),
-        _SectionLabel(l10n.jv22HelpersQuestion, strong: true),
-        _SectionLabel(l10n.jv2MultiSelectHint),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        _CapsLabel(l10n.jv22CopingQuestion),
+        _CardGrid(
+          columns: 3,
+          children: [
+            for (final c in JournalKeys.copings)
+              _ChoiceCard(
+                key: Key('jv22_coping_$c'),
+                emoji: journalEmojis[c],
+                label: JournalLabels.coping(l10n, c),
+                selected: state.coping == c,
+                onTap: () => _controller.chooseCoping(c),
+              ),
+          ],
+        ),
+        _CapsLabel(l10n.jv22HelpersQuestion),
+        _CardGrid(
+          columns: 3,
           children: [
             for (final h in JournalKeys.helpers)
-              FilterChip(
+              _ChoiceCard(
                 key: Key('jv22_helper_$h'),
-                label: Text('${journalEmojis[h]} ${JournalLabels.helper(l10n, h)}'),
+                emoji: journalEmojis[h],
+                label: JournalLabels.helper(l10n, h),
                 selected: state.helpers.contains(h),
-                onSelected: (_) => _controller.toggleHelper(h),
+                onTap: () => _controller.toggleHelper(h),
               ),
           ],
         ),
@@ -873,6 +1166,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
 
   Widget _noteStep(AppLocalizations l10n, JournalFlowState state) {
     return _StepLayout(
+      progress: _progress(state),
       question: l10n.jv2NoteQuestion,
       bottom: _ContinueButton(
         key: const Key('jv2_save'),
@@ -917,7 +1211,11 @@ class _StepLayout extends StatelessWidget {
   final List<Widget> children;
   final Widget? bottom;
 
+  /// Screen number and screen count, shown as a bar with "2 de 7".
+  final (int, int)? progress;
+
   const _StepLayout({
+    this.progress,
     this.eyebrow,
     this.lead,
     this.axisLabel,
@@ -934,9 +1232,43 @@ class _StepLayout extends StatelessWidget {
     final secondary = theme.brightness == Brightness.dark
         ? AppColors.textSecondaryDark
         : AppColors.textSecondaryLight;
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (progress != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+            child: Semantics(
+              label: l10n.jv23StepOf(progress!.$1, progress!.$2),
+              excludeSemantics: true,
+              child: Row(
+                key: const Key('jv23_progress'),
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: progress!.$1 / progress!.$2,
+                        minHeight: 5,
+                        color: AppColors.dualisSymbolBlue,
+                        backgroundColor: AppColors.outlineLight,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    l10n.jv23StepOf(progress!.$1, progress!.$2),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: secondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
@@ -1024,27 +1356,292 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-class _ChoiceTile extends StatelessWidget {
+/// Small grey label over a set of options.
+class _CapsLabel extends StatelessWidget {
+  final String text;
+
+  const _CapsLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, bottom: 8),
+      child: Semantics(
+        header: true,
+        child: Text(
+          text,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textSecondaryLight,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Lays cards out in rows of [columns], each row as tall as its tallest card.
+class _CardGrid extends StatelessWidget {
+  final int columns;
+  final List<Widget> children;
+
+  const _CardGrid({required this.columns, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        for (var i = 0; i < children.length; i += columns)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var j = i; j < i + columns; j++) ...[
+                    if (j > i) const SizedBox(width: 10),
+                    Expanded(
+                      child: j < children.length ? children[j] : const SizedBox.shrink(),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Card with a big icon for short answers (v2.3). Long answers use
+/// [_ChoiceTile] rows instead.
+class _ChoiceCard extends StatelessWidget {
   final String? emoji;
 
   /// Drawn instead of [emoji] when set.
   final Widget? leading;
   final String label;
   final bool selected;
-  final bool multi;
-  final bool large;
   final bool enabled;
+
+  /// Mood cards: taller, bigger text.
+  final bool large;
+
+  /// Icon beside the text, for answers about the question ("Não sei").
+  final bool wide;
+  final bool showCheck;
   final VoidCallback onTap;
 
-  const _ChoiceTile({
+  const _ChoiceCard({
     super.key,
     this.emoji,
     this.leading,
     required this.label,
     this.selected = false,
-    this.multi = false,
-    this.large = false,
     this.enabled = true,
+    this.large = false,
+    this.wide = false,
+    this.showCheck = true,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final icon = leading ??
+        (emoji == null
+            ? null
+            : ExcludeSemantics(
+                child: Text(emoji!, style: TextStyle(fontSize: large ? 52 : (wide ? 22 : 28))),
+              ));
+    final text = Text(
+      label,
+      textAlign: wide ? TextAlign.start : TextAlign.center,
+      style: GoogleFonts.plusJakartaSans(
+        fontSize: large ? 19 : 13.5,
+        fontWeight: FontWeight.w700,
+        height: 1.22,
+        color: enabled ? null : AppColors.textSecondaryLight,
+      ),
+    );
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: Material(
+        color: selected
+            ? AppColors.dualisSymbolBlue.withValues(alpha: 0.12)
+            : (isDark ? AppColors.surfaceDark : AppColors.surfaceLight),
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: enabled ? onTap : null,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            constraints: BoxConstraints(minHeight: large ? 170 : (wide ? 56 : 96)),
+            padding: EdgeInsets.symmetric(horizontal: wide ? 12 : 8, vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: selected
+                    ? AppColors.dualisSymbolBlue
+                    : (isDark ? AppColors.outlineDark : AppColors.outlineLight),
+                width: selected ? 2 : 1,
+              ),
+            ),
+            child: Stack(
+              children: [
+                if (wide)
+                  Row(
+                    children: [
+                      if (icon != null) ...[icon, const SizedBox(width: 10)],
+                      Expanded(child: text),
+                    ],
+                  )
+                else
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (icon != null) ...[icon, SizedBox(height: large ? 12 : 6)],
+                        text,
+                      ],
+                    ),
+                  ),
+                if (selected && showCheck)
+                  const Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Icon(
+                      Icons.check_circle_rounded,
+                      size: 20,
+                      color: AppColors.dualisSymbolBlue,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Tabs over the trigger cards, with how many are marked in each tab.
+class _TopicTabs extends StatelessWidget {
+  final List<
+      ({
+        Key key,
+        String label,
+        int count,
+        String countLabel,
+        bool selected,
+        VoidCallback onTap,
+      })> tabs;
+
+  const _TopicTabs({required this.tabs});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppColors.outlineLight, width: 2)),
+      ),
+      child: Row(
+        children: [
+          for (final t in tabs)
+            Expanded(
+              child: Semantics(
+                button: true,
+                selected: t.selected,
+                label: t.count > 0 ? '${t.label}, ${t.countLabel}' : t.label,
+                excludeSemantics: true,
+                child: InkWell(
+                  key: t.key,
+                  onTap: t.onTap,
+                  child: Container(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: t.selected ? AppColors.dualisSymbolBlue : Colors.transparent,
+                          width: 3,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            t.label,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: t.selected
+                                  ? AppColors.dualisNavy
+                                  : AppColors.textSecondaryLight,
+                            ),
+                          ),
+                        ),
+                        if (t.count > 0) ...[
+                          const SizedBox(width: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: AppColors.dualisSymbolBlue,
+                              borderRadius: BorderRadius.circular(9),
+                            ),
+                            child: Text(
+                              '${t.count}',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Row for answers with longer text (v2.3). Short answers use [_ChoiceCard].
+class _ChoiceTile extends StatelessWidget {
+  final String? emoji;
+  final String label;
+  final bool selected;
+  final bool multi;
+  final bool enabled;
+
+  /// Shorter row, for lists of several options.
+  final bool dense;
+
+  /// Blue text: an action row ("Escrever o meu").
+  final bool accent;
+  final String? semanticsHint;
+  final VoidCallback onTap;
+
+  const _ChoiceTile({
+    super.key,
+    this.emoji,
+    required this.label,
+    this.selected = false,
+    this.multi = false,
+    this.enabled = true,
+    this.dense = false,
+    this.accent = false,
+    this.semanticsHint,
     required this.onTap,
   });
 
@@ -1052,10 +1649,11 @@ class _ChoiceTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.only(bottom: dense ? 8 : 10),
       child: Semantics(
         button: true,
         selected: multi ? selected : null,
+        hint: semanticsHint,
         child: Material(
           color: selected
               ? AppColors.dualisSymbolBlue.withValues(alpha: 0.12)
@@ -1068,7 +1666,7 @@ class _ChoiceTile extends StatelessWidget {
               duration: const Duration(milliseconds: 180),
               padding: EdgeInsets.symmetric(
                 horizontal: 16,
-                vertical: large ? 20 : 14,
+                vertical: dense ? 11 : 14,
               ),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(18),
@@ -1081,11 +1679,8 @@ class _ChoiceTile extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  if (leading != null) ...[
-                    leading!,
-                    const SizedBox(width: 14),
-                  ] else if (emoji != null) ...[
-                    Text(emoji!, style: TextStyle(fontSize: large ? 34 : 26)),
+                  if (emoji != null) ...[
+                    Text(emoji!, style: TextStyle(fontSize: dense ? 22 : 26)),
                     const SizedBox(width: 14),
                   ],
                   Expanded(
@@ -1095,9 +1690,11 @@ class _ChoiceTile extends StatelessWidget {
                         Text(
                           label,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: large ? 18 : 15,
-                            fontWeight: FontWeight.w600,
-                            color: enabled ? null : AppColors.textSecondaryLight,
+                            fontSize: 15,
+                            fontWeight: accent ? FontWeight.w700 : FontWeight.w600,
+                            color: !enabled
+                                ? AppColors.textSecondaryLight
+                                : (accent ? AppColors.dualisSymbolBlue : null),
                           ),
                         ),
                       ],
@@ -1114,6 +1711,414 @@ class _ChoiceTile extends StatelessWidget {
                     ),
                 ],
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A topic that opens to show a few options in two columns (v2.3). The
+/// number shows how many options of the topic are marked.
+class _TopicCard extends StatefulWidget {
+  final Key headerKey;
+  final String emoji;
+  final String title;
+  final String subtitle;
+  final int count;
+  final String countLabel;
+  final bool initiallyOpen;
+  final List<Widget> children;
+
+  const _TopicCard({
+    required this.headerKey,
+    required this.emoji,
+    required this.title,
+    required this.subtitle,
+    required this.count,
+    required this.countLabel,
+    required this.initiallyOpen,
+    required this.children,
+  });
+
+  @override
+  State<_TopicCard> createState() => _TopicCardState();
+}
+
+class _TopicCardState extends State<_TopicCard> {
+  late bool _open = widget.initiallyOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final outline = isDark ? AppColors.outlineDark : AppColors.outlineLight;
+    final rows = <Widget>[];
+    for (var i = 0; i < widget.children.length; i += 2) {
+      rows.add(Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: widget.children[i]),
+              const SizedBox(width: 8),
+              Expanded(
+                child: i + 1 < widget.children.length
+                    ? widget.children[i + 1]
+                    : const SizedBox.shrink(),
+              ),
+            ],
+          ),
+        ),
+      ));
+    }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: _open ? AppColors.dualisSymbolBlue : outline,
+            width: _open ? 1.5 : 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Semantics(
+              button: true,
+              child: InkWell(
+                key: widget.headerKey,
+                borderRadius: BorderRadius.circular(18),
+                onTap: () => setState(() => _open = !_open),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: _open
+                              ? AppColors.dualisSymbolBlue.withValues(alpha: 0.12)
+                              : (isDark ? AppColors.backgroundDark : AppColors.backgroundLight),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: ExcludeSemantics(
+                          child: Text(widget.emoji, style: const TextStyle(fontSize: 22)),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.title,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              widget.subtitle,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 13,
+                                color: isDark
+                                    ? AppColors.textSecondaryDark
+                                    : AppColors.textSecondaryLight,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (widget.count > 0) ...[
+                        const SizedBox(width: 8),
+                        Semantics(
+                          label: widget.countLabel,
+                          child: ExcludeSemantics(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.dualisSymbolBlue,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '${widget.count}',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(width: 4),
+                      AnimatedRotation(
+                        turns: _open ? 0.5 : 0,
+                        duration: const Duration(milliseconds: 180),
+                        child: const Icon(
+                          Icons.expand_more_rounded,
+                          color: AppColors.textSecondaryLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            if (_open)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 2),
+                child: Column(children: rows),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// One condition in the "Minhas condições" list. A tracked one opens its
+/// reading card ([child]) below the row.
+class _ConditionTile extends StatelessWidget {
+  final String label;
+  final String? subtitle;
+  final IconData? icon;
+  final bool selected;
+  final bool expandable;
+  final bool open;
+  final VoidCallback onTap;
+  final Widget? child;
+
+  const _ConditionTile({
+    super.key,
+    required this.label,
+    this.subtitle,
+    this.icon,
+    required this.selected,
+    this.expandable = false,
+    this.open = false,
+    required this.onTap,
+    this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final outline = isDark ? AppColors.outlineDark : AppColors.outlineLight;
+    final highlighted = selected || open;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: highlighted ? AppColors.dualisSymbolBlue : outline,
+            width: highlighted ? 1.5 : 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Semantics(
+              button: true,
+              selected: expandable ? null : selected,
+              expanded: expandable ? open : null,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: onTap,
+                child: Container(
+                  constraints: const BoxConstraints(minHeight: 56),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  child: Row(
+                    children: [
+                      if (icon != null) ...[
+                        Icon(icon, size: 22, color: AppColors.dualisSymbolBlue),
+                        const SizedBox(width: 10),
+                      ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              label,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (subtitle != null)
+                              Text(
+                                subtitle!,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13,
+                                  color: isDark
+                                      ? AppColors.textSecondaryDark
+                                      : AppColors.textSecondaryLight,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      if (expandable)
+                        AnimatedRotation(
+                          turns: open ? 0.5 : 0,
+                          duration: const Duration(milliseconds: 180),
+                          child: const Icon(
+                            Icons.expand_more_rounded,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                        )
+                      else if (icon == null)
+                        Icon(
+                          selected
+                              ? Icons.check_circle_rounded
+                              : Icons.radio_button_unchecked_rounded,
+                          size: 22,
+                          color: selected ? AppColors.dualisSymbolBlue : outline,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            if (expandable && open && child != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 4),
+                child: child,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// One option inside a [_TopicCard].
+class _OptionCell extends StatelessWidget {
+  final String? emoji;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _OptionCell({
+    super.key,
+    this.emoji,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: Material(
+        color: selected
+            ? AppColors.dualisSymbolBlue.withValues(alpha: 0.12)
+            : (isDark ? AppColors.backgroundDark : AppColors.backgroundLight),
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 56),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: selected ? AppColors.dualisSymbolBlue : Colors.transparent,
+                width: 1.5,
+              ),
+            ),
+            child: Row(
+              children: [
+                if (emoji != null) ...[
+                  ExcludeSemantics(child: Text(emoji!, style: const TextStyle(fontSize: 22))),
+                  const SizedBox(width: 8),
+                ],
+                Expanded(
+                  child: Text(
+                    label,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                if (selected)
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    size: 18,
+                    color: AppColors.dualisSymbolBlue,
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A part marked on the map, with a button to take it off.
+class _MarkedPill extends StatelessWidget {
+  final String label;
+  final String removeLabel;
+  final VoidCallback onRemove;
+
+  const _MarkedPill({
+    super.key,
+    required this.label,
+    required this.removeLabel,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: removeLabel,
+      excludeSemantics: true,
+      child: Material(
+        color: AppColors.dualisSymbolBlue.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onRemove,
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 36),
+            padding: const EdgeInsets.fromLTRB(12, 6, 8, 6),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    label,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.dualisNavy,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.close_rounded, size: 18, color: AppColors.dualisNavy),
+              ],
             ),
           ),
         ),

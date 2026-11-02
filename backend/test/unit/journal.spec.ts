@@ -42,9 +42,9 @@ const withItem = (item: Record<string, unknown>, extra: Record<string, unknown> 
   errorsOf({ ...baseEntry, ...extra, items: [item] });
 
 describe('Journal v2 keys', () => {
-  it('match the contract tables: 20 emotional + 3 custom, 41 physical + 8 custom', () => {
+  it('match the contract tables: 20 emotional + 3 custom, 48 physical + 9 custom', () => {
     expect(EMOTIONAL_OPTION_KEYS).toHaveLength(23);
-    expect(PHYSICAL_OPTION_KEYS).toHaveLength(49);
+    expect(PHYSICAL_OPTION_KEYS).toHaveLength(57);
     expect(EMOTIONAL_OPTION_KEYS).toContain('passado.memoria.magoa');
     expect(EMOTIONAL_OPTION_KEYS).toContain('presente.custom');
     expect(PHYSICAL_OPTION_KEYS).toContain('costas.fisgada.ao_mexer');
@@ -262,7 +262,7 @@ describe('buildJournalSummary', () => {
     expect(summary.daysWithEntries).toBe(2);
     expect(summary.byTime).toEqual({ passado: 0, presente: 0, futuro: 2 });
     expect(summary.byRegion).toEqual({
-      cabeca: 1, peito: 0, barriga: 0, costas: 0, membros: 0, pele: 0, musculos: 0, hormonios: 0,
+      cabeca: 1, peito: 0, barriga: 0, pelve: 0, costas: 0, membros: 0, pele: 0, musculos: 0, hormonios: 0,
     });
     expect(summary.byOptionKey).toEqual({
       'cabeca.pressao.temporas': 1,
@@ -412,7 +412,7 @@ describe('Journal v2.2 wellness choices', () => {
       expect(PHYSICAL_ONLY_TRIGGER_KEYS).not.toContain(trigger);
       expect(errorsOf({ ...baseEntry, triggers: [trigger] })).toEqual([]);
     }
-    for (const optionKey of ['cabeca.rosto.tontura', 'cabeca.rosto.nariz', 'cabeca.rosto.ouvido', 'cabeca.rosto.mandibula', 'barriga.colica.menstrual', 'barriga.intestino.preso', 'barriga.intestino.solto']) {
+    for (const optionKey of ['cabeca.rosto.tontura', 'cabeca.rosto.nariz', 'cabeca.rosto.ouvido', 'cabeca.rosto.mandibula', 'barriga.colica.menstrual', 'barriga.intestino.preso', 'barriga.intestino.solto', 'pelve.urina.ardencia', 'pelve.urina.vontade', 'pelve.baixo_ventre.colica', 'pelve.baixo_ventre.peso', 'pelve.baixo_ventre.menstrual', 'pelve.intima.coceira', 'pelve.intima.inchaco']) {
       const item = { kind: 'physical', optionKey, bodySide: 'front', sensation: 'incomodo', persistence: 'hoje', intensity: 2 };
       expect(withItem(item, { area: 'physical' })).toEqual([]);
       expect(withItem({ ...item, bodySide: 'back' }, { area: 'physical' })).toContain('journalEntryShape');

@@ -1,19 +1,19 @@
 ---
 gsd_state_version: "1.0"
 milestone: v2.0
-current_phase: 11
-current_phase_name: multi-profile-legal-guardianship-consensual-sharing
-status: planning
-stopped_at: Phase 11 planned; Wave 3 live Flutter e2e is the sign-off gate
-last_updated: "2026-11-01T20:29:46.638Z"
+current_phase: 16
+current_phase_name: premium-chronic-condition-tracking-self-reported-measurement
+status: completed
+stopped_at: Phase 16 executed and verified (Live Flutter E2E signed off, points 1-3 addressed)
+last_updated: "2026-11-01T23:45:00.000Z"
 last_activity: 2026-11-01
-last_activity_desc: Added Plan 11-03 live Flutter e2e (integration_test + Dart driver) as Phase 11 sign-off
-state_head: f260fa46ce8b72f6a277f0357c5b413954c26e5d
+last_activity_desc: Completed Phase 16 chronic condition tracking & self-reported measurements
+state_head: 92536577658359928f4181866a0370ca85c752ba
 progress:
   total_phases: 15
-  completed_phases: 10
-  total_plans: 31
-  completed_plans: 20
+  completed_phases: 11
+  total_plans: 35
+  completed_plans: 24
 milestone_name: v2.0-premium-advanced
 ---
 
@@ -82,6 +82,10 @@ Recent decisions affecting current work:
 - [Init]: PostgreSQL environment strategy: Supabase free tier for development sandbox; Google Cloud SQL (São Paulo southamerica-east1) for production. Drizzle ORM provides standard connection string compatibility (DATABASE_URL) across both.
 - [Phase 11]: Widget tests do not close a v2 UI phase. Sign-off is a live Flutter session: `integration_test` plus a Dart driver pass (`dtd`, `widget_inspector`, `flutter_driver_command`, `get_runtime_errors`) on a simulator with the premium flag on.
 
+### Roadmap Evolution
+
+- Phase 16 added: Premium chronic-condition tracking and self-reported measurements (readings live inside the physical check-in, tied to conditions the person marks as needing records; Premium only).
+
 ### Pending Todos
 
 None yet.
@@ -145,6 +149,7 @@ None yet.
 | 261101-h2t | Simplify backend history recurrence checks and decryption fallback; 379 unit tests and typecheck pass | 2026-11-01 | 7801164 | [261101-h2t-simplify-backend-history-recurrence-chec](./quick/261101-h2t-simplify-backend-history-recurrence-chec/) |
 | 261101-nsb | Prescription with no medicines read can be read again as an exam (reprocess takes an optional kind; 'Ler como exame' button); production file fingerprint backfill run (2 filled) | 2026-11-01 | 570dce1 | [261101-nsb-read-a-prescription-upload-as-an-exam-wh](./quick/261101-nsb-read-a-prescription-upload-as-an-exam-wh/) |
 | 261101-o6w | Exam reading guards: Resultado rows take the exam name, values need a letter or digit, single capitals kept (Vitamina D); old confirmed readings identified as the source of the zero and Resultado rows | 2026-11-01 | f260fa4 | [261101-o6w-exam-reading-guards-resultado-takes-the-](./quick/261101-o6w-exam-reading-guards-resultado-takes-the-/) |
+| 261101-pms | Check-in: factores en temas (opción B), mapa del cuerpo protagonista, región pelve separada (pt/en/es) | 2026-11-01 | 9253657 | [261101-pms-check-in-opcion-b-factores-mapa-del-cuer](./quick/261101-pms-check-in-opcion-b-factores-mapa-del-cuer/) |
 
 ## Deferred Items
 

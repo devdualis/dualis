@@ -45,7 +45,7 @@ class MockAuthService {
     return {
       metadata: {
         exportDate: new Date().toISOString(),
-        formatVersion: '1.4',
+        formatVersion: '1.5',
         legalBasis: 'LGPD Art. 18, V (Portabilidade de Dados)',
         dataController: 'WGI (Brothers Baum Ltda.)',
         legacyFieldsNote: 'Os campos em "legacy" vêm de uma versão anterior do app e não são mais gravados.',
@@ -86,6 +86,7 @@ class MockAuthService {
       dailyHabits: [],
       journalEntries: [],
       userConditions: [],
+      conditionReadings: [],
       careRecords: [
         {
           id: 'care-e2e-1',
@@ -116,6 +117,7 @@ class MockAuthService {
           dailyHabits: [],
           journalEntries: [],
           userConditions: [],
+          conditionReadings: [],
           careRecords: [],
           careDocuments: [],
         },

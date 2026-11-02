@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/config/feature_flags.dart';
 import '../../data/journal_repository.dart';
 import '../../domain/journal_keys.dart';
 import '../../domain/journal_models.dart';
@@ -60,8 +61,14 @@ class JournalFlowController extends Notifier<JournalFlowState> {
   /// Records the general mood for the axis picked on Home ([area]). Returns
   /// true when the entry is ready to save right away (Bem on the physical
   /// axis). Bem on the emotional axis offers "Só registrar" or good moments;
-  /// "Não tão bem" goes straight to the first question of that axis.
-  bool chooseMood(String mood, {JournalArea area = JournalArea.emotional}) {
+  /// on the physical axis, with tracked [conditions] on a Premium build, it
+  /// opens the readings screen. "Não tão bem" goes straight to the first
+  /// question of that axis.
+  bool chooseMood(
+    String mood, {
+    JournalArea area = JournalArea.emotional,
+    List<UserCondition>? conditions,
+  }) {
     if (mood == JournalKeys.moodNaoTaoBem) {
       _go(state.copyWith(
         mood: mood,
@@ -81,19 +88,30 @@ class JournalFlowController extends Notifier<JournalFlowState> {
       ));
       return false;
     }
+    final list = conditions ?? state.conditions;
+    if (_premium && list.any((c) => c.isTracked)) {
+      _go(state.copyWith(
+        mood: mood,
+        area: area,
+        conditions: list,
+        step: JournalStep.conditions,
+        items: const [],
+      ));
+      return false;
+    }
     state = state.copyWith(mood: mood, area: area);
     return true;
   }
 
+  /// Tracked conditions take readings only on Premium builds; on Free builds
+  /// every condition uses the 1-5 card.
+  bool get _premium => ref.read(premiumProfilesEnabledProvider);
+
+  /// The condition takes readings (and no 1-5 answer) in this build.
+  bool tracksReadings(UserCondition condition) => _premium && condition.isTracked;
+
   // ---- Good moments (Bem, v2.2) ------------------------------------------
 
-  void choosePositiveTime(String time) {
-    _go(state.copyWith(
-      time: time,
-      clearBranch: true,
-      step: JournalStep.positiveBranch,
-    ));
-  }
 
   /// Puts the good moments picked on screen in the entry. Returns true when
   /// there is something to save.
@@ -121,9 +139,26 @@ class JournalFlowController extends Notifier<JournalFlowState> {
     state = state.copyWith(selectedConditionIds: next);
   }
 
+  /// Readings typed on a tracked condition's card (complete ones only).
+  void setConditionReadings(String conditionId, List<ConditionReading> readings) {
+    state = state.copyWith(conditionReadings: {
+      ...state.conditionReadings,
+      conditionId: List.unmodifiable(readings),
+    });
+  }
+
+  /// Picked untracked conditions, and tracked ones with at least one reading.
   List<JournalItem> _conditionItems(List<UserCondition>? conditions) => [
     for (final c in conditions ?? state.conditions)
-      if (state.selectedConditionIds.contains(c.id))
+      if (tracksReadings(c)) ...[
+        if ((state.conditionReadings[c.id] ?? const []).isNotEmpty)
+          JournalItem(
+            kind: JournalKeys.kindCondition,
+            conditionId: c.id,
+            conditionLabel: c.label,
+            readings: state.conditionReadings[c.id]!,
+          ),
+      ] else if (state.selectedConditionIds.contains(c.id))
         JournalItem(
           kind: JournalKeys.kindCondition,
           conditionId: c.id,
@@ -131,25 +166,49 @@ class JournalFlowController extends Notifier<JournalFlowState> {
         ),
   ];
 
-  /// After the last question of the axis: intensity of everything recorded.
+  /// "Só registrar medições" (Bem with tracked conditions): the entry gets
+  /// the conditions with readings. Returns true when there is one to save.
+  bool confirmReadingsOnly({List<UserCondition>? conditions}) {
+    final items = _conditionItems(conditions)
+        .where((i) => i.readings.isNotEmpty)
+        .toList();
+    if (items.isEmpty) return false;
+    state = state.copyWith(items: _capped(items));
+    return true;
+  }
+
+  /// "Salvar sem medições": the Bem entry as it was before readings.
+  void clearReadingsForSave() {
+    state = state.copyWith(items: const [], conditionReadings: const {});
+  }
+
+  /// After the last question of the axis: intensity of everything recorded
+  /// that takes a 1-5 answer.
   JournalFlowState _finish(JournalFlowState s) => s.copyWith(
-    step: s.items.isEmpty ? JournalStep.triggers : JournalStep.intensity,
+    step: s.itemsNeedingIntensity.isEmpty ? JournalStep.triggers : JournalStep.intensity,
   );
 
   // ---- Emotional --------------------------------------------------------
 
-  void chooseTime(String time) {
-    _go(state.copyWith(time: time, clearBranch: true, step: JournalStep.branch));
+  /// Time and branch are picked on one screen (v2.3): the branch tells the
+  /// time. From "Bem" it opens the good moments, otherwise the options.
+  void chooseTimeBranch(String time, String branch) {
+    _go(state.copyWith(
+      time: time,
+      branch: branch,
+      step: state.step == JournalStep.positiveStart
+          ? JournalStep.positiveOptions
+          : JournalStep.options,
+      selectedOptions: const {},
+      customLabels: const [],
+    ));
   }
 
+  /// Branch of the body region on screen.
   void chooseBranch(String branch) {
     _go(state.copyWith(
       branch: branch,
-      step: switch (state.step) {
-        JournalStep.regionBranch => JournalStep.regionOptions,
-        JournalStep.positiveBranch => JournalStep.positiveOptions,
-        _ => JournalStep.options,
-      },
+      step: JournalStep.regionOptions,
       selectedOptions: const {},
       customLabels: const [],
     ));
@@ -176,7 +235,9 @@ class JournalFlowController extends Notifier<JournalFlowState> {
     );
   }
 
-  void confirmEmotionalOptions() {
+  /// Puts the options on screen in the entry. [more] ("+ Registrar outra
+  /// coisa") goes back to the feelings; otherwise on to the intensity.
+  void confirmEmotionalOptions({bool more = false}) {
     if (!state.hasOptionSelection || state.time == null) return;
     final time = state.time!;
     final added = [
@@ -189,19 +250,15 @@ class JournalFlowController extends Notifier<JournalFlowState> {
           customLabel: label,
         ),
     ];
-    _go(state.copyWith(
+    final next = state.copyWith(
       items: _merge(state.items, added),
-      step: JournalStep.moreEmotional,
       selectedOptions: const {},
       customLabels: const [],
-    ));
-  }
-
-  void answerMoreEmotional(bool more) {
-    if (more && !state.itemLimitReached) {
-      _go(state.copyWith(step: JournalStep.time, clearBranch: true));
+    );
+    if (more && !next.itemLimitReached) {
+      _go(next.copyWith(step: JournalStep.time, clearBranch: true));
     } else {
-      _go(_finish(state));
+      _go(_finish(next));
     }
   }
 
@@ -229,7 +286,12 @@ class JournalFlowController extends Notifier<JournalFlowState> {
   /// Regions and conditions chosen on the body screen.
   void confirmBody({List<UserCondition>? conditions}) {
     if (!state.hasBodySelection) return;
-    final items = _merge(state.items, _conditionItems(conditions));
+    // Condition items are rebuilt from the screen, so changed readings and
+    // unpicked conditions are up to date after "mais alguma coisa".
+    final items = _merge(
+      [for (final i in state.items) if (i.kind != JournalKeys.kindCondition) i],
+      _conditionItems(conditions),
+    );
     if (state.selectedRegions.isEmpty) {
       _go(_finish(state.copyWith(items: items)));
       return;
@@ -248,7 +310,10 @@ class JournalFlowController extends Notifier<JournalFlowState> {
     state = state.copyWith(sensation: sensation);
   }
 
-  void confirmPhysicalOptions() {
+  /// Puts the options of the region on screen in the entry, then the next
+  /// marked region. After the last one, [more] ("+ Marcar outra parte")
+  /// goes back to the body map; otherwise on to the intensity.
+  void confirmPhysicalOptions({bool more = false}) {
     final region = state.currentRegion;
     final sensation = state.sensation;
     if (!state.hasOptionSelection || region == null || sensation == null) return;
@@ -280,20 +345,14 @@ class JournalFlowController extends Notifier<JournalFlowState> {
     );
     if (nextIndex < state.selectedRegions.length && !cleared.itemLimitReached) {
       _go(cleared.copyWith(step: JournalStep.regionBranch, regionIndex: nextIndex));
-    } else {
-      _go(cleared.copyWith(step: JournalStep.moreBody));
-    }
-  }
-
-  void answerMoreBody(bool more) {
-    if (more && !state.itemLimitReached) {
-      _go(state.copyWith(
+    } else if (more && !cleared.itemLimitReached) {
+      _go(cleared.copyWith(
         step: JournalStep.body,
         selectedRegions: const [],
         regionIndex: 0,
       ));
     } else {
-      _go(_finish(state));
+      _go(_finish(cleared));
     }
   }
 
@@ -326,9 +385,20 @@ class JournalFlowController extends Notifier<JournalFlowState> {
 
   // ---- Triggers and note ------------------------------------------------
 
+  /// "Não sei" cannot be combined with a trigger: choosing one clears the other.
   void toggleTrigger(String trigger) {
     final next = {...state.triggers};
-    next.contains(trigger) ? next.remove(trigger) : next.add(trigger);
+    if (next.contains(trigger)) {
+      next.remove(trigger);
+    } else if (trigger == JournalKeys.triggerNaoSei) {
+      next
+        ..clear()
+        ..add(trigger);
+    } else {
+      next
+        ..remove(JournalKeys.triggerNaoSei)
+        ..add(trigger);
+    }
     state = state.copyWith(triggers: next);
   }
 
@@ -396,6 +466,13 @@ class JournalFlowController extends Notifier<JournalFlowState> {
     final positive = quick && state.area == JournalArea.emotional
         ? [for (final i in state.items) if (i.kind == JournalKeys.kindPositive) i]
         : const <JournalItem>[];
+    // Physical Bem keeps only conditions with readings ("Só registrar medições").
+    final withReadings = quick && state.area == JournalArea.physical
+        ? [
+            for (final i in state.items)
+              if (i.kind == JournalKeys.kindCondition && i.readings.isNotEmpty) i,
+          ]
+        : const <JournalItem>[];
     return JournalEntry(
       clientId: _clientId,
       recordedAt: now ?? DateTime.now(),
@@ -407,7 +484,7 @@ class JournalFlowController extends Notifier<JournalFlowState> {
           : null,
       note: quick || note.isEmpty ? null : note,
       transitionVariantIds: state.shownPhraseIds,
-      items: quick ? positive : state.items,
+      items: quick ? [...positive, ...withReadings] : state.items,
       coping: quick ? null : state.coping,
       helpers: quick
           ? const []
@@ -464,7 +541,7 @@ class JournalFlowController extends Notifier<JournalFlowState> {
     switch (s.step) {
       case JournalStep.time:
         return 'time';
-      case JournalStep.branch:
+      case JournalStep.options:
         return s.time;
       case JournalStep.body:
         return 'body';
@@ -474,7 +551,7 @@ class JournalFlowController extends Notifier<JournalFlowState> {
         return 'intensity';
       case JournalStep.triggers:
         return 'triggers';
-      case JournalStep.positiveBranch:
+      case JournalStep.positiveOptions:
         return 'positive';
       case JournalStep.closing:
         return 'closing';

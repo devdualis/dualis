@@ -7,11 +7,14 @@ import {
 } from '@nestjs/common';
 import { and, asc, desc, eq, gte, inArray, isNull, sql } from 'drizzle-orm';
 import { DatabaseService, DrizzleTransaction } from '../../database/database.service';
-import { journalEntries, journalItems, symptomLogs, userConditions } from '../../database/schema';
+import { conditionReadings, journalEntries, journalItems, symptomLogs, userConditions } from '../../database/schema';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import { Lang, Localized, resolveLang } from '../../common/i18n/lang';
-import { JOURNAL_LIMITS } from './constants/journal-keys.constant';
+import { GlucoseMoment, JOURNAL_LIMITS, READING_INPUT_LIMITS, TrackingKind } from './constants/journal-keys.constant';
 import {
+  ConditionReadingDto,
+  ConditionReadingInputDto,
+  ConditionReadingsQueryDto,
   CreateJournalEntryDto,
   journalEntryShapeError,
   journalItemShapeError,
@@ -22,6 +25,7 @@ import {
   JournalSummaryDto,
   LegacyJournalEntryDto,
   LegacyJournalItemDto,
+  UpdateConditionDto,
   UserConditionDto,
   UserConditionsResponseDto,
 } from './dto/journal.dto';
@@ -30,6 +34,19 @@ import { buildJournalSummary } from './journal-summary';
 type EntryRow = typeof journalEntries.$inferSelect;
 type ItemRow = typeof journalItems.$inferSelect;
 type LegacyRow = typeof symptomLogs.$inferSelect;
+type ReadingRow = typeof conditionReadings.$inferSelect;
+
+/** Only the value fields of a reading, in a fixed order. Kind and time stay in their columns. */
+function readingValues(r: ConditionReadingInputDto): Record<string, unknown> {
+  switch (r.kind) {
+    case 'blood_pressure':
+      return { systolic: r.systolic, diastolic: r.diastolic, pulse: r.pulse ?? null };
+    case 'glucose':
+      return { mgdl: r.mgdl, moment: r.moment };
+    case 'weight':
+      return { kg: r.kg };
+  }
+}
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -134,7 +151,25 @@ export class JournalService {
             .returning()
         : [];
 
-      return this.toEntryDto(entry, items, conditionLabels);
+      // Readings ride on their condition item, in the same transaction as the entry, so a
+      // replayed clientId never stores them twice. Values are encrypted; only this module and
+      // the LGPD export read them.
+      const readingRows = dto.items.flatMap((item) =>
+        item.kind === 'condition' && item.readings?.length
+          ? item.readings.map((r) => ({
+              userId,
+              profileId,
+              entryId: entry.id,
+              conditionId: item.conditionId!,
+              kind: r.kind,
+              measuredAt: new Date(r.measuredAt),
+              data: this.encryptionService.encrypt(JSON.stringify(readingValues(r))),
+            }))
+          : [],
+      );
+      const readings = readingRows.length ? await tx.insert(conditionReadings).values(readingRows).returning() : [];
+
+      return this.toEntryDto(entry, items, conditionLabels, readings);
     });
   }
 
@@ -149,7 +184,7 @@ export class JournalService {
     const lang = resolveLang(acceptLanguage);
 
     return this.databaseService.withRls(userId, async (tx) => {
-      const { entries, itemsByEntry, conditionLabels } = await this.loadEntries(tx, profileId, cutoff);
+      const { entries, itemsByEntry, conditionLabels, readings } = await this.loadEntries(tx, profileId, cutoff);
       const legacyRows = await tx
         .select()
         .from(symptomLogs)
@@ -157,7 +192,7 @@ export class JournalService {
         .orderBy(desc(symptomLogs.recordedAt));
 
       const merged: Array<JournalEntryDto | LegacyJournalEntryDto> = [
-        ...entries.map((e) => this.toEntryDto(e, itemsByEntry.get(e.id) ?? [], conditionLabels)),
+        ...entries.map((e) => this.toEntryDto(e, itemsByEntry.get(e.id) ?? [], conditionLabels, readings)),
         ...legacyRows.map((row) => this.toLegacyDto(row, lang)),
       ];
       merged.sort((a, b) => b.recordedAt.localeCompare(a.recordedAt));
@@ -229,7 +264,12 @@ export class JournalService {
     });
   }
 
-  async createCondition(userId: string, profileId: string, label: string): Promise<UserConditionDto> {
+  async createCondition(
+    userId: string,
+    profileId: string,
+    label: string,
+    tracking: TrackingKind[] = [],
+  ): Promise<UserConditionDto> {
     this.assertIds(userId, profileId);
     const clean = label.trim();
     if (!clean) throw new BadRequestException('label não pode ser vazio.');
@@ -247,7 +287,7 @@ export class JournalService {
 
       const [row] = await tx
         .insert(userConditions)
-        .values({ userId, profileId, label: this.encryptionService.encrypt(clean) })
+        .values({ userId, profileId, label: this.encryptionService.encrypt(clean), tracking: [...new Set(tracking)] })
         .returning();
       return this.toConditionDto(row);
     });
@@ -265,6 +305,72 @@ export class JournalService {
         )
         .returning({ id: userConditions.id });
       if (!updated.length) throw new NotFoundException('Condição não encontrada.');
+    });
+  }
+
+  /**
+   * Changes the label and/or which readings the person notes. Past readings stay as they
+   * are. Archived conditions and other profiles' conditions answer 404.
+   */
+  async updateCondition(
+    userId: string,
+    profileId: string,
+    id: string,
+    dto: UpdateConditionDto,
+  ): Promise<UserConditionDto> {
+    this.assertIds(userId, profileId);
+    const changes: Partial<typeof userConditions.$inferInsert> = {};
+    if (dto.label !== undefined) {
+      const clean = dto.label.trim();
+      if (!clean) throw new BadRequestException('label não pode ser vazio.');
+      changes.label = this.encryptionService.encrypt(clean);
+    }
+    if (dto.tracking !== undefined) changes.tracking = [...new Set(dto.tracking)];
+
+    return this.databaseService.withRls(userId, async (tx) => {
+      const where = and(eq(userConditions.id, id), eq(userConditions.profileId, profileId), isNull(userConditions.archivedAt));
+      const [row] = Object.keys(changes).length
+        ? await tx.update(userConditions).set(changes).where(where).returning()
+        : await tx.select().from(userConditions).where(where).limit(1);
+      if (!row) throw new NotFoundException('Condição não encontrada.');
+      return this.toConditionDto(row);
+    });
+  }
+
+  /**
+   * Readings of one condition of the active profile, newest first, as typed. Archived
+   * conditions keep their readings. Another profile's condition returns 404.
+   */
+  async listConditionReadings(
+    userId: string,
+    profileId: string,
+    conditionId: string,
+    query: ConditionReadingsQueryDto,
+  ): Promise<ConditionReadingDto[]> {
+    this.assertIds(userId, profileId);
+    const days = Math.min(Math.max(query.days ?? READING_INPUT_LIMITS.defaultHistoryDays, 1), JOURNAL_LIMITS.maxDays);
+    const cutoff = new Date(Date.now() - days * DAY_MS);
+
+    return this.databaseService.withRls(userId, async (tx) => {
+      const [condition] = await tx
+        .select({ id: userConditions.id })
+        .from(userConditions)
+        .where(and(eq(userConditions.id, conditionId), eq(userConditions.profileId, profileId)))
+        .limit(1);
+      if (!condition) throw new NotFoundException('Condição não encontrada.');
+
+      const rows = await tx
+        .select()
+        .from(conditionReadings)
+        .where(
+          and(
+            eq(conditionReadings.profileId, profileId),
+            eq(conditionReadings.conditionId, conditionId),
+            gte(conditionReadings.measuredAt, cutoff),
+          ),
+        )
+        .orderBy(desc(conditionReadings.measuredAt), desc(conditionReadings.createdAt));
+      return rows.map((row) => this.toReadingDto(row)).filter((r): r is ConditionReadingDto => r !== null);
     });
   }
 
@@ -286,8 +392,9 @@ export class JournalService {
   /** Idempotent replay of an outbox record already stored on this profile. */
   private async replay(tx: DrizzleTransaction, entry: EntryRow, profileId: string): Promise<JournalEntryDto> {
     const items = await tx.select().from(journalItems).where(eq(journalItems.entryId, entry.id));
+    const readings = await tx.select().from(conditionReadings).where(eq(conditionReadings.entryId, entry.id));
     const conditionIds = items.map((i) => i.conditionId).filter((id): id is string => !!id);
-    return this.toEntryDto(entry, items, await this.conditionLabels(tx, profileId, conditionIds));
+    return this.toEntryDto(entry, items, await this.conditionLabels(tx, profileId, conditionIds), readings);
   }
 
   private async loadEntries(tx: DrizzleTransaction, profileId: string, cutoff: Date) {
@@ -308,7 +415,10 @@ export class JournalService {
     }
     const conditionIds = items.map((i) => i.conditionId).filter((id): id is string => !!id);
     const conditionLabels = await this.conditionLabels(tx, profileId, conditionIds);
-    return { entries, itemsByEntry, conditionLabels };
+    const readings = conditionIds.length
+      ? await tx.select().from(conditionReadings).where(inArray(conditionReadings.entryId, entries.map((e) => e.id)))
+      : [];
+    return { entries, itemsByEntry, conditionLabels, readings };
   }
 
   /** Decrypted labels of the profile's conditions with these ids (archived ones included). */
@@ -326,7 +436,21 @@ export class JournalService {
     return new Map(rows.map((r) => [r.id, this.decryptOptional(r.label) ?? '']));
   }
 
-  private toEntryDto(entry: EntryRow, items: ItemRow[], conditionLabels: Map<string, string>): JournalEntryDto {
+  private toEntryDto(
+    entry: EntryRow,
+    items: ItemRow[],
+    conditionLabels: Map<string, string>,
+    readings: ReadingRow[] = [],
+  ): JournalEntryDto {
+    // A reading belongs to the entry and to the condition of one of its items.
+    const readingsOf = (conditionId: string | null): ConditionReadingDto[] =>
+      conditionId
+        ? readings
+            .filter((r) => r.entryId === entry.id && r.conditionId === conditionId)
+            .sort((a, b) => a.measuredAt.getTime() - b.measuredAt.getTime())
+            .map((r) => this.toReadingDto(r))
+            .filter((r): r is ConditionReadingDto => r !== null)
+        : [];
     return {
       id: entry.id,
       legacy: false,
@@ -352,6 +476,7 @@ export class JournalService {
           sensation: item.sensation ?? null,
           persistence: item.persistence,
           intensity: item.intensity,
+          readings: item.kind === 'condition' ? readingsOf(item.conditionId) : [],
         }),
       ),
       createdAt: entry.createdAt.toISOString(),
@@ -411,7 +536,35 @@ export class JournalService {
   }
 
   private toConditionDto(row: typeof userConditions.$inferSelect): UserConditionDto {
-    return { id: row.id, label: this.decryptOptional(row.label) ?? '', createdAt: row.createdAt.toISOString() };
+    return {
+      id: row.id,
+      label: this.decryptOptional(row.label) ?? '',
+      tracking: (row.tracking ?? []) as TrackingKind[],
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  /** Decrypted reading; null when its values cannot be read (never ciphertext). */
+  private toReadingDto(row: ReadingRow): ConditionReadingDto | null {
+    const text = this.decryptOptional(row.data);
+    if (!text) return null;
+    let values: Record<string, unknown>;
+    try {
+      values = JSON.parse(text);
+    } catch {
+      return null;
+    }
+    const base = { id: row.id, entryId: row.entryId, conditionId: row.conditionId, measuredAt: row.measuredAt.toISOString() };
+    switch (row.kind) {
+      case 'blood_pressure':
+        return { ...base, kind: 'blood_pressure', systolic: values.systolic as number, diastolic: values.diastolic as number, pulse: (values.pulse as number | null) ?? null };
+      case 'glucose':
+        return { ...base, kind: 'glucose', mgdl: values.mgdl as number, moment: values.moment as GlucoseMoment };
+      case 'weight':
+        return { ...base, kind: 'weight', kg: values.kg as number };
+      default:
+        return null;
+    }
   }
 
   private encryptOptional(value?: string | null): string | null {

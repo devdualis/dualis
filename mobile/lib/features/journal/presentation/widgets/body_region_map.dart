@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/journal_keys.dart';
 
-/// Tappable body silhouette with the 5 journal regions, front and back.
+/// Tappable body silhouette with the journal regions, front and back.
+///
+/// Each region is its own labelled button (`jv2_region_<region>`), so the map
+/// works with a screen reader and needs no chips underneath.
 ///
 /// Reuses the silhouette proportions of the dashboard map
 /// (`anatomical_body_map.dart`) so both read as the same body, without
@@ -14,17 +17,21 @@ class BodyRegionMap extends StatelessWidget {
   final Set<String> selected;
   final ValueChanged<String> onToggle;
 
+  /// Text read out for each region.
+  final String Function(String region) labelOf;
+
   const BodyRegionMap({
     super.key,
     required this.side,
     required this.selected,
     required this.onToggle,
+    required this.labelOf,
   });
 
   /// Regions that can be tapped on each side.
   static List<String> regionsFor(String side) => side == JournalKeys.sideBack
       ? const ['cabeca', 'costas', 'membros']
-      : const ['cabeca', 'peito', 'barriga', 'membros'];
+      : const ['cabeca', 'peito', 'barriga', 'pelve', 'membros'];
 
   /// Relative rectangles of each region (x, y, width, height in 0..1).
   static List<Rect> shapesOf(String region, String side) {
@@ -36,11 +43,11 @@ class BodyRegionMap extends StatelessWidget {
         ];
       case 'peito':
         return const [Rect.fromLTWH(0.35, 0.18, 0.30, 0.14)];
+      // Upper belly only; the lower part is the pelvis.
       case 'barriga':
-        return const [
-          Rect.fromLTWH(0.36, 0.33, 0.28, 0.13),
-          Rect.fromLTWH(0.38, 0.47, 0.24, 0.10),
-        ];
+        return const [Rect.fromLTWH(0.36, 0.33, 0.28, 0.13)];
+      case 'pelve':
+        return const [Rect.fromLTWH(0.38, 0.47, 0.24, 0.10)];
       case 'costas':
         return const [Rect.fromLTWH(0.35, 0.18, 0.30, 0.39)];
       case 'membros':
@@ -54,16 +61,6 @@ class BodyRegionMap extends StatelessWidget {
     return const [];
   }
 
-  static String? regionAt(Offset position, Size size, String side) {
-    final rel = Offset(position.dx / size.width, position.dy / size.height);
-    for (final region in regionsFor(side)) {
-      for (final r in shapesOf(region, side)) {
-        if (r.inflate(0.01).contains(rel)) return region;
-      }
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
@@ -71,20 +68,64 @@ class BodyRegionMap extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final size = Size(constraints.maxWidth, constraints.maxHeight);
-          return GestureDetector(
+          return Stack(
             key: Key('jv2_body_map_$side'),
-            behavior: HitTestBehavior.opaque,
-            onTapUp: (details) {
-              final region = regionAt(details.localPosition, size, side);
-              if (region != null) onToggle(region);
-            },
-            child: CustomPaint(
-              size: size,
-              painter: _BodyRegionPainter(side: side, selected: selected),
-            ),
+            children: [
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _BodyRegionPainter(side: side, selected: selected),
+                ),
+              ),
+              for (final region in regionsFor(side))
+                for (final (i, r) in shapesOf(region, side).indexed)
+                  Positioned(
+                    left: r.left * size.width,
+                    top: r.top * size.height,
+                    width: r.width * size.width,
+                    height: r.height * size.height,
+                    child: _RegionTarget(
+                      key: i == 0 ? Key('jv2_region_$region') : null,
+                      label: labelOf(region),
+                      selected: selected.contains(region),
+                      // Arms and legs are one region: read it out once.
+                      excludeSemantics: i > 0,
+                      onTap: () => onToggle(region),
+                    ),
+                  ),
+            ],
           );
         },
       ),
+    );
+  }
+}
+
+class _RegionTarget extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final bool excludeSemantics;
+  final VoidCallback onTap;
+
+  const _RegionTarget({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.excludeSemantics,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final target = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+    );
+    if (excludeSemantics) return ExcludeSemantics(child: target);
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: target,
     );
   }
 }
@@ -100,7 +141,7 @@ class _BodyRegionPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final allRegions = ['cabeca', 'peito', 'barriga', 'costas', 'membros'];
+    final allRegions = ['cabeca', 'peito', 'barriga', 'pelve', 'costas', 'membros'];
     final visible = BodyRegionMap.regionsFor(side);
     for (final region in allRegions) {
       if (!visible.contains(region)) continue;
