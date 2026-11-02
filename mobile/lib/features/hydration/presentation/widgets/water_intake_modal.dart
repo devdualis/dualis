@@ -35,6 +35,14 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
   final List<int> _quickPresets = const [150, 200, 250, 300, 500];
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(hydrationControllerProvider.notifier).loadData();
+    });
+  }
+
+  @override
   void dispose() {
     _customController.dispose();
     super.dispose();
@@ -184,7 +192,9 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                       ),
                     ),
                     Text(
-                      '$total ml ($percent%)',
+                      state.isLoading
+                          ? 'Carregando...'
+                          : '$total ml ($percent%)',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -198,16 +208,24 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                 const SizedBox(height: 8),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(
-                    value: state.progressRatio.clamp(0.0, 1.0),
-                    minHeight: 8,
-                    backgroundColor: Colors.grey.shade200,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      state.isGoalReached
-                          ? AppColors.clinicalTealDark
-                          : AppColors.clinicalTeal,
-                    ),
-                  ),
+                  child: state.isLoading
+                      ? LinearProgressIndicator(
+                          minHeight: 8,
+                          backgroundColor: Colors.grey.shade200,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.clinicalTeal,
+                          ),
+                        )
+                      : LinearProgressIndicator(
+                          value: state.progressRatio.clamp(0.0, 1.0),
+                          minHeight: 8,
+                          backgroundColor: Colors.grey.shade200,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            state.isGoalReached
+                                ? AppColors.clinicalTealDark
+                                : AppColors.clinicalTeal,
+                          ),
+                        ),
                 ),
                 if (state.isGoalReached) ...[
                   const SizedBox(height: 6),

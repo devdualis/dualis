@@ -132,23 +132,15 @@ export class HydrationService {
     userId: string,
     profileId: string,
     dateStr?: string,
+    tzOffsetMinutes = 0,
   ): Promise<HydrationTodayResponseDto> {
     this.assertIds(userId, profileId);
 
-    let targetDate = new Date();
-    if (dateStr) {
-      const parsed = new Date(dateStr);
-      if (!isNaN(parsed.getTime())) {
-        targetDate = parsed;
-      }
-    }
-
-    // Define day window
-    const startOfDay = new Date(targetDate);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(targetDate);
-    endOfDay.setHours(23, 59, 59, 999);
+    const targetDay = referenceLocalDay(dateStr, tzOffsetMinutes);
+    const [y, m, d] = targetDay.split('-').map(Number);
+    const offsetMs = tzOffsetMinutes * 60_000;
+    const start = new Date(Date.UTC(y, m - 1, d) - offsetMs);
+    const end = new Date(Date.UTC(y, m - 1, d + 1) - offsetMs);
 
     return this.databaseService.withRls(userId, async (tx) => {
       const records = await tx
@@ -157,8 +149,8 @@ export class HydrationService {
         .where(
           and(
             eq(waterIntakeLogs.profileId, profileId),
-            gte(waterIntakeLogs.recordedAt, startOfDay),
-            lte(waterIntakeLogs.recordedAt, endOfDay),
+            gte(waterIntakeLogs.recordedAt, start),
+            lt(waterIntakeLogs.recordedAt, end),
           ),
         )
         .orderBy(waterIntakeLogs.recordedAt);

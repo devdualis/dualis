@@ -100,7 +100,21 @@ class AuthController extends Notifier<AuthState> {
     return e.toString();
   }
 
-  Future<void> restoreSession() async {
+  Future<void>? _ongoingRestore;
+
+  Future<void> restoreSession() {
+    return _ongoingRestore ??= _performRestoreSession().whenComplete(() {
+      _ongoingRestore = null;
+    });
+  }
+
+  Future<void> waitForSessionRestoration() async {
+    if (_ongoingRestore != null) {
+      await _ongoingRestore;
+    }
+  }
+
+  Future<void> _performRestoreSession() async {
     try {
       final token = await _secureStorage.getAccessToken();
       final cachedProfile = await _secureStorage.getUserProfile();

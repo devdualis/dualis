@@ -5,6 +5,14 @@ export class HydrationTodayQueryDto {
   @IsOptional()
   @IsDateString()
   date?: string;
+
+  /** Minutes east of UTC on the device (e.g. -180 for Brasília), used to match the local day. */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(-720)
+  @Max(840)
+  tzOffset?: number;
 }
 
 export class HydrationHistoryQueryDto {

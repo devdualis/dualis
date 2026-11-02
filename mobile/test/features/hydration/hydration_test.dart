@@ -289,6 +289,42 @@ void main() {
       // Success SnackBar is shown
       expect(find.text('💧 +500 ml registrados com sucesso!'), findsOneWidget);
     });
+
+    testWidgets('displays loading state when state.isLoading is true', (tester) async {
+      const testState = HydrationState(
+        isLoading: true,
+        todayTotalMl: 0,
+        settings: HydrationSettings(dailyTargetMl: 2000),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            hydrationControllerProvider.overrideWith(
+              () => FakeHydrationController(testState),
+            ),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) {
+                  return ElevatedButton(
+                    onPressed: () => WaterIntakeModal.show(context),
+                    child: const Text('Open Modal'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Modal'));
+      await tester.pump();
+
+      expect(find.text('Carregando...'), findsOneWidget);
+      expect(find.text('0 ml (0%)'), findsNothing);
+    });
   });
 
   group('HomeHydrationCard Widget', () {

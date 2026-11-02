@@ -81,10 +81,10 @@ class HydrationRemoteDataSource {
       final token = await _secureStorage.getAccessToken();
       if (token == null || token.isEmpty) return null;
 
-      final queryParams = <String, dynamic>{};
-      if (date != null) {
-        queryParams['date'] = date.toIso8601String();
-      }
+      final queryParams = <String, dynamic>{
+        'tzOffset': localTzOffsetMinutes(),
+        if (date != null) 'date': date.toIso8601String(),
+      };
 
       final headers = <String, dynamic>{
         'Authorization': 'Bearer $token',

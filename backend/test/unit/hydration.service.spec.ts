@@ -167,6 +167,39 @@ describe('HydrationService Unit Tests', () => {
     expect(result.logs[1].amountMl).toBe(500);
   });
 
+  it('2b. retrieves today logs with tzOffset: 22:00 in Brasília counts in today', async () => {
+    const mockLogs = [
+      {
+        id: 'log-1',
+        userId: 'usr-1',
+        profileId: 'prof-usr-1',
+        amountMl: 300,
+        source: 'manual',
+        recordedAt: new Date('2026-10-28T01:00:00Z'), // 27th, 22:00 BRT
+        createdAt: new Date('2026-10-28T01:00:00Z'),
+      },
+    ];
+
+    mockDatabaseService.withRls.mockImplementation(async (userId: string, callback: any) => {
+      const tx = {
+        select: vi.fn().mockReturnValue({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              orderBy: vi.fn().mockResolvedValue(mockLogs),
+            }),
+          }),
+        }),
+      };
+      return callback(tx);
+    });
+
+    const result = await service.getTodayLogs('usr-1', 'prof-usr-1', '2026-10-27T23:00:00.000', -180);
+
+    expect(result.todayTotalMl).toBe(300);
+    expect(result.logs).toHaveLength(1);
+    expect(result.logs[0].amountMl).toBe(300);
+  });
+
   it('3. returns 7-day history totals with all days populated', async () => {
     const refDate = new Date('2026-09-27T12:00:00Z');
     const mockLogs = [
@@ -291,6 +324,8 @@ describe('HydrationService Unit Tests', () => {
       }),
     );
 
-    await expect(service.getSettings('usr-1')).resolves.toEqual({ settings: null });
+    const result = await service.getSettings('usr-1');
+
+    expect(result.settings).toBeNull();
   });
 });

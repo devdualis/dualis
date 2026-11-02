@@ -97,7 +97,12 @@ export class HydrationController {
     @Query() query: HydrationTodayQueryDto,
   ): Promise<HydrationTodayResponseDto> {
     const userId = req.user?.id || req.user?.userId || req.user?.sub;
-    return this.hydrationService.getTodayLogs(userId, profile.profileId, query.date);
+    return this.hydrationService.getTodayLogs(
+      userId,
+      profile.profileId,
+      query.date,
+      query.tzOffset ?? 0,
+    );
   }
 
   @Get('history')

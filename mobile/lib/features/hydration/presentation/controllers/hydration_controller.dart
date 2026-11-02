@@ -126,6 +126,7 @@ class HydrationController extends Notifier<HydrationState> {
   bool get _isSignedIn => ref.read(authControllerProvider).isAuthenticated;
 
   Future<void> loadData() async {
+    await ref.read(authControllerProvider.notifier).waitForSessionRestoration();
     if (_isSignedIn &&
         _profileUnknown(ref.read(activeProfileControllerProvider))) {
       return; // build() runs again when the profile is known.
@@ -194,6 +195,7 @@ class HydrationController extends Notifier<HydrationState> {
     DateTime? timestamp,
   }) async {
     if (amountMl <= 0) return false;
+    await ref.read(authControllerProvider.notifier).waitForSessionRestoration();
 
     try {
       // A load in flight read today's logs before this one: reload instead
