@@ -13,7 +13,6 @@ import '../../domain/home_greeting.dart';
 import '../../domain/trigger_checkin_state.dart';
 import '../controllers/trigger_checkin_controller.dart';
 import '../widgets/dual_axis_trigger_card.dart';
-import '../../../sync/presentation/widgets/offline_indicator_banner.dart';
 import '../../../sync/presentation/controllers/sync_outbox_worker.dart';
 import '../../../settings/presentation/widgets/avatar_selector_sheet.dart';
 import '../widgets/dualis_bottom_nav_bar.dart';
@@ -270,7 +269,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            const OfflineIndicatorBanner(),
             Expanded(
               child: _buildCurrentTab(
                 context,

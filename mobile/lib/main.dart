@@ -11,6 +11,7 @@ import 'features/auth/presentation/controllers/auth_controller.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/locale_provider.dart';
 import 'shared/widgets/urgent_help_button.dart';
+import 'features/sync/presentation/widgets/offline_indicator_banner.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,9 +66,12 @@ class _DualisAppState extends ConsumerState<DualisApp> {
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) {
         // The urgent-help bar stays reachable even when an update is required.
-        return UrgentHelpOverlay(
-          router: router,
-          child: AppVersionGate(child: child ?? const SizedBox.shrink()),
+        // The offline banner sits above it, on every screen.
+        return OfflineBannerFrame(
+          child: UrgentHelpOverlay(
+            router: router,
+            child: AppVersionGate(child: child ?? const SizedBox.shrink()),
+          ),
         );
       },
     );

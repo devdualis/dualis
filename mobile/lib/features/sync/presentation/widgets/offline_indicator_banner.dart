@@ -43,22 +43,55 @@ Stream<int> _sumLatest(Stream<int> a, Stream<int> b) {
   return controller.stream;
 }
 
-class OfflineIndicatorBanner extends ConsumerWidget {
-  const OfflineIndicatorBanner({super.key});
+/// True while the banner has something to say: offline, items waiting to
+/// sync, or items the server rejected.
+bool offlineBannerVisible(WidgetRef ref) {
+  final isOnline = ref.watch(isOnlineProvider).value ?? true;
+  final pendingCount = ref.watch(pendingOutboxCountProvider).value ?? 0;
+  final rejectedCount = ref.watch(rejectedOutboxCountProvider).value ?? 0;
+  return !isOnline || pendingCount > 0 || rejectedCount > 0;
+}
+
+/// Puts the banner above every screen of the app. While it shows, it takes
+/// the status-bar area and the screens below lose their top inset, so app
+/// bars and the urgent-help button sit right under it.
+class OfflineBannerFrame extends ConsumerWidget {
+  const OfflineBannerFrame({super.key, required this.child});
+
+  final Widget child;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isOnlineAsync = ref.watch(isOnlineProvider);
-    final pendingCountAsync = ref.watch(pendingOutboxCountProvider);
-    final rejectedCountAsync = ref.watch(rejectedOutboxCountProvider);
+    if (!offlineBannerVisible(ref)) return child;
+    final topInset = MediaQuery.paddingOf(context).top;
+    return Column(
+      children: [
+        OfflineIndicatorBanner(topInset: topInset),
+        Expanded(
+          child: MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: child,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
-    final isOnline = isOnlineAsync.value ?? true;
-    final pendingCount = pendingCountAsync.value ?? 0;
-    final rejectedCount = rejectedCountAsync.value ?? 0;
+class OfflineIndicatorBanner extends ConsumerWidget {
+  const OfflineIndicatorBanner({super.key, this.topInset = 0});
 
-    if (isOnline && pendingCount == 0 && rejectedCount == 0) {
-      return const SizedBox.shrink();
-    }
+  /// Extra space on top so the banner color fills the status-bar area.
+  final double topInset;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!offlineBannerVisible(ref)) return const SizedBox.shrink();
+
+    final isOnline = ref.watch(isOnlineProvider).value ?? true;
+    final pendingCount = ref.watch(pendingOutboxCountProvider).value ?? 0;
+    final rejectedCount = ref.watch(rejectedOutboxCountProvider).value ?? 0;
 
     final l10n = AppLocalizations.of(context);
     final isOffline = !isOnline;
@@ -91,7 +124,7 @@ class OfflineIndicatorBanner extends ConsumerWidget {
           child: Container(
         key: const Key('offline_indicator_banner'),
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+        padding: EdgeInsets.fromLTRB(16, 9 + topInset, 16, 9),
         child: Row(
           children: [
             Icon(
