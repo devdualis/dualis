@@ -236,6 +236,8 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           moreLabel: lastRegion ? l10n.jv23MoreBody : null,
           onMore: () => _controller.confirmPhysicalOptions(more: true),
         );
+      case JournalStep.persistence:
+        return _persistenceStep(l10n, state);
       case JournalStep.intensity:
         return _intensityStep(l10n, state);
       case JournalStep.triggers:
@@ -255,12 +257,13 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         JournalStep.body || JournalStep.conditions => 2,
         JournalStep.regionBranch => 3,
         JournalStep.regionOptions => 4,
-        JournalStep.intensity => 5,
-        JournalStep.triggers => 6,
-        JournalStep.closing => 7,
-        _ => 8,
+        JournalStep.persistence => 5,
+        JournalStep.intensity => 6,
+        JournalStep.triggers => 7,
+        JournalStep.closing => 8,
+        _ => 9,
       };
-      return (index, 8);
+      return (index, 9);
     }
     if (state.mood == JournalKeys.moodBem) {
       final index = switch (state.step) {
@@ -275,12 +278,13 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       JournalStep.time => 2,
       JournalStep.branch => 3,
       JournalStep.options => 4,
-      JournalStep.intensity => 5,
-      JournalStep.triggers => 6,
-      JournalStep.closing => 7,
-      _ => 8,
+      JournalStep.persistence => 5,
+      JournalStep.intensity => 6,
+      JournalStep.triggers => 7,
+      JournalStep.closing => 8,
+      _ => 9,
     };
-    return (index, 8);
+    return (index, 9);
   }
 
   // ---- Steps ------------------------------------------------------------
@@ -918,13 +922,68 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     );
   }
 
+  /// "Há quanto tempo?" on its own screen (client spec). One item: three big
+  /// cards, a tap answers and moves on. Several: one row per item.
+  Widget _persistenceStep(AppLocalizations l10n, JournalFlowState state) {
+    final items = state.itemsNeedingPersistence;
+    final single = items.length == 1;
+    final voiceRow = items.indexWhere((i) => i.persistence == null);
+    return _StepLayout(
+      progress: _progress(state),
+      lead: _phrase(l10n, state),
+      question: single ? l10n.jv2PersistenceQuestion : l10n.jv24PersistenceCompactQuestion,
+      hint: single ? l10n.jv23TapOneHint : null,
+      bottom: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const JournalEmergencyLine(),
+          if (!single)
+            _ContinueButton(
+              label: l10n.jv2Continue,
+              onPressed: state.allPersistenceReady ? _controller.confirmPersistence : null,
+            ),
+        ],
+      ),
+      children: [
+        if (single) ...[
+          _SectionLabel(journalItemTitle(l10n, items.first)),
+          _CardGrid(
+            columns: 3,
+            children: [
+              for (final p in JournalKeys.persistences)
+                _ChoiceCard(
+                  key: Key('jv2_persistence_0_$p'),
+                  emoji: _persistenceShortEmojis[p],
+                  label: JournalLabels.persistence(l10n, p),
+                  selected: items.first.persistence == p,
+                  onTap: () => _controller.choosePersistence(items.first.draftId, p),
+                ),
+            ],
+          ),
+        ] else
+          for (var index = 0; index < items.length; index++)
+            _itemRow(
+              l10n,
+              items[index],
+              index,
+              child: _persistencePicker(
+                l10n,
+                items[index],
+                index,
+                compact: true,
+                voice: index == voiceRow,
+              ),
+            ),
+      ],
+    );
+  }
+
   Widget _intensityStep(AppLocalizations l10n, JournalFlowState state) {
     final items = state.itemsNeedingIntensity;
     final single = items.length == 1;
     // Row answered by voice: the first one with an answer missing.
-    final voiceRow = items.indexWhere((i) =>
-        i.intensity == null ||
-        (i.persistence == null && i.kind != JournalKeys.kindCondition));
+    final voiceRow = items.indexWhere((i) => i.intensity == null);
     return _StepLayout(
       progress: _progress(state),
       lead: _phrase(l10n, state),
@@ -1045,11 +1104,12 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (!isCondition) _SectionLabel(journalItemTitle(l10n, item)),
-        _CapsLabel(
-          isCondition ? l10n.jv2PersistenceOptional : l10n.jv2PersistenceQuestion,
-        ),
-        _persistencePicker(l10n, item, 0, compact: false),
-        _CapsLabel(l10n.jv23HowMuchLabel),
+        // Conditions keep their optional persistence here (Premium).
+        if (isCondition) ...[
+          _CapsLabel(l10n.jv2PersistenceOptional),
+          _persistencePicker(l10n, item, 0, compact: false),
+          _CapsLabel(l10n.jv23HowMuchLabel),
+        ],
         IntensityScaleFull(
           keyPrefix: 'jv2_intensity_0',
           value: item.intensity,
@@ -1067,6 +1127,48 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     JournalItem item,
     int index, {
     bool voice = false,
+  }) {
+    final isCondition = item.kind == JournalKeys.kindCondition;
+    return _itemRow(
+      l10n,
+      item,
+      index,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Conditions keep their optional persistence here (Premium).
+          if (isCondition) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                l10n.jv2PersistenceOptional,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  color: AppColors.textSecondaryLight,
+                ),
+              ),
+            ),
+            _persistencePicker(l10n, item, index, compact: true, voice: voice),
+            const SizedBox(height: 10),
+          ],
+          IntensityScaleCompact(
+            keyPrefix: 'jv2_intensity_$index',
+            value: item.intensity,
+            physical: item.kind == JournalKeys.kindPhysical,
+            voice: voice,
+            onChanged: (v) => _controller.setIntensity(item.draftId, v),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// One item of the persistence or intensity screen: its title, then [child].
+  Widget _itemRow(
+    AppLocalizations l10n,
+    JournalItem item,
+    int index, {
+    required Widget child,
   }) {
     final isCondition = item.kind == JournalKeys.kindCondition;
     return Container(
@@ -1090,26 +1192,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          if (isCondition)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                l10n.jv2PersistenceOptional,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  color: AppColors.textSecondaryLight,
-                ),
-              ),
-            ),
-          _persistencePicker(l10n, item, index, compact: true, voice: voice),
-          const SizedBox(height: 10),
-          IntensityScaleCompact(
-            keyPrefix: 'jv2_intensity_$index',
-            value: item.intensity,
-            physical: item.kind == JournalKeys.kindPhysical,
-            voice: voice,
-            onChanged: (v) => _controller.setIntensity(item.draftId, v),
-          ),
+          child,
         ],
       ),
     );
@@ -1444,7 +1527,7 @@ class _StepLayout extends StatelessWidget {
                 ),
               if (lead != null) ...[
                 const SizedBox(height: 4),
-                Text(
+                _TypingText(
                   lead!,
                   key: const Key('jv2_phrase'),
                   style: GoogleFonts.plusJakartaSans(fontSize: 15, color: secondary),
@@ -1491,6 +1574,78 @@ class _StepLayout extends StatelessWidget {
             child: bottom,
           ),
       ],
+    );
+  }
+}
+
+/// Transition phrase typed in softly (client spec 2.7). The rest of the text
+/// is laid out but transparent, so nothing below moves while it types. Shown
+/// whole at once when the system asks for no animations.
+class _TypingText extends StatefulWidget {
+  final String text;
+  final TextStyle style;
+
+  const _TypingText(this.text, {super.key, required this.style});
+
+  @override
+  State<_TypingText> createState() => _TypingTextState();
+}
+
+class _TypingTextState extends State<_TypingText> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(vsync: this);
+
+  static Duration _durationFor(String text) =>
+      Duration(milliseconds: (text.characters.length * 22).clamp(300, 1400));
+
+  @override
+  void initState() {
+    super.initState();
+    _controller
+      ..duration = _durationFor(widget.text)
+      ..forward();
+  }
+
+  @override
+  void didUpdateWidget(_TypingText old) {
+    super.didUpdateWidget(old);
+    if (old.text != widget.text) {
+      _controller
+        ..duration = _durationFor(widget.text)
+        ..forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.of(context).disableAnimations) {
+      return Text(widget.text, style: widget.style);
+    }
+    final chars = widget.text.characters;
+    return Semantics(
+      label: widget.text,
+      excludeSemantics: true,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          final shown = (chars.length * _controller.value).ceil();
+          return Text.rich(
+            TextSpan(children: [
+              TextSpan(text: chars.take(shown).toString()),
+              TextSpan(
+                text: chars.skip(shown).toString(),
+                style: const TextStyle(color: Colors.transparent),
+              ),
+            ]),
+            style: widget.style,
+          );
+        },
+      ),
     );
   }
 }

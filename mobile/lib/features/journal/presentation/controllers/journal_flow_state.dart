@@ -24,6 +24,9 @@ enum JournalStep {
   conditions,
   regionBranch,
   regionOptions,
+
+  /// "Há quanto tempo?" (client spec: its own screen, before intensity).
+  persistence,
   intensity,
   triggers,
 
@@ -145,6 +148,16 @@ class JournalFlowState {
             (i.intensity != null &&
                 (i.kind == JournalKeys.kindCondition || i.persistence != null)),
       );
+
+  /// Items asked on the persistence screen. Conditions keep their optional
+  /// persistence on the intensity card.
+  List<JournalItem> get itemsNeedingPersistence => [
+        for (final i in itemsNeedingIntensity)
+          if (i.kind != JournalKeys.kindCondition) i,
+      ];
+
+  bool get allPersistenceReady =>
+      itemsNeedingPersistence.every((i) => i.persistence != null);
 
   /// Body screen: a region, a condition or a reading is enough to continue.
   bool get hasBodySelection =>

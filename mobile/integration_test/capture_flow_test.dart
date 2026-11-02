@@ -171,8 +171,9 @@ void main() {
     // 05. Intensity screen: 2 items
     await _capture('05_male_intensidade_dois_itens');
     await _tapKey(tester, 'jv2_persistence_0_hoje');
-    await _tapKey(tester, 'jv2_intensity_0_3');
     await _tapKey(tester, 'jv2_persistence_1_hoje');
+    await _tapKey(tester, 'jv2_continue');
+    await _tapKey(tester, 'jv2_intensity_0_3');
     await _tapKey(tester, 'jv2_intensity_1_4');
     await _capture('05b_male_intensidade_preenchida');
     await _tapKey(tester, 'jv2_continue');

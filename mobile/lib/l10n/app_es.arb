@@ -1590,5 +1590,6 @@
   "jv2PhraseThanks1": "Gracias por compartir esto conmigo hoy. Vamos a anotar cuánto pesa en tu día.",
   "jv24BranchQuestionPassado": "¿Qué sensación te trae mirar atrás?",
   "jv24BranchQuestionPresente": "¿Cómo están reaccionando tu cuerpo y tu mente al ahora?",
-  "jv24BranchQuestionFuturo": "¿Qué sientes cuando piensas en el mañana?"
+  "jv24BranchQuestionFuturo": "¿Qué sientes cuando piensas en el mañana?",
+  "jv24PersistenceCompactQuestion": "Para cada ítem, ¿desde hace cuánto lo notas?"
 }

@@ -5548,4 +5548,8 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get jv24BranchQuestionFuturo =>
       '¿Qué sientes cuando piensas en el mañana?';
+
+  @override
+  String get jv24PersistenceCompactQuestion =>
+      'Para cada ítem, ¿desde hace cuánto lo notas?';
 }

@@ -1590,5 +1590,6 @@
   "jv2PhraseThanks1": "Thank you for sharing this with me today. Let us note how much it weighs on your day.",
   "jv24BranchQuestionPassado": "What feeling does looking back bring you?",
   "jv24BranchQuestionPresente": "How are your body and mind reacting to right now?",
-  "jv24BranchQuestionFuturo": "What do you feel when you picture tomorrow?"
+  "jv24BranchQuestionFuturo": "What do you feel when you picture tomorrow?",
+  "jv24PersistenceCompactQuestion": "For each item, how long have you noticed it?"
 }

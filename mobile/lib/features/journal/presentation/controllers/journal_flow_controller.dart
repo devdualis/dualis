@@ -186,10 +186,14 @@ class JournalFlowController extends Notifier<JournalFlowState> {
     state = state.copyWith(items: const [], conditionReadings: const {});
   }
 
-  /// After the last question of the axis: intensity of everything recorded
-  /// that takes a 1-5 answer.
+  /// After the last question of the axis: persistence, then intensity of
+  /// everything recorded that takes a 1-5 answer.
   JournalFlowState _finish(JournalFlowState s) => s.copyWith(
-    step: s.itemsNeedingIntensity.isEmpty ? JournalStep.triggers : JournalStep.intensity,
+    step: s.itemsNeedingIntensity.isEmpty
+        ? JournalStep.triggers
+        : (s.itemsNeedingPersistence.isEmpty
+            ? JournalStep.intensity
+            : JournalStep.persistence),
   );
 
   // ---- Emotional --------------------------------------------------------
@@ -383,6 +387,21 @@ class JournalFlowController extends Notifier<JournalFlowState> {
         else
           i,
     ]);
+  }
+
+  /// One item on the persistence screen: the tap answers and moves on.
+  /// Tapping the chosen card again keeps it.
+  void choosePersistence(String draftId, String persistence) {
+    state = state.copyWith(items: [
+      for (final i in state.items)
+        if (i.draftId == draftId) i.copyWith(persistence: persistence) else i,
+    ]);
+    confirmPersistence();
+  }
+
+  void confirmPersistence() {
+    if (!state.allPersistenceReady) return;
+    _go(state.copyWith(step: JournalStep.intensity));
   }
 
   void setIntensity(String draftId, int intensity) {
@@ -582,7 +601,7 @@ class JournalFlowController extends Notifier<JournalFlowState> {
       case JournalStep.regionBranch:
         final own = 'region.${s.currentRegion?.region}';
         return JournalLabels.phrasePools.containsKey(own) ? own : 'region';
-      case JournalStep.intensity:
+      case JournalStep.persistence:
         return 'thanks';
       case JournalStep.triggers:
         return 'triggers';

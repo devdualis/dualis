@@ -58,10 +58,14 @@ void main() {
   bool isMarked(WidgetTester tester, String region) =>
       find.byKey(Key('jv2_marked_$region')).evaluate().isNotEmpty;
 
-  /// Persistence "hoje" + intensity [level] for every row on the screen.
+  /// Persistence "hoje" for every row (its own screen; one item moves on by
+  /// itself), then intensity [level] for every row.
   Future<void> fillIntensity(WidgetTester tester, int count, int level) async {
     for (var i = 0; i < count; i++) {
       await tapKey(tester, 'jv2_persistence_${i}_hoje');
+    }
+    if (count > 1) await tapKey(tester, 'jv2_continue');
+    for (var i = 0; i < count; i++) {
       await tapKey(tester, 'jv2_intensity_${i}_$level');
     }
   }
@@ -169,12 +173,14 @@ void main() {
     expect(find.byKey(const Key('jv2_custom_chip_Cansaço do trânsito')), findsOneWidget);
     await tapKey(tester, 'jv2_continue');
 
-    // Compact screen: one row per item.
-    expect(find.text(pt.jv2IntensityCompactQuestion), findsOneWidget);
+    // Persistence on its own screen, one row per item; then intensity.
+    expect(find.text(pt.jv24PersistenceCompactQuestion), findsOneWidget);
     expect(find.byKey(const Key('jv2_item_row_2')), findsOneWidget);
+    expect(find.byKey(const Key('jv2_intensity_0_3')), findsNothing);
     final cont = find.byKey(const Key('jv2_continue'));
     expect(tester.widget<FilledButton>(cont).onPressed, isNull);
     await fillIntensity(tester, 3, 3);
+    expect(find.text(pt.jv2IntensityCompactQuestion), findsOneWidget);
     expect(tester.widget<FilledButton>(cont).onPressed, isNotNull);
     await tapKey(tester, 'jv2_continue');
 
@@ -258,7 +264,43 @@ void main() {
     expect(find.text(JournalLabels.phrase(pt, id)), findsOneWidget);
     await tapKey(tester, 'jv2_option_passado.tristeza.culpa');
     await tapKey(tester, 'jv2_continue');
+
+    // Persistence alone, after the thank-you line; one tap moves on.
     expect(find.text(pt.jv2PhraseThanks1), findsOneWidget);
+    expect(find.text(pt.jv2PersistenceQuestion), findsOneWidget);
+    expect(find.byKey(const Key('jv2_intensity_0_3')), findsNothing);
+    expect(find.byKey(const Key('jv2_emergency_line')), findsOneWidget);
+    await tapKey(tester, 'jv2_persistence_0_dias_semanas');
+
+    // Then intensity alone.
+    expect(find.text(pt.jv2IntensityQuestion), findsOneWidget);
+    expect(find.byKey(const Key('jv2_persistence_0_hoje')), findsNothing);
+    expect(find.byKey(const Key('jv2_emergency_line')), findsOneWidget);
+    await tapKey(tester, 'jv2_back');
+    expect(isCardSelected(tester, 'jv2_persistence_0_dias_semanas'), isTrue);
+  });
+
+  testWidgets('transition phrase types in, then shows whole', (tester) async {
+    final h = JournalHarness();
+    await pumpJournalFlow(tester, h);
+    await startNotSoGood(tester);
+    await tester.tap(find.byKey(const Key('jv2_time_futuro')));
+    await tester.pump();
+    // Past the screen fade (280 ms), still typing.
+    await tester.pump(const Duration(milliseconds: 350));
+    String typed() {
+      final text = tester.widget<Text>(find.descendant(
+        of: find.byKey(const Key('jv2_phrase')),
+        matching: find.byType(Text),
+      ));
+      return (text.textSpan! as TextSpan).children!.first.toPlainText();
+    }
+
+    final id = containerOf(tester).read(journalFlowControllerProvider).phraseId!;
+    final full = JournalLabels.phrase(pt, id);
+    expect(typed().length, lessThan(full.length));
+    await tester.pumpAndSettle();
+    expect(typed(), full);
   });
 
   test('a screen never shows the same phrase twice in a row', () {

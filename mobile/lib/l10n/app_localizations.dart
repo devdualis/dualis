@@ -9417,6 +9417,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'O que você sente quando projeta o amanhã?'**
   String get jv24BranchQuestionFuturo;
+
+  /// No description provided for @jv24PersistenceCompactQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para cada item, há quanto tempo você percebe isso?'**
+  String get jv24PersistenceCompactQuestion;
 }
 
 class _AppLocalizationsDelegate

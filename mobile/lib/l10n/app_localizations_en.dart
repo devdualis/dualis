@@ -5528,4 +5528,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get jv24BranchQuestionFuturo =>
       'What do you feel when you picture tomorrow?';
+
+  @override
+  String get jv24PersistenceCompactQuestion =>
+      'For each item, how long have you noticed it?';
 }
