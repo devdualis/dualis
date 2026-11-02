@@ -10,6 +10,7 @@ import '../../domain/care_models.dart';
 import '../../domain/pni_calendar.dart';
 import '../care_providers.dart';
 import '../widgets/care_widgets.dart';
+import '../../../../core/notifications/notifications_blocked_notice.dart';
 
 /// Vaccination booklet: the official calendar as published (counts only) and
 /// the doses the person registered.
@@ -363,6 +364,7 @@ class _DoseFormState extends ConsumerState<_DoseForm> {
           }),
         ),
         if (_remind) ...[
+          const NotificationsBlockedNotice(),
           CareDateField(label: l10n.careVaccineBoosterDate, value: _booster, onChanged: (d) => setState(() => _booster = d), firstDate: DateTime.now()),
           const SizedBox(height: 6),
           Text(interval != null ? l10n.careVaccineBoosterHint(interval) : l10n.careVaccineBoosterHintNone, style: careBody(12)),

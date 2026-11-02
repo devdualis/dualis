@@ -220,7 +220,10 @@ void main() {
             ),
           ],
           child: MaterialApp(
-            home: Scaffold(
+            locale: const Locale('pt'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home:  Scaffold(
               body: Builder(
                 builder: (context) {
                   return ElevatedButton(
@@ -262,7 +265,10 @@ void main() {
             ),
           ],
           child: MaterialApp(
-            home: Scaffold(
+            locale: const Locale('pt'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home:  Scaffold(
               body: Builder(
                 builder: (context) {
                   return ElevatedButton(
@@ -306,7 +312,10 @@ void main() {
             ),
           ],
           child: MaterialApp(
-            home: Scaffold(
+            locale: const Locale('pt'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home:  Scaffold(
               body: Builder(
                 builder: (context) {
                   return ElevatedButton(
@@ -342,8 +351,11 @@ void main() {
               () => FakeHydrationController(testState),
             ),
           ],
-          child: const MaterialApp(
-            home: Scaffold(
+          child: MaterialApp(
+            locale: const Locale('pt'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const  Scaffold(
               body: HomeHydrationCard(),
             ),
           ),
@@ -550,6 +562,43 @@ void main() {
       expect(find.byKey(const Key('confirm_water_intake_button')), findsOneWidget);
       expect(find.text('💧 +500 ml registrados com sucesso!'), findsNothing);
     });
+
+    testWidgets('reminder switch that fails to save says so and keeps its value', (tester) async {
+      await tester.pumpWidget(dashboard(_FailingHydrationController(
+        const HydrationState(settings: HydrationSettings(dailyTargetMl: 2000)),
+      )));
+      await tester.pumpAndSettle();
+
+      final toggle = find.byKey(const Key('settings_water_reminder_switch'));
+      await tester.ensureVisible(toggle);
+      await tester.tap(toggle);
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('save_failed_snack')), findsOneWidget);
+      // Reminders start on; turning them off failed, so they stay on.
+      expect(tester.widget<SwitchListTile>(toggle).value, isTrue);
+    });
+
+    testWidgets('home card speaks the app language', (tester) async {
+      await tester.pumpWidget(ProviderScope(
+        overrides: [
+          hydrationControllerProvider.overrideWith(() => _FailingHydrationController(
+                const HydrationState(todayTotalMl: 500, settings: HydrationSettings(dailyTargetMl: 2000)),
+              )),
+        ],
+        child: const MaterialApp(
+          locale: Locale('en'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(body: HomeHydrationCard()),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Hydration'), findsOneWidget);
+      expect(find.text('500 of 2000 ml today (25%)'), findsOneWidget);
+      expect(find.text('Controle de Hidratação'), findsNothing);
+    });
   });
 }
 
@@ -571,4 +620,7 @@ class _FailingHydrationController extends HydrationController {
 
   @override
   Future<bool> deleteLog(dynamic idOrEntry, {String? remoteId}) async => false;
+
+  @override
+  Future<bool> toggleReminders(bool enabled) async => false;
 }

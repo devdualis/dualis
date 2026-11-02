@@ -4804,4 +4804,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonSaveFailed => 'Could not save. Please try again.';
+
+  @override
+  String get waterTimeTitle => 'Time to hydrate 💧';
+
+  @override
+  String get waterHowMuchNow => 'How much water did you just drink?';
+
+  @override
+  String get waterClose => 'Close';
+
+  @override
+  String waterDailyGoal(int target) {
+    return 'Today\'s goal: $target ml';
+  }
+
+  @override
+  String get waterLoading => 'Loading...';
+
+  @override
+  String get waterGoalReached => 'Well done! Daily goal reached!';
+
+  @override
+  String get waterSelectPortion => 'Choose an amount:';
+
+  @override
+  String get waterOtherValue => 'Other amount';
+
+  @override
+  String get waterCustomAmount => 'Custom amount';
+
+  @override
+  String get waterLogButton => 'Log water';
+
+  @override
+  String get waterInvalidAmount => 'Please enter a valid amount in ml.';
+
+  @override
+  String waterLoggedSuccess(int ml) {
+    return '💧 +$ml ml logged!';
+  }
+
+  @override
+  String get waterCardTitle => 'Hydration';
+
+  @override
+  String waterCardProgress(int total, int target, int percent) {
+    return '$total of $target ml today ($percent%)';
+  }
+
+  @override
+  String get waterCardChart => 'Chart';
+
+  @override
+  String get waterCardGlass => '+250 ml (Glass)';
+
+  @override
+  String waterCardLogged(int ml) {
+    return '💧 +$ml ml logged!';
+  }
+
+  @override
+  String get waterCardOtherAmount => 'Other amount';
+
+  @override
+  String get notificationsBlockedTitle => 'Notifications are off on this phone';
+
+  @override
+  String get notificationsBlockedBody =>
+      'Reminders won\'t appear until you turn on DualisCheckUp notifications in your phone settings.';
+
+  @override
+  String get notificationsOpenSettings => 'Open settings';
 }

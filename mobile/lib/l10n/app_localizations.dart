@@ -8229,6 +8229,132 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não foi possível salvar. Tente de novo.'**
   String get commonSaveFailed;
+
+  /// No description provided for @waterTimeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hora de se hidratar 💧'**
+  String get waterTimeTitle;
+
+  /// No description provided for @waterHowMuchNow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quanto de água você consumiu agora?'**
+  String get waterHowMuchNow;
+
+  /// No description provided for @waterClose.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fechar'**
+  String get waterClose;
+
+  /// No description provided for @waterDailyGoal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Meta do dia: {target} ml'**
+  String waterDailyGoal(int target);
+
+  /// No description provided for @waterLoading.
+  ///
+  /// In pt, this message translates to:
+  /// **'Carregando...'**
+  String get waterLoading;
+
+  /// No description provided for @waterGoalReached.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parabéns! Meta diária atingida!'**
+  String get waterGoalReached;
+
+  /// No description provided for @waterSelectPortion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione a porção:'**
+  String get waterSelectPortion;
+
+  /// No description provided for @waterOtherValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outro valor'**
+  String get waterOtherValue;
+
+  /// No description provided for @waterCustomAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quantidade personalizada'**
+  String get waterCustomAmount;
+
+  /// No description provided for @waterLogButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar Consumo'**
+  String get waterLogButton;
+
+  /// No description provided for @waterInvalidAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Por favor, informe uma quantidade válida em ml.'**
+  String get waterInvalidAmount;
+
+  /// No description provided for @waterLoggedSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'💧 +{ml} ml registrados com sucesso!'**
+  String waterLoggedSuccess(int ml);
+
+  /// No description provided for @waterCardTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Controle de Hidratação'**
+  String get waterCardTitle;
+
+  /// No description provided for @waterCardProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'{total} de {target} ml atingidos hoje ({percent}%)'**
+  String waterCardProgress(int total, int target, int percent);
+
+  /// No description provided for @waterCardChart.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gráfico'**
+  String get waterCardChart;
+
+  /// No description provided for @waterCardGlass.
+  ///
+  /// In pt, this message translates to:
+  /// **'+250 ml (Copo)'**
+  String get waterCardGlass;
+
+  /// No description provided for @waterCardLogged.
+  ///
+  /// In pt, this message translates to:
+  /// **'💧 +{ml} ml registrados!'**
+  String waterCardLogged(int ml);
+
+  /// No description provided for @waterCardOtherAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outra Quantidade'**
+  String get waterCardOtherAmount;
+
+  /// No description provided for @notificationsBlockedTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'As notificações estão desligadas neste celular'**
+  String get notificationsBlockedTitle;
+
+  /// No description provided for @notificationsBlockedBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Os lembretes não vão aparecer até você ligar as notificações do DualisCheckUp nos ajustes do celular.'**
+  String get notificationsBlockedBody;
+
+  /// No description provided for @notificationsOpenSettings.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir ajustes'**
+  String get notificationsOpenSettings;
 }
 
 class _AppLocalizationsDelegate

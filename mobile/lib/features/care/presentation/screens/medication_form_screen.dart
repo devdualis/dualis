@@ -8,6 +8,7 @@ import '../../domain/care_models.dart';
 import '../care_providers.dart';
 import '../care_routes.dart';
 import '../widgets/care_widgets.dart';
+import '../../../../core/notifications/notifications_blocked_notice.dart';
 
 /// Official ANVISA leaflet search for [name] (Bulário Eletrônico). The app
 /// shows no leaflet text of its own.
@@ -199,6 +200,7 @@ class _MedicationFormScreenState extends ConsumerState<MedicationFormScreen> {
               value: _active,
               onChanged: (v) => setState(() => _active = v),
             ),
+            if (_active) const NotificationsBlockedNotice(),
             const SizedBox(height: 4),
             CareNote(l10n.careMedNote),
             const SizedBox(height: 14),

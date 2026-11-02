@@ -56,8 +56,8 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
       final parsed = int.tryParse(_customController.text.trim());
       if (parsed == null || parsed <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Por favor, informe uma quantidade válida em ml.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).waterInvalidAmount),
             backgroundColor: AppColors.emergencyCrimson,
           ),
         );
@@ -83,7 +83,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('💧 +$amountToSave ml registrados com sucesso!'),
+            content: Text(AppLocalizations.of(context).waterLoggedSuccess(amountToSave)),
             backgroundColor: AppColors.clinicalTealDark,
             duration: const Duration(seconds: 3),
           ),
@@ -149,7 +149,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hora de se hidratar 💧',
+                      AppLocalizations.of(context).waterTimeTitle,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -157,7 +157,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                       ),
                     ),
                     Text(
-                      'Quanto de água você consumiu agora?',
+                      AppLocalizations.of(context).waterHowMuchNow,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         color: AppColors.textSecondaryLight,
@@ -169,7 +169,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
               IconButton(
                 key: const Key('water_intake_modal_close_button'),
                 constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-                tooltip: 'Fechar',
+                tooltip: AppLocalizations.of(context).waterClose,
                 icon: const Icon(Icons.close, color: AppColors.textSecondaryLight),
                 onPressed: () => Navigator.of(context).pop(),
               ),
@@ -192,7 +192,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Meta do dia: $target ml',
+                      AppLocalizations.of(context).waterDailyGoal(target),
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -201,7 +201,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                     ),
                     Text(
                       state.isLoading
-                          ? 'Carregando...'
+                          ? AppLocalizations.of(context).waterLoading
                           : '$total ml ($percent%)',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
@@ -244,7 +244,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                           size: 14, color: AppColors.clinicalTealDark),
                       const SizedBox(width: 4),
                       Text(
-                        'Parabéns! Meta diária atingida!',
+                        AppLocalizations.of(context).waterGoalReached,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -261,7 +261,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
           const SizedBox(height: 20),
 
           Text(
-            'Selecione a porção:',
+            AppLocalizations.of(context).waterSelectPortion,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -308,7 +308,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                 key: const Key('water_preset_custom'),
                 selected: _isCustom,
                 materialTapTargetSize: MaterialTapTargetSize.padded,
-                label: const Text('Outro valor'),
+                label: Text(AppLocalizations.of(context).waterOtherValue),
                 labelStyle: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
                   fontWeight: _isCustom ? FontWeight.bold : FontWeight.w500,
@@ -338,7 +338,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
               keyboardType: TextInputType.number,
               autofocus: true,
               decoration: InputDecoration(
-                labelText: 'Quantidade personalizada',
+                labelText: AppLocalizations.of(context).waterCustomAmount,
                 hintText: 'Ex: 350',
                 suffixText: 'ml',
                 border: OutlineInputBorder(
@@ -378,7 +378,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
 
           DualisPrimaryButton(
             key: const Key('confirm_water_intake_button'),
-            text: 'Registrar Consumo',
+            text: AppLocalizations.of(context).waterLogButton,
             isLoading: _isSaving,
             onPressed: _isSaving ? null : _handleConfirm,
           ),

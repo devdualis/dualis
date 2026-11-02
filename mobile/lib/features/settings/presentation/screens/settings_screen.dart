@@ -14,6 +14,7 @@ import '../../../../l10n/locale_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../widgets/avatar_selector_sheet.dart';
 import 'photo_crop_screen.dart';
+import '../../../../core/notifications/notifications_blocked_notice.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -921,7 +922,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
+              const NotificationsBlockedNotice(),
+              const SizedBox(height: 8),
               _SectionLabel(
                 icon: Icons.shield_outlined,
                 label: l10n.settingsPrivacySection,

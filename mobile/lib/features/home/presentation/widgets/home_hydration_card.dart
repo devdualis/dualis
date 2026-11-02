@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/load_error_view.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
@@ -58,7 +59,7 @@ class HomeHydrationCard extends ConsumerWidget {
                       Row(
                         children: [
                           Text(
-                            'Controle de Hidratação',
+                            AppLocalizations.of(context).waterCardTitle,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
@@ -76,7 +77,7 @@ class HomeHydrationCard extends ConsumerWidget {
                         ],
                       ),
                       Text(
-                        '$total de $target ml atingidos hoje ($percent%)',
+                        AppLocalizations.of(context).waterCardProgress(total, target, percent),
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           color: AppColors.textSecondaryLight,
@@ -96,7 +97,7 @@ class HomeHydrationCard extends ConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Gráfico',
+                        AppLocalizations.of(context).waterCardChart,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -134,7 +135,7 @@ class HomeHydrationCard extends ConsumerWidget {
                     key: const Key('home_hydration_quick_add_button'),
                     icon: const Icon(Icons.add, size: 16, color: AppColors.clinicalTealDark),
                     label: Text(
-                      '+250 ml (Copo)',
+                      AppLocalizations.of(context).waterCardGlass,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -157,9 +158,9 @@ class HomeHydrationCard extends ConsumerWidget {
                         return;
                       }
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('💧 +250 ml registrados!'),
-                          duration: Duration(seconds: 2),
+                        SnackBar(
+                          content: Text(AppLocalizations.of(context).waterCardLogged(250)),
+                          duration: const Duration(seconds: 2),
                           backgroundColor: AppColors.clinicalTealDark,
                         ),
                       );
@@ -172,7 +173,7 @@ class HomeHydrationCard extends ConsumerWidget {
                     key: const Key('home_hydration_log_modal_button'),
                     icon: const Icon(Icons.edit_note, size: 16, color: Colors.white),
                     label: Text(
-                      'Outra Quantidade',
+                      AppLocalizations.of(context).waterCardOtherAmount,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,

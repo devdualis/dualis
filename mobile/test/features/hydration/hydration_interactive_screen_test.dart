@@ -48,10 +48,11 @@ class FakeHydration extends HydrationController {
   }
 
   @override
-  Future<void> setDailyTarget(int targetMl) async {
+  Future<bool> setDailyTarget(int targetMl) async {
     state = state.copyWith(
       settings: state.settings.copyWith(dailyTargetMl: targetMl),
     );
+    return true;
   }
 }
 

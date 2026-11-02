@@ -303,6 +303,23 @@ class AppNotificationCenter {
     }
   }
 
+  /// False only when the phone says this app may not show notifications.
+  /// Unknown (no plugin, call failed) counts as allowed, so nobody is told
+  /// to fix a setting that may be fine.
+  Future<bool> notificationsAllowed() async {
+    try {
+      final android = _android;
+      if (android != null) {
+        return (await android.areNotificationsEnabled()) ?? true;
+      }
+      final ios = _ios;
+      if (ios != null) {
+        return (await ios.checkPermissions())?.isEnabled ?? true;
+      }
+    } catch (_) {}
+    return true;
+  }
+
   /// Whether Android currently allows exact alarms (false elsewhere).
   Future<bool> canScheduleExactAlarms() async {
     try {

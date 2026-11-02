@@ -4817,4 +4817,78 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get commonSaveFailed => 'No se pudo guardar. Inténtalo de nuevo.';
+
+  @override
+  String get waterTimeTitle => 'Hora de hidratarte 💧';
+
+  @override
+  String get waterHowMuchNow => '¿Cuánta agua tomaste ahora?';
+
+  @override
+  String get waterClose => 'Cerrar';
+
+  @override
+  String waterDailyGoal(int target) {
+    return 'Meta del día: $target ml';
+  }
+
+  @override
+  String get waterLoading => 'Cargando...';
+
+  @override
+  String get waterGoalReached => '¡Felicidades! ¡Meta diaria alcanzada!';
+
+  @override
+  String get waterSelectPortion => 'Elige la porción:';
+
+  @override
+  String get waterOtherValue => 'Otro valor';
+
+  @override
+  String get waterCustomAmount => 'Cantidad personalizada';
+
+  @override
+  String get waterLogButton => 'Registrar consumo';
+
+  @override
+  String get waterInvalidAmount =>
+      'Por favor, indica una cantidad válida en ml.';
+
+  @override
+  String waterLoggedSuccess(int ml) {
+    return '💧 ¡+$ml ml registrados!';
+  }
+
+  @override
+  String get waterCardTitle => 'Control de hidratación';
+
+  @override
+  String waterCardProgress(int total, int target, int percent) {
+    return '$total de $target ml hoy ($percent%)';
+  }
+
+  @override
+  String get waterCardChart => 'Gráfico';
+
+  @override
+  String get waterCardGlass => '+250 ml (Vaso)';
+
+  @override
+  String waterCardLogged(int ml) {
+    return '💧 ¡+$ml ml registrados!';
+  }
+
+  @override
+  String get waterCardOtherAmount => 'Otra cantidad';
+
+  @override
+  String get notificationsBlockedTitle =>
+      'Las notificaciones están desactivadas en este celular';
+
+  @override
+  String get notificationsBlockedBody =>
+      'Los recordatorios no aparecerán hasta que actives las notificaciones de DualisCheckUp en los ajustes del celular.';
+
+  @override
+  String get notificationsOpenSettings => 'Abrir ajustes';
 }

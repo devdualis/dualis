@@ -16,6 +16,7 @@ import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../controllers/hydration_controller.dart';
 import '../widgets/hydration_visuals.dart';
 import '../widgets/water_intake_modal.dart';
+import '../../../../core/notifications/notifications_blocked_notice.dart';
 
 /// Interactive hydration screen (strategy §11): one action at a time, a glass
 /// that fills, quick buttons 200 ml / 500 ml / Outro, the person's own daily
@@ -242,7 +243,9 @@ class _TodayCard extends ConsumerWidget {
       builder: (_) => _GoalDialog(initialMl: state.dailyTargetMl),
     );
     if (value != null) {
-      await ref.read(hydrationControllerProvider.notifier).setDailyTarget(value);
+      final ok =
+          await ref.read(hydrationControllerProvider.notifier).setDailyTarget(value);
+      if (!ok && context.mounted) showSaveFailedSnackBar(context);
     }
   }
 
@@ -575,8 +578,18 @@ class _ReminderSettings extends ConsumerWidget {
               ),
               value: settings.reminderEnabled,
               activeThumbColor: AppColors.clinicalTeal,
-              onChanged: viewOnly ? null : notifier.toggleReminders,
+              onChanged: viewOnly
+                  ? null
+                  : (on) async {
+                      final ok = await notifier.toggleReminders(on);
+                      if (!ok && context.mounted) showSaveFailedSnackBar(context);
+                    },
             ),
+            if (settings.reminderEnabled)
+              const Padding(
+                padding: EdgeInsets.fromLTRB(12, 0, 12, 8),
+                child: NotificationsBlockedNotice(),
+              ),
           ],
         ),
       ),

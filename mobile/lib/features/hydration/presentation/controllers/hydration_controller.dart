@@ -283,8 +283,13 @@ class HydrationController extends Notifier<HydrationState> {
     _settingsEdits++;
     try {
       await _repository.saveSettings(newSettings);
-      state = state.copyWith(settings: newSettings);
-
+    } catch (_) {
+      return false;
+    }
+    state = state.copyWith(settings: newSettings);
+    // Saved. A reminder problem here is not a failed save; a phone that
+    // blocks notifications is shown by NotificationsBlockedNotice.
+    try {
       if (newSettings.reminderEnabled) {
         final isGoalReached = state.todayTotalMl >= newSettings.dailyTargetMl &&
             newSettings.dailyTargetMl > 0;
@@ -295,29 +300,28 @@ class HydrationController extends Notifier<HydrationState> {
       } else {
         await _notificationService.cancelAllReminders();
       }
-    } catch (_) {
-      return false;
-    }
+    } catch (_) {}
     return true;
   }
 
-  Future<void> toggleReminders(bool enabled) async {
+  /// False when the choice could not be saved (the switch keeps the old value).
+  Future<bool> toggleReminders(bool enabled) async {
     final updated = state.settings.copyWith(reminderEnabled: enabled);
     if (enabled) await _requestExactAlarmsIfMissing();
-    await updateSettings(updated);
+    return updateSettings(updated);
   }
 
-  Future<void> toggleTracking(bool enabled) async {
+  Future<bool> toggleTracking(bool enabled) async {
     final updated = state.settings.copyWith(trackingEnabled: enabled);
-    await updateSettings(updated);
+    return updateSettings(updated);
   }
 
-  Future<void> setSoundStyle(ReminderSoundStyle style) async {
+  Future<bool> setSoundStyle(ReminderSoundStyle style) async {
     final updated = state.settings.copyWith(reminderSoundStyle: style);
     if (style == ReminderSoundStyle.phoneAlarm && updated.reminderEnabled) {
       await _requestExactAlarmsIfMissing();
     }
-    await updateSettings(updated);
+    return updateSettings(updated);
   }
 
   /// Android 12+ denies exact alarms by default, making reminders drift.
@@ -341,9 +345,9 @@ class HydrationController extends Notifier<HydrationState> {
     } catch (_) {}
   }
 
-  Future<void> setDailyTarget(int targetMl) async {
+  Future<bool> setDailyTarget(int targetMl) async {
     final updated = state.settings.copyWith(dailyTargetMl: targetMl);
-    await updateSettings(updated);
+    return updateSettings(updated);
   }
 }
 
