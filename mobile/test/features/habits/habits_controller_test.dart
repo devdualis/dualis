@@ -292,4 +292,58 @@ void main() {
       expect(state.yesterdayHabit.moved, isTrue);
     });
   });
+
+  group('HabitsController failures', () {
+    test('a failed load keeps the error until a retry succeeds', () async {
+      when(() => repository.getTrackMenstrualCycleSetting())
+          .thenAnswer((_) async => false);
+      when(() => repository.getHabits(days: 60))
+          .thenThrow(Exception('SocketException'));
+
+      final notifier = container.read(habitsControllerProvider.notifier);
+      await notifier.loadData();
+      var state = container.read(habitsControllerProvider);
+      expect(state.isLoading, isFalse);
+      expect(state.loadError, isNotNull);
+
+      when(() => repository.getHabits(days: 60)).thenAnswer((_) async => []);
+      await notifier.loadData();
+      state = container.read(habitsControllerProvider);
+      expect(state.loadError, isNull);
+    });
+
+    test('a failed save puts the previous answer back and reports it', () async {
+      when(() => repository.getHabits(days: 60)).thenAnswer((_) async => [
+            const HabitDay(day: '2026-10-31', sleepQuality: HabitSleepQuality.bem),
+          ]);
+      when(() => repository.getTrackMenstrualCycleSetting())
+          .thenAnswer((_) async => false);
+      when(() => repository.saveHabitDay(any())).thenThrow(Exception('500'));
+
+      final notifier = container.read(habitsControllerProvider.notifier);
+      await notifier.loadData();
+      await notifier.saveAnswer(day: '2026-10-31', sleepQuality: HabitSleepQuality.mal);
+
+      final state = container.read(habitsControllerProvider);
+      expect(state.todayHabit.sleepQuality, HabitSleepQuality.bem);
+      expect(state.saveError, isNotNull);
+      expect(state.isSaving, isFalse);
+    });
+
+    test('a failed cycle setting goes back to the previous value', () async {
+      when(() => repository.getHabits(days: 60)).thenAnswer((_) async => []);
+      when(() => repository.getTrackMenstrualCycleSetting())
+          .thenAnswer((_) async => false);
+      when(() => repository.setTrackMenstrualCycleSetting(true))
+          .thenThrow(Exception('500'));
+
+      final notifier = container.read(habitsControllerProvider.notifier);
+      await notifier.loadData();
+      await notifier.setTrackMenstrualCycle(true);
+
+      final state = container.read(habitsControllerProvider);
+      expect(state.trackMenstrualCycle, isFalse);
+      expect(state.saveError, isNotNull);
+    });
+  });
 }

@@ -2830,5 +2830,8 @@
   "jv23ClosingHint": "As duas perguntas são opcionais.",
   "jv23StepOf": "{current} de {total}",
   "@jv23StepOf": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
-  "chronicTrackConditionsSubtitle": "Informadas por você. Escreva com suas palavras. As que precisam de registro recebem suas medições no registro diário; as outras usam a escala de 1 a 5."
+  "chronicTrackConditionsSubtitle": "Informadas por você. Escreva com suas palavras. As que precisam de registro recebem suas medições no registro diário; as outras usam a escala de 1 a 5.",
+  "commonRetry": "Tentar de novo",
+  "commonLoadFailed": "Não foi possível carregar",
+  "commonSaveFailed": "Não foi possível salvar. Tente de novo."
 }

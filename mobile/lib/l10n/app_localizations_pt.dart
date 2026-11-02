@@ -4800,4 +4800,13 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get chronicTrackConditionsSubtitle =>
       'Informadas por você. Escreva com suas palavras. As que precisam de registro recebem suas medições no registro diário; as outras usam a escala de 1 a 5.';
+
+  @override
+  String get commonRetry => 'Tentar de novo';
+
+  @override
+  String get commonLoadFailed => 'Não foi possível carregar';
+
+  @override
+  String get commonSaveFailed => 'Não foi possível salvar. Tente de novo.';
 }

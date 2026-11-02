@@ -15,7 +15,12 @@ class HabitsState {
   final HabitDay yesterdayHabit;
   final List<HabitDay> recentDays;
   final bool trackMenstrualCycle;
-  final String? errorMessage;
+
+  /// Why the last load failed. Kept until the next load starts.
+  final Object? loadError;
+
+  /// Why the last save failed. Cleared by the next state change.
+  final Object? saveError;
 
   const HabitsState({
     this.isLoading = false,
@@ -24,7 +29,8 @@ class HabitsState {
     required this.yesterdayHabit,
     this.recentDays = const [],
     this.trackMenstrualCycle = false,
-    this.errorMessage,
+    this.loadError,
+    this.saveError,
   });
 
   /// The period card is shown only when the person turned on
@@ -57,7 +63,8 @@ class HabitsState {
     HabitDay? yesterdayHabit,
     List<HabitDay>? recentDays,
     bool? trackMenstrualCycle,
-    String? errorMessage,
+    Object? loadError = _keep,
+    Object? saveError,
   }) {
     return HabitsState(
       isLoading: isLoading ?? this.isLoading,
@@ -66,10 +73,13 @@ class HabitsState {
       yesterdayHabit: yesterdayHabit ?? this.yesterdayHabit,
       recentDays: recentDays ?? this.recentDays,
       trackMenstrualCycle: trackMenstrualCycle ?? this.trackMenstrualCycle,
-      errorMessage: errorMessage,
+      loadError: identical(loadError, _keep) ? this.loadError : loadError,
+      saveError: saveError,
     );
   }
 }
+
+const Object _keep = Object();
 
 class HabitsController extends Notifier<HabitsState> {
   /// Bumped on every rebuild (sign-in, sign-out, profile switch). A load or a
@@ -138,7 +148,7 @@ class HabitsController extends Notifier<HabitsState> {
     final profileId = _profileId;
     final editsBefore = _editCount;
     final session = ++_loadSession;
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, loadError: null);
 
     try {
       final loaded = await _repository.getHabits(
@@ -186,7 +196,7 @@ class HabitsController extends Notifier<HabitsState> {
       if (!_isCurrent(generation) || session != _loadSession) return;
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'Erro ao carregar hábitos: $e',
+        loadError: e,
       );
     }
   }
@@ -251,9 +261,12 @@ class HabitsController extends Notifier<HabitsState> {
     } catch (e) {
       if (!_isCurrent(generation)) return;
       _savesInFlight--;
+      // Not saved: show the previous answer again, unless a newer edit of
+      // this day replaced it meanwhile.
+      if (_latestEdit[day] == edit) _applyLocalDay(current);
       state = state.copyWith(
         isSaving: _savesInFlight > 0,
-        errorMessage: 'Erro ao salvar hábito: $e',
+        saveError: e,
       );
     }
   }
@@ -277,13 +290,18 @@ class HabitsController extends Notifier<HabitsState> {
 
   Future<void> setTrackMenstrualCycle(bool enabled) async {
     ++_loadSession;
+    final generation = _generation;
+    final previous = state.trackMenstrualCycle;
     state = state.copyWith(trackMenstrualCycle: enabled);
     try {
       await _repository.setTrackMenstrualCycleSetting(
         enabled,
         profileId: _profileId,
       );
-    } catch (_) {}
+    } catch (e) {
+      if (!_isCurrent(generation) || state.trackMenstrualCycle != enabled) return;
+      state = state.copyWith(trackMenstrualCycle: previous, saveError: e);
+    }
   }
 
   Future<void> deleteHabit(String day) async {
@@ -300,7 +318,10 @@ class HabitsController extends Notifier<HabitsState> {
         yesterdayHabit: day == yesterdayDayString ? emptyDay : state.yesterdayHabit,
         recentDays: list,
       );
-    } catch (_) {}
+    } catch (e) {
+      if (!_isCurrent(generation) || _latestEdit[day] != edit) return;
+      state = state.copyWith(saveError: e);
+    }
   }
 }
 

@@ -8211,6 +8211,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Informadas por você. Escreva com suas palavras. As que precisam de registro recebem suas medições no registro diário; as outras usam a escala de 1 a 5.'**
   String get chronicTrackConditionsSubtitle;
+
+  /// No description provided for @commonRetry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tentar de novo'**
+  String get commonRetry;
+
+  /// No description provided for @commonLoadFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar'**
+  String get commonLoadFailed;
+
+  /// No description provided for @commonSaveFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível salvar. Tente de novo.'**
+  String get commonSaveFailed;
 }
 
 class _AppLocalizationsDelegate

@@ -238,4 +238,48 @@ void main() {
       expect(find.text('Emergency Screen'), findsOneWidget);
     });
   });
+
+  group('HabitsScreen failure states', () {
+    testWidgets('load failure shows retry, and retry loads the habits', (tester) async {
+      when(() => repository.getTrackMenstrualCycleSetting())
+          .thenAnswer((_) async => false);
+      when(() => repository.getHabits(days: 60))
+          .thenThrow(Exception('SocketException: Failed host lookup'));
+
+      await tester.pumpWidget(createHabitsTestWidget(
+        repository: repository,
+        storage: storage,
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Não foi possível carregar'), findsOneWidget);
+      expect(find.byKey(const Key('habits_sleep_bem')), findsNothing);
+      // The urgent-help button stays reachable on the error state.
+      expect(find.byType(UrgentHelpButton), findsOneWidget);
+
+      when(() => repository.getHabits(days: 60)).thenAnswer((_) async => []);
+      await tester.tap(find.byKey(const Key('load_error_retry')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('habits_sleep_bem')), findsOneWidget);
+    });
+
+    testWidgets('save failure shows a snackbar', (tester) async {
+      when(() => repository.getHabits(days: 60)).thenAnswer((_) async => []);
+      when(() => repository.getTrackMenstrualCycleSetting())
+          .thenAnswer((_) async => false);
+      when(() => repository.saveHabitDay(any())).thenThrow(Exception('500'));
+
+      await tester.pumpWidget(createHabitsTestWidget(
+        repository: repository,
+        storage: storage,
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('habits_sleep_bem')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Não foi possível salvar. Tente de novo.'), findsOneWidget);
+    });
+  });
 }

@@ -1389,5 +1389,8 @@
   "jv23ClosingTitle": "Para cerrar",
   "jv23ClosingHint": "Las dos preguntas son opcionales.",
   "jv23StepOf": "{current} de {total}",
-  "chronicTrackConditionsSubtitle": "Informadas por ti. Escríbelas con tus palabras. Las que necesitan registro reciben tus mediciones en el registro diario; las demás usan la escala de 1 a 5."
+  "chronicTrackConditionsSubtitle": "Informadas por ti. Escríbelas con tus palabras. Las que necesitan registro reciben tus mediciones en el registro diario; las demás usan la escala de 1 a 5.",
+  "commonRetry": "Intentar de nuevo",
+  "commonLoadFailed": "No se pudo cargar",
+  "commonSaveFailed": "No se pudo guardar. Inténtalo de nuevo."
 }

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/load_error_view.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../controllers/habits_controller.dart';
 import '../../domain/models/habit_day.dart';
@@ -29,6 +30,10 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
     final state = ref.watch(habitsControllerProvider);
     final controller = ref.read(habitsControllerProvider.notifier);
     final viewOnly = activeProfileIsViewOnly(ref);
+    ref.listen<Object?>(habitsControllerProvider.select((s) => s.saveError),
+        (_, error) {
+      if (error != null) showSaveFailedSnackBar(context);
+    });
 
     final activeDayString =
         _isYesterday
@@ -59,6 +64,11 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
       body:
           state.isLoading
               ? const Center(child: CircularProgressIndicator())
+              : state.loadError != null
+              ? LoadErrorView(
+                error: state.loadError!,
+                onRetry: () => controller.loadData(),
+              )
               : RefreshIndicator(
                 onRefresh: () => controller.loadData(),
                 child: SingleChildScrollView(
