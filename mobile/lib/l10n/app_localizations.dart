@@ -9423,6 +9423,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Para cada item, há quanto tempo você percebe isso?'**
   String get jv24PersistenceCompactQuestion;
+
+  /// No description provided for @jv24EntryPersistence.
+  ///
+  /// In pt, this message translates to:
+  /// **'Há quanto tempo: {label}'**
+  String jv24EntryPersistence(String label);
+
+  /// No description provided for @jv24EntryTriggers.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que pode ter contribuído: {labels}'**
+  String jv24EntryTriggers(String labels);
+
+  /// No description provided for @jv24EntryNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sua nota: {note}'**
+  String jv24EntryNote(String note);
+
+  /// No description provided for @jv24SummaryBodyTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Onde você marcou'**
+  String get jv24SummaryBodyTitle;
+
+  /// No description provided for @jv24SummaryDetailsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que você registrou'**
+  String get jv24SummaryDetailsTitle;
 }
 
 class _AppLocalizationsDelegate

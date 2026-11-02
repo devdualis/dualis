@@ -43,6 +43,7 @@ class JournalItemView {
         bodySide: item.bodySide,
         persistence: item.persistence,
         intensity: item.intensity,
+        sensation: item.sensation,
         legacyLabel: item.legacyLabel,
       );
 
@@ -111,6 +112,10 @@ class JournalEntryView {
   /// Closing answers of a "não tão bem" entry (v2.2); null / [] otherwise.
   final String? coping;
   final List<String> helpers;
+
+  /// What the person wrote for "Outro" and the closing note, if any.
+  final String? triggerNote;
+  final String? note;
   final bool legacy;
   final List<JournalItemView> items;
   final bool pendingSync;
@@ -123,6 +128,8 @@ class JournalEntryView {
     this.triggers = const [],
     this.coping,
     this.helpers = const [],
+    this.triggerNote,
+    this.note,
     this.legacy = false,
     this.items = const [],
     this.pendingSync = false,
@@ -136,6 +143,8 @@ class JournalEntryView {
         triggers: entry.triggers,
         coping: entry.coping,
         helpers: entry.helpers,
+        triggerNote: entry.triggerNote,
+        note: entry.note,
         legacy: entry.legacy,
         items: [for (final item in entry.items) JournalItemView.fromItem(item)],
         pendingSync: entry.pendingSync,
@@ -156,6 +165,8 @@ class JournalEntryView {
       helpers: (json['helpers'] as List<dynamic>? ?? const [])
           .map((e) => e.toString())
           .toList(),
+      triggerNote: json['triggerNote'] as String?,
+      note: json['note'] as String?,
       legacy: json['legacy'] as bool? ?? false,
       items: (json['items'] as List<dynamic>? ?? const [])
           .whereType<Map>()

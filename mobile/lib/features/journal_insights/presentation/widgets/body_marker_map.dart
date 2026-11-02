@@ -7,7 +7,9 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../journal/domain/journal_keys.dart';
 import '../../domain/chart_data.dart';
 import '../../domain/history_series.dart' show historySensationLabel;
+import '../../../journal/presentation/journal_labels.dart';
 import 'chart_tokens.dart';
+import 'entry_details.dart';
 import 'record_series_chart.dart' show chartCaptionStyle;
 
 /// F1: one body map, front and back, with a fixed-size numbered marker per
@@ -346,14 +348,7 @@ class RegionMarksView extends StatelessWidget {
       height: 1.4,
       color: AppColors.textPrimaryLight,
     );
-    String viewLabel(String? view) => switch (view) {
-          JournalKeys.sideFront => l10n.xv2DashFront,
-          JournalKeys.sideBack => l10n.xv2DashBack,
-          _ => l10n.gxViewUnspecified,
-        };
     final marks = summary.marks.reversed.toList();
-    final byView = summary.byView;
-    final isWholeBody = JournalKeys.isWholeBody(summary.region);
     return ListView(
       key: Key('region_marks_${summary.region}'),
       controller: controller,
@@ -373,17 +368,6 @@ class RegionMarksView extends StatelessWidget {
           key: const Key('region_marks_headline'),
           style: text,
         ),
-        if (!isWholeBody) ...[
-          const SizedBox(height: 4),
-          Text(
-            [
-              for (final view in [JournalKeys.sideFront, JournalKeys.sideBack, null])
-                if ((byView[view] ?? 0) > 0)
-                  '${viewLabel(view)}: ${byView[view]}',
-            ].join(' · '),
-            style: chartCaptionStyle,
-          ),
-        ],
         const SizedBox(height: 12),
         FilledButton.tonalIcon(
           key: const Key('region_marks_see_evolution'),
@@ -423,13 +407,21 @@ class RegionMarksView extends StatelessWidget {
                 ),
                 Text(
                   [
-                    if (!isWholeBody) viewLabel(m.view),
+                    // Where exactly, in the person's words (not the map side).
+                    if (m.branchKey != null) JournalLabels.branch(l10n, m.branchKey!),
+                    if (m.persistence != null)
+                      l10n.jv24EntryPersistence(
+                          JournalLabels.persistence(l10n, m.persistence!)),
                     m.intensity != null
                         ? l10n.gxIntensityValue(m.intensity!)
                         : l10n.gxIntensityNotInformed,
                   ].join(' · '),
                   style: chartCaptionStyle,
                 ),
+                if (m.entry != null) ...[
+                  const SizedBox(height: 4),
+                  JournalEntryDetails(entry: m.entry!, showItems: false),
+                ],
               ],
             ),
           ),

@@ -283,17 +283,81 @@ void main() {
       await tester.tap(find.byKey(const Key('combined_day_20261027')));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('calendar_day_20261027')), findsOneWidget);
-      expect(find.textContaining('Intensidade 4/5'), findsOneWidget);
-      expect(find.textContaining('Intensidade 3/5'), findsOneWidget);
-      expect(find.textContaining('1.600 ml'), findsOneWidget);
+      Finder inDay(String text) => find.descendant(
+            of: find.byKey(const Key('calendar_day_20261027')),
+            matching: find.textContaining(text),
+          );
+      expect(inDay('Intensidade 4/5'), findsOneWidget);
+      expect(inDay('Intensidade 3/5'), findsOneWidget);
+      expect(inDay('1.600 ml'), findsOneWidget);
     });
 
-    testWidgets('entries list shows the reported intensity', (tester) async {
-      await pumpDashboard(tester, [entry('e1', 0, [head, mind])]);
-      expect(
-        find.text('Fico antecipando problemas · Intensidade que você informou: 4/5'),
-        findsOneWidget,
+    testWidgets('entries list shows region, sensation, how long, how much and the closing',
+        (tester) async {
+      await pumpDashboard(tester, [
+        entry('e1', 0, [
+          const JournalItemView(
+            kind: 'physical',
+            optionKey: 'barriga.colica.gases',
+            bodySide: 'front',
+            sensation: 'incomodo',
+            persistence: 'meses_anos',
+            intensity: 3,
+          ),
+          mind,
+        ]),
+      ]);
+      // Region instead of the map side, in the person's words.
+      expect(find.text('💨 Barriga · Incômodo · Gases ou barriga estufada'), findsOneWidget);
+      expect(find.text('Há quanto tempo: Meses ou anos · Intensidade 3/5'), findsOneWidget);
+      expect(find.text('🧠 O que vem pela frente · Fico antecipando problemas'), findsOneWidget);
+      expect(find.text('Há quanto tempo: Alguns dias ou semanas · Intensidade 4/5'), findsOneWidget);
+      expect(find.textContaining('Frente'), findsNothing);
+    });
+
+    testWidgets('entries list and body marks show triggers, coping, helpers and note',
+        (tester) async {
+      final full = JournalEntryView(
+        id: 'e1',
+        recordedAt: today,
+        mood: 'nao_tao_bem',
+        area: 'physical',
+        triggers: const ['alimentacao', 'outro'],
+        triggerNote: 'Feijoada',
+        coping: 'esperei',
+        helpers: const ['beber_agua', 'repouso'],
+        note: 'Passou à noite',
+        items: const [
+          JournalItemView(
+            kind: 'physical',
+            optionKey: 'barriga.colica.gases',
+            bodySide: 'front',
+            sensation: 'incomodo',
+            persistence: 'meses_anos',
+            intensity: 3,
+          ),
+        ],
       );
+      await pumpDashboard(tester, [full]);
+      expect(find.text('O que pode ter contribuído: Alimentação, Outro (Feijoada)'), findsOneWidget);
+      expect(find.byKey(const Key('entry_coping_e1')), findsOneWidget);
+      expect(find.byKey(const Key('entry_helpers_e1')), findsOneWidget);
+      expect(find.text('Sua nota: Passou à noite'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('history_tab_HistoryTab.body')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('body_marker_barriga')));
+      await tester.pumpAndSettle();
+      final sheet = find.byKey(const Key('region_marks_barriga'));
+      expect(sheet, findsOneWidget);
+      Finder inSheet(String text) =>
+          find.descendant(of: sheet, matching: find.textContaining(text));
+      // Where exactly and how long, not the side of the map.
+      expect(inSheet('Cólica ou estufamento · Há quanto tempo: Meses ou anos · Intensidade 3/5'),
+          findsOneWidget);
+      expect(inSheet('Frente'), findsNothing);
+      expect(inSheet('Como foi lidar'), findsOneWidget);
+      expect(inSheet('Sua nota: Passou à noite'), findsOneWidget);
     });
 
     testWidgets('legacy entries render with their saved text and are not deletable',
@@ -303,10 +367,8 @@ void main() {
           JournalItemView(kind: 'physical', legacyLabel: 'Dor nas costas', intensity: 2),
         ], legacy: true),
       ]);
-      expect(
-        find.text('Dor nas costas · Intensidade que você informou: 2/5'),
-        findsOneWidget,
-      );
+      expect(find.text('Dor nas costas'), findsOneWidget);
+      expect(find.text('Intensidade 2/5'), findsOneWidget);
       expect(find.byKey(const Key('journal_entry_delete_legacy-1')), findsNothing);
     });
 
@@ -321,10 +383,8 @@ void main() {
           ),
         ]),
       ]);
-      expect(
-        find.text('Saudade da praia · Intensidade que você informou: 2/5'),
-        findsOneWidget,
-      );
+      expect(find.text('📍 O momento atual · Saudade da praia'), findsOneWidget);
+      expect(find.text('Intensidade 2/5'), findsOneWidget);
     });
 
     testWidgets('deleting an entry asks first and calls the API', (tester) async {

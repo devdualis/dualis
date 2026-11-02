@@ -51,6 +51,12 @@ class RecordPoint {
   /// A good moment of a "Bem" entry (v2.2): no intensity is asked.
   final bool positive;
 
+  /// `hoje`, `dias_semanas`, `meses_anos` or null.
+  final String? persistence;
+
+  /// The entry of this mark, for its closing answers and note.
+  final JournalEntryView? entry;
+
   const RecordPoint({
     required this.id,
     required this.at,
@@ -63,6 +69,8 @@ class RecordPoint {
     this.view,
     this.sensation,
     this.positive = false,
+    this.persistence,
+    this.entry,
   });
 
   DateTime get day => DateTime(at.year, at.month, at.day);
@@ -113,6 +121,8 @@ List<RecordPoint> _points(
           view: item.bodySide,
           sensation: item.sensation,
           positive: kind == JournalKeys.kindPositive,
+          persistence: item.persistence,
+          entry: entry,
         ),
       );
     }

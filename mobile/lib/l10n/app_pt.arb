@@ -3203,5 +3203,31 @@
   "jv24BranchQuestionPassado": "Olhar para trás está te trazendo qual sensação?",
   "jv24BranchQuestionPresente": "Como seu corpo e sua mente estão reagindo ao agora?",
   "jv24BranchQuestionFuturo": "O que você sente quando projeta o amanhã?",
-  "jv24PersistenceCompactQuestion": "Para cada item, há quanto tempo você percebe isso?"
+  "jv24PersistenceCompactQuestion": "Para cada item, há quanto tempo você percebe isso?",
+  "jv24EntryPersistence": "Há quanto tempo: {label}",
+  "@jv24EntryPersistence": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "jv24EntryTriggers": "O que pode ter contribuído: {labels}",
+  "@jv24EntryTriggers": {
+    "placeholders": {
+      "labels": {
+        "type": "String"
+      }
+    }
+  },
+  "jv24EntryNote": "Sua nota: {note}",
+  "@jv24EntryNote": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "jv24SummaryBodyTitle": "Onde você marcou",
+  "jv24SummaryDetailsTitle": "O que você registrou"
 }

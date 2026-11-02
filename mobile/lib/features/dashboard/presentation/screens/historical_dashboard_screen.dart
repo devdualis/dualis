@@ -9,13 +9,12 @@ import '../../../habits/presentation/controllers/habits_controller.dart';
 import '../../../home/domain/home_greeting.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../journal/domain/journal_keys.dart';
-import '../../../journal/presentation/journal_item_text.dart';
-import '../../../journal/presentation/journal_labels.dart';
 import '../../../journal_insights/domain/chart_data.dart';
 import '../../../journal_insights/domain/history_series.dart';
 import '../../../journal_insights/domain/journal_insights_models.dart';
 import '../../../journal_insights/presentation/controllers/journal_insights_controller.dart';
 import '../../../journal_insights/presentation/widgets/body_marker_map.dart';
+import '../../../journal_insights/presentation/widgets/entry_details.dart';
 import '../../../journal_insights/presentation/widgets/combined_calendar.dart';
 import '../../../journal_insights/presentation/widgets/habits_charts.dart';
 import '../../../journal_insights/presentation/widgets/history_widgets.dart';
@@ -518,8 +517,8 @@ class _EntriesList extends ConsumerWidget {
       );
     }
     final canDelete = !activeProfileIsViewOnly(ref);
-    final dateFormat =
-        DateFormat.yMd(Localizations.localeOf(context).toLanguageTag());
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final dateFormat = DateFormat.yMd(locale).add_Hm();
     return Column(
       children: [
         for (final entry in entries)
@@ -559,24 +558,7 @@ class _EntriesList extends ConsumerWidget {
                         ),
                       ],
                       const SizedBox(height: 4),
-                      if (entry.items.isEmpty && entry.mood != null)
-                        _line(l10n.xv2DashMoodLine(
-                            JournalLabels.mood(l10n, entry.mood!))),
-                      for (final item in entry.items)
-                        _line(
-                          item.kind == JournalKeys.kindPositive
-                              ? '${journalEmojis[item.optionKey] ?? '✨'} ${item.label(l10n)}'
-                              : item.intensity != null
-                                  ? '${item.label(l10n)} · ${l10n.xv2ReportedIntensity(item.intensity!)}'
-                                  : item.label(l10n),
-                        ),
-                      if (entry.coping != null)
-                        _line(l10n.jv22EntryCoping(
-                            JournalLabels.coping(l10n, entry.coping!))),
-                      if (entry.helpers.isNotEmpty)
-                        _line(l10n.jv22EntryHelpers(entry.helpers
-                            .map((h) => JournalLabels.helper(l10n, h))
-                            .join(', '))),
+                      JournalEntryDetails(entry: entry),
                     ],
                   ),
                 ),
@@ -595,14 +577,4 @@ class _EntriesList extends ConsumerWidget {
     );
   }
 
-  Widget _line(String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 2),
-        child: Text(
-          text,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 13,
-            color: AppColors.textPrimaryLight,
-          ),
-        ),
-      );
 }

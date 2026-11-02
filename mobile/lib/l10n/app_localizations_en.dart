@@ -5532,4 +5532,25 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get jv24PersistenceCompactQuestion =>
       'For each item, how long have you noticed it?';
+
+  @override
+  String jv24EntryPersistence(String label) {
+    return 'How long: $label';
+  }
+
+  @override
+  String jv24EntryTriggers(String labels) {
+    return 'What may have contributed: $labels';
+  }
+
+  @override
+  String jv24EntryNote(String note) {
+    return 'Your note: $note';
+  }
+
+  @override
+  String get jv24SummaryBodyTitle => 'Where you marked';
+
+  @override
+  String get jv24SummaryDetailsTitle => 'What you recorded';
 }

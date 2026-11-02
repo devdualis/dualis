@@ -1591,5 +1591,10 @@
   "jv24BranchQuestionPassado": "¿Qué sensación te trae mirar atrás?",
   "jv24BranchQuestionPresente": "¿Cómo están reaccionando tu cuerpo y tu mente al ahora?",
   "jv24BranchQuestionFuturo": "¿Qué sientes cuando piensas en el mañana?",
-  "jv24PersistenceCompactQuestion": "Para cada ítem, ¿desde hace cuánto lo notas?"
+  "jv24PersistenceCompactQuestion": "Para cada ítem, ¿desde hace cuánto lo notas?",
+  "jv24EntryPersistence": "Desde cuándo: {label}",
+  "jv24EntryTriggers": "Lo que pudo haber contribuido: {labels}",
+  "jv24EntryNote": "Tu nota: {note}",
+  "jv24SummaryBodyTitle": "Dónde marcaste",
+  "jv24SummaryDetailsTitle": "Lo que registraste"
 }

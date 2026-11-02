@@ -11,7 +11,11 @@ import '../../../../shared/widgets/landscape_background.dart';
 import '../../../house_ads/presentation/house_ad_card.dart';
 import '../../../journal/domain/journal_models.dart';
 import '../../../journal/presentation/journal_labels.dart';
+import '../../../journal_insights/domain/chart_data.dart';
+import '../../../journal_insights/domain/journal_insights_models.dart';
 import '../../../journal_insights/presentation/controllers/journal_insights_controller.dart';
+import '../../../journal_insights/presentation/widgets/body_marker_map.dart';
+import '../../../journal_insights/presentation/widgets/entry_details.dart';
 
 /// One line of "Seu registro de hoje": what the person chose or wrote, in
 /// their words, and the intensity they reported.
@@ -128,6 +132,12 @@ class _CheckInSummaryScreenState extends ConsumerState<CheckInSummaryScreen> {
           ];
     final moodLabel = widget.args.moodLabel ??
         (entry == null ? null : JournalLabels.mood(l10n, entry.mood));
+    // The saved entry in full: every item with how long and how much, the
+    // closing answers and the note, plus the body map of a physical entry.
+    final view = entry == null ? null : JournalEntryView.fromEntry(entry);
+    final bodyRegions = view == null
+        ? const <RegionSummary>[]
+        : regionSummaries(physicalPoints(l10n, [view]));
 
     return PopScope(
       canPop: false,
@@ -168,7 +178,25 @@ class _CheckInSummaryScreenState extends ConsumerState<CheckInSummaryScreen> {
                     child: ListView(
                       padding: const EdgeInsets.all(16),
                       children: [
-                        if (items.isEmpty)
+                        if (view != null) ...[
+                          _SummaryCard(
+                            key: const Key('check_in_summary_details'),
+                            title: l10n.jv24SummaryDetailsTitle,
+                            child: JournalEntryDetails(entry: view),
+                          ),
+                          if (bodyRegions.isNotEmpty)
+                            _SummaryCard(
+                              key: const Key('check_in_summary_body'),
+                              title: l10n.jv24SummaryBodyTitle,
+                              child: BodyMarkerMap(
+                                regions: bodyRegions,
+                                onSeeEvolution: (_) {
+                                  _stopCountdown();
+                                  context.go(RoutePaths.history);
+                                },
+                              ),
+                            ),
+                        ] else if (items.isEmpty)
                           _SummaryItemTile(
                             label: moodLabel ?? l10n.xv2SummarySaved,
                           )
@@ -236,6 +264,41 @@ class _CheckInSummaryScreenState extends ConsumerState<CheckInSummaryScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SummaryCard extends StatelessWidget {
+  final String title;
+  final Widget child;
+
+  const _SummaryCard({super.key, required this.title, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.outlineLight),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textSecondaryLight,
+            ),
+          ),
+          const SizedBox(height: 8),
+          child,
+        ],
       ),
     );
   }

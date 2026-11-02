@@ -11,6 +11,7 @@ import 'package:dualis_mobile/features/home/domain/home_greeting.dart';
 import 'package:dualis_mobile/features/house_ads/data/house_ads_repository.dart';
 import 'package:dualis_mobile/features/house_ads/domain/house_ad.dart';
 import 'package:dualis_mobile/features/house_ads/presentation/house_ad_card.dart';
+import 'package:dualis_mobile/features/journal/domain/journal_models.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 class FakeHouseAdsRepository extends HouseAdsRepository {
@@ -103,6 +104,68 @@ void main() {
       find.textContaining('Obrigado por registrar seu dia! 🌿'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('saved physical entry: everything recorded and the body map', (tester) async {
+    await pumpSummary(
+      tester,
+      CheckInSummaryArgs(
+        entry: JournalEntry(
+          clientId: 'c1',
+          recordedAt: fixedNow,
+          mood: 'nao_tao_bem',
+          area: 'physical',
+          triggers: const ['alimentacao'],
+          coping: 'esperei',
+          helpers: const ['beber_agua'],
+          note: 'Passou à noite',
+          items: const [
+            JournalItem(
+              kind: 'physical',
+              optionKey: 'barriga.colica.gases',
+              bodySide: 'front',
+              sensation: 'incomodo',
+              persistence: 'meses_anos',
+              intensity: 3,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.byKey(const Key('check_in_summary_details')), findsOneWidget);
+    expect(find.text('💨 Barriga · Incômodo · Gases ou barriga estufada'), findsOneWidget);
+    expect(find.text('Há quanto tempo: Meses ou anos · Intensidade 3/5'), findsOneWidget);
+    expect(find.text('O que pode ter contribuído: Alimentação'), findsOneWidget);
+    expect(find.textContaining('Como foi lidar'), findsOneWidget);
+    expect(find.textContaining('O que ajudou'), findsOneWidget);
+    expect(find.text('Sua nota: Passou à noite'), findsOneWidget);
+    expect(find.byKey(const Key('check_in_summary_body')), findsOneWidget);
+    expect(find.byKey(const Key('body_marker_barriga')), findsOneWidget);
+  });
+
+  testWidgets('saved emotional entry has no body map', (tester) async {
+    await pumpSummary(
+      tester,
+      CheckInSummaryArgs(
+        entry: JournalEntry(
+          clientId: 'c2',
+          recordedAt: fixedNow,
+          mood: 'nao_tao_bem',
+          area: 'emotional',
+          items: const [
+            JournalItem(
+              kind: 'emotional',
+              optionKey: 'passado.tristeza.culpa',
+              persistence: 'hoje',
+              intensity: 2,
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(find.text('🛑 O que já passou · Culpa ou arrependimento'), findsOneWidget);
+    expect(find.byKey(const Key('check_in_summary_body')), findsNothing);
   });
 
   testWidgets('shows the bundled house ad labelled "Anúncio" when offline',
