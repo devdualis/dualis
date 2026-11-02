@@ -507,16 +507,11 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       hint: l10n.jv23TapOneHint,
       children: [
         for (final time in JournalKeys.times)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: _ChoiceCard(
-              key: Key('jv2_time_$time'),
-              emoji: journalEmojis[time],
-              label: JournalLabels.root(l10n, time),
-              wide: true,
-              showCheck: false,
-              onTap: () => _controller.chooseTime(time),
-            ),
+          _ChoiceTile(
+            key: Key('jv2_time_$time'),
+            emoji: journalEmojis[time],
+            label: JournalLabels.root(l10n, time),
+            onTap: () => _controller.chooseTime(time),
           ),
       ],
     );
@@ -971,7 +966,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
                 l10n,
                 items[index],
                 index,
-                compact: true,
+                compact: false,
                 voice: index == voiceRow,
               ),
             ),
@@ -1036,6 +1031,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
               emoji: _persistenceShortEmojis[p],
               label: JournalLabels.persistence(l10n, p),
               selected: item.persistence == p,
+              voice: voice,
               onTap: () => _controller.setPersistence(item.draftId, p),
             ),
         ],
@@ -1746,6 +1742,9 @@ class _ChoiceCard extends StatelessWidget {
   /// Icon beside the text, for answers about the question ("Não sei").
   final bool wide;
   final bool showCheck;
+
+  /// Answers by voice; off on all rows but one when the same labels repeat.
+  final bool voice;
   final VoidCallback onTap;
 
   const _ChoiceCard({
@@ -1758,11 +1757,16 @@ class _ChoiceCard extends StatelessWidget {
     this.large = false,
     this.wide = false,
     this.showCheck = true,
+    this.voice = true,
     required this.onTap,
   });
 
   @override
-  Widget build(BuildContext context) => VoiceTarget(labels: [label], onSelect: enabled ? onTap : null, child: _content(context));
+  Widget build(BuildContext context) => VoiceTarget(
+        labels: [label],
+        onSelect: enabled && voice ? onTap : null,
+        child: _content(context),
+      );
 
   Widget _content(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
