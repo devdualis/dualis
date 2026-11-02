@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/config/feature_flags.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../home/domain/home_greeting.dart';
@@ -11,12 +12,14 @@ import '../domain/house_ad.dart';
 
 /// Native, non-blocking house ad card labelled "Anúncio" (strategy §14).
 /// It takes no parameters about the journal on purpose: the ad can never
-/// depend on what the person recorded.
+/// depend on what the person recorded. Premium builds show no ads at all
+/// and don't fetch them.
 class HouseAdCard extends ConsumerWidget {
   const HouseAdCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.watch(premiumProfilesEnabledProvider)) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context);
     final remote = ref.watch(houseAdsProvider).value;
     final ads = remote ?? bundledHouseAds(l10n);

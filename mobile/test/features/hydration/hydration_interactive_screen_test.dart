@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:dualis_mobile/core/network/api_client.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/home/domain/home_greeting.dart';
+import 'package:dualis_mobile/core/config/feature_flags.dart';
 import 'package:dualis_mobile/features/house_ads/data/house_ads_repository.dart';
 import 'package:dualis_mobile/features/house_ads/domain/house_ad.dart';
 import 'package:dualis_mobile/features/house_ads/presentation/house_ad_card.dart';
@@ -78,6 +79,7 @@ Future<FakeHydration> pumpHydration(
   WidgetTester tester, {
   HydrationState? state,
   FakeAdsRepository? ads,
+  bool premium = false,
 }) async {
   tester.view.physicalSize = const Size(900, 3000);
   tester.view.devicePixelRatio = 1.0;
@@ -93,6 +95,7 @@ Future<FakeHydration> pumpHydration(
         hydrationControllerProvider.overrideWith(() => controller),
         houseAdsRepositoryProvider.overrideWithValue(ads ?? FakeAdsRepository()),
         homeClockProvider.overrideWithValue(() => now),
+        premiumProfilesEnabledProvider.overrideWithValue(premium),
       ],
       child: const MaterialApp(
         locale: Locale('pt'),
@@ -168,6 +171,14 @@ void main() {
     await tester.tap(find.byKey(const Key('hydration_quick_add_200')));
     await tester.pumpAndSettle();
     expect(find.byType(HouseAdCard), findsNothing);
+  });
+
+  testWidgets('Premium shows no house ad after logging water', (tester) async {
+    await pumpHydration(tester, premium: true);
+    await tester.tap(find.byKey(const Key('hydration_quick_add_200')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('house_ad_card')), findsNothing);
+    expect(find.text('Anúncio'), findsNothing);
   });
 
   test('streak counts consecutive days that reached the goal', () {

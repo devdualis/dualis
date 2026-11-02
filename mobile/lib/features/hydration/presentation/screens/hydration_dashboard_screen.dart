@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/load_error_view.dart';
@@ -21,7 +22,8 @@ import '../../../../core/notifications/notifications_blocked_notice.dart';
 /// Interactive hydration screen (strategy §11): one action at a time, a glass
 /// that fills, quick buttons 200 ml / 500 ml / Outro, the person's own daily
 /// goal as a ring, a streak and 30 days of history. After logging water, the
-/// house ad card may appear at most once per day (strategy §14).
+/// house ad card may appear at most once per day (strategy §14), never on
+/// Premium.
 class HydrationDashboardScreen extends ConsumerStatefulWidget {
   static const int historyDays = 30;
 
@@ -38,7 +40,7 @@ class _HydrationDashboardScreenState
   bool _showAd = false;
 
   Future<void> _onWaterLogged() async {
-    if (_showAd) return;
+    if (_showAd || ref.read(premiumProfilesEnabledProvider)) return;
     final now = ref.read(homeClockProvider)();
     final allowed =
         await ref.read(houseAdsRepositoryProvider).takeWaterAdSlot(now);

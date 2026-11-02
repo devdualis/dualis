@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:dualis_mobile/core/config/feature_flags.dart';
 import 'package:dualis_mobile/core/network/api_client.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
@@ -35,6 +36,7 @@ void main() {
     WidgetTester tester,
     CheckInSummaryArgs args, {
     List<HouseAd>? remoteAds,
+    bool premium = false,
   }) async {
     tester.view.physicalSize = const Size(800, 1800);
     tester.view.devicePixelRatio = 1.0;
@@ -68,6 +70,7 @@ void main() {
         overrides: [
           houseAdsRepositoryProvider.overrideWithValue(ads),
           homeClockProvider.overrideWithValue(() => fixedNow),
+          premiumProfilesEnabledProvider.overrideWithValue(premium),
         ],
         child: MaterialApp.router(
           routerConfig: router,
@@ -108,6 +111,15 @@ void main() {
 
     expect(find.byType(HouseAdCard), findsOneWidget);
     expect(find.text('Anúncio'), findsOneWidget);
+  });
+
+  testWidgets('Premium shows no house ad and does not fetch ads',
+      (tester) async {
+    final ads = await pumpSummary(tester, items, premium: true);
+
+    expect(find.byKey(const Key('house_ad_card')), findsNothing);
+    expect(find.text('Anúncio'), findsNothing);
+    expect(ads.fetchCount, 0);
   });
 
   testWidgets('the ad is the same whatever was recorded', (tester) async {
