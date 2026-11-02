@@ -75,7 +75,7 @@ void main() {
     // Icons, no emoji.
     expect(find.text('😊'), findsNothing);
     expect(find.text('😕'), findsNothing);
-    expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.sentiment_satisfied_rounded), findsOneWidget);
     expect(find.byIcon(Icons.sentiment_dissatisfied_rounded), findsOneWidget);
     // Opened without an area: emotional axis.
     expect(find.text(pt.jv2AxisEmotional), findsOneWidget);

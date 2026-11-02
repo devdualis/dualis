@@ -2099,7 +2099,7 @@ class _MarkedPill extends StatelessWidget {
   }
 }
 
-/// Mood icon: green check for "Bem", amber face for "Não tão bem". Same
+/// Mood icon: green face for "Bem", amber face for "Não tão bem". Same
 /// size and shape for both; nothing else on screen depends on the choice.
 class _MoodIcon extends StatelessWidget {
   final String mood;
@@ -2121,7 +2121,7 @@ class _MoodIcon extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       child: Icon(
-        bem ? Icons.check_circle_rounded : Icons.sentiment_dissatisfied_rounded,
+        bem ? Icons.sentiment_satisfied_rounded : Icons.sentiment_dissatisfied_rounded,
         color: color,
         size: 32,
       ),
