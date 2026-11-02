@@ -35,14 +35,6 @@ extension TriggerStatusTierExtension on TriggerStatus {
 
 const Object _unset = Object();
 
-enum RoutingOutcome {
-  none,
-  wellnessConfirmation,
-  psicoEmocionalOnly,
-  fisicaOnly,
-  dualOrganicPrimacy,
-}
-
 @immutable
 class TriggerCheckInState {
   final TriggerStatus? emotionalStatus;
@@ -92,8 +84,6 @@ class TriggerCheckInState {
     this.textTouched = false,
   });
 
-  bool get isReadyToSubmit => emotionalStatus != null && physicalStatus != null;
-
   /// Resolved Single-Source-of-Truth clinical tier for the emotional axis.
   ClinicalIntensityTier get resolvedEmotionalTier =>
       ClinicalIntensityTier.fromScore(emotionalIntensity ?? emotionalStatus?.defaultIntensity);
@@ -101,39 +91,6 @@ class TriggerCheckInState {
   /// Resolved Single-Source-of-Truth clinical tier for the physical axis.
   ClinicalIntensityTier get resolvedPhysicalTier =>
       ClinicalIntensityTier.fromScore(physicalIntensity ?? physicalStatus?.defaultIntensity);
-
-  /// When editing an already-completed check-in, only the axis the user
-  /// actually touched this session should drive routing — the other axis's
-  /// carried-over value must not pull it into a combined/dual outcome.
-  RoutingOutcome get routingOutcome {
-    if (!isReadyToSubmit) return RoutingOutcome.none;
-
-    final emotionalOk = emotionalStatus == TriggerStatus.goodNormal;
-    final physicalOk = physicalStatus == TriggerStatus.goodNormal;
-
-    if (emotionalOk && physicalOk) {
-      return RoutingOutcome.wellnessConfirmation;
-    }
-
-    if (isCompletedToday && emotionalTouched != physicalTouched) {
-      final touchedEmotional = emotionalTouched;
-      final touchedStatus = touchedEmotional ? emotionalStatus : physicalStatus;
-      if (touchedStatus == TriggerStatus.goodNormal) {
-        return RoutingOutcome.none;
-      }
-      return touchedEmotional
-          ? RoutingOutcome.psicoEmocionalOnly
-          : RoutingOutcome.fisicaOnly;
-    }
-
-    if (!emotionalOk && physicalOk) {
-      return RoutingOutcome.psicoEmocionalOnly;
-    }
-    if (emotionalOk && !physicalOk) {
-      return RoutingOutcome.fisicaOnly;
-    }
-    return RoutingOutcome.dualOrganicPrimacy;
-  }
 
   /// [emotionalNarrative] and [physicalNarrative] take an explicit `null` to
   /// clear a stage's description; omit them to keep the current value.

@@ -217,15 +217,13 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
 
         if (rec != null &&
             (chk == null || !rec.recordedAt.isBefore(chk.recordedAt))) {
-          final declaredOnRec = declaredStatusOnLog(rec, axis);
           final code = AxisIntensityResolver.categoryCodeFor(rec, axis);
-          final status = declaredOnRec ??
-              (rec.intensity > 0
-                  ? triggerStatusFromIntensity(rec.intensity)
-                  : (chkStatus ?? TriggerStatus.goodNormal));
+          final status = rec.intensity > 0
+              ? triggerStatusFromIntensity(rec.intensity)
+              : (chkStatus ?? TriggerStatus.goodNormal);
           final intensity = rec.intensity > 0
               ? rec.intensity
-              : (declaredOnRec ?? chkStatus)?.defaultIntensity;
+              : chkStatus?.defaultIntensity;
           return (
             status: status,
             intensity: intensity,
