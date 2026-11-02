@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
 import '../controllers/hydration_controller.dart';
 
@@ -31,6 +32,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
   final TextEditingController _customController = TextEditingController();
   bool _isCustom = false;
   bool _isSaving = false;
+  bool _saveFailed = false;
 
   final List<int> _quickPresets = const [150, 200, 250, 300, 500];
 
@@ -64,13 +66,19 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
       amountToSave = parsed;
     }
 
-    setState(() => _isSaving = true);
+    setState(() {
+      _isSaving = true;
+      _saveFailed = false;
+    });
     final success = await ref
         .read(hydrationControllerProvider.notifier)
         .logWater(amountMl: amountToSave, source: widget.source);
 
     if (mounted) {
-      setState(() => _isSaving = false);
+      setState(() {
+        _isSaving = false;
+        _saveFailed = !success;
+      });
       if (success) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -352,6 +360,21 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
           ],
 
           const SizedBox(height: 24),
+
+          // A snackbar would sit behind this sheet, so the failure shows here.
+          if (_saveFailed) ...[
+            Text(
+              AppLocalizations.of(context).commonSaveFailed,
+              key: const Key('water_intake_save_failed'),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.emergencyCrimson,
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
 
           DualisPrimaryButton(
             key: const Key('confirm_water_intake_button'),

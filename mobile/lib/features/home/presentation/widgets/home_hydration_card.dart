@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../shared/widgets/load_error_view.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../hydration/presentation/widgets/water_intake_modal.dart';
@@ -150,15 +151,18 @@ class HomeHydrationCard extends ConsumerWidget {
                       final success = await ref
                           .read(hydrationControllerProvider.notifier)
                           .logWater(amountMl: 250, source: 'home_quick_button');
-                      if (success && context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('💧 +250 ml registrados!'),
-                            duration: Duration(seconds: 2),
-                            backgroundColor: AppColors.clinicalTealDark,
-                          ),
-                        );
+                      if (!context.mounted) return;
+                      if (!success) {
+                        showSaveFailedSnackBar(context);
+                        return;
                       }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('💧 +250 ml registrados!'),
+                          duration: Duration(seconds: 2),
+                          backgroundColor: AppColors.clinicalTealDark,
+                        ),
+                      );
                     },
                   ),
                 ),

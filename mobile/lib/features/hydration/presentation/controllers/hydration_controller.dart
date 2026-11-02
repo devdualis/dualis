@@ -14,7 +14,9 @@ class HydrationState {
   final List<WaterIntakeEntry> todayLogs;
   final Map<DateTime, int> last30DaysTotals;
   final HydrationSettings settings;
-  final String? errorMessage;
+
+  /// Why the last load failed. Kept until the next load starts.
+  final Object? loadError;
 
   const HydrationState({
     this.isLoading = false,
@@ -22,7 +24,7 @@ class HydrationState {
     this.todayLogs = const [],
     this.last30DaysTotals = const {},
     this.settings = const HydrationSettings(),
-    this.errorMessage,
+    this.loadError,
   });
 
   int get dailyTargetMl => settings.dailyTargetMl;
@@ -67,7 +69,7 @@ class HydrationState {
     List<WaterIntakeEntry>? todayLogs,
     Map<DateTime, int>? last30DaysTotals,
     HydrationSettings? settings,
-    String? errorMessage,
+    Object? loadError = _keep,
   }) {
     return HydrationState(
       isLoading: isLoading ?? this.isLoading,
@@ -75,10 +77,12 @@ class HydrationState {
       todayLogs: todayLogs ?? this.todayLogs,
       last30DaysTotals: last30DaysTotals ?? this.last30DaysTotals,
       settings: settings ?? this.settings,
-      errorMessage: errorMessage,
+      loadError: identical(loadError, _keep) ? this.loadError : loadError,
     );
   }
 }
+
+const Object _keep = Object();
 
 /// Profiles are still loading and none is known yet (right after login).
 bool _profileUnknown(ActiveProfileState s) =>
@@ -135,7 +139,7 @@ class HydrationController extends Notifier<HydrationState> {
     final activeProfileId = ref.read(activeProfileControllerProvider).activeProfile?.id;
     final session = ++_loadSession;
     final settingsEdits = _settingsEdits;
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, loadError: null);
     try {
       final settings = await _repository.getSettings();
       final todayLogs = await _repository.getLogsForDay(
@@ -182,10 +186,8 @@ class HydrationController extends Notifier<HydrationState> {
         await _notificationService.cancelAllReminders();
       }
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Erro ao carregar dados de hidratação: $e',
-      );
+      if (session != _loadSession) return;
+      state = state.copyWith(isLoading: false, loadError: e);
     }
   }
 
@@ -232,23 +234,24 @@ class HydrationController extends Notifier<HydrationState> {
       if (state.settings.reminderEnabled && _isSignedIn) {
         final isGoalReached = state.isGoalReached;
         if (!wasGoalReached && isGoalReached) {
-          await _notificationService.scheduleHydrationReminders(
-            state.settings,
-            isGoalReached: true,
-          );
+          // The water is saved: a reminder problem must not report a failed save.
+          try {
+            await _notificationService.scheduleHydrationReminders(
+              state.settings,
+              isGoalReached: true,
+            );
+          } catch (_) {}
         }
       }
 
       return true;
-    } catch (e) {
-      state = state.copyWith(
-        errorMessage: 'Erro ao registrar consumo de água: $e',
-      );
+    } catch (_) {
       return false;
     }
   }
 
-  Future<void> deleteLog(dynamic idOrEntry, {String? remoteId}) async {
+  /// False when the log could not be deleted.
+  Future<bool> deleteLog(dynamic idOrEntry, {String? remoteId}) async {
     try {
       int? localId;
       String? actualRemoteId = remoteId;
@@ -268,15 +271,15 @@ class HydrationController extends Notifier<HydrationState> {
       if (actualRemoteId != null && actualRemoteId.isNotEmpty) {
         await _repository.deleteRemoteLog(actualRemoteId);
       }
-      await loadData();
-    } catch (e) {
-      state = state.copyWith(
-        errorMessage: 'Erro ao excluir registro: $e',
-      );
+    } catch (_) {
+      return false;
     }
+    await loadData();
+    return true;
   }
 
-  Future<void> updateSettings(HydrationSettings newSettings) async {
+  /// False when the settings could not be saved.
+  Future<bool> updateSettings(HydrationSettings newSettings) async {
     _settingsEdits++;
     try {
       await _repository.saveSettings(newSettings);
@@ -292,11 +295,10 @@ class HydrationController extends Notifier<HydrationState> {
       } else {
         await _notificationService.cancelAllReminders();
       }
-    } catch (e) {
-      state = state.copyWith(
-        errorMessage: 'Erro ao atualizar configurações: $e',
-      );
+    } catch (_) {
+      return false;
     }
+    return true;
   }
 
   Future<void> toggleReminders(bool enabled) async {

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/load_error_view.dart';
 import '../../../home/domain/home_greeting.dart';
 import '../../../house_ads/data/house_ads_repository.dart';
 import '../../../house_ads/presentation/house_ad_card.dart';
@@ -60,6 +61,8 @@ class _HydrationDashboardScreenState
 
     final content = state.isLoading
         ? const Center(child: CircularProgressIndicator())
+        : state.loadError != null
+        ? LoadErrorView(error: state.loadError!, onRetry: () => notifier.loadData())
         : RefreshIndicator(
             onRefresh: () => notifier.loadData(),
             child: SingleChildScrollView(
@@ -133,7 +136,10 @@ Future<void> _logWithUndo(BuildContext context, WidgetRef ref, int ml) async {
   final messenger = ScaffoldMessenger.of(context);
   final l10n = AppLocalizations.of(context);
   final ok = await notifier.logWater(amountMl: ml, source: 'quick_chip');
-  if (!ok) return;
+  if (!ok) {
+    if (context.mounted) showSaveFailedSnackBar(context);
+    return;
+  }
   final logs = ref.read(hydrationControllerProvider).todayLogs;
   if (logs.isEmpty) return;
   final added = logs.last;
@@ -513,9 +519,12 @@ class _TodayLogs extends ConsumerWidget {
                     tooltip: l10n.xv2WaterDeleteLog,
                     icon: const Icon(Icons.delete_outline,
                         size: 20, color: Colors.grey),
-                    onPressed: () => ref
-                        .read(hydrationControllerProvider.notifier)
-                        .deleteLog(log),
+                    onPressed: () async {
+                      final ok = await ref
+                          .read(hydrationControllerProvider.notifier)
+                          .deleteLog(log);
+                      if (!ok && context.mounted) showSaveFailedSnackBar(context);
+                    },
                   ),
           ),
         );

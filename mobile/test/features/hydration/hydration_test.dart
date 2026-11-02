@@ -47,7 +47,7 @@ class FakeHydrationController extends HydrationController {
   }
 
   @override
-  Future<void> deleteLog(dynamic idOrEntry, {String? remoteId}) async {
+  Future<bool> deleteLog(dynamic idOrEntry, {String? remoteId}) async {
     deletedEntries.add(idOrEntry);
     final toRemove = state.todayLogs.where((l) {
       if (idOrEntry is WaterIntakeEntry) {
@@ -65,6 +65,7 @@ class FakeHydrationController extends HydrationController {
     final remaining = state.todayLogs.where((l) => !toRemove.contains(l)).toList();
     final newTotal = remaining.fold<int>(0, (sum, l) => sum + l.amountMl);
     state = state.copyWith(todayLogs: remaining, todayTotalMl: newTotal);
+    return true;
   }
 }
 
@@ -471,4 +472,103 @@ void main() {
       expect(find.text('Nenhum copo de água registrado hoje ainda.'), findsOneWidget);
     });
   });
+
+  group('Hydration failure states', () {
+    Widget dashboard(HydrationController controller) => ProviderScope(
+          overrides: [hydrationControllerProvider.overrideWith(() => controller)],
+          child: const MaterialApp(
+            locale: Locale('pt'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: HydrationDashboardScreen(),
+          ),
+        );
+
+    testWidgets('load failure shows the reason and a retry that reloads', (tester) async {
+      final controller = _FailingHydrationController(
+        HydrationState(loadError: Exception('SocketException: Failed host lookup')),
+      );
+      await tester.pumpWidget(dashboard(controller));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Não foi possível carregar'), findsOneWidget);
+      expect(
+        find.text('Não foi possível conectar ao servidor. Verifique sua conexão com a internet.'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('hydration_today_total')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('load_error_retry')));
+      await tester.pumpAndSettle();
+      expect(controller.loadCalls, 1);
+    });
+
+    testWidgets('quick add that fails says it was not saved', (tester) async {
+      await tester.pumpWidget(dashboard(_FailingHydrationController(
+        const HydrationState(settings: HydrationSettings(dailyTargetMl: 2000)),
+      )));
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.byKey(const Key('hydration_quick_add_200')));
+      await tester.tap(find.byKey(const Key('hydration_quick_add_200')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('save_failed_snack')), findsOneWidget);
+      expect(find.text('Não foi possível salvar. Tente de novo.'), findsOneWidget);
+      expect(find.byKey(const Key('hydration_logged_snack')), findsNothing);
+    });
+
+    testWidgets('modal that fails stays open and shows the error inside', (tester) async {
+      await tester.pumpWidget(ProviderScope(
+        overrides: [
+          hydrationControllerProvider.overrideWith(() => _FailingHydrationController(
+                const HydrationState(settings: HydrationSettings(dailyTargetMl: 2000)),
+              )),
+        ],
+        child: MaterialApp(
+          locale: const Locale('pt'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () => WaterIntakeModal.show(context),
+                child: const Text('Open Modal'),
+              ),
+            ),
+          ),
+        ),
+      ));
+      await tester.tap(find.text('Open Modal'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('water_preset_500ml')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('confirm_water_intake_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('water_intake_save_failed')), findsOneWidget);
+      expect(find.byKey(const Key('confirm_water_intake_button')), findsOneWidget);
+      expect(find.text('💧 +500 ml registrados com sucesso!'), findsNothing);
+    });
+  });
+}
+
+/// Every save fails; loads only count calls.
+class _FailingHydrationController extends HydrationController {
+  _FailingHydrationController(this._initial);
+  final HydrationState _initial;
+  int loadCalls = 0;
+
+  @override
+  HydrationState build() => _initial;
+
+  @override
+  Future<void> loadData() async => loadCalls++;
+
+  @override
+  Future<bool> logWater({required int amountMl, String source = 'manual', DateTime? timestamp}) async =>
+      false;
+
+  @override
+  Future<bool> deleteLog(dynamic idOrEntry, {String? remoteId}) async => false;
 }
