@@ -2058,7 +2058,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Entry saved on this device. It will be sent when you are online.';
 
   @override
-  String get jv2ConditionsTitle => 'My conditions';
+  String get jv2ConditionsTitle => 'Conditions & diseases';
 
   @override
   String get jv2ConditionsSubtitle =>
@@ -4876,4 +4876,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationsOpenSettings => 'Open settings';
+
+  @override
+  String get careConditionsTitle => 'Conditions & diseases';
+
+  @override
+  String get careConditionsAdd => 'Add disease or condition';
+
+  @override
+  String get careConditionsEmpty => 'No diseases or conditions registered yet.';
+
+  @override
+  String get careConditionsIntro =>
+      'Record your diseases and chronic conditions to track readings and keep your health history up to date.';
+
+  @override
+  String get careConditionsNew => 'New disease or condition';
+
+  @override
+  String get careConditionsTrackingActive => 'Measurement tracking active';
+
+  @override
+  String get careConditionsNoTracking => 'No periodic measurements';
 }

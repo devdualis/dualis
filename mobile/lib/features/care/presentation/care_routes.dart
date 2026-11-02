@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/route_paths.dart';
 import '../domain/care_models.dart';
 import 'screens/allergies_screen.dart';
 import 'screens/appointments_screen.dart';
@@ -17,6 +18,7 @@ import 'screens/vaccines_screen.dart';
 abstract final class CarePaths {
   static const vaccines = '/care/vaccines';
   static const allergies = '/care/allergies';
+  static const conditions = RoutePaths.myConditions;
   static const medications = '/care/medications';
   static const medicationForm = '/care/medications/form';
   static const appointments = '/care/appointments';

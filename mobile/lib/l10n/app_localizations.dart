@@ -3727,7 +3727,7 @@ abstract class AppLocalizations {
   /// No description provided for @jv2ConditionsTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Minhas condições'**
+  /// **'Doenças e condições'**
   String get jv2ConditionsTitle;
 
   /// No description provided for @jv2ConditionsSubtitle.
@@ -8355,6 +8355,48 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Abrir ajustes'**
   String get notificationsOpenSettings;
+
+  /// No description provided for @careConditionsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Doenças e condições'**
+  String get careConditionsTitle;
+
+  /// No description provided for @careConditionsAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar doença ou condição'**
+  String get careConditionsAdd;
+
+  /// No description provided for @careConditionsEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma doença ou condição cadastrada ainda.'**
+  String get careConditionsEmpty;
+
+  /// No description provided for @careConditionsIntro.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cadastre suas doenças e condições crônicas para registrar medições e manter seu histórico atualizado.'**
+  String get careConditionsIntro;
+
+  /// No description provided for @careConditionsNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova doença ou condição'**
+  String get careConditionsNew;
+
+  /// No description provided for @careConditionsTrackingActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acompanhamento de medições ativo'**
+  String get careConditionsTrackingActive;
+
+  /// No description provided for @careConditionsNoTracking.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem medições periódicas'**
+  String get careConditionsNoTracking;
 }
 
 class _AppLocalizationsDelegate

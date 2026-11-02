@@ -610,7 +610,7 @@
   "jv2NoteHint": "Write in your own words (optional)",
   "jv2SaveError": "Could not save right now. Please try again.",
   "jv2SavedOffline": "Entry saved on this device. It will be sent when you are online.",
-  "jv2ConditionsTitle": "My conditions",
+  "jv2ConditionsTitle": "Conditions & diseases",
   "jv2ConditionsSubtitle": "Added by you. Write them in your own words; each one shows up in your daily entry with the same 1 to 5 scale.",
   "jv2ConditionsAdd": "Add",
   "jv2ConditionsFieldHint": "E.g. Migraine",
@@ -1413,5 +1413,12 @@
   "waterCardOtherAmount": "Other amount",
   "notificationsBlockedTitle": "Notifications are off on this phone",
   "notificationsBlockedBody": "Reminders won't appear until you turn on DualisCheckUp notifications in your phone settings.",
-  "notificationsOpenSettings": "Open settings"
+  "notificationsOpenSettings": "Open settings",
+  "careConditionsTitle": "Conditions & diseases",
+  "careConditionsAdd": "Add disease or condition",
+  "careConditionsEmpty": "No diseases or conditions registered yet.",
+  "careConditionsIntro": "Record your diseases and chronic conditions to track readings and keep your health history up to date.",
+  "careConditionsNew": "New disease or condition",
+  "careConditionsTrackingActive": "Measurement tracking active",
+  "careConditionsNoTracking": "No periodic measurements"
 }

@@ -105,17 +105,16 @@ Future<void> _scrollHistoryTo(WidgetTester tester, Finder finder) async {
 }
 
 Future<void> _openMyConditions(WidgetTester tester) async {
-  await _tap(tester, _key('home_settings_button'));
-  await _tap(tester, _key('settings_my_conditions_tile'));
+  await _tap(tester, _key('nav_destination_care'));
+  await _tap(tester, _key('care_hub_conditions'));
   await _waitFor(tester, find.byType(MyConditionsScreen));
 }
 
 Future<void> _backToHome(WidgetTester tester) async {
-  // Minhas condições (or its history) -> Ajustes -> Home.
   while (find.byType(BackButton).evaluate().isNotEmpty) {
     await _tap(tester, find.byType(BackButton));
   }
-  await _tap(tester, find.byIcon(Icons.arrow_back_ios_new_rounded));
+  await _tap(tester, _key('nav_destination_home'));
   await _waitFor(tester, _key('home_settings_button'));
 }
 

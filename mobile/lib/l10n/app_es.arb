@@ -610,7 +610,7 @@
   "jv2NoteHint": "Escribe con tus palabras (opcional)",
   "jv2SaveError": "No se pudo guardar ahora. Inténtalo de nuevo.",
   "jv2SavedOffline": "Registro guardado en el dispositivo. Se enviará cuando haya conexión.",
-  "jv2ConditionsTitle": "Mis condiciones",
+  "jv2ConditionsTitle": "Enfermedades y condiciones",
   "jv2ConditionsSubtitle": "Informadas por ti. Escríbelas con tus palabras; cada una aparece en tu registro diario con la misma escala de 1 a 5.",
   "jv2ConditionsAdd": "Agregar",
   "jv2ConditionsFieldHint": "Ej.: Migraña",
@@ -1413,5 +1413,12 @@
   "waterCardOtherAmount": "Otra cantidad",
   "notificationsBlockedTitle": "Las notificaciones están desactivadas en este celular",
   "notificationsBlockedBody": "Los recordatorios no aparecerán hasta que actives las notificaciones de DualisCheckUp en los ajustes del celular.",
-  "notificationsOpenSettings": "Abrir ajustes"
+  "notificationsOpenSettings": "Abrir ajustes",
+  "careConditionsTitle": "Enfermedades y condiciones",
+  "careConditionsAdd": "Agregar enfermedad o condición",
+  "careConditionsEmpty": "Ninguna enfermedad o condición registrada todavía.",
+  "careConditionsIntro": "Registra tus enfermedades y condiciones crónicas para registrar mediciones y mantener tu historial actualizado.",
+  "careConditionsNew": "Nueva enfermedad o condición",
+  "careConditionsTrackingActive": "Seguimiento de mediciones activo",
+  "careConditionsNoTracking": "Sin mediciones periódicas"
 }

@@ -1,3 +1,4 @@
+import '../../../care/presentation/widgets/care_widgets.dart' show careAppBar, CareColors;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -198,12 +199,8 @@ class _MyConditionsScreenState extends ConsumerState<MyConditionsScreen> {
     final missingKind = premium && _track && _kinds.isEmpty;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          l10n.jv2ConditionsTitle,
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
-        ),
-      ),
+      backgroundColor: AppColors.backgroundLight,
+      appBar: careAppBar(context, l10n.careConditionsTitle),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(20),
@@ -286,14 +283,41 @@ class _MyConditionsScreenState extends ConsumerState<MyConditionsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       ListTile(
-                        leading: const Text('📝', style: TextStyle(fontSize: 22)),
-                        title: Text(c.label),
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: c.isTracked ? CareColors.greenBg : CareColors.slateBg,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            c.isTracked ? Icons.monitor_heart_outlined : Icons.healing_outlined,
+                            size: 20,
+                            color: c.isTracked ? CareColors.green : CareColors.slate,
+                          ),
+                        ),
+                        title: Text(
+                          c.label,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
                         subtitle: premium && c.isTracked
                             ? Text(
                                 c.tracking.map((k) => readingKindLabel(l10n, k)).join(' · '),
                                 key: Key('chronicTrack_kinds_${c.id}'),
                               )
                             : null,
+                        onTap: () {
+                          if (premium && c.isTracked) {
+                            context.push(
+                              RoutePaths.conditionReadingsOf(c.id),
+                              extra: c.label,
+                            );
+                          } else {
+                            _edit(c);
+                          }
+                        },
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

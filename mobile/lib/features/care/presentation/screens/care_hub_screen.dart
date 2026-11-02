@@ -3,14 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/router/route_paths.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../journal/presentation/controllers/journal_flow_controller.dart' show userConditionsProvider;
 import '../../domain/care_models.dart';
 import '../care_providers.dart';
 import '../care_routes.dart';
 import '../widgets/care_widgets.dart';
 
-/// "Meus cuidados" tab (premium): entry to vaccines, allergies, medications,
-/// prescriptions, appointments, exams and the PDF summary of the active profile.
+/// "Meus cuidados" tab (premium): entry to vaccines, allergies, diseases & conditions,
+/// medications, prescriptions, appointments, exams and the PDF summary of the active profile.
 class CareHubScreen extends ConsumerStatefulWidget {
   const CareHubScreen({super.key});
 
@@ -32,6 +34,7 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
     final meds = ref.watch(medicationsProvider).value ?? const <Medication>[];
     final doses = ref.watch(careRecordsProvider(CareKind.vaccineDose)).value;
     final allergies = ref.watch(careRecordsProvider(CareKind.allergy)).value;
+    final conditions = ref.watch(userConditionsProvider).value;
     final appts = ref.watch(careRecordsProvider(CareKind.appointment)).value;
     final allDocs = ref.watch(careDocumentsProvider).value;
     final docs = allDocs?.where((d) => d.kind != DocumentKind.prescription).length;
@@ -50,6 +53,7 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
       onRefresh: () async {
         ref.invalidate(careRecordsProvider);
         ref.invalidate(careDocumentsProvider);
+        ref.invalidate(userConditionsProvider);
       },
       child: ListView(
         key: const Key('care_hub_list'),
@@ -103,6 +107,18 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
                     ? l10n.careHubNone
                     : allergies.map((a) => a.str('name')).whereType<String>().take(3).join(', '),
             onTap: () => context.push(CarePaths.allergies),
+          ),
+          const SizedBox(height: 10),
+          CareRow(
+            key: const Key('care_hub_conditions'),
+            leading: const CareIconTile(Icons.healing_outlined, background: CareColors.slateBg, foreground: AppColors.clinicalTeal),
+            title: l10n.careConditionsTitle,
+            subtitle: conditions == null
+                ? null
+                : conditions.isEmpty
+                    ? l10n.careHubNone
+                    : conditions.map((c) => c.label).take(3).join(', '),
+            onTap: () => context.push(RoutePaths.myConditions),
           ),
           const SizedBox(height: 10),
           CareRow(

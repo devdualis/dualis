@@ -1371,7 +1371,7 @@
   "jv2NoteHint": "Escreva com suas palavras (opcional)",
   "jv2SaveError": "Não foi possível salvar agora. Tente de novo.",
   "jv2SavedOffline": "Registro salvo no aparelho. Ele será enviado quando houver conexão.",
-  "jv2ConditionsTitle": "Minhas condições",
+  "jv2ConditionsTitle": "Doenças e condições",
   "jv2ConditionsSubtitle": "Informadas por você. Escreva com suas palavras; cada uma aparece no seu registro diário com a mesma escala de 1 a 5.",
   "jv2ConditionsAdd": "Adicionar",
   "jv2ConditionsFieldHint": "Ex.: Enxaqueca",
@@ -2270,27 +2270,72 @@
   "careExamCompareTitle": "Abra o exame original e compare",
   "careExamCompareBody": "O Dualis copiou os valores do seu exame. Compare cada valor com o original antes de salvar.",
   "careExamSummary": "{exams, plural, =1{1 exame} other{{exams} exames}} · {values, plural, =1{1 valor} other{{values} valores}}",
-  "@careExamSummary": {"placeholders": {"exams": {"type": "int"}, "values": {"type": "int"}}},
+  "@careExamSummary": {
+    "placeholders": {
+      "exams": {
+        "type": "int"
+      },
+      "values": {
+        "type": "int"
+      }
+    }
+  },
   "careExamDetailsMissing": "Laboratório e data da coleta não informados",
   "careExamCollectedOn": "coleta em {date}",
-  "@careExamCollectedOn": {"placeholders": {"date": {"type": "String"}}},
+  "@careExamCollectedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "careExamDetails": "Dados do exame",
   "careExamProgress": "Exame {index} de {total} · {name}",
-  "@careExamProgress": {"placeholders": {"index": {"type": "int"}, "total": {"type": "int"}, "name": {"type": "String"}}},
+  "@careExamProgress": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "careExamJumpTitle": "Ir para um exame",
   "careExamFix": "Corrigir",
   "careExamReferenceLabel": "Referência do laudo: {text}",
-  "@careExamReferenceLabel": {"placeholders": {"text": {"type": "String"}}},
+  "@careExamReferenceLabel": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "careExamReferenceMore": "Ver referência completa",
   "careExamReferenceLess": "Ver menos",
   "careExamFixTitle": "Corrigir {item}",
-  "@careExamFixTitle": {"placeholders": {"item": {"type": "String"}}},
+  "@careExamFixTitle": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
   "careExamFixHint": "Escreva igual ao que está no exame original.",
   "careExamRowRemoved": "Valor apagado.",
   "careExamConfirmAll": "Está tudo igual ao original",
   "careExamConfirmAllHint": "Algo diferente? Toque em \"Corrigir\" no valor.",
   "careExamConfirmTitle": "Você comparou {count, plural, =1{o valor} other{os {count} valores}} com o exame original?",
-  "@careExamConfirmTitle": {"placeholders": {"count": {"type": "int"}}},
+  "@careExamConfirmTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "careExamConfirmBody": "Depois de salvar, eles aparecem no seu histórico de exames.",
   "careExamConfirmYes": "Sim, salvar",
   "careExamConfirmBack": "Voltar",
@@ -2698,30 +2743,30 @@
   "habitsChartPeriodTitle": "Ciclo menstrual",
   "habitsChartSleepBadCount": "Você dormiu mal em {count} dos últimos {days} dias",
   "@habitsChartSleepBadCount": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          },
-          "days": {
-              "type": "int"
-          }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
       }
+    }
   },
   "habitsChartMovementCount": "{count, plural, =1{Você se mexeu em 1 dia} other{Você se mexeu em {count} dias}}",
   "@habitsChartMovementCount": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "habitsChartPeriodCount": "Dias com menstruação: {count}",
   "@habitsChartPeriodCount": {
-      "placeholders": {
-          "count": {
-              "type": "int"
-          }
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
+    }
   },
   "habitsChartEmpty": "Sem registros no período",
   "habitsPeriodLabel": "Menstruação",
@@ -2739,7 +2784,13 @@
   "jv23BodyMapHint": "Toque direto no desenho.",
   "jv23BodyMarked": "Marcado:",
   "jv23BodyRemove": "Tirar {part}",
-  "@jv23BodyRemove": {"placeholders": {"part": {"type": "String"}}},
+  "@jv23BodyRemove": {
+    "placeholders": {
+      "part": {
+        "type": "String"
+      }
+    }
+  },
   "jv23WholeBodyHint": "Pele, músculos, hormônios",
   "jv23ConditionsEmpty": "Adicione uma condição que você acompanha",
   "jv23TriggersHint": "Opcional. Toque nos que combinam com hoje.",
@@ -2747,7 +2798,13 @@
   "jv23TriggerTopicPessoas": "Pessoas e dinheiro",
   "jv23TriggerTopicCorpo": "Seu corpo e o ambiente",
   "jv23TopicMarked": "{count} marcado(s)",
-  "@jv23TopicMarked": {"placeholders": {"count": {"type": "int"}}},
+  "@jv23TopicMarked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "chronicTrackBemBanner": "Como você está bem, pode só registrar suas medições do dia ou salvar sem elas.",
   "chronicTrackJustLog": "Só registrar medições",
   "chronicTrackSaveWithout": "Salvar sem medições",
@@ -2773,7 +2830,13 @@
   "chronicTrackCheckValue": "Confira o valor digitado",
   "chronicTrackTapToLog": "Toque para registrar medições",
   "chronicTrackReadingsCount": "{count, plural, =1{1 medição} other{{count} medições}}",
-  "@chronicTrackReadingsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@chronicTrackReadingsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "chronicTrackToggle": "Precisa de registro (condição crônica)",
   "chronicTrackPremiumBadge": "PREMIUM",
   "chronicTrackEdit": "Editar condição",
@@ -2784,22 +2847,58 @@
   "chronicTrackPromoScreenTitle": "Dualis Premium",
   "chronicHistoryTitle": "Histórico de medições",
   "chronicHistoryProfile": "Perfil: {name}",
-  "@chronicHistoryProfile": {"placeholders": {"name": {"type": "String"}}},
+  "@chronicHistoryProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "chronicHistoryDays": "{days} dias",
-  "@chronicHistoryDays": {"placeholders": {"days": {"type": "int"}}},
+  "@chronicHistoryDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "chronicHistoryEmpty": "Nenhuma medição registrada nos últimos {days} dias.",
-  "@chronicHistoryEmpty": {"placeholders": {"days": {"type": "int"}}},
+  "@chronicHistoryEmpty": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "chronicHistoryOffline": "Sem conexão. Mostrando só as medições salvas neste aparelho.",
   "chronicHistoryPending": "Aguardando envio",
   "chronicHistoryError": "Não foi possível carregar as medições.",
   "chronicHistoryRetry": "Tentar de novo",
   "chronicHistoryToday": "Hoje, {date}",
-  "@chronicHistoryToday": {"placeholders": {"date": {"type": "String"}}},
+  "@chronicHistoryToday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "chronicHistoryYesterday": "Ontem, {date}",
-  "@chronicHistoryYesterday": {"placeholders": {"date": {"type": "String"}}},
+  "@chronicHistoryYesterday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "chronicHistoryChartHint": "Cada ponto é uma medição, do jeito que você registrou. Toque em um ponto para ver o valor.",
   "chronicHistoryCount": "{count, plural, =1{1 medição} other{{count} medições}}",
-  "@chronicHistoryCount": {"placeholders": {"count": {"type": "int"}}},
+  "@chronicHistoryCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "chronicHistoryKindBloodPressure": "Pressão arterial",
   "chronicHistoryKindGlucose": "Glicose",
   "chronicHistoryKindWeight": "Peso",
@@ -2810,13 +2909,40 @@
   "chronicHistoryMomentPosRefeicao": "Pós-refeição",
   "chronicHistoryMomentDormir": "Ao dormir",
   "chronicHistoryValueBp": "{systolic}/{diastolic} mmHg",
-  "@chronicHistoryValueBp": {"placeholders": {"systolic": {"type": "int"}, "diastolic": {"type": "int"}}},
+  "@chronicHistoryValueBp": {
+    "placeholders": {
+      "systolic": {
+        "type": "int"
+      },
+      "diastolic": {
+        "type": "int"
+      }
+    }
+  },
   "chronicHistoryValuePulse": "pulso {pulse} bpm",
-  "@chronicHistoryValuePulse": {"placeholders": {"pulse": {"type": "int"}}},
+  "@chronicHistoryValuePulse": {
+    "placeholders": {
+      "pulse": {
+        "type": "int"
+      }
+    }
+  },
   "chronicHistoryValueGlucose": "{mgdl} mg/dL",
-  "@chronicHistoryValueGlucose": {"placeholders": {"mgdl": {"type": "int"}}},
+  "@chronicHistoryValueGlucose": {
+    "placeholders": {
+      "mgdl": {
+        "type": "int"
+      }
+    }
+  },
   "chronicHistoryValueWeight": "{kg} kg",
-  "@chronicHistoryValueWeight": {"placeholders": {"kg": {"type": "String"}}},
+  "@chronicHistoryValueWeight": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
   "chronicHistorySummarySection": "Medições",
   "chronicHistorySummaryTitle": "Medições registradas",
   "jv23MoreEmotional": "Registrar outra coisa",
@@ -2829,7 +2955,16 @@
   "jv23ClosingTitle": "Para fechar",
   "jv23ClosingHint": "As duas perguntas são opcionais.",
   "jv23StepOf": "{current} de {total}",
-  "@jv23StepOf": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@jv23StepOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "chronicTrackConditionsSubtitle": "Informadas por você. Escreva com suas palavras. As que precisam de registro recebem suas medições no registro diário; as outras usam a escala de 1 a 5.",
   "commonRetry": "Tentar de novo",
   "commonLoadFailed": "Não foi possível carregar",
@@ -2838,7 +2973,13 @@
   "waterHowMuchNow": "Quanto de água você consumiu agora?",
   "waterClose": "Fechar",
   "waterDailyGoal": "Meta do dia: {target} ml",
-  "@waterDailyGoal": {"placeholders": {"target": {"type": "int"}}},
+  "@waterDailyGoal": {
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
   "waterLoading": "Carregando...",
   "waterGoalReached": "Parabéns! Meta diária atingida!",
   "waterSelectPortion": "Selecione a porção:",
@@ -2847,16 +2988,47 @@
   "waterLogButton": "Registrar Consumo",
   "waterInvalidAmount": "Por favor, informe uma quantidade válida em ml.",
   "waterLoggedSuccess": "💧 +{ml} ml registrados com sucesso!",
-  "@waterLoggedSuccess": {"placeholders": {"ml": {"type": "int"}}},
+  "@waterLoggedSuccess": {
+    "placeholders": {
+      "ml": {
+        "type": "int"
+      }
+    }
+  },
   "waterCardTitle": "Controle de Hidratação",
   "waterCardProgress": "{total} de {target} ml atingidos hoje ({percent}%)",
-  "@waterCardProgress": {"placeholders": {"total": {"type": "int"}, "target": {"type": "int"}, "percent": {"type": "int"}}},
+  "@waterCardProgress": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "waterCardChart": "Gráfico",
   "waterCardGlass": "+250 ml (Copo)",
   "waterCardLogged": "💧 +{ml} ml registrados!",
-  "@waterCardLogged": {"placeholders": {"ml": {"type": "int"}}},
+  "@waterCardLogged": {
+    "placeholders": {
+      "ml": {
+        "type": "int"
+      }
+    }
+  },
   "waterCardOtherAmount": "Outra Quantidade",
   "notificationsBlockedTitle": "As notificações estão desligadas neste celular",
   "notificationsBlockedBody": "Os lembretes não vão aparecer até você ligar as notificações do DualisCheckUp nos ajustes do celular.",
-  "notificationsOpenSettings": "Abrir ajustes"
+  "notificationsOpenSettings": "Abrir ajustes",
+  "careConditionsTitle": "Doenças e condições",
+  "careConditionsAdd": "Adicionar doença ou condição",
+  "careConditionsEmpty": "Nenhuma doença ou condição cadastrada ainda.",
+  "careConditionsIntro": "Cadastre suas doenças e condições crônicas para registrar medições e manter seu histórico atualizado.",
+  "careConditionsNew": "Nova doença ou condição",
+  "careConditionsTrackingActive": "Acompanhamento de medições ativo",
+  "careConditionsNoTracking": "Sem medições periódicas"
 }

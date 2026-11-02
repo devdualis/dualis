@@ -379,7 +379,7 @@ void main() {
     await startNotSoGood(tester);
 
     expect(find.text(pt.jv2AreaConditions), findsOneWidget);
-    expect(find.byKey(const Key('jv2_condition_add')), findsOneWidget);
+    expect(find.byKey(const Key('jv2_condition_add')), findsNothing);
     // First on the screen, above the map (Phase 16).
     expect(
       tester.getTopLeft(find.byKey(const Key('jv2_condition_c1'))).dy,
@@ -414,6 +414,16 @@ void main() {
     expect(item, {'kind': 'condition', 'conditionId': 'c1', 'intensity': 4});
     // The condition name never leaves in the request body.
     expect(body.toString(), isNot(contains('Enxaqueca')));
+  });
+
+  testWidgets('when conditions list is empty, conditions section is completely omitted from check-in',
+      (tester) async {
+    final h = JournalHarness(conditions: const []);
+    await pumpJournalFlow(tester, h, args: physical);
+    await startNotSoGood(tester);
+
+    expect(find.text(pt.jv2AreaConditions), findsNothing);
+    expect(find.byKey(const Key('jv2_condition_add')), findsNothing);
   });
 
   testWidgets('offline save goes to the outbox and syncs once online', (tester) async {

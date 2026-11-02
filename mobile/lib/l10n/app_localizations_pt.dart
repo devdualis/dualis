@@ -2061,7 +2061,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Registro salvo no aparelho. Ele será enviado quando houver conexão.';
 
   @override
-  String get jv2ConditionsTitle => 'Minhas condições';
+  String get jv2ConditionsTitle => 'Doenças e condições';
 
   @override
   String get jv2ConditionsSubtitle =>
@@ -4883,4 +4883,27 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get notificationsOpenSettings => 'Abrir ajustes';
+
+  @override
+  String get careConditionsTitle => 'Doenças e condições';
+
+  @override
+  String get careConditionsAdd => 'Adicionar doença ou condição';
+
+  @override
+  String get careConditionsEmpty =>
+      'Nenhuma doença ou condição cadastrada ainda.';
+
+  @override
+  String get careConditionsIntro =>
+      'Cadastre suas doenças e condições crônicas para registrar medições e manter seu histórico atualizado.';
+
+  @override
+  String get careConditionsNew => 'Nova doença ou condição';
+
+  @override
+  String get careConditionsTrackingActive => 'Acompanhamento de medições ativo';
+
+  @override
+  String get careConditionsNoTracking => 'Sem medições periódicas';
 }

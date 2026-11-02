@@ -433,14 +433,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             selected: state.selectedConditionIds.contains(c.id),
             onTap: () => _controller.toggleCondition(c.id),
           ),
-      if (!trackedOnly)
-        _ConditionTile(
-          key: const Key('jv2_condition_add'),
-          icon: Icons.add_rounded,
-          label: l10n.jv2ConditionsAdd,
-          selected: false,
-          onTap: _addCondition,
-        ),
+
     ];
   }
 
@@ -718,20 +711,11 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             : null,
       ),
       children: [
-        _SectionLabel(l10n.jv2AreaConditions, strong: true),
-        if (conditions.isEmpty)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              l10n.jv23ConditionsEmpty,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
-                color: AppColors.textSecondaryLight,
-              ),
-            ),
-          ),
-        ..._conditionTiles(l10n, state, conditions),
-        const SizedBox(height: 16),
+        if (conditions.isNotEmpty) ...[
+          _SectionLabel(l10n.jv2AreaConditions, strong: true),
+          ..._conditionTiles(l10n, state, conditions),
+          const SizedBox(height: 16),
+        ],
         Center(
           child: SegmentedButton<String>(
             segments: [
@@ -811,13 +795,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         ),
       ],
     );
-  }
-
-  /// Opens "Minhas condições"; the list is read again on return.
-  Future<void> _addCondition() async {
-    await context.push(RoutePaths.myConditions);
-    if (!mounted) return;
-    ref.invalidate(userConditionsProvider);
   }
 
   Widget _intensityStep(AppLocalizations l10n, JournalFlowState state) {
@@ -1893,7 +1870,6 @@ class _TopicCardState extends State<_TopicCard> {
 class _ConditionTile extends StatelessWidget {
   final String label;
   final String? subtitle;
-  final IconData? icon;
   final bool selected;
   final bool expandable;
   final bool open;
@@ -1904,7 +1880,6 @@ class _ConditionTile extends StatelessWidget {
     super.key,
     required this.label,
     this.subtitle,
-    this.icon,
     required this.selected,
     this.expandable = false,
     this.open = false,
@@ -1944,10 +1919,7 @@ class _ConditionTile extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   child: Row(
                     children: [
-                      if (icon != null) ...[
-                        Icon(icon, size: 22, color: AppColors.dualisSymbolBlue),
-                        const SizedBox(width: 10),
-                      ],
+
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1981,7 +1953,7 @@ class _ConditionTile extends StatelessWidget {
                             color: AppColors.textSecondaryLight,
                           ),
                         )
-                      else if (icon == null)
+                      else
                         Icon(
                           selected
                               ? Icons.check_circle_rounded

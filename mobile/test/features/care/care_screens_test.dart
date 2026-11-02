@@ -183,7 +183,7 @@ void main() {
   testWidgets('hub lists every care area of the active profile', (tester) async {
     final api = FakeCareApi()..add(CareKind.allergy, {'type': 'food', 'name': 'Camarão', 'showOnProfile': true});
     await pump(tester, const CareHubScreen(), api: api);
-    for (final key in ['vaccines', 'allergies', 'medications', 'appointments', 'exams', 'summary']) {
+    for (final key in ['vaccines', 'allergies', 'conditions', 'medications', 'appointments', 'exams', 'summary']) {
       expect(find.byKey(Key('care_hub_$key')), findsOneWidget);
     }
     expect(find.text('Camarão'), findsOneWidget);

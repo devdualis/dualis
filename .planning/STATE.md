@@ -5,10 +5,10 @@ current_phase: 16
 current_phase_name: premium-chronic-condition-tracking-self-reported-measurement
 status: completed
 stopped_at: Phase 16 executed and verified (Live Flutter E2E signed off, points 1-3 addressed)
-last_updated: "2026-11-01T23:45:00.000Z"
-last_activity: 2026-11-01
+last_updated: "2026-11-02T14:22:09.857Z"
+last_activity: 2026-11-02
 last_activity_desc: Completed Phase 16 chronic condition tracking & self-reported measurements
-state_head: 92536577658359928f4181866a0370ca85c752ba
+state_head: 61dc76636fb68d15e62206e6d9f29329db2d1f07
 progress:
   total_phases: 15
   completed_phases: 11
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
 Plan: 0 of 3
 Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-11-01 - Completed quick task 261101-h2t: Simplify backend history recurrence checks and decryption fallback
+Last activity: 2026-11-02 - Completed quick task 261102-fmk: Hydration settings save feedback, localized water texts, notifications-off notice
 
 Progress: [██████████] 100%
 
@@ -150,6 +150,8 @@ None yet.
 | 261101-nsb | Prescription with no medicines read can be read again as an exam (reprocess takes an optional kind; 'Ler como exame' button); production file fingerprint backfill run (2 filled) | 2026-11-01 | 570dce1 | [261101-nsb-read-a-prescription-upload-as-an-exam-wh](./quick/261101-nsb-read-a-prescription-upload-as-an-exam-wh/) |
 | 261101-o6w | Exam reading guards: Resultado rows take the exam name, values need a letter or digit, single capitals kept (Vitamina D); old confirmed readings identified as the source of the zero and Resultado rows | 2026-11-01 | f260fa4 | [261101-o6w-exam-reading-guards-resultado-takes-the-](./quick/261101-o6w-exam-reading-guards-resultado-takes-the-/) |
 | 261101-pms | Check-in: factores en temas (opción B), mapa del cuerpo protagonista, región pelve separada (pt/en/es) | 2026-11-01 | 9253657 | [261101-pms-check-in-opcion-b-factores-mapa-del-cuer](./quick/261101-pms-check-in-opcion-b-factores-mapa-del-cuer/) |
+| 261102-ffw | Show errors/retry in habits and hydration; offline banner on every screen | 2026-11-02 | eab5cf5 | [261102-ffw-fix-ui-state-gaps-habits-hydration-offli](./quick/261102-ffw-fix-ui-state-gaps-habits-hydration-offli/) |
+| 261102-fmk | Hydration settings save feedback, localized water texts, notifications-off notice | 2026-11-02 | 61dc766 | [261102-fmk-ui-state-gaps-settings-l10n-permission](./quick/261102-fmk-ui-state-gaps-settings-l10n-permission/) |
 
 ## Deferred Items
 
