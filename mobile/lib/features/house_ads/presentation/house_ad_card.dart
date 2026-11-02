@@ -263,7 +263,7 @@ class _BrandStyle {
           tags: l10n.xv2AdPremiumTags,
           cta: l10n.xv2AdPremiumCta,
           footnote: l10n.xv2AdPremiumPrice,
-          screenshot: 'lib/assets/brand/premium_screen_care.png',
+          screenshot: 'lib/assets/brand/premium_screen_habits.png',
         );
       case 'zoc':
         return _BrandStyle(

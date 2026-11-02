@@ -220,9 +220,9 @@ class _Hero extends StatelessWidget {
 
   /// (asset, rotation, horizontal offset from centre, top). Last is on top.
   static const _screens = [
-    ('lib/assets/brand/premium_screen_medication.png', -0.14, -100.0, 34.0),
+    ('lib/assets/brand/premium_screen_care.png', -0.14, -100.0, 34.0),
     ('lib/assets/brand/premium_screen_exams.png', 0.14, 100.0, 34.0),
-    ('lib/assets/brand/premium_screen_care.png', 0.0, 0.0, 0.0),
+    ('lib/assets/brand/premium_screen_habits.png', 0.0, 0.0, 0.0),
   ];
 
   @override
