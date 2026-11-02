@@ -31,6 +31,7 @@ final branch = JournalKeys.emotionalTree[time]!.keys.first;
 final option = JournalKeys.emotionalTree[time]![branch]!.first;
 final optionKey = '$time.$branch.$option';
 String get branchLabel => JournalLabels.branch(pt, '$time.$branch');
+String get timeLabel => JournalLabels.root(pt, time);
 String get optionLabel => JournalLabels.option(pt, optionKey);
 
 VoiceState voiceState(QaApp app) => app.container.read(voiceControllerProvider);
@@ -109,6 +110,7 @@ void main() {
       await waitFor(tester, byKey('jv2_mood_nao_tao_bem'));
       expect(mic, findsNothing);
       await tap(tester, byKey('jv2_mood_nao_tao_bem'));
+      await tap(tester, byKey('jv2_time_$time'));
       await tap(tester, byKey('jv2_branch_$time.$branch'));
       await tap(tester, byKey('jv2_write_mine'));
       await waitFor(tester, byKey('jv2_custom_field'));
@@ -278,6 +280,7 @@ void main() {
     await videoStart('V04_hands_free_check_in');
     app.voice.say([
       'não tão bem',
+      timeLabel,
       branchLabel,
       optionLabel,
       'continuar',
@@ -334,7 +337,7 @@ void main() {
     await shot(tester, 'V05_stopped_on_parar');
     expect(app.voice.listens.length - base, 2);
     expect(voiceState(app).handsFree, isFalse);
-    expect(find.byKey(Key('jv2_branch_$time.$branch')), findsOneWidget,
+    expect(find.byKey(Key('jv2_time_$time')), findsOneWidget,
         reason: 'first answer applied');
   });
 
@@ -375,6 +378,7 @@ void main() {
     final app = await bootApp(tester);
     await openCheckIn(tester, app);
     await heard(tester, app, 'não tão bem');
+    await heard(tester, app, timeLabel);
     await heard(tester, app, branchLabel);
     expect(find.byKey(Key('jv2_option_$time.$branch.$option')), findsOneWidget);
     await heard(tester, app, 'voltar');
@@ -389,6 +393,7 @@ void main() {
     await openCheckIn(tester, app);
     await videoStart('V09_dictation');
     await heard(tester, app, 'não tão bem');
+    await heard(tester, app, timeLabel);
     await heard(tester, app, branchLabel);
 
     // "Escrever o meu".

@@ -204,6 +204,8 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         );
       case JournalStep.time:
         return _timeStep(l10n, state);
+      case JournalStep.branch:
+        return _branchStep(l10n, state);
       case JournalStep.options:
         return _optionsStep(
           l10n,
@@ -271,13 +273,14 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     final index = switch (state.step) {
       JournalStep.mood => 1,
       JournalStep.time => 2,
-      JournalStep.options => 3,
-      JournalStep.intensity => 4,
-      JournalStep.triggers => 5,
-      JournalStep.closing => 6,
-      _ => 7,
+      JournalStep.branch => 3,
+      JournalStep.options => 4,
+      JournalStep.intensity => 5,
+      JournalStep.triggers => 6,
+      JournalStep.closing => 7,
+      _ => 8,
     };
-    return (index, 7);
+    return (index, 8);
   }
 
   // ---- Steps ------------------------------------------------------------
@@ -491,14 +494,53 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     );
   }
 
-  /// Time and branch on one screen (v2.3).
+  /// Screen 1 of "Não tão bem": three big cards, one per time.
   Widget _timeStep(AppLocalizations l10n, JournalFlowState state) {
     return _StepLayout(
       progress: _progress(state),
       lead: _phrase(l10n, state),
-      question: l10n.jv23WhatWeighsQuestion,
+      question: l10n.jv2TimeQuestion,
       hint: l10n.jv23TapOneHint,
-      children: _branchRows(l10n, JournalKeys.emotionalTree),
+      children: [
+        for (final time in JournalKeys.times)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _ChoiceCard(
+              key: Key('jv2_time_$time'),
+              emoji: journalEmojis[time],
+              label: JournalLabels.root(l10n, time),
+              wide: true,
+              showCheck: false,
+              onTap: () => _controller.chooseTime(time),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Screen 2: the branches of the time picked on screen 1.
+  Widget _branchStep(AppLocalizations l10n, JournalFlowState state) {
+    final time = state.time!;
+    final question = switch (time) {
+      'passado' => l10n.jv24BranchQuestionPassado,
+      'presente' => l10n.jv24BranchQuestionPresente,
+      _ => l10n.jv24BranchQuestionFuturo,
+    };
+    return _StepLayout(
+      progress: _progress(state),
+      eyebrow: '${journalEmojis[time] ?? ''} ${JournalLabels.root(l10n, time)}'.trim(),
+      lead: _phrase(l10n, state),
+      question: question,
+      hint: l10n.jv23TapOneHint,
+      children: [
+        for (final branch in JournalKeys.emotionalTree[time]!.keys)
+          _ChoiceTile(
+            key: Key('jv2_branch_$time.$branch'),
+            emoji: journalEmojis['$time.$branch'],
+            label: JournalLabels.branch(l10n, '$time.$branch'),
+            onTap: () => _controller.chooseTimeBranch(time, branch),
+          ),
+      ],
     );
   }
 
@@ -2252,7 +2294,7 @@ class _MarkedPill extends StatelessWidget {
   }
 }
 
-/// Mood icon: green face for "Bem", amber face for "Não tão bem". Same
+/// Mood emoji (😊 Bem, 😕 Não tão bem) on a green or amber circle. Same
 /// size and shape for both; nothing else on screen depends on the choice.
 class _MoodIcon extends StatelessWidget {
   final String mood;
@@ -2273,10 +2315,9 @@ class _MoodIcon extends StatelessWidget {
         color: color.withValues(alpha: 0.15),
         shape: BoxShape.circle,
       ),
-      child: Icon(
-        bem ? Icons.sentiment_satisfied_rounded : Icons.sentiment_dissatisfied_rounded,
-        color: color,
-        size: 32,
+      alignment: Alignment.center,
+      child: ExcludeSemantics(
+        child: Text(journalEmojis[mood] ?? '', style: const TextStyle(fontSize: 30)),
       ),
     );
   }

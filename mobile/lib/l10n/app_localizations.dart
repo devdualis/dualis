@@ -2965,7 +2965,7 @@ abstract class AppLocalizations {
   /// No description provided for @jv2TimeQuestion.
   ///
   /// In pt, this message translates to:
-  /// **'Isso que você sente tem mais a ver com…'**
+  /// **'O que está ocupando mais espaço na sua mente agora?'**
   String get jv2TimeQuestion;
 
   /// No description provided for @jv2TimePassado.
@@ -3907,55 +3907,55 @@ abstract class AppLocalizations {
   /// No description provided for @jv2PhrasePassado1.
   ///
   /// In pt, this message translates to:
-  /// **'A mente às vezes volta no tempo. Vamos anotar isso.'**
+  /// **'Olhar para trás às vezes dói ou nos prende... Vamos registrar isso com calma.'**
   String get jv2PhrasePassado1;
 
   /// No description provided for @jv2PhrasePassado2.
   ///
   /// In pt, this message translates to:
-  /// **'Obrigado por contar. Tem a ver com o quê?'**
+  /// **'Relembrar faz parte. O que do passado está visitando sua mente hoje?'**
   String get jv2PhrasePassado2;
 
   /// No description provided for @jv2PhrasePassado3.
   ///
   /// In pt, this message translates to:
-  /// **'Vamos registrar isso com calma.'**
+  /// **'Às vezes nossa atenção fica presa lá atrás... O que houve?'**
   String get jv2PhrasePassado3;
 
   /// No description provided for @jv2PhrasePresente1.
   ///
   /// In pt, this message translates to:
-  /// **'Vamos anotar o que está pesando hoje.'**
+  /// **'O agora tem exigido muito de você, não é? Vamos olhar para isso juntos...'**
   String get jv2PhrasePresente1;
 
   /// No description provided for @jv2PhrasePresente2.
   ///
   /// In pt, this message translates to:
-  /// **'Entendi. O que combina mais com agora?'**
+  /// **'Viver o presente às vezes é desafiador. Onde está o seu foco hoje?'**
   String get jv2PhrasePresente2;
 
   /// No description provided for @jv2PhrasePresente3.
   ///
   /// In pt, this message translates to:
-  /// **'Obrigado por contar. Vamos registrar isso.'**
+  /// **'Muita coisa acontecendo ao mesmo tempo... Como você se sente com o hoje?'**
   String get jv2PhrasePresente3;
 
   /// No description provided for @jv2PhraseFuturo1.
   ///
   /// In pt, this message translates to:
-  /// **'Pensar no que vem pela frente faz parte. Vamos anotar.'**
+  /// **'O amanhã pode parecer um grande ponto de interrogação... Me conta uma coisa...'**
   String get jv2PhraseFuturo1;
 
   /// No description provided for @jv2PhraseFuturo2.
   ///
   /// In pt, this message translates to:
-  /// **'Entendi. O que combina mais com você?'**
+  /// **'Olhar para frente acelera o passo... Como está sua mente em relação ao amanhã?'**
   String get jv2PhraseFuturo2;
 
   /// No description provided for @jv2PhraseFuturo3.
   ///
   /// In pt, this message translates to:
-  /// **'Obrigado por contar. Vamos registrar isso com calma.'**
+  /// **'O futuro reserva muitas expectativas. O que ele está te trazendo agora?'**
   String get jv2PhraseFuturo3;
 
   /// No description provided for @jv2PhraseBody1.
@@ -3999,24 +3999,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Registrar ajuda você a acompanhar seu dia a dia.'**
   String get jv2PhraseRegion4;
-
-  /// No description provided for @jv2PhraseIntensity1.
-  ///
-  /// In pt, this message translates to:
-  /// **'Você escolhe o número. A escala é sua.'**
-  String get jv2PhraseIntensity1;
-
-  /// No description provided for @jv2PhraseIntensity2.
-  ///
-  /// In pt, this message translates to:
-  /// **'Não existe resposta certa. Vale o que você sente.'**
-  String get jv2PhraseIntensity2;
-
-  /// No description provided for @jv2PhraseIntensity3.
-  ///
-  /// In pt, this message translates to:
-  /// **'Quase lá. Só mais um pouco.'**
-  String get jv2PhraseIntensity3;
 
   /// No description provided for @jv2PhraseTriggers1.
   ///
@@ -8428,12 +8410,6 @@ abstract class AppLocalizations {
   /// **'Toque em uma opção.'**
   String get jv23TapOneHint;
 
-  /// No description provided for @jv23WhatWeighsQuestion.
-  ///
-  /// In pt, this message translates to:
-  /// **'O que pesa mais agora?'**
-  String get jv23WhatWeighsQuestion;
-
   /// No description provided for @jv23WhereExactly.
   ///
   /// In pt, this message translates to:
@@ -8841,6 +8817,606 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'um,uma|dois,duas|três|quatro|cinco'**
   String get voiceNumberWords;
+
+  /// No description provided for @jv2PhrasePassado4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nossa história nos acompanha, mas hoje parece que ela está pesando um pouco mais...'**
+  String get jv2PhrasePassado4;
+
+  /// No description provided for @jv2PhrasePassado5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendi. Parece que alguma coisa que já aconteceu ficou ecoando na sua cabeça...'**
+  String get jv2PhrasePassado5;
+
+  /// No description provided for @jv2PhrasePassado6.
+  ///
+  /// In pt, this message translates to:
+  /// **'Certo. Resgatar memórias exige energia. Vamos olhar mais de perto para esse momento...'**
+  String get jv2PhrasePassado6;
+
+  /// No description provided for @jv2PhrasePassado7.
+  ///
+  /// In pt, this message translates to:
+  /// **'A mente às vezes volta no tempo. Vamos anotar isso.'**
+  String get jv2PhrasePassado7;
+
+  /// No description provided for @jv2PhrasePresente4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estar no aqui e agora está parecendo uma tarefa pesada neste momento...'**
+  String get jv2PhrasePresente4;
+
+  /// No description provided for @jv2PhrasePresente5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Certo. Vamos anotar o que aconteceu nas últimas horas.'**
+  String get jv2PhrasePresente5;
+
+  /// No description provided for @jv2PhrasePresente6.
+  ///
+  /// In pt, this message translates to:
+  /// **'O dia a dia consome nossa energia. Me conta o que está drenando você agora...'**
+  String get jv2PhrasePresente6;
+
+  /// No description provided for @jv2PhrasePresente7.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos anotar o que está pesando hoje.'**
+  String get jv2PhrasePresente7;
+
+  /// No description provided for @jv2PhraseFuturo4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pensar no que vem pela frente faz parte. Vamos anotar.'**
+  String get jv2PhraseFuturo4;
+
+  /// No description provided for @jv2PhraseFuturo5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendi. Parece que o amanhã está ocupando sua atenção agora...'**
+  String get jv2PhraseFuturo5;
+
+  /// No description provided for @jv2PhraseFuturo6.
+  ///
+  /// In pt, this message translates to:
+  /// **'Planejar faz parte, e às vezes o amanhã pesa. Vamos anotar isso.'**
+  String get jv2PhraseFuturo6;
+
+  /// No description provided for @jv2PhraseFuturo7.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obrigado por contar. Vamos registrar isso com calma.'**
+  String get jv2PhraseFuturo7;
+
+  /// No description provided for @jv2PhrasePassadoTristeza1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compreendo... Essa falta pesa no peito. É algo mais específico?'**
+  String get jv2PhrasePassadoTristeza1;
+
+  /// No description provided for @jv2PhrasePassadoTristeza2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sentir essa ausência é doloroso. O que exatamente está fazendo falta hoje?'**
+  String get jv2PhrasePassadoTristeza2;
+
+  /// No description provided for @jv2PhrasePassadoTristeza3.
+  ///
+  /// In pt, this message translates to:
+  /// **'A nostalgia e a melancolia têm um peso próprio. Me conta onde dói mais:'**
+  String get jv2PhrasePassadoTristeza3;
+
+  /// No description provided for @jv2PhrasePassadoTristeza4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obrigado por contar. Tem a ver com o quê?'**
+  String get jv2PhrasePassadoTristeza4;
+
+  /// No description provided for @jv2PhrasePassadoTristeza5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acolho o seu desabafo. Vamos tentar clarear um pouco o que é esse sentimento:'**
+  String get jv2PhrasePassadoTristeza5;
+
+  /// No description provided for @jv2PhrasePassadoTristeza6.
+  ///
+  /// In pt, this message translates to:
+  /// **'Às vezes o peito aperta quando lembramos. Qual o formato dessa tristeza hoje?'**
+  String get jv2PhrasePassadoTristeza6;
+
+  /// No description provided for @jv2PhrasePassadoTristeza7.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendo... É uma sensação de perda ou de caminhos que ficaram para trás?'**
+  String get jv2PhrasePassadoTristeza7;
+
+  /// No description provided for @jv2PhrasePassadoMemoria1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sei como é... Pensamentos antigos martelando. O que exatamente está voltando?'**
+  String get jv2PhrasePassadoMemoria1;
+
+  /// No description provided for @jv2PhrasePassadoMemoria2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Memórias desconfortáveis podem ser muito invasivas. O que está insistindo em aparecer?'**
+  String get jv2PhrasePassadoMemoria2;
+
+  /// No description provided for @jv2PhrasePassadoMemoria3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lidar com o que incomoda exige coragem. O que está tirando sua paz agora?'**
+  String get jv2PhrasePassadoMemoria3;
+
+  /// No description provided for @jv2PhrasePassadoMemoria4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendi. Uma lembrança voltou hoje. Como ela aparece?'**
+  String get jv2PhrasePassadoMemoria4;
+
+  /// No description provided for @jv2PhrasePassadoMemoria5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ficar preso a uma cena antiga cansa. É sobre qual tipo de conflito?'**
+  String get jv2PhrasePassadoMemoria5;
+
+  /// No description provided for @jv2PhrasePassadoMemoria6.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obrigado por confiar. O que está voltando à sua mente?'**
+  String get jv2PhrasePassadoMemoria6;
+
+  /// No description provided for @jv2PhrasePassadoMemoria7.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compreendo o incômodo. Vamos dar um nome para esse pensamento que está te travando:'**
+  String get jv2PhrasePassadoMemoria7;
+
+  /// No description provided for @jv2PhrasePresenteEnergia1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendi, o cansaço apareceu. Como ele está?'**
+  String get jv2PhrasePresenteEnergia1;
+
+  /// No description provided for @jv2PhrasePresenteEnergia2.
+  ///
+  /// In pt, this message translates to:
+  /// **'A exaustão física e mental desliga nossos motores. O que você sente mais forte?'**
+  String get jv2PhrasePresenteEnergia2;
+
+  /// No description provided for @jv2PhrasePresenteEnergia3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem energia hoje? Vamos anotar como isso aparece.'**
+  String get jv2PhrasePresenteEnergia3;
+
+  /// No description provided for @jv2PhrasePresenteEnergia4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parece que você está operando na reserva da reserva hoje. Onde pesa mais?'**
+  String get jv2PhrasePresenteEnergia4;
+
+  /// No description provided for @jv2PhrasePresenteEnergia5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Respire fundo. Não precisa carregar o mundo nas costas. O que essa fadiga te causa?'**
+  String get jv2PhrasePresenteEnergia5;
+
+  /// No description provided for @jv2PhrasePresenteEnergia6.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obrigado por contar. Como esse cansaço está hoje?'**
+  String get jv2PhrasePresenteEnergia6;
+
+  /// No description provided for @jv2PhrasePresenteEnergia7.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendo o cansaço. Me conta o que mais faltou hoje:'**
+  String get jv2PhrasePresenteEnergia7;
+
+  /// No description provided for @jv2PhrasePresenteSobrecarga1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Os nervos estão à flor da pele por aí... O que parece estar transbordando?'**
+  String get jv2PhrasePresenteSobrecarga1;
+
+  /// No description provided for @jv2PhrasePresenteSobrecarga2.
+  ///
+  /// In pt, this message translates to:
+  /// **'A sensação de sobrecarga nos deixa com pavio curto. O que está gerando essa pressão?'**
+  String get jv2PhrasePresenteSobrecarga2;
+
+  /// No description provided for @jv2PhrasePresenteSobrecarga3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Muita pressão externa acaba gerando faíscas internas. O que está te irritando?'**
+  String get jv2PhrasePresenteSobrecarga3;
+
+  /// No description provided for @jv2PhrasePresenteSobrecarga4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parece que o ambiente ao seu redor engoliu a sua paciência hoje. O que está acontecendo?'**
+  String get jv2PhrasePresenteSobrecarga4;
+
+  /// No description provided for @jv2PhrasePresenteSobrecarga5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Excesso de estímulos cansa. Onde está o peso maior hoje?'**
+  String get jv2PhrasePresenteSobrecarga5;
+
+  /// No description provided for @jv2PhrasePresenteSobrecarga6.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendi, está demais hoje. O que mais pesa agora?'**
+  String get jv2PhrasePresenteSobrecarga6;
+
+  /// No description provided for @jv2PhrasePresenteSobrecarga7.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compreendo o estresse. O que mais está pesando agora?'**
+  String get jv2PhrasePresenteSobrecarga7;
+
+  /// No description provided for @jv2PhrasePresenteSolidao1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sentir-se sozinho(a) pesa. Obrigado por contar.'**
+  String get jv2PhrasePresenteSolidao1;
+
+  /// No description provided for @jv2PhrasePresenteSolidao2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendi. Como essa falta de companhia aparece hoje?'**
+  String get jv2PhrasePresenteSolidao2;
+
+  /// No description provided for @jv2PhrasePresenteSolidao3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Às vezes a gente se sente longe das pessoas. O que combina mais?'**
+  String get jv2PhrasePresenteSolidao3;
+
+  /// No description provided for @jv2PhrasePresenteSolidao4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obrigado por confiar. Vamos anotar isso com calma.'**
+  String get jv2PhrasePresenteSolidao4;
+
+  /// No description provided for @jv2PhrasePresenteSolidao5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estar com menos gente por perto muda o dia. Como está hoje?'**
+  String get jv2PhrasePresenteSolidao5;
+
+  /// No description provided for @jv2PhrasePresenteSolidao6.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tudo bem sentir isso. O que mais combina com agora?'**
+  String get jv2PhrasePresenteSolidao6;
+
+  /// No description provided for @jv2PhrasePresenteSolidao7.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos registrar do seu jeito. O que você sente?'**
+  String get jv2PhrasePresenteSolidao7;
+
+  /// No description provided for @jv2PhraseFuturoMente1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Essa engrenagem na sua cabeça rodando sem parar... O foco está em:'**
+  String get jv2PhraseFuturoMente1;
+
+  /// No description provided for @jv2PhraseFuturoMente2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pensamentos em cascata fazem muito barulho por dentro. Qual o assunto principal deles?'**
+  String get jv2PhraseFuturoMente2;
+
+  /// No description provided for @jv2PhraseFuturoMente3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acelerar o pensamento é como correr em uma esteira sem fim. Para onde você está correndo?'**
+  String get jv2PhraseFuturoMente3;
+
+  /// No description provided for @jv2PhraseFuturoMente4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendi, a mente está rápida hoje. Sobre o que ela gira?'**
+  String get jv2PhraseFuturoMente4;
+
+  /// No description provided for @jv2PhraseFuturoMente5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendo o turbilhão. Quando o rádio interno não desliga, o que ele fica repetindo?'**
+  String get jv2PhraseFuturoMente5;
+
+  /// No description provided for @jv2PhraseFuturoMente6.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obrigado por contar. O que mais ocupa sua cabeça agora?'**
+  String get jv2PhraseFuturoMente6;
+
+  /// No description provided for @jv2PhraseFuturoMente7.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sei como é esse loop mental. Sobre o que são esses pensamentos?'**
+  String get jv2PhraseFuturoMente7;
+
+  /// No description provided for @jv2PhraseFuturoMedo1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obrigado por contar. O que mais assusta você?'**
+  String get jv2PhraseFuturoMedo1;
+
+  /// No description provided for @jv2PhraseFuturoMedo2.
+  ///
+  /// In pt, this message translates to:
+  /// **'A insegurança em relação ao amanhã gera cenários difíceis. Qual o seu maior receio?'**
+  String get jv2PhraseFuturoMedo2;
+
+  /// No description provided for @jv2PhraseFuturoMedo3.
+  ///
+  /// In pt, this message translates to:
+  /// **'O medo do amanhã sussurra previsões ruins. O que ele está dizendo?'**
+  String get jv2PhraseFuturoMedo3;
+
+  /// No description provided for @jv2PhraseFuturoMedo4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendi. Diante do que você se sente desprotegido(a)?'**
+  String get jv2PhraseFuturoMedo4;
+
+  /// No description provided for @jv2PhraseFuturoMedo5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compreendo essa sensação de ameaça no horizonte. O que trouxe isso hoje?'**
+  String get jv2PhraseFuturoMedo5;
+
+  /// No description provided for @jv2PhraseFuturoMedo6.
+  ///
+  /// In pt, this message translates to:
+  /// **'O medo do fracasso ou da incerteza pesa muito hoje. O que você está tentando evitar?'**
+  String get jv2PhraseFuturoMedo6;
+
+  /// No description provided for @jv2PhraseFuturoMedo7.
+  ///
+  /// In pt, this message translates to:
+  /// **'Respeito o seu receio. Vamos anotar essa preocupação com calma.'**
+  String get jv2PhraseFuturoMedo7;
+
+  /// No description provided for @jv2PhraseRegionCabeca1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos anotar o que você sente aqui.'**
+  String get jv2PhraseRegionCabeca1;
+
+  /// No description provided for @jv2PhraseRegionCabeca2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendi. O que está acontecendo nessa região?'**
+  String get jv2PhraseRegionCabeca2;
+
+  /// No description provided for @jv2PhraseRegionCabeca3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Certo. Vamos registrar esse ponto de tensão. Como ele se manifesta agora?'**
+  String get jv2PhraseRegionCabeca3;
+
+  /// No description provided for @jv2PhraseRegionCabeca4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendi. Desconfortos nessa área mudam totalmente o nosso dia. Qual a sensação principal?'**
+  String get jv2PhraseRegionCabeca4;
+
+  /// No description provided for @jv2PhraseRegionCabeca5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos focar na cabeça e no pescoço. O que está incomodando?'**
+  String get jv2PhraseRegionCabeca5;
+
+  /// No description provided for @jv2PhraseRegionCabeca6.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acolho o seu relato. Como a sua cabeça está hoje?'**
+  String get jv2PhraseRegionCabeca6;
+
+  /// No description provided for @jv2PhraseRegionCabeca7.
+  ///
+  /// In pt, this message translates to:
+  /// **'Perceber o desconforto no rosto ou no pescoço é o primeiro passo. Me conta mais:'**
+  String get jv2PhraseRegionCabeca7;
+
+  /// No description provided for @jv2PhraseRegionPeito1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos olhar para o peito com calma. O que você nota?'**
+  String get jv2PhraseRegionPeito1;
+
+  /// No description provided for @jv2PhraseRegionPeito2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Certo. Vamos registrar isso com cuidado. Como está essa sensação?'**
+  String get jv2PhraseRegionPeito2;
+
+  /// No description provided for @jv2PhraseRegionPeito3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos olhar para o centro do seu peito agora. O que parece fora do lugar?'**
+  String get jv2PhraseRegionPeito3;
+
+  /// No description provided for @jv2PhraseRegionPeito4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compreendo. O que você sente mais hoje?'**
+  String get jv2PhraseRegionPeito4;
+
+  /// No description provided for @jv2PhraseRegionPeito5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obrigado por contar. Como é essa sensação no peito?'**
+  String get jv2PhraseRegionPeito5;
+
+  /// No description provided for @jv2PhraseRegionPeito6.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendido. Me ajuda a anotar o que você sente:'**
+  String get jv2PhraseRegionPeito6;
+
+  /// No description provided for @jv2PhraseRegionPeito7.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar o desconforto no peito ajuda o seu histórico. O que está presente?'**
+  String get jv2PhraseRegionPeito7;
+
+  /// No description provided for @jv2PhraseRegionBarriga1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos anotar o que a barriga está sentindo. O que há por aí?'**
+  String get jv2PhraseRegionBarriga1;
+
+  /// No description provided for @jv2PhraseRegionBarriga2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Certo. Como a sua barriga está hoje?'**
+  String get jv2PhraseRegionBarriga2;
+
+  /// No description provided for @jv2PhraseRegionBarriga3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos registrar o que você sente na barriga nas últimas horas.'**
+  String get jv2PhraseRegionBarriga3;
+
+  /// No description provided for @jv2PhraseRegionBarriga4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendi. Desconfortos aqui mudam o nosso dia. Qual o foco do incômodo?'**
+  String get jv2PhraseRegionBarriga4;
+
+  /// No description provided for @jv2PhraseRegionBarriga5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olhar para o estômago ou o intestino com calma ajuda. Me conta:'**
+  String get jv2PhraseRegionBarriga5;
+
+  /// No description provided for @jv2PhraseRegionBarriga6.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acolho o seu registro. O que a sua barriga está sentindo agora?'**
+  String get jv2PhraseRegionBarriga6;
+
+  /// No description provided for @jv2PhraseRegionBarriga7.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar isso na linha do tempo ajuda a acompanhar seus hábitos. Qual a sensação?'**
+  String get jv2PhraseRegionBarriga7;
+
+  /// No description provided for @jv2PhraseRegionCostas1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Carregar o peso do dia a dia às vezes cobra um preço. Onde incomoda?'**
+  String get jv2PhraseRegionCostas1;
+
+  /// No description provided for @jv2PhraseRegionCostas2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Certo. Vamos olhar para a coluna. O que você nota?'**
+  String get jv2PhraseRegionCostas2;
+
+  /// No description provided for @jv2PhraseRegionCostas3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos registrar esse ponto nas costas para acompanhar o histórico. Como está?'**
+  String get jv2PhraseRegionCostas3;
+
+  /// No description provided for @jv2PhraseRegionCostas4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendi. Um incômodo nas costas limita nossa liberdade de movimento. Qual a sensação?'**
+  String get jv2PhraseRegionCostas4;
+
+  /// No description provided for @jv2PhraseRegionCostas5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Focar na linha da coluna ajuda a identificar o travamento. Me conta mais sobre isso:'**
+  String get jv2PhraseRegionCostas5;
+
+  /// No description provided for @jv2PhraseRegionCostas6.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acolho o seu registro. O que as suas costas estão sentindo agora?'**
+  String get jv2PhraseRegionCostas6;
+
+  /// No description provided for @jv2PhraseRegionCostas7.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anotar o que você sente nas costas ajuda a acompanhar seus dias. Como está?'**
+  String get jv2PhraseRegionCostas7;
+
+  /// No description provided for @jv2PhraseRegionMembros1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nossos braços e pernas executam nossas ações. Onde está o limite hoje?'**
+  String get jv2PhraseRegionMembros1;
+
+  /// No description provided for @jv2PhraseRegionMembros2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Certo. O cansaço ou a tensão nas extremidades afeta nossa mobilidade. O que houve?'**
+  String get jv2PhraseRegionMembros2;
+
+  /// No description provided for @jv2PhraseRegionMembros3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vamos anotar essa sensação nos braços, pernas ou mãos. Como ela é?'**
+  String get jv2PhraseRegionMembros3;
+
+  /// No description provided for @jv2PhraseRegionMembros4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendi. Mãos, braços ou pernas doloridas mudam nosso rendimento. Qual a sensação?'**
+  String get jv2PhraseRegionMembros4;
+
+  /// No description provided for @jv2PhraseRegionMembros5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Focar nos músculos ou nas juntas ajuda a descrever. O que você sente?'**
+  String get jv2PhraseRegionMembros5;
+
+  /// No description provided for @jv2PhraseRegionMembros6.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acolho seu registro. Como seus braços e pernas estão agora?'**
+  String get jv2PhraseRegionMembros6;
+
+  /// No description provided for @jv2PhraseRegionMembros7.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar ajuda você a acompanhar seu dia a dia.'**
+  String get jv2PhraseRegionMembros7;
+
+  /// No description provided for @jv2PhraseThanks1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obrigado por compartilhar isso comigo hoje. Vamos anotar quanto isso pesa no seu dia.'**
+  String get jv2PhraseThanks1;
+
+  /// No description provided for @jv24BranchQuestionPassado.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olhar para trás está te trazendo qual sensação?'**
+  String get jv24BranchQuestionPassado;
+
+  /// No description provided for @jv24BranchQuestionPresente.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como seu corpo e sua mente estão reagindo ao agora?'**
+  String get jv24BranchQuestionPresente;
+
+  /// No description provided for @jv24BranchQuestionFuturo.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que você sente quando projeta o amanhã?'**
+  String get jv24BranchQuestionFuturo;
 }
 
 class _AppLocalizationsDelegate

@@ -201,6 +201,7 @@ void main() {
     testWidgets('Premium: whole check-in answered by voice, hands-free', (tester) async {
       voice = FakeVoiceInput([
         'não tão bem',
+        JournalLabels.root(pt, time),
         JournalLabels.branch(pt, '$time.$branch'),
         JournalLabels.option(pt, optionKey),
         'próximo',
@@ -246,6 +247,7 @@ void main() {
       voice = FakeVoiceInput();
       await pump(tester, premium: true);
       await say(tester, 'não tão bem');
+      await say(tester, JournalLabels.root(pt, time));
       await say(tester, JournalLabels.branch(pt, '$time.$branch'));
       final options = JournalKeys.emotionalTree[time]![branch]!.take(2).toList();
       final labels = [for (final o in options) JournalLabels.option(pt, '$time.$branch.$o')];
@@ -272,7 +274,8 @@ void main() {
     testWidgets('dictation writes into the note field', (tester) async {
       voice = FakeVoiceInput(['dormi pouco']);
       await pump(tester, premium: true);
-      for (final phrase in ['não tão bem', JournalLabels.branch(pt, '$time.$branch'),
+      for (final phrase in ['não tão bem', JournalLabels.root(pt, time),
+          JournalLabels.branch(pt, '$time.$branch'),
           JournalLabels.option(pt, optionKey), 'continuar', 'hoje', 'três', 'continuar',
           'pular', 'pular']) {
         await say(tester, phrase);

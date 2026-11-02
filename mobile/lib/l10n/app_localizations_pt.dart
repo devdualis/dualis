@@ -1662,7 +1662,8 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get jv2TimeQuestion => 'Isso que você sente tem mais a ver com…';
+  String get jv2TimeQuestion =>
+      'O que está ocupando mais espaço na sua mente agora?';
 
   @override
   String get jv2TimePassado => 'O que já passou';
@@ -2165,33 +2166,39 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get jv2PhrasePassado1 =>
-      'A mente às vezes volta no tempo. Vamos anotar isso.';
+      'Olhar para trás às vezes dói ou nos prende... Vamos registrar isso com calma.';
 
   @override
-  String get jv2PhrasePassado2 => 'Obrigado por contar. Tem a ver com o quê?';
+  String get jv2PhrasePassado2 =>
+      'Relembrar faz parte. O que do passado está visitando sua mente hoje?';
 
   @override
-  String get jv2PhrasePassado3 => 'Vamos registrar isso com calma.';
+  String get jv2PhrasePassado3 =>
+      'Às vezes nossa atenção fica presa lá atrás... O que houve?';
 
   @override
-  String get jv2PhrasePresente1 => 'Vamos anotar o que está pesando hoje.';
+  String get jv2PhrasePresente1 =>
+      'O agora tem exigido muito de você, não é? Vamos olhar para isso juntos...';
 
   @override
-  String get jv2PhrasePresente2 => 'Entendi. O que combina mais com agora?';
+  String get jv2PhrasePresente2 =>
+      'Viver o presente às vezes é desafiador. Onde está o seu foco hoje?';
 
   @override
-  String get jv2PhrasePresente3 => 'Obrigado por contar. Vamos registrar isso.';
+  String get jv2PhrasePresente3 =>
+      'Muita coisa acontecendo ao mesmo tempo... Como você se sente com o hoje?';
 
   @override
   String get jv2PhraseFuturo1 =>
-      'Pensar no que vem pela frente faz parte. Vamos anotar.';
+      'O amanhã pode parecer um grande ponto de interrogação... Me conta uma coisa...';
 
   @override
-  String get jv2PhraseFuturo2 => 'Entendi. O que combina mais com você?';
+  String get jv2PhraseFuturo2 =>
+      'Olhar para frente acelera o passo... Como está sua mente em relação ao amanhã?';
 
   @override
   String get jv2PhraseFuturo3 =>
-      'Obrigado por contar. Vamos registrar isso com calma.';
+      'O futuro reserva muitas expectativas. O que ele está te trazendo agora?';
 
   @override
   String get jv2PhraseBody1 => 'Vamos anotar o que você sente no corpo.';
@@ -2214,16 +2221,6 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get jv2PhraseRegion4 =>
       'Registrar ajuda você a acompanhar seu dia a dia.';
-
-  @override
-  String get jv2PhraseIntensity1 => 'Você escolhe o número. A escala é sua.';
-
-  @override
-  String get jv2PhraseIntensity2 =>
-      'Não existe resposta certa. Vale o que você sente.';
-
-  @override
-  String get jv2PhraseIntensity3 => 'Quase lá. Só mais um pouco.';
 
   @override
   String get jv2PhraseTriggers1 =>
@@ -4915,9 +4912,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get jv23TapOneHint => 'Toque em uma opção.';
 
   @override
-  String get jv23WhatWeighsQuestion => 'O que pesa mais agora?';
-
-  @override
   String get jv23WhereExactly => 'Onde exatamente?';
 
   @override
@@ -5153,4 +5147,400 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get voiceNumberWords => 'um,uma|dois,duas|três|quatro|cinco';
+
+  @override
+  String get jv2PhrasePassado4 =>
+      'Nossa história nos acompanha, mas hoje parece que ela está pesando um pouco mais...';
+
+  @override
+  String get jv2PhrasePassado5 =>
+      'Entendi. Parece que alguma coisa que já aconteceu ficou ecoando na sua cabeça...';
+
+  @override
+  String get jv2PhrasePassado6 =>
+      'Certo. Resgatar memórias exige energia. Vamos olhar mais de perto para esse momento...';
+
+  @override
+  String get jv2PhrasePassado7 =>
+      'A mente às vezes volta no tempo. Vamos anotar isso.';
+
+  @override
+  String get jv2PhrasePresente4 =>
+      'Estar no aqui e agora está parecendo uma tarefa pesada neste momento...';
+
+  @override
+  String get jv2PhrasePresente5 =>
+      'Certo. Vamos anotar o que aconteceu nas últimas horas.';
+
+  @override
+  String get jv2PhrasePresente6 =>
+      'O dia a dia consome nossa energia. Me conta o que está drenando você agora...';
+
+  @override
+  String get jv2PhrasePresente7 => 'Vamos anotar o que está pesando hoje.';
+
+  @override
+  String get jv2PhraseFuturo4 =>
+      'Pensar no que vem pela frente faz parte. Vamos anotar.';
+
+  @override
+  String get jv2PhraseFuturo5 =>
+      'Entendi. Parece que o amanhã está ocupando sua atenção agora...';
+
+  @override
+  String get jv2PhraseFuturo6 =>
+      'Planejar faz parte, e às vezes o amanhã pesa. Vamos anotar isso.';
+
+  @override
+  String get jv2PhraseFuturo7 =>
+      'Obrigado por contar. Vamos registrar isso com calma.';
+
+  @override
+  String get jv2PhrasePassadoTristeza1 =>
+      'Compreendo... Essa falta pesa no peito. É algo mais específico?';
+
+  @override
+  String get jv2PhrasePassadoTristeza2 =>
+      'Sentir essa ausência é doloroso. O que exatamente está fazendo falta hoje?';
+
+  @override
+  String get jv2PhrasePassadoTristeza3 =>
+      'A nostalgia e a melancolia têm um peso próprio. Me conta onde dói mais:';
+
+  @override
+  String get jv2PhrasePassadoTristeza4 =>
+      'Obrigado por contar. Tem a ver com o quê?';
+
+  @override
+  String get jv2PhrasePassadoTristeza5 =>
+      'Acolho o seu desabafo. Vamos tentar clarear um pouco o que é esse sentimento:';
+
+  @override
+  String get jv2PhrasePassadoTristeza6 =>
+      'Às vezes o peito aperta quando lembramos. Qual o formato dessa tristeza hoje?';
+
+  @override
+  String get jv2PhrasePassadoTristeza7 =>
+      'Entendo... É uma sensação de perda ou de caminhos que ficaram para trás?';
+
+  @override
+  String get jv2PhrasePassadoMemoria1 =>
+      'Sei como é... Pensamentos antigos martelando. O que exatamente está voltando?';
+
+  @override
+  String get jv2PhrasePassadoMemoria2 =>
+      'Memórias desconfortáveis podem ser muito invasivas. O que está insistindo em aparecer?';
+
+  @override
+  String get jv2PhrasePassadoMemoria3 =>
+      'Lidar com o que incomoda exige coragem. O que está tirando sua paz agora?';
+
+  @override
+  String get jv2PhrasePassadoMemoria4 =>
+      'Entendi. Uma lembrança voltou hoje. Como ela aparece?';
+
+  @override
+  String get jv2PhrasePassadoMemoria5 =>
+      'Ficar preso a uma cena antiga cansa. É sobre qual tipo de conflito?';
+
+  @override
+  String get jv2PhrasePassadoMemoria6 =>
+      'Obrigado por confiar. O que está voltando à sua mente?';
+
+  @override
+  String get jv2PhrasePassadoMemoria7 =>
+      'Compreendo o incômodo. Vamos dar um nome para esse pensamento que está te travando:';
+
+  @override
+  String get jv2PhrasePresenteEnergia1 =>
+      'Entendi, o cansaço apareceu. Como ele está?';
+
+  @override
+  String get jv2PhrasePresenteEnergia2 =>
+      'A exaustão física e mental desliga nossos motores. O que você sente mais forte?';
+
+  @override
+  String get jv2PhrasePresenteEnergia3 =>
+      'Sem energia hoje? Vamos anotar como isso aparece.';
+
+  @override
+  String get jv2PhrasePresenteEnergia4 =>
+      'Parece que você está operando na reserva da reserva hoje. Onde pesa mais?';
+
+  @override
+  String get jv2PhrasePresenteEnergia5 =>
+      'Respire fundo. Não precisa carregar o mundo nas costas. O que essa fadiga te causa?';
+
+  @override
+  String get jv2PhrasePresenteEnergia6 =>
+      'Obrigado por contar. Como esse cansaço está hoje?';
+
+  @override
+  String get jv2PhrasePresenteEnergia7 =>
+      'Entendo o cansaço. Me conta o que mais faltou hoje:';
+
+  @override
+  String get jv2PhrasePresenteSobrecarga1 =>
+      'Os nervos estão à flor da pele por aí... O que parece estar transbordando?';
+
+  @override
+  String get jv2PhrasePresenteSobrecarga2 =>
+      'A sensação de sobrecarga nos deixa com pavio curto. O que está gerando essa pressão?';
+
+  @override
+  String get jv2PhrasePresenteSobrecarga3 =>
+      'Muita pressão externa acaba gerando faíscas internas. O que está te irritando?';
+
+  @override
+  String get jv2PhrasePresenteSobrecarga4 =>
+      'Parece que o ambiente ao seu redor engoliu a sua paciência hoje. O que está acontecendo?';
+
+  @override
+  String get jv2PhrasePresenteSobrecarga5 =>
+      'Excesso de estímulos cansa. Onde está o peso maior hoje?';
+
+  @override
+  String get jv2PhrasePresenteSobrecarga6 =>
+      'Entendi, está demais hoje. O que mais pesa agora?';
+
+  @override
+  String get jv2PhrasePresenteSobrecarga7 =>
+      'Compreendo o estresse. O que mais está pesando agora?';
+
+  @override
+  String get jv2PhrasePresenteSolidao1 =>
+      'Sentir-se sozinho(a) pesa. Obrigado por contar.';
+
+  @override
+  String get jv2PhrasePresenteSolidao2 =>
+      'Entendi. Como essa falta de companhia aparece hoje?';
+
+  @override
+  String get jv2PhrasePresenteSolidao3 =>
+      'Às vezes a gente se sente longe das pessoas. O que combina mais?';
+
+  @override
+  String get jv2PhrasePresenteSolidao4 =>
+      'Obrigado por confiar. Vamos anotar isso com calma.';
+
+  @override
+  String get jv2PhrasePresenteSolidao5 =>
+      'Estar com menos gente por perto muda o dia. Como está hoje?';
+
+  @override
+  String get jv2PhrasePresenteSolidao6 =>
+      'Tudo bem sentir isso. O que mais combina com agora?';
+
+  @override
+  String get jv2PhrasePresenteSolidao7 =>
+      'Vamos registrar do seu jeito. O que você sente?';
+
+  @override
+  String get jv2PhraseFuturoMente1 =>
+      'Essa engrenagem na sua cabeça rodando sem parar... O foco está em:';
+
+  @override
+  String get jv2PhraseFuturoMente2 =>
+      'Pensamentos em cascata fazem muito barulho por dentro. Qual o assunto principal deles?';
+
+  @override
+  String get jv2PhraseFuturoMente3 =>
+      'Acelerar o pensamento é como correr em uma esteira sem fim. Para onde você está correndo?';
+
+  @override
+  String get jv2PhraseFuturoMente4 =>
+      'Entendi, a mente está rápida hoje. Sobre o que ela gira?';
+
+  @override
+  String get jv2PhraseFuturoMente5 =>
+      'Entendo o turbilhão. Quando o rádio interno não desliga, o que ele fica repetindo?';
+
+  @override
+  String get jv2PhraseFuturoMente6 =>
+      'Obrigado por contar. O que mais ocupa sua cabeça agora?';
+
+  @override
+  String get jv2PhraseFuturoMente7 =>
+      'Sei como é esse loop mental. Sobre o que são esses pensamentos?';
+
+  @override
+  String get jv2PhraseFuturoMedo1 =>
+      'Obrigado por contar. O que mais assusta você?';
+
+  @override
+  String get jv2PhraseFuturoMedo2 =>
+      'A insegurança em relação ao amanhã gera cenários difíceis. Qual o seu maior receio?';
+
+  @override
+  String get jv2PhraseFuturoMedo3 =>
+      'O medo do amanhã sussurra previsões ruins. O que ele está dizendo?';
+
+  @override
+  String get jv2PhraseFuturoMedo4 =>
+      'Entendi. Diante do que você se sente desprotegido(a)?';
+
+  @override
+  String get jv2PhraseFuturoMedo5 =>
+      'Compreendo essa sensação de ameaça no horizonte. O que trouxe isso hoje?';
+
+  @override
+  String get jv2PhraseFuturoMedo6 =>
+      'O medo do fracasso ou da incerteza pesa muito hoje. O que você está tentando evitar?';
+
+  @override
+  String get jv2PhraseFuturoMedo7 =>
+      'Respeito o seu receio. Vamos anotar essa preocupação com calma.';
+
+  @override
+  String get jv2PhraseRegionCabeca1 => 'Vamos anotar o que você sente aqui.';
+
+  @override
+  String get jv2PhraseRegionCabeca2 =>
+      'Entendi. O que está acontecendo nessa região?';
+
+  @override
+  String get jv2PhraseRegionCabeca3 =>
+      'Certo. Vamos registrar esse ponto de tensão. Como ele se manifesta agora?';
+
+  @override
+  String get jv2PhraseRegionCabeca4 =>
+      'Entendi. Desconfortos nessa área mudam totalmente o nosso dia. Qual a sensação principal?';
+
+  @override
+  String get jv2PhraseRegionCabeca5 =>
+      'Vamos focar na cabeça e no pescoço. O que está incomodando?';
+
+  @override
+  String get jv2PhraseRegionCabeca6 =>
+      'Acolho o seu relato. Como a sua cabeça está hoje?';
+
+  @override
+  String get jv2PhraseRegionCabeca7 =>
+      'Perceber o desconforto no rosto ou no pescoço é o primeiro passo. Me conta mais:';
+
+  @override
+  String get jv2PhraseRegionPeito1 =>
+      'Vamos olhar para o peito com calma. O que você nota?';
+
+  @override
+  String get jv2PhraseRegionPeito2 =>
+      'Certo. Vamos registrar isso com cuidado. Como está essa sensação?';
+
+  @override
+  String get jv2PhraseRegionPeito3 =>
+      'Vamos olhar para o centro do seu peito agora. O que parece fora do lugar?';
+
+  @override
+  String get jv2PhraseRegionPeito4 => 'Compreendo. O que você sente mais hoje?';
+
+  @override
+  String get jv2PhraseRegionPeito5 =>
+      'Obrigado por contar. Como é essa sensação no peito?';
+
+  @override
+  String get jv2PhraseRegionPeito6 =>
+      'Entendido. Me ajuda a anotar o que você sente:';
+
+  @override
+  String get jv2PhraseRegionPeito7 =>
+      'Registrar o desconforto no peito ajuda o seu histórico. O que está presente?';
+
+  @override
+  String get jv2PhraseRegionBarriga1 =>
+      'Vamos anotar o que a barriga está sentindo. O que há por aí?';
+
+  @override
+  String get jv2PhraseRegionBarriga2 => 'Certo. Como a sua barriga está hoje?';
+
+  @override
+  String get jv2PhraseRegionBarriga3 =>
+      'Vamos registrar o que você sente na barriga nas últimas horas.';
+
+  @override
+  String get jv2PhraseRegionBarriga4 =>
+      'Entendi. Desconfortos aqui mudam o nosso dia. Qual o foco do incômodo?';
+
+  @override
+  String get jv2PhraseRegionBarriga5 =>
+      'Olhar para o estômago ou o intestino com calma ajuda. Me conta:';
+
+  @override
+  String get jv2PhraseRegionBarriga6 =>
+      'Acolho o seu registro. O que a sua barriga está sentindo agora?';
+
+  @override
+  String get jv2PhraseRegionBarriga7 =>
+      'Registrar isso na linha do tempo ajuda a acompanhar seus hábitos. Qual a sensação?';
+
+  @override
+  String get jv2PhraseRegionCostas1 =>
+      'Carregar o peso do dia a dia às vezes cobra um preço. Onde incomoda?';
+
+  @override
+  String get jv2PhraseRegionCostas2 =>
+      'Certo. Vamos olhar para a coluna. O que você nota?';
+
+  @override
+  String get jv2PhraseRegionCostas3 =>
+      'Vamos registrar esse ponto nas costas para acompanhar o histórico. Como está?';
+
+  @override
+  String get jv2PhraseRegionCostas4 =>
+      'Entendi. Um incômodo nas costas limita nossa liberdade de movimento. Qual a sensação?';
+
+  @override
+  String get jv2PhraseRegionCostas5 =>
+      'Focar na linha da coluna ajuda a identificar o travamento. Me conta mais sobre isso:';
+
+  @override
+  String get jv2PhraseRegionCostas6 =>
+      'Acolho o seu registro. O que as suas costas estão sentindo agora?';
+
+  @override
+  String get jv2PhraseRegionCostas7 =>
+      'Anotar o que você sente nas costas ajuda a acompanhar seus dias. Como está?';
+
+  @override
+  String get jv2PhraseRegionMembros1 =>
+      'Nossos braços e pernas executam nossas ações. Onde está o limite hoje?';
+
+  @override
+  String get jv2PhraseRegionMembros2 =>
+      'Certo. O cansaço ou a tensão nas extremidades afeta nossa mobilidade. O que houve?';
+
+  @override
+  String get jv2PhraseRegionMembros3 =>
+      'Vamos anotar essa sensação nos braços, pernas ou mãos. Como ela é?';
+
+  @override
+  String get jv2PhraseRegionMembros4 =>
+      'Entendi. Mãos, braços ou pernas doloridas mudam nosso rendimento. Qual a sensação?';
+
+  @override
+  String get jv2PhraseRegionMembros5 =>
+      'Focar nos músculos ou nas juntas ajuda a descrever. O que você sente?';
+
+  @override
+  String get jv2PhraseRegionMembros6 =>
+      'Acolho seu registro. Como seus braços e pernas estão agora?';
+
+  @override
+  String get jv2PhraseRegionMembros7 =>
+      'Registrar ajuda você a acompanhar seu dia a dia.';
+
+  @override
+  String get jv2PhraseThanks1 =>
+      'Obrigado por compartilhar isso comigo hoje. Vamos anotar quanto isso pesa no seu dia.';
+
+  @override
+  String get jv24BranchQuestionPassado =>
+      'Olhar para trás está te trazendo qual sensação?';
+
+  @override
+  String get jv24BranchQuestionPresente =>
+      'Como seu corpo e sua mente estão reagindo ao agora?';
+
+  @override
+  String get jv24BranchQuestionFuturo =>
+      'O que você sente quando projeta o amanhã?';
 }

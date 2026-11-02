@@ -12,8 +12,10 @@ enum JournalStep {
   positiveStart,
   positiveOptions,
 
-  /// Time and branch on one screen (v2.3).
+  /// "Não tão bem": the time (screen 1), then its branches (screen 2), then
+  /// the options (screen 3), as in the client spec.
   time,
+  branch,
   options,
   body,
 

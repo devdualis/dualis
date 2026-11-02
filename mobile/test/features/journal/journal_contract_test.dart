@@ -342,7 +342,17 @@ void main() {
         final expected = JournalLabels.phrasePools.values.fold<int>(0, (a, b) => a + b);
         expect(phrases, hasLength(expected));
         for (final pool in JournalLabels.phrasePools.entries) {
-          expect(pool.value, inInclusiveRange(3, 4), reason: pool.key);
+          expect(pool.value, inInclusiveRange(1, 7), reason: pool.key);
+        }
+        // Client spec: 7 per time, per emotional branch and per client region.
+        final sevens = [
+          ...JournalKeys.times,
+          for (final t in JournalKeys.emotionalTree.entries)
+            for (final b in t.value.keys) '${t.key}.$b',
+          for (final r in ['cabeca', 'peito', 'barriga', 'costas', 'membros']) 'region.$r',
+        ];
+        for (final pool in sevens) {
+          expect(JournalLabels.phrasePools[pool], 7, reason: pool);
         }
         for (final e in phrases.entries) {
           expect(e.value.length, lessThanOrEqualTo(90), reason: e.key);

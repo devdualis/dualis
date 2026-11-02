@@ -13,6 +13,10 @@ import 'journal_flow_state.dart';
 /// Source of randomness for transition phrases; overridden in tests.
 final journalRandomProvider = Provider<Random>((ref) => Random());
 
+/// Last phrase variant shown per pool, kept for the app session so the
+/// next entry opens each screen with a different phrase.
+final lastPhraseProvider = Provider<Map<String, int>>((ref) => {});
+
 /// Active conditions of the current profile (cached for offline use).
 final userConditionsProvider = FutureProvider.autoDispose<List<UserCondition>>(
   (ref) => ref.watch(journalRepositoryProvider).conditions(),
@@ -190,8 +194,19 @@ class JournalFlowController extends Notifier<JournalFlowState> {
 
   // ---- Emotional --------------------------------------------------------
 
-  /// Time and branch are picked on one screen (v2.3): the branch tells the
-  /// time. From "Bem" it opens the good moments, otherwise the options.
+  /// Screen 1 of "Não tão bem": the time opens its branches.
+  void chooseTime(String time) {
+    _go(state.copyWith(
+      time: time,
+      clearBranch: true,
+      step: JournalStep.branch,
+      selectedOptions: const {},
+      customLabels: const [],
+    ));
+  }
+
+  /// A branch of [time]. From "Bem" (good moments, time and branch on one
+  /// screen) it opens the good moments, otherwise the options.
   void chooseTimeBranch(String time, String branch) {
     _go(state.copyWith(
       time: time,
@@ -521,7 +536,8 @@ class JournalFlowController extends Notifier<JournalFlowState> {
     return _capped(merged);
   }
 
-  /// Picks a random approved phrase for the screen being shown.
+  /// Picks a random approved phrase for the screen being shown, never the
+  /// one the same screen showed last time in this app session.
   JournalFlowState _withPhrase(JournalFlowState next) {
     final limit = next.items.length >= JournalKeys.maxItems;
     final pool = _phrasePool(next);
@@ -530,7 +546,20 @@ class JournalFlowController extends Notifier<JournalFlowState> {
     }
     final count = JournalLabels.phrasePools[pool] ?? 0;
     if (count == 0) return next.copyWith(clearPhrase: true, itemLimitReached: limit);
-    final id = '$pool.${ref.read(journalRandomProvider).nextInt(count) + 1}';
+    final last = ref.read(lastPhraseProvider);
+    final previous = last[pool];
+    final random = ref.read(journalRandomProvider);
+    var n = 1;
+    if (count > 1) {
+      if (previous == null) {
+        n = random.nextInt(count) + 1;
+      } else {
+        n = random.nextInt(count - 1) + 1;
+        if (n >= previous) n++;
+      }
+    }
+    last[pool] = n;
+    final id = '$pool.$n';
     return next.copyWith(
       phraseId: id,
       itemLimitReached: limit,
@@ -544,14 +573,17 @@ class JournalFlowController extends Notifier<JournalFlowState> {
     switch (s.step) {
       case JournalStep.time:
         return 'time';
-      case JournalStep.options:
+      case JournalStep.branch:
         return s.time;
+      case JournalStep.options:
+        return '${s.time}.${s.branch}';
       case JournalStep.body:
         return 'body';
       case JournalStep.regionBranch:
-        return 'region';
+        final own = 'region.${s.currentRegion?.region}';
+        return JournalLabels.phrasePools.containsKey(own) ? own : 'region';
       case JournalStep.intensity:
-        return 'intensity';
+        return 'thanks';
       case JournalStep.triggers:
         return 'triggers';
       case JournalStep.positiveOptions:

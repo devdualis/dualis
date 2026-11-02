@@ -295,8 +295,10 @@ void main() {
     await _capture('11_emotional_humor');
     await _tapKey(tester, 'jv2_mood_nao_tao_bem');
 
-    // Emotional branches
+    // Emotional times, then branches
     await _capture('12_emotional_o_que_pesa');
+    await _tapKey(tester, 'jv2_time_futuro');
+    await _capture('12b_emotional_bifurcacao');
     await _tapKey(tester, 'jv2_branch_futuro.mente');
 
     // Emotional options

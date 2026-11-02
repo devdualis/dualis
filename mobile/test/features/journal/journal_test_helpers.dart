@@ -235,6 +235,13 @@ Future<GoRouter> pumpJournalFlow(
   return router;
 }
 
+/// "Não tão bem" emotional path: the time (screen 1), then its branch
+/// (screen 2).
+Future<void> pickFeeling(WidgetTester tester, String time, String branch) async {
+  await tapKey(tester, 'jv2_time_$time');
+  await tapKey(tester, 'jv2_branch_$time.$branch');
+}
+
 Future<void> tapKey(WidgetTester tester, String key) async {
   final finder = find.byKey(Key(key));
   await tester.ensureVisible(finder);

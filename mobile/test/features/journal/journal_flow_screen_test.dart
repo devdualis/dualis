@@ -1,6 +1,7 @@
 import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
 import 'package:dualis_mobile/features/journal/domain/journal_keys.dart';
 import 'package:dualis_mobile/features/journal/domain/journal_models.dart';
+import 'package:dualis_mobile/features/journal/presentation/controllers/journal_flow_controller.dart';
 import 'package:dualis_mobile/features/journal/presentation/controllers/journal_flow_state.dart';
 import 'package:dualis_mobile/features/journal/presentation/journal_labels.dart';
 import 'package:dualis_mobile/features/journal/presentation/screens/journal_flow_screen.dart';
@@ -74,11 +75,11 @@ void main() {
     expect(find.byKey(const Key('jv2_mood_nao_tao_bem')), findsOneWidget);
     expect(find.byKey(const Key('jv2_mood_normal')), findsNothing);
     expect(find.text(pt.jv2MoodNormal), findsNothing);
-    // Icons, no emoji.
-    expect(find.text('😊'), findsNothing);
-    expect(find.text('😕'), findsNothing);
-    expect(find.byIcon(Icons.sentiment_satisfied_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.sentiment_dissatisfied_rounded), findsOneWidget);
+    // Emoji faces (client spec 2.4), no Material icons.
+    expect(find.text('😊'), findsOneWidget);
+    expect(find.text('😕'), findsOneWidget);
+    expect(find.byIcon(Icons.sentiment_satisfied_rounded), findsNothing);
+    expect(find.byIcon(Icons.sentiment_dissatisfied_rounded), findsNothing);
     // Opened without an area: emotional axis.
     expect(find.text(pt.jv2AxisEmotional), findsOneWidget);
   });
@@ -140,10 +141,25 @@ void main() {
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
 
-    // Straight to the feelings, grouped by time, on one screen (v2.3).
-    expect(find.text(pt.jv23WhatWeighsQuestion), findsOneWidget);
-    expect(find.text(pt.jv2BranchFuturoMente), findsOneWidget);
+    // Screen 1: the three times with their emojis and the client question.
+    expect(find.text(pt.jv2TimeQuestion), findsOneWidget);
+    for (final time in JournalKeys.times) {
+      expect(find.byKey(Key('jv2_time_$time')), findsOneWidget);
+    }
+    expect(find.text('⏳'), findsOneWidget);
+    expect(find.text('📍'), findsOneWidget);
+    expect(find.text('🚀'), findsOneWidget);
+    expect(find.byKey(const Key('jv2_branch_futuro.mente')), findsNothing);
+    await tapKey(tester, 'jv2_time_futuro');
+
+    // Screen 2: only the branches of that time, with its own question.
+    expect(find.text(pt.jv24BranchQuestionFuturo), findsOneWidget);
+    expect(find.byKey(const Key('jv2_branch_futuro.mente')), findsOneWidget);
+    expect(find.byKey(const Key('jv2_branch_futuro.medo')), findsOneWidget);
+    expect(find.byKey(const Key('jv2_branch_passado.tristeza')), findsNothing);
     await tapKey(tester, 'jv2_branch_futuro.mente');
+
+    // Screen 3: the options.
 
     await tapKey(tester, 'jv2_option_futuro.mente.antecipar');
     await tapKey(tester, 'jv2_option_futuro.mente.cobranca');
@@ -215,16 +231,56 @@ void main() {
     final h = JournalHarness();
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
-    await tapKey(tester, 'jv2_branch_passado.tristeza');
+    await pickFeeling(tester, 'passado', 'tristeza');
     await tapKey(tester, 'jv2_option_passado.tristeza.saudade');
     await tapKey(tester, 'jv23_more');
 
-    expect(find.text(pt.jv23WhatWeighsQuestion), findsOneWidget);
-    await tapKey(tester, 'jv2_branch_presente.energia');
+    expect(find.text(pt.jv2TimeQuestion), findsOneWidget);
+    await pickFeeling(tester, 'presente', 'energia');
     await tapKey(tester, 'jv2_option_presente.energia.corpo');
     await tapKey(tester, 'jv2_continue');
 
     expect(find.byKey(const Key('jv2_item_row_1')), findsOneWidget);
+  });
+
+  testWidgets('phrases: own pool per time, per branch and per region; thank-you before the scale',
+      (tester) async {
+    final h = JournalHarness();
+    await pumpJournalFlow(tester, h);
+    await startNotSoGood(tester);
+    await tapKey(tester, 'jv2_time_passado');
+    var id = containerOf(tester).read(journalFlowControllerProvider).phraseId!;
+    expect(id, startsWith('passado.'));
+    expect(find.text(JournalLabels.phrase(pt, id)), findsOneWidget);
+    await tapKey(tester, 'jv2_branch_passado.tristeza');
+    id = containerOf(tester).read(journalFlowControllerProvider).phraseId!;
+    expect(id, startsWith('passado.tristeza.'));
+    expect(find.text(JournalLabels.phrase(pt, id)), findsOneWidget);
+    await tapKey(tester, 'jv2_option_passado.tristeza.culpa');
+    await tapKey(tester, 'jv2_continue');
+    expect(find.text(pt.jv2PhraseThanks1), findsOneWidget);
+  });
+
+  test('a screen never shows the same phrase twice in a row', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    final sub = container.listen(journalFlowControllerProvider, (_, _) {});
+    addTearDown(sub.close);
+    final flow = container.read(journalFlowControllerProvider.notifier);
+    String? last;
+    for (var i = 0; i < 40; i++) {
+      flow.chooseMood(JournalKeys.moodNaoTaoBem);
+      flow.chooseTime('futuro');
+      final id = container.read(journalFlowControllerProvider).phraseId;
+      expect(id, startsWith('futuro.'));
+      expect(id, isNot(last));
+      last = id;
+    }
+    // Over 40 entries all 7 variants show up.
+    expect(
+      container.read(journalFlowControllerProvider).shownPhraseIds.where((i) => RegExp(r'^futuro\.\d$').hasMatch(i)).toSet(),
+      hasLength(7),
+    );
   });
 
   testWidgets('physical path: regions on both sides, sensation, per-region options', (tester) async {
@@ -432,7 +488,7 @@ void main() {
     final h = JournalHarness(online: false);
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
-    await tapKey(tester, 'jv2_branch_presente.sobrecarga');
+    await pickFeeling(tester, 'presente', 'sobrecarga');
     await tapKey(tester, 'jv2_option_presente.sobrecarga.paciencia');
     await tapKey(tester, 'jv2_continue');
     await fillIntensity(tester, 1, 3);
@@ -458,7 +514,7 @@ void main() {
     final h = JournalHarness();
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
-    await tapKey(tester, 'jv2_branch_presente.sobrecarga');
+    await pickFeeling(tester, 'presente', 'sobrecarga');
     await tapKey(tester, 'jv2_option_presente.sobrecarga.aperto');
     await tapKey(tester, 'jv2_continue');
 
@@ -495,7 +551,7 @@ void main() {
     h.remote.suggestedOptionKey = 'futuro.mente.antecipar';
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
-    await tapKey(tester, 'jv2_branch_futuro.mente');
+    await pickFeeling(tester, 'futuro', 'mente');
     await tapKey(tester, 'jv2_write_mine');
     await tester.enterText(
       find.byKey(const Key('jv2_custom_field')),
@@ -589,6 +645,7 @@ void main() {
       final h = JournalHarness();
       await pumpJournalFlow(tester, h);
       await startNotSoGood(tester);
+      await tapKey(tester, 'jv2_time_presente');
       for (final b in ['energia', 'sobrecarga', 'solidao']) {
         expect(find.byKey(Key('jv2_branch_presente.$b')), findsOneWidget);
       }
@@ -684,7 +741,7 @@ void main() {
       final h = JournalHarness();
       await pumpJournalFlow(tester, h);
       await startNotSoGood(tester);
-      await tapKey(tester, 'jv2_branch_futuro.mente');
+      await pickFeeling(tester, 'futuro', 'mente');
       await tapKey(tester, 'jv2_option_futuro.mente.indecisao');
       await tapKey(tester, 'jv2_continue');
       await fillIntensity(tester, 1, 2);
@@ -724,7 +781,7 @@ void main() {
       final h = JournalHarness();
       await pumpJournalFlow(tester, h);
       await startNotSoGood(tester);
-      await tapKey(tester, 'jv2_branch_passado.memoria');
+      await pickFeeling(tester, 'passado', 'memoria');
       await tapKey(tester, 'jv2_option_passado.memoria.vergonha');
       await tapKey(tester, 'jv2_continue');
       await fillIntensity(tester, 1, 2);
@@ -805,7 +862,7 @@ void main() {
       final h = JournalHarness();
       await pumpJournalFlow(tester, h);
       await startNotSoGood(tester);
-      await tapKey(tester, 'jv2_branch_futuro.mente');
+      await pickFeeling(tester, 'futuro', 'mente');
       await tapKey(tester, 'jv2_option_futuro.mente.indecisao');
       await tapKey(tester, 'jv2_continue');
       await fillIntensity(tester, 1, 2);
@@ -1038,7 +1095,7 @@ void main() {
       final h = JournalHarness();
       await pumpJournalFlow(tester, h);
       await startNotSoGood(tester);
-      await tapKey(tester, 'jv2_branch_passado.tristeza');
+      await pickFeeling(tester, 'passado', 'tristeza');
       await tapKey(tester, 'jv2_option_passado.tristeza.culpa');
       await tapKey(tester, 'jv2_continue');
       await fillIntensity(tester, 1, 2);

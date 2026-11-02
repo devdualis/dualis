@@ -456,18 +456,212 @@ class JournalLabels {
         return l10n.jv2PhrasePassado2;
       case 'passado.3':
         return l10n.jv2PhrasePassado3;
+      case 'passado.4':
+        return l10n.jv2PhrasePassado4;
+      case 'passado.5':
+        return l10n.jv2PhrasePassado5;
+      case 'passado.6':
+        return l10n.jv2PhrasePassado6;
+      case 'passado.7':
+        return l10n.jv2PhrasePassado7;
       case 'presente.1':
         return l10n.jv2PhrasePresente1;
       case 'presente.2':
         return l10n.jv2PhrasePresente2;
       case 'presente.3':
         return l10n.jv2PhrasePresente3;
+      case 'presente.4':
+        return l10n.jv2PhrasePresente4;
+      case 'presente.5':
+        return l10n.jv2PhrasePresente5;
+      case 'presente.6':
+        return l10n.jv2PhrasePresente6;
+      case 'presente.7':
+        return l10n.jv2PhrasePresente7;
       case 'futuro.1':
         return l10n.jv2PhraseFuturo1;
       case 'futuro.2':
         return l10n.jv2PhraseFuturo2;
       case 'futuro.3':
         return l10n.jv2PhraseFuturo3;
+      case 'futuro.4':
+        return l10n.jv2PhraseFuturo4;
+      case 'futuro.5':
+        return l10n.jv2PhraseFuturo5;
+      case 'futuro.6':
+        return l10n.jv2PhraseFuturo6;
+      case 'futuro.7':
+        return l10n.jv2PhraseFuturo7;
+      case 'passado.tristeza.1':
+        return l10n.jv2PhrasePassadoTristeza1;
+      case 'passado.tristeza.2':
+        return l10n.jv2PhrasePassadoTristeza2;
+      case 'passado.tristeza.3':
+        return l10n.jv2PhrasePassadoTristeza3;
+      case 'passado.tristeza.4':
+        return l10n.jv2PhrasePassadoTristeza4;
+      case 'passado.tristeza.5':
+        return l10n.jv2PhrasePassadoTristeza5;
+      case 'passado.tristeza.6':
+        return l10n.jv2PhrasePassadoTristeza6;
+      case 'passado.tristeza.7':
+        return l10n.jv2PhrasePassadoTristeza7;
+      case 'passado.memoria.1':
+        return l10n.jv2PhrasePassadoMemoria1;
+      case 'passado.memoria.2':
+        return l10n.jv2PhrasePassadoMemoria2;
+      case 'passado.memoria.3':
+        return l10n.jv2PhrasePassadoMemoria3;
+      case 'passado.memoria.4':
+        return l10n.jv2PhrasePassadoMemoria4;
+      case 'passado.memoria.5':
+        return l10n.jv2PhrasePassadoMemoria5;
+      case 'passado.memoria.6':
+        return l10n.jv2PhrasePassadoMemoria6;
+      case 'passado.memoria.7':
+        return l10n.jv2PhrasePassadoMemoria7;
+      case 'presente.energia.1':
+        return l10n.jv2PhrasePresenteEnergia1;
+      case 'presente.energia.2':
+        return l10n.jv2PhrasePresenteEnergia2;
+      case 'presente.energia.3':
+        return l10n.jv2PhrasePresenteEnergia3;
+      case 'presente.energia.4':
+        return l10n.jv2PhrasePresenteEnergia4;
+      case 'presente.energia.5':
+        return l10n.jv2PhrasePresenteEnergia5;
+      case 'presente.energia.6':
+        return l10n.jv2PhrasePresenteEnergia6;
+      case 'presente.energia.7':
+        return l10n.jv2PhrasePresenteEnergia7;
+      case 'presente.sobrecarga.1':
+        return l10n.jv2PhrasePresenteSobrecarga1;
+      case 'presente.sobrecarga.2':
+        return l10n.jv2PhrasePresenteSobrecarga2;
+      case 'presente.sobrecarga.3':
+        return l10n.jv2PhrasePresenteSobrecarga3;
+      case 'presente.sobrecarga.4':
+        return l10n.jv2PhrasePresenteSobrecarga4;
+      case 'presente.sobrecarga.5':
+        return l10n.jv2PhrasePresenteSobrecarga5;
+      case 'presente.sobrecarga.6':
+        return l10n.jv2PhrasePresenteSobrecarga6;
+      case 'presente.sobrecarga.7':
+        return l10n.jv2PhrasePresenteSobrecarga7;
+      case 'presente.solidao.1':
+        return l10n.jv2PhrasePresenteSolidao1;
+      case 'presente.solidao.2':
+        return l10n.jv2PhrasePresenteSolidao2;
+      case 'presente.solidao.3':
+        return l10n.jv2PhrasePresenteSolidao3;
+      case 'presente.solidao.4':
+        return l10n.jv2PhrasePresenteSolidao4;
+      case 'presente.solidao.5':
+        return l10n.jv2PhrasePresenteSolidao5;
+      case 'presente.solidao.6':
+        return l10n.jv2PhrasePresenteSolidao6;
+      case 'presente.solidao.7':
+        return l10n.jv2PhrasePresenteSolidao7;
+      case 'futuro.mente.1':
+        return l10n.jv2PhraseFuturoMente1;
+      case 'futuro.mente.2':
+        return l10n.jv2PhraseFuturoMente2;
+      case 'futuro.mente.3':
+        return l10n.jv2PhraseFuturoMente3;
+      case 'futuro.mente.4':
+        return l10n.jv2PhraseFuturoMente4;
+      case 'futuro.mente.5':
+        return l10n.jv2PhraseFuturoMente5;
+      case 'futuro.mente.6':
+        return l10n.jv2PhraseFuturoMente6;
+      case 'futuro.mente.7':
+        return l10n.jv2PhraseFuturoMente7;
+      case 'futuro.medo.1':
+        return l10n.jv2PhraseFuturoMedo1;
+      case 'futuro.medo.2':
+        return l10n.jv2PhraseFuturoMedo2;
+      case 'futuro.medo.3':
+        return l10n.jv2PhraseFuturoMedo3;
+      case 'futuro.medo.4':
+        return l10n.jv2PhraseFuturoMedo4;
+      case 'futuro.medo.5':
+        return l10n.jv2PhraseFuturoMedo5;
+      case 'futuro.medo.6':
+        return l10n.jv2PhraseFuturoMedo6;
+      case 'futuro.medo.7':
+        return l10n.jv2PhraseFuturoMedo7;
+      case 'region.cabeca.1':
+        return l10n.jv2PhraseRegionCabeca1;
+      case 'region.cabeca.2':
+        return l10n.jv2PhraseRegionCabeca2;
+      case 'region.cabeca.3':
+        return l10n.jv2PhraseRegionCabeca3;
+      case 'region.cabeca.4':
+        return l10n.jv2PhraseRegionCabeca4;
+      case 'region.cabeca.5':
+        return l10n.jv2PhraseRegionCabeca5;
+      case 'region.cabeca.6':
+        return l10n.jv2PhraseRegionCabeca6;
+      case 'region.cabeca.7':
+        return l10n.jv2PhraseRegionCabeca7;
+      case 'region.peito.1':
+        return l10n.jv2PhraseRegionPeito1;
+      case 'region.peito.2':
+        return l10n.jv2PhraseRegionPeito2;
+      case 'region.peito.3':
+        return l10n.jv2PhraseRegionPeito3;
+      case 'region.peito.4':
+        return l10n.jv2PhraseRegionPeito4;
+      case 'region.peito.5':
+        return l10n.jv2PhraseRegionPeito5;
+      case 'region.peito.6':
+        return l10n.jv2PhraseRegionPeito6;
+      case 'region.peito.7':
+        return l10n.jv2PhraseRegionPeito7;
+      case 'region.barriga.1':
+        return l10n.jv2PhraseRegionBarriga1;
+      case 'region.barriga.2':
+        return l10n.jv2PhraseRegionBarriga2;
+      case 'region.barriga.3':
+        return l10n.jv2PhraseRegionBarriga3;
+      case 'region.barriga.4':
+        return l10n.jv2PhraseRegionBarriga4;
+      case 'region.barriga.5':
+        return l10n.jv2PhraseRegionBarriga5;
+      case 'region.barriga.6':
+        return l10n.jv2PhraseRegionBarriga6;
+      case 'region.barriga.7':
+        return l10n.jv2PhraseRegionBarriga7;
+      case 'region.costas.1':
+        return l10n.jv2PhraseRegionCostas1;
+      case 'region.costas.2':
+        return l10n.jv2PhraseRegionCostas2;
+      case 'region.costas.3':
+        return l10n.jv2PhraseRegionCostas3;
+      case 'region.costas.4':
+        return l10n.jv2PhraseRegionCostas4;
+      case 'region.costas.5':
+        return l10n.jv2PhraseRegionCostas5;
+      case 'region.costas.6':
+        return l10n.jv2PhraseRegionCostas6;
+      case 'region.costas.7':
+        return l10n.jv2PhraseRegionCostas7;
+      case 'region.membros.1':
+        return l10n.jv2PhraseRegionMembros1;
+      case 'region.membros.2':
+        return l10n.jv2PhraseRegionMembros2;
+      case 'region.membros.3':
+        return l10n.jv2PhraseRegionMembros3;
+      case 'region.membros.4':
+        return l10n.jv2PhraseRegionMembros4;
+      case 'region.membros.5':
+        return l10n.jv2PhraseRegionMembros5;
+      case 'region.membros.6':
+        return l10n.jv2PhraseRegionMembros6;
+      case 'region.membros.7':
+        return l10n.jv2PhraseRegionMembros7;
+      case 'thanks.1':
+        return l10n.jv2PhraseThanks1;
       case 'body.1':
         return l10n.jv2PhraseBody1;
       case 'body.2':
@@ -482,12 +676,6 @@ class JournalLabels {
         return l10n.jv2PhraseRegion3;
       case 'region.4':
         return l10n.jv2PhraseRegion4;
-      case 'intensity.1':
-        return l10n.jv2PhraseIntensity1;
-      case 'intensity.2':
-        return l10n.jv2PhraseIntensity2;
-      case 'intensity.3':
-        return l10n.jv2PhraseIntensity3;
       case 'triggers.1':
         return l10n.jv2PhraseTriggers1;
       case 'triggers.2':
@@ -511,15 +699,32 @@ class JournalLabels {
     }
   }
 
-  /// Approved transition phrase variants per screen (strategy section 7).
+  /// Approved transition phrase variants per pool (strategy section 7).
   static const Map<String, int> phrasePools = {
     'time': 4,
-    'passado': 3,
-    'presente': 3,
-    'futuro': 3,
+    // Screen 2 of the emotional flow, by time (client spec, 7 each).
+    'passado': 7,
+    'presente': 7,
+    'futuro': 7,
+    // Screen 3 of the emotional flow, by branch (7 each).
+    'passado.tristeza': 7,
+    'passado.memoria': 7,
+    'presente.energia': 7,
+    'presente.sobrecarga': 7,
+    'presente.solidao': 7,
+    'futuro.mente': 7,
+    'futuro.medo': 7,
     'body': 3,
+    // "É dor ou incômodo?" of the client's five regions (7 each); the
+    // other areas use the shared `region` pool.
+    'region.cabeca': 7,
+    'region.peito': 7,
+    'region.barriga': 7,
+    'region.costas': 7,
+    'region.membros': 7,
     'region': 4,
-    'intensity': 3,
+    // Fixed thank-you before persistence and intensity.
+    'thanks': 1,
     'triggers': 3,
     'positive': 3,
     'closing': 3,
