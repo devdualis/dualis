@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/voice/voice_matcher.dart';
+import '../../../../core/voice/voice_targets.dart';
 import '../../../../l10n/app_localizations.dart';
 
 /// Shade of the single-hue intensity scale (light to strong). Not a traffic
@@ -39,6 +41,18 @@ String intensityText(AppLocalizations l10n, int level, {required bool physical})
   }
 }
 
+/// What can be said to pick [level]: the number, its words ("três") and
+/// its description ("Forte").
+List<String> intensityVoiceLabels(AppLocalizations l10n, int level, {required bool physical}) {
+  final words = VoiceMatcher.aliases(l10n.voiceNumberWords);
+  return [
+    '$level',
+    if (level <= words.length) ...words[level - 1].split(','),
+    l10n.jv2IntensityLevel(level),
+    intensityText(l10n, level, physical: physical),
+  ];
+}
+
 /// Big 1-5 scale (single item, v2.3): five numbers, and the description of
 /// the chosen level in a box underneath. Before a choice, the box says how
 /// the scale works.
@@ -48,12 +62,16 @@ class IntensityScaleFull extends StatelessWidget {
   final ValueChanged<int> onChanged;
   final String keyPrefix;
 
+  /// Pickable by voice (only one row of a compact list at a time).
+  final bool voice;
+
   const IntensityScaleFull({
     super.key,
     required this.value,
     required this.physical,
     required this.onChanged,
     this.keyPrefix = 'jv2_intensity',
+    this.voice = true,
   });
 
   @override
@@ -62,6 +80,13 @@ class IntensityScaleFull extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Zero-size voice targets; the Row below keeps its spacing.
+        for (var level = 1; level <= 5; level++)
+          VoiceTarget(
+            labels: intensityVoiceLabels(l10n, level, physical: physical),
+            onSelect: voice ? () => onChanged(level) : null,
+            child: const SizedBox.shrink(),
+          ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -118,12 +143,16 @@ class IntensityScaleCompact extends StatelessWidget {
   final ValueChanged<int> onChanged;
   final String keyPrefix;
 
+  /// Pickable by voice (only one row of a compact list at a time).
+  final bool voice;
+
   const IntensityScaleCompact({
     super.key,
     required this.value,
     required this.physical,
     required this.onChanged,
     required this.keyPrefix,
+    this.voice = true,
   });
 
   @override
@@ -132,6 +161,13 @@ class IntensityScaleCompact extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Zero-size voice targets; the Row below keeps its spacing.
+        for (var level = 1; level <= 5; level++)
+          VoiceTarget(
+            labels: intensityVoiceLabels(l10n, level, physical: physical),
+            onSelect: voice ? () => onChanged(level) : null,
+            child: const SizedBox.shrink(),
+          ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

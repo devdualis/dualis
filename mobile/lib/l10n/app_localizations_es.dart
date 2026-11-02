@@ -1222,6 +1222,57 @@ class AppLocalizationsEs extends AppLocalizations {
   String get privacyVeilUnlockManually => 'Desbloquear manualmente';
 
   @override
+  String get bioLockTitle => 'Tus registros están protegidos';
+
+  @override
+  String get bioLockPasswordButton => 'Entrar con contraseña';
+
+  @override
+  String get bioLockPasswordLabel => 'Contraseña de la cuenta';
+
+  @override
+  String get bioLockPasswordSubmit => 'Entrar';
+
+  @override
+  String get bioLockPasswordBack => 'Volver';
+
+  @override
+  String get bioLockPasswordEmpty => 'Escribe tu contraseña.';
+
+  @override
+  String get bioLockNoAccount =>
+      'No encontramos tu cuenta en este dispositivo. Usa tu rostro, tu huella o el código del dispositivo, o cierra la sesión.';
+
+  @override
+  String get bioLockSettingsTitle => 'Desbloquear con biometría';
+
+  @override
+  String get bioLockSettingsSubtitle =>
+      'Pide tu huella, rostro o PIN del dispositivo al abrir la app.';
+
+  @override
+  String get bioLockEnableReason =>
+      'Confirma para activar el desbloqueo con biometría.';
+
+  @override
+  String get bioLockEnabled => 'Desbloqueo con biometría activado.';
+
+  @override
+  String get bioLockDisabled => 'Desbloqueo con biometría desactivado.';
+
+  @override
+  String get bioLockEnableFailed =>
+      'No se pudo confirmar. El desbloqueo con biometría sigue desactivado.';
+
+  @override
+  String get bioLockBody =>
+      'Usa tu rostro, tu huella o el código del dispositivo para ver tus registros.';
+
+  @override
+  String get bioLockOffline =>
+      'Sin conexión, no se puede comprobar la contraseña de la cuenta ahora. Usa tu rostro, tu huella o el código del dispositivo.';
+
+  @override
   String get settingsChangePhotoSubtitle =>
       'Elige cómo quieres seleccionar tu foto de perfil.';
 
@@ -2399,7 +2450,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get xv2AdLearnMore => 'Más información';
 
   @override
-  String get xv2AdPremiumTags => '💉 Vacunas|💊 Recordatorios|📅 Citas|📄 PDF';
+  String get xv2AdPremiumTags =>
+      '😴 Hábitos|💉 Vacunas|💊 Recordatorios|📅 Citas';
 
   @override
   String get xv2AdPremiumCta => 'Conocer Premium';
@@ -2433,11 +2485,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get premiumPromoBadge => 'Solo en Premium';
 
   @override
-  String get premiumPromoTitle => 'Tus cuidados, organizados en un solo lugar';
+  String get premiumPromoTitle => 'Tus hábitos y cuidados, en un solo lugar';
 
   @override
   String get premiumPromoSubtitle =>
-      'Todo lo gratuito, sin anuncios, más Mis cuidados.';
+      'Todo lo gratuito, sin anuncios, más Hábitos y Mis cuidados.';
 
   @override
   String get premiumPromoVaccines => 'Vacunas';
@@ -2485,11 +2537,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get navCareLockedTooltip => 'Mis cuidados · solo en Premium';
 
   @override
-  String get xv2AdPremiumTitle => 'Mis cuidados, organizados en un solo lugar';
+  String get xv2AdPremiumTitle => 'Hábitos y cuidados, en un solo lugar';
 
   @override
   String get xv2AdPremiumBody =>
-      'Vacunas, alergias, recordatorios de medicamentos, citas y exámenes. Sin anuncios.';
+      'Sueño, movimiento y ciclo, además de vacunas, alergias, recordatorios de medicamentos, citas y exámenes. Sin anuncios.';
 
   @override
   String get xv2AdZocTitle => 'Cada hora del equipo, en el proyecto correcto';
@@ -4283,6 +4335,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get jv22CopingEsperei => 'Esperé a que pasara';
 
   @override
+  String get jv22CopingPhysicalQuestion =>
+      '¿Cómo fue sobrellevar esta molestia?';
+
+  @override
   String get jv22CopingDificil => 'Fue difícil';
 
   @override
@@ -4302,6 +4358,27 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get jv22HelperDescansar => 'Descansar';
+
+  @override
+  String get jv22HelpersPhysicalQuestion => '¿Qué te ayudó a aliviarlo hoy?';
+
+  @override
+  String get jv22HelperBeberAgua => 'Beber agua / líquidos';
+
+  @override
+  String get jv22HelperRemedio => 'Tomar un medicamento';
+
+  @override
+  String get jv22HelperRepouso => 'Reposo o descansar';
+
+  @override
+  String get jv22HelperCompressa => 'Calor o frío local';
+
+  @override
+  String get jv22HelperAlimentacaoLeve => 'Comer liviano / infusión';
+
+  @override
+  String get jv22HelperConsultaMedica => 'Consultar a un médico';
 
   @override
   String get jv22HelperNadaAinda => 'Nada todavía';
@@ -4383,7 +4460,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get habitsSaved => 'Guardado';
 
   @override
-  String get habitsSleepQualityQuestion => '¿Cómo dormiste?';
+  String get habitsSleepQualityQuestion => '¿Cómo dormiste anoche?';
 
   @override
   String get habitsSleepQualityBem => '😴 Dormí bien';
@@ -4488,6 +4565,64 @@ class AppLocalizationsEs extends AppLocalizations {
   String get habitsPeriodLabel => 'Menstruación';
 
   @override
+  String get habitsHomeEyebrow => 'Tu día';
+
+  @override
+  String get habitsSleepQualityQuestionYesterday =>
+      '¿Cómo dormiste la noche anterior?';
+
+  @override
+  String get habitsMovedQuestionYesterday => '¿Moviste el cuerpo ayer?';
+
+  @override
+  String get habitsPeriodQuestionYesterday => '¿Menstruación ayer?';
+
+  @override
+  String get habitsTileSleep => 'Sueño';
+
+  @override
+  String get habitsTileMovement => 'Movimiento';
+
+  @override
+  String get habitsTileAnswer => 'Responder';
+
+  @override
+  String get habitsTileEdit => 'Editar';
+
+  @override
+  String get habitsTileSleepPending => '¿Cómo fue la noche?';
+
+  @override
+  String get habitsTileMovedPending => '¿Te moviste?';
+
+  @override
+  String get habitsTileMovedYesValue => 'Te moviste';
+
+  @override
+  String get habitsTileMovedNoValue => 'No te moviste';
+
+  @override
+  String get habitsPremiumTeaserTitle => 'Sueño, movimiento y ciclo';
+
+  @override
+  String get habitsPremiumTeaserBody => 'Sigue tus hábitos con Premium.';
+
+  @override
+  String get habitsPremiumTeaserCta => 'Conocer Premium';
+
+  @override
+  String get habitsWaterSummaryTitle => 'Agua de hoy';
+
+  @override
+  String get habitsWaterSummaryOpen => 'Registros y recordatorios';
+
+  @override
+  String get premiumPromoHabits => 'Hábitos';
+
+  @override
+  String get premiumPromoHabitsDesc => 'Sueño, movimiento y ciclo';
+
+  @override
   String get jv23RegionPelve => 'Pelvis y bajo vientre';
 
   @override
@@ -4501,6 +4636,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get jv23OptPelveUrinaArdencia => 'Arde o duele al orinar';
+
+  @override
+  String get jv23OptPelveUrinaDificuldade =>
+      'Dificultad o flujo débil al orinar';
+
+  @override
+  String get jv23OptPelveUrinaCorOdor => 'Orina oscura o con olor fuerte';
 
   @override
   String get jv23OptPelveUrinaVontade => 'Ganas de orinar a cada rato';
@@ -4914,4 +5056,110 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get careConditionsNoTracking => 'Sin mediciones periódicas';
+
+  @override
+  String get voiceButtonTooltip => 'Comandos de voz';
+
+  @override
+  String get voiceStopTooltip => 'Dejar de escuchar';
+
+  @override
+  String get voiceDictate => 'Dictar';
+
+  @override
+  String get voiceListening => 'Escuchando…';
+
+  @override
+  String get voiceListeningHandsFree =>
+      'Escuchando… di una opción de la pantalla, \"continuar\" o \"parar\"';
+
+  @override
+  String voiceHeard(String text) {
+    return 'Entendido: $text';
+  }
+
+  @override
+  String get voiceNoted => 'Anotado.';
+
+  @override
+  String voiceNotUnderstood(String text) {
+    return 'No encontré \"$text\" en esta pantalla. Di una opción tal como está escrita.';
+  }
+
+  @override
+  String get voicePermissionDenied =>
+      'Para usar la voz, permite el micrófono y el reconocimiento de voz en los ajustes del dispositivo.';
+
+  @override
+  String get voiceUnavailable =>
+      'El reconocimiento de voz no está disponible en este dispositivo ahora.';
+
+  @override
+  String get voiceWaterLogged => 'Registrado: un vaso de agua (250 ml).';
+
+  @override
+  String get voiceWaterFailed =>
+      'No se pudo registrar el agua. Inténtalo de nuevo.';
+
+  @override
+  String get voiceAliasHelp =>
+      'ayuda|socorro|emergencia|necesito ayuda|192|188';
+
+  @override
+  String get voiceAliasStop =>
+      'parar|para|detener|dejar de escuchar|cancelar|basta';
+
+  @override
+  String get voiceAliasHome => 'inicio|pantalla de inicio|página principal';
+
+  @override
+  String get voiceAliasJournalEmotional =>
+      'cómo me siento|registrar cómo me siento|registrar ánimo|ánimo|diario|check-in|emocional|mente';
+
+  @override
+  String get voiceAliasJournalPhysical =>
+      'cuerpo|registrar cuerpo|físico|cómo está mi cuerpo';
+
+  @override
+  String get voiceAliasHistory =>
+      'historial|mis registros|ver historial|evolución';
+
+  @override
+  String get voiceAliasHydration => 'agua|hidratación|ver agua';
+
+  @override
+  String get voiceAliasLogWater =>
+      'registrar agua|registrar un vaso de agua|bebí agua|bebí un vaso de agua|tomé agua|un vaso de agua';
+
+  @override
+  String get voiceAliasHabits => 'hábitos|mis hábitos|sueño';
+
+  @override
+  String get voiceAliasSettings => 'configuración|ajustes|abrir configuración';
+
+  @override
+  String get voiceAliasLibrary => 'biblioteca|artículos|contenidos';
+
+  @override
+  String get voiceAliasBack => 'volver|atrás|anterior';
+
+  @override
+  String get voiceAliasContinue =>
+      'continuar|siguiente|seguir|avanzar|listo|ok';
+
+  @override
+  String get voiceAliasSave => 'guardar|terminar|finalizar|guardar registro';
+
+  @override
+  String get voiceAliasSkip =>
+      'saltar|omitir|no quiero responder|siguiente pregunta';
+
+  @override
+  String get voiceAliasYes => 'sí|si|claro|usar';
+
+  @override
+  String get voiceAliasNo => 'no|mantener|déjalo así';
+
+  @override
+  String get voiceNumberWords => 'uno,una|dos|tres|cuatro|cinco';
 }

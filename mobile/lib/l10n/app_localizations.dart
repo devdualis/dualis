@@ -2176,6 +2176,96 @@ abstract class AppLocalizations {
   /// **'Desbloquear manualmente'**
   String get privacyVeilUnlockManually;
 
+  /// No description provided for @bioLockTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seus registros estão protegidos'**
+  String get bioLockTitle;
+
+  /// No description provided for @bioLockPasswordButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar com senha'**
+  String get bioLockPasswordButton;
+
+  /// No description provided for @bioLockPasswordLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Senha da conta'**
+  String get bioLockPasswordLabel;
+
+  /// No description provided for @bioLockPasswordSubmit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar'**
+  String get bioLockPasswordSubmit;
+
+  /// No description provided for @bioLockPasswordBack.
+  ///
+  /// In pt, this message translates to:
+  /// **'Voltar'**
+  String get bioLockPasswordBack;
+
+  /// No description provided for @bioLockPasswordEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite sua senha.'**
+  String get bioLockPasswordEmpty;
+
+  /// No description provided for @bioLockNoAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não encontramos sua conta neste aparelho. Use o rosto, a digital ou a senha do aparelho, ou saia da conta.'**
+  String get bioLockNoAccount;
+
+  /// No description provided for @bioLockSettingsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desbloquear com biometria'**
+  String get bioLockSettingsTitle;
+
+  /// No description provided for @bioLockSettingsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pede sua digital, rosto ou senha do aparelho ao abrir o app.'**
+  String get bioLockSettingsSubtitle;
+
+  /// No description provided for @bioLockEnableReason.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirme para ativar o desbloqueio com biometria.'**
+  String get bioLockEnableReason;
+
+  /// No description provided for @bioLockEnabled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desbloqueio com biometria ativado.'**
+  String get bioLockEnabled;
+
+  /// No description provided for @bioLockDisabled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desbloqueio com biometria desativado.'**
+  String get bioLockDisabled;
+
+  /// No description provided for @bioLockEnableFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível confirmar. O desbloqueio com biometria continua desativado.'**
+  String get bioLockEnableFailed;
+
+  /// No description provided for @bioLockBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Use o rosto, a digital ou a senha do aparelho para ver seus registros.'**
+  String get bioLockBody;
+
+  /// No description provided for @bioLockOffline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem conexão, não dá para conferir a senha da conta agora. Use o rosto, a digital ou a senha do aparelho.'**
+  String get bioLockOffline;
+
   /// No description provided for @settingsChangePhotoSubtitle.
   ///
   /// In pt, this message translates to:
@@ -4303,7 +4393,7 @@ abstract class AppLocalizations {
   /// No description provided for @xv2AdPremiumTags.
   ///
   /// In pt, this message translates to:
-  /// **'💉 Vacinas|💊 Lembretes|📅 Consultas|📄 PDF'**
+  /// **'😴 Hábitos|💉 Vacinas|💊 Lembretes|📅 Consultas'**
   String get xv2AdPremiumTags;
 
   /// No description provided for @xv2AdPremiumCta.
@@ -4363,13 +4453,13 @@ abstract class AppLocalizations {
   /// No description provided for @premiumPromoTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Seus cuidados, organizados num só lugar'**
+  /// **'Seus hábitos e cuidados, num só lugar'**
   String get premiumPromoTitle;
 
   /// No description provided for @premiumPromoSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Tudo do gratuito, sem anúncios, mais Meus cuidados.'**
+  /// **'Tudo do gratuito, sem anúncios, mais Hábitos e Meus cuidados.'**
   String get premiumPromoSubtitle;
 
   /// No description provided for @premiumPromoVaccines.
@@ -4465,13 +4555,13 @@ abstract class AppLocalizations {
   /// No description provided for @xv2AdPremiumTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Meus cuidados, organizados num só lugar'**
+  /// **'Hábitos e cuidados, num só lugar'**
   String get xv2AdPremiumTitle;
 
   /// No description provided for @xv2AdPremiumBody.
   ///
   /// In pt, this message translates to:
-  /// **'Vacinas, alergias, lembretes de medicamentos, consultas e exames. Sem anúncios.'**
+  /// **'Sono, movimento e ciclo, mais vacinas, alergias, lembretes de medicamentos, consultas e exames. Sem anúncios.'**
   String get xv2AdPremiumBody;
 
   /// No description provided for @xv2AdZocTitle.
@@ -7300,6 +7390,12 @@ abstract class AppLocalizations {
   /// **'Esperei passar'**
   String get jv22CopingEsperei;
 
+  /// No description provided for @jv22CopingPhysicalQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como foi lidar com esse incômodo?'**
+  String get jv22CopingPhysicalQuestion;
+
   /// No description provided for @jv22CopingDificil.
   ///
   /// In pt, this message translates to:
@@ -7341,6 +7437,48 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Descansar'**
   String get jv22HelperDescansar;
+
+  /// No description provided for @jv22HelpersPhysicalQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que te ajudou a aliviar hoje?'**
+  String get jv22HelpersPhysicalQuestion;
+
+  /// No description provided for @jv22HelperBeberAgua.
+  ///
+  /// In pt, this message translates to:
+  /// **'Beber água / líquidos'**
+  String get jv22HelperBeberAgua;
+
+  /// No description provided for @jv22HelperRemedio.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tomar um remédio'**
+  String get jv22HelperRemedio;
+
+  /// No description provided for @jv22HelperRepouso.
+  ///
+  /// In pt, this message translates to:
+  /// **'Repouso ou descansar'**
+  String get jv22HelperRepouso;
+
+  /// No description provided for @jv22HelperCompressa.
+  ///
+  /// In pt, this message translates to:
+  /// **'Calor ou compressa'**
+  String get jv22HelperCompressa;
+
+  /// No description provided for @jv22HelperAlimentacaoLeve.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comida leve ou chá'**
+  String get jv22HelperAlimentacaoLeve;
+
+  /// No description provided for @jv22HelperConsultaMedica.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falar com um médico'**
+  String get jv22HelperConsultaMedica;
 
   /// No description provided for @jv22HelperNadaAinda.
   ///
@@ -7477,7 +7615,7 @@ abstract class AppLocalizations {
   /// No description provided for @habitsSleepQualityQuestion.
   ///
   /// In pt, this message translates to:
-  /// **'Como você dormiu?'**
+  /// **'Como você dormiu esta noite?'**
   String get habitsSleepQualityQuestion;
 
   /// No description provided for @habitsSleepQualityBem.
@@ -7660,6 +7798,120 @@ abstract class AppLocalizations {
   /// **'Menstruação'**
   String get habitsPeriodLabel;
 
+  /// No description provided for @habitsHomeEyebrow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu dia'**
+  String get habitsHomeEyebrow;
+
+  /// No description provided for @habitsSleepQualityQuestionYesterday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como você dormiu na noite anterior?'**
+  String get habitsSleepQualityQuestionYesterday;
+
+  /// No description provided for @habitsMovedQuestionYesterday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mexeu o corpo ontem?'**
+  String get habitsMovedQuestionYesterday;
+
+  /// No description provided for @habitsPeriodQuestionYesterday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Menstruação ontem?'**
+  String get habitsPeriodQuestionYesterday;
+
+  /// No description provided for @habitsTileSleep.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sono'**
+  String get habitsTileSleep;
+
+  /// No description provided for @habitsTileMovement.
+  ///
+  /// In pt, this message translates to:
+  /// **'Movimento'**
+  String get habitsTileMovement;
+
+  /// No description provided for @habitsTileAnswer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Responder'**
+  String get habitsTileAnswer;
+
+  /// No description provided for @habitsTileEdit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar'**
+  String get habitsTileEdit;
+
+  /// No description provided for @habitsTileSleepPending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como foi a noite?'**
+  String get habitsTileSleepPending;
+
+  /// No description provided for @habitsTileMovedPending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mexeu o corpo?'**
+  String get habitsTileMovedPending;
+
+  /// No description provided for @habitsTileMovedYesValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se mexeu'**
+  String get habitsTileMovedYesValue;
+
+  /// No description provided for @habitsTileMovedNoValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não se mexeu'**
+  String get habitsTileMovedNoValue;
+
+  /// No description provided for @habitsPremiumTeaserTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sono, movimento e ciclo'**
+  String get habitsPremiumTeaserTitle;
+
+  /// No description provided for @habitsPremiumTeaserBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acompanhe seus hábitos no Premium.'**
+  String get habitsPremiumTeaserBody;
+
+  /// No description provided for @habitsPremiumTeaserCta.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conhecer o Premium'**
+  String get habitsPremiumTeaserCta;
+
+  /// No description provided for @habitsWaterSummaryTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Água de hoje'**
+  String get habitsWaterSummaryTitle;
+
+  /// No description provided for @habitsWaterSummaryOpen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registros e lembretes'**
+  String get habitsWaterSummaryOpen;
+
+  /// No description provided for @premiumPromoHabits.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hábitos'**
+  String get premiumPromoHabits;
+
+  /// No description provided for @premiumPromoHabitsDesc.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sono, movimento e ciclo'**
+  String get premiumPromoHabitsDesc;
+
   /// No description provided for @jv23RegionPelve.
   ///
   /// In pt, this message translates to:
@@ -7689,6 +7941,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Arde ou dói ao fazer xixi'**
   String get jv23OptPelveUrinaArdencia;
+
+  /// No description provided for @jv23OptPelveUrinaDificuldade.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dificuldade ou fluxo fraco ao fazer xixi'**
+  String get jv23OptPelveUrinaDificuldade;
+
+  /// No description provided for @jv23OptPelveUrinaCorOdor.
+  ///
+  /// In pt, this message translates to:
+  /// **'Urina escura ou com cheiro forte'**
+  String get jv23OptPelveUrinaCorOdor;
 
   /// No description provided for @jv23OptPelveUrinaVontade.
   ///
@@ -8397,6 +8661,186 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Sem medições periódicas'**
   String get careConditionsNoTracking;
+
+  /// No description provided for @voiceButtonTooltip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comandos de voz'**
+  String get voiceButtonTooltip;
+
+  /// No description provided for @voiceStopTooltip.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parar de ouvir'**
+  String get voiceStopTooltip;
+
+  /// No description provided for @voiceDictate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ditar'**
+  String get voiceDictate;
+
+  /// No description provided for @voiceListening.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ouvindo…'**
+  String get voiceListening;
+
+  /// No description provided for @voiceListeningHandsFree.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ouvindo… diga uma opção da tela, \"continuar\" ou \"parar\"'**
+  String get voiceListeningHandsFree;
+
+  /// No description provided for @voiceHeard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entendi: {text}'**
+  String voiceHeard(String text);
+
+  /// No description provided for @voiceNoted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anotado.'**
+  String get voiceNoted;
+
+  /// No description provided for @voiceNotUnderstood.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não encontrei \"{text}\" nesta tela. Diga uma opção como está escrita.'**
+  String voiceNotUnderstood(String text);
+
+  /// No description provided for @voicePermissionDenied.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para usar a voz, permita o microfone e o reconhecimento de fala nos ajustes do aparelho.'**
+  String get voicePermissionDenied;
+
+  /// No description provided for @voiceUnavailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'O reconhecimento de voz não está disponível neste aparelho agora.'**
+  String get voiceUnavailable;
+
+  /// No description provided for @voiceWaterLogged.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrado: um copo de água (250 ml).'**
+  String get voiceWaterLogged;
+
+  /// No description provided for @voiceWaterFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível registrar a água. Tente de novo.'**
+  String get voiceWaterFailed;
+
+  /// No description provided for @voiceAliasHelp.
+  ///
+  /// In pt, this message translates to:
+  /// **'ajuda|socorro|emergência|samu|cvv|192|188|preciso de ajuda'**
+  String get voiceAliasHelp;
+
+  /// No description provided for @voiceAliasStop.
+  ///
+  /// In pt, this message translates to:
+  /// **'parar|pare|chega|parar de ouvir|cancelar|sair da voz'**
+  String get voiceAliasStop;
+
+  /// No description provided for @voiceAliasHome.
+  ///
+  /// In pt, this message translates to:
+  /// **'início|inicio|tela inicial|página inicial'**
+  String get voiceAliasHome;
+
+  /// No description provided for @voiceAliasJournalEmotional.
+  ///
+  /// In pt, this message translates to:
+  /// **'como me sinto|registrar como me sinto|registrar humor|humor|diário|check-in|emocional|mente'**
+  String get voiceAliasJournalEmotional;
+
+  /// No description provided for @voiceAliasJournalPhysical.
+  ///
+  /// In pt, this message translates to:
+  /// **'corpo|registrar corpo|físico|registrar físico|como está meu corpo'**
+  String get voiceAliasJournalPhysical;
+
+  /// No description provided for @voiceAliasHistory.
+  ///
+  /// In pt, this message translates to:
+  /// **'histórico|meus registros|ver histórico|evolução'**
+  String get voiceAliasHistory;
+
+  /// No description provided for @voiceAliasHydration.
+  ///
+  /// In pt, this message translates to:
+  /// **'água|hidratação|ver água'**
+  String get voiceAliasHydration;
+
+  /// No description provided for @voiceAliasLogWater.
+  ///
+  /// In pt, this message translates to:
+  /// **'registrar água|registrar um copo de água|bebi água|bebi um copo de água|tomei água|um copo de água'**
+  String get voiceAliasLogWater;
+
+  /// No description provided for @voiceAliasHabits.
+  ///
+  /// In pt, this message translates to:
+  /// **'hábitos|meus hábitos|sono'**
+  String get voiceAliasHabits;
+
+  /// No description provided for @voiceAliasSettings.
+  ///
+  /// In pt, this message translates to:
+  /// **'configurações|ajustes|abrir configurações'**
+  String get voiceAliasSettings;
+
+  /// No description provided for @voiceAliasLibrary.
+  ///
+  /// In pt, this message translates to:
+  /// **'biblioteca|conteúdos|artigos'**
+  String get voiceAliasLibrary;
+
+  /// No description provided for @voiceAliasBack.
+  ///
+  /// In pt, this message translates to:
+  /// **'voltar|volta|anterior|tela anterior'**
+  String get voiceAliasBack;
+
+  /// No description provided for @voiceAliasContinue.
+  ///
+  /// In pt, this message translates to:
+  /// **'continuar|próximo|seguir|avançar|pronto|ok'**
+  String get voiceAliasContinue;
+
+  /// No description provided for @voiceAliasSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'salvar|guardar|terminar|finalizar|salvar registro'**
+  String get voiceAliasSave;
+
+  /// No description provided for @voiceAliasSkip.
+  ///
+  /// In pt, this message translates to:
+  /// **'pular|pula|não quero responder|próxima pergunta'**
+  String get voiceAliasSkip;
+
+  /// No description provided for @voiceAliasYes.
+  ///
+  /// In pt, this message translates to:
+  /// **'sim|pode|isso|usar'**
+  String get voiceAliasYes;
+
+  /// No description provided for @voiceAliasNo.
+  ///
+  /// In pt, this message translates to:
+  /// **'não|manter|deixa assim'**
+  String get voiceAliasNo;
+
+  /// No description provided for @voiceNumberWords.
+  ///
+  /// In pt, this message translates to:
+  /// **'um,uma|dois,duas|três|quatro|cinco'**
+  String get voiceNumberWords;
 }
 
 class _AppLocalizationsDelegate

@@ -58,6 +58,9 @@ dependencies:
   geocoding: ^5.0.1
   printing: ^5.15.1
 
+  # Premium voice commands and dictation
+  speech_to_text: ^7.5.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -13,6 +13,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../l10n/locale_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../widgets/avatar_selector_sheet.dart';
+import '../widgets/biometric_lock_tile.dart';
 import 'photo_crop_screen.dart';
 import '../../../../core/notifications/notifications_blocked_notice.dart';
 
@@ -942,6 +943,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   child: Column(
                     children: [
+                      // Premium only; renders nothing on Free builds.
+                      const BiometricLockTile(),
                       ListTile(
                         key: const Key('settings_privacy_tile'),
                         leading: const Icon(Icons.shield_outlined, color: AppColors.clinicalTeal),

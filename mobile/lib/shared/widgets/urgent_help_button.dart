@@ -3,6 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/router/route_paths.dart';
+import '../../features/voice/presentation/voice_widgets.dart';
 import '../../l10n/app_localizations.dart';
 
 /// Small round "Ajuda urgente" button that opens the help resources screen.
@@ -41,7 +42,9 @@ class UrgentHelpButton extends StatelessWidget {
 
 /// Wraps the whole app (MaterialApp `builder`) and adds [UrgentHelpButton]
 /// below every screen, so it never covers content. Hidden on the help screen
-/// itself and while the keyboard is open.
+/// itself and while the keyboard is open. On Premium builds the check-in
+/// screen also gets the voice mic next to it, and every screen the voice
+/// status banner along the top.
 class UrgentHelpOverlay extends StatefulWidget {
   final GoRouter router;
   final Widget child;
@@ -86,6 +89,12 @@ class _UrgentHelpOverlayState extends State<UrgentHelpOverlay> {
     return router.state.matchedLocation == RoutePaths.home;
   }
 
+  bool _onCheckIn() {
+    final router = widget.router;
+    if (router.routerDelegate.currentConfiguration.isEmpty) return false;
+    return router.state.matchedLocation == RoutePaths.journal;
+  }
+
   bool _syncScheduled = false;
 
   void _onRouteChanged() {
@@ -122,6 +131,31 @@ class _UrgentHelpOverlayState extends State<UrgentHelpOverlay> {
               ),
             ),
           ),
+        // Premium hands-free check-in: the mic sits left of the help button,
+        // inside the app bar band (that screen has no app bar actions), so
+        // it never covers content. Home has its own mic in the app bar.
+        if (visible && _onCheckIn())
+          const Positioned(
+            top: 0,
+            right: 64,
+            child: SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(top: 10),
+                child: IfProviderScope(child: VoiceMicButton(size: 40)),
+              ),
+            ),
+          ),
+        const Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(64, 10, 64, 0),
+              child: Center(child: IfProviderScope(child: VoiceStatusBanner())),
+            ),
+          ),
+        ),
       ],
     );
   }

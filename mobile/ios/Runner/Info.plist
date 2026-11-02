@@ -6,6 +6,10 @@
 	<string>$(MAPS_API_KEY_IOS)</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>O Dualis usa Face ID para proteger o acesso aos seus registros de bem-estar.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>O Dualis usa o microfone só quando você toca no botão de voz, para entender seus comandos e ditados.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>O Dualis transforma sua fala em texto para você navegar e registrar seu dia por voz. Quando o aparelho permite, isso acontece no próprio aparelho.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Usamos a câmera para sua foto de perfil.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/journal_keys.dart';
+import '../../../../core/voice/voice_targets.dart';
 
 /// Tappable body silhouette with the journal regions, front and back.
 ///
@@ -83,13 +84,18 @@ class BodyRegionMap extends StatelessWidget {
                     top: r.top * size.height,
                     width: r.width * size.width,
                     height: r.height * size.height,
-                    child: _RegionTarget(
-                      key: i == 0 ? Key('jv2_region_$region') : null,
-                      label: labelOf(region),
-                      selected: selected.contains(region),
-                      // Arms and legs are one region: read it out once.
-                      excludeSemantics: i > 0,
-                      onTap: () => onToggle(region),
+                    child: VoiceTarget(
+                      labels: [labelOf(region)],
+                      // Arms and legs are one region: one voice target.
+                      onSelect: i == 0 ? () => onToggle(region) : null,
+                      child: _RegionTarget(
+                        key: i == 0 ? Key('jv2_region_$region') : null,
+                        label: labelOf(region),
+                        selected: selected.contains(region),
+                        // Arms and legs are one region: read it out once.
+                        excludeSemantics: i > 0,
+                        onTap: () => onToggle(region),
+                      ),
                     ),
                   ),
             ],

@@ -5,8 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
+import '../../../../core/voice/voice_matcher.dart';
+import '../../../../core/voice/voice_targets.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../auth/domain/user_profile.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../profile/presentation/controllers/active_profile_controller.dart';
+import '../../../voice/presentation/voice_widgets.dart';
 import '../../../dashboard/presentation/screens/check_in_summary_screen.dart';
 import '../../../home/domain/home_greeting.dart' as greeting;
 import '../../../home/presentation/controllers/trigger_checkin_controller.dart';
@@ -57,6 +62,15 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
 
   JournalArea get _area => widget.args.initialArea ?? JournalArea.emotional;
 
+  bool get _isMale {
+    final activeGender = ref.watch(activeProfileControllerProvider).activeProfile?.gender;
+    if (activeGender != null && activeGender.isNotEmpty) {
+      return activeGender.toLowerCase() == 'masculino';
+    }
+    final userGender = ref.watch(authControllerProvider).user?.gender;
+    return userGender == Gender.masculino;
+  }
+
   @override
   void dispose() {
     _customController.dispose();
@@ -80,7 +94,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     try {
-      final entry = await _controller.save();
+      final entry = await _controller.save(isMale: _isMale);
       if (!mounted) return;
       _updateHome(l10n, entry);
       if (entry.pendingSync) {
@@ -110,6 +124,9 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     final l10n = AppLocalizations.of(context);
     final state = ref.watch(journalFlowControllerProvider);
     final conditions = ref.watch(userConditionsProvider).value ?? const [];
+    final stepToken =
+        '${state.step.name}-${state.time}-${state.regionIndex}-${state.branch}';
+    ref.read(voiceTargetRegistryProvider).activeStep = stepToken;
 
     return PopScope(
       canPop: false,
@@ -118,11 +135,15 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          leading: IconButton(
-            key: const Key('jv2_back'),
-            tooltip: l10n.jv2Back,
-            icon: const Icon(Icons.arrow_back_rounded),
-            onPressed: _back,
+          leading: VoiceTarget(
+            labels: [l10n.jv2Back, ...VoiceMatcher.aliases(l10n.voiceAliasBack)],
+            onSelect: _back,
+            child: IconButton(
+              key: const Key('jv2_back'),
+              tooltip: l10n.jv2Back,
+              icon: const Icon(Icons.arrow_back_rounded),
+              onPressed: _back,
+            ),
           ),
           title: Text(
             l10n.jv2FlowTitle,
@@ -145,10 +166,12 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
               ),
             ),
             child: KeyedSubtree(
-              key: ValueKey(
-                '${state.step.name}-${state.time}-${state.regionIndex}-${state.branch}',
+              key: ValueKey(stepToken),
+              // Voice answers only the step coming in, not the one leaving.
+              child: VoiceStep(
+                token: stepToken,
+                child: _buildStep(context, l10n, state, conditions),
               ),
-              child: _buildStep(context, l10n, state, conditions),
             ),
           ),
         ),
@@ -200,10 +223,12 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       case JournalStep.regionOptions:
         final region = state.currentRegion!.region;
         final lastRegion = state.regionIndex == state.selectedRegions.length - 1;
+        final branches = JournalKeys.branchesFor(region, state.currentRegion!.side, isMale: _isMale);
+        final options = branches[state.branch] ?? JournalKeys.physicalTree[region]![state.branch]!;
         return _optionsStep(
           l10n,
           state,
-          JournalKeys.physicalTree[region]![state.branch]!,
+          options,
           '$region.${state.branch}',
           _controller.confirmPhysicalOptions,
           moreLabel: lastRegion ? l10n.jv23MoreBody : null,
@@ -361,6 +386,16 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
                 : null,
           ),
           const SizedBox(height: 4),
+          VoiceTarget(
+            labels: [l10n.chronicTrackSaveWithout],
+            onSelect: state.isSaving
+                ? null
+                : () {
+                    _controller.clearReadingsForSave();
+                    _save();
+                  },
+            child: const SizedBox.shrink(),
+          ),
           TextButton(
             key: const Key('chronicTrack_save_without'),
             style: TextButton.styleFrom(minimumSize: const Size.fromHeight(48)),
@@ -482,7 +517,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         ? null
         : (side == JournalKeys.sideBack ? l10n.jv2BodyBack : l10n.jv2BodyFront);
     final rootLabel = JournalLabels.root(l10n, region);
-    final branches = JournalKeys.branchesFor(region, side);
+    final branches = JournalKeys.branchesFor(region, side, isMale: _isMale);
     final hasSensation = state.sensation != null;
     return _StepLayout(
       progress: _progress(state),
@@ -541,6 +576,12 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (showMore)
+            VoiceTarget(
+              labels: [moreLabel],
+              onSelect: canConfirm ? onMore : null,
+              child: const SizedBox.shrink(),
+            ),
+          if (showMore)
             TextButton(
               key: const Key('jv23_more'),
               onPressed: canConfirm ? onMore : null,
@@ -586,17 +627,39 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           Row(
             children: [
               Expanded(
-                child: TextField(
-                  key: const Key('jv2_custom_field'),
-                  controller: _customController,
-                  autofocus: true,
-                  maxLength: JournalKeys.customLabelMaxLength,
-                  textInputAction: TextInputAction.done,
-                  decoration: InputDecoration(hintText: l10n.jv2WriteMineHint),
-                  onSubmitted: (_) => _addCustom(),
+                child: VoiceTextSink(
+                  // Hands-free: what is said becomes the label, as if typed.
+                  onText: _suggestingCustom
+                      ? null
+                      : (text) {
+                          _customController.text = text;
+                          _addCustom();
+                        },
+                  child: TextField(
+                    key: const Key('jv2_custom_field'),
+                    controller: _customController,
+                    autofocus: true,
+                    maxLength: JournalKeys.customLabelMaxLength,
+                    textInputAction: TextInputAction.done,
+                    decoration: InputDecoration(
+                      hintText: l10n.jv2WriteMineHint,
+                      suffixIcon: voiceAvailable(ref)
+                          ? VoiceDictationButton(
+                              controller: _customController,
+                              fieldKey: 'custom',
+                            )
+                          : null,
+                    ),
+                    onSubmitted: (_) => _addCustom(),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
+              VoiceTarget(
+                labels: [l10n.jv2WriteMineAdd],
+                onSelect: _suggestingCustom ? null : _addCustom,
+                child: const SizedBox.shrink(),
+              ),
               FilledButton(
                 key: const Key('jv2_custom_add'),
                 style: FilledButton.styleFrom(minimumSize: const Size(0, 52)),
@@ -662,15 +725,23 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           title: Text(l10n.jv2SuggestTitle),
           content: Text(l10n.jv2SuggestBody(optionLabel)),
           actions: [
-            TextButton(
-              key: const Key('jv2_suggest_no'),
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: Text(l10n.jv2SuggestNo),
+            VoiceTarget(
+              labels: [l10n.jv2SuggestNo, ...VoiceMatcher.aliases(l10n.voiceAliasNo)],
+              onSelect: () => Navigator.of(ctx).pop(false),
+              child: TextButton(
+                key: const Key('jv2_suggest_no'),
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: Text(l10n.jv2SuggestNo),
+              ),
             ),
-            FilledButton(
-              key: const Key('jv2_suggest_yes'),
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: Text(l10n.jv2SuggestYes),
+            VoiceTarget(
+              labels: [l10n.jv2SuggestYes, ...VoiceMatcher.aliases(l10n.voiceAliasYes)],
+              onSelect: () => Navigator.of(ctx).pop(true),
+              child: FilledButton(
+                key: const Key('jv2_suggest_yes'),
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: Text(l10n.jv2SuggestYes),
+              ),
             ),
           ],
         ),
@@ -732,6 +803,14 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             onSelectionChanged: (s) => _controller.setBodySide(s.first),
           ),
         ),
+        // By voice, the side not on screen ("Costas" turns the map around;
+        // said again on the back view it marks the back region).
+        for (final side in [JournalKeys.sideFront, JournalKeys.sideBack])
+          VoiceTarget(
+            labels: [side == JournalKeys.sideBack ? l10n.jv2BodyBack : l10n.jv2BodyFront],
+            onSelect: state.bodySide == side ? null : () => _controller.setBodySide(side),
+            child: const SizedBox.shrink(),
+          ),
         const SizedBox(height: 12),
         Center(
           child: ConstrainedBox(
@@ -800,6 +879,10 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
   Widget _intensityStep(AppLocalizations l10n, JournalFlowState state) {
     final items = state.itemsNeedingIntensity;
     final single = items.length == 1;
+    // Row answered by voice: the first one with an answer missing.
+    final voiceRow = items.indexWhere((i) =>
+        i.intensity == null ||
+        (i.persistence == null && i.kind != JournalKeys.kindCondition));
     return _StepLayout(
       progress: _progress(state),
       lead: _phrase(l10n, state),
@@ -823,7 +906,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         for (var index = 0; index < items.length; index++)
           single
               ? _singleItemIntensity(l10n, items.first)
-              : _compactItemRow(l10n, items[index], index),
+              : _compactItemRow(l10n, items[index], index, voice: index == voiceRow),
       ],
     );
   }
@@ -840,6 +923,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     JournalItem item,
     int index, {
     required bool compact,
+    bool voice = true,
   }) {
     if (!compact) {
       return _CardGrid(
@@ -864,6 +948,12 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       ),
       child: Row(
         children: [
+          for (final p in JournalKeys.persistences)
+            VoiceTarget(
+              labels: [JournalLabels.persistence(l10n, p)],
+              onSelect: voice ? () => _controller.setPersistence(item.draftId, p) : null,
+              child: const SizedBox.shrink(),
+            ),
           for (final p in JournalKeys.persistences)
             Expanded(
               child: Semantics(
@@ -928,7 +1018,14 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     );
   }
 
-  Widget _compactItemRow(AppLocalizations l10n, JournalItem item, int index) {
+  /// Several items: by voice, answers go to the first item still missing
+  /// an answer, so "três" never lands on two rows at once.
+  Widget _compactItemRow(
+    AppLocalizations l10n,
+    JournalItem item,
+    int index, {
+    bool voice = false,
+  }) {
     final isCondition = item.kind == JournalKeys.kindCondition;
     return Container(
       key: Key('jv2_item_row_$index'),
@@ -962,12 +1059,13 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
                 ),
               ),
             ),
-          _persistencePicker(l10n, item, index, compact: true),
+          _persistencePicker(l10n, item, index, compact: true, voice: voice),
           const SizedBox(height: 10),
           IntensityScaleCompact(
             keyPrefix: 'jv2_intensity_$index',
             value: item.intensity,
             physical: item.kind == JournalKeys.kindPhysical,
+            voice: voice,
             onChanged: (v) => _controller.setIntensity(item.draftId, v),
           ),
         ],
@@ -990,7 +1088,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
   /// Triggers in three tabs of icon cards (v2.3). "Não sei" and "Outro"
   /// sit below the tabs.
   Widget _triggersStep(AppLocalizations l10n, JournalFlowState state) {
-    final offered = JournalKeys.triggersFor(hasPhysicalItem: state.hasPhysicalItem);
+    final offered = JournalKeys.triggersFor(hasPhysicalItem: state.hasPhysicalItem, isMale: _isMale);
     final topics = [
       for (final e in JournalKeys.triggerTopics.entries)
         (e.key, [for (final t in e.value) if (offered.contains(t)) t]),
@@ -1058,12 +1156,27 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         ),
         if (state.triggers.contains(JournalKeys.triggerOutro)) ...[
           const SizedBox(height: 4),
-          TextField(
-            key: const Key('jv2_trigger_note'),
-            controller: _triggerNoteController,
-            maxLength: JournalKeys.triggerNoteMaxLength,
-            decoration: InputDecoration(hintText: l10n.jv2TriggerNoteHint),
-            onChanged: _controller.setTriggerNote,
+          VoiceTextSink(
+            onText: (text) {
+              appendDictation(_triggerNoteController, text);
+              _controller.setTriggerNote(_triggerNoteController.text);
+            },
+            child: TextField(
+              key: const Key('jv2_trigger_note'),
+              controller: _triggerNoteController,
+              maxLength: JournalKeys.triggerNoteMaxLength,
+              decoration: InputDecoration(
+                hintText: l10n.jv2TriggerNoteHint,
+                suffixIcon: voiceAvailable(ref)
+                    ? VoiceDictationButton(
+                        controller: _triggerNoteController,
+                        fieldKey: 'trigger_note',
+                        onChanged: _controller.setTriggerNote,
+                      )
+                    : null,
+              ),
+              onChanged: _controller.setTriggerNote,
+            ),
           ),
         ],
       ],
@@ -1078,6 +1191,11 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
   }) {
     return Row(
       children: [
+        VoiceTarget(
+          labels: [l10n.jv2Skip, ...VoiceMatcher.aliases(l10n.voiceAliasSkip)],
+          onSelect: onSkip,
+          child: const SizedBox.shrink(),
+        ),
         Expanded(
           child: OutlinedButton(
             key: skipKey,
@@ -1097,6 +1215,8 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
   /// Optional closing questions; "Pular" stays visible. Both questions use
   /// the same card (v2.3).
   Widget _closingStep(AppLocalizations l10n, JournalFlowState state) {
+    final isPhysical = _area == JournalArea.physical || state.hasPhysicalItem;
+    final helpers = JournalKeys.helpersFor(isPhysical: isPhysical);
     return _StepLayout(
       progress: _progress(state),
       lead: _phrase(l10n, state),
@@ -1109,7 +1229,11 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         onContinue: () => _controller.confirmClosing(),
       ),
       children: [
-        _CapsLabel(l10n.jv22CopingQuestion),
+        _CapsLabel(
+          isPhysical
+              ? l10n.jv22CopingPhysicalQuestion
+              : l10n.jv22CopingQuestion,
+        ),
         _CardGrid(
           columns: 3,
           children: [
@@ -1123,11 +1247,15 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
               ),
           ],
         ),
-        _CapsLabel(l10n.jv22HelpersQuestion),
+        _CapsLabel(
+          isPhysical
+              ? l10n.jv22HelpersPhysicalQuestion
+              : l10n.jv22HelpersQuestion,
+        ),
         _CardGrid(
           columns: 3,
           children: [
-            for (final h in JournalKeys.helpers)
+            for (final h in helpers)
               _ChoiceCard(
                 key: Key('jv22_helper_$h'),
                 emoji: journalEmojis[h],
@@ -1152,17 +1280,30 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         onPressed: state.isSaving ? null : _save,
       ),
       children: [
-        TextField(
-          key: const Key('jv2_note_field'),
-          controller: _noteController,
-          minLines: 4,
-          maxLines: 8,
-          maxLength: 1000,
-          decoration: InputDecoration(
-            hintText: l10n.jv2NoteHint,
-            border: const OutlineInputBorder(),
+        VoiceTextSink(
+          onText: (text) {
+            appendDictation(_noteController, text);
+            _controller.setNote(_noteController.text);
+          },
+          child: TextField(
+            key: const Key('jv2_note_field'),
+            controller: _noteController,
+            minLines: 4,
+            maxLines: 8,
+            maxLength: 1000,
+            decoration: InputDecoration(
+              hintText: l10n.jv2NoteHint,
+              border: const OutlineInputBorder(),
+              suffixIcon: voiceAvailable(ref)
+                  ? VoiceDictationButton(
+                      controller: _noteController,
+                      fieldKey: 'note',
+                      onChanged: _controller.setNote,
+                    )
+                  : null,
+            ),
+            onChanged: _controller.setNote,
           ),
-          onChanged: _controller.setNote,
         ),
       ],
     );
@@ -1424,7 +1565,9 @@ class _ChoiceCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => VoiceTarget(labels: [label], onSelect: enabled ? onTap : null, child: _content(context));
+
+  Widget _content(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final icon = leading ??
         (emoji == null
@@ -1527,6 +1670,8 @@ class _TopicTabs extends StatelessWidget {
       child: Row(
         children: [
           for (final t in tabs)
+            VoiceTarget(labels: [t.label], onSelect: t.onTap, child: const SizedBox.shrink()),
+          for (final t in tabs)
             Expanded(
               child: Semantics(
                 button: true,
@@ -1623,7 +1768,9 @@ class _ChoiceTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => VoiceTarget(labels: [label], onSelect: enabled ? onTap : null, child: _content(context));
+
+  Widget _content(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: EdgeInsets.only(bottom: dense ? 8 : 10),
@@ -1888,7 +2035,9 @@ class _ConditionTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => VoiceTarget(labels: [label], onSelect: onTap, child: _content(context));
+
+  Widget _content(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final outline = isDark ? AppColors.outlineDark : AppColors.outlineLight;
     final highlighted = selected || open;
@@ -1994,7 +2143,9 @@ class _OptionCell extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => VoiceTarget(labels: [label], onSelect: onTap, child: _content(context));
+
+  Widget _content(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Semantics(
       button: true,
@@ -2061,7 +2212,9 @@ class _MarkedPill extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => VoiceTarget(labels: [removeLabel], onSelect: onRemove, child: _content(context));
+
+  Widget _content(BuildContext context) {
     return Semantics(
       button: true,
       label: removeLabel,
@@ -2142,7 +2295,20 @@ class _ContinueButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => VoiceTarget(labels: _voiceLabels(context), onSelect: busy ? null : onPressed, child: _content(context));
+
+  /// "Continuar" and "Salvar" also answer to their usual synonyms.
+  List<String> _voiceLabels(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return [
+      label,
+      if (label == l10n.jv2Continue) ...VoiceMatcher.aliases(l10n.voiceAliasContinue),
+      if (label == l10n.jv2Save || label == l10n.jv22JustSave)
+        ...VoiceMatcher.aliases(l10n.voiceAliasSave),
+    ];
+  }
+
+  Widget _content(BuildContext context) {
     return FilledButton(
       key: key == null ? const Key('jv2_continue') : null,
       style: FilledButton.styleFrom(

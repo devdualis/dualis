@@ -15,6 +15,7 @@ import '../controllers/trigger_checkin_controller.dart';
 import '../widgets/dual_axis_trigger_card.dart';
 import '../../../sync/presentation/controllers/sync_outbox_worker.dart';
 import '../../../settings/presentation/widgets/avatar_selector_sheet.dart';
+import '../../../voice/presentation/voice_widgets.dart';
 import '../widgets/dualis_bottom_nav_bar.dart';
 import '../../../care/presentation/screens/care_hub_screen.dart';
 import '../../../care/presentation/screens/premium_promo_screen.dart';
@@ -29,6 +30,7 @@ import '../../../hydration/presentation/hydration_reminder_offer.dart';
 import '../../../hydration/presentation/screens/hydration_dashboard_screen.dart';
 import '../../../hydration/presentation/widgets/water_intake_modal.dart';
 import '../../../habits/presentation/controllers/habits_controller.dart';
+import '../../../habits/presentation/screens/habits_screen.dart';
 import '../../../habits/presentation/widgets/today_habits_card.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
@@ -80,7 +82,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(triggerCheckInProvider.notifier).loadTodayCheckIn();
       ref.read(triageOutcomeProvider.notifier).loadTodayOutcome();
       ref.read(hydrationControllerProvider.notifier).loadData();
-      ref.read(habitsControllerProvider.notifier).loadData();
+      if (ref.read(premiumProfilesEnabledProvider)) {
+        ref.read(habitsControllerProvider.notifier).loadData();
+      }
       if (mounted && ref.read(authControllerProvider).isAuthenticated) {
         await ref.read(hydrationReminderOfferProvider).maybeShow(context);
       }
@@ -105,7 +109,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if ((prev == null || !prev.isAuthenticated) && next.isAuthenticated) {
         ref.read(triggerCheckInProvider.notifier).loadTodayCheckIn();
         ref.read(hydrationControllerProvider.notifier).loadData();
-        ref.read(habitsControllerProvider.notifier).loadData();
+        if (ref.read(premiumProfilesEnabledProvider)) {
+          ref.read(habitsControllerProvider.notifier).loadData();
+        }
         unawaited(ref.read(hydrationReminderOfferProvider).maybeShow(context));
       }
     });
@@ -220,31 +226,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ];
     } else {
       appBarTitle = Text(
-        'Controle de Hidratação 💧',
+        ref.watch(premiumProfilesEnabledProvider)
+            ? l10n.habitsChartTitle
+            : l10n.navHydration,
         style: GoogleFonts.plusJakartaSans(
           fontSize: 18,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimaryLight,
         ),
       );
-      appBarActions = [
-        if (ref.watch(premiumProfilesEnabledProvider)) ...[
-          const ProfileAppBarPill(),
-          const SizedBox(width: 8),
-        ],
-        _AppBarIconButton(
-          key: const Key('home_library_button'),
-          icon: Icons.menu_book_outlined,
-          color: AppColors.clinicalTealDark,
-          tooltip: l10n.xv2LibTitle,
-          onTap: () => context.push(RoutePaths.library),
-        ),
-        const SizedBox(width: 8),
-      ];
+      // Premium "Hábitos" tab: the profile pill takes the library's place so
+      // the title still fits.
+      appBarActions = ref.watch(premiumProfilesEnabledProvider)
+          ? const [ProfileAppBarPill(), SizedBox(width: 8)]
+          : [
+              _AppBarIconButton(
+                key: const Key('home_library_button'),
+                icon: Icons.menu_book_outlined,
+                color: AppColors.clinicalTealDark,
+                tooltip: l10n.xv2LibTitle,
+                onTap: () => context.push(RoutePaths.library),
+              ),
+              const SizedBox(width: 8),
+            ];
     }
 
     appBarActions = [
       ...appBarActions,
+      // Premium voice commands.
+      if (ref.watch(premiumProfilesEnabledProvider)) ...[
+        const VoiceMicButton(size: 38),
+        const SizedBox(width: 8),
+      ],
       _AppBarIconButton(
         key: const Key('home_settings_button'),
         icon: Icons.settings_outlined,
@@ -286,6 +299,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       bottomNavigationBar: DualisBottomNavBar(
         showCare: true,
         careLocked: careLocked,
+        habitsTab: !careLocked,
         currentIndex: _currentTabIndex,
         onTap: (index) {
           setState(() => _currentTabIndex = index);
@@ -308,7 +322,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       case 1:
         return const HistoricalDashboardScreen(isEmbedded: true);
       case 2:
-        return const HydrationDashboardScreen(isEmbedded: true);
+        return ref.watch(premiumProfilesEnabledProvider)
+            ? const HabitsScreen(isEmbedded: true)
+            : const HydrationDashboardScreen(isEmbedded: true);
       case 3:
         return ref.watch(premiumProfilesEnabledProvider)
             ? const CareHubScreen()

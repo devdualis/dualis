@@ -10,6 +10,7 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/controllers/auth_controller.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/locale_provider.dart';
+import 'shared/widgets/privacy_veil_overlay.dart';
 import 'shared/widgets/urgent_help_button.dart';
 import 'features/sync/presentation/widgets/offline_indicator_banner.dart';
 
@@ -67,10 +68,15 @@ class _DualisAppState extends ConsumerState<DualisApp> {
       builder: (context, child) {
         // The urgent-help bar stays reachable even when an update is required.
         // The offline banner sits above it, on every screen.
+        // The Premium app lock covers everything below it but brings its own
+        // urgent-help button and steps aside on the help screen.
         return OfflineBannerFrame(
-          child: UrgentHelpOverlay(
+          child: PrivacyVeilOverlay(
             router: router,
-            child: AppVersionGate(child: child ?? const SizedBox.shrink()),
+            child: UrgentHelpOverlay(
+              router: router,
+              child: AppVersionGate(child: child ?? const SizedBox.shrink()),
+            ),
           ),
         );
       },
