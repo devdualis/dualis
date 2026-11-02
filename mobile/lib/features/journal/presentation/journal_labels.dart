@@ -18,21 +18,6 @@ class JournalLabels {
     'musculos',
     'hormonios',
   ];
-  static const List<String> triggers = [
-    'trabalho',
-    'familia',
-    'sono',
-    'dinheiro',
-    'telas',
-    'ciclo',
-    'alimentacao',
-    'esforco',
-    'queda',
-    'medicamento',
-    'clima',
-    'nao_sei',
-    'outro',
-  ];
 
   /// Any summary marker: option, branch, bare region/time, or `trigger:<key>`.
   static String? marker(AppLocalizations l10n, String key) {
@@ -304,36 +289,8 @@ class JournalLabels {
   }
 
   /// Text of a time (emotional) or body region (physical).
-  static String root(AppLocalizations l10n, String key) {
-    switch (key) {
-      case 'passado':
-        return l10n.jv2TimePassado;
-      case 'presente':
-        return l10n.jv2TimePresente;
-      case 'futuro':
-        return l10n.jv2TimeFuturo;
-      case 'cabeca':
-        return l10n.jv2RegionCabeca;
-      case 'peito':
-        return l10n.jv2RegionPeito;
-      case 'barriga':
-        return l10n.jv2RegionBarriga;
-      case 'pelve':
-        return l10n.jv23RegionPelve;
-      case 'costas':
-        return l10n.jv2RegionCostas;
-      case 'membros':
-        return l10n.jv2RegionMembros;
-      case 'pele':
-        return l10n.jv2RegionPele;
-      case 'musculos':
-        return l10n.jv2RegionMusculos;
-      case 'hormonios':
-        return l10n.jv2RegionHormonios;
-      default:
-        return key;
-    }
-  }
+  static String root(AppLocalizations l10n, String key) =>
+      time(l10n, key) ?? region(l10n, key) ?? key;
 
   static String? region(AppLocalizations l10n, String key) => switch (key) {
         'cabeca' => l10n.jv2RegionCabeca,
