@@ -40,6 +40,53 @@ class UrgentHelpButton extends StatelessWidget {
   }
 }
 
+/// Tracks popup routes (bottom sheets, dialogs, menus) open on a router's
+/// navigator. On /home the bottom bar's emergency entry stands in for the
+/// floating help button, but a modal sheet covers that bar; while a popup is
+/// open [UrgentHelpOverlay] shows the floating button again so help stays one
+/// tap away (claim sheet, profile sheet, family-sharing dialogs).
+class PopupRouteTracker extends NavigatorObserver with ChangeNotifier {
+  static final Expando<PopupRouteTracker> _byRouter = Expando();
+
+  /// The tracker registered for [router] with [attachTo], if any.
+  static PopupRouteTracker? of(GoRouter router) => _byRouter[router];
+
+  final Set<Route<dynamic>> _popups = {};
+
+  void attachTo(GoRouter router) => _byRouter[router] = this;
+
+  bool get hasOpenPopup {
+    _popups.removeWhere((r) => !r.isActive);
+    return _popups.isNotEmpty;
+  }
+
+  void _add(Route<dynamic>? route) {
+    if (route is PopupRoute && _popups.add(route)) notifyListeners();
+  }
+
+  void _drop(Route<dynamic>? route) {
+    if (route != null && _popups.remove(route)) notifyListeners();
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      _add(route);
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      _drop(route);
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      _drop(route);
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    _drop(oldRoute);
+    _add(newRoute);
+  }
+}
+
 /// Wraps the whole app (MaterialApp `builder`) and adds [UrgentHelpButton]
 /// below every screen, so it never covers content. Hidden on the help screen
 /// itself and while the keyboard is open. On Premium builds the check-in
@@ -59,22 +106,32 @@ class _UrgentHelpOverlayState extends State<UrgentHelpOverlay> {
   @override
   void initState() {
     super.initState();
-    widget.router.routerDelegate.addListener(_onRouteChanged);
+    _listen(widget.router);
   }
 
   @override
   void didUpdateWidget(UrgentHelpOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.router != widget.router) {
-      oldWidget.router.routerDelegate.removeListener(_onRouteChanged);
-      widget.router.routerDelegate.addListener(_onRouteChanged);
+      _unlisten(oldWidget.router);
+      _listen(widget.router);
     }
   }
 
   @override
   void dispose() {
-    widget.router.routerDelegate.removeListener(_onRouteChanged);
+    _unlisten(widget.router);
     super.dispose();
+  }
+
+  void _listen(GoRouter router) {
+    router.routerDelegate.addListener(_onRouteChanged);
+    PopupRouteTracker.of(router)?.addListener(_onRouteChanged);
+  }
+
+  void _unlisten(GoRouter router) {
+    router.routerDelegate.removeListener(_onRouteChanged);
+    PopupRouteTracker.of(router)?.removeListener(_onRouteChanged);
   }
 
   bool _isOnHelpScreen() {
@@ -83,10 +140,13 @@ class _UrgentHelpOverlayState extends State<UrgentHelpOverlay> {
     return router.state.matchedLocation == RoutePaths.emergency;
   }
 
+  /// On /home the bottom bar's emergency entry is the one-tap help, unless a
+  /// popup (sheet or dialog) covers it.
   bool _homeNavCoversHelp() {
     final router = widget.router;
     if (router.routerDelegate.currentConfiguration.isEmpty) return false;
-    return router.state.matchedLocation == RoutePaths.home;
+    if (router.state.matchedLocation != RoutePaths.home) return false;
+    return !(PopupRouteTracker.of(router)?.hasOpenPopup ?? false);
   }
 
   bool _onCheckIn() {

@@ -27,6 +27,7 @@ import '../../features/profile/presentation/screens/family_sharing_screen.dart';
 import '../../features/library/presentation/library_screen.dart';
 import '../../features/care/presentation/care_routes.dart';
 import '../presentation/screens/not_found_screen.dart';
+import '../../shared/widgets/urgent_help_button.dart';
 import 'route_paths.dart';
 
 class RouterNotifier extends ChangeNotifier {
@@ -86,7 +87,10 @@ GoRouter createRouter({
   Listenable? refreshListenable,
   GoRouterRedirect? redirect,
 }) {
-  return GoRouter(
+  // Lets UrgentHelpOverlay see bottom sheets and dialogs over /home.
+  final popups = PopupRouteTracker();
+  final router = GoRouter(
+    observers: [popups],
     initialLocation: initialLocation,
     refreshListenable: refreshListenable,
     redirect: redirect,
@@ -240,4 +244,6 @@ GoRouter createRouter({
       ),
     ],
   );
+  popups.attachTo(router);
+  return router;
 }

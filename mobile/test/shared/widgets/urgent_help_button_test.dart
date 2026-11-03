@@ -52,8 +52,9 @@ class _NoAudit extends EmergencyAuditService {
 }
 
 /// Real screens under the same global builder used by `main.dart`.
-Widget buildApp(AppDatabase db, String initialLocation) {
+Widget buildApp(AppDatabase db, String initialLocation, {PopupRouteTracker? popups}) {
   final router = GoRouter(
+    observers: [if (popups != null) popups],
     initialLocation: initialLocation,
     routes: [
       GoRoute(path: RoutePaths.onboarding, builder: (_, __) => const OnboardingScreen()),
@@ -65,6 +66,7 @@ Widget buildApp(AppDatabase db, String initialLocation) {
       GoRoute(path: RoutePaths.emergency, builder: (_, __) => const EmergencyScreen()),
     ],
   );
+  popups?.attachTo(router);
 
   return ProviderScope(
     overrides: [
@@ -151,6 +153,43 @@ void main() {
       expect(helpControlFor(entry.key), findsOneWidget);
     });
   }
+
+  testWidgets('on home, a sheet covering the bottom bar brings the button back', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    final popups = PopupRouteTracker();
+    await tester.pumpWidget(buildApp(db, RoutePaths.home, popups: popups));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byKey(const Key('urgent_help_button')), findsNothing);
+
+    showModalBottomSheet<void>(
+      context: tester.element(find.byType(HomeScreen)),
+      builder: (_) => const SizedBox(height: 300, child: Text('sheet')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('sheet'), findsOneWidget);
+    expect(find.byKey(const Key('nav_destination_emergency')).hitTestable(), findsNothing,
+        reason: 'the modal barrier covers the bottom bar');
+    final button = find.byKey(const Key('urgent_help_button')).hitTestable();
+    expect(button, findsOneWidget);
+
+    await tester.tap(button);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(EmergencyScreen), findsOneWidget);
+
+    // Back on home with the sheet closed: the bottom bar entry again.
+    await tester.tap(find.byKey(const Key('emergency_close_button')));
+    await tester.pump(const Duration(milliseconds: 500));
+    Navigator.of(tester.element(find.text('sheet'))).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('sheet'), findsNothing);
+    expect(find.byKey(const Key('urgent_help_button')), findsNothing);
+    expect(find.byKey(const Key('nav_destination_emergency')), findsOneWidget);
+  });
 
   testWidgets('button floats in the top-right corner, away from the bottom nav', (tester) async {
     await pump(tester, RoutePaths.login);
