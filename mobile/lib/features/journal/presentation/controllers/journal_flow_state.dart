@@ -135,6 +135,12 @@ class JournalFlowState {
 
   bool get hasPhysicalItem => items.any((i) => i.kind == 'physical');
 
+  /// Option keys of the physical items, to fit the factors to them.
+  List<String> get physicalOptionKeys => [
+        for (final i in items)
+          if (i.kind == 'physical' && i.optionKey != null) i.optionKey!,
+      ];
+
   /// Every item has an intensity, and a persistence unless it is a condition
   /// (optional there). A condition item with at least one reading is ready
   /// without an intensity (tracked conditions, v2.4).

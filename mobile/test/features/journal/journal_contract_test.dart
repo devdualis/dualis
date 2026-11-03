@@ -113,12 +113,56 @@ void main() {
       ]);
       expect(JournalKeys.physicalOnlyTriggers,
           {'alimentacao', 'esforco', 'queda', 'medicamento', 'clima'});
-      expect(JournalKeys.triggersFor(hasPhysicalItem: false),
+      expect(JournalKeys.triggersFor(),
           ['trabalho', 'familia', 'sono', 'dinheiro', 'telas', 'ciclo', 'nao_sei', 'outro']);
       // v2.3 topics: every trigger once, "Não sei" and "Outro" outside them.
       final inTopics = [for (final t in JournalKeys.triggerTopics.values) ...t];
       expect(inTopics.toSet(), hasLength(inTopics.length));
       expect({...inTopics, 'nao_sei', 'outro'}, JournalKeys.triggers.toSet());
+    });
+
+    test('v2.6 factors follow the chosen body options', () {
+      // Every physical option has its own factors, all real trigger keys,
+      // never "Não sei" or "Outro" (always offered anyway).
+      final physicalKeys = {
+        for (final r in JournalKeys.physicalTree.entries)
+          for (final b in r.value.entries)
+            for (final o in b.value) JournalKeys.optionKey(r.key, b.key, o),
+      };
+      expect(JournalKeys.optionTriggers.keys.toSet(), physicalKeys);
+      for (final factors in JournalKeys.optionTriggers.values) {
+        expect(factors, isNotEmpty);
+        expect(JournalKeys.triggers.toSet().containsAll(factors), isTrue);
+        expect(factors.intersection({'nao_sei', 'outro'}), isEmpty);
+      }
+
+      // Lower back: no screens, family or money.
+      expect(JournalKeys.triggersFor(physicalOptionKeys: ['costas.rigidez.lombar']),
+          ['trabalho', 'sono', 'ciclo', 'esforco', 'queda', 'nao_sei', 'outro']);
+      expect(JournalKeys.triggersFor(
+              physicalOptionKeys: ['costas.rigidez.lombar'], isMale: true),
+          ['trabalho', 'sono', 'esforco', 'queda', 'nao_sei', 'outro']);
+      // Several options: their factors together.
+      expect(JournalKeys.triggersFor(
+              physicalOptionKeys: ['peito.incomodo.costelas', 'cabeca.sentidos.nariz']),
+          ['esforco', 'queda', 'medicamento', 'clima', 'nao_sei', 'outro']);
+      // Written item: every factor of its region.
+      expect(JournalKeys.triggersOfOption('peito.custom'), {
+        ...JournalKeys.optionTriggers['peito.respiracao.curta']!,
+        ...JournalKeys.optionTriggers['peito.respiracao.tosse']!,
+        ...JournalKeys.optionTriggers['peito.incomodo.batedeira']!,
+        ...JournalKeys.optionTriggers['peito.incomodo.costelas']!,
+      });
+      // Old keys use the factors of the option they moved to; removed ones
+      // fall back to their region.
+      expect(JournalKeys.triggersOfOption('barriga.intestino.preso'),
+          JournalKeys.optionTriggers['barriga.colica.preso']);
+      expect(JournalKeys.triggersOfOption('pelve.urina.cor_odor'),
+          JournalKeys.triggersOfOption('pelve.custom'));
+      // Only on a physical entry: the backend refuses physical-only factors
+      // without a physical item.
+      expect(JournalKeys.triggersFor().toSet()
+          .intersection(JournalKeys.physicalOnlyTriggers), isEmpty);
     });
 
     test('v2.2 emotional tree, positive tree and closing keys match the contract', () {
