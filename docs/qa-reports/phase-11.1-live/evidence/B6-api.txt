@@ -1,0 +1,13 @@
+## Bruno CO_MANAGE (habits) on Sofia
+water rows by Bruno on Sofia: 1
+POST /hydration/log (granted habits)
+{"id":"ed45c528-15f5-4140-b8c1-5a05560c01e4","userId":"aec62107-5095-439b-b3c1-2dd246544e2c","profileId":"93701df0-0c0e-4952-bc05-47784060c8d2","amountMl":250,"source":"m
+
+POST /journal/entries physical (ungranted)
+{"message":"Esta categoria não foi compartilhada com você.","error":"Forbidden","statusCode":403} [HTTP 403]
+POST /journal/conditions (ungranted)
+{"message":"Esta categoria não foi compartilhada com você.","error":"Forbidden","statusCode":403} [HTTP 403]
+POST /care/records (ungranted)
+{"message":"Esta categoria não foi compartilhada com você.","error":"Forbidden","statusCode":403} [HTTP 403]
+## VIEW_ONLY Bruno on Ana: POST /hydration/log
+{"message":"Acesso somente leitura a este perfil.","error":"Forbidden","statusCode":403} [HTTP 403]

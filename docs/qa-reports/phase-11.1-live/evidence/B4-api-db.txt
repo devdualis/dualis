@@ -1,0 +1,39 @@
+## Bruno (VIEW_ONLY, habits) on Ana's profile
+GET /habits
+{"days":[{"day":"2026-11-02","sleepQuality":null,"sleepHours":null,"moved":true,"movementMinutes":null,"period":null,"updatedAt":"2026-11-03T04:09:50.247Z"}]} [
+
+GET /hydration/today
+{"todayTotalMl":300,"logs":[{"id":"bf8b09b1-da10-497e-9a2e-70453340f42c","userId":"20ad47ac-1743-4d89-b005-42a253895dec","profileId":"868fe5f1-76c2-4e92-b7ab-f3
+
+GET /journal/entries
+{"entries":[]} [HTTP 200]
+GET /journal/conditions
+{"message":"Esta categoria não foi compartilhada com você.","error":"Forbidden","statusCode":403} [HTTP 403]
+GET /care/records?kind=allergy
+{"message":"Esta categoria não foi compartilhada com você.","error":"Forbidden","statusCode":403} [HTTP 403]
+
+## DB as dualis_app with app.current_user_id=Bruno
+BEGIN
+              set_config              
+--------------------------------------
+ aec62107-5095-439b-b3c1-2dd246544e2c
+(1 row)
+
+         t         | count 
+-------------------+-------
+ journal_entries   |     0
+ user_conditions   |     0
+ care_records      |     0
+ water_intake_logs |     1
+ daily_habits      |     1
+(5 rows)
+
+COMMIT
+## same counts as postgres (truth)
+        t        | count 
+-----------------+-------
+ journal_entries |     2
+ user_conditions |     1
+ care_records    |     1
+(3 rows)
+

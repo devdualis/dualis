@@ -1,0 +1,8 @@
+           name           |  profile_type   | relationship_type  | lgpd_legal_basis 
+--------------------------+-----------------+--------------------+------------------
+ Lucas Menor Teste        | dependent_minor | parent             | lgpd_art_14
+ Sofia Tutelada Teste     | dependent_minor | legal_guardian     | lgpd_art_14
+ Roberto Curatelado Teste | dependent_adult | curator            | lgpd_art_11_i
+ Helena Apoiada Teste     | dependent_adult | supported_decision | lgpd_art_11_i
+(4 rows)
+

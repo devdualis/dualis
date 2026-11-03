@@ -1,0 +1,14 @@
+## Diego (has data) claims
+{"message":["property code should not exist","claimCode must be longer than or equal to 10 characters","claimCode should not be empty","claimCode must be a string"],"error":"Bad Request","statusCode":400} [HTTP 400]
+## Ana claims her own code
+{"message":["property code should not exist","claimCode must be longer than or equal to 10 characters","claimCode should not be empty","claimCode must be a string"],"error":"Bad Request","statusCode":400} [HTTP 400]
+## Ana handover-code for Sofia (13 y)
+{"statusCode":409,"code":"HANDOVER_NOT_DUE","message":"O código de transferência fica disponível quando a pessoa completa 18 anos."} [HTTP 409]
+## Carla invalid
+{"message":["property code should not exist","claimCode must be longer than or equal to 10 characters","claimCode should not be empty","claimCode must be a string"],"error":"Bad Request","statusCode":400} [HTTP 400]
+## Diego (has data) claims
+{"statusCode":409,"code":"CLAIM_ACCOUNT_HAS_DATA","message":"Esta conta já tem registros. Use uma conta nova para receber o perfil."} [HTTP 409]
+## Ana claims her own code
+{"statusCode":403,"code":"CLAIM_BY_GUARDIAN","message":"Este código deve ser usado na conta da pessoa que completou 18 anos, não na conta de quem o gerou."} [HTTP 403]
+## Carla invalid
+{"statusCode":404,"code":"CLAIM_INVALID_CODE","message":"Código de transferência inválido ou expirado."} [HTTP 404]
