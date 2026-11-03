@@ -5,6 +5,7 @@ import { CreateDependentDto } from '../../src/modules/profiles/dto/create-depend
 import { UpdateProfileDto } from '../../src/modules/profiles/dto/update-profile.dto';
 import { profiles } from '../../src/database/schema/profiles.schema';
 import { legalGuardianships } from '../../src/database/schema/legal-guardianships.schema';
+import { SHARE_CATEGORIES } from '../../src/database/schema/shared-access-grants.schema';
 
 const USER_ID = '11111111-1111-4111-8111-111111111111';
 const OTHER_USER_ID = '22222222-2222-4222-8222-222222222222';
@@ -270,6 +271,98 @@ describe('ProfilesService Unit Tests', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({ id: racedPrimary.id, ownership: 'own' });
+    });
+  });
+
+  describe('getProfilesForUser categories (Phase 11.1, PREM-07)', () => {
+    const ALL = [...SHARE_CATEGORIES];
+    const sharedProfile = profileRow({
+      id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+      accountOwnerId: OTHER_USER_ID,
+      name: 'Mariana',
+    });
+
+    it('gives owned profiles (primary and dependents) every category in both arrays', async () => {
+      const primary = profileRow();
+      const dependent = profileRow({ id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', profileType: 'dependent_minor' });
+      const { tx } = createTx({ select: [[primary, dependent], []] });
+      runWith(tx);
+
+      const result = await service.getProfilesForUser(USER_ID);
+
+      expect(result).toHaveLength(2);
+      for (const profile of result) {
+        expect(profile.readableCategories).toEqual(ALL);
+        expect(profile.writableCategories).toEqual(ALL);
+      }
+    });
+
+    it('unions readable categories across grants and writable only across CO_MANAGE grants', async () => {
+      const { tx } = createTx({
+        select: [
+          [profileRow()],
+          [
+            { profile: sharedProfile, accessLevel: 'VIEW_ONLY', categories: ['emotional_journal'] },
+            { profile: sharedProfile, accessLevel: 'CO_MANAGE', categories: ['habits'] },
+          ],
+        ],
+      });
+      runWith(tx);
+
+      const [, shared] = await service.getProfilesForUser(USER_ID);
+
+      expect(shared).toMatchObject({
+        id: sharedProfile.id,
+        accessLevel: 'CO_MANAGE',
+        readableCategories: ['habits', 'emotional_journal'],
+        writableCategories: ['habits'],
+      });
+    });
+
+    it('orders the arrays as SHARE_CATEGORIES and drops unknown values', async () => {
+      const { tx } = createTx({
+        select: [
+          [profileRow()],
+          [{ profile: sharedProfile, accessLevel: 'CO_MANAGE', categories: ['care', 'unknown', 'habits', 'conditions'] }],
+        ],
+      });
+      runWith(tx);
+
+      const [, shared] = await service.getProfilesForUser(USER_ID);
+
+      expect(shared.readableCategories).toEqual(['habits', 'conditions', 'care']);
+      expect(shared.writableCategories).toEqual(['habits', 'conditions', 'care']);
+    });
+
+    it('gives a VIEW_ONLY-only grantee nothing to write', async () => {
+      const { tx } = createTx({
+        select: [[profileRow()], [{ profile: sharedProfile, accessLevel: 'VIEW_ONLY', categories: ['habits', 'care'] }]],
+      });
+      runWith(tx);
+
+      const [, shared] = await service.getProfilesForUser(USER_ID);
+
+      expect(shared).toMatchObject({ accessLevel: 'VIEW_ONLY', readableCategories: ['habits', 'care'], writableCategories: [] });
+    });
+
+    it('returns the co-manager\'s categories after updateProfile', async () => {
+      const updated = { ...sharedProfile, name: 'Novo nome' };
+      const { tx } = createTx({
+        select: [[sharedProfile], [
+          { accessLevel: 'CO_MANAGE', categories: ['habits'] },
+          { accessLevel: 'VIEW_ONLY', categories: ['care'] },
+        ]],
+        update: [[updated]],
+      });
+      runWith(tx);
+
+      const result = await service.updateProfile(USER_ID, sharedProfile.id, { name: 'Novo nome' });
+
+      expect(result).toMatchObject({
+        accessLevel: 'CO_MANAGE',
+        readableCategories: ['habits', 'care'],
+        writableCategories: ['habits'],
+      });
     });
   });
 
