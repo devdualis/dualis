@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/load_error_view.dart';
-import '../../../auth/domain/user_profile.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
