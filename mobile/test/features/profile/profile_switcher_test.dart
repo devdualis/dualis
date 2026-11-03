@@ -387,6 +387,31 @@ void main() {
       expect(find.text('Co-gestão'), findsOneWidget);
     });
 
+    testWidgets(
+        'close button stays left of the floating urgent-help strip',
+        (tester) async {
+      final fake = FakeActiveProfileController(
+        const ActiveProfileState(
+          profiles: [primaryProfile],
+          activeProfileId: 'p-1',
+        ),
+      );
+
+      await tester.pumpWidget(
+        _buildHost(
+          fakeController: fake,
+          child: const Scaffold(body: ProfileSelectionSheet()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final screenWidth = tester.view.physicalSize.width /
+          tester.view.devicePixelRatio;
+      final close = tester.getRect(find.byIcon(Icons.close));
+      // The help button covers the top-right strip (12 margin + 44 button).
+      expect(close.right, lessThanOrEqualTo(screenWidth - 56));
+    });
+
     testWidgets('the two driver keys exist: add-dependent and manage-sharing',
         (tester) async {
       final fake = FakeActiveProfileController(

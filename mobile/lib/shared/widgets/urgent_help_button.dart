@@ -12,6 +12,11 @@ import '../../l10n/app_localizations.dart';
 class UrgentHelpButton extends StatelessWidget {
   final VoidCallback onPressed;
 
+  /// Width of the top-right strip the floating button covers (12 margin +
+  /// 44 button + 8 gap). Sheets whose header can reach the top of the screen
+  /// keep their trailing actions out of it, so help never hides a close button.
+  static const double reservedEdgeWidth = 64;
+
   const UrgentHelpButton({super.key, required this.onPressed});
 
   @override

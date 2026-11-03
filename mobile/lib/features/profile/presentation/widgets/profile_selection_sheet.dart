@@ -10,6 +10,7 @@ import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/urgent_help_button.dart';
 import '../../data/profile_repository.dart';
 import '../../domain/models/profile.dart';
 import '../controllers/active_profile_controller.dart';
@@ -78,7 +79,11 @@ class ProfileSelectionSheet extends ConsumerWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 4, 12, 8),
+                // At full height the header reaches the top of the screen,
+                // where the floating urgent-help button sits: keep the close
+                // button out of that strip.
+                padding: const EdgeInsets.fromLTRB(
+                    20, 4, UrgentHelpButton.reservedEdgeWidth, 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
