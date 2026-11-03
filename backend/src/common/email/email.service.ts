@@ -169,6 +169,13 @@ export class EmailService {
     const firstName = guardianName?.trim().split(' ')[0];
     const dependent = dependentFirstName.trim();
 
+    // No code in this notice; in simulation mode log it so local QA can see it was sent once.
+    if (!this.apiKey && process.env.NODE_ENV !== 'production') {
+      this.logger.log(
+        `[EmailService] Simulação: aviso de transferência aos 18 anos para ${normalizedEmail} (${dependent})`,
+      );
+    }
+
     const htmlContent = renderCodeEmail({
       preheader: `${escapeHtml(dependent)} completou 18 anos e o perfil pode passar para a conta própria.`,
       title: 'Hora de transferir o perfil',

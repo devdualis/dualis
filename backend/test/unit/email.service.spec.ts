@@ -104,6 +104,18 @@ describe('EmailService (Resend)', () => {
     expect(findBannedVocabulary(`${body.subject}\n${body.text}\n${body.html}`)).toEqual([]);
   });
 
+  it('logs the hand-over notice in simulation mode (no API key, not production)', async () => {
+    delete process.env.RESEND_API_KEY;
+    const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+
+    await new EmailService().sendHandoverDueEmail('ana@example.com', 'Ana', 'Lucas');
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(log).toHaveBeenCalledWith(
+      expect.stringContaining('Simulação: aviso de transferência aos 18 anos para ana@example.com (Lucas)'),
+    );
+  });
+
   it('does not send the hand-over notice under NODE_ENV test', async () => {
     process.env.NODE_ENV = 'test';
     await new EmailService().sendHandoverDueEmail('ana@example.com', 'Ana', 'Lucas');
