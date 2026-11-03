@@ -2,11 +2,14 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  HttpStatus,
   Inject,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
+import { HOUR_MS, RateLimiter } from '../../common/http/rate-limiter';
 import { DatabaseService, DrizzleTransaction } from '../../database/database.service';
 import { profiles, ProfileType } from '../../database/schema/profiles.schema';
 import {
@@ -23,6 +26,13 @@ import {
   ShareCategory,
 } from '../../database/schema/shared-access-grants.schema';
 import { users } from '../../database/schema/users.schema';
+import {
+  generateInviteCode,
+  INVITE_TTL_HOURS,
+  MAX_FAILED_INVITE_ACCEPTS,
+  FAILED_INVITE_ACCEPT_WINDOW_MS,
+  MAX_INVITE_COLLISION_RETRIES,
+} from './family-sharing.service';
 import { CreateDependentDto } from './dto/create-dependent.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfileAccessLevel, ProfileResponseDto } from './dto/profile-response.dto';
@@ -42,6 +52,22 @@ type GuardianshipInfo = {
   relationshipType: RelationshipType;
   lgpdLegalBasis: LgpdLegalBasis;
 };
+
+/** Claim refusals raised by claim_dependent_profile (migration 0028) and their HTTP mapping. */
+const CLAIM_REFUSALS = {
+  CLAIM_BY_GUARDIAN: {
+    status: HttpStatus.FORBIDDEN,
+    message: 'Este código deve ser usado na conta da pessoa que completou 18 anos, não na conta de quem o gerou.',
+  },
+  CLAIM_NOT_ADULT: {
+    status: HttpStatus.CONFLICT,
+    message: 'O perfil só pode passar para a conta própria depois que a pessoa completar 18 anos.',
+  },
+  CLAIM_ACCOUNT_HAS_DATA: {
+    status: HttpStatus.CONFLICT,
+    message: 'Esta conta já tem registros. Use uma conta nova para receber o perfil.',
+  },
+} as const;
 
 const OWNER_ACCESS: ProfileAccess = {
   accessLevel: 'OWNER',
@@ -77,6 +103,18 @@ export function ageInYears(dateOfBirth: string, now: Date = new Date()): number 
   return age;
 }
 
+/**
+ * D3: a minor's guardianship (parent / legal_guardian) whose dependent is now 18 or older
+ * is due to be handed over to the person's own account.
+ */
+function isHandoverDue(dateOfBirth: string | null, relationshipType: RelationshipType, now: Date = new Date()): boolean {
+  if (!dateOfBirth) return false;
+  return (
+    (MINOR_RELATIONSHIPS as readonly string[]).includes(relationshipType) &&
+    ageInYears(dateOfBirth, now) >= ADULT_AGE_YEARS
+  );
+}
+
 function profileTypeForAge(age: number): ProfileType {
   return age < ADULT_AGE_YEARS ? 'dependent_minor' : 'dependent_adult';
 }
@@ -97,6 +135,13 @@ export function assertRelationshipFitsAge(relationshipType: RelationshipType, ag
 
 @Injectable()
 export class ProfilesService {
+  /**
+   * Claim attempts per account (memory of this instance, same limits as invite accept;
+   * gap 10: Redis is not wired). Every attempt counts, so the sixth try in the window is
+   * refused before it reaches the database, whatever the code.
+   */
+  private readonly claimLimiter = new RateLimiter();
+
   constructor(
     @Inject(DatabaseService)
     private readonly databaseService: DatabaseService,
@@ -313,6 +358,108 @@ export class ProfilesService {
 
       return this.toResponse(profile, userId, OWNER_ACCESS, updated);
     });
+  }
+
+  /**
+   * D3: the guardian of a minor who turned 18 generates a hand-over code (A6: invite
+   * alphabet and length, 72 h). Generating again replaces the code and its expiry.
+   */
+  async createHandoverCode(userId: string, profileId: string): Promise<{ claimCode: string; expiresAt: Date }> {
+    this.assertUserId(userId);
+
+    return this.databaseService.withRls(userId, async (tx) => {
+      const [profile] = await tx.select().from(profiles).where(eq(profiles.id, profileId)).limit(1);
+      if (!profile) {
+        throw new ForbiddenException('Apenas quem cadastrou o perfil pode gerar o código de transferência.');
+      }
+
+      const guardianship =
+        profile.accountOwnerId === userId && profile.profileType !== 'primary'
+          ? await this.findOpenGuardianship(tx, userId, profileId)
+          : undefined;
+      if (!guardianship || !isHandoverDue(profile.dateOfBirth ?? null, guardianship.relationshipType)) {
+        throw new ConflictException({
+          statusCode: HttpStatus.CONFLICT,
+          code: 'HANDOVER_NOT_DUE',
+          message: 'O código de transferência fica disponível quando a pessoa completa 18 anos.',
+        });
+      }
+
+      const expiresAt = new Date(Date.now() + INVITE_TTL_HOURS * HOUR_MS);
+      for (let attempt = 1; attempt <= MAX_INVITE_COLLISION_RETRIES; attempt++) {
+        const claimCode = generateInviteCode();
+        try {
+          // Nested transaction = SAVEPOINT, so a unique violation does not abort the outer transaction.
+          const [updated] = await tx.transaction((sp) =>
+            sp
+              .update(legalGuardianships)
+              .set({ handoverCode: claimCode, handoverCodeExpiresAt: expiresAt })
+              .where(eq(legalGuardianships.id, guardianship.id))
+              .returning({ id: legalGuardianships.id }),
+          );
+          if (!updated) {
+            throw new NotFoundException(`Profile with id ${profileId} not found.`);
+          }
+          return { claimCode, expiresAt };
+        } catch (err: any) {
+          const uniqueViolation = err?.code === '23505' || err?.cause?.code === '23505';
+          if (uniqueViolation && attempt < MAX_INVITE_COLLISION_RETRIES) continue;
+          if (uniqueViolation) break;
+          throw err;
+        }
+      }
+      throw new InternalServerErrorException('Não foi possível gerar o código de transferência. Tente de novo.');
+    });
+  }
+
+  /**
+   * D3: the young adult, signed in to their own account, claims the profile through the
+   * SECURITY DEFINER function claim_dependent_profile (migration 0028). The profile becomes
+   * the caller's primary; the former guardian loses access. The code never reaches logs or
+   * exception messages.
+   */
+  async claimProfile(userId: string, claimCode: string): Promise<ProfileResponseDto> {
+    this.assertUserId(userId);
+    const code = typeof claimCode === 'string' ? claimCode.trim().toUpperCase() : '';
+    if (!code) {
+      throw new BadRequestException('Informe o código de transferência.');
+    }
+
+    this.claimLimiter.hit(`claim:${userId}`, MAX_FAILED_INVITE_ACCEPTS, FAILED_INVITE_ACCEPT_WINDOW_MS);
+
+    return this.databaseService.withRls(userId, async (tx) => {
+      let claimedId: string | null = null;
+      try {
+        const result = await tx.execute(sql`SELECT claim_dependent_profile(${code}) AS profile_id`);
+        const rows = ((result as any).rows ?? result) as Array<{ profile_id: string | null }>;
+        claimedId = Array.isArray(rows) ? (rows[0]?.profile_id ?? null) : null;
+      } catch (err: any) {
+        throw this.mapClaimError(err);
+      }
+
+      if (!claimedId) {
+        throw new NotFoundException({
+          statusCode: HttpStatus.NOT_FOUND,
+          code: 'CLAIM_INVALID_CODE',
+          message: 'Código de transferência inválido ou expirado.',
+        });
+      }
+
+      const profile = await this.findProfile(tx, claimedId);
+      return this.toResponse(profile, userId, OWNER_ACCESS);
+    });
+  }
+
+  /** Maps claim_dependent_profile refusals (SQLSTATE P0001) to HTTP errors with a `code`. */
+  private mapClaimError(err: any): unknown {
+    const message = `${err?.message ?? ''} ${err?.cause?.message ?? ''}`;
+    for (const [code, refusal] of Object.entries(CLAIM_REFUSALS)) {
+      if (message.includes(code)) {
+        const body = { statusCode: refusal.status, code, message: refusal.message };
+        return refusal.status === HttpStatus.FORBIDDEN ? new ForbiddenException(body) : new ConflictException(body);
+      }
+    }
+    return err;
   }
 
   async deleteProfile(userId: string, profileId: string): Promise<void> {

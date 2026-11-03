@@ -16,6 +16,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ClaimProfileDto } from './dto/claim-profile.dto';
 import { ConfirmLegalBasisDto, CreateDependentDto } from './dto/create-dependent.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfileResponseDto } from './dto/profile-response.dto';
@@ -50,6 +51,31 @@ export class ProfilesController {
   ): Promise<ProfileResponseDto> {
     const userId = req.user?.id || req.user?.userId || req.user?.sub;
     return this.profilesService.createDependent(userId, dto);
+  }
+
+  /**
+   * D3: the young adult claims a profile handed over by the former guardian. Declared
+   * before the :id routes.
+   */
+  @Post('claim')
+  @HttpCode(HttpStatus.OK)
+  async claimProfile(
+    @Request() req: any,
+    @Body(validate(ClaimProfileDto)) dto: ClaimProfileDto,
+  ): Promise<ProfileResponseDto> {
+    const userId = req.user?.id || req.user?.userId || req.user?.sub;
+    return this.profilesService.claimProfile(userId, dto.claimCode);
+  }
+
+  /** D3: the guardian of a minor who turned 18 generates the 72 h hand-over code. */
+  @Post(':id/handover-code')
+  @HttpCode(HttpStatus.CREATED)
+  async createHandoverCode(
+    @Request() req: any,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<{ claimCode: string; expiresAt: Date }> {
+    const userId = req.user?.id || req.user?.userId || req.user?.sub;
+    return this.profilesService.createHandoverCode(userId, id);
   }
 
   /** Guardian re-confirms an adult dependent's consent under LGPD Art. 11, I (A3). */

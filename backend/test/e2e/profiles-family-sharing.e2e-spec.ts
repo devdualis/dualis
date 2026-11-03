@@ -42,7 +42,7 @@ import {
   SHARE_CATEGORIES,
   ShareCategory,
 } from '../../src/database/schema/shared-access-grants.schema';
-import { InviteScope } from '../../src/modules/profiles/family-sharing.service';
+import { InviteScope, generateInviteCode as generateHandoverCode } from '../../src/modules/profiles/family-sharing.service';
 import { UpdateGrantDto } from '../../src/modules/profiles/dto/update-grant.dto';
 
 const USER_A = 'a0000000-0000-0000-0000-000000000001';
@@ -86,6 +86,8 @@ const e2eStore = {
   /** Open guardianship per dependent profile id. */
   guardianships: new Map<string, StoredGuardianship>(),
   grants: new Map<string, StoredGrant>(),
+  /** Hand-over code per dependent profile id. */
+  handoverCodes: new Map<string, string>(),
   dependentCreates: 0,
 };
 
@@ -291,6 +293,38 @@ class E2EProfilesService {
     return toProfileResponse(profile, userId, accessLevel);
   }
 
+  async createHandoverCode(userId: string, profileId: string) {
+    const profile = e2eStore.profiles.get(profileId);
+    const g = e2eStore.guardianships.get(profileId);
+    if (!profile || profile.accountOwnerId !== userId || !g || g.guardianUserId !== userId) {
+      throw new ConflictException({ statusCode: 409, code: 'HANDOVER_NOT_DUE', message: 'Ainda não.' });
+    }
+    if (!profile.dateOfBirth || ageInYears(profile.dateOfBirth) < 18) {
+      throw new ConflictException({ statusCode: 409, code: 'HANDOVER_NOT_DUE', message: 'Ainda não.' });
+    }
+    e2eStore.handoverCodes.set(profileId, generateHandoverCode());
+    return { claimCode: e2eStore.handoverCodes.get(profileId)!, expiresAt: new Date(Date.now() + INVITE_TTL_MS) };
+  }
+
+  async claimProfile(userId: string, claimCode: string): Promise<ProfileResponseDto> {
+    const entry = [...e2eStore.handoverCodes.entries()].find(([, code]) => code === claimCode.toUpperCase());
+    if (!entry) {
+      throw new NotFoundException({ statusCode: 404, code: 'CLAIM_INVALID_CODE', message: 'Código inválido.' });
+    }
+    const profile = e2eStore.profiles.get(entry[0])!;
+    if (profile.accountOwnerId === userId) {
+      throw new ForbiddenException({ statusCode: 403, code: 'CLAIM_BY_GUARDIAN', message: 'Conta errada.' });
+    }
+    e2eStore.handoverCodes.delete(entry[0]);
+    e2eStore.guardianships.delete(entry[0]);
+    for (const [id, p] of e2eStore.profiles) {
+      if (p.accountOwnerId === userId && p.profileType === 'primary') e2eStore.profiles.delete(id);
+    }
+    profile.accountOwnerId = userId;
+    profile.profileType = 'primary';
+    return toProfileResponse(profile, userId, 'OWNER');
+  }
+
   async deleteProfile(userId: string, profileId: string): Promise<void> {
     const profile = e2eStore.profiles.get(profileId);
     if (!profile) {
@@ -447,6 +481,8 @@ describe('Profiles & Family Sharing E2E (PREM-06, PREM-07)', () => {
     { method: 'PUT', url: '/v1/profiles/c0000000-0000-0000-0000-000000000001' },
     { method: 'DELETE', url: '/v1/profiles/c0000000-0000-0000-0000-000000000001' },
     { method: 'POST', url: '/v1/profiles/c0000000-0000-0000-0000-000000000001/legal-basis-confirmation' },
+    { method: 'POST', url: '/v1/profiles/c0000000-0000-0000-0000-000000000001/handover-code' },
+    { method: 'POST', url: '/v1/profiles/claim' },
     { method: 'POST', url: '/v1/family-sharing/invite' },
     { method: 'POST', url: '/v1/family-sharing/accept' },
     {
@@ -461,6 +497,7 @@ describe('Profiles & Family Sharing E2E (PREM-06, PREM-07)', () => {
     e2eStore.profiles.clear();
     e2eStore.guardianships.clear();
     e2eStore.grants.clear();
+    e2eStore.handoverCodes.clear();
     e2eStore.dependentCreates = 0;
 
     const moduleRef: TestingModule = await Test.createTestingModule({
@@ -898,6 +935,92 @@ describe('Profiles & Family Sharing E2E (PREM-06, PREM-07)', () => {
         payload: { lgpdConsent: true },
       });
       expect(onMinor.statusCode).toBe(409);
+    });
+
+    it('validates the hand-over routes: empty claim code and non-UUID profile id answer 400', async () => {
+      for (const payload of [{}, { claimCode: '' }, { claimCode: '   ' }, { claimCode: 'ABC' }, { claimCode: 'ABCDEFGH23', extra: 1 }]) {
+        const response = await app.inject({
+          method: 'POST',
+          url: '/v1/profiles/claim',
+          headers: { authorization: `Bearer ${tokenB}` },
+          payload,
+        });
+        expect(response.statusCode).toBe(400);
+      }
+
+      const badId = await app.inject({
+        method: 'POST',
+        url: '/v1/profiles/not-a-uuid/handover-code',
+        headers: { authorization: `Bearer ${tokenA}` },
+      });
+      expect(badId.statusCode).toBe(400);
+    });
+
+    it('hands an aged-out dependent over: code for the guardian, claim by the young adult, no access left for the guardian', async () => {
+      const year = new Date().getUTCFullYear();
+      const created = await app.inject({
+        method: 'POST',
+        url: '/v1/profiles/dependents',
+        headers: { authorization: `Bearer ${tokenA}` },
+        payload: { ...dependentPayload, name: 'Rafa Souza', dateOfBirth: `${year - 10}-01-01` },
+      });
+      expect(created.statusCode).toBe(201);
+      const dependent = JSON.parse(created.payload) as ProfileResponseDto;
+
+      const notDue = await app.inject({
+        method: 'POST',
+        url: `/v1/profiles/${dependent.id}/handover-code`,
+        headers: { authorization: `Bearer ${tokenA}` },
+      });
+      expect(notDue.statusCode).toBe(409);
+      expect(JSON.parse(notDue.payload).code).toBe('HANDOVER_NOT_DUE');
+
+      // Time passes: the dependent turns 18.
+      e2eStore.profiles.get(dependent.id)!.dateOfBirth = `${year - 19}-01-01`;
+
+      const issued = await app.inject({
+        method: 'POST',
+        url: `/v1/profiles/${dependent.id}/handover-code`,
+        headers: { authorization: `Bearer ${tokenA}` },
+      });
+      expect(issued.statusCode).toBe(201);
+      const { claimCode, expiresAt } = JSON.parse(issued.payload);
+      expect(typeof claimCode).toBe('string');
+      expect(new Date(expiresAt).getTime()).toBeGreaterThan(Date.now());
+
+      const byGuardian = await app.inject({
+        method: 'POST',
+        url: '/v1/profiles/claim',
+        headers: { authorization: `Bearer ${tokenA}` },
+        payload: { claimCode },
+      });
+      expect(byGuardian.statusCode).toBe(403);
+      expect(JSON.parse(byGuardian.payload).code).toBe('CLAIM_BY_GUARDIAN');
+
+      const wrong = await app.inject({
+        method: 'POST',
+        url: '/v1/profiles/claim',
+        headers: { authorization: `Bearer ${tokenB}` },
+        payload: { claimCode: 'ZZZZZZZZZZ' },
+      });
+      expect(wrong.statusCode).toBe(404);
+      expect(JSON.parse(wrong.payload).code).toBe('CLAIM_INVALID_CODE');
+
+      const claimed = await app.inject({
+        method: 'POST',
+        url: '/v1/profiles/claim',
+        headers: { authorization: `Bearer ${tokenB}` },
+        payload: { claimCode },
+      });
+      expect(claimed.statusCode).toBe(200);
+      expect(JSON.parse(claimed.payload)).toMatchObject({ id: dependent.id, ownership: 'own', profileType: 'primary' });
+
+      const guardianList = await app.inject({
+        method: 'GET',
+        url: '/v1/profiles',
+        headers: { authorization: `Bearer ${tokenA}` },
+      });
+      expect((JSON.parse(guardianList.payload) as ProfileResponseDto[]).some((p) => p.id === dependent.id)).toBe(false);
     });
 
     it('PATCH on a revoked grant answers 409 GRANT_SCOPE_LOCKED', async () => {

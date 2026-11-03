@@ -1,8 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { BadRequestException, ConflictException, ForbiddenException, ValidationPipe } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  HttpException,
+  NotFoundException,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ProfilesService, ageInYears } from '../../src/modules/profiles/profiles.service';
 import { ConfirmLegalBasisDto, CreateDependentDto } from '../../src/modules/profiles/dto/create-dependent.dto';
 import { UpdateProfileDto } from '../../src/modules/profiles/dto/update-profile.dto';
+import { ClaimProfileDto } from '../../src/modules/profiles/dto/claim-profile.dto';
+import { INVITE_CODE_CHARS } from '../../src/modules/profiles/family-sharing.service';
 import { profiles } from '../../src/database/schema/profiles.schema';
 import { legalGuardianships } from '../../src/database/schema/legal-guardianships.schema';
 import { SHARE_CATEGORIES } from '../../src/database/schema/shared-access-grants.schema';
@@ -37,7 +46,15 @@ function profileRow(overrides: Record<string, unknown> = {}) {
  * Chainable Drizzle-like query mock. Every builder method returns the chain;
  * awaiting the chain resolves to the next queued result for that operation kind.
  */
-function createTx(results: { select?: unknown[][]; insert?: unknown[][]; update?: unknown[][]; delete?: unknown[][] }) {
+function createTx(results: {
+  select?: unknown[][];
+  insert?: unknown[][];
+  update?: unknown[][];
+  delete?: unknown[][];
+  /** Raw tx.execute results; an Error entry is thrown instead. */
+  execute?: unknown[];
+}) {
+  const executeQueue = [...(results.execute ?? [])];
   const queues = {
     select: [...(results.select ?? [])],
     insert: [...(results.insert ?? [])],
@@ -69,7 +86,14 @@ function createTx(results: { select?: unknown[][]; insert?: unknown[][]; update?
     return c;
   };
 
-  const tx = {
+  const tx: any = {
+    execute: vi.fn(async () => {
+      const next = executeQueue.shift();
+      if (next instanceof Error) throw next;
+      return next ?? { rows: [] };
+    }),
+    // Nested transaction (SAVEPOINT): runs the callback on the same mock.
+    transaction: vi.fn(async (cb: (sp: unknown) => unknown) => cb(tx)),
     select: vi.fn(() => chain('select')),
     insert: vi.fn((table: unknown) => {
       calls.insertTables.push(table);
@@ -726,6 +750,154 @@ describe('ProfilesService Unit Tests', () => {
       await expect(
         pipe.transform({ lgpdConsent: true }, { type: 'body', metatype: ConfirmLegalBasisDto }),
       ).resolves.toMatchObject({ lgpdConsent: true });
+    });
+  });
+
+  describe('createHandoverCode (D3, A6)', () => {
+    /** YYYY-MM-DD for someone who turned 18 yesterday (UTC). */
+    const eighteenPlusOneDay = () => {
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() - 1);
+      d.setUTCFullYear(d.getUTCFullYear() - 18);
+      return d.toISOString().slice(0, 10);
+    };
+    const guardianship = { id: 'ffffffff-ffff-4fff-8fff-ffffffffffff', relationshipType: 'parent', lgpdLegalBasis: 'lgpd_art_14' };
+    const agedOut = () =>
+      profileRow({ id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', profileType: 'dependent_minor', dateOfBirth: eighteenPlusOneDay() });
+
+    it('stores a 10-character invite-alphabet code valid for 72 h on the open guardianship', async () => {
+      const { tx, calls } = createTx({ select: [[agedOut()], [guardianship]], update: [[{ id: guardianship.id }]] });
+      runWith(tx);
+
+      const before = Date.now();
+      const result = await service.createHandoverCode(USER_ID, agedOut().id);
+
+      expect(result.claimCode).toMatch(new RegExp(`^[${INVITE_CODE_CHARS}]{10}$`));
+      const expectedExpiry = before + 72 * 60 * 60 * 1000;
+      expect(result.expiresAt.getTime()).toBeGreaterThanOrEqual(expectedExpiry);
+      expect(result.expiresAt.getTime()).toBeLessThan(expectedExpiry + 5_000);
+      expect(calls.updateSets[0]).toEqual({ handoverCode: result.claimCode, handoverCodeExpiresAt: result.expiresAt });
+      expect(tx.transaction).toHaveBeenCalledTimes(1);
+    });
+
+    it('retries with a new code on a unique violation', async () => {
+      const { tx, calls } = createTx({ select: [[agedOut()], [guardianship]], update: [[{ id: guardianship.id }]] });
+      const collision = Object.assign(new Error('duplicate key value'), { code: '23505' });
+      tx.transaction.mockImplementationOnce(async () => {
+        throw collision;
+      });
+      runWith(tx);
+
+      const result = await service.createHandoverCode(USER_ID, agedOut().id);
+
+      expect(tx.transaction).toHaveBeenCalledTimes(2);
+      expect(calls.updateSets).toHaveLength(1);
+      expect(result.claimCode).toHaveLength(10);
+    });
+
+    it('refuses a minor with 409 HANDOVER_NOT_DUE', async () => {
+      const minor = profileRow({ id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', profileType: 'dependent_minor', dateOfBirth: bornYearsAgo(12) });
+      const { tx } = createTx({ select: [[minor], [guardianship]] });
+      runWith(tx);
+
+      const err = await service.createHandoverCode(USER_ID, minor.id).catch((e) => e);
+      expect(err).toBeInstanceOf(ConflictException);
+      expect(err.getResponse()).toMatchObject({ code: 'HANDOVER_NOT_DUE' });
+      expect(tx.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses an adult curator dependent with 409 HANDOVER_NOT_DUE', async () => {
+      const adult = profileRow({ id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', profileType: 'dependent_adult', dateOfBirth: bornYearsAgo(40) });
+      const { tx } = createTx({ select: [[adult], [{ ...guardianship, relationshipType: 'curator' }]] });
+      runWith(tx);
+
+      const err = await service.createHandoverCode(USER_ID, adult.id).catch((e) => e);
+      expect(err).toBeInstanceOf(ConflictException);
+      expect(err.getResponse()).toMatchObject({ code: 'HANDOVER_NOT_DUE' });
+    });
+
+    it('refuses a profile the caller does not own with 409 and an invisible one with 403', async () => {
+      const shared = { ...agedOut(), accountOwnerId: OTHER_USER_ID };
+      const first = createTx({ select: [[shared]] });
+      runWith(first.tx);
+      const err = await service.createHandoverCode(USER_ID, shared.id).catch((e) => e);
+      expect(err).toBeInstanceOf(ConflictException);
+      expect(err.getResponse()).toMatchObject({ code: 'HANDOVER_NOT_DUE' });
+
+      const second = createTx({ select: [[]] });
+      runWith(second.tx);
+      await expect(service.createHandoverCode(USER_ID, shared.id)).rejects.toBeInstanceOf(ForbiddenException);
+      expect(second.tx.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('claimProfile (D3, A4, A5)', () => {
+    const claimed = profileRow({ id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', profileType: 'primary', name: 'Lucas Souza' });
+    const CODE = 'ABCDEFGH23';
+    const refusal = (name: string) => Object.assign(new Error(name), { code: 'P0001' });
+
+    it('claims through claim_dependent_profile and returns the profile as the caller\'s own primary', async () => {
+      const { tx } = createTx({ execute: [{ rows: [{ profile_id: claimed.id }] }], select: [[claimed]] });
+      runWith(tx);
+
+      const result = await service.claimProfile(USER_ID, ` ${CODE.toLowerCase()} `);
+
+      expect(tx.execute).toHaveBeenCalledTimes(1);
+      const query = tx.execute.mock.calls[0][0];
+      expect(JSON.stringify(query.queryChunks)).toContain('claim_dependent_profile');
+      expect(query.queryChunks).toContain(CODE);
+      expect(result).toMatchObject({ id: claimed.id, ownership: 'own', accessLevel: 'OWNER', profileType: 'primary' });
+    });
+
+    it('answers 404 CLAIM_INVALID_CODE when the function returns NULL, without the code in the message', async () => {
+      const { tx } = createTx({ execute: [{ rows: [{ profile_id: null }] }] });
+      runWith(tx);
+
+      const err = await service.claimProfile(USER_ID, CODE).catch((e) => e);
+      expect(err).toBeInstanceOf(NotFoundException);
+      expect(err.getResponse()).toMatchObject({ code: 'CLAIM_INVALID_CODE' });
+      expect(JSON.stringify(err.getResponse())).not.toContain(CODE);
+    });
+
+    it.each([
+      ['CLAIM_BY_GUARDIAN', 403],
+      ['CLAIM_NOT_ADULT', 409],
+      ['CLAIM_ACCOUNT_HAS_DATA', 409],
+    ])('maps %s to %i with the code', async (name, status) => {
+      const { tx } = createTx({ execute: [refusal(name)] });
+      runWith(tx);
+
+      const err = await service.claimProfile(USER_ID, CODE).catch((e) => e);
+      expect(err).toBeInstanceOf(HttpException);
+      expect(err.getStatus()).toBe(status);
+      expect(err.getResponse()).toMatchObject({ code: name });
+    });
+
+    it('refuses the sixth attempt in 15 minutes with 429 before reaching the database', async () => {
+      const { tx } = createTx({ execute: Array.from({ length: 6 }, () => ({ rows: [{ profile_id: null }] })) });
+      runWith(tx);
+
+      for (let i = 0; i < 5; i++) {
+        await expect(service.claimProfile(USER_ID, CODE)).rejects.toBeInstanceOf(NotFoundException);
+      }
+      const err = await service.claimProfile(USER_ID, CODE).catch((e) => e);
+      expect(err).toBeInstanceOf(HttpException);
+      expect(err.getStatus()).toBe(429);
+      expect(tx.execute).toHaveBeenCalledTimes(5);
+
+      // Another account keeps its own budget.
+      await expect(service.claimProfile(OTHER_USER_ID, CODE)).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('validates the body: trimmed string of 10 to 12 characters', async () => {
+      const pipe = new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true });
+      const run = (body: unknown) => pipe.transform(body, { type: 'body', metatype: ClaimProfileDto });
+
+      await expect(run({})).rejects.toBeInstanceOf(BadRequestException);
+      await expect(run({ claimCode: '' })).rejects.toBeInstanceOf(BadRequestException);
+      await expect(run({ claimCode: 'ABC' })).rejects.toBeInstanceOf(BadRequestException);
+      await expect(run({ claimCode: 12345678901 })).rejects.toBeInstanceOf(BadRequestException);
+      await expect(run({ claimCode: ` ${CODE} ` })).resolves.toMatchObject({ claimCode: CODE });
     });
   });
 
