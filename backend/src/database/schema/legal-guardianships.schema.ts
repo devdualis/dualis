@@ -1,10 +1,20 @@
-import { pgTable, uuid, varchar, text, timestamp, index, unique, uniqueIndex, pgPolicy } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, timestamp, index, unique, uniqueIndex, pgPolicy, check } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { users } from './users.schema';
 import { profiles } from './profiles.schema';
 
-export const RELATIONSHIP_TYPES = ['parent', 'legal_guardian', 'curator'] as const;
+// supported_decision: tomada de decisão apoiada (adult dependents).
+export const RELATIONSHIP_TYPES = ['parent', 'legal_guardian', 'curator', 'supported_decision'] as const;
 export type RelationshipType = (typeof RELATIONSHIP_TYPES)[number];
+
+// Relationships allowed for a dependent under 18 and for an adult dependent.
+export const MINOR_RELATIONSHIPS = ['parent', 'legal_guardian'] as const satisfies readonly RelationshipType[];
+export const ADULT_RELATIONSHIPS = ['curator', 'supported_decision'] as const satisfies readonly RelationshipType[];
+
+// LGPD legal basis of the guardianship record: Art. 14 (minors) or Art. 11, I (explicit
+// consent, adult dependents). Rows created before 0028 carry lgpd_art_14.
+export const LGPD_LEGAL_BASES = ['lgpd_art_14', 'lgpd_art_11_i'] as const;
+export type LgpdLegalBasis = (typeof LGPD_LEGAL_BASES)[number];
 
 export const legalGuardianships = pgTable(
   'legal_guardianships',
@@ -18,6 +28,7 @@ export const legalGuardianships = pgTable(
       .references(() => profiles.id, { onDelete: 'cascade' }),
     relationshipType: varchar('relationship_type', { length: 32 }).$type<RelationshipType>().notNull(),
     lgpdConsentRecordedAt: timestamp('lgpd_consent_recorded_at', { withTimezone: true }).notNull(),
+    lgpdLegalBasis: varchar('lgpd_legal_basis', { length: 16 }).$type<LgpdLegalBasis>().notNull().default('lgpd_art_14'),
     lgpdLegalBasisNotes: text('lgpd_legal_basis_notes'),
     // Hand-over at 18 (0028, D3): claim code opened by the guardian, then the closed row
     // is kept for audit.
@@ -31,6 +42,11 @@ export const legalGuardianships = pgTable(
   },
   (table) => [
     index('idx_legal_guardianships_guardian').on(table.guardianUserId),
+    check('legal_guardianships_lgpd_legal_basis_check', sql`${table.lgpdLegalBasis} IN ('lgpd_art_14', 'lgpd_art_11_i')`),
+    check(
+      'legal_guardianships_relationship_type_check',
+      sql`${table.relationshipType} IN ('parent', 'legal_guardian', 'curator', 'supported_decision')`,
+    ),
     unique('uq_legal_guardianships_guardian_dependent').on(table.guardianUserId, table.dependentProfileId),
     uniqueIndex('uq_legal_guardianships_handover_code')
       .on(table.handoverCode)

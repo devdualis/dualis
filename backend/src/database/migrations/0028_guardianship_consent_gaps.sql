@@ -902,3 +902,44 @@ BEGIN
   RETURN v_profile.id;
 END;
 $$;
+
+-- G. Legal basis, relationship CHECK and stored profile types (CONTEXT gaps 1-2, A3)
+
+-- Legal basis of the guardianship record. Rows created before 0028 were recorded under
+-- the Art. 14 consent text, so the default fills them truthfully (A3). The default also
+-- keeps inserts that do not send the column valid; it stays as a safety net.
+ALTER TABLE legal_guardianships ADD COLUMN IF NOT EXISTS lgpd_legal_basis varchar(16) NOT NULL DEFAULT 'lgpd_art_14';
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'legal_guardianships'::regclass AND conname = 'legal_guardianships_lgpd_legal_basis_check'
+  ) THEN
+    ALTER TABLE legal_guardianships ADD CONSTRAINT legal_guardianships_lgpd_legal_basis_check
+      CHECK (lgpd_legal_basis IN ('lgpd_art_14', 'lgpd_art_11_i'));
+  END IF;
+
+  -- supported_decision: tomada de decisão apoiada (adult dependents, gap 1).
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'legal_guardianships'::regclass AND conname = 'legal_guardianships_relationship_type_check'
+  ) THEN
+    ALTER TABLE legal_guardianships ADD CONSTRAINT legal_guardianships_relationship_type_check
+      CHECK (relationship_type IN ('parent', 'legal_guardian', 'curator', 'supported_decision'));
+  END IF;
+END
+$$;
+
+-- Stored profile types of dependents follow the date of birth (a minor who turned 18
+-- becomes dependent_adult). Harmless when re-run; dependents without a date of birth keep
+-- their stored type. FORCE RLS is lifted for this one UPDATE so it also works when the
+-- migration runs as a non-superuser table owner without app.current_user_id.
+ALTER TABLE profiles NO FORCE ROW LEVEL SECURITY;
+UPDATE profiles
+SET profile_type = CASE WHEN date_of_birth > current_date - interval '18 years' THEN 'dependent_minor' ELSE 'dependent_adult' END
+WHERE profile_type <> 'primary'
+  AND date_of_birth IS NOT NULL
+  AND profile_type IS DISTINCT FROM
+    CASE WHEN date_of_birth > current_date - interval '18 years' THEN 'dependent_minor' ELSE 'dependent_adult' END;
+ALTER TABLE profiles FORCE ROW LEVEL SECURITY;
