@@ -14,7 +14,11 @@ import 'package:dualis_mobile/core/notifications/daily_checkin_notification_serv
 import 'package:dualis_mobile/core/notifications/hydration_notification_service.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:dualis_mobile/features/dashboard/data/triage_history_remote_data_source.dart';
+import 'package:dualis_mobile/features/dashboard/domain/models/triage_history_models.dart';
+import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
 import 'package:dualis_mobile/features/hydration/domain/models/hydration_settings.dart';
+import 'package:dualis_mobile/features/triage/domain/triage_vertical.dart';
 
 class MockFlutterLocalNotificationsPlugin extends Mock
     implements FlutterLocalNotificationsPlugin {}
@@ -134,6 +138,39 @@ class _FakeSecureStorage extends Fake implements SecureStorageService {
   }
 }
 
+class _EmptyHistoryDataSource extends TriageHistoryRemoteDataSource {
+  @override
+  Future<TriageHistoryResponse> fetchHistory({int days = 14}) async =>
+      const TriageHistoryResponse(
+        logs: [],
+        physicalSummary: {},
+        emotionalSummary: [],
+        journalPatterns: [],
+      );
+}
+
+/// Records what the controller asks of the check-in reminder service.
+class _RecordingCheckinService extends Fake
+    implements DailyCheckinNotificationService {
+  final List<bool> scheduledWithCompleted = <bool>[];
+  int bareCancelCalls = 0;
+
+  @override
+  Future<void> scheduleDailyCheckInReminders({
+    required bool isCompletedToday,
+  }) async {
+    scheduledWithCompleted.add(isCompletedToday);
+  }
+
+  @override
+  Future<void> cancelAllCheckInReminders() async => bareCancelCalls++;
+
+  void clear() {
+    scheduledWithCompleted.clear();
+    bareCancelCalls = 0;
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -209,6 +246,48 @@ void main() {
       );
     });
 
+    group('controller completion paths re-arm reminders instead of a bare cancel', () {
+      late _RecordingCheckinService recorder;
+      late ProviderContainer container;
+
+      setUp(() async {
+        recorder = _RecordingCheckinService();
+        container = ProviderContainer(overrides: [
+          dailyCheckinNotificationServiceProvider.overrideWithValue(recorder),
+          secureStorageServiceProvider.overrideWithValue(_FakeSecureStorage()),
+          triageHistoryDataSourceProvider
+              .overrideWithValue(_EmptyHistoryDataSource()),
+        ]);
+        container.read(triggerCheckInProvider);
+        // Let build()'s loadTodayCheckIn settle, then observe only the
+        // completion call.
+        await pumpEventQueue();
+        recorder.clear();
+      });
+
+      tearDown(() => container.dispose());
+
+      Future<void> expectRearmedFromTomorrow() async {
+        await pumpEventQueue();
+        expect(recorder.bareCancelCalls, 0,
+            reason: 'a bare cancel silences every future day');
+        expect(recorder.scheduledWithCompleted, contains(true));
+      }
+
+      test('completeStage', () async {
+        container.read(triggerCheckInProvider.notifier).completeStage(
+              vertical: TriageVertical.psicoEmocional,
+              summary: 'Bem',
+            );
+        await expectRearmedFromTomorrow();
+      });
+
+      test('markCompletedToday', () async {
+        container.read(triggerCheckInProvider.notifier).markCompletedToday();
+        await expectRearmedFromTomorrow();
+      });
+
+    });
   });
 
   group('Finding 3: one tap handler for both reminder kinds', () {

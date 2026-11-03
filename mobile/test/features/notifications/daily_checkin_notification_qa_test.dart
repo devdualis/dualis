@@ -1,10 +1,13 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 import 'package:dualis_mobile/core/notifications/daily_checkin_notification_service.dart';
+import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
+import 'package:dualis_mobile/features/triage/domain/triage_vertical.dart';
 
 class MockFlutterLocalNotificationsPlugin extends Mock
     implements FlutterLocalNotificationsPlugin {}
@@ -119,5 +122,61 @@ void main() {
       expect(firesTomorrow, DailyCheckinNotificationService.reminderHours.toSet());
     });
 
+    test('QA 1.4: Completing check-in stage via TriggerCheckInNotifier clears today\'s reminders and re-arms the next days', () async {
+      final container = ProviderContainer(
+        overrides: [
+          dailyCheckinNotificationServiceProvider.overrideWithValue(service),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(triggerCheckInProvider.notifier);
+      notifier.completeStage(
+        vertical: TriageVertical.psicoEmocional,
+        summary: 'Bem / Ótimo',
+      );
+
+      await pumpEventQueue();
+
+      // Today's pending slots are cleared...
+      for (final hour in DailyCheckinNotificationService.reminderHours) {
+        verify(() => mockPlugin.cancel(id: 2000 + hour)).called(greaterThanOrEqualTo(1));
+      }
+      // ...and the following days are re-armed (not a bare cancel).
+      verify(() => mockPlugin.zonedSchedule(
+            id: any(named: 'id'),
+            title: any(named: 'title'),
+            body: any(named: 'body'),
+            scheduledDate: any(named: 'scheduledDate'),
+            notificationDetails: any(named: 'notificationDetails'),
+            payload: any(named: 'payload'),
+            androidScheduleMode: any(named: 'androidScheduleMode'),
+            matchDateTimeComponents: any(named: 'matchDateTimeComponents'),
+          )).called(greaterThanOrEqualTo(DailyCheckinNotificationService.reminderHours.length));
+    });
+
+    test('QA 1.5: Resetting check-in for a new day clears completed status and enables reminders', () async {
+      final container = ProviderContainer(
+        overrides: [
+          dailyCheckinNotificationServiceProvider.overrideWithValue(service),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(triggerCheckInProvider.notifier);
+      notifier.completeStage(
+        vertical: TriageVertical.psicoEmocional,
+        summary: 'Bem / Ótimo',
+      );
+      expect(container.read(triggerCheckInProvider).isCompletedToday, isTrue);
+
+      notifier.reset();
+      await pumpEventQueue();
+
+      final state = container.read(triggerCheckInProvider);
+      expect(state.isCompletedToday, isFalse);
+      expect(state.isEmotionalCompleted, isFalse);
+      expect(state.isPhysicalCompleted, isFalse);
+    });
   });
 }

@@ -23,6 +23,7 @@ import 'package:dualis_mobile/features/auth/domain/user_profile.dart';
 import 'package:dualis_mobile/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:dualis_mobile/features/dashboard/data/triage_history_remote_data_source.dart';
 import 'package:dualis_mobile/features/dashboard/domain/models/triage_history_models.dart';
+import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
 import 'package:dualis_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:dualis_mobile/features/hydration/data/hydration_repository.dart';
 import 'package:dualis_mobile/features/hydration/domain/models/hydration_settings.dart';
@@ -647,7 +648,7 @@ void main() {
       ]);
       addTearDown(container.dispose);
 
-      container.read(dailyCheckinNotificationServiceProvider);
+      container.read(triggerCheckInProvider);
       await pumpEventQueue();
       h.scheduled.clear();
 

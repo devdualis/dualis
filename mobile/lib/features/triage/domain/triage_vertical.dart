@@ -1,0 +1,4 @@
+enum TriageVertical {
+  psicoEmocional,
+  fisica,
+}

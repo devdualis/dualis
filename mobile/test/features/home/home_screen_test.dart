@@ -1,3 +1,5 @@
+import 'package:dualis_mobile/features/home/domain/trigger_checkin_state.dart';
+import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,6 +17,7 @@ import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 Widget createHomeTestApp({
   AuthState? initialAuthState,
+  TriggerCheckInState? initialCheckInState,
   DateTime? now,
   bool hydrationOfferPending = false,
 }) {
@@ -70,6 +73,10 @@ Widget createHomeTestApp({
         authControllerProvider.overrideWith(
           () => _TestAuthController(initialAuthState),
         ),
+      if (initialCheckInState != null)
+        triggerCheckInProvider.overrideWith(
+          () => _TestTriggerCheckInController(initialCheckInState),
+        ),
     ],
     child: MaterialApp.router(
       routerConfig: router,
@@ -94,6 +101,19 @@ class _FakeHydrationOffer extends HydrationReminderOffer {
     final value = pending;
     pending = false;
     return value;
+  }
+}
+
+class _TestTriggerCheckInController extends TriggerCheckInNotifier {
+  final TriggerCheckInState _initial;
+  _TestTriggerCheckInController(this._initial);
+
+  @override
+  TriggerCheckInState build() => _initial;
+
+  @override
+  Future<void> loadTodayCheckIn([DateTime? now]) async {
+    state = _initial;
   }
 }
 
@@ -143,6 +163,42 @@ void main() {
       expect(find.byKey(const Key('home_profile_card')), findsOneWidget);
       expect(find.byKey(const Key('home_hydration_nav_button')), findsNothing);
       expect(find.byKey(const Key('nav_destination_hydration')), findsOneWidget);
+
+      // Verify Stage Buttons
+      expect(find.byKey(const Key('start_psicoemocional_triage_button')), findsOneWidget);
+      expect(find.byKey(const Key('start_fisica_triage_button')), findsOneWidget);
+    });
+
+    testWidgets('Tapping stage buttons navigates to /triage screen',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createHomeTestApp());
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.byKey(const Key('start_psicoemocional_triage_button')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('start_psicoemocional_triage_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Triage Screen'), findsOneWidget);
+    });
+
+    testWidgets('Shows the completed stage card on the main home tab; Meu Dia is not in the nav',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createHomeTestApp(
+        initialCheckInState: const TriggerCheckInState(
+          isPhysicalCompleted: true,
+          physicalIntensity: 5,
+          physicalSummary: 'Peito',
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      // Verify physical stage card is marked completed, NOT displaying uncompleted start button
+      expect(find.byKey(const Key('fisica_completed_card')), findsOneWidget);
+      expect(find.byKey(const Key('start_fisica_triage_button')), findsNothing);
+
+      // "Meu Dia" is no longer a bottom-nav destination.
+      expect(find.byKey(const Key('nav_destination_today_outcome')), findsNothing);
     });
 
     testWidgets('Tapping settings button navigates to /settings screen',

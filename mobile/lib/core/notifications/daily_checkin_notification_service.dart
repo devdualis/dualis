@@ -1,4 +1,3 @@
-import '../../features/auth/presentation/controllers/auth_controller.dart';
 import 'dart:async';
 import 'dart:ui' show Locale;
 
@@ -268,17 +267,6 @@ final dailyCheckinNotificationServiceProvider =
     center: ref.watch(appNotificationCenterProvider),
     localeResolver: () => ref.read(localeProvider),
   );
-  ref.listen<Locale>(localeProvider, (previous, next) {
-    if (previous != next) {
-      try {
-        if (ref.read(authControllerProvider).isAuthenticated) {
-          unawaited(service
-              .scheduleDailyCheckInReminders(isCompletedToday: false)
-              .catchError((Object _) {}));
-        }
-      } catch (_) {}
-    }
-  });
   ref.onDispose(service.dispose);
   return service;
 });

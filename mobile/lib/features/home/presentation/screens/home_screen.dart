@@ -10,6 +10,9 @@ import '../../../../shared/widgets/landscape_background.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../domain/home_greeting.dart';
+import '../../domain/trigger_checkin_state.dart';
+import '../controllers/trigger_checkin_controller.dart';
+import '../widgets/dual_axis_trigger_card.dart';
 import '../../../sync/presentation/controllers/sync_outbox_worker.dart';
 import '../../../settings/presentation/widgets/avatar_selector_sheet.dart';
 import '../../../voice/presentation/voice_widgets.dart';
@@ -74,6 +77,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (authState.user == null) {
         await ref.read(authControllerProvider.notifier).restoreSession();
       }
+      ref.read(triggerCheckInProvider.notifier).checkAndResetIfNewDay();
+      ref.read(triggerCheckInProvider.notifier).loadTodayCheckIn();
       ref.read(hydrationControllerProvider.notifier).loadData();
       if (ref.read(premiumProfilesEnabledProvider)) {
         ref.read(habitsControllerProvider.notifier).loadData();
@@ -100,6 +105,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     ref.listen(authControllerProvider, (prev, next) {
       if ((prev == null || !prev.isAuthenticated) && next.isAuthenticated) {
+        ref.read(triggerCheckInProvider.notifier).loadTodayCheckIn();
         ref.read(hydrationControllerProvider.notifier).loadData();
         if (ref.read(premiumProfilesEnabledProvider)) {
           ref.read(habitsControllerProvider.notifier).loadData();
@@ -128,6 +134,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.watch(syncOutboxWorkerProvider);
     ref.watch(hydrationControllerProvider);
 
+    final triggerState = ref.watch(triggerCheckInProvider);
     // The care tab is always visible; in the free build it shows the Premium promo.
     final careLocked = !ref.watch(premiumProfilesEnabledProvider);
 
@@ -281,6 +288,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 cardDisplaySubtitle,
                 cardAvatarInitial,
                 viewOnlyActive,
+                triggerState,
               ),
             ),
           ],
@@ -306,6 +314,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     String cardDisplaySubtitle,
     String cardAvatarInitial,
     bool viewOnlyActive,
+    TriggerCheckInState triggerState,
   ) {
     switch (_currentTabIndex) {
       case 1:
@@ -326,6 +335,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           cardDisplaySubtitle,
           cardAvatarInitial,
           viewOnlyActive,
+          triggerState,
         );
     }
   }
@@ -337,6 +347,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     String cardDisplaySubtitle,
     String cardAvatarInitial,
     bool viewOnlyActive,
+    TriggerCheckInState triggerState,
   ) {
     final useDelegatedAvatar = showsDelegatedActiveProfile(ref);
 
@@ -457,6 +468,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               const SizedBox(height: 20),
 
+              const DualAxisTriggerCard(),
+              const SizedBox(height: 16),
               const TodayHabitsCard(),
               const SizedBox(height: 16),
             ],
@@ -485,10 +498,22 @@ class _AppBarIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: tooltip,
-      icon: Icon(icon, color: color, size: 22),
-      onPressed: onTap,
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: color.withAlpha(20),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: color.withAlpha(80)),
+          ),
+          child: Icon(icon, size: 18, color: color),
+        ),
+      ),
     );
   }
 }
