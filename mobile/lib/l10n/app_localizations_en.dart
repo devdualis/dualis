@@ -260,6 +260,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changeAvatar => 'Change Picture';
 
   @override
+  String get settingsPhotoAdjustHint => 'Tap to adjust your photo';
+
+  @override
   String get selectAvatar => 'Choose your Avatar';
 
   @override
@@ -375,6 +378,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguageEnglish => 'English';
 
   @override
+  String get settingsRecordsAndHabitsSection => 'Your records and habits';
+
+  @override
   String get settingsPrivacySection => 'Privacy & Data';
 
   @override
@@ -382,13 +388,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsPrivacyCenterSubtitle =>
-      'Access and manage your health data';
+      'View, download, or delete your data';
 
   @override
   String get settingsDataHistoryTile => 'History & Trends';
 
   @override
-  String get settingsDataHistorySubtitle => 'View your entry history';
+  String get settingsDataHistorySubtitle =>
+      'See everything you logged, day by day';
 
   @override
   String get deleteAction => 'Delete';
@@ -1297,7 +1304,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsRemindersSubtitle =>
-      'Notification times, alarms and closed-app test';
+      'Choose when to be reminded to drink water';
 
   @override
   String get settingsTermsTile => 'Terms of Use';

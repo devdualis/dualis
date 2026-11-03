@@ -7,10 +7,60 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 
+/// Decodes width and height synchronously from PNG or JPEG headers, if possible.
+Size? decodeImageSizeSync(Uint8List bytes) {
+  // Check PNG signature: 89 50 4E 47 0D 0A 1A 0A
+  if (bytes.length >= 24 &&
+      bytes[0] == 0x89 &&
+      bytes[1] == 0x50 &&
+      bytes[2] == 0x4E &&
+      bytes[3] == 0x47) {
+    final view = ByteData.sublistView(bytes);
+    final width = view.getUint32(16);
+    final height = view.getUint32(20);
+    if (width > 0 && height > 0) return Size(width.toDouble(), height.toDouble());
+  }
+
+  // Check JPEG SOI: FF D8
+  if (bytes.length >= 4 && bytes[0] == 0xFF && bytes[1] == 0xD8) {
+    int offset = 2;
+    final view = ByteData.sublistView(bytes);
+    while (offset + 4 < bytes.length) {
+      if (bytes[offset] != 0xFF) break;
+      final marker = bytes[offset + 1];
+      if (marker == 0xC0 || marker == 0xC2) {
+        if (offset + 9 < bytes.length) {
+          final height = view.getUint16(offset + 5);
+          final width = view.getUint16(offset + 7);
+          if (width > 0 && height > 0) {
+            return Size(width.toDouble(), height.toDouble());
+          }
+        }
+        break;
+      } else if (marker == 0xD9 || marker == 0xDA) {
+        break;
+      } else {
+        final length = view.getUint16(offset + 2);
+        offset += 2 + length;
+      }
+    }
+  }
+
+  return null;
+}
+
 /// Circular crop step shown after picking or taking a profile photo
-/// (strategy §13). The person pinches to zoom and drags to frame the face;
-/// the square under the circle is saved as a PNG of [outputSize] pixels.
-/// Built with InteractiveViewer and RenderRepaintBoundary only (no plugins).
+/// (client spec 1.1 / strategy §13).
+///
+/// Features:
+/// - Initial frame centres horizontally and places the circle's centre at ~35%
+///   of the image height (where faces sit in portrait selfies), clamped so the
+///   circle never leaves the image.
+/// - Minimum scale covers the circle (cover, not contain) for portrait,
+///   landscape and square photos, preventing transparent stripes.
+/// - Panning is clamped with [boundaryMargin] = [EdgeInsets.zero] so no empty
+///   area ever shows inside the circle.
+/// - Output is rendered as a square PNG of [outputSize] pixels.
 class PhotoCropScreen extends StatefulWidget {
   static const double outputSize = 512;
 
@@ -28,6 +78,49 @@ class PhotoCropScreen extends StatefulWidget {
     );
   }
 
+  /// Computes the cover dimensions for the given [side] and [imageSize].
+  /// The image expands so that both dimensions are at least [side].
+  static Size calculateCoverSize({
+    required double side,
+    required Size imageSize,
+  }) {
+    if (imageSize.width <= 0 || imageSize.height <= 0) {
+      return Size(side, side);
+    }
+    final aspect = imageSize.width / imageSize.height;
+    if (aspect <= 1.0) {
+      // Portrait or square: width is side, height expands
+      return Size(side, side / aspect);
+    } else {
+      // Landscape: height is side, width expands
+      return Size(side * aspect, side);
+    }
+  }
+
+  /// Computes the initial transform:
+  /// - Horizontally centred
+  /// - Circle centre placed at 35% of image height
+  /// - Clamped so the circle never leaves the image
+  static Matrix4 calculateInitialTransform({
+    required double side,
+    required Size imageSize,
+  }) {
+    final coverSize = calculateCoverSize(side: side, imageSize: imageSize);
+    final childWidth = coverSize.width;
+    final childHeight = coverSize.height;
+
+    // Centre horizontally
+    final dxInitial = (side - childWidth) / 2.0;
+    final dx = dxInitial.clamp(side - childWidth, 0.0);
+
+    // Place circle centre (side / 2) at 35% of image height
+    final targetY = 0.35 * childHeight;
+    final dyInitial = (side / 2.0) - targetY;
+    final dy = dyInitial.clamp(side - childHeight, 0.0);
+
+    return Matrix4.translationValues(dx, dy, 0.0);
+  }
+
   @override
   State<PhotoCropScreen> createState() => _PhotoCropScreenState();
 }
@@ -35,7 +128,30 @@ class PhotoCropScreen extends StatefulWidget {
 class _PhotoCropScreenState extends State<PhotoCropScreen> {
   final GlobalKey _boundaryKey = GlobalKey();
   final TransformationController _transform = TransformationController();
+  Size? _imageSize;
+  bool _initializedTransform = false;
+  double? _lastSide;
   bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _imageSize = decodeImageSizeSync(widget.imageBytes);
+    if (_imageSize == null) {
+      ui.instantiateImageCodec(widget.imageBytes).then((codec) {
+        return codec.getNextFrame();
+      }).then((frame) {
+        if (mounted) {
+          setState(() {
+            _imageSize = Size(
+              frame.image.width.toDouble(),
+              frame.image.height.toDouble(),
+            );
+          });
+        }
+      }).catchError((_) {});
+    }
+  }
 
   @override
   void dispose() {
@@ -83,6 +199,22 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
                     : constraints.maxHeight - 160)
                 .clamp(160.0, 520.0) -
                 32;
+
+            final effectiveImageSize = _imageSize ?? Size(side, side);
+            final coverSize = PhotoCropScreen.calculateCoverSize(
+              side: side,
+              imageSize: effectiveImageSize,
+            );
+
+            if (!_initializedTransform || _lastSide != side) {
+              _lastSide = side;
+              _initializedTransform = true;
+              _transform.value = PhotoCropScreen.calculateInitialTransform(
+                side: side,
+                imageSize: effectiveImageSize,
+              );
+            }
+
             return Column(
               children: [
                 const SizedBox(height: 16),
@@ -106,21 +238,25 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
                           RepaintBoundary(
                             key: _boundaryKey,
                             child: ClipRect(
-                              child: InteractiveViewer(
-                                key: const Key('photo_crop_viewer'),
-                                transformationController: _transform,
-                                minScale: 1,
-                                maxScale: 5,
-                                clipBehavior: Clip.hardEdge,
-                                child: SizedBox(
-                                  width: side,
-                                  height: side,
-                                  child: Image.memory(
-                                    widget.imageBytes,
-                                    // Contain keeps the whole picture (heads included).
-                                    // Cover was cropping the top before the person could zoom.
-                                    fit: BoxFit.contain,
-                                    gaplessPlayback: true,
+                              child: SizedBox(
+                                width: side,
+                                height: side,
+                                child: InteractiveViewer(
+                                  key: const Key('photo_crop_viewer'),
+                                  transformationController: _transform,
+                                  constrained: false,
+                                  boundaryMargin: EdgeInsets.zero,
+                                  minScale: 1.0,
+                                  maxScale: 5.0,
+                                  clipBehavior: Clip.hardEdge,
+                                  child: SizedBox(
+                                    width: coverSize.width,
+                                    height: coverSize.height,
+                                    child: Image.memory(
+                                      widget.imageBytes,
+                                      fit: BoxFit.cover,
+                                      gaplessPlayback: true,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -145,7 +281,13 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
                             side: const BorderSide(color: Colors.white54),
                             minimumSize: const Size.fromHeight(52),
                           ),
-                          onPressed: () => _transform.value = Matrix4.identity(),
+                          onPressed: () {
+                            _transform.value =
+                                PhotoCropScreen.calculateInitialTransform(
+                              side: side,
+                              imageSize: effectiveImageSize,
+                            );
+                          },
                           child: Text(l10n.xv2CropReset),
                         ),
                       ),

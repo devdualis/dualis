@@ -550,6 +550,12 @@ abstract class AppLocalizations {
   /// **'Alterar Foto'**
   String get changeAvatar;
 
+  /// One-time hint to adjust profile photo framing
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque para ajustar sua foto'**
+  String get settingsPhotoAdjustHint;
+
   /// Title for avatar selection modal
   ///
   /// In pt, this message translates to:
@@ -766,6 +772,12 @@ abstract class AppLocalizations {
   /// **'English'**
   String get settingsLanguageEnglish;
 
+  /// Section header for records and habits in settings
+  ///
+  /// In pt, this message translates to:
+  /// **'Seus registros e hábitos'**
+  String get settingsRecordsAndHabitsSection;
+
   /// Section header for privacy and data in settings
   ///
   /// In pt, this message translates to:
@@ -781,7 +793,7 @@ abstract class AppLocalizations {
   /// Subtitle for privacy center tile
   ///
   /// In pt, this message translates to:
-  /// **'Acesse e gerencie seus dados de saúde'**
+  /// **'Veja, baixe ou apague seus dados'**
   String get settingsPrivacyCenterSubtitle;
 
   /// Tile to navigate to historical dashboard
@@ -793,7 +805,7 @@ abstract class AppLocalizations {
   /// Subtitle for history tile
   ///
   /// In pt, this message translates to:
-  /// **'Visualize seu histórico de registros'**
+  /// **'Veja tudo o que você registrou, dia a dia'**
   String get settingsDataHistorySubtitle;
 
   /// Action button text to discard/delete
@@ -2335,7 +2347,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsRemindersSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Horários de notificações, alarmes e teste com app fechado'**
+  /// **'Escolha quando lembrar de beber água'**
   String get settingsRemindersSubtitle;
 
   /// No description provided for @settingsTermsTile.

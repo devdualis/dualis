@@ -32,6 +32,11 @@ class SecureStorageService {
   /// same account and wiped when another account signs in on this device.
   static const String habitsKeyPrefix = 'dualis_habits_';
 
+  /// Set once the profile photo framing has been confirmed or adjusted with
+  /// the top-third rule, dismissing the one-time adjustment hint.
+  static const String keyPhotoFramingAdjusted =
+      'dualis_photo_framing_adjusted_v2';
+
   final FlutterSecureStorage _storage;
 
   SecureStorageService({FlutterSecureStorage? storage})
@@ -115,6 +120,14 @@ class SecureStorageService {
       value: enabled ? 'true' : 'false',
     );
   }
+
+  Future<bool> isPhotoFramingAdjusted() async {
+    final val = await _storage.read(key: keyPhotoFramingAdjusted);
+    return val == 'true';
+  }
+
+  Future<void> setPhotoFramingAdjusted([bool adjusted = true]) =>
+      _storage.write(key: keyPhotoFramingAdjusted, value: adjusted ? 'true' : 'false');
 
   Future<void> saveDailyCheckIn({
     required String userId,
