@@ -185,6 +185,8 @@ void main() {
         findsOneWidget,
         reason: 'invite defaults to the active (dependent) profile');
     await _tap(tester, _key('family-share-scope-viewOnly'));
+    await _tap(tester, _key('family-share-relationship'));
+    await _tap(tester, _key('family-share-relationship-caregiver').last);
     await _tap(tester, _key('family-share-invite-generate'));
     await _waitFor(tester, _key('family-share-invite-code'));
     final code =

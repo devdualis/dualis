@@ -183,6 +183,9 @@ class ActiveProfileController extends Notifier<ActiveProfileState> {
   Future<SharedAccessGrant> createInvite({
     required String targetProfileId,
     required ProfileShareLevel accessLevel,
+    required GrantRelationship relationship,
+    required List<ShareCategory> categories,
+    bool dependentShareConfirmed = false,
   }) async {
     final session = _requireSession();
     final targetName = state.profiles
@@ -193,6 +196,9 @@ class ActiveProfileController extends Notifier<ActiveProfileState> {
     final grant = await _repository.createInvite(
       targetProfileId: targetProfileId,
       accessLevel: accessLevel,
+      relationship: relationship,
+      categories: categories,
+      dependentShareConfirmed: dependentShareConfirmed,
       targetProfileName: targetName,
     );
     if (_isCurrent(session)) {

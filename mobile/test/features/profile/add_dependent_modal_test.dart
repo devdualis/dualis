@@ -78,6 +78,9 @@ class FakeActiveProfileController extends ActiveProfileController {
   Future<SharedAccessGrant> createInvite({
     required String targetProfileId,
     required ProfileShareLevel accessLevel,
+    required GrantRelationship relationship,
+    required List<ShareCategory> categories,
+    bool dependentShareConfirmed = false,
   }) async =>
       throw UnimplementedError();
 

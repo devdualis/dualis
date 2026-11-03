@@ -260,14 +260,21 @@ void main() {
     final grant = await repository.createInvite(
       targetProfileId: 'p1',
       accessLevel: ProfileShareLevel.coManage,
+      relationship: GrantRelationship.sibling,
+      categories: [ShareCategory.habits, ShareCategory.emotionalJournal],
       targetProfileName: 'Ana',
     );
     await repository.acceptInvite('XYZ789');
     await repository.revokeGrant('g1');
 
     expect(adapter.requests[0].path, '/v1/family-sharing/invite');
-    expect(adapter.bodies[0],
-        {'targetProfileId': 'p1', 'accessLevel': 'CO_MANAGE'});
+    expect(adapter.bodies[0], {
+      'targetProfileId': 'p1',
+      'accessLevel': 'CO_MANAGE',
+      'relationship': 'sibling',
+      'categories': ['habits', 'emotional_journal'],
+      'dependentShareConfirmed': false,
+    });
     expect(grant.status, GrantStatus.pending);
     expect(grant.inviteCode, 'XYZ789');
     expect(grant.targetProfileName, 'Ana');

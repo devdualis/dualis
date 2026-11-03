@@ -9585,6 +9585,108 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'O que você registrou'**
   String get jv24SummaryDetailsTitle;
+
+  /// No description provided for @familySharingRelationshipLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quem é essa pessoa para você?'**
+  String get familySharingRelationshipLabel;
+
+  /// No description provided for @familySharingRelationshipSpousePartner.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cônjuge ou parceiro(a)'**
+  String get familySharingRelationshipSpousePartner;
+
+  /// No description provided for @familySharingRelationshipSibling.
+  ///
+  /// In pt, this message translates to:
+  /// **'Irmão ou irmã'**
+  String get familySharingRelationshipSibling;
+
+  /// No description provided for @familySharingRelationshipParent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pai ou mãe'**
+  String get familySharingRelationshipParent;
+
+  /// No description provided for @familySharingRelationshipChild.
+  ///
+  /// In pt, this message translates to:
+  /// **'Filho ou filha'**
+  String get familySharingRelationshipChild;
+
+  /// No description provided for @familySharingRelationshipOtherFamily.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outro familiar'**
+  String get familySharingRelationshipOtherFamily;
+
+  /// No description provided for @familySharingRelationshipCaregiver.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cuidador(a)'**
+  String get familySharingRelationshipCaregiver;
+
+  /// No description provided for @familySharingRelationshipFriend.
+  ///
+  /// In pt, this message translates to:
+  /// **'Amigo(a)'**
+  String get familySharingRelationshipFriend;
+
+  /// No description provided for @familySharingRelationshipOther.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outro'**
+  String get familySharingRelationshipOther;
+
+  /// No description provided for @familySharingRelationshipUnknown.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não informado'**
+  String get familySharingRelationshipUnknown;
+
+  /// No description provided for @familySharingCategoriesLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que essa pessoa poderá ver'**
+  String get familySharingCategoriesLabel;
+
+  /// No description provided for @familySharingCategoryHabits.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hábitos (água, sono, movimento)'**
+  String get familySharingCategoryHabits;
+
+  /// No description provided for @familySharingCategoryPhysicalJournal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Diário do corpo'**
+  String get familySharingCategoryPhysicalJournal;
+
+  /// No description provided for @familySharingCategoryEmotionalJournal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Diário emocional'**
+  String get familySharingCategoryEmotionalJournal;
+
+  /// No description provided for @familySharingCategoryConditions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Condições e medições'**
+  String get familySharingCategoryConditions;
+
+  /// No description provided for @familySharingCategoryCare.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cuidados (medicamentos, consultas, exames)'**
+  String get familySharingCategoryCare;
+
+  /// No description provided for @familySharingCategoriesRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha ao menos uma categoria.'**
+  String get familySharingCategoriesRequired;
 }
 
 class _AppLocalizationsDelegate

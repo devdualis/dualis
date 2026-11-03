@@ -36,6 +36,8 @@ SharedAccessGrant _grant(
   String? code,
   String? granteeName,
   String? granteeEmail,
+  GrantRelationship? relationship,
+  List<ShareCategory> categories = const [],
 }) =>
     SharedAccessGrant(
       id: id,
@@ -49,6 +51,8 @@ SharedAccessGrant _grant(
       acceptedAt: status == GrantStatus.accepted ? DateTime(2026, 10, 1) : null,
       granteeName: granteeName,
       granteeEmail: granteeEmail,
+      relationship: relationship,
+      categories: categories,
     );
 
 /// In-memory controller: records calls and mutates state like the real one.
@@ -58,7 +62,13 @@ class _FakeController extends ActiveProfileController {
 
   final List<String> acceptedCodes = [];
   final List<String> revokedIds = [];
-  ({String targetProfileId, ProfileShareLevel accessLevel})? lastInvite;
+  ({
+    String targetProfileId,
+    ProfileShareLevel accessLevel,
+    GrantRelationship relationship,
+    List<ShareCategory> categories,
+    bool dependentShareConfirmed,
+  })? lastInvite;
   Object? acceptError;
 
   @override
@@ -71,8 +81,17 @@ class _FakeController extends ActiveProfileController {
   Future<SharedAccessGrant> createInvite({
     required String targetProfileId,
     required ProfileShareLevel accessLevel,
+    required GrantRelationship relationship,
+    required List<ShareCategory> categories,
+    bool dependentShareConfirmed = false,
   }) async {
-    lastInvite = (targetProfileId: targetProfileId, accessLevel: accessLevel);
+    lastInvite = (
+      targetProfileId: targetProfileId,
+      accessLevel: accessLevel,
+      relationship: relationship,
+      categories: categories,
+      dependentShareConfirmed: dependentShareConfirmed,
+    );
     final invite = SharedAccessGrant(
       id: 'g-new',
       direction: GrantDirection.outgoing,
@@ -82,6 +101,8 @@ class _FakeController extends ActiveProfileController {
       status: GrantStatus.pending,
       expiresAt: DateTime.now().add(const Duration(hours: 72)),
       inviteCode: 'AB12CD34EF',
+      relationship: relationship,
+      categories: categories,
     );
     state = state.copyWith(outgoingGrants: [...state.outgoingGrants, invite]);
     return invite;
@@ -131,6 +152,32 @@ ActiveProfileState _state({
       outgoingGrants: outgoing,
       incomingGrants: incoming,
     );
+
+Future<void> _pickRelationship(WidgetTester tester, String apiValue) async {
+  final field = find.byKey(const ValueKey('family-share-relationship'));
+  await tester.ensureVisible(field);
+  await tester.pumpAndSettle();
+  await tester.tap(field);
+  await tester.pumpAndSettle();
+  // The menu copy of the item sits in the route overlay, after the button's.
+  final item = find
+      .descendant(
+          of: find.byKey(ValueKey('family-share-relationship-$apiValue')).last,
+          matching: find.byType(Text))
+      .first;
+  await tester.ensureVisible(item);
+  await tester.pumpAndSettle();
+  await tester.tap(item);
+  await tester.pumpAndSettle();
+}
+
+Future<void> _openInviteDialog(WidgetTester tester) async {
+  await tester.tap(find.byKey(const ValueKey('family-share-invite-button')));
+  await tester.pumpAndSettle();
+}
+
+FilledButton _generateButton(WidgetTester tester) => tester.widget<FilledButton>(
+    find.byKey(const ValueKey('family-share-invite-generate')));
 
 void main() {
   testWidgets('shows not-available state when premium flag is off',
@@ -198,6 +245,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('family-share-scope-coManage')));
     await tester.pumpAndSettle();
+    await _pickRelationship(tester, 'friend');
     await tester.tap(find.byKey(const ValueKey('family-share-invite-generate')));
     await tester.pumpAndSettle();
 
@@ -214,6 +262,92 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('family-share-invite-done')));
     await tester.pumpAndSettle();
     expect(find.textContaining('AB12CD34EF'), findsOneWidget); // pending row
+  });
+
+  testWidgets(
+      'invite needs a relationship; default categories are habits only and '
+      'the new grant lists relationship and category chips', (tester) async {
+    final controller = _FakeController(_state());
+    await tester.pumpWidget(_app(controller));
+    await tester.pumpAndSettle();
+    await _openInviteDialog(tester);
+
+    // Habits pre-checked, everything else (emotional journal included) not.
+    for (final c in ShareCategory.values) {
+      final tile = tester.widget<CheckboxListTile>(
+          find.byKey(ValueKey('family-share-category-${c.apiValue}')));
+      expect(tile.value, c == ShareCategory.habits, reason: c.apiValue);
+    }
+    expect(_generateButton(tester).onPressed, isNull,
+        reason: 'relationship is required');
+
+    await _pickRelationship(tester, 'sibling');
+    expect(_generateButton(tester).onPressed, isNotNull);
+
+    await tester.tap(find.byKey(const ValueKey('family-share-invite-generate')));
+    await tester.pumpAndSettle();
+    expect(controller.lastInvite?.targetProfileId, 'p-me');
+    expect(controller.lastInvite?.relationship, GrantRelationship.sibling);
+    expect(controller.lastInvite?.categories, [ShareCategory.habits]);
+
+    await tester.tap(find.byKey(const ValueKey('family-share-invite-done')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('grant-relationship-g-new')),
+        findsOneWidget);
+    expect(find.text('Irmão ou irmã'), findsOneWidget);
+    expect(find.byKey(const ValueKey('grant-category-g-new-habits')),
+        findsOneWidget);
+    expect(find.text('Hábitos (água, sono, movimento)'), findsOneWidget);
+    expect(find.byKey(const ValueKey('grant-category-g-new-emotional_journal')),
+        findsNothing);
+  });
+
+  testWidgets('unchecking every category blocks Generate', (tester) async {
+    final controller = _FakeController(_state());
+    await tester.pumpWidget(_app(controller));
+    await tester.pumpAndSettle();
+    await _openInviteDialog(tester);
+    await _pickRelationship(tester, 'friend');
+
+    final habits = find.byKey(const ValueKey('family-share-category-habits'));
+    await tester.ensureVisible(habits);
+    await tester.pumpAndSettle();
+    await tester.tap(habits);
+    await tester.pumpAndSettle();
+
+    expect(_generateButton(tester).onPressed, isNull);
+    expect(find.text('Escolha ao menos uma categoria.'), findsOneWidget);
+  });
+
+  testWidgets('both lists show the relationship; legacy grants say Não informado',
+      (tester) async {
+    final controller = _FakeController(_state(
+      outgoing: [
+        _grant('g1', GrantDirection.outgoing, 'Ana',
+            relationship: GrantRelationship.caregiver,
+            categories: [ShareCategory.habits, ShareCategory.care]),
+        _grant('g2', GrantDirection.outgoing, 'Pedro'),
+      ],
+      incoming: [
+        _grant('g3', GrantDirection.incoming, 'Marta',
+            relationship: GrantRelationship.parent,
+            categories: [ShareCategory.physicalJournal]),
+      ],
+    ));
+    await tester.pumpWidget(_app(controller));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cuidador(a)'), findsOneWidget);
+    expect(find.text('Não informado'), findsOneWidget);
+    expect(find.byKey(const ValueKey('grant-category-g1-habits')),
+        findsOneWidget);
+    expect(find.byKey(const ValueKey('grant-category-g1-care')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('family-share-tab-incoming')));
+    await tester.pumpAndSettle();
+    expect(find.text('Pai ou mãe'), findsOneWidget);
+    expect(find.byKey(const ValueKey('grant-category-g3-physical_journal')),
+        findsOneWidget);
   });
 
   testWidgets('accept sheet uppercases the code and calls acceptInvite',

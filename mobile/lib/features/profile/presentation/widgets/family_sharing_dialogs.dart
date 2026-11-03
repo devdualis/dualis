@@ -10,6 +10,72 @@ import '../controllers/active_profile_controller.dart';
 
 final familySharingDateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
+String relationshipLabel(AppLocalizations l10n, GrantRelationship? r) =>
+    switch (r) {
+      GrantRelationship.spousePartner =>
+        l10n.familySharingRelationshipSpousePartner,
+      GrantRelationship.sibling => l10n.familySharingRelationshipSibling,
+      GrantRelationship.parent => l10n.familySharingRelationshipParent,
+      GrantRelationship.child => l10n.familySharingRelationshipChild,
+      GrantRelationship.otherFamily =>
+        l10n.familySharingRelationshipOtherFamily,
+      GrantRelationship.caregiver => l10n.familySharingRelationshipCaregiver,
+      GrantRelationship.friend => l10n.familySharingRelationshipFriend,
+      GrantRelationship.other => l10n.familySharingRelationshipOther,
+      null => l10n.familySharingRelationshipUnknown,
+    };
+
+String shareCategoryLabel(AppLocalizations l10n, ShareCategory c) =>
+    switch (c) {
+      ShareCategory.habits => l10n.familySharingCategoryHabits,
+      ShareCategory.physicalJournal =>
+        l10n.familySharingCategoryPhysicalJournal,
+      ShareCategory.emotionalJournal =>
+        l10n.familySharingCategoryEmotionalJournal,
+      ShareCategory.conditions => l10n.familySharingCategoryConditions,
+      ShareCategory.care => l10n.familySharingCategoryCare,
+    };
+
+/// One checkbox per category (D2), keyed `family-share-category-<apiValue>`.
+class FamilySharingCategoryChecklist extends StatelessWidget {
+  final Set<ShareCategory> selected;
+  final ValueChanged<Set<ShareCategory>> onChanged;
+
+  const FamilySharingCategoryChecklist({
+    super.key,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(l10n.familySharingCategoriesLabel,
+            style: Theme.of(context).textTheme.labelLarge),
+        for (final c in ShareCategory.values)
+          CheckboxListTile(
+            key: ValueKey('family-share-category-${c.apiValue}'),
+            contentPadding: EdgeInsets.zero,
+            dense: true,
+            controlAffinity: ListTileControlAffinity.leading,
+            value: selected.contains(c),
+            title: Text(shareCategoryLabel(l10n, c)),
+            onChanged: (checked) => onChanged(checked == true
+                ? {...selected, c}
+                : selected.where((x) => x != c).toSet()),
+          ),
+        if (selected.isEmpty)
+          Text(l10n.familySharingCategoriesRequired,
+              style: const TextStyle(color: AppColors.emergencyCrimson)),
+      ],
+    );
+  }
+}
+
 /// Invite dialog: pick one of my own profiles + scope, then show the code.
 class FamilySharingInviteDialog extends ConsumerStatefulWidget {
   const FamilySharingInviteDialog({super.key});
@@ -23,6 +89,8 @@ class _FamilySharingInviteDialogState
     extends ConsumerState<FamilySharingInviteDialog> {
   String? _profileId;
   ProfileShareLevel _level = ProfileShareLevel.viewOnly;
+  GrantRelationship? _relationship;
+  Set<ShareCategory> _categories = {...ShareCategory.defaults};
   bool _submitting = false;
   bool _failed = false;
   SharedAccessGrant? _invite;
@@ -38,9 +106,18 @@ class _FamilySharingInviteDialogState
         : (own.isEmpty ? null : own.first.id);
   }
 
+  bool get _canGenerate =>
+      !_submitting &&
+      _profileId != null &&
+      _relationship != null &&
+      _categories.isNotEmpty;
+
   Future<void> _generate() async {
     final profileId = _profileId;
-    if (profileId == null) return;
+    final relationship = _relationship;
+    if (profileId == null || relationship == null || _categories.isEmpty) {
+      return;
+    }
     setState(() {
       _submitting = true;
       _failed = false;
@@ -48,7 +125,16 @@ class _FamilySharingInviteDialogState
     try {
       final invite = await ref
           .read(activeProfileControllerProvider.notifier)
-          .createInvite(targetProfileId: profileId, accessLevel: _level);
+          .createInvite(
+            targetProfileId: profileId,
+            accessLevel: _level,
+            relationship: relationship,
+            // Enum order keeps the payload stable.
+            categories: [
+              for (final c in ShareCategory.values)
+                if (_categories.contains(c)) c,
+            ],
+          );
       if (mounted) setState(() => _invite = invite);
     } catch (_) {
       if (mounted) setState(() => _failed = true);
@@ -74,8 +160,7 @@ class _FamilySharingInviteDialogState
               ),
               FilledButton(
                 key: const ValueKey('family-share-invite-generate'),
-                onPressed:
-                    _submitting || _profileId == null ? null : _generate,
+                onPressed: _canGenerate ? _generate : null,
                 child: Text(l10n.familySharingInviteGenerate),
               ),
             ]
@@ -115,6 +200,28 @@ class _FamilySharingInviteDialogState
             l10n.familySharingScopeViewOnlyOption, Icons.visibility_outlined),
         _scopeOption(ProfileShareLevel.coManage,
             l10n.familySharingScopeCoManageOption, Icons.edit_note),
+        const SizedBox(height: 16),
+        DropdownButtonFormField<GrantRelationship>(
+          key: const ValueKey('family-share-relationship'),
+          initialValue: _relationship,
+          isExpanded: true,
+          decoration:
+              InputDecoration(labelText: l10n.familySharingRelationshipLabel),
+          items: [
+            for (final r in GrantRelationship.values)
+              DropdownMenuItem(
+                key: ValueKey('family-share-relationship-${r.apiValue}'),
+                value: r,
+                child: Text(relationshipLabel(l10n, r)),
+              ),
+          ],
+          onChanged: (r) => setState(() => _relationship = r),
+        ),
+        const SizedBox(height: 16),
+        FamilySharingCategoryChecklist(
+          selected: _categories,
+          onChanged: (next) => setState(() => _categories = next),
+        ),
         if (_failed)
           Padding(
             padding: const EdgeInsets.only(top: 8),

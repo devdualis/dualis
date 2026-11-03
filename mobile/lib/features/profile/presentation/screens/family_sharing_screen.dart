@@ -344,6 +344,29 @@ class _GrantTile extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 8),
+            Text(
+              relationshipLabel(l10n, grant.relationship),
+              key: ValueKey('grant-relationship-${grant.id}'),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            if (grant.categories.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: [
+                  for (final c in grant.categories)
+                    Chip(
+                      key: ValueKey('grant-category-${grant.id}-${c.apiValue}'),
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      labelStyle: Theme.of(context).textTheme.labelSmall,
+                      label: Text(shareCategoryLabel(l10n, c)),
+                    ),
+                ],
+              ),
+            ],
             if (grantee != null) ...[
               const SizedBox(height: 8),
               Text(

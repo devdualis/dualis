@@ -5699,4 +5699,57 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get jv24SummaryDetailsTitle => 'O que você registrou';
+
+  @override
+  String get familySharingRelationshipLabel => 'Quem é essa pessoa para você?';
+
+  @override
+  String get familySharingRelationshipSpousePartner => 'Cônjuge ou parceiro(a)';
+
+  @override
+  String get familySharingRelationshipSibling => 'Irmão ou irmã';
+
+  @override
+  String get familySharingRelationshipParent => 'Pai ou mãe';
+
+  @override
+  String get familySharingRelationshipChild => 'Filho ou filha';
+
+  @override
+  String get familySharingRelationshipOtherFamily => 'Outro familiar';
+
+  @override
+  String get familySharingRelationshipCaregiver => 'Cuidador(a)';
+
+  @override
+  String get familySharingRelationshipFriend => 'Amigo(a)';
+
+  @override
+  String get familySharingRelationshipOther => 'Outro';
+
+  @override
+  String get familySharingRelationshipUnknown => 'Não informado';
+
+  @override
+  String get familySharingCategoriesLabel => 'O que essa pessoa poderá ver';
+
+  @override
+  String get familySharingCategoryHabits => 'Hábitos (água, sono, movimento)';
+
+  @override
+  String get familySharingCategoryPhysicalJournal => 'Diário do corpo';
+
+  @override
+  String get familySharingCategoryEmotionalJournal => 'Diário emocional';
+
+  @override
+  String get familySharingCategoryConditions => 'Condições e medições';
+
+  @override
+  String get familySharingCategoryCare =>
+      'Cuidados (medicamentos, consultas, exames)';
+
+  @override
+  String get familySharingCategoriesRequired =>
+      'Escolha ao menos uma categoria.';
 }

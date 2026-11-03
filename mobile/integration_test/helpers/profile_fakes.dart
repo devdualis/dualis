@@ -160,6 +160,8 @@ class _FakeGrant {
   final String ownerUserId;
   final String targetProfileId;
   final ProfileShareLevel level;
+  GrantRelationship? relationship;
+  List<ShareCategory> categories;
   final String inviteCode;
   final DateTime expiresAt;
   String status = 'PENDING';
@@ -173,6 +175,8 @@ class _FakeGrant {
     required this.level,
     required this.inviteCode,
     required this.expiresAt,
+    this.relationship,
+    this.categories = const [],
   });
 }
 
@@ -245,6 +249,8 @@ class FakeProfileBackend {
         'expiresAt': g.expiresAt.toUtc().toIso8601String(),
         if (g.acceptedAt != null)
           'acceptedAt': g.acceptedAt!.toUtc().toIso8601String(),
+        'relationship': g.relationship?.apiValue,
+        'categories': [for (final c in g.categories) c.apiValue],
       };
 
   List<_FakeProfile> _visibleTo(String userId) => _profiles
@@ -372,6 +378,9 @@ class FakeProfileRepository implements ProfileRepository {
   Future<SharedAccessGrant> createInvite({
     required String targetProfileId,
     required ProfileShareLevel accessLevel,
+    required GrantRelationship relationship,
+    required List<ShareCategory> categories,
+    bool dependentShareConfirmed = false,
     String targetProfileName = '',
   }) =>
       _respond(() {
@@ -382,6 +391,10 @@ class FakeProfileRepository implements ProfileRepository {
               'Só o responsável pode compartilhar este perfil.',
               statusCode: 403);
         }
+        if (categories.isEmpty) {
+          throw const ProfileApiException('Escolha ao menos uma categoria.',
+              statusCode: 400);
+        }
         final g = _FakeGrant(
           id: 'grant-${_db._grants.length + 1}',
           ownerUserId: _uid,
@@ -389,6 +402,8 @@ class FakeProfileRepository implements ProfileRepository {
           level: accessLevel,
           inviteCode: _db._nextCode(),
           expiresAt: DateTime.now().add(const Duration(hours: 48)),
+          relationship: relationship,
+          categories: categories,
         );
         _db._grants.add(g);
         // Like the API: no targetProfileName in the create response.

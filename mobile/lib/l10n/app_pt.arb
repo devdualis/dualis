@@ -3340,5 +3340,22 @@
     }
   },
   "jv24SummaryBodyTitle": "Onde você marcou",
-  "jv24SummaryDetailsTitle": "O que você registrou"
+  "jv24SummaryDetailsTitle": "O que você registrou",
+  "familySharingRelationshipLabel": "Quem é essa pessoa para você?",
+  "familySharingRelationshipSpousePartner": "Cônjuge ou parceiro(a)",
+  "familySharingRelationshipSibling": "Irmão ou irmã",
+  "familySharingRelationshipParent": "Pai ou mãe",
+  "familySharingRelationshipChild": "Filho ou filha",
+  "familySharingRelationshipOtherFamily": "Outro familiar",
+  "familySharingRelationshipCaregiver": "Cuidador(a)",
+  "familySharingRelationshipFriend": "Amigo(a)",
+  "familySharingRelationshipOther": "Outro",
+  "familySharingRelationshipUnknown": "Não informado",
+  "familySharingCategoriesLabel": "O que essa pessoa poderá ver",
+  "familySharingCategoryHabits": "Hábitos (água, sono, movimento)",
+  "familySharingCategoryPhysicalJournal": "Diário do corpo",
+  "familySharingCategoryEmotionalJournal": "Diário emocional",
+  "familySharingCategoryConditions": "Condições e medições",
+  "familySharingCategoryCare": "Cuidados (medicamentos, consultas, exames)",
+  "familySharingCategoriesRequired": "Escolha ao menos uma categoria."
 }

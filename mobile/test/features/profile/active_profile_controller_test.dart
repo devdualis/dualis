@@ -319,11 +319,19 @@ void main() {
     when(() => repo.createInvite(
           targetProfileId: 'child',
           accessLevel: ProfileShareLevel.viewOnly,
+          relationship: GrantRelationship.caregiver,
+          categories: [ShareCategory.habits, ShareCategory.care],
+          dependentShareConfirmed: true,
           targetProfileName: 'Ana',
         )).thenAnswer((_) async => pendingGrant);
 
     final grant = await notifier().createInvite(
-        targetProfileId: 'child', accessLevel: ProfileShareLevel.viewOnly);
+      targetProfileId: 'child',
+      accessLevel: ProfileShareLevel.viewOnly,
+      relationship: GrantRelationship.caregiver,
+      categories: [ShareCategory.habits, ShareCategory.care],
+      dependentShareConfirmed: true,
+    );
 
     expect(grant.inviteCode, 'NEW123');
     expect(current().outgoingGrants.first.id, 'g-new');

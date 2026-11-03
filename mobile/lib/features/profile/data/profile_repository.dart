@@ -145,6 +145,9 @@ class ProfileRepository {
   Future<SharedAccessGrant> createInvite({
     required String targetProfileId,
     required ProfileShareLevel accessLevel,
+    required GrantRelationship relationship,
+    required List<ShareCategory> categories,
+    bool dependentShareConfirmed = false,
     String targetProfileName = '',
   }) async {
     final data = await _send((options) => _apiClient.post<dynamic>(
@@ -152,6 +155,9 @@ class ProfileRepository {
           data: {
             'targetProfileId': targetProfileId,
             'accessLevel': shareLevelToApi(accessLevel),
+            'relationship': relationship.apiValue,
+            'categories': [for (final c in categories) c.apiValue],
+            'dependentShareConfirmed': dependentShareConfirmed,
           },
           options: options,
         ));

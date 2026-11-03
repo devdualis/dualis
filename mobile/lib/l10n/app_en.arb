@@ -1618,5 +1618,22 @@
   "jv24EntryTriggers": "What may have contributed: {labels}",
   "jv24EntryNote": "Your note: {note}",
   "jv24SummaryBodyTitle": "Where you marked",
-  "jv24SummaryDetailsTitle": "What you recorded"
+  "jv24SummaryDetailsTitle": "What you recorded",
+  "familySharingRelationshipLabel": "Who is this person to you?",
+  "familySharingRelationshipSpousePartner": "Spouse or partner",
+  "familySharingRelationshipSibling": "Brother or sister",
+  "familySharingRelationshipParent": "Father or mother",
+  "familySharingRelationshipChild": "Son or daughter",
+  "familySharingRelationshipOtherFamily": "Other family member",
+  "familySharingRelationshipCaregiver": "Caregiver",
+  "familySharingRelationshipFriend": "Friend",
+  "familySharingRelationshipOther": "Other",
+  "familySharingRelationshipUnknown": "Not specified",
+  "familySharingCategoriesLabel": "What this person will be able to see",
+  "familySharingCategoryHabits": "Habits (water, sleep, movement)",
+  "familySharingCategoryPhysicalJournal": "Body journal",
+  "familySharingCategoryEmotionalJournal": "Emotional journal",
+  "familySharingCategoryConditions": "Conditions and measurements",
+  "familySharingCategoryCare": "Care (medications, appointments, tests)",
+  "familySharingCategoriesRequired": "Choose at least one category."
 }

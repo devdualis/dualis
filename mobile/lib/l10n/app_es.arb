@@ -1618,5 +1618,22 @@
   "jv24EntryTriggers": "Lo que pudo haber contribuido: {labels}",
   "jv24EntryNote": "Tu nota: {note}",
   "jv24SummaryBodyTitle": "Dónde marcaste",
-  "jv24SummaryDetailsTitle": "Lo que registraste"
+  "jv24SummaryDetailsTitle": "Lo que registraste",
+  "familySharingRelationshipLabel": "¿Quién es esta persona para ti?",
+  "familySharingRelationshipSpousePartner": "Cónyuge o pareja",
+  "familySharingRelationshipSibling": "Hermano o hermana",
+  "familySharingRelationshipParent": "Padre o madre",
+  "familySharingRelationshipChild": "Hijo o hija",
+  "familySharingRelationshipOtherFamily": "Otro familiar",
+  "familySharingRelationshipCaregiver": "Cuidador(a)",
+  "familySharingRelationshipFriend": "Amigo(a)",
+  "familySharingRelationshipOther": "Otro",
+  "familySharingRelationshipUnknown": "No informado",
+  "familySharingCategoriesLabel": "Lo que esta persona podrá ver",
+  "familySharingCategoryHabits": "Hábitos (agua, sueño, movimiento)",
+  "familySharingCategoryPhysicalJournal": "Diario del cuerpo",
+  "familySharingCategoryEmotionalJournal": "Diario emocional",
+  "familySharingCategoryConditions": "Condiciones y mediciones",
+  "familySharingCategoryCare": "Cuidados (medicamentos, consultas, exámenes)",
+  "familySharingCategoriesRequired": "Elige al menos una categoría."
 }
