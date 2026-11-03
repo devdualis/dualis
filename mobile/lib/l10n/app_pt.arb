@@ -305,6 +305,10 @@
   "@changeAvatar": {
     "description": "Action button to change user avatar"
   },
+  "settingsPhotoAdjustHint": "Toque para ajustar sua foto",
+  "@settingsPhotoAdjustHint": {
+    "description": "One-time hint to adjust profile photo framing"
+  },
   "selectAvatar": "Escolha seu Avatar",
   "@selectAvatar": {
     "description": "Title for avatar selection modal"
@@ -454,6 +458,10 @@
   "@settingsLanguageEnglish": {
     "description": "English language option"
   },
+  "settingsRecordsAndHabitsSection": "Seus registros e hábitos",
+  "@settingsRecordsAndHabitsSection": {
+    "description": "Section header for records and habits in settings"
+  },
   "settingsPrivacySection": "Privacidade e Dados",
   "@settingsPrivacySection": {
     "description": "Section header for privacy and data in settings"
@@ -462,7 +470,7 @@
   "@settingsPrivacyCenterTile": {
     "description": "Tile to navigate to full privacy center"
   },
-  "settingsPrivacyCenterSubtitle": "Acesse e gerencie seus dados de saúde",
+  "settingsPrivacyCenterSubtitle": "Veja, baixe ou apague seus dados",
   "@settingsPrivacyCenterSubtitle": {
     "description": "Subtitle for privacy center tile"
   },
@@ -470,7 +478,7 @@
   "@settingsDataHistoryTile": {
     "description": "Tile to navigate to historical dashboard"
   },
-  "settingsDataHistorySubtitle": "Visualize seu histórico de registros",
+  "settingsDataHistorySubtitle": "Veja tudo o que você registrou, dia a dia",
   "@settingsDataHistorySubtitle": {
     "description": "Subtitle for history tile"
   },
@@ -1047,7 +1055,7 @@
   "settingsLogoutConfirmAction": "Sair",
   "settingsNameHint": "Seu nome completo",
   "settingsRemindersTile": "Lembretes e Hidratação",
-  "settingsRemindersSubtitle": "Horários de notificações, alarmes e teste com app fechado",
+  "settingsRemindersSubtitle": "Escolha quando lembrar de beber água",
   "settingsTermsTile": "Termos de Uso",
   "settingsTermsSubtitle": "Condições de uso, planos, cancelamento e reembolso",
   "settingsPrivacyPolicyTile": "Política de Privacidade (LGPD)",

@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/security/secure_storage_service.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../core/utils/error_message_resolver.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -36,6 +37,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   String? _selectedPicture;
   Uint8List? _localImageBytes; // in-memory bytes for a locally picked photo
   DateTime? _selectedDateOfBirth;
+  bool _showPhotoAdjustHint = false;
   bool _obscureCurrentPassword = true;
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
@@ -55,6 +57,50 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // _localImageBytes stays null on init — only populated after a new pick.
     if (user?.dateOfBirth != null && user!.dateOfBirth!.isNotEmpty) {
       _selectedDateOfBirth = DateTime.tryParse(user.dateOfBirth!);
+    }
+    _checkPhotoAdjustHint();
+  }
+
+  Future<void> _checkPhotoAdjustHint() async {
+    final pic = _selectedPicture;
+    if (pic == null || pic.isEmpty || pic.startsWith('avatar_')) return;
+    try {
+      final adjusted =
+          await ref.read(secureStorageServiceProvider).isPhotoFramingAdjusted();
+      if (!adjusted && mounted) {
+        setState(() => _showPhotoAdjustHint = true);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _handleAdjustHintTap() async {
+    Uint8List? sourceBytes = _localImageBytes;
+    if (sourceBytes == null &&
+        _selectedPicture != null &&
+        _selectedPicture!.startsWith('data:image')) {
+      try {
+        final commaIndex = _selectedPicture!.indexOf(',');
+        final base64Str = commaIndex != -1
+            ? _selectedPicture!.substring(commaIndex + 1)
+            : _selectedPicture!;
+        sourceBytes = base64Decode(base64Str);
+      } catch (_) {}
+    }
+
+    if (sourceBytes != null) {
+      final bytes = await PhotoCropScreen.open(context, sourceBytes);
+      if (bytes != null && mounted) {
+        final base64Image = 'data:image/png;base64,${base64Encode(bytes)}';
+        await ref.read(secureStorageServiceProvider).setPhotoFramingAdjusted();
+        setState(() {
+          _localImageBytes = bytes;
+          _selectedPicture = base64Image;
+          _showPhotoAdjustHint = false;
+        });
+        return;
+      }
+    } else {
+      _showPhotoPickerSheet();
     }
   }
 
@@ -94,9 +140,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         final bytes = await PhotoCropScreen.open(context, picked);
         if (bytes == null || !mounted) return;
         final base64Image = 'data:image/png;base64,${base64Encode(bytes)}';
+        await ref.read(secureStorageServiceProvider).setPhotoFramingAdjusted();
         setState(() {
           _localImageBytes = bytes;
           _selectedPicture = base64Image;
+          _showPhotoAdjustHint = false;
         });
       }
     } catch (_) {
@@ -191,6 +239,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       setState(() {
                         _selectedPicture = avatarId;
                         _localImageBytes = null;
+                        _showPhotoAdjustHint = false;
                       });
                     },
                   ),
@@ -497,6 +546,47 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ],
                         ),
                       ),
+                      if (_showPhotoAdjustHint) ...[
+                        const SizedBox(height: 8),
+                        Center(
+                          child: GestureDetector(
+                            key: const Key('photo_adjust_hint'),
+                            onTap: _handleAdjustHintTap,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.clinicalTeal.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: AppColors.clinicalTeal.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.crop_rounded,
+                                    size: 14,
+                                    color: AppColors.clinicalTeal,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    l10n.settingsPhotoAdjustHint,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.clinicalTealDark,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 10),
                       Center(
                         child: TextButton.icon(
@@ -927,9 +1017,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const NotificationsBlockedNotice(),
               const SizedBox(height: 8),
               _SectionLabel(
-                icon: Icons.shield_outlined,
-                label: l10n.settingsPrivacySection,
-                color: AppColors.clinicalTeal,
+                icon: Icons.bookmark_border_rounded,
+                label: l10n.settingsRecordsAndHabitsSection,
+                color: AppColors.softIndigo,
               ),
               const SizedBox(height: 10),
               Material(
@@ -943,29 +1033,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   child: Column(
                     children: [
-                      // Premium only; renders nothing on Free builds.
-                      const BiometricLockTile(),
-                      ListTile(
-                        key: const Key('settings_privacy_tile'),
-                        leading: const Icon(Icons.shield_outlined, color: AppColors.clinicalTeal),
-                        title: Text(
-                          l10n.settingsPrivacyCenterTile,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                        subtitle: Text(
-                          l10n.settingsPrivacyCenterSubtitle,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            color: AppColors.textSecondaryLight,
-                          ),
-                        ),
-                        trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
-                        onTap: () => context.push(RoutePaths.privacyCenter),
-                      ),
-                      const Divider(height: 1, color: AppColors.outlineLight),
                       ListTile(
                         key: const Key('settings_history_tile'),
                         leading: const Icon(Icons.analytics_outlined, color: AppColors.softIndigo),
@@ -1006,6 +1073,50 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
                         onTap: () => context.push(RoutePaths.hydration),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              _SectionLabel(
+                icon: Icons.shield_outlined,
+                label: l10n.settingsPrivacySection,
+                color: AppColors.clinicalTeal,
+              ),
+              const SizedBox(height: 10),
+              Material(
+                color: AppColors.surfaceLight,
+                borderRadius: BorderRadius.circular(16),
+                clipBehavior: Clip.antiAlias,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.outlineLight),
+                  ),
+                  child: Column(
+                    children: [
+                      // Premium only; renders nothing on Free builds.
+                      const BiometricLockTile(),
+                      ListTile(
+                        key: const Key('settings_privacy_tile'),
+                        leading: const Icon(Icons.shield_outlined, color: AppColors.clinicalTeal),
+                        title: Text(
+                          l10n.settingsPrivacyCenterTile,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        subtitle: Text(
+                          l10n.settingsPrivacyCenterSubtitle,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
+                        onTap: () => context.push(RoutePaths.privacyCenter),
                       ),
                       const Divider(height: 1, color: AppColors.outlineLight),
                       ListTile(

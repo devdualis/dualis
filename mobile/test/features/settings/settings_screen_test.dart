@@ -13,6 +13,24 @@ import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 class FakeSecureStorageService extends SecureStorageService {
   String? persistedAccessToken;
+  final Map<String, String> _mem = {};
+
+  @override
+  Future<String?> read({required String key}) async => _mem[key];
+
+  @override
+  Future<void> write({required String key, required String value}) async {
+    _mem[key] = value;
+  }
+
+  @override
+  Future<bool> isPhotoFramingAdjusted() async =>
+      _mem[SecureStorageService.keyPhotoFramingAdjusted] == 'true';
+
+  @override
+  Future<void> setPhotoFramingAdjusted([bool adjusted = true]) async {
+    _mem[SecureStorageService.keyPhotoFramingAdjusted] = adjusted ? 'true' : 'false';
+  }
 
   @override
   Future<void> persistTokens({
@@ -335,6 +353,87 @@ void main() {
       expect(fakeRepo.lastNewPassword, 'BrandNewPass123!');
       // The server ends every session on a password change: this device keeps the new tokens.
       expect(storage.persistedAccessToken, 'jwt-access-after-change');
+    });
+
+    testWidgets('6. Renders Seus registros e hábitos section with plain subtitles and Privacy separately', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(createSettingsTestApp(repository: fakeRepo, user: testUser));
+      await tester.pumpAndSettle();
+
+      // Section "Seus registros e hábitos"
+      expect(find.text('Seus registros e hábitos'), findsOneWidget);
+
+      final historyTile = find.byKey(const Key('settings_history_tile'));
+      await tester.ensureVisible(historyTile);
+      expect(find.text('Histórico e Tendências'), findsOneWidget);
+      expect(find.text('Veja tudo o que você registrou, dia a dia'), findsOneWidget);
+
+      final hydrationTile = find.byKey(const Key('settings_hydration_tile'));
+      await tester.ensureVisible(hydrationTile);
+      expect(find.text('Lembretes e Hidratação'), findsOneWidget);
+      expect(find.text('Escolha quando lembrar de beber água'), findsOneWidget);
+
+      // Section "Privacidade e Dados"
+      final privacySection = find.text('Privacidade e Dados');
+      await tester.ensureVisible(privacySection);
+      expect(privacySection, findsOneWidget);
+
+      final privacyTile = find.byKey(const Key('settings_privacy_tile'));
+      await tester.ensureVisible(privacyTile);
+      expect(find.text('Central de Privacidade e LGPD'), findsOneWidget);
+      expect(find.text('Veja, baixe ou apague seus dados'), findsOneWidget);
+    });
+
+    testWidgets('7. Shows one-time photo adjust hint for custom photo when not yet adjusted', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      const customPhotoUser = UserProfile(
+        id: 'usr-custom',
+        name: 'Maria Silva',
+        email: 'maria@dualis.com.br',
+        gender: Gender.feminino,
+        picture: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      );
+      final repo = FakeAuthRepository(mockUser: customPhotoUser);
+      final storage = FakeSecureStorageService();
+
+      await tester.pumpWidget(createSettingsTestApp(repository: repo, user: customPhotoUser, storage: storage));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('photo_adjust_hint')), findsOneWidget);
+      expect(find.text('Toque para ajustar sua foto'), findsOneWidget);
+    });
+
+    testWidgets('8. Does not show photo adjust hint if already adjusted or preset avatar', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      // Case A: Preset avatar does not show hint
+      await tester.pumpWidget(createSettingsTestApp(repository: fakeRepo, user: testUser));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('photo_adjust_hint')), findsNothing);
+
+      // Case B: Custom photo that has already been adjusted does not show hint
+      const customPhotoUser = UserProfile(
+        id: 'usr-custom',
+        name: 'Maria Silva',
+        email: 'maria@dualis.com.br',
+        gender: Gender.feminino,
+        picture: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      );
+      final repo = FakeAuthRepository(mockUser: customPhotoUser);
+      final storage = FakeSecureStorageService();
+      await storage.setPhotoFramingAdjusted(true);
+
+      await tester.pumpWidget(createSettingsTestApp(repository: repo, user: customPhotoUser, storage: storage));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('photo_adjust_hint')), findsNothing);
     });
   });
 }

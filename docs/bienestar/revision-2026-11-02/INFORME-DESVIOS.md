@@ -79,11 +79,17 @@ Ya decididos y documentados. No se implementan como los pidió el cliente.
 
 ## 5. Cadastro (sección 1 del pedido)
 
-- **Foto que corta la cabeza:** la causa era el avatar circular con recorte centrado sobre una selfie vertical. Ya existe una pantalla de recorte manual (`photo_crop_screen.dart`, commit `b9c94a7`). Pendiente:
-  1. Las fotos guardadas antes del cambio siguen cortadas.
-  2. Una foto vertical sin zoom queda con franjas transparentes.
-  3. Sin detección de rostro, el encuadre inicial puede no centrar la cara.
-- **"¿Para qué sirven los 3 elementos de abajo?"** La pantalla que el cliente llama "cadastro" es **Configurações**, no el registro. Los 3 accesos funcionan (privacidad, historial, panel de agua), pero están bajo "Privacidade e Dados" con subtítulos técnicos, así que no se entiende para qué son. El historial casi no tiene otra entrada en la app. Es un problema de copy y de ubicación, no de funcionalidad.
+- **Foto que corta la cabeza (1.1): RESUELTO.**
+  1. En `photo_crop_screen.dart`, el encuadre inicial se centra horizontalmente y ubica el centro del círculo al ~35% de la altura de la imagen (donde se ubica el rostro en selfies verticales), limitado por clamping para que el círculo nunca salga de la imagen.
+  2. La escala mínima cubre el círculo por completo (`BoxFit.cover`, `constrained: false`, `boundaryMargin: EdgeInsets.zero`) para fotos verticales, horizontales y cuadradas, eliminando franjas transparentes y evitando que al arrastrar se muestre área vacía dentro del círculo.
+  3. Para fotos existentes, `UserAvatar` alinea las fotos no cuadradas al tercio superior (`Alignment(0, -0.3)`), y en `settings_screen.dart` se añadió un aviso de una sola vez ("Toque para ajustar sua foto" respaldado en secure storage) que permite abrir el recorte o selector y se oculta al guardar.
+- **"¿Para qué sirven los 3 elementos de abajo?" (1.2): RESUELTO.**
+  1. En `settings_screen.dart`, "Histórico e tendências" y "Lembretes de hidratação" se separaron en su propia sección ("Seus registros e hábitos" / "Your records and habits" / "Tus registros y hábitos"), dejando "Central de privacidade" dentro de "Privacidade e Dados".
+  2. Se reescribieron los subtítulos en lenguaje claro y centrado en la persona:
+     - Historial: "Veja tudo o que você registrou, dia a dia"
+     - Hidratación: "Escolha quando lembrar de beber água"
+     - Privacidad: "Veja, baixe ou apague seus dados"
+  3. Se mantuvieron sincronizadas las cadenas en `app_pt.arb`, `app_en.arb` y `app_es.arb`, y las rutas quedaron sin cambios.
 
 ---
 
