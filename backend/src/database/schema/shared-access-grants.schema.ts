@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, timestamp, index, pgPolicy } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, timestamp, index, pgPolicy, check } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { users } from './users.schema';
 import { profiles } from './profiles.schema';
@@ -8,6 +8,14 @@ export type AccessLevel = (typeof ACCESS_LEVELS)[number];
 
 export const GRANT_STATUSES = ['PENDING', 'ACCEPTED', 'REVOKED', 'EXPIRED'] as const;
 export type GrantStatus = (typeof GRANT_STATUSES)[number];
+
+/**
+ * Data categories a grant opens (Phase 11.1, D2). Enforced by RLS through
+ * app_can_read_profile_category / app_can_write_profile_category (migration 0028).
+ * emotional_journal is always opt-in. Safety events are never shared.
+ */
+export const SHARE_CATEGORIES = ['habits', 'physical_journal', 'emotional_journal', 'conditions', 'care'] as const;
+export type ShareCategory = (typeof SHARE_CATEGORIES)[number];
 
 export const sharedAccessGrants = pgTable(
   'shared_access_grants',
@@ -26,12 +34,17 @@ export const sharedAccessGrants = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     acceptedAt: timestamp('accepted_at', { withTimezone: true }),
     revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    categories: text('categories').array().$type<ShareCategory[]>().default(sql`ARRAY['habits']::text[]`).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
     index('idx_shared_access_grants_granter').on(table.granterUserId),
     index('idx_shared_access_grants_grantee_status').on(table.granteeUserId, table.status),
     index('idx_shared_access_grants_target').on(table.targetProfileId),
+    check(
+      'shared_access_grants_categories_check',
+      sql`${table.categories} <@ ARRAY['habits', 'physical_journal', 'emotional_journal', 'conditions', 'care']::text[]`,
+    ),
     pgPolicy('shared_access_grants_participant_select', {
       for: 'select',
       using: sql`granter_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR grantee_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR invite_code = NULLIF(current_setting('app.accepting_invite_code', true), '')`,

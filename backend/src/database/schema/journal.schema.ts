@@ -29,20 +29,20 @@ export const userConditions = pgTable(
     check('user_conditions_tracking_check', sql`${table.tracking} <@ ARRAY['blood_pressure', 'glucose', 'weight']::text[]`),
     pgPolicy('user_conditions_profile_select', {
       for: 'select',
-      using: sql`app_can_read_profile(profile_id)`,
+      using: sql`app_can_read_profile_category(profile_id, 'conditions')`,
     }),
     pgPolicy('user_conditions_profile_insert', {
       for: 'insert',
-      withCheck: sql`app_can_write_profile(profile_id) AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`,
+      withCheck: sql`app_can_write_profile_category(profile_id, 'conditions') AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`,
     }),
     pgPolicy('user_conditions_profile_update', {
       for: 'update',
-      using: sql`app_can_write_profile(profile_id)`,
-      withCheck: sql`app_can_write_profile(profile_id)`,
+      using: sql`app_can_write_profile_category(profile_id, 'conditions')`,
+      withCheck: sql`app_can_write_profile_category(profile_id, 'conditions')`,
     }),
     pgPolicy('user_conditions_profile_delete', {
       for: 'delete',
-      using: sql`app_can_write_profile(profile_id)`,
+      using: sql`app_can_write_profile_category(profile_id, 'conditions')`,
     }),
   ],
 );
@@ -75,20 +75,20 @@ export const journalEntries = pgTable(
     check('journal_entries_area_check', sql`${table.area} IS NULL OR ${table.area} IN ('emotional', 'physical')`),
     pgPolicy('journal_entries_profile_select', {
       for: 'select',
-      using: sql`app_can_read_profile(profile_id)`,
+      using: sql`app_can_read_profile_category(profile_id, app_journal_area_category(area))`,
     }),
     pgPolicy('journal_entries_profile_insert', {
       for: 'insert',
-      withCheck: sql`app_can_write_profile(profile_id) AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`,
+      withCheck: sql`app_can_write_profile_category(profile_id, app_journal_area_category(area)) AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`,
     }),
     pgPolicy('journal_entries_profile_update', {
       for: 'update',
-      using: sql`app_can_write_profile(profile_id)`,
-      withCheck: sql`app_can_write_profile(profile_id)`,
+      using: sql`app_can_write_profile_category(profile_id, app_journal_area_category(area))`,
+      withCheck: sql`app_can_write_profile_category(profile_id, app_journal_area_category(area))`,
     }),
     pgPolicy('journal_entries_profile_delete', {
       for: 'delete',
-      using: sql`app_can_write_profile(profile_id)`,
+      using: sql`app_can_write_profile_category(profile_id, app_journal_area_category(area))`,
     }),
   ],
 );
@@ -131,26 +131,26 @@ export const journalItems = pgTable(
     check('journal_items_intensity_check', sql`${table.intensity} IS NULL OR ${table.intensity} BETWEEN 1 AND 5`),
     pgPolicy('journal_items_profile_select', {
       for: 'select',
-      using: sql`EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = entry_id AND app_can_read_profile(e.profile_id))`,
+      using: sql`EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = entry_id AND app_can_read_profile_category(e.profile_id, app_journal_area_category(e.area)))`,
     }),
     pgPolicy('journal_items_profile_insert', {
       for: 'insert',
-      withCheck: sql`EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = entry_id AND app_can_write_profile(e.profile_id))
+      withCheck: sql`EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = entry_id AND app_can_write_profile_category(e.profile_id, app_journal_area_category(e.area)))
         AND (condition_id IS NULL OR EXISTS (
           SELECT 1 FROM user_conditions c JOIN journal_entries e ON e.id = entry_id
           WHERE c.id = condition_id AND c.profile_id = e.profile_id))`,
     }),
     pgPolicy('journal_items_profile_update', {
       for: 'update',
-      using: sql`EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = entry_id AND app_can_write_profile(e.profile_id))`,
-      withCheck: sql`EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = entry_id AND app_can_write_profile(e.profile_id))
+      using: sql`EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = entry_id AND app_can_write_profile_category(e.profile_id, app_journal_area_category(e.area)))`,
+      withCheck: sql`EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = entry_id AND app_can_write_profile_category(e.profile_id, app_journal_area_category(e.area)))
         AND (condition_id IS NULL OR EXISTS (
           SELECT 1 FROM user_conditions c JOIN journal_entries e ON e.id = entry_id
           WHERE c.id = condition_id AND c.profile_id = e.profile_id))`,
     }),
     pgPolicy('journal_items_profile_delete', {
       for: 'delete',
-      using: sql`EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = entry_id AND app_can_write_profile(e.profile_id))`,
+      using: sql`EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = entry_id AND app_can_write_profile_category(e.profile_id, app_journal_area_category(e.area)))`,
     }),
   ],
 );
@@ -186,24 +186,24 @@ export const conditionReadings = pgTable(
     check('condition_readings_kind_check', sql`${table.kind} IN ('blood_pressure', 'glucose', 'weight')`),
     pgPolicy('condition_readings_profile_select', {
       for: 'select',
-      using: sql`app_can_read_profile(profile_id)`,
+      using: sql`app_can_read_profile_category(profile_id, 'conditions')`,
     }),
     pgPolicy('condition_readings_profile_insert', {
       for: 'insert',
-      withCheck: sql`app_can_write_profile(profile_id) AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+      withCheck: sql`app_can_write_profile_category(profile_id, 'conditions') AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
         AND EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = condition_readings.entry_id AND e.profile_id = condition_readings.profile_id)
         AND EXISTS (SELECT 1 FROM user_conditions c WHERE c.id = condition_readings.condition_id AND c.profile_id = condition_readings.profile_id)`,
     }),
     pgPolicy('condition_readings_profile_update', {
       for: 'update',
-      using: sql`app_can_write_profile(profile_id)`,
-      withCheck: sql`app_can_write_profile(profile_id)
+      using: sql`app_can_write_profile_category(profile_id, 'conditions')`,
+      withCheck: sql`app_can_write_profile_category(profile_id, 'conditions')
         AND EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = condition_readings.entry_id AND e.profile_id = condition_readings.profile_id)
         AND EXISTS (SELECT 1 FROM user_conditions c WHERE c.id = condition_readings.condition_id AND c.profile_id = condition_readings.profile_id)`,
     }),
     pgPolicy('condition_readings_profile_delete', {
       for: 'delete',
-      using: sql`app_can_write_profile(profile_id)`,
+      using: sql`app_can_write_profile_category(profile_id, 'conditions')`,
     }),
   ],
 );
