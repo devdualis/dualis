@@ -5844,4 +5844,20 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get profileLegalBasisConfirm => 'Confirmar';
+
+  @override
+  String get profileCategoryNotSharedTitle => 'Não compartilhado com você';
+
+  @override
+  String profileCategoryNotSharedBody(String name) {
+    return '$name não compartilhou esta área com você.';
+  }
+
+  @override
+  String get historyOnlyPhysicalShared =>
+      'Você vê apenas o diário do corpo deste perfil.';
+
+  @override
+  String get historyOnlyEmotionalShared =>
+      'Você vê apenas o diário emocional deste perfil.';
 }

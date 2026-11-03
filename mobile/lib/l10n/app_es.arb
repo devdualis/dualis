@@ -1660,5 +1660,9 @@
   "profileHandoverCopy": "Copiar código",
   "profileHandoverCodeActive": "Código activo hasta el {date}",
   "profileLegalBasisBanner": "Confirma la base legal del registro de {name}.",
-  "profileLegalBasisConfirm": "Confirmar"
+  "profileLegalBasisConfirm": "Confirmar",
+  "profileCategoryNotSharedTitle": "No compartido contigo",
+  "profileCategoryNotSharedBody": "{name} no compartió esta área contigo.",
+  "historyOnlyPhysicalShared": "Solo ves el diario del cuerpo de este perfil.",
+  "historyOnlyEmotionalShared": "Solo ves el diario emocional de este perfil."
 }

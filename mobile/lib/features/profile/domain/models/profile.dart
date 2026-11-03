@@ -1,3 +1,5 @@
+import 'share_category.dart';
+
 enum ProfileType { primary, dependentMinor, dependentAdult }
 
 /// How the signed-in user relates to a profile (`ownership` in the API).
@@ -34,6 +36,12 @@ class Profile {
   /// once to re-confirm under Art. 11, I.
   final bool legalBasisNeedsConfirmation;
 
+  /// Data areas the signed-in user may see / change on this profile
+  /// (`readableCategories` / `writableCategories` in the API). The API sends
+  /// all five for owners and the union across grants for grantees.
+  final List<ShareCategory> readableCategories;
+  final List<ShareCategory> writableCategories;
+
   const Profile({
     required this.id,
     required this.name,
@@ -47,11 +55,21 @@ class Profile {
     this.relationshipType,
     this.lgpdLegalBasis,
     this.legalBasisNeedsConfirmation = false,
+    this.readableCategories = ShareCategory.values,
+    this.writableCategories = ShareCategory.values,
   });
 
   factory Profile.fromJson(Map<String, dynamic> json) {
     final dob = json['dateOfBirth'];
     final codeExpiry = json['handoverCodeExpiresAt'];
+    final accessLevel = parseProfileAccessLevel(json['accessLevel']);
+    // Missing keys: owners keep every area, anyone else gets none (most
+    // restrictive, like unknown access levels).
+    List<ShareCategory> categories(String key) => json.containsKey(key)
+        ? ShareCategory.parseList(json[key])
+        : accessLevel == ProfileAccessLevel.owner
+            ? ShareCategory.values
+            : const <ShareCategory>[];
     return Profile(
       id: json['id'] as String,
       name: json['name'] as String? ?? '',
@@ -65,7 +83,7 @@ class Profile {
         'shared' => ProfileOwnership.shared,
         _ => ProfileOwnership.own,
       },
-      accessLevel: parseProfileAccessLevel(json['accessLevel']),
+      accessLevel: accessLevel,
       // `yyyy-MM-dd` parses as a local calendar date (no timezone shift).
       dateOfBirth: dob is String ? DateTime.tryParse(dob) : null,
       gender: json['gender'] as String?,
@@ -75,6 +93,8 @@ class Profile {
       relationshipType: _stringOrNull(json['relationshipType']),
       lgpdLegalBasis: _stringOrNull(json['lgpdLegalBasis']),
       legalBasisNeedsConfirmation: json['legalBasisNeedsConfirmation'] == true,
+      readableCategories: categories('readableCategories'),
+      writableCategories: categories('writableCategories'),
     );
   }
 
@@ -82,6 +102,15 @@ class Profile {
   bool get isShared => ownership == ProfileOwnership.shared;
   bool get canEdit => accessLevel != ProfileAccessLevel.viewOnly;
   bool get canDelete => accessLevel == ProfileAccessLevel.owner && !isPrimary;
+
+  /// Display only: the API and RLS enforce access.
+  bool canRead(ShareCategory category) =>
+      accessLevel == ProfileAccessLevel.owner ||
+      readableCategories.contains(category);
+
+  bool canWrite(ShareCategory category) =>
+      accessLevel == ProfileAccessLevel.owner ||
+      (canEdit && writableCategories.contains(category));
 
   /// Only the owner (guardian) of a dependent manages its hand-over and
   /// legal basis.

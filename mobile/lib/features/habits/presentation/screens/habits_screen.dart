@@ -5,10 +5,11 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/load_error_view.dart';
-import '../../../auth/domain/user_profile.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../profile/domain/models/share_category.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
+import '../../../profile/presentation/widgets/not_shared_placeholder.dart';
 import '../controllers/habits_controller.dart';
 import '../widgets/habits_water_summary_card.dart';
 import '../../domain/models/habit_day.dart';
@@ -36,7 +37,9 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
     final l10n = AppLocalizations.of(context);
     final state = ref.watch(habitsControllerProvider);
     final controller = ref.read(habitsControllerProvider.notifier);
-    final viewOnly = activeProfileIsViewOnly(ref);
+    final canRead = activeProfileCanRead(ref, ShareCategory.habits);
+    final viewOnly = activeProfileIsViewOnly(ref) ||
+        !activeProfileCanWrite(ref, ShareCategory.habits);
     final activeProfile = ref.watch(activeProfileControllerProvider).activeProfile;
     final user = ref.watch(authControllerProvider).user;
     final isMale = (activeProfile?.gender ?? user?.gender.value)?.toLowerCase() == 'masculino';
@@ -51,8 +54,19 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
             : controller.todayDayString;
     final activeHabit = _isYesterday ? state.yesterdayHabit : state.todayHabit;
 
-    final body =
-          state.isLoading
+    final body = !canRead
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const ActiveProfileBanner(),
+              Expanded(
+                child: NotSharedPlaceholder(
+                  profileName: activeProfile?.name ?? '',
+                ),
+              ),
+            ],
+          )
+        : state.isLoading
               ? const Center(child: CircularProgressIndicator())
               : state.loadError != null
               ? LoadErrorView(

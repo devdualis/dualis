@@ -9837,6 +9837,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Confirmar'**
   String get profileLegalBasisConfirm;
+
+  /// No description provided for @profileCategoryNotSharedTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não compartilhado com você'**
+  String get profileCategoryNotSharedTitle;
+
+  /// No description provided for @profileCategoryNotSharedBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} não compartilhou esta área com você.'**
+  String profileCategoryNotSharedBody(String name);
+
+  /// No description provided for @historyOnlyPhysicalShared.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você vê apenas o diário do corpo deste perfil.'**
+  String get historyOnlyPhysicalShared;
+
+  /// No description provided for @historyOnlyEmotionalShared.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você vê apenas o diário emocional deste perfil.'**
+  String get historyOnlyEmotionalShared;
 }
 
 class _AppLocalizationsDelegate

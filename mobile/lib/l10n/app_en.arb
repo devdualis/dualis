@@ -1660,5 +1660,9 @@
   "profileHandoverCopy": "Copy code",
   "profileHandoverCodeActive": "Code active until {date}",
   "profileLegalBasisBanner": "Confirm the legal basis for {name}'s registration.",
-  "profileLegalBasisConfirm": "Confirm"
+  "profileLegalBasisConfirm": "Confirm",
+  "profileCategoryNotSharedTitle": "Not shared with you",
+  "profileCategoryNotSharedBody": "{name} has not shared this area with you.",
+  "historyOnlyPhysicalShared": "You only see this profile's body journal.",
+  "historyOnlyEmotionalShared": "You only see this profile's emotional journal."
 }

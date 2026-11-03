@@ -3413,5 +3413,16 @@
       }
     }
   },
-  "profileLegalBasisConfirm": "Confirmar"
+  "profileLegalBasisConfirm": "Confirmar",
+  "profileCategoryNotSharedTitle": "Não compartilhado com você",
+  "profileCategoryNotSharedBody": "{name} não compartilhou esta área com você.",
+  "@profileCategoryNotSharedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "historyOnlyPhysicalShared": "Você vê apenas o diário do corpo deste perfil.",
+  "historyOnlyEmotionalShared": "Você vê apenas o diário emocional deste perfil."
 }

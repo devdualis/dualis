@@ -270,6 +270,22 @@ class FakeProfileBackend {
           (p.relationshipType == 'curator' ||
               p.relationshipType == 'supported_decision') &&
           p.lgpdLegalBasis == 'lgpd_art_14',
+      // Owners get every area; a grantee gets the grant's categories, and
+      // writes only on CO_MANAGE grants (GET /v1/profiles, 11.1-05).
+      'readableCategories': [
+        for (final c in p.ownerUserId == userId
+            ? ShareCategory.values
+            : grant!.categories)
+          c.apiValue,
+      ],
+      'writableCategories': [
+        for (final c in p.ownerUserId == userId
+            ? ShareCategory.values
+            : grant!.level == ProfileShareLevel.coManage
+                ? grant.categories
+                : const <ShareCategory>[])
+          c.apiValue,
+      ],
     };
   }
 
