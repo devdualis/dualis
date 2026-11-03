@@ -112,13 +112,15 @@ function createTx(results: {
 describe('ProfilesService Unit Tests', () => {
   let service: ProfilesService;
   let mockDatabaseService: any;
+  let mockEmailService: { sendHandoverDueEmail: ReturnType<typeof vi.fn> };
 
   const runWith = (tx: unknown) =>
     mockDatabaseService.withRls.mockImplementation(async (_userId: string, cb: any) => cb(tx));
 
   beforeEach(() => {
     mockDatabaseService = { withRls: vi.fn() };
-    service = new ProfilesService(mockDatabaseService);
+    mockEmailService = { sendHandoverDueEmail: vi.fn().mockResolvedValue(undefined) };
+    service = new ProfilesService(mockDatabaseService, mockEmailService as any);
   });
 
   const validDependent = (overrides: Partial<CreateDependentDto> = {}): CreateDependentDto => ({
@@ -407,6 +409,91 @@ describe('ProfilesService Unit Tests', () => {
       expect(byId.get(curated.id)).toMatchObject({ relationshipType: 'curator', lgpdLegalBasis: 'lgpd_art_14', legalBasisNeedsConfirmation: true });
       expect(byId.get(supported.id)).toMatchObject({ relationshipType: 'supported_decision', lgpdLegalBasis: 'lgpd_art_11_i', legalBasisNeedsConfirmation: false });
       expect(byId.get(minor.id)).toMatchObject({ relationshipType: 'parent', lgpdLegalBasis: 'lgpd_art_14', legalBasisNeedsConfirmation: false });
+    });
+  });
+
+  describe('getProfilesForUser hand-over status (D3)', () => {
+    const primary = profileRow();
+    const agedOut = profileRow({
+      id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      profileType: 'dependent_minor',
+      name: 'Lucas Souza',
+      dateOfBirth: bornYearsAgo(19),
+    });
+    const withCode = profileRow({ id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', profileType: 'dependent_minor', name: 'Bia', dateOfBirth: bornYearsAgo(18) });
+    const minor = profileRow({ id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd', profileType: 'dependent_minor', name: 'Teo', dateOfBirth: bornYearsAgo(10) });
+    const curated = profileRow({ id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', profileType: 'dependent_adult', name: 'Rui', dateOfBirth: bornYearsAgo(70) });
+    const sharedAgedOut = profileRow({ id: '99999999-9999-4999-8999-999999999999', accountOwnerId: OTHER_USER_ID, profileType: 'dependent_minor', dateOfBirth: bornYearsAgo(19) });
+    const future = new Date(Date.now() + 60 * 60 * 1000);
+    const past = new Date(Date.now() - 60 * 1000);
+    const guardianships = (agedOutNotified: Date | null) => [
+      { id: 'g1', dependentProfileId: agedOut.id, relationshipType: 'parent', lgpdLegalBasis: 'lgpd_art_14', handoverCodeExpiresAt: past, handoverNotifiedAt: agedOutNotified },
+      { id: 'g2', dependentProfileId: withCode.id, relationshipType: 'legal_guardian', lgpdLegalBasis: 'lgpd_art_14', handoverCodeExpiresAt: future, handoverNotifiedAt: new Date() },
+      { id: 'g3', dependentProfileId: minor.id, relationshipType: 'parent', lgpdLegalBasis: 'lgpd_art_14', handoverCodeExpiresAt: null, handoverNotifiedAt: null },
+      { id: 'g4', dependentProfileId: curated.id, relationshipType: 'curator', lgpdLegalBasis: 'lgpd_art_11_i', handoverCodeExpiresAt: null, handoverNotifiedAt: null },
+    ];
+
+    it('reports due, code_active with its expiry, and none for minors, adult curator dependents and shared profiles', async () => {
+      const { tx } = createTx({
+        select: [
+          [primary, agedOut, withCode, minor, curated],
+          [{ profile: sharedAgedOut, accessLevel: 'VIEW_ONLY', categories: ['habits'] }],
+          guardianships(new Date()),
+        ],
+      });
+      runWith(tx);
+
+      const byId = new Map((await service.getProfilesForUser(USER_ID)).map((p) => [p.id, p]));
+
+      expect(byId.get(agedOut.id)).toMatchObject({ handoverStatus: 'due', handoverCodeExpiresAt: null });
+      expect(byId.get(withCode.id)).toMatchObject({ handoverStatus: 'code_active', handoverCodeExpiresAt: future.toISOString() });
+      for (const id of [primary.id, minor.id, curated.id, sharedAgedOut.id]) {
+        expect(byId.get(id)).toMatchObject({ handoverStatus: 'none', handoverCodeExpiresAt: null });
+      }
+      // Already notified: no update, no email.
+      expect(tx.update).not.toHaveBeenCalled();
+      expect(mockEmailService.sendHandoverDueEmail).not.toHaveBeenCalled();
+    });
+
+    it('marks a newly due guardianship as notified and emails the guardian once', async () => {
+      const first = createTx({
+        select: [[primary, agedOut, withCode, minor, curated], [], guardianships(null), [{ email: 'ana@example.com', name: 'Ana Souza' }]],
+        update: [[{ dependentProfileId: agedOut.id }]],
+      });
+      runWith(first.tx);
+
+      await service.getProfilesForUser(USER_ID);
+
+      expect(first.tx.update).toHaveBeenCalledTimes(1);
+      expect(first.tx.update).toHaveBeenCalledWith(legalGuardianships);
+      expect(first.calls.updateSets[0]).toEqual({ handoverNotifiedAt: expect.any(Date) });
+      expect(mockEmailService.sendHandoverDueEmail).toHaveBeenCalledTimes(1);
+      expect(mockEmailService.sendHandoverDueEmail).toHaveBeenCalledWith('ana@example.com', 'Ana Souza', 'Lucas');
+
+      // A concurrent or later list finds the row already marked: the UPDATE returns nothing.
+      const second = createTx({
+        select: [[primary, agedOut, withCode, minor, curated], [], guardianships(null)],
+        update: [[]],
+      });
+      runWith(second.tx);
+
+      await service.getProfilesForUser(USER_ID);
+
+      expect(mockEmailService.sendHandoverDueEmail).toHaveBeenCalledTimes(1);
+    });
+
+    it('sends nothing when the transaction fails after marking', async () => {
+      const { tx } = createTx({
+        select: [[primary, agedOut], [], guardianships(null), [{ email: 'ana@example.com', name: 'Ana Souza' }]],
+        update: [[{ dependentProfileId: agedOut.id }]],
+      });
+      mockDatabaseService.withRls.mockImplementation(async (_userId: string, cb: any) => {
+        await cb(tx);
+        throw new Error('commit failed');
+      });
+
+      await expect(service.getProfilesForUser(USER_ID)).rejects.toThrow('commit failed');
+      expect(mockEmailService.sendHandoverDueEmail).not.toHaveBeenCalled();
     });
   });
 
