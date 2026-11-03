@@ -9789,6 +9789,54 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Muitas tentativas. Tente de novo em alguns minutos.'**
   String get profileClaimErrorTooMany;
+
+  /// No description provided for @profileHandoverDueBanner.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} fez 18 anos. O perfil pode passar para a conta própria.'**
+  String profileHandoverDueBanner(String name);
+
+  /// No description provided for @profileHandoverGenerate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerar código de transferência'**
+  String get profileHandoverGenerate;
+
+  /// No description provided for @profileHandoverCodeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de transferência'**
+  String get profileHandoverCodeTitle;
+
+  /// No description provided for @profileHandoverCodeBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entregue este código para {name}. Vale até {date}. Até a transferência, você continua com acesso.'**
+  String profileHandoverCodeBody(String name, String date);
+
+  /// No description provided for @profileHandoverCopy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar código'**
+  String get profileHandoverCopy;
+
+  /// No description provided for @profileHandoverCodeActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código ativo até {date}'**
+  String profileHandoverCodeActive(String date);
+
+  /// No description provided for @profileLegalBasisBanner.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirme a base legal do cadastro de {name}.'**
+  String profileLegalBasisBanner(String name);
+
+  /// No description provided for @profileLegalBasisConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar'**
+  String get profileLegalBasisConfirm;
 }
 
 class _AppLocalizationsDelegate

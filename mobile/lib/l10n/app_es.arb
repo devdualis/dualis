@@ -1652,5 +1652,13 @@
   "profileClaimErrorGuardian": "Este código debe usarse en la cuenta de la persona que cumplió 18 años.",
   "profileClaimErrorNotAdult": "La transferencia solo es posible a partir de los 18 años.",
   "profileClaimErrorAccountHasData": "Esta cuenta ya tiene registros. Usa una cuenta nueva para recibir el perfil.",
-  "profileClaimErrorTooMany": "Demasiados intentos. Inténtalo de nuevo en unos minutos."
+  "profileClaimErrorTooMany": "Demasiados intentos. Inténtalo de nuevo en unos minutos.",
+  "profileHandoverDueBanner": "{name} cumplió 18 años. El perfil puede pasar a su propia cuenta.",
+  "profileHandoverGenerate": "Generar código de transferencia",
+  "profileHandoverCodeTitle": "Código de transferencia",
+  "profileHandoverCodeBody": "Entrega este código a {name}. Vale hasta el {date}. Hasta la transferencia, sigues con acceso.",
+  "profileHandoverCopy": "Copiar código",
+  "profileHandoverCodeActive": "Código activo hasta el {date}",
+  "profileLegalBasisBanner": "Confirma la base legal del registro de {name}.",
+  "profileLegalBasisConfirm": "Confirmar"
 }

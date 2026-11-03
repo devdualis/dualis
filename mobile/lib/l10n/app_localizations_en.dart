@@ -5798,4 +5798,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get profileClaimErrorTooMany =>
       'Too many attempts. Try again in a few minutes.';
+
+  @override
+  String profileHandoverDueBanner(String name) {
+    return '$name turned 18. The profile can move to their own account.';
+  }
+
+  @override
+  String get profileHandoverGenerate => 'Create transfer code';
+
+  @override
+  String get profileHandoverCodeTitle => 'Transfer code';
+
+  @override
+  String profileHandoverCodeBody(String name, String date) {
+    return 'Give this code to $name. Valid until $date. Until the transfer, you keep access.';
+  }
+
+  @override
+  String get profileHandoverCopy => 'Copy code';
+
+  @override
+  String profileHandoverCodeActive(String date) {
+    return 'Code active until $date';
+  }
+
+  @override
+  String profileLegalBasisBanner(String name) {
+    return 'Confirm the legal basis for $name\'s registration.';
+  }
+
+  @override
+  String get profileLegalBasisConfirm => 'Confirm';
 }

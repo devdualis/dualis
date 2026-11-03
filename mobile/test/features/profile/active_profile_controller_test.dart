@@ -456,4 +456,22 @@ void main() {
       verify(() => repo.fetchProfiles()).called(2);
     });
   });
+
+  test('after a hand-over the guardian falls back to the primary (Pitfall 7)',
+      () async {
+    when(() => repo.readActiveProfileId('guardian'))
+        .thenAnswer((_) async => 'child');
+    serve([primary, child]);
+    await start(signedIn('guardian'));
+    expect(current().activeProfileId, 'child');
+
+    // The young adult claimed 'child': it is gone from the guardian's list.
+    serve([primary]);
+    await notifier().refresh();
+
+    expect(current().profiles.map((p) => p.id), ['primary']);
+    expect(current().activeProfileId, isNull);
+    expect(current().activeProfile?.id, 'primary');
+    verify(() => repo.saveActiveProfileId('guardian', null)).called(1);
+  });
 }

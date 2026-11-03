@@ -3374,5 +3374,44 @@
   "profileClaimErrorGuardian": "Este código deve ser usado na conta da pessoa que fez 18 anos.",
   "profileClaimErrorNotAdult": "A transferência só é possível a partir dos 18 anos.",
   "profileClaimErrorAccountHasData": "Esta conta já tem registros. Use uma conta nova para receber o perfil.",
-  "profileClaimErrorTooMany": "Muitas tentativas. Tente de novo em alguns minutos."
+  "profileClaimErrorTooMany": "Muitas tentativas. Tente de novo em alguns minutos.",
+  "profileHandoverDueBanner": "{name} fez 18 anos. O perfil pode passar para a conta própria.",
+  "@profileHandoverDueBanner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "profileHandoverGenerate": "Gerar código de transferência",
+  "profileHandoverCodeTitle": "Código de transferência",
+  "profileHandoverCodeBody": "Entregue este código para {name}. Vale até {date}. Até a transferência, você continua com acesso.",
+  "@profileHandoverCodeBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "profileHandoverCopy": "Copiar código",
+  "profileHandoverCodeActive": "Código ativo até {date}",
+  "@profileHandoverCodeActive": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "profileLegalBasisBanner": "Confirme a base legal do cadastro de {name}.",
+  "@profileLegalBasisBanner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "profileLegalBasisConfirm": "Confirmar"
 }

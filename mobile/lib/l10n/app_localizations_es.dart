@@ -5815,4 +5815,36 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get profileClaimErrorTooMany =>
       'Demasiados intentos. Inténtalo de nuevo en unos minutos.';
+
+  @override
+  String profileHandoverDueBanner(String name) {
+    return '$name cumplió 18 años. El perfil puede pasar a su propia cuenta.';
+  }
+
+  @override
+  String get profileHandoverGenerate => 'Generar código de transferencia';
+
+  @override
+  String get profileHandoverCodeTitle => 'Código de transferencia';
+
+  @override
+  String profileHandoverCodeBody(String name, String date) {
+    return 'Entrega este código a $name. Vale hasta el $date. Hasta la transferencia, sigues con acceso.';
+  }
+
+  @override
+  String get profileHandoverCopy => 'Copiar código';
+
+  @override
+  String profileHandoverCodeActive(String date) {
+    return 'Código activo hasta el $date';
+  }
+
+  @override
+  String profileLegalBasisBanner(String name) {
+    return 'Confirma la base legal del registro de $name.';
+  }
+
+  @override
+  String get profileLegalBasisConfirm => 'Confirmar';
 }
