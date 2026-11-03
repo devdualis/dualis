@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   HttpException,
   HttpStatus,
@@ -18,6 +19,9 @@ import {
   MAX_FAILED_INVITE_ACCEPTS,
 } from '../../src/modules/profiles/family-sharing.service';
 import { CreateInviteDto } from '../../src/modules/profiles/dto/create-invite.dto';
+import { UpdateGrantDto } from '../../src/modules/profiles/dto/update-grant.dto';
+import { profiles } from '../../src/database/schema/profiles.schema';
+import { sharedAccessGrants } from '../../src/database/schema/shared-access-grants.schema';
 
 describe('FamilySharingService Unit Tests', () => {
   let service: FamilySharingService;
@@ -276,6 +280,267 @@ describe('FamilySharingService Unit Tests', () => {
       ['a non-boolean confirmation', { dependentShareConfirmed: 'yes' }, 'dependentShareConfirmed'],
     ])('rejects %s', async (_label, patch, property) => {
       expect(await errorsFor({ ...valid, ...patch })).toContain(property);
+    });
+  });
+
+  describe('UpdateGrantDto validation', () => {
+    const errorsFor = async (payload: Record<string, unknown>) =>
+      (await validate(plainToInstance(UpdateGrantDto, payload))).map((e) => e.property);
+
+    it('accepts partial edits', async () => {
+      expect(await errorsFor({ categories: ['care'] })).toEqual([]);
+      expect(await errorsFor({ relationship: 'friend' })).toEqual([]);
+      expect(await errorsFor({ categories: ['care'], dependentShareConfirmed: true })).toEqual([]);
+    });
+
+    it.each([
+      ['empty categories', { categories: [] }, 'categories'],
+      ['duplicate categories', { categories: ['care', 'care'] }, 'categories'],
+      ['an unknown category', { categories: ['safety'] }, 'categories'],
+      ['an unknown relationship', { relationship: 'boss' }, 'relationship'],
+      ['a non-boolean confirmation', { categories: ['care'], dependentShareConfirmed: 1 }, 'dependentShareConfirmed'],
+    ])('rejects %s', async (_label, payload, property) => {
+      expect(await errorsFor(payload)).toContain(property);
+    });
+  });
+
+  describe('dependent share confirmation (gap 9)', () => {
+    const userId = 'user-owner-uuid';
+    const targetProfileId = 'profile-dependent-uuid';
+
+    const mockInvite = (profileType: string) => {
+      const captured: { values?: any } = {};
+      mockDatabaseService.withRls.mockImplementation(async (_uid: string, callback: any) => {
+        const tx = {
+          transaction: vi.fn().mockImplementation((cb: any) => cb(tx)),
+          select: vi.fn().mockReturnValue({
+            from: vi.fn().mockReturnValue({
+              where: vi.fn().mockResolvedValue([
+                { id: targetProfileId, accountOwnerId: userId, profileType },
+              ]),
+            }),
+          }),
+          insert: vi.fn().mockReturnValue({
+            values: vi.fn().mockImplementation((val) => {
+              captured.values = val;
+              return {
+                returning: vi.fn().mockResolvedValue([
+                  { id: 'g', inviteCode: 'C', accessLevel: 'VIEW_ONLY', targetProfileId, ...val },
+                ]),
+              };
+            }),
+          }),
+        };
+        return callback(tx);
+      });
+      return captured;
+    };
+
+    it('refuses an invite for a dependent without dependentShareConfirmed true, before inserting', async () => {
+      const captured = mockInvite('dependent_minor');
+      const attempt = service.createInvite(userId, targetProfileId, 'VIEW_ONLY', {
+        relationship: 'parent',
+        categories: ['habits'],
+      });
+      await expect(attempt).rejects.toThrow(BadRequestException);
+      await expect(
+        service.createInvite(userId, targetProfileId, 'VIEW_ONLY', {
+          relationship: 'parent',
+          categories: ['habits'],
+          dependentShareConfirmed: false,
+        }),
+      ).rejects.toThrow('Confirme o compartilhamento do perfil dependente.');
+      expect(captured.values).toBeUndefined();
+    });
+
+    it('stores the confirmation time when the dependent share is confirmed', async () => {
+      const captured = mockInvite('dependent_adult');
+      const before = Date.now();
+      await service.createInvite(userId, targetProfileId, 'VIEW_ONLY', {
+        relationship: 'caregiver',
+        categories: ['care'],
+        dependentShareConfirmed: true,
+      });
+      expect(captured.values.dependentShareConfirmedAt).toBeInstanceOf(Date);
+      expect(captured.values.dependentShareConfirmedAt.getTime()).toBeGreaterThanOrEqual(before);
+    });
+
+    it("ignores the flag on the caller's primary profile and leaves the column NULL", async () => {
+      const captured = mockInvite('primary');
+      await service.createInvite(userId, targetProfileId, 'VIEW_ONLY', {
+        relationship: 'sibling',
+        categories: ['habits'],
+        dependentShareConfirmed: true,
+      });
+      expect(captured.values.dependentShareConfirmedAt ?? null).toBeNull();
+    });
+  });
+
+  describe('updateGrant', () => {
+    const granterId = 'user-granter-uuid';
+    const grantId = 'grant-edit-uuid';
+    const targetProfileId = 'profile-edit-uuid';
+
+    const grantRow = (overrides: Record<string, unknown> = {}) => ({
+      id: grantId,
+      granterUserId: granterId,
+      targetProfileId,
+      granteeUserId: 'user-grantee-uuid',
+      accessLevel: 'VIEW_ONLY',
+      inviteCode: 'EDIT234567',
+      status: 'ACCEPTED',
+      expiresAt: new Date(Date.now() - 60_000),
+      acceptedAt: new Date(),
+      revokedAt: null,
+      relationship: 'sibling',
+      categories: ['habits'],
+      dependentShareConfirmedAt: null,
+      createdAt: new Date(),
+      ...overrides,
+    });
+
+    const mockUpdate = (opts: {
+      grant?: any;
+      profileType?: string;
+      updateError?: any;
+    }) => {
+      const captured: { set?: any; updates: number } = { updates: 0 };
+      mockDatabaseService.withRls.mockImplementation(async (_uid: string, callback: any) => {
+        const tx = {
+          execute: vi.fn().mockResolvedValue({ rows: [] }),
+          select: vi.fn().mockImplementation(() => ({
+            from: vi.fn().mockImplementation((table: unknown) => ({
+              where: vi.fn().mockImplementation(() => {
+                if (table === sharedAccessGrants) return Promise.resolve(opts.grant ? [opts.grant] : []);
+                if (table === profiles) {
+                  return Promise.resolve([
+                    { name: 'Lucas', profileType: opts.profileType ?? 'primary' },
+                  ]);
+                }
+                return Promise.resolve([
+                  { id: 'user-grantee-uuid', name: 'Maria Souza', email: 'maria@example.com' },
+                ]);
+              }),
+            })),
+          })),
+          update: vi.fn().mockReturnValue({
+            set: vi.fn().mockImplementation((values: any) => {
+              captured.set = values;
+              captured.updates++;
+              return {
+                where: vi.fn().mockReturnValue({
+                  returning: vi.fn().mockImplementation(() =>
+                    opts.updateError
+                      ? Promise.reject(opts.updateError)
+                      : Promise.resolve([{ ...opts.grant, ...values }]),
+                  ),
+                }),
+              };
+            }),
+          }),
+        };
+        return callback(tx);
+      });
+      return captured;
+    };
+
+    it('lets the granter change the categories of an ACCEPTED grant and returns the outgoing item', async () => {
+      const captured = mockUpdate({ grant: grantRow() });
+      const result = await service.updateGrant(granterId, grantId, {
+        categories: ['habits', 'emotional_journal'],
+      });
+      expect(captured.set.categories).toEqual(['habits', 'emotional_journal']);
+      expect(captured.set.dependentShareConfirmedAt).toBeUndefined();
+      expect(result).toMatchObject({
+        id: grantId,
+        targetProfileName: 'Lucas',
+        relationship: 'sibling',
+        categories: ['habits', 'emotional_journal'],
+        status: 'ACCEPTED',
+        granteeName: 'Maria Souza',
+        granteeEmail: 'maria@example.com',
+      });
+    });
+
+    it('changes the relationship alone', async () => {
+      const captured = mockUpdate({ grant: grantRow({ relationship: null }) });
+      const result = await service.updateGrant(granterId, grantId, { relationship: 'friend' });
+      expect(captured.set).toEqual({ relationship: 'friend' });
+      expect(result.relationship).toBe('friend');
+    });
+
+    it('requires at least one of categories or relationship (400)', async () => {
+      const captured = mockUpdate({ grant: grantRow() });
+      await expect(
+        service.updateGrant(granterId, grantId, { dependentShareConfirmed: true }),
+      ).rejects.toThrow(BadRequestException);
+      expect(captured.updates).toBe(0);
+    });
+
+    it('on a dependent target requires dependentShareConfirmed true and refreshes the confirmation time', async () => {
+      let captured = mockUpdate({ grant: grantRow(), profileType: 'dependent_minor' });
+      await expect(
+        service.updateGrant(granterId, grantId, { categories: ['care'] }),
+      ).rejects.toThrow('Confirme o compartilhamento do perfil dependente.');
+      expect(captured.updates).toBe(0);
+
+      captured = mockUpdate({ grant: grantRow(), profileType: 'dependent_minor' });
+      const before = Date.now();
+      await service.updateGrant(granterId, grantId, {
+        categories: ['care'],
+        dependentShareConfirmed: true,
+      });
+      expect(captured.set.dependentShareConfirmedAt).toBeInstanceOf(Date);
+      expect(captured.set.dependentShareConfirmedAt.getTime()).toBeGreaterThanOrEqual(before);
+    });
+
+    it('returns 404 when the grant is unknown or not visible', async () => {
+      mockUpdate({ grant: undefined });
+      await expect(
+        service.updateGrant(granterId, grantId, { categories: ['habits'] }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('returns 403 when the caller is not the granter', async () => {
+      const captured = mockUpdate({ grant: grantRow() });
+      await expect(
+        service.updateGrant('user-grantee-uuid', grantId, { categories: ['habits', 'care'] }),
+      ).rejects.toThrow(ForbiddenException);
+      expect(captured.updates).toBe(0);
+    });
+
+    it('returns 409 GRANT_SCOPE_LOCKED on a REVOKED grant', async () => {
+      const captured = mockUpdate({ grant: grantRow({ status: 'REVOKED', revokedAt: new Date() }) });
+      const error = await service
+        .updateGrant(granterId, grantId, { categories: ['habits'] })
+        .catch((e) => e);
+      expect(error).toBeInstanceOf(ConflictException);
+      expect(error.getResponse()).toMatchObject({ code: 'GRANT_SCOPE_LOCKED' });
+      expect(captured.updates).toBe(0);
+    });
+
+    it('returns 409 GRANT_SCOPE_LOCKED on a PENDING invite past its expiry', async () => {
+      mockUpdate({ grant: grantRow({ status: 'PENDING', granteeUserId: null, acceptedAt: null }) });
+      await expect(
+        service.updateGrant(granterId, grantId, { categories: ['habits'] }),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('maps the database trigger errors: GRANT_SCOPE_LOCKED to 409, GRANTEE_MAY_ONLY_REVOKE to 403', async () => {
+      const dbError = (message: string) =>
+        Object.assign(new Error('Failed query'), { cause: Object.assign(new Error(message), { code: 'P0001' }) });
+
+      mockUpdate({ grant: grantRow(), updateError: dbError('GRANT_SCOPE_LOCKED') });
+      const locked = await service
+        .updateGrant(granterId, grantId, { categories: ['habits'] })
+        .catch((e) => e);
+      expect(locked).toBeInstanceOf(ConflictException);
+      expect(locked.getResponse()).toMatchObject({ code: 'GRANT_SCOPE_LOCKED' });
+
+      mockUpdate({ grant: grantRow(), updateError: Object.assign(new Error('GRANTEE_MAY_ONLY_REVOKE'), { code: 'P0001' }) });
+      await expect(
+        service.updateGrant(granterId, grantId, { categories: ['habits'] }),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 

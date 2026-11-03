@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   HttpException,
   HttpStatus,
@@ -14,7 +15,10 @@ import {
   DatabaseService,
   DrizzleTransaction,
 } from "../../database/database.service";
-import { profiles } from "../../database/schema/profiles.schema";
+import {
+  ProfileType,
+  profiles,
+} from "../../database/schema/profiles.schema";
 import {
   AccessLevel,
   GrantRelationship,
@@ -26,8 +30,15 @@ import {
   AcceptedGrantResponseDto,
   InviteCreatedResponseDto,
   ListGrantsResponseDto,
+  OutgoingGrantItemDto,
   RevokeGrantResponseDto,
 } from "./dto/grant-response.dto";
+import { UpdateGrantDto } from "./dto/update-grant.dto";
+
+type GrantRow = typeof sharedAccessGrants.$inferSelect;
+
+export const DEPENDENT_SHARE_CONFIRMATION_MESSAGE =
+  "Confirme o compartilhamento do perfil dependente.";
 
 export const INVITE_CODE_CHARS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 // 32^10 ≈ 1.1e15 codes: guessing one within the 72-hour window is out of reach.
@@ -70,6 +81,75 @@ export class FamilySharingService {
     @Inject(DatabaseService)
     private readonly databaseService: DatabaseService,
   ) {}
+
+  /**
+   * Sharing a dependent's data needs the owner's explicit confirmation (gap 9).
+   * Returns the confirmation time to store, or null for the caller's primary profile.
+   * The granter insert policy (migration 0028) is the database backstop.
+   */
+  private dependentShareConfirmation(
+    profileType: ProfileType,
+    confirmed: boolean | undefined,
+  ): Date | null {
+    if (profileType === "primary") return null;
+    if (confirmed !== true) {
+      throw new BadRequestException(DEPENDENT_SHARE_CONFIRMATION_MESSAGE);
+    }
+    return new Date();
+  }
+
+  private scopeLocked(): ConflictException {
+    return new ConflictException({
+      statusCode: HttpStatus.CONFLICT,
+      code: "GRANT_SCOPE_LOCKED",
+      message: "Este compartilhamento foi encerrado e não pode mais ser alterado.",
+    });
+  }
+
+  /** Maps the shared_access_grants guard trigger errors (migration 0028) to HTTP errors. */
+  private mapGrantUpdateError(err: any): unknown {
+    const message = `${err?.message ?? ""} ${err?.cause?.message ?? ""}`;
+    if (message.includes("GRANT_SCOPE_LOCKED")) return this.scopeLocked();
+    if (message.includes("GRANTEE_MAY_ONLY_REVOKE")) {
+      return new ForbiddenException(
+        "Somente quem compartilhou pode alterar este compartilhamento.",
+      );
+    }
+    return err;
+  }
+
+  /** PENDING invites past their expiry are reported (and treated) as EXPIRED. */
+  private effectiveStatus(grant: GrantRow, now: Date): GrantRow["status"] {
+    if (grant.status === "PENDING" && new Date(grant.expiresAt) <= now) {
+      return "EXPIRED";
+    }
+    return grant.status;
+  }
+
+  private toOutgoingItem(
+    grant: GrantRow,
+    targetProfileName: string | null,
+    grantee: { name: string; email: string } | undefined,
+    now: Date,
+  ): OutgoingGrantItemDto {
+    return {
+      id: grant.id,
+      targetProfileId: grant.targetProfileId,
+      targetProfileName: targetProfileName ?? "",
+      accessLevel: grant.accessLevel,
+      relationship: grant.relationship ?? null,
+      categories: grant.categories,
+      status: this.effectiveStatus(grant, now),
+      inviteCode: grant.inviteCode,
+      granteeUserId: grant.granteeUserId,
+      granteeName: grantee?.name ?? null,
+      granteeEmail: grantee?.email ?? null,
+      expiresAt: grant.expiresAt,
+      acceptedAt: grant.acceptedAt,
+      revokedAt: grant.revokedAt,
+      createdAt: grant.createdAt,
+    };
+  }
 
   private assertUserId(userId: string): void {
     if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
@@ -145,11 +225,16 @@ export class FamilySharingService {
         throw new ForbiddenException("You do not own this profile");
       }
 
+      const dependentShareConfirmedAt = this.dependentShareConfirmation(
+        targetProfile.profileType,
+        scope.dependentShareConfirmed,
+      );
+
       const expiresAt = new Date(
         Date.now() + INVITE_TTL_HOURS * 60 * 60 * 1000,
       );
 
-      let grant: typeof sharedAccessGrants.$inferSelect | undefined;
+      let grant: GrantRow | undefined;
       let attempts = 0;
 
       while (attempts < MAX_INVITE_COLLISION_RETRIES) {
@@ -170,6 +255,7 @@ export class FamilySharingService {
                 expiresAt,
                 relationship: scope.relationship,
                 categories: scope.categories,
+                dependentShareConfirmedAt,
               })
               .returning(),
           );
@@ -327,6 +413,90 @@ export class FamilySharingService {
   }
 
   /**
+   * The granter changes a grant's categories and/or relationship while it is PENDING
+   * (not past expiry) or ACCEPTED. 404 when the grant is not visible to the caller,
+   * 403 when the caller is not the granter, 409 GRANT_SCOPE_LOCKED once it has ended.
+   * Changing the categories of a dependent profile's grant needs a fresh confirmation.
+   */
+  async updateGrant(
+    userId: string,
+    grantId: string,
+    dto: UpdateGrantDto,
+  ): Promise<OutgoingGrantItemDto> {
+    this.assertUserId(userId);
+
+    if (dto.categories === undefined && dto.relationship === undefined) {
+      throw new BadRequestException(
+        "Informe as categorias ou a relação que deseja alterar.",
+      );
+    }
+
+    return this.databaseService.withRls(userId, async (tx) => {
+      const now = new Date();
+      const [grant] = await tx
+        .select()
+        .from(sharedAccessGrants)
+        .where(eq(sharedAccessGrants.id, grantId));
+
+      if (!grant) {
+        throw new NotFoundException("Grant not found");
+      }
+      if (grant.granterUserId !== userId) {
+        throw new ForbiddenException(
+          "Somente quem compartilhou pode alterar este compartilhamento.",
+        );
+      }
+      const status = this.effectiveStatus(grant, now);
+      if (status !== "PENDING" && status !== "ACCEPTED") {
+        throw this.scopeLocked();
+      }
+
+      const [target] = await tx
+        .select({ name: profiles.name, profileType: profiles.profileType })
+        .from(profiles)
+        .where(eq(profiles.id, grant.targetProfileId));
+      if (!target) {
+        throw new ForbiddenException("You do not own this profile");
+      }
+
+      const changes: Partial<typeof sharedAccessGrants.$inferInsert> = {};
+      if (dto.categories !== undefined) {
+        changes.categories = dto.categories;
+        const confirmedAt = this.dependentShareConfirmation(
+          target.profileType,
+          dto.dependentShareConfirmed,
+        );
+        if (confirmedAt) changes.dependentShareConfirmedAt = confirmedAt;
+      }
+      if (dto.relationship !== undefined) {
+        changes.relationship = dto.relationship;
+      }
+
+      let updated: GrantRow | undefined;
+      try {
+        [updated] = await tx
+          .update(sharedAccessGrants)
+          .set(changes)
+          .where(eq(sharedAccessGrants.id, grantId))
+          .returning();
+      } catch (err) {
+        throw this.mapGrantUpdateError(err);
+      }
+      if (!updated) {
+        throw new NotFoundException("Grant not found");
+      }
+
+      const grantees = await this.findGrantees(tx, [updated.granteeUserId]);
+      return this.toOutgoingItem(
+        updated,
+        target.name,
+        updated.granteeUserId ? grantees.get(updated.granteeUserId) : undefined,
+        now,
+      );
+    });
+  }
+
+  /**
    * Lists outgoing grants (created by user) and incoming grants (accepted by user).
    * - Outgoing PENDING past expiresAt are reported as EXPIRED.
    * - Outgoing grants name the person who accepted, so the owner can check who has access.
@@ -352,33 +522,14 @@ export class FamilySharingService {
         outgoingRows.map(({ grant }) => grant.granteeUserId),
       );
 
-      const outgoing = outgoingRows.map(({ grant, targetProfileName }) => {
-        let effectiveStatus = grant.status;
-        if (effectiveStatus === "PENDING" && new Date(grant.expiresAt) <= now) {
-          effectiveStatus = "EXPIRED";
-        }
-        const grantee = grant.granteeUserId
-          ? grantees.get(grant.granteeUserId)
-          : undefined;
-
-        return {
-          id: grant.id,
-          targetProfileId: grant.targetProfileId,
-          targetProfileName: targetProfileName ?? "",
-          accessLevel: grant.accessLevel,
-          relationship: grant.relationship ?? null,
-          categories: grant.categories,
-          status: effectiveStatus,
-          inviteCode: grant.inviteCode,
-          granteeUserId: grant.granteeUserId,
-          granteeName: grantee?.name ?? null,
-          granteeEmail: grantee?.email ?? null,
-          expiresAt: grant.expiresAt,
-          acceptedAt: grant.acceptedAt,
-          revokedAt: grant.revokedAt,
-          createdAt: grant.createdAt,
-        };
-      });
+      const outgoing = outgoingRows.map(({ grant, targetProfileName }) =>
+        this.toOutgoingItem(
+          grant,
+          targetProfileName,
+          grant.granteeUserId ? grantees.get(grant.granteeUserId) : undefined,
+          now,
+        ),
+      );
 
       const incomingRows = await tx
         .select({

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/platform-fastify';
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -27,8 +28,12 @@ import {
 import { ProfileType } from '../../src/database/schema/profiles.schema';
 import {
   AccessLevel,
+  GrantRelationship,
   GrantStatus,
+  ShareCategory,
 } from '../../src/database/schema/shared-access-grants.schema';
+import { InviteScope } from '../../src/modules/profiles/family-sharing.service';
+import { UpdateGrantDto } from '../../src/modules/profiles/dto/update-grant.dto';
 
 const USER_A = 'a0000000-0000-0000-0000-000000000001';
 const USER_B = 'b0000000-0000-0000-0000-000000000002';
@@ -55,6 +60,9 @@ type StoredGrant = {
   expiresAt: Date;
   acceptedAt: Date | null;
   revokedAt: Date | null;
+  relationship: GrantRelationship | null;
+  categories: ShareCategory[];
+  dependentShareConfirmedAt: Date | null;
 };
 
 const e2eStore = {
@@ -231,10 +239,15 @@ class E2EFamilySharingService {
     userId: string,
     targetProfileId: string,
     accessLevel: AccessLevel,
+    scope: InviteScope,
   ) {
     const profile = e2eStore.profiles.get(targetProfileId);
     if (!profile || profile.accountOwnerId !== userId) {
       throw new ForbiddenException('Perfil não encontrado ou sem permissão para compartilhar.');
+    }
+    const isDependent = profile.profileType !== 'primary';
+    if (isDependent && scope.dependentShareConfirmed !== true) {
+      throw new BadRequestException('Confirme o compartilhamento do perfil dependente.');
     }
 
     const grant: StoredGrant = {
@@ -248,6 +261,9 @@ class E2EFamilySharingService {
       expiresAt: new Date(Date.now() + INVITE_TTL_MS),
       acceptedAt: null,
       revokedAt: null,
+      relationship: scope.relationship,
+      categories: scope.categories,
+      dependentShareConfirmedAt: isDependent ? new Date() : null,
     };
     e2eStore.grants.set(grant.id, grant);
 
@@ -255,6 +271,8 @@ class E2EFamilySharingService {
       id: grant.id,
       targetProfileId: grant.targetProfileId,
       accessLevel: grant.accessLevel,
+      relationship: grant.relationship,
+      categories: grant.categories,
       inviteCode: grant.inviteCode,
       status: grant.status,
       expiresAt: grant.expiresAt.toISOString(),
@@ -305,6 +323,25 @@ class E2EFamilySharingService {
     return { id: grant.id, status: grant.status, revokedAt: grant.revokedAt.toISOString() };
   }
 
+  async updateGrant(userId: string, grantId: string, dto: UpdateGrantDto) {
+    const grant = e2eStore.grants.get(grantId);
+    if (!grant || (grant.granterUserId !== userId && grant.granteeUserId !== userId)) {
+      throw new NotFoundException('Compartilhamento não encontrado.');
+    }
+    if (grant.granterUserId !== userId) {
+      throw new ForbiddenException('Somente quem compartilhou pode alterar este compartilhamento.');
+    }
+    if (grant.status === 'REVOKED' || grant.status === 'EXPIRED') {
+      throw new ConflictException({ statusCode: 409, code: 'GRANT_SCOPE_LOCKED', message: 'Encerrado.' });
+    }
+    if (dto.categories === undefined && dto.relationship === undefined) {
+      throw new BadRequestException('Informe as categorias ou a relação que deseja alterar.');
+    }
+    if (dto.categories) grant.categories = dto.categories;
+    if (dto.relationship) grant.relationship = dto.relationship;
+    return { ...grant };
+  }
+
   async listGrants(userId: string) {
     const outgoing = [...e2eStore.grants.values()].filter((g) => g.granterUserId === userId);
     const incoming = [...e2eStore.grants.values()].filter(
@@ -332,7 +369,9 @@ describe('Profiles & Family Sharing E2E (PREM-06, PREM-07)', () => {
     lgpdConsent: true,
   };
 
-  const protectedRoutes: Array<{ method: 'GET' | 'POST' | 'PUT' | 'DELETE'; url: string }> = [
+  const shareScope = { relationship: 'sibling', categories: ['habits'] };
+
+  const protectedRoutes: Array<{ method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'; url: string }> = [
     { method: 'GET', url: '/v1/profiles' },
     { method: 'POST', url: '/v1/profiles/dependents' },
     { method: 'PUT', url: '/v1/profiles/c0000000-0000-0000-0000-000000000001' },
@@ -344,6 +383,7 @@ describe('Profiles & Family Sharing E2E (PREM-06, PREM-07)', () => {
       url: '/v1/family-sharing/revoke/d0000000-0000-0000-0000-000000000001',
     },
     { method: 'GET', url: '/v1/family-sharing/grants' },
+    { method: 'PATCH', url: '/v1/family-sharing/grants/d0000000-0000-0000-0000-000000000001' },
   ];
 
   beforeAll(async () => {
@@ -408,7 +448,7 @@ describe('Profiles & Family Sharing E2E (PREM-06, PREM-07)', () => {
           route.method === 'POST' && route.url.includes('dependents')
             ? dependentPayload
             : route.method === 'POST' && route.url.includes('invite')
-              ? { targetProfileId: 'c0000000-0000-0000-0000-000000000001', accessLevel: 'VIEW_ONLY' }
+              ? { targetProfileId: 'c0000000-0000-0000-0000-000000000001', accessLevel: 'VIEW_ONLY', ...shareScope }
               : route.method === 'POST' && route.url.includes('accept')
                 ? { inviteCode: 'ABC123' }
                 : undefined,
@@ -479,7 +519,7 @@ describe('Profiles & Family Sharing E2E (PREM-06, PREM-07)', () => {
         method: 'POST',
         url: '/v1/family-sharing/invite',
         headers: { authorization: `Bearer ${tokenA}` },
-        payload: { targetProfileId: primaryProfileIdA, accessLevel: 'VIEW_ONLY' },
+        payload: { targetProfileId: primaryProfileIdA, accessLevel: 'VIEW_ONLY', ...shareScope },
       });
       expect(invite.statusCode).toBe(201);
       const inviteBody = JSON.parse(invite.payload);
@@ -534,7 +574,7 @@ describe('Profiles & Family Sharing E2E (PREM-06, PREM-07)', () => {
         method: 'POST',
         url: '/v1/family-sharing/invite',
         headers: { authorization: `Bearer ${tokenA}` },
-        payload: { targetProfileId: primaryProfileIdA, accessLevel: 'VIEW_ONLY' },
+        payload: { targetProfileId: primaryProfileIdA, accessLevel: 'VIEW_ONLY', ...shareScope },
       });
       expect(reinvite.statusCode).toBe(201);
       const code = JSON.parse(reinvite.payload).inviteCode;
@@ -553,6 +593,146 @@ describe('Profiles & Family Sharing E2E (PREM-06, PREM-07)', () => {
         payload: { name: 'Tentativa de edição' },
       });
       expect(update.statusCode).toBe(403);
+    });
+
+    it('rejects an invite without a relationship or with an invalid category set (400)', async () => {
+      const base = { targetProfileId: primaryProfileIdA, accessLevel: 'VIEW_ONLY' };
+      for (const payload of [
+        { ...base, categories: ['habits'] },
+        { ...base, relationship: 'boss', categories: ['habits'] },
+        { ...base, relationship: 'sibling', categories: [] },
+        { ...base, relationship: 'sibling', categories: ['habits', 'habits'] },
+        { ...base, relationship: 'sibling', categories: ['safety'] },
+        { ...base, relationship: 'sibling' },
+      ]) {
+        const response = await app.inject({
+          method: 'POST',
+          url: '/v1/family-sharing/invite',
+          headers: { authorization: `Bearer ${tokenA}` },
+          payload,
+        });
+        expect(response.statusCode, JSON.stringify(payload)).toBe(400);
+      }
+    });
+
+    it('creates an invite that opens only the emotional journal and lists it with its scope', async () => {
+      const invite = await app.inject({
+        method: 'POST',
+        url: '/v1/family-sharing/invite',
+        headers: { authorization: `Bearer ${tokenA}` },
+        payload: {
+          targetProfileId: primaryProfileIdA,
+          accessLevel: 'VIEW_ONLY',
+          relationship: 'spouse_partner',
+          categories: ['emotional_journal'],
+        },
+      });
+      expect(invite.statusCode).toBe(201);
+      const body = JSON.parse(invite.payload);
+      expect(body).toMatchObject({ relationship: 'spouse_partner', categories: ['emotional_journal'] });
+
+      const list = await app.inject({
+        method: 'GET',
+        url: '/v1/family-sharing/grants',
+        headers: { authorization: `Bearer ${tokenA}` },
+      });
+      expect(list.statusCode).toBe(200);
+      const outgoing = JSON.parse(list.payload).outgoing;
+      expect(outgoing.find((g: any) => g.id === body.id)).toMatchObject({
+        relationship: 'spouse_partner',
+        categories: ['emotional_journal'],
+      });
+    });
+
+    it('needs dependentShareConfirmed true to share a dependent profile', async () => {
+      const payload = {
+        targetProfileId: dependentProfileId,
+        accessLevel: 'VIEW_ONLY',
+        relationship: 'other_family',
+        categories: ['habits'],
+      };
+      const refused = await app.inject({
+        method: 'POST',
+        url: '/v1/family-sharing/invite',
+        headers: { authorization: `Bearer ${tokenA}` },
+        payload,
+      });
+      expect(refused.statusCode).toBe(400);
+
+      const confirmed = await app.inject({
+        method: 'POST',
+        url: '/v1/family-sharing/invite',
+        headers: { authorization: `Bearer ${tokenA}` },
+        payload: { ...payload, dependentShareConfirmed: true },
+      });
+      expect(confirmed.statusCode).toBe(201);
+      const grant = e2eStore.grants.get(JSON.parse(confirmed.payload).id);
+      expect(grant?.dependentShareConfirmedAt).toBeInstanceOf(Date);
+    });
+
+    it('PATCH /grants/:id lets the granter edit the categories and validates the body', async () => {
+      const invite = await app.inject({
+        method: 'POST',
+        url: '/v1/family-sharing/invite',
+        headers: { authorization: `Bearer ${tokenA}` },
+        payload: { targetProfileId: primaryProfileIdA, accessLevel: 'CO_MANAGE', ...shareScope },
+      });
+      const { id, inviteCode } = JSON.parse(invite.payload);
+      await app.inject({
+        method: 'POST',
+        url: '/v1/family-sharing/accept',
+        headers: { authorization: `Bearer ${tokenB}` },
+        payload: { inviteCode },
+      });
+
+      const empty = await app.inject({
+        method: 'PATCH',
+        url: `/v1/family-sharing/grants/${id}`,
+        headers: { authorization: `Bearer ${tokenA}` },
+        payload: { categories: [] },
+      });
+      expect(empty.statusCode).toBe(400);
+
+      const badId = await app.inject({
+        method: 'PATCH',
+        url: '/v1/family-sharing/grants/not-a-uuid',
+        headers: { authorization: `Bearer ${tokenA}` },
+        payload: { categories: ['habits'] },
+      });
+      expect(badId.statusCode).toBe(400);
+
+      const edited = await app.inject({
+        method: 'PATCH',
+        url: `/v1/family-sharing/grants/${id}`,
+        headers: { authorization: `Bearer ${tokenA}` },
+        payload: { categories: ['habits', 'care'], relationship: 'caregiver' },
+      });
+      expect(edited.statusCode).toBe(200);
+      expect(JSON.parse(edited.payload)).toMatchObject({
+        id,
+        relationship: 'caregiver',
+        categories: ['habits', 'care'],
+      });
+
+      const byGrantee = await app.inject({
+        method: 'PATCH',
+        url: `/v1/family-sharing/grants/${id}`,
+        headers: { authorization: `Bearer ${tokenB}` },
+        payload: { categories: ['habits', 'emotional_journal'] },
+      });
+      expect(byGrantee.statusCode).toBe(403);
+      expect(e2eStore.grants.get(id)?.categories).toEqual(['habits', 'care']);
+    });
+
+    it('PATCH on a revoked grant answers 409 GRANT_SCOPE_LOCKED', async () => {
+      const locked = await app.inject({
+        method: 'PATCH',
+        url: `/v1/family-sharing/grants/${shareGrantId}`,
+        headers: { authorization: `Bearer ${tokenA}` },
+        payload: { categories: ['habits'] },
+      });
+      expect(locked.statusCode).toBe(409);
+      expect(JSON.parse(locked.payload).code).toBe('GRANT_SCOPE_LOCKED');
     });
   });
 });
