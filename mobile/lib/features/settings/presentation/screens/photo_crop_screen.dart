@@ -7,7 +7,11 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 
-/// Decodes width and height synchronously from PNG or JPEG headers, if possible.
+/// Reads width and height from a PNG header, if possible.
+///
+/// JPEG is left to the async decoder on purpose: its header holds the sensor
+/// size before the EXIF rotation, so a portrait iPhone photo would read as
+/// landscape and the cover frame would cut the head again.
 Size? decodeImageSizeSync(Uint8List bytes) {
   // Check PNG signature: 89 50 4E 47 0D 0A 1A 0A
   if (bytes.length >= 24 &&
@@ -19,31 +23,6 @@ Size? decodeImageSizeSync(Uint8List bytes) {
     final width = view.getUint32(16);
     final height = view.getUint32(20);
     if (width > 0 && height > 0) return Size(width.toDouble(), height.toDouble());
-  }
-
-  // Check JPEG SOI: FF D8
-  if (bytes.length >= 4 && bytes[0] == 0xFF && bytes[1] == 0xD8) {
-    int offset = 2;
-    final view = ByteData.sublistView(bytes);
-    while (offset + 4 < bytes.length) {
-      if (bytes[offset] != 0xFF) break;
-      final marker = bytes[offset + 1];
-      if (marker == 0xC0 || marker == 0xC2) {
-        if (offset + 9 < bytes.length) {
-          final height = view.getUint16(offset + 5);
-          final width = view.getUint16(offset + 7);
-          if (width > 0 && height > 0) {
-            return Size(width.toDouble(), height.toDouble());
-          }
-        }
-        break;
-      } else if (marker == 0xD9 || marker == 0xDA) {
-        break;
-      } else {
-        final length = view.getUint16(offset + 2);
-        offset += 2 + length;
-      }
-    }
   }
 
   return null;
@@ -147,6 +126,8 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
               frame.image.width.toDouble(),
               frame.image.height.toDouble(),
             );
+            // Frame again with the real (rotated) size.
+            _initializedTransform = false;
           });
         }
       }).catchError((_) {});
