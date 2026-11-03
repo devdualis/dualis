@@ -197,6 +197,7 @@
   "familySharingAcceptFieldLabel": "Código de 10 caracteres",
   "familySharingAcceptSubmit": "Aceptar invitación",
   "familySharingAcceptError": "Código inválido o vencido.",
+  "familySharingAcceptOwnCode": "Este código es tuyo. Envíalo a la persona que te va a acompañar.",
   "familySharingAcceptTooMany": "Demasiados intentos. Espera 15 minutos y vuelve a intentarlo.",
   "familySharingAccepted": "Invitación aceptada. El perfil ya aparece en tu lista.",
   "addDependentTitle": "Registrar dependiente legal",

@@ -614,6 +614,31 @@ void main() {
     expect(find.text('Código inválido ou expirado.'), findsNothing);
   });
 
+  testWidgets('accept sheet says when the code is the caller\'s own invite',
+      (tester) async {
+    final controller = _FakeController(_state())
+      ..acceptError = const ProfileApiException('own',
+          statusCode: 400, code: 'INVITE_OWN_PROFILE');
+    await tester.pumpWidget(_app(controller));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('family-share-tab-incoming')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('family-share-accept-button')));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+        find.byKey(const ValueKey('invite-code-field')), 'AB12CD34EF');
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('invite-code-submit')));
+    await tester.pumpAndSettle();
+
+    expect(
+        find.text(
+            'Este código é seu. Envie-o para a pessoa que vai acompanhar você.'),
+        findsOneWidget);
+    expect(find.text('Código inválido ou expirado.'), findsNothing);
+  });
+
   testWidgets('active outgoing grants name who accepted; incoming ones do not',
       (tester) async {
     final controller = _FakeController(_state(

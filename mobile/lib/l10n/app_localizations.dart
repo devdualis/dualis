@@ -1282,6 +1282,12 @@ abstract class AppLocalizations {
   /// **'Código inválido ou expirado.'**
   String get familySharingAcceptError;
 
+  /// No description provided for @familySharingAcceptOwnCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este código é seu. Envie-o para a pessoa que vai acompanhar você.'**
+  String get familySharingAcceptOwnCode;
+
   /// No description provided for @familySharingAcceptTooMany.
   ///
   /// In pt, this message translates to:

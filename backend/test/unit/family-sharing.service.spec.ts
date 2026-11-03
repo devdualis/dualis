@@ -613,6 +613,10 @@ describe('FamilySharingService Unit Tests', () => {
       await expect(service.acceptInvite(granteeUserId, inviteCode)).rejects.toThrow(
         BadRequestException,
       );
+      // The app shows a specific message for the caller's own code.
+      await expect(service.acceptInvite(granteeUserId, inviteCode)).rejects.toMatchObject({
+        response: { code: 'INVITE_OWN_PROFILE' },
+      });
     });
 
     describe('failed-attempt cap', () => {

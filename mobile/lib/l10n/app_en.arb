@@ -197,6 +197,7 @@
   "familySharingAcceptFieldLabel": "10-character code",
   "familySharingAcceptSubmit": "Accept Invite",
   "familySharingAcceptError": "Invalid or expired code.",
+  "familySharingAcceptOwnCode": "This code is yours. Send it to the person who will follow along with you.",
   "familySharingAcceptTooMany": "Too many attempts. Wait 15 minutes and try again.",
   "familySharingAccepted": "Invite accepted. The profile is now in your list.",
   "addDependentTitle": "Register Legal Dependent",

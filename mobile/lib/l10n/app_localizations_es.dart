@@ -683,6 +683,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get familySharingAcceptError => 'Código inválido o vencido.';
 
   @override
+  String get familySharingAcceptOwnCode =>
+      'Este código es tuyo. Envíalo a la persona que te va a acompañar.';
+
+  @override
   String get familySharingAcceptTooMany =>
       'Demasiados intentos. Espera 15 minutos y vuelve a intentarlo.';
 

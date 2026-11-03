@@ -431,6 +431,7 @@ class _FamilySharingAcceptSheetState
   bool _submitting = false;
   bool _failed = false;
   bool _tooManyAttempts = false;
+  bool _ownCode = false;
 
   @override
   void dispose() {
@@ -454,6 +455,8 @@ class _FamilySharingAcceptSheetState
           _failed = true;
           // The server caps failed codes per account (429 for 15 minutes).
           _tooManyAttempts = e is ProfileApiException && e.statusCode == 429;
+          _ownCode =
+              e is ProfileApiException && e.code == 'INVITE_OWN_PROFILE';
         });
       }
     } finally {
@@ -490,10 +493,13 @@ class _FamilySharingAcceptSheetState
             ],
             decoration: InputDecoration(
               labelText: l10n.familySharingAcceptFieldLabel,
+              errorMaxLines: 3,
               errorText: _failed
                   ? (_tooManyAttempts
                       ? l10n.familySharingAcceptTooMany
-                      : l10n.familySharingAcceptError)
+                      : _ownCode
+                          ? l10n.familySharingAcceptOwnCode
+                          : l10n.familySharingAcceptError)
                   : null,
             ),
             onChanged: (_) => setState(() => _failed = false),

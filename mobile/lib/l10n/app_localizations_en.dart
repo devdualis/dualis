@@ -676,6 +676,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familySharingAcceptError => 'Invalid or expired code.';
 
   @override
+  String get familySharingAcceptOwnCode =>
+      'This code is yours. Send it to the person who will follow along with you.';
+
+  @override
   String get familySharingAcceptTooMany =>
       'Too many attempts. Wait 15 minutes and try again.';
 

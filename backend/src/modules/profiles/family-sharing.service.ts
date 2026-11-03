@@ -347,7 +347,11 @@ export class FamilySharingService {
 
         const message = err?.message || "";
         if (err?.code === "P0001" || message.includes("SELF_GRANT")) {
-          throw new BadRequestException("Cannot share access with yourself");
+          throw new BadRequestException({
+            statusCode: HttpStatus.BAD_REQUEST,
+            code: "INVITE_OWN_PROFILE",
+            message: "Este código é seu. Envie-o para a pessoa que vai acompanhar você.",
+          });
         }
 
         throw err;
