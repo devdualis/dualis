@@ -17,6 +17,8 @@ import {
 import { profiles } from "../../database/schema/profiles.schema";
 import {
   AccessLevel,
+  GrantRelationship,
+  ShareCategory,
   sharedAccessGrants,
 } from "../../database/schema/shared-access-grants.schema";
 import { users } from "../../database/schema/users.schema";
@@ -35,6 +37,14 @@ export const MAX_INVITE_COLLISION_RETRIES = 5;
 export const MAX_FAILED_INVITE_ACCEPTS = 5;
 export const FAILED_INVITE_ACCEPT_WINDOW_MS = 15 * 60 * 1000;
 const MAX_TRACKED_ACCEPT_USERS = 10_000;
+
+/** Who the grantee is and which data categories the grant opens (Phase 11.1, PREM-07). */
+export interface InviteScope {
+  relationship: GrantRelationship;
+  categories: ShareCategory[];
+  /** Must be true when the target is a dependent profile (gap 9). */
+  dependentShareConfirmed?: boolean;
+}
 
 /**
  * Generates an uppercase 10-character alphanumeric invite code using node:crypto,
@@ -70,6 +80,11 @@ export class FamilySharingService {
   }
 
   /**
+   * Gap 10 (CONTEXT, RESEARCH §G): this limiter lives in the memory of each instance
+   * because Redis is not wired in this backend. Production runs at most 2 instances
+   * (see common/http/rate-limiter.ts), so the real cap is at most twice the number below;
+   * with a 32^10 code space and a 72-hour TTL that stays out of guessing range.
+   *
    * Counts an accept attempt before the lookup, so parallel requests cannot slip past
    * the cap; a successful accept gives its slot back (releaseAcceptAttempt). After
    * MAX_FAILED_INVITE_ACCEPTS failures in the window the account gets 429.
@@ -105,12 +120,14 @@ export class FamilySharingService {
   /**
    * Creates a family sharing invitation with a 72-hour TTL.
    * The caller must own the target profile (403 otherwise).
+   * Stores the relationship and the chosen data categories on the grant.
    * Retries on unique code violation up to 5 times.
    */
   async createInvite(
     userId: string,
     targetProfileId: string,
     accessLevel: AccessLevel,
+    scope: InviteScope,
   ): Promise<InviteCreatedResponseDto> {
     this.assertUserId(userId);
 
@@ -151,6 +168,8 @@ export class FamilySharingService {
                 inviteCode,
                 status: "PENDING",
                 expiresAt,
+                relationship: scope.relationship,
+                categories: scope.categories,
               })
               .returning(),
           );
@@ -180,6 +199,8 @@ export class FamilySharingService {
         inviteCode: grant.inviteCode,
         accessLevel: grant.accessLevel,
         targetProfileId: grant.targetProfileId,
+        relationship: grant.relationship ?? null,
+        categories: grant.categories,
         expiresAt: grant.expiresAt,
       };
     });
@@ -345,6 +366,8 @@ export class FamilySharingService {
           targetProfileId: grant.targetProfileId,
           targetProfileName: targetProfileName ?? "",
           accessLevel: grant.accessLevel,
+          relationship: grant.relationship ?? null,
+          categories: grant.categories,
           status: effectiveStatus,
           inviteCode: grant.inviteCode,
           granteeUserId: grant.granteeUserId,
@@ -378,6 +401,8 @@ export class FamilySharingService {
         targetProfileId: grant.targetProfileId,
         targetProfileName: targetProfileName ?? "",
         accessLevel: grant.accessLevel,
+        relationship: grant.relationship ?? null,
+        categories: grant.categories,
         status: grant.status,
         expiresAt: grant.expiresAt,
         acceptedAt: grant.acceptedAt,

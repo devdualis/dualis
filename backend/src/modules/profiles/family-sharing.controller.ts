@@ -40,7 +40,11 @@ export class FamilySharingController {
     @Body() dto: CreateInviteDto,
   ): Promise<InviteCreatedResponseDto> {
     const userId = req.user?.id || req.user?.userId || req.user?.sub;
-    return this.familySharingService.createInvite(userId, dto.targetProfileId, dto.accessLevel);
+    return this.familySharingService.createInvite(userId, dto.targetProfileId, dto.accessLevel, {
+      relationship: dto.relationship,
+      categories: dto.categories,
+      dependentShareConfirmed: dto.dependentShareConfirmed,
+    });
   }
 
   @Post('accept')

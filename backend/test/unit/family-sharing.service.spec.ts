@@ -8,6 +8,8 @@ import {
 } from '@nestjs/common';
 import { SQL } from 'drizzle-orm';
 import { PgDialect } from 'drizzle-orm/pg-core';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import {
   FamilySharingService,
   generateInviteCode,
@@ -15,6 +17,7 @@ import {
   INVITE_CODE_CHARS,
   MAX_FAILED_INVITE_ACCEPTS,
 } from '../../src/modules/profiles/family-sharing.service';
+import { CreateInviteDto } from '../../src/modules/profiles/dto/create-invite.dto';
 
 describe('FamilySharingService Unit Tests', () => {
   let service: FamilySharingService;
@@ -53,11 +56,13 @@ describe('FamilySharingService Unit Tests', () => {
   describe('createInvite', () => {
     const userId = 'user-owner-uuid';
     const targetProfileId = 'profile-target-uuid';
+    const scope = { relationship: 'sibling' as const, categories: ['habits' as const] };
 
     it('creates an invite with 72h TTL and PENDING status when caller owns the profile', async () => {
       const mockProfile = {
         id: targetProfileId,
         accountOwnerId: userId,
+        profileType: 'primary',
         name: 'John Doe',
       };
 
@@ -95,7 +100,7 @@ describe('FamilySharingService Unit Tests', () => {
         return callback(tx);
       });
 
-      const result = await service.createInvite(userId, targetProfileId, 'VIEW_ONLY');
+      const result = await service.createInvite(userId, targetProfileId, 'VIEW_ONLY', scope);
 
       expect(mockDatabaseService.withRls).toHaveBeenCalledWith(userId, expect.any(Function));
       expect(result.id).toBe(mockCreatedGrant.id);
@@ -130,7 +135,7 @@ describe('FamilySharingService Unit Tests', () => {
       });
 
       await expect(
-        service.createInvite(userId, targetProfileId, 'VIEW_ONLY'),
+        service.createInvite(userId, targetProfileId, 'VIEW_ONLY', scope),
       ).rejects.toThrow(ForbiddenException);
     });
 
@@ -147,7 +152,7 @@ describe('FamilySharingService Unit Tests', () => {
       });
 
       await expect(
-        service.createInvite(userId, targetProfileId, 'CO_MANAGE'),
+        service.createInvite(userId, targetProfileId, 'CO_MANAGE', scope),
       ).rejects.toThrow(ForbiddenException);
     });
 
@@ -155,6 +160,7 @@ describe('FamilySharingService Unit Tests', () => {
       const mockProfile = {
         id: targetProfileId,
         accountOwnerId: userId,
+        profileType: 'primary',
         name: 'John Doe',
       };
 
@@ -194,9 +200,82 @@ describe('FamilySharingService Unit Tests', () => {
         return callback(tx);
       });
 
-      const result = await service.createInvite(userId, targetProfileId, 'CO_MANAGE');
+      const result = await service.createInvite(userId, targetProfileId, 'CO_MANAGE', scope);
       expect(attempts).toBe(2);
       expect(result.id).toBe('grant-uuid-retry');
+    });
+
+    it('stores the relationship and categories and returns them', async () => {
+      let insertedValues: any = null;
+      mockDatabaseService.withRls.mockImplementation(async (_uid: string, callback: any) => {
+        const tx = {
+          transaction: vi.fn().mockImplementation((cb: any) => cb(tx)),
+          select: vi.fn().mockReturnValue({
+            from: vi.fn().mockReturnValue({
+              where: vi.fn().mockResolvedValue([
+                { id: targetProfileId, accountOwnerId: userId, profileType: 'primary' },
+              ]),
+            }),
+          }),
+          insert: vi.fn().mockReturnValue({
+            values: vi.fn().mockImplementation((val) => {
+              insertedValues = val;
+              return {
+                returning: vi.fn().mockResolvedValue([
+                  {
+                    id: 'grant-scope',
+                    inviteCode: 'SCOPE23456',
+                    accessLevel: 'VIEW_ONLY',
+                    targetProfileId,
+                    expiresAt: new Date(),
+                    relationship: val.relationship,
+                    categories: val.categories,
+                  },
+                ]),
+              };
+            }),
+          }),
+        };
+        return callback(tx);
+      });
+
+      const result = await service.createInvite(userId, targetProfileId, 'VIEW_ONLY', {
+        relationship: 'sibling',
+        categories: ['habits', 'care'],
+      });
+
+      expect(insertedValues.relationship).toBe('sibling');
+      expect(insertedValues.categories).toEqual(['habits', 'care']);
+      expect(result.relationship).toBe('sibling');
+      expect(result.categories).toEqual(['habits', 'care']);
+    });
+  });
+
+  describe('CreateInviteDto validation', () => {
+    const valid = {
+      targetProfileId: 'c0a80121-7ac0-4e1c-9d3a-0e5f8a7b6c5d',
+      accessLevel: 'VIEW_ONLY',
+      relationship: 'sibling',
+      categories: ['habits'],
+    };
+    const errorsFor = async (payload: Record<string, unknown>) =>
+      (await validate(plainToInstance(CreateInviteDto, payload))).map((e) => e.property);
+
+    it('accepts a relationship and a set of valid categories', async () => {
+      expect(await errorsFor(valid)).toEqual([]);
+      expect(await errorsFor({ ...valid, dependentShareConfirmed: true })).toEqual([]);
+    });
+
+    it.each([
+      ['a missing relationship', { relationship: undefined }, 'relationship'],
+      ['an unknown relationship', { relationship: 'boss' }, 'relationship'],
+      ['missing categories', { categories: undefined }, 'categories'],
+      ['empty categories', { categories: [] }, 'categories'],
+      ['duplicate categories', { categories: ['habits', 'habits'] }, 'categories'],
+      ['an unknown category', { categories: ['habits', 'safety'] }, 'categories'],
+      ['a non-boolean confirmation', { dependentShareConfirmed: 'yes' }, 'dependentShareConfirmed'],
+    ])('rejects %s', async (_label, patch, property) => {
+      expect(await errorsFor({ ...valid, ...patch })).toContain(property);
     });
   });
 
@@ -599,6 +678,68 @@ describe('FamilySharingService Unit Tests', () => {
       expect(result.incoming[0].id).toBe('grant-in-1');
       expect(result.incoming[0].status).toBe('ACCEPTED');
       expect(result.incoming[0].targetProfileName).toBe('Helena Rincon');
+    });
+
+    it('returns relationship and categories on both lists, null for a legacy grant (A7)', async () => {
+      const base = {
+        granterUserId: userId,
+        targetProfileId: 'profile-1',
+        accessLevel: 'VIEW_ONLY',
+        status: 'ACCEPTED',
+        inviteCode: 'CODE03',
+        granteeUserId: null,
+        expiresAt: new Date(Date.now() + 60_000),
+        acceptedAt: new Date(),
+        revokedAt: null,
+        createdAt: new Date(),
+      };
+      const outgoingRows = [
+        {
+          grant: { ...base, id: 'out-new', relationship: 'sibling', categories: ['habits', 'care'] },
+          targetProfileName: 'Lucas',
+        },
+        {
+          grant: { ...base, id: 'out-legacy', relationship: null, categories: ['habits'] },
+          targetProfileName: 'Lucas',
+        },
+      ];
+      const incomingRows = [
+        {
+          grant: {
+            ...base,
+            id: 'in-1',
+            granterUserId: 'other-user',
+            relationship: 'caregiver',
+            categories: ['physical_journal'],
+          },
+          targetProfileName: 'Helena',
+        },
+      ];
+
+      mockDatabaseService.withRls.mockImplementation(async (_uid: string, callback: any) => {
+        let callCount = 0;
+        const tx = {
+          select: vi.fn().mockImplementation(() => ({
+            from: vi.fn().mockReturnValue({
+              leftJoin: vi.fn().mockReturnValue({
+                where: vi.fn().mockImplementation(() =>
+                  Promise.resolve(++callCount === 1 ? outgoingRows : incomingRows),
+                ),
+              }),
+            }),
+          })),
+        };
+        return callback(tx);
+      });
+
+      const result = await service.listGrants(userId);
+
+      expect(result.outgoing[0]).toMatchObject({ relationship: 'sibling', categories: ['habits', 'care'] });
+      expect(result.outgoing[1]).toMatchObject({ relationship: null, categories: ['habits'] });
+      expect(result.incoming[0]).toMatchObject({
+        relationship: 'caregiver',
+        categories: ['physical_journal'],
+      });
     });
 
     it('names who accepted each outgoing grant, looking up only those grantees', async () => {
