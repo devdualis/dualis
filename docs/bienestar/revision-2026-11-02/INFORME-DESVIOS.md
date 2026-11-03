@@ -28,6 +28,8 @@ Detalle por área:
 
 Orden por impacto en lo que el cliente ve.
 
+> **Estado al cierre del 2026-11-02:** D1–D9 y D11 se resolvieron con los commits `5e56a8d`, `7506e88` y `1bd29f3` (3 pantallas emocionales, 7 frases por posición, frase de cierre, efecto de escritura, emojis y persistencia en su propia pantalla). La columna "Hay hoy" de esas filas describe el estado antes de esos commits. D10, D12, D13 y D15–D17 tienen su nota en la fila. Sigue abierto D14 (PDF Free o Premium), que es una decisión con el cliente.
+
 | # | Desvío | Pidió el cliente | Hay hoy | Evidencia |
 |---|---|---|---|---|
 | D1 | Frases de bifurcación | 7 por cada uno de los 6 botones de la pantalla 2 (42) | 0 | 02 §Pantalla 2 |
