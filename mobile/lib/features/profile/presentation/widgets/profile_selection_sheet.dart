@@ -249,13 +249,14 @@ class ProfileSelectionSheet extends ConsumerWidget {
         ? profile.name.trim()[0].toUpperCase()
         : '?';
 
+    // Shared first: someone else's primary profile is not "Titular" here.
     final Color avatarBgColor;
-    if (profile.isPrimary) {
-      avatarBgColor = AppColors.clinicalTeal;
-    } else if (profile.ownership == ProfileOwnership.shared) {
+    if (profile.ownership == ProfileOwnership.shared) {
       avatarBgColor = profile.accessLevel == ProfileAccessLevel.viewOnly
           ? const Color(0xFFD97706)
           : AppColors.softIndigo;
+    } else if (profile.isPrimary) {
+      avatarBgColor = AppColors.clinicalTeal;
     } else {
       avatarBgColor = AppColors.softIndigo;
     }
@@ -548,13 +549,13 @@ class ProfileSelectionSheet extends ConsumerWidget {
   }
 
   String _subtitleFor(Profile profile, AppLocalizations l10n) {
-    if (profile.isPrimary) {
-      return l10n.profileSwitcherBadgePrimary;
-    }
     if (profile.ownership == ProfileOwnership.shared) {
       return profile.accessLevel == ProfileAccessLevel.viewOnly
           ? l10n.profileSwitcherBadgeViewOnly
           : l10n.profileSwitcherBadgeCoManage;
+    }
+    if (profile.isPrimary) {
+      return l10n.profileSwitcherBadgePrimary;
     }
     if (profile.profileType == ProfileType.dependentMinor) {
       return l10n.profileSwitcherBadgeMinor;

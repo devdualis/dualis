@@ -340,6 +340,30 @@ void main() {
       );
     });
 
+    testWidgets(
+        'a shared primary profile shows its access level, not "Titular"',
+        (tester) async {
+      final fake = FakeActiveProfileController(
+        const ActiveProfileState(
+          profiles: [primaryProfile, sharedViewOnly, sharedCoManage],
+          activeProfileId: 'p-1',
+        ),
+      );
+
+      await tester.pumpWidget(
+        _buildHost(
+          fakeController: fake,
+          child: const Scaffold(body: ProfileSelectionSheet()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Only the caller's own primary profile is "Titular".
+      expect(find.text('Titular'), findsOneWidget);
+      expect(find.text('Somente leitura'), findsOneWidget);
+      expect(find.text('Co-gestão'), findsOneWidget);
+    });
+
     testWidgets('the two driver keys exist: add-dependent and manage-sharing',
         (tester) async {
       final fake = FakeActiveProfileController(
