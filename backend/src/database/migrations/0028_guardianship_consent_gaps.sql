@@ -448,3 +448,118 @@ BEGIN
   END IF;
 END
 $$;
+
+-- E. Grant relationship, dependent share confirmation and the grant update guard
+
+-- relationship: NULL means "não informado" (legacy grants, A7).
+ALTER TABLE shared_access_grants ADD COLUMN IF NOT EXISTS relationship varchar(32);
+-- When the owner confirmed sharing a dependent's data with this grantee (gap 9).
+ALTER TABLE shared_access_grants ADD COLUMN IF NOT EXISTS dependent_share_confirmed_at timestamp with time zone;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'shared_access_grants'::regclass AND conname = 'shared_access_grants_relationship_check'
+  ) THEN
+    ALTER TABLE shared_access_grants ADD CONSTRAINT shared_access_grants_relationship_check
+      CHECK (
+        relationship IS NULL
+        OR relationship IN ('spouse_partner', 'sibling', 'parent', 'child', 'other_family', 'caregiver', 'friend', 'other')
+      );
+  END IF;
+END
+$$;
+
+-- Stored type of a profile ('primary', 'dependent_minor', 'dependent_adult').
+-- Reads only profiles. Used only in the shared_access_grants INSERT policy, never in a
+-- SELECT/UPDATE policy of that table (see the recursion note at the top).
+CREATE OR REPLACE FUNCTION app_profile_type(p_profile_id uuid)
+RETURNS text
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT p.profile_type::text FROM profiles p WHERE p.id = p_profile_id;
+$$;
+
+-- shared_access_grants: only the granter can create, only for profiles they own, and
+-- sharing a dependent's profile needs the owner's explicit confirmation.
+-- The participant SELECT/UPDATE policies stay exactly as 0013 defines them.
+DROP POLICY IF EXISTS shared_access_grants_granter_insert ON shared_access_grants;
+CREATE POLICY shared_access_grants_granter_insert ON shared_access_grants
+  FOR INSERT
+  WITH CHECK (
+    granter_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+    AND app_owns_profile(target_profile_id)
+    AND (app_profile_type(target_profile_id) = 'primary' OR dependent_share_confirmed_at IS NOT NULL)
+  );
+
+-- Grant update guard (0013) extended for the new columns: a grantee may still only
+-- revoke; the granter edits categories, relationship and the dependent confirmation
+-- only while the grant is PENDING or ACCEPTED; accepting an invite changes none of them.
+CREATE OR REPLACE FUNCTION app_guard_shared_access_grant_update()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+DECLARE
+  v_user uuid := NULLIF(current_setting('app.current_user_id', true), '')::uuid;
+  v_scope_changed boolean :=
+    NEW.categories IS DISTINCT FROM OLD.categories
+    OR NEW.relationship IS DISTINCT FROM OLD.relationship
+    OR NEW.dependent_share_confirmed_at IS DISTINCT FROM OLD.dependent_share_confirmed_at;
+BEGIN
+  IF NEW.granter_user_id IS DISTINCT FROM OLD.granter_user_id
+    OR NEW.target_profile_id IS DISTINCT FROM OLD.target_profile_id
+    OR NEW.invite_code IS DISTINCT FROM OLD.invite_code
+    OR NEW.created_at IS DISTINCT FROM OLD.created_at THEN
+    RAISE EXCEPTION 'GRANT_IMMUTABLE_COLUMN' USING ERRCODE = 'P0001';
+  END IF;
+
+  IF OLD.status IN ('REVOKED', 'EXPIRED') AND NEW.status IS DISTINCT FROM OLD.status THEN
+    RAISE EXCEPTION 'GRANT_TERMINAL_STATUS' USING ERRCODE = 'P0001';
+  END IF;
+
+  IF v_user IS NOT NULL AND v_user = OLD.grantee_user_id AND v_user <> OLD.granter_user_id THEN
+    IF NEW.access_level IS DISTINCT FROM OLD.access_level
+      OR NEW.grantee_user_id IS DISTINCT FROM OLD.grantee_user_id
+      OR NEW.expires_at IS DISTINCT FROM OLD.expires_at
+      OR NEW.accepted_at IS DISTINCT FROM OLD.accepted_at
+      OR v_scope_changed
+      OR NEW.status NOT IN (OLD.status, 'REVOKED') THEN
+      RAISE EXCEPTION 'GRANTEE_MAY_ONLY_REVOKE' USING ERRCODE = 'P0001';
+    END IF;
+  ELSIF v_user IS NOT NULL AND v_user = OLD.granter_user_id THEN
+    IF NEW.grantee_user_id IS DISTINCT FROM OLD.grantee_user_id
+      OR NEW.accepted_at IS DISTINCT FROM OLD.accepted_at
+      OR NEW.status NOT IN (OLD.status, 'REVOKED', 'EXPIRED') THEN
+      RAISE EXCEPTION 'GRANTER_MAY_ONLY_REVOKE' USING ERRCODE = 'P0001';
+    END IF;
+    IF v_scope_changed AND OLD.status NOT IN ('PENDING', 'ACCEPTED') THEN
+      RAISE EXCEPTION 'GRANT_SCOPE_LOCKED' USING ERRCODE = 'P0001';
+    END IF;
+  ELSIF v_user IS NOT NULL THEN
+    -- Accept path: PENDING -> ACCEPTED by the caller, or PENDING -> EXPIRED.
+    IF OLD.status <> 'PENDING'
+      OR NEW.access_level IS DISTINCT FROM OLD.access_level
+      OR NEW.expires_at IS DISTINCT FROM OLD.expires_at
+      OR NEW.revoked_at IS DISTINCT FROM OLD.revoked_at
+      OR v_scope_changed
+      OR NOT (
+        (NEW.status = 'ACCEPTED' AND NEW.grantee_user_id = v_user AND NEW.accepted_at IS NOT NULL)
+        OR (NEW.status = 'EXPIRED' AND NEW.grantee_user_id IS NULL)
+      ) THEN
+      RAISE EXCEPTION 'GRANT_INVALID_ACCEPT' USING ERRCODE = 'P0001';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_guard_shared_access_grant_update ON shared_access_grants;
+CREATE TRIGGER trg_guard_shared_access_grant_update
+  BEFORE UPDATE ON shared_access_grants
+  FOR EACH ROW EXECUTE FUNCTION app_guard_shared_access_grant_update();

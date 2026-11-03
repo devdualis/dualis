@@ -122,9 +122,9 @@ describe('Security Regression: 0021 premium care (care_records, care_documents R
     );
     await adminPool.query(
       `INSERT INTO shared_access_grants
-         (granter_user_id, target_profile_id, grantee_user_id, access_level, invite_code, status, expires_at, accepted_at)
-       VALUES ($1, $2, $3, 'VIEW_ONLY', 'CAREV1', 'ACCEPTED', now() + interval '72 hours', now()),
-              ($1, $2, $4, 'CO_MANAGE', 'CAREV2', 'ACCEPTED', now() + interval '72 hours', now())`,
+         (granter_user_id, target_profile_id, grantee_user_id, access_level, invite_code, status, expires_at, accepted_at, categories)
+       VALUES ($1, $2, $3, 'VIEW_ONLY', 'CAREV1', 'ACCEPTED', now() + interval '72 hours', now(), ARRAY['care']::text[]),
+              ($1, $2, $4, 'CO_MANAGE', 'CAREV2', 'ACCEPTED', now() + interval '72 hours', now(), ARRAY['care']::text[])`,
       [ownerA, dependentId, viewerB, coManagerC],
     );
 
