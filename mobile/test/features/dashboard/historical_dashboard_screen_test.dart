@@ -315,6 +315,45 @@ void main() {
       expect(find.textContaining('Frente'), findsNothing);
     });
 
+    testWidgets('v2.5: old keys keep their text and sensation; new items omit it',
+        (tester) async {
+      await pumpDashboard(tester, [
+        entry('e1', 0, [
+          // Legacy key with a sensation (app v2.2 to v2.4).
+          const JournalItemView(
+            kind: 'physical',
+            optionKey: 'cabeca.rosto.tontura',
+            bodySide: 'front',
+            sensation: 'dor',
+            persistence: 'hoje',
+            intensity: 2,
+          ),
+          // Removed urinary option, still readable.
+          const JournalItemView(
+            kind: 'physical',
+            optionKey: 'pelve.urina.dificuldade',
+            bodySide: 'front',
+            sensation: 'incomodo',
+            persistence: 'hoje',
+            intensity: 1,
+          ),
+          // New key, no sensation (v2.5).
+          const JournalItemView(
+            kind: 'physical',
+            optionKey: 'barriga.colica.preso',
+            bodySide: 'front',
+            persistence: 'hoje',
+            intensity: 2,
+          ),
+        ]),
+      ]);
+      expect(find.textContaining('Cabeça e pescoço · Dor · Tontura'), findsOneWidget);
+      expect(find.textContaining('Incômodo · Dificuldade ou fluxo fraco ao fazer xixi'), findsOneWidget);
+      expect(find.textContaining('Barriga · Intestino preso'), findsOneWidget);
+      expect(find.textContaining('cabeca.'), findsNothing);
+      expect(find.textContaining('pelve.'), findsNothing);
+    });
+
     testWidgets('entries list and body marks show triggers, coping, helpers and note',
         (tester) async {
       final full = JournalEntryView(
@@ -353,7 +392,7 @@ void main() {
       Finder inSheet(String text) =>
           find.descendant(of: sheet, matching: find.textContaining(text));
       // Where exactly and how long, not the side of the map.
-      expect(inSheet('Cólica ou estufamento · Há quanto tempo: Meses ou anos · Intensidade 3/5'),
+      expect(inSheet('Cólica, gases ou intestino · Há quanto tempo: Meses ou anos · Intensidade 3/5'),
           findsOneWidget);
       expect(inSheet('Frente'), findsNothing);
       expect(inSheet('Como foi lidar'), findsOneWidget);

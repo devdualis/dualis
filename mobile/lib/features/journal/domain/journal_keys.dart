@@ -23,7 +23,8 @@ class JournalKeys {
   static const String areaEmotional = 'emotional';
   static const String areaPhysical = 'physical';
 
-  // What the user feels in a physical item (journal v2.1).
+  // What the user felt in a physical item (journal v2.1 to v2.4). The flow
+  // no longer asks it (v2.5); old entries keep it and still show it.
   static const String sensationDor = 'dor';
   static const String sensationIncomodo = 'incomodo';
   static const List<String> sensations = [sensationDor, sensationIncomodo];
@@ -59,7 +60,6 @@ class JournalKeys {
     'presente': {
       'energia': ['corpo', 'desligado', 'concentracao'],
       'sobrecarga': ['paciencia', 'aperto', 'muita_coisa', 'inquieto'],
-      'solidao': ['sozinho', 'menos'],
     },
     'futuro': {
       'mente': ['antecipar', 'cobranca', 'indecisao'],
@@ -84,12 +84,13 @@ class JournalKeys {
     },
   };
 
-  /// Physical tree: region -> branch -> options.
+  /// Physical tree: region -> branch -> options. At most 2 branches per
+  /// screen (v2.5): the old `cabeca.rosto`, `barriga.intestino`,
+  /// `pelve.urina` and `pelve.intima` options moved into other branches.
   static const Map<String, Map<String, List<String>>> physicalTree = {
     'cabeca': {
-      'pressao': ['temporas', 'latejando'],
-      'sentidos': ['garganta', 'olhos'],
-      'rosto': ['tontura', 'nariz', 'ouvido', 'mandibula'],
+      'pressao': ['temporas', 'latejando', 'tontura', 'mandibula'],
+      'sentidos': ['garganta', 'olhos', 'nariz', 'ouvido'],
       'nuca': ['rigida', 'pontada'],
     },
     'peito': {
@@ -98,14 +99,12 @@ class JournalKeys {
     },
     'barriga': {
       'queimacao': ['subindo', 'enjoo'],
-      'colica': ['gases', 'pontadas', 'menstrual'],
-      'intestino': ['preso', 'solto'],
+      'colica': ['gases', 'pontadas', 'preso', 'solto', 'menstrual'],
     },
     // Pelvis and lower belly, front only (v2.3). Kept apart from barriga.
     'pelve': {
-      'urina': ['ardencia', 'vontade', 'dificuldade', 'cor_odor'],
+      'xixi_intima': ['ardencia', 'vontade', 'coceira', 'inchaco'],
       'baixo_ventre': ['colica', 'peso', 'menstrual'],
-      'intima': ['coceira', 'inchaco'],
     },
     'costas': {
       'rigidez': ['ombros', 'lombar'],
@@ -135,7 +134,7 @@ class JournalKeys {
 
   /// Branches shown on one side only; every other branch shows on both.
   static const Map<String, Set<String>> frontOnlyBranches = {
-    'cabeca': {'sentidos', 'rosto'},
+    'cabeca': {'sentidos'},
   };
   static const Map<String, Set<String>> backOnlyBranches = {
     'cabeca': {'nuca'},
@@ -346,10 +345,42 @@ class JournalKeys {
   static const int intensityMin = 1;
   static const int intensityMax = 5;
 
-  /// Every valid emotional and physical option key, for validation and tests.
+  /// Every emotional and physical option key the flow offers today.
   static Set<String> get allOptionKeys => {
     for (final tree in [emotionalTree, physicalTree]) ..._keysOf(tree),
   };
+
+  /// Keys of older app versions (v2.2 to v2.4) that the flow no longer
+  /// offers, with the key the same option has now (`null`: removed in v2.5).
+  /// Old entries and queued outbox items still carry them, so they stay
+  /// valid and keep their label.
+  static const Map<String, String?> legacyKeyMoves = {
+    'presente.solidao.sozinho': null,
+    'presente.solidao.menos': null,
+    'cabeca.rosto.tontura': 'cabeca.pressao.tontura',
+    'cabeca.rosto.mandibula': 'cabeca.pressao.mandibula',
+    'cabeca.rosto.nariz': 'cabeca.sentidos.nariz',
+    'cabeca.rosto.ouvido': 'cabeca.sentidos.ouvido',
+    'barriga.intestino.preso': 'barriga.colica.preso',
+    'barriga.intestino.solto': 'barriga.colica.solto',
+    'pelve.urina.ardencia': 'pelve.xixi_intima.ardencia',
+    'pelve.urina.vontade': 'pelve.xixi_intima.vontade',
+    'pelve.urina.dificuldade': null,
+    'pelve.urina.cor_odor': null,
+    'pelve.intima.coceira': 'pelve.xixi_intima.coceira',
+    'pelve.intima.inchaco': 'pelve.xixi_intima.inchaco',
+  };
+
+  static Set<String> get legacyOptionKeys => legacyKeyMoves.keys.toSet();
+
+  /// The key [optionKey] has today, so old and new records of the same
+  /// option count together. Removed and current keys come back unchanged.
+  static String currentOptionKey(String optionKey) =>
+      legacyKeyMoves[optionKey] ?? optionKey;
+
+  /// Every key an entry may carry: the offered ones and the legacy ones.
+  static Set<String> get acceptedOptionKeys =>
+      {...allOptionKeys, ...legacyOptionKeys};
 
   /// Every valid key of a positive item (`<time>.custom` included).
   static Set<String> get positiveOptionKeys => _keysOf(positiveTree);

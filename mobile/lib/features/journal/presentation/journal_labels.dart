@@ -64,6 +64,28 @@ class JournalLabels {
         return l10n.jv2OptCabecaSentidosGarganta;
       case 'cabeca.sentidos.olhos':
         return l10n.jv2OptCabecaSentidosOlhos;
+      // v2.5: options moved into two branches per screen. Same text as the
+      // legacy keys below, which old entries still carry.
+      case 'cabeca.pressao.tontura':
+        return l10n.jv22OptCabecaRostoTontura;
+      case 'cabeca.pressao.mandibula':
+        return l10n.jv22OptCabecaRostoMandibula;
+      case 'cabeca.sentidos.nariz':
+        return l10n.jv22OptCabecaRostoNariz;
+      case 'cabeca.sentidos.ouvido':
+        return l10n.jv22OptCabecaRostoOuvido;
+      case 'barriga.colica.preso':
+        return l10n.jv22OptBarrigaIntestinoPreso;
+      case 'barriga.colica.solto':
+        return l10n.jv22OptBarrigaIntestinoSolto;
+      case 'pelve.xixi_intima.ardencia':
+        return l10n.jv23OptPelveUrinaArdencia;
+      case 'pelve.xixi_intima.vontade':
+        return l10n.jv23OptPelveUrinaVontade;
+      case 'pelve.xixi_intima.coceira':
+        return l10n.jv23OptPelveIntimaCoceira;
+      case 'pelve.xixi_intima.inchaco':
+        return l10n.jv23OptPelveIntimaInchaco;
       case 'peito.respiracao.curta':
         return l10n.jv2OptPeitoRespiracaoCurta;
       case 'peito.respiracao.tosse':
@@ -124,7 +146,9 @@ class JournalLabels {
         return l10n.jv2OptHormoniosApetiteSede;
       case 'hormonios.apetite.fome':
         return l10n.jv2OptHormoniosApetiteFome;
-      // v2.2: new emotional and physical options.
+      // v2.2: new emotional and physical options. `presente.solidao.*`,
+      // `cabeca.rosto.*`, `barriga.intestino.*` and the v2.3 `pelve.urina.*`
+      // and `pelve.intima.*` are legacy since v2.5: kept for old entries.
       case 'passado.memoria.vergonha':
         return l10n.jv22OptPassadoMemoriaVergonha;
       case 'presente.energia.concentracao':
@@ -270,6 +294,8 @@ class JournalLabels {
         return l10n.jv23BranchPelveBaixoVentre;
       case 'pelve.intima':
         return l10n.jv23BranchPelveIntima;
+      case 'pelve.xixi_intima':
+        return l10n.jv25BranchPelveXixiIntima;
       case 'passado.gratidao':
         return l10n.jv22BranchPassadoGratidao;
       case 'passado.orgulho':
@@ -548,20 +574,6 @@ class JournalLabels {
         return l10n.jv2PhrasePresenteSobrecarga6;
       case 'presente.sobrecarga.7':
         return l10n.jv2PhrasePresenteSobrecarga7;
-      case 'presente.solidao.1':
-        return l10n.jv2PhrasePresenteSolidao1;
-      case 'presente.solidao.2':
-        return l10n.jv2PhrasePresenteSolidao2;
-      case 'presente.solidao.3':
-        return l10n.jv2PhrasePresenteSolidao3;
-      case 'presente.solidao.4':
-        return l10n.jv2PhrasePresenteSolidao4;
-      case 'presente.solidao.5':
-        return l10n.jv2PhrasePresenteSolidao5;
-      case 'presente.solidao.6':
-        return l10n.jv2PhrasePresenteSolidao6;
-      case 'presente.solidao.7':
-        return l10n.jv2PhrasePresenteSolidao7;
       case 'futuro.mente.1':
         return l10n.jv2PhraseFuturoMente1;
       case 'futuro.mente.2':
@@ -711,12 +723,11 @@ class JournalLabels {
     'passado.memoria': 7,
     'presente.energia': 7,
     'presente.sobrecarga': 7,
-    'presente.solidao': 7,
     'futuro.mente': 7,
     'futuro.medo': 7,
     'body': 3,
-    // "É dor ou incômodo?" of the client's five regions (7 each); the
-    // other areas use the shared `region` pool.
+    // Branch screen of the client's five regions (7 each); the other areas
+    // (pelve, whole body) use the shared `region` pool.
     'region.cabeca': 7,
     'region.peito': 7,
     'region.barriga': 7,

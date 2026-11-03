@@ -325,7 +325,7 @@ void main() {
     );
   });
 
-  testWidgets('physical path: regions on both sides, sensation, per-region options', (tester) async {
+  testWidgets('physical path: regions on both sides, no sensation step, per-region options', (tester) async {
     final h = JournalHarness();
     await pumpJournalFlow(tester, h, args: physical);
     await startNotSoGood(tester);
@@ -339,22 +339,23 @@ void main() {
     await tapKey(tester, 'jv2_region_costas');
     await tapKey(tester, 'jv2_continue');
 
-    // Region 1: cabeça (front). Sensation first, branches wait for it.
-    expect(find.text(pt.jv2SensationQuestion), findsOneWidget);
+    // Region 1: cabeça (front). Straight to its 2 branches (v2.5): no
+    // "É dor ou incômodo?" and no Rosto branch.
+    expect(find.text(pt.jv23WhereExactly), findsOneWidget);
+    expect(find.byKey(const Key('jv2_sensation_dor')), findsNothing);
     expect(find.text('${pt.jv2RegionCabeca} · ${pt.jv2BodyFront}'), findsOneWidget);
     expect(find.byKey(const Key('jv2_branch_cabeca.sentidos')), findsOneWidget);
+    expect(find.byKey(const Key('jv2_branch_cabeca.rosto')), findsNothing);
     expect(find.byKey(const Key('jv2_branch_cabeca.nuca')), findsNothing);
     await tapKey(tester, 'jv2_branch_cabeca.pressao');
-    expect(find.text(pt.jv2SensationQuestion), findsOneWidget);
-    await tapKey(tester, 'jv2_sensation_dor');
-    await tapKey(tester, 'jv2_branch_cabeca.pressao');
+    // Tontura and mandíbula moved here from Rosto.
+    expect(find.byKey(const Key('jv2_option_cabeca.pressao.tontura')), findsOneWidget);
+    expect(find.byKey(const Key('jv2_option_cabeca.pressao.mandibula')), findsOneWidget);
     await tapKey(tester, 'jv2_option_cabeca.pressao.temporas');
+    await tapKey(tester, 'jv2_option_cabeca.pressao.tontura');
     await tapKey(tester, 'jv2_continue');
-    // Region 2: costas (back). Sensation is asked again.
-    final branch = find.byKey(const Key('jv2_branch_costas.rigidez'));
-    await tapKey(tester, 'jv2_branch_costas.rigidez');
-    expect(branch, findsOneWidget);
-    await tapKey(tester, 'jv2_sensation_incomodo');
+    // Region 2: costas (back).
+    expect(find.byKey(const Key('jv2_branch_costas.rigidez')), findsOneWidget);
     await tapKey(tester, 'jv2_branch_costas.rigidez');
     await tapKey(tester, 'jv2_option_costas.rigidez.lombar');
     await tapKey(tester, 'jv2_write_mine');
@@ -363,7 +364,7 @@ void main() {
     await tapKey(tester, 'jv2_continue');
 
     expect(find.textContaining(pt.jv2RegionCostas), findsWidgets);
-    await fillIntensity(tester, 3, 2);
+    await fillIntensity(tester, 4, 2);
     await tapKey(tester, 'jv2_continue');
 
     // Physical item present: every trigger is offered. Skip clears choices.
@@ -377,11 +378,13 @@ void main() {
     expect(body['area'], 'physical');
     expect(body['triggers'], isEmpty);
     final items = (body['items'] as List).cast<Map<String, dynamic>>();
-    expect(items.map((i) => [i['optionKey'], i['bodySide'], i['sensation']]), [
-      ['cabeca.pressao.temporas', 'front', 'dor'],
-      ['costas.rigidez.lombar', 'back', 'incomodo'],
-      ['costas.custom', 'back', 'incomodo'],
+    expect(items.map((i) => [i['optionKey'], i['bodySide']]), [
+      ['cabeca.pressao.temporas', 'front'],
+      ['cabeca.pressao.tontura', 'front'],
+      ['costas.rigidez.lombar', 'back'],
+      ['costas.custom', 'back'],
     ]);
+    expect(items.every((i) => !i.containsKey('sensation')), isTrue);
     expect(items.last['customLabel'], 'Peso no cóccix');
     expect(items.every((i) => i['kind'] == 'physical'), isTrue);
     final home = containerOf(tester).read(triggerCheckInProvider);
@@ -401,7 +404,6 @@ void main() {
     expect(find.byKey(const Key('jv2_branch_cabeca.pressao')), findsOneWidget);
     expect(find.byKey(const Key('jv2_branch_cabeca.nuca')), findsOneWidget);
     expect(find.byKey(const Key('jv2_branch_cabeca.sentidos')), findsNothing);
-    await tapKey(tester, 'jv2_sensation_dor');
     await tapKey(tester, 'jv2_branch_cabeca.nuca');
     expect(find.text(pt.jv2OptCabecaNucaRigida), findsOneWidget);
     expect(find.text(pt.jv2OptCabecaNucaPontada), findsOneWidget);
@@ -416,7 +418,7 @@ void main() {
     final item = (h.remote.requestBodies.single['items'] as List).single as Map;
     expect(item['optionKey'], 'cabeca.nuca.rigida');
     expect(item['bodySide'], 'back');
-    expect(item['sensation'], 'dor');
+    expect(item.containsKey('sensation'), isFalse);
   });
 
   testWidgets('whole-body areas are recorded without a side', (tester) async {
@@ -434,7 +436,6 @@ void main() {
     await tapKey(tester, 'jv2_continue');
 
     expect(find.text(pt.jv2RegionHormonios), findsWidgets);
-    await tapKey(tester, 'jv2_sensation_incomodo');
     await tapKey(tester, 'jv2_branch_hormonios.temperatura');
     await tapKey(tester, 'jv2_option_hormonios.temperatura.calorao');
     await tapKey(tester, 'jv2_continue');
@@ -447,7 +448,7 @@ void main() {
     final item = (h.remote.requestBodies.single['items'] as List).single as Map;
     expect(item['optionKey'], 'hormonios.temperatura.calorao');
     expect(item.containsKey('bodySide'), isFalse);
-    expect(item['sensation'], 'incomodo');
+    expect(item.containsKey('sensation'), isFalse);
   });
 
   testWidgets('tapping the body map toggles the region', (tester) async {
@@ -503,7 +504,9 @@ void main() {
     expect(find.text(pt.jv23IntensityPickHint), findsOneWidget);
     expect(find.text(pt.jv2PersistenceOptional), findsOneWidget);
     await tapKey(tester, 'jv2_intensity_0_4');
-    expect(find.text('4 · ${pt.jv2IntensityEmotional4}'), findsOneWidget);
+    // D10: the level shows its name before the description.
+    expect(find.text('4 · ${pt.jv25IntensityName4} — ${pt.jv2IntensityEmotional4}'), findsOneWidget);
+    expect(pt.jv25IntensityName4, 'Forte');
     await tapKey(tester, 'jv2_continue');
     await tapKey(tester, 'jv2_skip');
     await tapKey(tester, 'jv22_closing_skip');
@@ -683,15 +686,16 @@ void main() {
       expect(h.remote.requestBodies, isEmpty);
     });
 
-    testWidgets('presente has 3 branches; new options appear, max 4 per screen', (tester) async {
+    testWidgets('presente has 2 branches (no solidão since v2.5), max 4 options per screen', (tester) async {
       final h = JournalHarness();
       await pumpJournalFlow(tester, h);
       await startNotSoGood(tester);
       await tapKey(tester, 'jv2_time_presente');
-      for (final b in ['energia', 'sobrecarga', 'solidao']) {
+      for (final b in ['energia', 'sobrecarga']) {
         expect(find.byKey(Key('jv2_branch_presente.$b')), findsOneWidget);
       }
-      expect(find.text(pt.jv22BranchPresenteSolidao), findsOneWidget);
+      expect(find.byKey(const Key('jv2_branch_presente.solidao')), findsNothing);
+      expect(find.text(pt.jv22BranchPresenteSolidao), findsNothing);
       await tapKey(tester, 'jv2_branch_presente.sobrecarga');
       expect(
         find.byWidgetPredicate((w) =>
@@ -699,9 +703,7 @@ void main() {
             (w.key as ValueKey<String>).value.startsWith('jv2_option_')),
         findsNWidgets(4),
       );
-      await tapKey(tester, 'jv2_back');
-      await tapKey(tester, 'jv2_branch_presente.solidao');
-      await tapKey(tester, 'jv2_option_presente.solidao.menos');
+      await tapKey(tester, 'jv2_option_presente.sobrecarga.inquieto');
       await tapKey(tester, 'jv2_continue');
       await fillIntensity(tester, 1, 2);
       await tapKey(tester, 'jv2_continue');
@@ -718,10 +720,10 @@ void main() {
 
       final body = h.remote.requestBodies.single;
       expect(body['triggers'], ['trabalho', 'telas']);
-      expect((body['items'] as List).single['optionKey'], 'presente.solidao.menos');
+      expect((body['items'] as List).single['optionKey'], 'presente.sobrecarga.inquieto');
     });
 
-    testWidgets('front head shows rosto, back head does not; barriga has the new branches',
+    testWidgets('front head: nariz and ouvido under sentidos; barriga: intestino under cólica',
         (tester) async {
       final h = JournalHarness();
       await pumpJournalFlow(tester, h, args: physical);
@@ -730,23 +732,30 @@ void main() {
       await tapKey(tester, 'jv2_region_barriga');
       await tapKey(tester, 'jv2_continue');
 
-      expect(find.byKey(const Key('jv2_branch_cabeca.rosto')), findsOneWidget);
+      expect(find.byKey(const Key('jv2_branch_cabeca.rosto')), findsNothing);
       expect(find.byKey(const Key('jv2_branch_cabeca.nuca')), findsNothing);
-      await tapKey(tester, 'jv2_sensation_incomodo');
-      await tapKey(tester, 'jv2_branch_cabeca.rosto');
-      for (final o in ['tontura', 'nariz', 'ouvido', 'mandibula']) {
-        expect(find.byKey(Key('jv2_option_cabeca.rosto.$o')), findsOneWidget);
+      expect(find.text(pt.jv2BranchCabecaSentidos), findsOneWidget);
+      await tapKey(tester, 'jv2_branch_cabeca.sentidos');
+      for (final o in ['garganta', 'olhos', 'nariz', 'ouvido']) {
+        expect(find.byKey(Key('jv2_option_cabeca.sentidos.$o')), findsOneWidget);
       }
-      await tapKey(tester, 'jv2_option_cabeca.rosto.tontura');
+      expect(find.text('Garganta arranhando, seca ou dificuldade de engolir'), findsOneWidget);
+      await tapKey(tester, 'jv2_option_cabeca.sentidos.nariz');
       await tapKey(tester, 'jv2_continue');
 
-      expect(find.byKey(const Key('jv2_branch_barriga.intestino')), findsOneWidget);
-      await tapKey(tester, 'jv2_sensation_dor');
+      expect(find.byKey(const Key('jv2_branch_barriga.intestino')), findsNothing);
+      expect(find.text('Cólica, gases ou intestino'), findsOneWidget);
       await tapKey(tester, 'jv2_branch_barriga.colica');
-      expect(find.text(pt.jv22OptBarrigaColicaMenstrual), findsOneWidget);
+      for (final o in ['gases', 'pontadas', 'preso', 'solto', 'menstrual']) {
+        expect(find.byKey(Key('jv2_option_barriga.colica.$o')), findsOneWidget);
+      }
+      // A merged branch still opens with its region's phrase.
+      expect(containerOf(tester).read(journalFlowControllerProvider).shownPhraseIds
+          .where((id) => id.startsWith('region.barriga.')), isNotEmpty);
+      await tapKey(tester, 'jv2_option_barriga.colica.solto');
       await tapKey(tester, 'jv2_option_barriga.colica.menstrual');
       await tapKey(tester, 'jv2_continue');
-      await fillIntensity(tester, 2, 3);
+      await fillIntensity(tester, 3, 3);
       await tapKey(tester, 'jv2_continue');
 
       // Physical entry: every trigger, in topic order.
@@ -764,7 +773,8 @@ void main() {
       expect(body['triggers'], ['ciclo']);
       final items = (body['items'] as List).cast<Map<String, dynamic>>();
       expect(items.map((i) => [i['optionKey'], i['bodySide']]), [
-        ['cabeca.rosto.tontura', 'front'],
+        ['cabeca.sentidos.nariz', 'front'],
+        ['barriga.colica.solto', 'front'],
         ['barriga.colica.menstrual', 'front'],
       ]);
     });
@@ -880,13 +890,21 @@ void main() {
       await tapKey(tester, 'jv2_continue');
 
       expect(find.text('${pt.jv23RegionPelve} · ${pt.jv2BodyFront}'), findsOneWidget);
-      for (final b in ['urina', 'baixo_ventre', 'intima']) {
+      for (final b in ['xixi_intima', 'baixo_ventre']) {
         expect(find.byKey(Key('jv2_branch_pelve.$b')), findsOneWidget);
       }
-      await tapKey(tester, 'jv2_sensation_dor');
-      await tapKey(tester, 'jv2_branch_pelve.urina');
+      expect(find.byKey(const Key('jv2_branch_pelve.urina')), findsNothing);
+      expect(find.byKey(const Key('jv2_branch_pelve.intima')), findsNothing);
+      expect(find.text('Xixi ou região íntima'), findsOneWidget);
+      await tapKey(tester, 'jv2_branch_pelve.xixi_intima');
       expect(find.text(pt.jv23OptPelveUrinaArdencia), findsOneWidget);
-      await tapKey(tester, 'jv2_option_pelve.urina.ardencia');
+      for (final o in ['ardencia', 'vontade', 'coceira', 'inchaco']) {
+        expect(find.byKey(Key('jv2_option_pelve.xixi_intima.$o')), findsOneWidget);
+      }
+      // D12: the two unrequested urinary options are gone.
+      expect(find.text(pt.jv23OptPelveUrinaDificuldade), findsNothing);
+      expect(find.text(pt.jv23OptPelveUrinaCorOdor), findsNothing);
+      await tapKey(tester, 'jv2_option_pelve.xixi_intima.ardencia');
       await tapKey(tester, 'jv2_continue');
       await fillIntensity(tester, 1, 2);
       await tapKey(tester, 'jv2_continue');
@@ -895,9 +913,9 @@ void main() {
       await tapKey(tester, 'jv2_save');
 
       final item = (h.remote.requestBodies.single['items'] as List).single as Map;
-      expect(item['optionKey'], 'pelve.urina.ardencia');
+      expect(item['optionKey'], 'pelve.xixi_intima.ardencia');
       expect(item['bodySide'], 'front');
-      expect(item['sensation'], 'dor');
+      expect(item.containsKey('sensation'), isFalse);
     });
 
     testWidgets('triggers: tabs keep their answers, Não sei goes alone', (tester) async {
@@ -1093,19 +1111,16 @@ void main() {
       await tapKey(tester, 'jv2_continue');
 
       // Region 1: barriga
-      await tapKey(tester, 'jv2_sensation_dor');
       await tapKey(tester, 'jv2_branch_barriga.colica');
       expect(find.byKey(const Key('jv2_option_barriga.colica.menstrual')), findsNothing);
       expect(find.byKey(const Key('jv2_option_barriga.colica.gases')), findsOneWidget);
       await tapKey(tester, 'jv2_option_barriga.colica.gases');
       await tapKey(tester, 'jv2_continue');
 
-      // Region 2: pelve
-      await tapKey(tester, 'jv2_sensation_incomodo');
-      await tapKey(tester, 'jv2_branch_pelve.urina');
-      expect(find.byKey(const Key('jv2_option_pelve.urina.dificuldade')), findsOneWidget);
-      expect(find.byKey(const Key('jv2_option_pelve.urina.cor_odor')), findsOneWidget);
-      await tapKey(tester, 'jv2_option_pelve.urina.dificuldade');
+      // Region 2: pelve. Menstrual is hidden under baixo ventre too.
+      await tapKey(tester, 'jv2_branch_pelve.baixo_ventre');
+      expect(find.byKey(const Key('jv2_option_pelve.baixo_ventre.menstrual')), findsNothing);
+      await tapKey(tester, 'jv2_option_pelve.baixo_ventre.peso');
       await tapKey(tester, 'jv2_continue');
 
       // Intensity

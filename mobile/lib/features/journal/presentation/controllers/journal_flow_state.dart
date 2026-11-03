@@ -84,9 +84,6 @@ class JournalFlowState {
   final List<SelectedRegion> selectedRegions;
   final int regionIndex;
 
-  /// "Dor" or "Incômodo" for the region on screen.
-  final String? sensation;
-
   /// Options and custom labels picked on the current options screen.
   final Set<String> selectedOptions;
   final List<String> customLabels;
@@ -119,7 +116,6 @@ class JournalFlowState {
     this.bodySide = 'front',
     this.selectedRegions = const [],
     this.regionIndex = 0,
-    this.sensation,
     this.selectedOptions = const {},
     this.customLabels = const [],
     this.items = const [],
@@ -189,8 +185,6 @@ class JournalFlowState {
     String? bodySide,
     List<SelectedRegion>? selectedRegions,
     int? regionIndex,
-    String? sensation,
-    bool clearSensation = false,
     Set<String>? selectedOptions,
     List<String>? customLabels,
     List<JournalItem>? items,
@@ -218,7 +212,6 @@ class JournalFlowState {
       bodySide: bodySide ?? this.bodySide,
       selectedRegions: selectedRegions ?? this.selectedRegions,
       regionIndex: regionIndex ?? this.regionIndex,
-      sensation: clearSensation ? null : (sensation ?? this.sensation),
       selectedOptions: selectedOptions ?? this.selectedOptions,
       customLabels: customLabels ?? this.customLabels,
       items: items ?? this.items,

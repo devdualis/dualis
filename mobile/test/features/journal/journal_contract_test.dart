@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dualis_mobile/features/journal/domain/journal_keys.dart';
 import 'package:dualis_mobile/features/journal/domain/journal_models.dart';
 import 'package:dualis_mobile/features/journal/presentation/journal_labels.dart';
+import 'package:dualis_mobile/features/journal/presentation/widgets/intensity_scale.dart';
 import 'package:dualis_mobile/l10n/app_localizations_en.dart';
 import 'package:dualis_mobile/l10n/app_localizations_es.dart';
 import 'package:dualis_mobile/l10n/app_localizations_pt.dart';
@@ -12,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// Mirrors `docs/bienestar/CONTRATO-JOURNAL-V2.md`.
 void main() {
   group('keys mirror the contract', () {
-    test('20 emotional and 48 physical options (v2.3), plus one custom key per root', () {
+    test('18 emotional and 48 physical options (v2.5), plus one custom key per root', () {
       final keys = JournalKeys.allOptionKeys;
       final emotional = keys.where(
         (k) => JournalKeys.times.contains(JournalKeys.rootOf(k)) && !JournalKeys.isCustomKey(k),
@@ -20,8 +21,8 @@ void main() {
       final physical = keys.where(
         (k) => JournalKeys.regions.contains(JournalKeys.rootOf(k)) && !JournalKeys.isCustomKey(k),
       );
-      expect(emotional, hasLength(20));
-      expect(physical, hasLength(50));
+      expect(emotional, hasLength(18));
+      expect(physical, hasLength(48));
       expect(keys.where(JournalKeys.isCustomKey), hasLength(12));
       expect(keys, containsAll(['passado.tristeza.culpa', 'futuro.medo.desanimo', 'costas.fisgada.ao_mexer', 'membros.custom']));
       expect(keys, containsAll([
@@ -36,9 +37,9 @@ void main() {
     test('branches follow the side rules (v2.1)', () {
       Set<String> b(String region, String? side) =>
           JournalKeys.branchesFor(region, side).keys.toSet();
-      expect(b('cabeca', 'front'), {'pressao', 'sentidos', 'rosto'});
-      expect(b('barriga', 'front'), {'queimacao', 'colica', 'intestino'});
-      expect(b('pelve', 'front'), {'urina', 'baixo_ventre', 'intima'});
+      expect(b('cabeca', 'front'), {'pressao', 'sentidos'});
+      expect(b('barriga', 'front'), {'queimacao', 'colica'});
+      expect(b('pelve', 'front'), {'xixi_intima', 'baixo_ventre'});
       expect(b('cabeca', 'back'), {'pressao', 'nuca'});
       expect(b('costas', 'back'), {'rigidez', 'fisgada'});
       expect(b('membros', 'front'), {'cansaco', 'formigamento'});
@@ -47,6 +48,58 @@ void main() {
       expect(b('hormonios', null), {'temperatura', 'apetite'});
       expect(JournalKeys.wholeBodyAreas, ['pele', 'musculos', 'hormonios']);
       expect(JournalKeys.bodyRegions, ['cabeca', 'peito', 'barriga', 'pelve', 'costas', 'membros']);
+      // v2.5: no screen shows more than 2 branches, on any side.
+      for (final region in JournalKeys.regions) {
+        for (final side in JournalKeys.isWholeBody(region)
+            ? const <String?>[null]
+            : const <String?>['front', 'back']) {
+          expect(b(region, side).length, lessThanOrEqualTo(2), reason: '$region $side');
+        }
+      }
+      for (final branches in JournalKeys.emotionalTree.values) {
+        expect(branches.length, lessThanOrEqualTo(2));
+      }
+    });
+
+    test('v2.5 legacy keys stay valid, keep their text and point to their new place', () {
+      final pt = AppLocalizationsPt();
+      final legacy = JournalKeys.legacyOptionKeys;
+      expect(legacy, hasLength(14));
+      expect(JournalKeys.allOptionKeys.intersection(legacy), isEmpty);
+      expect(JournalKeys.acceptedOptionKeys, containsAll(legacy));
+      expect(JournalKeys.acceptedOptionKeys, containsAll(JournalKeys.allOptionKeys));
+      for (final l10n in [pt, AppLocalizationsEn(), AppLocalizationsEs()]) {
+        for (final key in legacy) {
+          expect(JournalLabels.option(l10n, key), isNot(key), reason: key);
+          final parts = key.split('.');
+          final branch = '${parts[0]}.${parts[1]}';
+          expect(JournalLabels.branch(l10n, branch), isNot(branch), reason: branch);
+          final moved = JournalKeys.legacyKeyMoves[key];
+          if (moved != null) {
+            expect(JournalKeys.allOptionKeys, contains(moved));
+            expect(JournalLabels.option(l10n, moved), JournalLabels.option(l10n, key));
+          }
+        }
+      }
+      expect(JournalKeys.currentOptionKey('cabeca.rosto.tontura'), 'cabeca.pressao.tontura');
+      expect(JournalKeys.currentOptionKey('barriga.intestino.solto'), 'barriga.colica.solto');
+      expect(JournalKeys.currentOptionKey('pelve.intima.coceira'), 'pelve.xixi_intima.coceira');
+      expect(JournalKeys.currentOptionKey('pelve.urina.cor_odor'), 'pelve.urina.cor_odor');
+      expect(JournalKeys.currentOptionKey('presente.solidao.menos'), 'presente.solidao.menos');
+      expect(JournalKeys.currentOptionKey('peito.respiracao.curta'), 'peito.respiracao.curta');
+      expect(JournalLabels.option(pt, 'pelve.urina.dificuldade'), 'Dificuldade ou fluxo fraco ao fazer xixi');
+      expect(JournalLabels.branch(pt, 'pelve.xixi_intima'), 'Xixi ou região íntima');
+      expect(JournalLabels.branch(pt, 'barriga.colica'), 'Cólica, gases ou intestino');
+    });
+
+    test('client wording restored on three physical options (D13)', () {
+      final pt = AppLocalizationsPt();
+      expect(JournalLabels.option(pt, 'cabeca.sentidos.garganta'),
+          'Garganta arranhando, seca ou dificuldade de engolir');
+      expect(JournalLabels.option(pt, 'peito.incomodo.batedeira'),
+          'Coração acelerado, batedeira ou palpitação');
+      expect(JournalLabels.option(pt, 'barriga.queimacao.subindo'),
+          'Queimação subindo para a garganta ou refluxo ácido');
     });
 
     test('moods, persistence and triggers', () {
@@ -77,23 +130,29 @@ void main() {
         'presente': {
           'energia': ['corpo', 'desligado', 'concentracao'],
           'sobrecarga': ['paciencia', 'aperto', 'muita_coisa', 'inquieto'],
-          'solidao': ['sozinho', 'menos'],
         },
         'futuro': {
           'mente': ['antecipar', 'cobranca', 'indecisao'],
           'medo': ['julgamento', 'desanimo', 'evitar'],
         },
       });
-      expect(JournalKeys.physicalTree['cabeca']!['rosto'],
-          ['tontura', 'nariz', 'ouvido', 'mandibula']);
-      expect(JournalKeys.physicalTree['barriga']!['colica'], ['gases', 'pontadas', 'menstrual']);
-      expect(JournalKeys.physicalTree['barriga']!['intestino'], ['preso', 'solto']);
+      // v2.5: two branches per screen; the third branch's options moved.
+      expect(JournalKeys.physicalTree['cabeca'], {
+        'pressao': ['temporas', 'latejando', 'tontura', 'mandibula'],
+        'sentidos': ['garganta', 'olhos', 'nariz', 'ouvido'],
+        'nuca': ['rigida', 'pontada'],
+      });
+      expect(JournalKeys.physicalTree['barriga'], {
+        'queimacao': ['subindo', 'enjoo'],
+        'colica': ['gases', 'pontadas', 'preso', 'solto', 'menstrual'],
+      });
       // v2.3: pelvis and lower belly, apart from barriga.
       expect(JournalKeys.physicalTree['pelve'], {
-        'urina': ['ardencia', 'vontade', 'dificuldade', 'cor_odor'],
+        'xixi_intima': ['ardencia', 'vontade', 'coceira', 'inchaco'],
         'baixo_ventre': ['colica', 'peso', 'menstrual'],
-        'intima': ['coceira', 'inchaco'],
       });
+      expect(JournalKeys.branchesFor('barriga', 'front', isMale: true)['colica'],
+          ['gases', 'pontadas', 'preso', 'solto']);
       expect(JournalKeys.positiveTree, {
         'passado': {
           'gratidao': ['alguem', 'algo'],
@@ -116,11 +175,14 @@ void main() {
           isEmpty,
         );
       }
-      // Max 4 options per screen.
+      // Max 4 options per screen. Only "Cólica, gases ou intestino" has a
+      // fifth one, "Cólica menstrual", which men never see (v2.5).
       for (final tree in [JournalKeys.emotionalTree, JournalKeys.physicalTree, JournalKeys.positiveTree]) {
-        for (final branches in tree.values) {
-          for (final options in branches.values) {
-            expect(options.length, lessThanOrEqualTo(4));
+        for (final branches in tree.entries) {
+          for (final options in branches.value.entries) {
+            final shown = [for (final o in options.value) if (o != 'menstrual') o];
+            expect(shown.length, lessThanOrEqualTo(4), reason: '${branches.key}.${options.key}');
+            expect(options.value.length, lessThanOrEqualTo(5));
           }
         }
       }
@@ -144,6 +206,7 @@ void main() {
       final pt = AppLocalizationsPt();
       final en = AppLocalizationsEn();
       final es = AppLocalizationsEs();
+      // Legacy branch since v2.5: still has its text for old entries.
       expect(JournalLabels.branch(pt, 'presente.solidao'), 'Sozinho(a) ou inseguro(a)');
       expect(JournalLabels.option(en, 'futuro.medo.evitar'), 'I want to avoid or get away from something');
       expect(JournalLabels.option(es, 'cabeca.rosto.nariz'), 'Nariz tapada o que gotea');
@@ -261,6 +324,8 @@ void main() {
         items: const [
           JournalItem(kind: 'condition', conditionId: 'c1', conditionLabel: 'Enxaqueca', intensity: 3),
           JournalItem(kind: 'physical', optionKey: 'peito.respiracao.curta', bodySide: 'front', sensation: 'dor', persistence: 'hoje', intensity: 2),
+          // v2.5: new physical items carry no sensation.
+          JournalItem(kind: 'physical', optionKey: 'cabeca.pressao.tontura', bodySide: 'front', persistence: 'hoje', intensity: 1),
         ],
       );
       final body = entry.toRequestJson();
@@ -270,7 +335,8 @@ void main() {
         for (final i in body['items'] as List) ...(i as Map).keys,
       };
       expect(itemKeys.difference({'kind', 'optionKey', 'customLabel', 'conditionId', 'bodySide', 'sensation', 'persistence', 'intensity'}), isEmpty);
-      expect((body['items'] as List).last['sensation'], 'dor');
+      expect((body['items'] as List)[1]['sensation'], 'dor');
+      expect((body['items'] as List).last.containsKey('sensation'), isFalse);
     });
 
     test('old entries without area or sensation stay readable', () {
@@ -370,5 +436,24 @@ void main() {
     final arb = File('lib/l10n/app_pt.arb').readAsStringSync();
     expect(arb.contains('☠'), isFalse);
     expect(RegExp(r'"jv2Intensity[^"]*":\s*"[^"]*(Paralisante|Incapacitante|urgente)').hasMatch(arb), isFalse);
+  });
+
+  test('intensity level names (D10): client words where not alarming, no grade', () {
+    expect([for (var l = 1; l <= 5; l++) intensityName(AppLocalizationsPt(), l)],
+        ['Leve', 'Notável', 'Desgastante', 'Forte', 'Muito forte']);
+    expect([for (var l = 1; l <= 5; l++) intensityName(AppLocalizationsEn(), l)],
+        ['Mild', 'Noticeable', 'Draining', 'Strong', 'Very strong']);
+    expect([for (var l = 1; l <= 5; l++) intensityName(AppLocalizationsEs(), l)],
+        ['Leve', 'Notable', 'Agotador', 'Fuerte', 'Muy fuerte']);
+    for (final lang in ['pt', 'en', 'es']) {
+      final arb = jsonDecode(File('lib/l10n/app_$lang.arb').readAsStringSync()) as Map<String, dynamic>;
+      for (var l = 1; l <= 5; l++) {
+        expect(
+          RegExp(r'sever|grave|paralis|incapacit|limitante|urgen|☠', caseSensitive: false)
+              .hasMatch(arb['jv25IntensityName$l'] as String),
+          isFalse,
+        );
+      }
+    }
   });
 }

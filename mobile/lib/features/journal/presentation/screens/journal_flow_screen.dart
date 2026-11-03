@@ -543,13 +543,8 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     );
   }
 
-  static const Map<String, String> _sensationEmojis = {
-    JournalKeys.sensationDor: '⚡',
-    JournalKeys.sensationIncomodo: '〰️',
-  };
-
-  /// "É dor ou incômodo?" (required) and the branches of the region, for
-  /// the side it was marked on.
+  /// The branches of the region, for the side it was marked on. Since v2.5
+  /// there is no "É dor ou incômodo?" step and at most 2 branches.
   Widget _regionBranchStep(AppLocalizations l10n, JournalFlowState state) {
     final current = state.currentRegion!;
     final region = current.region;
@@ -559,34 +554,18 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         : (side == JournalKeys.sideBack ? l10n.jv2BodyBack : l10n.jv2BodyFront);
     final rootLabel = JournalLabels.root(l10n, region);
     final branches = JournalKeys.branchesFor(region, side, isMale: _isMale);
-    final hasSensation = state.sensation != null;
     return _StepLayout(
       progress: _progress(state),
       eyebrow: sideLabel == null ? rootLabel : '$rootLabel · $sideLabel',
       lead: _phrase(l10n, state),
-      question: l10n.jv2SensationQuestion,
+      question: l10n.jv23WhereExactly,
+      hint: l10n.jv23TapOneHint,
       children: [
-        _CardGrid(
-          columns: 2,
-          children: [
-            for (final sensation in JournalKeys.sensations)
-              _ChoiceCard(
-                key: Key('jv2_sensation_$sensation'),
-                emoji: _sensationEmojis[sensation],
-                label: JournalLabels.sensation(l10n, sensation),
-                selected: state.sensation == sensation,
-                onTap: () => _controller.chooseSensation(sensation),
-              ),
-          ],
-        ),
-        _CapsLabel(l10n.jv23WhereExactly),
         for (final branch in branches.keys)
           _ChoiceTile(
             key: Key('jv2_branch_$region.$branch'),
             emoji: journalEmojis['$region.$branch'],
             label: JournalLabels.branch(l10n, '$region.$branch'),
-            dense: true,
-            enabled: hasSensation,
             onTap: () => _controller.chooseBranch(branch),
           ),
       ],

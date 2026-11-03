@@ -3280,12 +3280,6 @@ abstract class AppLocalizations {
   /// **'Hormônios e metabolismo'**
   String get jv2RegionHormonios;
 
-  /// No description provided for @jv2SensationQuestion.
-  ///
-  /// In pt, this message translates to:
-  /// **'É dor ou incômodo?'**
-  String get jv2SensationQuestion;
-
   /// No description provided for @jv2SensationDor.
   ///
   /// In pt, this message translates to:
@@ -3427,13 +3421,13 @@ abstract class AppLocalizations {
   /// No description provided for @jv2BranchCabecaPressao.
   ///
   /// In pt, this message translates to:
-  /// **'Aperto, peso ou pressão'**
+  /// **'Aperto, peso, pressão ou tontura'**
   String get jv2BranchCabecaPressao;
 
   /// No description provided for @jv2BranchCabecaSentidos.
   ///
   /// In pt, this message translates to:
-  /// **'Olhos, boca ou garganta'**
+  /// **'Olhos, ouvido, nariz ou garganta'**
   String get jv2BranchCabecaSentidos;
 
   /// No description provided for @jv2BranchPeitoRespiracao.
@@ -3457,7 +3451,7 @@ abstract class AppLocalizations {
   /// No description provided for @jv2BranchBarrigaColica.
   ///
   /// In pt, this message translates to:
-  /// **'Cólica ou estufamento'**
+  /// **'Cólica, gases ou intestino'**
   String get jv2BranchBarrigaColica;
 
   /// No description provided for @jv2BranchCostasRigidez.
@@ -3499,7 +3493,7 @@ abstract class AppLocalizations {
   /// No description provided for @jv2OptCabecaSentidosGarganta.
   ///
   /// In pt, this message translates to:
-  /// **'Garganta arranhando ou seca'**
+  /// **'Garganta arranhando, seca ou dificuldade de engolir'**
   String get jv2OptCabecaSentidosGarganta;
 
   /// No description provided for @jv2OptCabecaSentidosOlhos.
@@ -3523,7 +3517,7 @@ abstract class AppLocalizations {
   /// No description provided for @jv2OptPeitoIncomodoBatedeira.
   ///
   /// In pt, this message translates to:
-  /// **'Coração acelerado ou batedeira'**
+  /// **'Coração acelerado, batedeira ou palpitação'**
   String get jv2OptPeitoIncomodoBatedeira;
 
   /// No description provided for @jv2OptPeitoIncomodoCostelas.
@@ -3535,7 +3529,7 @@ abstract class AppLocalizations {
   /// No description provided for @jv2OptBarrigaQueimacaoSubindo.
   ///
   /// In pt, this message translates to:
-  /// **'Queimação subindo'**
+  /// **'Queimação subindo para a garganta ou refluxo ácido'**
   String get jv2OptBarrigaQueimacaoSubindo;
 
   /// No description provided for @jv2OptBarrigaQueimacaoEnjoo.
@@ -3651,6 +3645,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{level} de 5'**
   String jv2IntensityLevel(int level);
+
+  /// No description provided for @jv25IntensityName1.
+  ///
+  /// In pt, this message translates to:
+  /// **'Leve'**
+  String get jv25IntensityName1;
+
+  /// No description provided for @jv25IntensityName2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notável'**
+  String get jv25IntensityName2;
+
+  /// No description provided for @jv25IntensityName3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desgastante'**
+  String get jv25IntensityName3;
+
+  /// No description provided for @jv25IntensityName4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Forte'**
+  String get jv25IntensityName4;
+
+  /// No description provided for @jv25IntensityName5.
+  ///
+  /// In pt, this message translates to:
+  /// **'Muito forte'**
+  String get jv25IntensityName5;
 
   /// No description provided for @jv2IntensityEmotional1.
   ///
@@ -7918,6 +7942,12 @@ abstract class AppLocalizations {
   /// **'Região íntima'**
   String get jv23BranchPelveIntima;
 
+  /// No description provided for @jv25BranchPelveXixiIntima.
+  ///
+  /// In pt, this message translates to:
+  /// **'Xixi ou região íntima'**
+  String get jv25BranchPelveXixiIntima;
+
   /// No description provided for @jv23OptPelveUrinaArdencia.
   ///
   /// In pt, this message translates to:
@@ -9057,48 +9087,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Compreendo o estresse. O que mais está pesando agora?'**
   String get jv2PhrasePresenteSobrecarga7;
-
-  /// No description provided for @jv2PhrasePresenteSolidao1.
-  ///
-  /// In pt, this message translates to:
-  /// **'Sentir-se sozinho(a) pesa. Obrigado por contar.'**
-  String get jv2PhrasePresenteSolidao1;
-
-  /// No description provided for @jv2PhrasePresenteSolidao2.
-  ///
-  /// In pt, this message translates to:
-  /// **'Entendi. Como essa falta de companhia aparece hoje?'**
-  String get jv2PhrasePresenteSolidao2;
-
-  /// No description provided for @jv2PhrasePresenteSolidao3.
-  ///
-  /// In pt, this message translates to:
-  /// **'Às vezes a gente se sente longe das pessoas. O que combina mais?'**
-  String get jv2PhrasePresenteSolidao3;
-
-  /// No description provided for @jv2PhrasePresenteSolidao4.
-  ///
-  /// In pt, this message translates to:
-  /// **'Obrigado por confiar. Vamos anotar isso com calma.'**
-  String get jv2PhrasePresenteSolidao4;
-
-  /// No description provided for @jv2PhrasePresenteSolidao5.
-  ///
-  /// In pt, this message translates to:
-  /// **'Estar com menos gente por perto muda o dia. Como está hoje?'**
-  String get jv2PhrasePresenteSolidao5;
-
-  /// No description provided for @jv2PhrasePresenteSolidao6.
-  ///
-  /// In pt, this message translates to:
-  /// **'Tudo bem sentir isso. O que mais combina com agora?'**
-  String get jv2PhrasePresenteSolidao6;
-
-  /// No description provided for @jv2PhrasePresenteSolidao7.
-  ///
-  /// In pt, this message translates to:
-  /// **'Vamos registrar do seu jeito. O que você sente?'**
-  String get jv2PhrasePresenteSolidao7;
 
   /// No description provided for @jv2PhraseFuturoMente1.
   ///
