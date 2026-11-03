@@ -94,6 +94,11 @@ const Map<String, String> journalEmojis = {
   'cabeca.sentidos': '👄',
   'cabeca.sentidos.garganta': '👄',
   'cabeca.sentidos.olhos': '👁️',
+  'cabeca.pressao.tontura': '💫',
+  'cabeca.pressao.mandibula': '🦷',
+  'cabeca.sentidos.nariz': '👃',
+  'cabeca.sentidos.ouvido': '👂',
+  // Legacy branches and options (v2.2 to v2.4), kept for old entries.
   'cabeca.rosto': '😶',
   'cabeca.rosto.tontura': '💫',
   'cabeca.rosto.nariz': '👃',
@@ -115,9 +120,16 @@ const Map<String, String> journalEmojis = {
   'barriga.colica.gases': '💨',
   'barriga.colica.pontadas': '⚡',
   'barriga.colica.menstrual': '🩸',
+  'barriga.colica.preso': '🧱',
+  'barriga.colica.solto': '💧',
   'barriga.intestino': '🔄',
   'barriga.intestino.preso': '🧱',
   'barriga.intestino.solto': '💧',
+  'pelve.xixi_intima': '🚽',
+  'pelve.xixi_intima.ardencia': '🔥',
+  'pelve.xixi_intima.vontade': '🏃',
+  'pelve.xixi_intima.coceira': '🤚',
+  'pelve.xixi_intima.inchaco': '🎈',
   'pelve.urina': '🚽',
   'pelve.urina.ardencia': '🔥',
   'pelve.urina.vontade': '🏃',
@@ -175,8 +187,8 @@ String journalItemText(AppLocalizations l10n, JournalItem item) {
   return item.legacyLabel ?? '';
 }
 
-/// Row title: physical items are prefixed with the body region
-/// and, on new entries, what the user felt
+/// Row title: physical items are prefixed with the body region and, on
+/// entries of v2.1 to v2.4 that have it, what the user felt
 /// ("Cabeça e pescoço · Dor · Dor ou pressão nas têmporas ou testa").
 String journalItemTitle(AppLocalizations l10n, JournalItem item) {
   final text = journalItemText(l10n, item);

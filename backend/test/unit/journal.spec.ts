@@ -8,6 +8,12 @@ import {
   JournalDaysQueryDto,
 } from '../../src/modules/journal/dto/journal.dto';
 import {
+  ACCEPTED_EMOTIONAL_OPTION_KEYS,
+  ACCEPTED_PHYSICAL_OPTION_KEYS,
+  LEGACY_EMOTIONAL_OPTION_KEYS,
+  LEGACY_PHYSICAL_OPTION_KEYS,
+  PHYSICAL_SIDE_BRANCHES,
+  PHYSICAL_TREE,
   EMOTIONAL_OPTION_KEYS,
   POSITIVE_OPTION_KEYS,
   POSITIVE_TREE,
@@ -42,9 +48,9 @@ const withItem = (item: Record<string, unknown>, extra: Record<string, unknown> 
   errorsOf({ ...baseEntry, ...extra, items: [item] });
 
 describe('Journal v2 keys', () => {
-  it('match the contract tables: 20 emotional + 3 custom, 50 physical + 9 custom', () => {
-    expect(EMOTIONAL_OPTION_KEYS).toHaveLength(23);
-    expect(PHYSICAL_OPTION_KEYS).toHaveLength(59);
+  it('match the contract tables (v2.5): 18 emotional + 3 custom, 48 physical + 9 custom', () => {
+    expect(EMOTIONAL_OPTION_KEYS).toHaveLength(21);
+    expect(PHYSICAL_OPTION_KEYS).toHaveLength(57);
     expect(EMOTIONAL_OPTION_KEYS).toContain('passado.memoria.magoa');
     expect(EMOTIONAL_OPTION_KEYS).toContain('presente.custom');
     expect(PHYSICAL_OPTION_KEYS).toContain('costas.fisgada.ao_mexer');
@@ -60,6 +66,31 @@ describe('Journal v2 keys', () => {
     }
     expect(SENSATION_KEYS).toEqual(['dor', 'incomodo']);
     expect(ENTRY_AREAS).toEqual(['emotional', 'physical']);
+  });
+
+  it('v2.5: at most 2 branches per screen; legacy keys stay accepted but are not offered', () => {
+    for (const side of ['front', 'back'] as const) {
+      for (const [region, branches] of Object.entries(PHYSICAL_SIDE_BRANCHES[side])) {
+        expect(branches!.length, `${region} ${side}`).toBeLessThanOrEqual(2);
+      }
+    }
+    for (const region of ['pele', 'musculos', 'hormonios'] as const) {
+      expect(Object.keys(PHYSICAL_TREE[region])).toHaveLength(2);
+    }
+    expect(LEGACY_EMOTIONAL_OPTION_KEYS).toEqual(['presente.solidao.sozinho', 'presente.solidao.menos']);
+    expect(LEGACY_PHYSICAL_OPTION_KEYS).toHaveLength(12);
+    for (const key of [...LEGACY_EMOTIONAL_OPTION_KEYS, ...LEGACY_PHYSICAL_OPTION_KEYS]) {
+      expect([...EMOTIONAL_OPTION_KEYS, ...PHYSICAL_OPTION_KEYS], key).not.toContain(key);
+    }
+    expect(ACCEPTED_EMOTIONAL_OPTION_KEYS).toEqual([...EMOTIONAL_OPTION_KEYS, ...LEGACY_EMOTIONAL_OPTION_KEYS]);
+    expect(ACCEPTED_PHYSICAL_OPTION_KEYS).toEqual([...PHYSICAL_OPTION_KEYS, ...LEGACY_PHYSICAL_OPTION_KEYS]);
+    expect(PHYSICAL_OPTION_KEYS).not.toContain('pelve.urina.dificuldade');
+    expect(PHYSICAL_OPTION_KEYS).not.toContain('pelve.urina.cor_odor');
+    // Legacy branches were front only.
+    expect(isOptionKeyOnSide('cabeca.rosto.tontura', 'front')).toBe(true);
+    expect(isOptionKeyOnSide('cabeca.rosto.tontura', 'back')).toBe(false);
+    expect(isOptionKeyOnSide('pelve.intima.coceira', 'front')).toBe(true);
+    expect(isOptionKeyOnSide('cabeca.pressao.tontura', 'back')).toBe(true);
   });
 
   it('branch side rules: front, back and whole body', () => {
@@ -108,8 +139,9 @@ describe('CreateJournalEntryDto v2.1: area, sensation and sides', () => {
     expect(errorsOf({ ...baseEntry, area: 'emotional', mood: 'normal', items: [] })).toContain('journalEntryShape');
   });
 
-  it('sensation is required on physical items of v2.1 entries and only accepted on physical items', () => {
-    expect(v21([physical({ optionKey: 'peito.respiracao.curta', bodySide: 'front' })])).toContain('journalEntryShape');
+  it('sensation is optional (v2.5) and only accepted on physical items', () => {
+    expect(v21([physical({ optionKey: 'peito.respiracao.curta', bodySide: 'front' })])).toEqual([]);
+    expect(v21([physical({ optionKey: 'peito.respiracao.curta', bodySide: 'front', sensation: 'dor' })])).toEqual([]);
     expect(v21([physical({ optionKey: 'peito.respiracao.curta', bodySide: 'front', sensation: 'forte' })])).toContain('isIn');
     expect(
       withItem({ kind: 'emotional', optionKey: 'futuro.mente.antecipar', sensation: 'dor', persistence: 'hoje', intensity: 1 }),
@@ -117,6 +149,18 @@ describe('CreateJournalEntryDto v2.1: area, sensation and sides', () => {
     expect(
       withItem({ kind: 'condition', conditionId: '11111111-1111-4111-8111-111111111111', sensation: 'dor', intensity: 1 }),
     ).toContain('journalItemShape');
+  });
+
+  it('v2.5: new keys without sensation, and old keys from an offline outbox, are both accepted', () => {
+    // New app: moved option, no sensation.
+    expect(v21([physical({ optionKey: 'cabeca.pressao.tontura', bodySide: 'back' }), physical({ optionKey: 'pelve.xixi_intima.coceira', bodySide: 'front' })])).toEqual([]);
+    // Old app (v2.4) item still in the outbox: legacy key with its sensation.
+    expect(v21([physical({ optionKey: 'cabeca.rosto.tontura', bodySide: 'front', sensation: 'dor' })])).toEqual([]);
+    // Legacy key and no sensation at once.
+    expect(v21([physical({ optionKey: 'pelve.urina.cor_odor', bodySide: 'front' })])).toEqual([]);
+    expect(withItem({ kind: 'emotional', optionKey: 'presente.solidao.sozinho', persistence: 'hoje', intensity: 2 }, { area: 'emotional' })).toEqual([]);
+    // A key that never existed is still rejected.
+    expect(v21([physical({ optionKey: 'cabeca.rosto.olhos', bodySide: 'front' })])).toContain('journalItemShape');
   });
 
   it('old clients without area keep working (no sensation, any side for old keys)', () => {
@@ -412,7 +456,8 @@ describe('Journal v2.2 wellness choices', () => {
       expect(PHYSICAL_ONLY_TRIGGER_KEYS).not.toContain(trigger);
       expect(errorsOf({ ...baseEntry, triggers: [trigger] })).toEqual([]);
     }
-    for (const optionKey of ['cabeca.rosto.tontura', 'cabeca.rosto.nariz', 'cabeca.rosto.ouvido', 'cabeca.rosto.mandibula', 'barriga.colica.menstrual', 'barriga.intestino.preso', 'barriga.intestino.solto', 'pelve.urina.ardencia', 'pelve.urina.vontade', 'pelve.baixo_ventre.colica', 'pelve.baixo_ventre.peso', 'pelve.baixo_ventre.menstrual', 'pelve.intima.coceira', 'pelve.intima.inchaco']) {
+    // Front-only options: current keys and the legacy keys of v2.2 to v2.4.
+    for (const optionKey of ['cabeca.rosto.tontura', 'cabeca.rosto.nariz', 'cabeca.rosto.ouvido', 'cabeca.rosto.mandibula', 'barriga.colica.menstrual', 'barriga.intestino.preso', 'barriga.intestino.solto', 'pelve.urina.ardencia', 'pelve.urina.vontade', 'pelve.urina.dificuldade', 'pelve.urina.cor_odor', 'pelve.baixo_ventre.colica', 'pelve.baixo_ventre.peso', 'pelve.baixo_ventre.menstrual', 'pelve.intima.coceira', 'pelve.intima.inchaco', 'cabeca.sentidos.nariz', 'cabeca.sentidos.ouvido', 'barriga.colica.preso', 'barriga.colica.solto', 'pelve.xixi_intima.ardencia', 'pelve.xixi_intima.vontade', 'pelve.xixi_intima.coceira', 'pelve.xixi_intima.inchaco']) {
       const item = { kind: 'physical', optionKey, bodySide: 'front', sensation: 'incomodo', persistence: 'hoje', intensity: 2 };
       expect(withItem(item, { area: 'physical' })).toEqual([]);
       expect(withItem({ ...item, bodySide: 'back' }, { area: 'physical' })).toContain('journalEntryShape');

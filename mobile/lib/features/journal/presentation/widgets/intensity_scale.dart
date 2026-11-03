@@ -41,6 +41,21 @@ String intensityText(AppLocalizations l10n, int level, {required bool physical})
   }
 }
 
+/// Short name of a level, the same on the emotional and the physical scale
+/// (client wording where it is not alarming; strategy section 8). A word the
+/// person picks for themselves; the app never grades it.
+String intensityName(AppLocalizations l10n, int level) => switch (level) {
+      1 => l10n.jv25IntensityName1,
+      2 => l10n.jv25IntensityName2,
+      3 => l10n.jv25IntensityName3,
+      4 => l10n.jv25IntensityName4,
+      _ => l10n.jv25IntensityName5,
+    };
+
+/// "3 · Desgastante": the number and its name.
+String intensityTitle(AppLocalizations l10n, int level) =>
+    '$level · ${intensityName(l10n, level)}';
+
 /// What can be said to pick [level]: the number, its words ("três") and
 /// its description ("Forte").
 List<String> intensityVoiceLabels(AppLocalizations l10n, int level, {required bool physical}) {
@@ -49,6 +64,7 @@ List<String> intensityVoiceLabels(AppLocalizations l10n, int level, {required bo
     '$level',
     if (level <= words.length) ...words[level - 1].split(','),
     l10n.jv2IntensityLevel(level),
+    intensityName(l10n, level),
     intensityText(l10n, level, physical: physical),
   ];
 }
@@ -94,7 +110,8 @@ class IntensityScaleFull extends StatelessWidget {
               Semantics(
                 selected: value == level,
                 button: true,
-                label: '${l10n.jv2IntensityLevel(level)}: ${intensityText(l10n, level, physical: physical)}',
+                label: '${l10n.jv2IntensityLevel(level)}, ${intensityName(l10n, level)}: '
+                    '${intensityText(l10n, level, physical: physical)}',
                 excludeSemantics: true,
                 child: InkWell(
                   key: Key('${keyPrefix}_$level'),
@@ -119,17 +136,17 @@ class IntensityScaleFull extends StatelessWidget {
                 : AppColors.dualisSymbolBlue.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(14),
           ),
-          child: Text(
-            value == null
-                ? l10n.jv23IntensityPickHint
-                : '$value · ${intensityText(l10n, value!, physical: physical)}',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14.5,
-              fontWeight: value == null ? FontWeight.w500 : FontWeight.w600,
-              color: value == null ? AppColors.textSecondaryLight : AppColors.dualisNavy,
-              height: 1.3,
-            ),
-          ),
+          child: value == null
+              ? Text(
+                  l10n.jv23IntensityPickHint,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textSecondaryLight,
+                    height: 1.3,
+                  ),
+                )
+              : _LevelText(level: value!, physical: physical, fontSize: 14.5),
         ),
       ],
     );
@@ -175,7 +192,7 @@ class IntensityScaleCompact extends StatelessWidget {
               Semantics(
                 selected: value == level,
                 button: true,
-                label: l10n.jv2IntensityLevel(level),
+                label: '${l10n.jv2IntensityLevel(level)}, ${intensityName(l10n, level)}',
                 child: InkWell(
                   key: Key('${keyPrefix}_$level'),
                   customBorder: const CircleBorder(),
@@ -197,17 +214,39 @@ class IntensityScaleCompact extends StatelessWidget {
               color: AppColors.dualisSymbolBlue.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(
-              '$value · ${intensityText(l10n, value!, physical: physical)}',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.dualisNavy,
-              ),
-            ),
+            child: _LevelText(level: value!, physical: physical, fontSize: 13),
           ),
         ],
       ],
+    );
+  }
+}
+
+/// "3 · Desgastante" in bold, then the description of the level.
+class _LevelText extends StatelessWidget {
+  final int level;
+  final bool physical;
+  final double fontSize;
+
+  const _LevelText({required this.level, required this.physical, required this.fontSize});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Text.rich(
+      TextSpan(children: [
+        TextSpan(
+          text: intensityTitle(l10n, level),
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+        TextSpan(text: ' — ${intensityText(l10n, level, physical: physical)}'),
+      ]),
+      style: GoogleFonts.plusJakartaSans(
+        fontSize: fontSize,
+        fontWeight: FontWeight.w600,
+        color: AppColors.dualisNavy,
+        height: 1.3,
+      ),
     );
   }
 }

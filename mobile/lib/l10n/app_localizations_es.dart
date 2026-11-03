@@ -1835,9 +1835,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get jv2RegionHormonios => 'Hormonas y metabolismo';
 
   @override
-  String get jv2SensationQuestion => '¿Es dolor o molestia?';
-
-  @override
   String get jv2SensationDor => 'Dolor';
 
   @override
@@ -1907,10 +1904,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get jv2OptHormoniosApetiteFome => 'Hambre fuera de lo común';
 
   @override
-  String get jv2BranchCabecaPressao => 'Opresión, peso o presión';
+  String get jv2BranchCabecaPressao => 'Opresión, peso, presión o mareo';
 
   @override
-  String get jv2BranchCabecaSentidos => 'Ojos, boca o garganta';
+  String get jv2BranchCabecaSentidos => 'Ojos, oídos, nariz o garganta';
 
   @override
   String get jv2BranchPeitoRespiracao => 'Respiración diferente';
@@ -1922,7 +1919,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get jv2BranchBarrigaQueimacao => 'Ardor o náuseas';
 
   @override
-  String get jv2BranchBarrigaColica => 'Cólico o hinchazón';
+  String get jv2BranchBarrigaColica => 'Cólico, gases o intestino';
 
   @override
   String get jv2BranchCostasRigidez => 'Rigidez o bloqueo';
@@ -1945,7 +1942,8 @@ class AppLocalizationsEs extends AppLocalizations {
       'Pulsante, con molestia a la luz o al ruido';
 
   @override
-  String get jv2OptCabecaSentidosGarganta => 'Garganta raspada o seca';
+  String get jv2OptCabecaSentidosGarganta =>
+      'Garganta raspada, seca o dificultad para tragar';
 
   @override
   String get jv2OptCabecaSentidosOlhos => 'Ojos pesados o ardiendo';
@@ -1958,14 +1956,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get jv2OptPeitoIncomodoBatedeira =>
-      'Corazón acelerado o palpitaciones';
+      'Corazón acelerado, golpeteo o palpitaciones';
 
   @override
   String get jv2OptPeitoIncomodoCostelas =>
       'Punzada en las costillas al respirar hondo';
 
   @override
-  String get jv2OptBarrigaQueimacaoSubindo => 'Ardor que sube';
+  String get jv2OptBarrigaQueimacaoSubindo =>
+      'Ardor que sube a la garganta o reflujo ácido';
 
   @override
   String get jv2OptBarrigaQueimacaoEnjoo => 'Náuseas';
@@ -2028,6 +2027,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String jv2IntensityLevel(int level) {
     return '$level de 5';
   }
+
+  @override
+  String get jv25IntensityName1 => 'Leve';
+
+  @override
+  String get jv25IntensityName2 => 'Notable';
+
+  @override
+  String get jv25IntensityName3 => 'Agotador';
+
+  @override
+  String get jv25IntensityName4 => 'Fuerte';
+
+  @override
+  String get jv25IntensityName5 => 'Muy fuerte';
 
   @override
   String get jv2IntensityEmotional1 =>
@@ -4631,6 +4645,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get jv23BranchPelveIntima => 'Zona íntima';
 
   @override
+  String get jv25BranchPelveXixiIntima => 'Orina o zona íntima';
+
+  @override
   String get jv23OptPelveUrinaArdencia => 'Arde o duele al orinar';
 
   @override
@@ -5314,34 +5331,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get jv2PhrasePresenteSobrecarga7 =>
       'Comprendo el estrés. ¿Qué es lo que más pesa ahora?';
-
-  @override
-  String get jv2PhrasePresenteSolidao1 =>
-      'Sentirse solo(a) pesa. Gracias por contarlo.';
-
-  @override
-  String get jv2PhrasePresenteSolidao2 =>
-      'Entiendo. ¿Cómo aparece hoy esta falta de compañía?';
-
-  @override
-  String get jv2PhrasePresenteSolidao3 =>
-      'A veces nos sentimos lejos de la gente. ¿Qué encaja más?';
-
-  @override
-  String get jv2PhrasePresenteSolidao4 =>
-      'Gracias por confiar. Vamos a anotarlo con calma.';
-
-  @override
-  String get jv2PhrasePresenteSolidao5 =>
-      'Tener menos gente cerca cambia el día. ¿Cómo está hoy?';
-
-  @override
-  String get jv2PhrasePresenteSolidao6 =>
-      'Está bien sentir esto. ¿Qué encaja más con este momento?';
-
-  @override
-  String get jv2PhrasePresenteSolidao7 =>
-      'Vamos a anotarlo a tu manera. ¿Qué sientes?';
 
   @override
   String get jv2PhraseFuturoMente1 =>

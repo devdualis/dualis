@@ -28,7 +28,7 @@ Shared contract between backend and mobile for the new daily journal. Source of 
 Custom: `optionKey = "<time>.custom"` (time chosen by the user) + `customLabel`.
 
 ### Physical (`kind = "physical"`)
-`optionKey` = `<region>.<branch>.<option>`, plus `bodySide` = `front` | `back` (null for whole-body regions) and, from v2.1, `sensation` = `dor` | `incomodo`:
+`optionKey` = `<region>.<branch>.<option>`, plus `bodySide` = `front` | `back` (null for whole-body regions) and, on v2.1 to v2.4 apps only, `sensation` = `dor` | `incomodo` (optional and legacy since v2.5). The table below is the v2 base; the tree the app offers today is in the v2.5 section.
 
 | region | branch | options | side |
 |---|---|---|---|
@@ -54,7 +54,7 @@ Custom: `optionKey = "<region>.custom"` + `customLabel`, for every region (`pele
 
 **Side rules (v2.1).** Front shows `cabeca` {`pressao`, `sentidos`}, `peito`, `barriga`, `membros`. Back shows `cabeca` {`pressao`, `nuca`}, `costas`, `membros`. Whole body (`pele`, `musculos`, `hormonios`) has no side: `bodySide` must be null (absent). Every other region needs `bodySide`. The backend enforces the side of each sided option only on v2.1 entries (`area` set); entries without `area` (older apps, queued outbox records) keep accepting any side for the old keys. Backend source: `PHYSICAL_SIDE_BRANCHES` in `journal-keys.constant.ts`.
 
-**Sensation (v2.1).** `dor` | `incomodo`, chosen by the person. Required on physical items of entries with `area`; optional (null) on entries without `area`; never accepted on emotional or condition items.
+**Sensation (v2.1, legacy since v2.5).** `dor` | `incomodo`, chosen by the person on app versions v2.1 to v2.4. Since v2.5 the app no longer asks it and new physical items are sent without it. The backend accepts it as optional on physical items (with or without `area`) so older apps and queued outbox items keep working; it is never accepted on emotional, condition or positive items. Summary, history and entry details show it when present and omit it when null.
 
 #### Labels for the v2.1 keys (lay words only)
 
@@ -119,7 +119,7 @@ Old `symptom_logs` rows stay as they are and are returned by history as `legacy:
 
 ## API (`/v1/journal`, JWT, active profile header as today)
 
-- `POST /v1/journal/entries` → 201 `JournalEntryDto`. Body: `{ clientId, recordedAt, mood, area?, triggers[], triggerNote?, note?, transitionVariantIds[], items: [{ kind, optionKey?, customLabel?, conditionId?, bodySide?, sensation?, persistence?, intensity }] }`. Validation: keys from the tables above only; max 12 items; with `area`: one axis, mood `bem`/`nao_tao_bem`, `sensation` on physical items, side rules.
+- `POST /v1/journal/entries` → 201 `JournalEntryDto`. Body: `{ clientId, recordedAt, mood, area?, triggers[], triggerNote?, note?, transitionVariantIds[], items: [{ kind, optionKey?, customLabel?, conditionId?, bodySide?, sensation?, persistence?, intensity }] }`. Validation: current keys (v2.5 tree) plus the legacy keys listed in the v2.5 section; max 12 items; with `area`: one axis, mood `bem`/`nao_tao_bem`, side rules; `sensation` optional.
 - `GET /v1/journal/entries?days=30` (max 365; Free UI uses 30) → `{ entries: JournalEntryDto[] }` newest first, including legacy rows mapped to `{ legacy: true, items: [{ kind, legacyLabel, intensity }] }`.
 - `DELETE /v1/journal/entries/:id` → 204.
 - `GET /v1/journal/conditions` → `{ conditions: [{ id, label, tracking, createdAt }] }`.
@@ -290,6 +290,56 @@ Subset of `blood_pressure` | `glucose` | `weight`, no repeats; `[]` = plain cond
 
 ### Storage (`condition_readings`, migration 0027)
 `id uuid pk`, `user_id` (author, null after account delete), `profile_id` (subject, cascade), `entry_id` (cascade with the entry), `condition_id` (cascade), `kind text` (`blood_pressure` | `glucose` | `weight`), `measured_at timestamptz`, `data text` (AES-256-GCM JSON of the values only), `created_at`. Index `(profile_id, condition_id, measured_at desc)` and `(entry_id)`. RLS forced: read with `app_can_read_profile`, write with `app_can_write_profile`; insert pins the author to the caller; insert and update require the entry and the condition to belong to the same profile. Included in the LGPD export (`conditionReadings` per profile, `formatVersion` 1.5; conditions export `tracking`); removed with the entry, the condition, the profile or the owner's account. Migration 0027 is idempotent and is applied to production by hand.
+
+## v2.5: fewer options per screen (2026-11-02)
+
+Client request "poucas opções por tela" (review 2026-11-02, items D10, D12, D13 and point 4). No screen shows more than 2 branches. Nothing new is stored; only the offered tree changes.
+
+### Changes
+- **No "É dor ou incômodo?" step.** Physical items of new entries carry no `sensation` (see Sensation above).
+- **Emotional:** `presente.solidao` is no longer offered. `presente` = {`energia`, `sobrecarga`}.
+- **`cabeca` (front):** the `rosto` branch is gone. `tontura` and `mandibula` move to `pressao`; `nariz` and `ouvido` move to `sentidos`. Back stays {`pressao`, `nuca`}.
+- **`barriga`:** `intestino` merges into `colica` (label "Cólica, gases ou intestino"). `colica.menstrual` stays hidden for men.
+- **`pelve`:** `urina` and `intima` merge into `xixi_intima` ("Xixi ou região íntima"); `baixo_ventre` stays. `urina.dificuldade` and `urina.cor_odor` are removed (D12: nobody asked for them).
+- **Texts (D13):** client wording restored on `cabeca.sentidos.garganta` ("Garganta arranhando, seca ou dificuldade de engolir"), `peito.incomodo.batedeira` ("Coração acelerado, batedeira ou palpitação") and `barriga.queimacao.subindo` ("Queimação subindo para a garganta ou refluxo ácido"). Strategy §7 and the vocabulary tests do not forbid these words.
+- **Intensity names (D10):** the 1–5 scale shows a short name per level, the same on both axes: 1 Leve, 2 Notável, 3 Desgastante, 4 Forte, 5 Muito forte (en: Mild, Noticeable, Draining, Strong, Very strong; es: Leve, Notable, Agotador, Fuerte, Muy fuerte). The client's "Severo" and "Incapacitante" are not used: they read as a severity grade. No colours by level. Only the label changes; the stored value is still `intensity` 1–5.
+
+### Tree offered by the app (v2.5)
+
+| region | branch | options | side |
+|---|---|---|---|
+| `cabeca` | `pressao` | `temporas`, `latejando`, `tontura`, `mandibula` | front, back |
+| `cabeca` | `sentidos` | `garganta`, `olhos`, `nariz`, `ouvido` | front |
+| `cabeca` | `nuca` | `rigida`, `pontada` | back |
+| `peito` | `respiracao` | `curta`, `tosse` | front |
+| `peito` | `incomodo` | `batedeira`, `costelas` | front |
+| `barriga` | `queimacao` | `subindo`, `enjoo` | front |
+| `barriga` | `colica` | `gases`, `pontadas`, `preso`, `solto`, `menstrual` (not for men) | front |
+| `pelve` | `xixi_intima` | `ardencia`, `vontade`, `coceira`, `inchaco` | front |
+| `pelve` | `baixo_ventre` | `colica`, `peso`, `menstrual` (not for men) | front |
+| `costas`, `membros`, `pele`, `musculos`, `hormonios` | unchanged | unchanged | unchanged |
+
+Emotional: `passado` {`tristeza`: culpa, saudade · `memoria`: lembranca, magoa, vergonha} · `presente` {`energia`: corpo, desligado, concentracao · `sobrecarga`: paciencia, aperto, muita_coisa, inquieto} · `futuro` {`mente`: antecipar, cobranca, indecisao · `medo`: julgamento, desanimo, evitar}.
+
+Counts: 18 emotional and 48 physical options, plus one custom key per root. Max 4 options per screen, except `barriga.colica`, which shows 5 to women (4 + `menstrual`).
+
+New labels: `pelve.xixi_intima` = "Xixi ou região íntima" / "Peeing or intimate area" / "Orina o zona íntima"; `barriga.colica` = "Cólica, gases ou intestino" / "Cramps, gas or bowels" / "Cólico, gases o intestino"; `cabeca.pressao` = "Aperto, peso, pressão ou tontura"; `cabeca.sentidos` = "Olhos, ouvido, nariz ou garganta". Moved options keep their old text.
+
+### Legacy keys (accepted, never offered)
+
+Old entries and offline outbox items from v2.2 to v2.4 still carry these keys. The backend accepts them (`LEGACY_EMOTIONAL_OPTION_KEYS`, `LEGACY_PHYSICAL_OPTION_KEYS`, kept apart from the offered trees; the AI suggestion catalog never offers them) and the app keeps their labels (`JournalKeys.legacyKeyMoves`). All legacy physical branches were front only. Charts count a moved key under its new key.
+
+| legacy key | now |
+|---|---|
+| `presente.solidao.sozinho`, `presente.solidao.menos` | removed |
+| `cabeca.rosto.tontura`, `cabeca.rosto.mandibula` | `cabeca.pressao.tontura`, `cabeca.pressao.mandibula` |
+| `cabeca.rosto.nariz`, `cabeca.rosto.ouvido` | `cabeca.sentidos.nariz`, `cabeca.sentidos.ouvido` |
+| `barriga.intestino.preso`, `barriga.intestino.solto` | `barriga.colica.preso`, `barriga.colica.solto` |
+| `pelve.urina.ardencia`, `pelve.urina.vontade` | `pelve.xixi_intima.ardencia`, `pelve.xixi_intima.vontade` |
+| `pelve.intima.coceira`, `pelve.intima.inchaco` | `pelve.xixi_intima.coceira`, `pelve.xixi_intima.inchaco` |
+| `pelve.urina.dificuldade`, `pelve.urina.cor_odor` | removed |
+
+Transition phrases: physical phrases stay keyed by region (`region.<region>`, or the shared `region` pool), so merged branches keep a phrase. The 7 `presente.solidao` phrases were removed with the branch.
 
 ## Removed
 - Mobile: `RedFlagEvaluator`, `SafetyNoticeKind`, inline safety notice banner, any conditional emergency UI, `SymptomClassification*`, `ApiEndpoints.tagEntry`.

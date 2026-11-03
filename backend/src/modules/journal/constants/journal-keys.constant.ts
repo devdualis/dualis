@@ -13,7 +13,6 @@ export const EMOTIONAL_TREE = {
   presente: {
     energia: ['corpo', 'desligado', 'concentracao'],
     sobrecarga: ['paciencia', 'aperto', 'muita_coisa', 'inquieto'],
-    solidao: ['sozinho', 'menos'],
   },
   futuro: {
     mente: ['antecipar', 'cobranca', 'indecisao'],
@@ -22,14 +21,14 @@ export const EMOTIONAL_TREE = {
 } as const;
 
 /**
- * Physical choices: region -> branch -> options. optionKey = `<region>.<branch>.<option>`.
+ * Physical choices offered by the app: region -> branch -> options.
+ * optionKey = `<region>.<branch>.<option>`. Since v2.5 no screen shows more than 2 branches.
  * Which branches show on each side of the body map: PHYSICAL_SIDE_BRANCHES.
  */
 export const PHYSICAL_TREE = {
   cabeca: {
-    pressao: ['temporas', 'latejando'],
-    sentidos: ['garganta', 'olhos'], // front only
-    rosto: ['tontura', 'nariz', 'ouvido', 'mandibula'], // front only
+    pressao: ['temporas', 'latejando', 'tontura', 'mandibula'],
+    sentidos: ['garganta', 'olhos', 'nariz', 'ouvido'], // front only
     nuca: ['rigida', 'pontada'], // back only
   },
   peito: {
@@ -38,14 +37,12 @@ export const PHYSICAL_TREE = {
   },
   barriga: {
     queimacao: ['subindo', 'enjoo'],
-    colica: ['gases', 'pontadas', 'menstrual'],
-    intestino: ['preso', 'solto'],
+    colica: ['gases', 'pontadas', 'preso', 'solto', 'menstrual'],
   },
   // Pelvis and lower belly, front only (v2.3). Kept apart from barriga.
   pelve: {
-    urina: ['ardencia', 'vontade', 'dificuldade', 'cor_odor'],
+    xixi_intima: ['ardencia', 'vontade', 'coceira', 'inchaco'],
     baixo_ventre: ['colica', 'peso', 'menstrual'],
-    intima: ['coceira', 'inchaco'],
   },
   costas: {
     rigidez: ['ombros', 'lombar'],
@@ -90,10 +87,36 @@ function flatten(tree: Record<string, Record<string, readonly string[]>>): strin
   return keys;
 }
 
-/** Every accepted emotional optionKey, custom keys included. */
+/** Emotional optionKeys the app offers today, custom keys included. */
 export const EMOTIONAL_OPTION_KEYS: readonly string[] = flatten(EMOTIONAL_TREE);
-/** Every accepted physical optionKey, custom keys included. */
+/** Physical optionKeys the app offers today, custom keys included. */
 export const PHYSICAL_OPTION_KEYS: readonly string[] = flatten(PHYSICAL_TREE);
+
+/**
+ * Keys of app versions v2.2 to v2.4 that the app no longer offers (v2.5). Old entries and
+ * offline outbox items still carry them, so they stay accepted. Kept apart from the trees
+ * above so the AI suggestion catalog only offers current keys.
+ */
+export const LEGACY_EMOTIONAL_OPTION_KEYS: readonly string[] = ['presente.solidao.sozinho', 'presente.solidao.menos'];
+export const LEGACY_PHYSICAL_OPTION_KEYS: readonly string[] = [
+  'cabeca.rosto.tontura',
+  'cabeca.rosto.nariz',
+  'cabeca.rosto.ouvido',
+  'cabeca.rosto.mandibula',
+  'barriga.intestino.preso',
+  'barriga.intestino.solto',
+  'pelve.urina.ardencia',
+  'pelve.urina.vontade',
+  'pelve.urina.dificuldade',
+  'pelve.urina.cor_odor',
+  'pelve.intima.coceira',
+  'pelve.intima.inchaco',
+];
+
+/** Every emotional optionKey the API accepts: offered and legacy. */
+export const ACCEPTED_EMOTIONAL_OPTION_KEYS: readonly string[] = [...EMOTIONAL_OPTION_KEYS, ...LEGACY_EMOTIONAL_OPTION_KEYS];
+/** Every physical optionKey the API accepts: offered and legacy. */
+export const ACCEPTED_PHYSICAL_OPTION_KEYS: readonly string[] = [...PHYSICAL_OPTION_KEYS, ...LEGACY_PHYSICAL_OPTION_KEYS];
 
 export const POSITIVE_TREE = {
   passado: { gratidao: ['alguem', 'algo'], orgulho: ['conquista', 'resolvi'] },
@@ -146,7 +169,7 @@ export const WHOLE_BODY_REGIONS: readonly PhysicalRegion[] = ['pele', 'musculos'
 /** Region -> branches shown on each side of the body map. `<region>.custom` follows its region. */
 export const PHYSICAL_SIDE_BRANCHES: Record<BodySide, Partial<Record<PhysicalRegion, readonly string[]>>> = {
   front: {
-    cabeca: ['pressao', 'sentidos', 'rosto'],
+    cabeca: ['pressao', 'sentidos'],
     peito: Object.keys(PHYSICAL_TREE.peito),
     barriga: Object.keys(PHYSICAL_TREE.barriga),
     pelve: Object.keys(PHYSICAL_TREE.pelve),
@@ -159,6 +182,12 @@ export const PHYSICAL_SIDE_BRANCHES: Record<BodySide, Partial<Record<PhysicalReg
   },
 };
 
+/** Sides of the legacy branches (v2.2 to v2.4), all front only. */
+const LEGACY_SIDE_BRANCHES: Record<BodySide, Partial<Record<PhysicalRegion, readonly string[]>>> = {
+  front: { cabeca: ['rosto'], barriga: ['intestino'], pelve: ['urina', 'intima'] },
+  back: {},
+};
+
 export function isWholeBodyOptionKey(optionKey: string): boolean {
   return (WHOLE_BODY_REGIONS as readonly string[]).includes(optionKeyRoot(optionKey));
 }
@@ -168,7 +197,8 @@ export function isOptionKeyOnSide(optionKey: string, side: BodySide): boolean {
   const [region, branch] = optionKey.split('.');
   const branches = PHYSICAL_SIDE_BRANCHES[side][region as PhysicalRegion];
   if (!branches) return false;
-  return branch === CUSTOM_SUFFIX || branches.includes(branch);
+  const legacy = LEGACY_SIDE_BRANCHES[side][region as PhysicalRegion] ?? [];
+  return branch === CUSTOM_SUFFIX || branches.includes(branch) || legacy.includes(branch);
 }
 
 export const PERSISTENCE_KEYS = ['hoje', 'dias_semanas', 'meses_anos'] as const;
@@ -180,7 +210,10 @@ export const ENTRY_MOOD_KEYS = ['bem', 'nao_tao_bem'] as const;
 export const ENTRY_AREAS = ['emotional', 'physical'] as const;
 export type EntryArea = (typeof ENTRY_AREAS)[number];
 
-/** How a physical item feels, chosen by the person. Physical items only. */
+/**
+ * How a physical item felt, chosen by the person on app versions v2.1 to v2.4. Optional and
+ * physical items only; the app stopped asking it in v2.5, old clients may still send it.
+ */
 export const SENSATION_KEYS = ['dor', 'incomodo'] as const;
 export type SensationKey = (typeof SENSATION_KEYS)[number];
 

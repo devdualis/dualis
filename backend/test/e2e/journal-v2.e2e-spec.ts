@@ -189,6 +189,24 @@ describe('Journal v2 E2E (/v1/journal/entries, conditions, summary, /v1/house-ad
     expect(physical.statusCode, physical.body).toBe(201);
   });
 
+  it('v2.5 accepts physical items without sensation and old keys from older apps', async () => {
+    const current = await post('/v1/journal/entries', entry({ area: 'physical', items: [
+      { kind: 'physical', optionKey: 'barriga.colica.preso', bodySide: 'front', persistence: 'hoje', intensity: 2 },
+      { kind: 'physical', optionKey: 'pelve.xixi_intima.ardencia', bodySide: 'front', persistence: 'dias_semanas', intensity: 1 },
+    ] }));
+    expect(current.statusCode, current.body).toBe(201);
+    expect(current.json().items.map((i: any) => i.sensation ?? null)).toEqual([null, null]);
+    const outbox = await post('/v1/journal/entries', entry({ area: 'physical', items: [
+      { kind: 'physical', optionKey: 'pelve.urina.dificuldade', bodySide: 'front', persistence: 'hoje', intensity: 1 },
+      { kind: 'physical', optionKey: 'barriga.intestino.solto', bodySide: 'front', sensation: 'dor', persistence: 'hoje', intensity: 3 },
+    ] }));
+    expect(outbox.statusCode, outbox.body).toBe(201);
+    const wrongSide = await post('/v1/journal/entries', entry({ area: 'physical', items: [
+      { kind: 'physical', optionKey: 'cabeca.rosto.nariz', bodySide: 'back', persistence: 'hoje', intensity: 1 },
+    ] }));
+    expect(wrongSide.statusCode).toBe(400);
+  });
+
   it('1. every journal v2 route requires authentication', async () => {
     for (const [method, url] of [
       ['POST', '/v1/journal/entries'],

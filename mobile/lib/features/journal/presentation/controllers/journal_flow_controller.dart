@@ -320,13 +320,7 @@ class JournalFlowController extends Notifier<JournalFlowState> {
       step: JournalStep.regionBranch,
       regionIndex: 0,
       clearBranch: true,
-      clearSensation: true,
     ));
-  }
-
-  /// "Dor" or "Incômodo" for the region on screen (required before a branch).
-  void chooseSensation(String sensation) {
-    state = state.copyWith(sensation: sensation);
   }
 
   /// Puts the options of the region on screen in the entry, then the next
@@ -334,15 +328,13 @@ class JournalFlowController extends Notifier<JournalFlowState> {
   /// goes back to the body map; otherwise on to the intensity.
   void confirmPhysicalOptions({bool more = false}) {
     final region = state.currentRegion;
-    final sensation = state.sensation;
-    if (!state.hasOptionSelection || region == null || sensation == null) return;
+    if (!state.hasOptionSelection || region == null) return;
     final added = [
       for (final key in state.selectedOptions)
         JournalItem(
           kind: JournalKeys.kindPhysical,
           optionKey: key,
           bodySide: region.side,
-          sensation: sensation,
         ),
       for (final label in state.customLabels)
         JournalItem(
@@ -350,7 +342,6 @@ class JournalFlowController extends Notifier<JournalFlowState> {
           optionKey: JournalKeys.customKey(region.region),
           customLabel: label,
           bodySide: region.side,
-          sensation: sensation,
         ),
     ];
     final items = _merge(state.items, added);
@@ -360,7 +351,6 @@ class JournalFlowController extends Notifier<JournalFlowState> {
       selectedOptions: const {},
       customLabels: const [],
       clearBranch: true,
-      clearSensation: true,
     );
     if (nextIndex < state.selectedRegions.length && !cleared.itemLimitReached) {
       _go(cleared.copyWith(step: JournalStep.regionBranch, regionIndex: nextIndex));

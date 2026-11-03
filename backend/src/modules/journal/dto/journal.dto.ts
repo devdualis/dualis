@@ -33,7 +33,8 @@ import {
   HELPER_KEYS,
   POSITIVE_OPTION_KEYS,
   BodySide,
-  EMOTIONAL_OPTION_KEYS,
+  ACCEPTED_EMOTIONAL_OPTION_KEYS,
+  ACCEPTED_PHYSICAL_OPTION_KEYS,
   ENTRY_AREAS,
   ENTRY_MOOD_KEYS,
   EntryArea,
@@ -45,7 +46,6 @@ import {
   MOOD_KEYS,
   PERSISTENCE_KEYS,
   PHYSICAL_ONLY_TRIGGER_KEYS,
-  PHYSICAL_OPTION_KEYS,
   SENSATION_KEYS,
   SensationKey,
   TRIGGER_KEYS,
@@ -54,7 +54,7 @@ import {
   isWholeBodyOptionKey,
 } from '../constants/journal-keys.constant';
 
-const ALL_OPTION_KEYS = [...EMOTIONAL_OPTION_KEYS, ...PHYSICAL_OPTION_KEYS, ...POSITIVE_OPTION_KEYS];
+const ALL_OPTION_KEYS = [...ACCEPTED_EMOTIONAL_OPTION_KEYS, ...ACCEPTED_PHYSICAL_OPTION_KEYS, ...POSITIVE_OPTION_KEYS];
 
 /** Returns why an item is inconsistent with its kind, or null when it is valid. */
 export function journalItemShapeError(item: Partial<JournalItemInputDto>): string | null {
@@ -79,7 +79,7 @@ export function journalItemShapeError(item: Partial<JournalItemInputDto>): strin
       return null;
     case 'emotional':
     case 'physical': {
-      const keys = item.kind === 'emotional' ? EMOTIONAL_OPTION_KEYS : PHYSICAL_OPTION_KEYS;
+      const keys = item.kind === 'emotional' ? ACCEPTED_EMOTIONAL_OPTION_KEYS : ACCEPTED_PHYSICAL_OPTION_KEYS;
       if (!item.optionKey || !keys.includes(item.optionKey)) return `optionKey inválido para ${item.kind}.`;
       if (item.readings !== undefined) return 'readings só é aceito em itens de condição.';
       if (item.conditionId) return 'conditionId só é aceito em itens de condição.';
@@ -141,10 +141,10 @@ function readingTimeError(items: Array<Partial<JournalItemInputDto>>, recordedAt
 }
 
 /**
- * Entry-level rules of journal v2.1. Entries with `area` come from v2.1 apps: one axis per
- * entry, mood `bem` or `nao_tao_bem`, a sensation on every physical item and each sided
- * option on a side where the map shows it. Entries without `area` (older apps, queued
- * outbox records) keep the v2 rules.
+ * Entry-level rules of journal v2.1. Entries with `area` come from v2.1+ apps: one axis per
+ * entry, mood `bem` or `nao_tao_bem` and each sided option on a side where the map shows it.
+ * `sensation` is optional: v2.1 to v2.4 apps send it, v2.5 apps do not. Entries without
+ * `area` (older apps, queued outbox records) keep the v2 rules.
  */
 export function journalEntryShapeError(entry: Partial<CreateJournalEntryDto>): string | null {
   const items = Array.isArray(entry.items) ? entry.items : [];
@@ -172,7 +172,6 @@ export function journalEntryShapeError(entry: Partial<CreateJournalEntryDto>): s
     const otherAxis = entry.area === 'emotional' ? 'physical' : 'emotional';
     if (item.kind === otherAxis) return `Um registro com area ${entry.area} não aceita itens ${otherAxis}.`;
     if (item.kind !== 'physical' || !item.optionKey) continue;
-    if (!item.sensation) return 'sensation é obrigatório para itens físicos quando o registro tem area.';
     if (item.bodySide && !isOptionKeyOnSide(item.optionKey, item.bodySide)) {
       return `${item.optionKey} não fica no lado ${item.bodySide} do corpo.`;
     }

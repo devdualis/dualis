@@ -18,6 +18,7 @@ Detalle por área:
 3. **"Pocas opciones por pantalla" no se cumple.**
    - Emocional: el cliente pidió 3 botones y luego 2. La app los fusiona en una pantalla de 7 filas.
    - Físico: el cliente describió 4 pantallas y la app tiene 8, con un paso extra ("É dor ou incômodo?") y ramas de 3 botones.
+   - **Hecho en parte (2026-11-02, "recorte medio"):** se quitó el paso "É dor ou incômodo?" y la rama emocional Presente › Solidão; ninguna pantalla física muestra más de 2 ramas (Rosto se repartió entre Pressão y Sentidos, Intestino entró en Cólica, Urina e Íntima se unieron en "Xixi ou região íntima"). Pelve y las áreas de cuerpo entero se quedan. Claves antiguas aceptadas como legacy; ver contrato v2.5.
 4. **Lo clínico se quitó a propósito**, y está documentado: grupos DSM-5/CID-11, síntoma estructurado, "Esferas", "possível diagnóstico", verticales de tratamiento, semáforo y ☠️. Si se hiciera como pide el cliente, la app pasaría a ser un dispositivo médico (ANVISA RDC 657/2022) y se rompería el uso previsto de bienestar. **Esto no se negocia en código; hay que explicárselo al cliente.**
 5. **Queda un riesgo regulatorio real, ajeno al pedido:** los endpoints antiguos de triaje (`/v1/triage/outcome`, `/daily-checkin`) siguen activos en el backend y clasifican por sistema corporal o dimensión emocional.
 
@@ -38,10 +39,10 @@ Orden por impacto en lo que el cliente ve.
 | D7 | Emojis en el flujo físico | Emoji en cada botón y cada opción | Ninguno, salvo 🚽 y 🧪 en pelvis: queda inconsistente con el flujo emocional | 03 |
 | D8 | Efecto de escritura en las transiciones | Fade-in + escritura suave | Solo fade de 280 ms | 01 |
 | D9 | Emojis en "bem / não tão bem" | Emojis | Iconos Material | 01 |
-| D10 | Nombres de los niveles de intensidad | Leve / Notável / Desgastante / Severo | Solo números con descripción. §8 solo quita "Paralisante"; quitar los demás no está escrito | 02, 03 |
+| D10 | Nombres de los niveles de intensidad | Leve / Notável / Desgastante / Severo | **Hecho (2026-11-02).** Cada nivel muestra un nombre corto antes de la descripción, igual en lo emocional y lo físico: 1 Leve, 2 Notável, 3 Desgastante, 4 Forte, 5 Muito forte. "Severo" e "Incapacitante" no se usan porque se leen como grado de gravedad; sin colores de semáforo. Contrato v2.5 | 02, 03 |
 | D11 | Persistencia e intensidad | 2 pasos (2 pantallas) | 1 pantalla compartida + 3 pasos opcionales (disparadores, qué ayudó, nota) | 02, 03 |
-| D12 | Opciones de pelvis que nadie pidió | — | "Dificuldade ou fluxo fraco ao fazer xixi", "Urina escura ou com cheiro forte". No están en ningún documento (verificado) y se parecen a un verificador de síntomas | 03 |
-| D13 | Textos físicos acortados | Texto del cliente | Se perdieron "dificuldade de engolir", "palpitação", "refluxo ácido"; solo 2 recortes tienen justificación escrita | 03 |
+| D12 | Opciones de pelvis que nadie pidió | — | **Hecho (2026-11-02).** Se quitaron "Dificuldade ou fluxo fraco ao fazer xixi" y "Urina escura ou com cheiro forte". Los registros antiguos que las tienen siguen mostrando su texto y el backend las sigue aceptando como claves legacy | 03 |
+| D13 | Textos físicos acortados | Texto del cliente | **Hecho (2026-11-02).** Se restauraron "Garganta arranhando, seca ou dificuldade de engolir", "Coração acelerado, batedeira ou palpitação" y "Queimação subindo para a garganta ou refluxo ácido". §7 y la prueba de vocabulario no los prohíben. Los demás recortes siguen igual | 03 |
 | D14 | PDF "Resumo dos meus registros" | Exportar para llevar a un profesional | Solo en Premium. La estrategia lo ponía en Free; en Free queda solo el JSON de LGPD | 04 |
 | D15 | Coincidencias físico-emocionales | Correlación | Se calculan en backend y app, pero **ninguna pantalla las muestra** | 04 |
 | D16 | Reporte de tendencia | 14 días + frase resumen + día de la semana | 7 o 30 días, sin frase, sin conteo por día de la semana (este último es compatible con bienestar) | 04 |
@@ -72,6 +73,7 @@ Ya decididos y documentados. No se implementan como los pidió el cliente.
 ## 4. Lo que la app añadió sin que el cliente lo pidiera
 
 - Flujo físico: región Pelve; ramas Rosto, Nuca e Intestino; cólica menstrual (oculta para hombres); 3 áreas de "cuerpo entero"; paso "É dor ou incômodo?"; 2 opciones extra para las ramas que en el pedido tenían 1 sola ("Dor ao mexer", "Sensação de choque").
+  - **2026-11-02:** ya no existen el paso "É dor ou incômodo?" ni las ramas Rosto e Intestino como pantallas propias (sus opciones pasaron a otras ramas). Siguen Pelve, Nuca, cuerpo entero y las 2 opciones de relleno.
 - Cierre: 3 pasos opcionales (disparadores, qué ayudó, nota libre) y una línea fija del 192 bajo la escala.
 - En conjunto, esto va contra el pedido de "pocas opciones por pantalla, sin menús profundos".
 
@@ -112,7 +114,7 @@ Hay que aclararlas con el cliente antes de tocar el texto:
 2. Ampliar los bancos de frases a 7 por posición, usando los textos del cliente que pasan el filtro de §7. Incluir las de bifurcación y las de región física (D1–D3).
 3. Añadir la frase de cierre, el efecto de escritura y emojis en el flujo físico y en "bem / não tão bem" (D6–D9).
 4. Separar persistencia e intensidad en 2 pasos y recuperar los nombres de nivel no alarmistas, como Leve y Notável (D10, D11).
-5. Quitar o documentar las 2 opciones urinarias (D12).
+5. Quitar o documentar las 2 opciones urinarias (D12). **Hecho:** quitadas.
 
 **Decidir con el cliente:**
 - Recortar las zonas y opciones extra del flujo físico para cumplir "pocas opciones" (sección 4).

@@ -1824,9 +1824,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jv2RegionHormonios => 'Hormones and metabolism';
 
   @override
-  String get jv2SensationQuestion => 'Is it pain or discomfort?';
-
-  @override
   String get jv2SensationDor => 'Pain';
 
   @override
@@ -1896,10 +1893,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jv2OptHormoniosApetiteFome => 'Hungrier than usual';
 
   @override
-  String get jv2BranchCabecaPressao => 'Tightness, heaviness or pressure';
+  String get jv2BranchCabecaPressao =>
+      'Tightness, heaviness, pressure or dizziness';
 
   @override
-  String get jv2BranchCabecaSentidos => 'Eyes, mouth or throat';
+  String get jv2BranchCabecaSentidos => 'Eyes, ears, nose or throat';
 
   @override
   String get jv2BranchPeitoRespiracao => 'Breathing feels different';
@@ -1911,7 +1909,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jv2BranchBarrigaQueimacao => 'Burning or nausea';
 
   @override
-  String get jv2BranchBarrigaColica => 'Cramps or bloating';
+  String get jv2BranchBarrigaColica => 'Cramps, gas or bowels';
 
   @override
   String get jv2BranchCostasRigidez => 'Stiffness or locking up';
@@ -1934,7 +1932,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Throbbing, bothered by light or noise';
 
   @override
-  String get jv2OptCabecaSentidosGarganta => 'Scratchy or dry throat';
+  String get jv2OptCabecaSentidosGarganta =>
+      'Scratchy or dry throat, or hard to swallow';
 
   @override
   String get jv2OptCabecaSentidosOlhos => 'Heavy or burning eyes';
@@ -1946,14 +1945,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jv2OptPeitoRespiracaoTosse => 'Cough or heavy chest';
 
   @override
-  String get jv2OptPeitoIncomodoBatedeira => 'Racing or pounding heart';
+  String get jv2OptPeitoIncomodoBatedeira =>
+      'Racing or pounding heart, or palpitations';
 
   @override
   String get jv2OptPeitoIncomodoCostelas =>
       'Stitch in the ribs when breathing deeply';
 
   @override
-  String get jv2OptBarrigaQueimacaoSubindo => 'Burning that rises';
+  String get jv2OptBarrigaQueimacaoSubindo =>
+      'Burning rising to the throat, or acid reflux';
 
   @override
   String get jv2OptBarrigaQueimacaoEnjoo => 'Nausea';
@@ -2017,6 +2018,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String jv2IntensityLevel(int level) {
     return '$level of 5';
   }
+
+  @override
+  String get jv25IntensityName1 => 'Mild';
+
+  @override
+  String get jv25IntensityName2 => 'Noticeable';
+
+  @override
+  String get jv25IntensityName3 => 'Draining';
+
+  @override
+  String get jv25IntensityName4 => 'Strong';
+
+  @override
+  String get jv25IntensityName5 => 'Very strong';
 
   @override
   String get jv2IntensityEmotional1 =>
@@ -4618,6 +4634,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jv23BranchPelveIntima => 'Intimate area';
 
   @override
+  String get jv25BranchPelveXixiIntima => 'Peeing or intimate area';
+
+  @override
   String get jv23OptPelveUrinaArdencia => 'It burns or hurts when I pee';
 
   @override
@@ -5293,34 +5312,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get jv2PhrasePresenteSobrecarga7 =>
       'I understand the stress. What is weighing on you most right now?';
-
-  @override
-  String get jv2PhrasePresenteSolidao1 =>
-      'Feeling alone weighs on us. Thanks for sharing.';
-
-  @override
-  String get jv2PhrasePresenteSolidao2 =>
-      'I see. How does this lack of company show up today?';
-
-  @override
-  String get jv2PhrasePresenteSolidao3 =>
-      'Sometimes we feel far from people. What fits best?';
-
-  @override
-  String get jv2PhrasePresenteSolidao4 =>
-      'Thanks for trusting me with this. Let us note it down calmly.';
-
-  @override
-  String get jv2PhrasePresenteSolidao5 =>
-      'Having fewer people around changes the day. How is it today?';
-
-  @override
-  String get jv2PhrasePresenteSolidao6 =>
-      'It is okay to feel this. What fits best right now?';
-
-  @override
-  String get jv2PhrasePresenteSolidao7 =>
-      'Let us note it your way. What do you feel?';
 
   @override
   String get jv2PhraseFuturoMente1 =>

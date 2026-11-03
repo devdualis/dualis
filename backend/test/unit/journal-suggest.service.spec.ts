@@ -109,7 +109,17 @@ describe('JournalSuggestService', () => {
 it('never receives or suggests positive items and includes new side-aware chips', () => {
   expect(catalogKeys('positive' as any)).toEqual([]);
   expect(catalogKeys('emotional', 'presente.calma')).toEqual([]);
-  expect(catalogKeys('emotional', 'presente.solidao')).toEqual(['presente.solidao.sozinho', 'presente.solidao.menos']);
-  expect(catalogKeys('physical', 'cabeca.rosto', 'back')).toEqual([]);
-  expect(catalogKeys('physical', 'cabeca.rosto', 'front')).toHaveLength(4);
+  // v2.5: legacy branches are never offered; their options live in other branches.
+  expect(catalogKeys('emotional', 'presente.solidao')).toEqual([]);
+  expect(catalogKeys('physical', 'cabeca.rosto', 'front')).toEqual([]);
+  expect(catalogKeys('physical', 'pelve.urina', 'front')).toEqual([]);
+  expect(catalogKeys('physical', 'cabeca.sentidos', 'back')).toEqual([]);
+  expect(catalogKeys('physical', 'cabeca.sentidos', 'front')).toEqual([
+    'cabeca.sentidos.garganta', 'cabeca.sentidos.olhos', 'cabeca.sentidos.nariz', 'cabeca.sentidos.ouvido',
+  ]);
+  expect(catalogKeys('physical', 'cabeca.pressao', 'back')).toContain('cabeca.pressao.tontura');
+  expect(catalogKeys('physical', 'pelve.xixi_intima', 'front')).toEqual([
+    'pelve.xixi_intima.ardencia', 'pelve.xixi_intima.vontade', 'pelve.xixi_intima.coceira', 'pelve.xixi_intima.inchaco',
+  ]);
+  expect(catalogKeys('physical')).not.toContain('pelve.urina.dificuldade');
 });

@@ -78,7 +78,8 @@ class RecordPoint {
 
 String _answerKey(JournalItemView item) {
   if (item.isCustom) return 'custom:${(item.customLabel ?? '').toLowerCase()}';
-  return item.optionKey ?? item.seriesKey;
+  final key = item.optionKey;
+  return key == null ? item.seriesKey : JournalKeys.currentOptionKey(key);
 }
 
 String _answerText(AppLocalizations l10n, JournalItemView item) {
@@ -103,7 +104,8 @@ List<RecordPoint> _points(
       if (item.kind != kind || item.legacyLabel != null) continue;
       final key = item.optionKey;
       if (key == null) continue;
-      final parts = key.split('.');
+      // Options moved in v2.5 count under their current branch.
+      final parts = JournalKeys.currentOptionKey(key).split('.');
       final root = parts.first;
       if (!roots.contains(root)) continue;
       final hasBranch = !item.isCustom && parts.length >= 3;
