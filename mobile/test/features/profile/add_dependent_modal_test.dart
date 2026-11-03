@@ -1,3 +1,4 @@
+import 'package:dualis_mobile/features/profile/data/profile_repository.dart';
 import 'package:dualis_mobile/features/profile/domain/models/profile.dart';
 import 'package:dualis_mobile/features/profile/domain/models/shared_access_grant.dart';
 import 'package:dualis_mobile/features/profile/presentation/controllers/active_profile_controller.dart';
@@ -9,9 +10,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class FakeActiveProfileController extends ActiveProfileController {
-  FakeActiveProfileController({this.failWithMessage});
+  FakeActiveProfileController({this.failWithMessage, this.apiError});
 
   final String? failWithMessage;
+
+  /// Thrown as-is, like the real controller rethrowing a backend 400.
+  final ProfileApiException? apiError;
 
   String? lastName;
   DateTime? lastDateOfBirth;
@@ -47,6 +51,7 @@ class FakeActiveProfileController extends ActiveProfileController {
     lastRelationshipType = relationshipType;
     lastLgpdConsent = lgpdConsent;
 
+    if (apiError != null) throw apiError!;
     if (failWithMessage != null) {
       state = state.copyWith(errorMessage: failWithMessage);
       throw Exception(failWithMessage);
@@ -267,6 +272,125 @@ void main() {
 
       expect(find.text('Cadastrar Dependente Legal'), findsNothing);
       expect(find.text('Dependente cadastrado com sucesso.'), findsOneWidget);
+    });
+
+    testWidgets(
+        'minor: only parent and legal_guardian tiles with the Art. 14 consent',
+        (tester) async {
+      tester.view.physicalSize = const Size(800, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await _openModal(tester, FakeActiveProfileController());
+
+      expect(
+        find.text('Informe a data de nascimento para ver os vínculos possíveis.'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('lgpd-art14-consent')), findsNothing);
+      expect(find.byKey(const ValueKey('lgpd-art11-consent')), findsNothing);
+
+      await _enterDob(tester, _dobDigitsYearsAgo(10));
+
+      expect(_tile('parent'), findsOneWidget);
+      expect(_tile('legal_guardian'), findsOneWidget);
+      expect(_tile('curator'), findsNothing);
+      expect(_tile('supported_decision'), findsNothing);
+      expect(find.text('Para menores de 18 anos: poder familiar ou tutela.'),
+          findsOneWidget);
+      expect(find.byKey(const ValueKey('lgpd-art14-consent')), findsOneWidget);
+      expect(find.byKey(const ValueKey('lgpd-art11-consent')), findsNothing);
+      expect(find.textContaining('Artigo 14 da LGPD'), findsOneWidget);
+    });
+
+    testWidgets('18th birthday today counts as adult', (tester) async {
+      tester.view.physicalSize = const Size(800, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await _openModal(tester, FakeActiveProfileController());
+      await _enterDob(tester, _dobDigitsYearsAgo(18));
+
+      expect(_tile('curator'), findsOneWidget);
+      expect(_tile('parent'), findsNothing);
+    });
+
+    testWidgets(
+        'switching from adult to minor resets the relationship and the consent',
+        (tester) async {
+      tester.view.physicalSize = const Size(800, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await _openModal(tester, FakeActiveProfileController());
+      await tester.enterText(find.byType(TextFormField).at(0), 'Maria Silva');
+      await _enterDob(tester, _dobDigitsYearsAgo(40));
+      await tester.tap(_tile('curator'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('lgpd-art11-consent')));
+      await tester.pumpAndSettle();
+      expect(_submitButton(tester).onPressed, isNotNull);
+
+      await _enterDob(tester, _dobDigitsYearsAgo(10));
+
+      expect(_tile('curator'), findsNothing);
+      expect(find.byIcon(Icons.radio_button_checked), findsNothing);
+      final consent = tester.widget<Checkbox>(
+          find.byKey(const ValueKey('lgpd-art14-consent')));
+      expect(consent.value, isFalse);
+      expect(_submitButton(tester).onPressed, isNull);
+
+      // Back to adult: the earlier choice is not restored.
+      await _enterDob(tester, _dobDigitsYearsAgo(40));
+      expect(find.byIcon(Icons.radio_button_checked), findsNothing);
+      expect(
+        tester
+            .widget<Checkbox>(find.byKey(const ValueKey('lgpd-art11-consent')))
+            .value,
+        isFalse,
+      );
+    });
+
+    testWidgets('notes are optional: empty notes send nothing', (tester) async {
+      tester.view.physicalSize = const Size(800, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final fake = FakeActiveProfileController();
+      await _openModal(tester, fake);
+      await _fillValidForm(tester);
+      await tester.enterText(
+          find.byKey(const ValueKey('add-dependent-notes')), '   ');
+      await tester.tap(find.byKey(const ValueKey('lgpd-art14-consent')));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const ValueKey('add-dependent-submit')));
+      await tester.tap(find.byKey(const ValueKey('add-dependent-submit')));
+      await tester.pumpAndSettle();
+
+      expect(fake.createDependentCallCount, 1);
+      expect(fake.lastLgpdLegalBasisNotes, isNull);
+    });
+
+    testWidgets('backend 400 message is shown unchanged', (tester) async {
+      tester.view.physicalSize = const Size(800, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      const backendMessage =
+          'O vínculo escolhido não corresponde à idade informada.';
+      final fake = FakeActiveProfileController(
+        apiError: const ProfileApiException(backendMessage, statusCode: 400),
+      );
+      await _openModal(tester, fake);
+      await _fillValidForm(tester);
+      await tester.tap(find.byKey(const ValueKey('lgpd-art14-consent')));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const ValueKey('add-dependent-submit')));
+      await tester.tap(find.byKey(const ValueKey('add-dependent-submit')));
+      await tester.pumpAndSettle();
+
+      expect(find.text(backendMessage), findsOneWidget);
+      expect(find.text('Cadastrar Dependente Legal'), findsOneWidget);
     });
 
     testWidgets('error keeps modal open', (tester) async {

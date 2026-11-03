@@ -740,7 +740,7 @@
   "addDependentRelationshipLabel": "Grau de Parentesco / Representação",
   "addDependentRelationshipHint": "Selecione o vínculo legal",
   "addDependentRelationshipParent": "Filho(a) menor de idade (Poder Familiar)",
-  "addDependentRelationshipCurator": "Curador(a) de maior incapaz (Curatela)",
+  "addDependentRelationshipCurator": "Curador(a) de pessoa maior (Curatela)",
   "addDependentRelationshipLegalGuardian": "Tutor(a) legal de menor (Tutela)",
   "addDependentLgpdArt14Consent": "Declaro, sob as penas da lei, que sou pai, mãe ou representante legal deste dependente e autorizo expressamente a coleta e tratamento dos seus dados de bem-estar na plataforma DualisCheckUp, em estrita conformidade com o Artigo 14 da LGPD (Lei 13.709/2018).",
   "addDependentRelationshipSupportedDecision": "Apoiador(a) em tomada de decisão apoiada",
@@ -817,7 +817,7 @@
   "@profileSwitcherBadgeMinor": {
     "description": "Badge for dependent minor"
   },
-  "profileSwitcherBadgeAdult": "Maior sob tutela",
+  "profileSwitcherBadgeAdult": "Maior com representação legal",
   "@profileSwitcherBadgeAdult": {
     "description": "Badge for dependent adult"
   },

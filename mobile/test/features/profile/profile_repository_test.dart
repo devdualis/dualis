@@ -125,6 +125,40 @@ void main() {
     expect(profile.id, 'p1');
   });
 
+  test('createDependent sends lgpdLegalBasisNotes only when provided',
+      () async {
+    adapter.enqueue(201, profileJson);
+    adapter.enqueue(201, profileJson);
+
+    await repository.createDependent(
+      name: 'Rui',
+      dateOfBirth: DateTime(1980, 5, 2),
+      gender: 'masculino',
+      relationshipType: 'supported_decision',
+      lgpdConsent: true,
+      lgpdLegalBasisNotes: '  Processo 0001234-56.2025.8.26.0100 ',
+    );
+    await repository.createDependent(
+      name: 'Rui',
+      dateOfBirth: DateTime(1980, 5, 2),
+      gender: 'masculino',
+      relationshipType: 'curator',
+      lgpdConsent: true,
+      lgpdLegalBasisNotes: '   ',
+    );
+
+    expect(adapter.bodies[0], {
+      'name': 'Rui',
+      'dateOfBirth': '1980-05-02',
+      'gender': 'masculino',
+      'relationshipType': 'supported_decision',
+      'lgpdConsent': true,
+      'lgpdLegalBasisNotes': 'Processo 0001234-56.2025.8.26.0100',
+    });
+    expect((adapter.bodies[1] as Map).containsKey('lgpdLegalBasisNotes'),
+        isFalse);
+  });
+
   test('updateProfileName uses PUT and deleteProfile uses DELETE', () async {
     adapter.enqueue(200, {...profileJson, 'name': 'Ana Clara'});
     adapter.enqueue(204);

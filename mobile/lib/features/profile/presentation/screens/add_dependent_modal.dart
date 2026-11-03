@@ -10,6 +10,7 @@ import '../../../../core/utils/date_input_formatter.dart';
 import '../../../auth/domain/form_validators.dart';
 import '../../../auth/domain/user_profile.dart';
 import '../../../auth/presentation/widgets/biological_sex_selector.dart';
+import '../../data/profile_repository.dart';
 import '../../domain/models/profile.dart';
 import '../controllers/active_profile_controller.dart';
 
@@ -203,6 +204,7 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
     final l10n = AppLocalizations.of(context);
     final dob = _resolveDateOfBirth();
     if (dob == null) return;
+    final notes = _notesController.text.trim();
 
     setState(() => _isSubmitting = true);
     try {
@@ -212,7 +214,7 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
             gender: _selectedGender.value,
             relationshipType: _relationshipType!,
             lgpdConsent: true,
-            lgpdLegalBasisNotes: _notesController.text,
+            lgpdLegalBasisNotes: notes.isEmpty ? null : notes,
           );
       if (!mounted) return;
       Navigator.of(context).pop(profile);
@@ -222,10 +224,14 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
           backgroundColor: AppColors.clinicalTealDark,
         ),
       );
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
-      final message = ref.read(activeProfileControllerProvider).errorMessage ??
-          l10n.addDependentGenericError;
+      // Backend 400s (e.g. relationship does not match the age) arrive as
+      // ProfileApiException and are shown as sent.
+      final message = e is ProfileApiException && e.message.isNotEmpty
+          ? e.message
+          : ref.read(activeProfileControllerProvider).errorMessage ??
+              l10n.addDependentGenericError;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),

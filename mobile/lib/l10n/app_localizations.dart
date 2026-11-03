@@ -1357,7 +1357,7 @@ abstract class AppLocalizations {
   /// No description provided for @addDependentRelationshipCurator.
   ///
   /// In pt, this message translates to:
-  /// **'Curador(a) de maior incapaz (Curatela)'**
+  /// **'Curador(a) de pessoa maior (Curatela)'**
   String get addDependentRelationshipCurator;
 
   /// No description provided for @addDependentRelationshipLegalGuardian.
@@ -1519,7 +1519,7 @@ abstract class AppLocalizations {
   /// Badge for dependent adult
   ///
   /// In pt, this message translates to:
-  /// **'Maior sob tutela'**
+  /// **'Maior com representação legal'**
   String get profileSwitcherBadgeAdult;
 
   /// Badge for view-only shared access

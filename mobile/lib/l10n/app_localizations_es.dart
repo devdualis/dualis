@@ -726,7 +726,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get addDependentRelationshipCurator =>
-      'Curador(a) de mayor incapaz (curatela)';
+      'Curador(a) de persona mayor de edad (curatela)';
 
   @override
   String get addDependentRelationshipLegalGuardian =>
@@ -819,7 +819,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get profileSwitcherBadgeMinor => 'Menor de edad';
 
   @override
-  String get profileSwitcherBadgeAdult => 'Adulto dependiente';
+  String get profileSwitcherBadgeAdult => 'Adulto con representación legal';
 
   @override
   String get profileSwitcherBadgeViewOnly => 'Solo lectura';

@@ -717,7 +717,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addDependentRelationshipCurator =>
-      'Court-appointed curator of an incapacitated adult';
+      'Court-appointed curator of an adult (curatorship)';
 
   @override
   String get addDependentRelationshipLegalGuardian =>
@@ -808,7 +808,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSwitcherBadgeMinor => 'Minor';
 
   @override
-  String get profileSwitcherBadgeAdult => 'Adult dependent';
+  String get profileSwitcherBadgeAdult => 'Adult with legal representative';
 
   @override
   String get profileSwitcherBadgeViewOnly => 'View only';
