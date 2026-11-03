@@ -1,15 +1,10 @@
 import '../../dashboard/domain/models/triage_history_models.dart';
-import '../../triage_outcome/domain/triage_outcome_models.dart';
 import 'trigger_checkin_state.dart';
 
 /// The two check-in axes shown on Home and "Resultado do Dia".
 enum CheckInAxis {
   emotional,
   physical;
-
-  /// Matches the `TriageOutcome.vertical` string for this axis.
-  String get outcomeVertical =>
-      this == CheckInAxis.emotional ? 'emotional' : 'physical';
 
   CheckInAxis get other =>
       this == CheckInAxis.emotional ? CheckInAxis.physical : CheckInAxis.emotional;
@@ -147,23 +142,79 @@ abstract final class AxisIntensityResolver {
   static int? resolveDisplayIntensity({
     required CheckInAxis axis,
     required TriggerCheckInState state,
-    TriageOutcome? outcome,
   }) {
-    if (outcome != null && outcome.vertical == axis.outcomeVertical) {
-      return outcome.intensityScore;
-    }
     final stateIntensity = axis == CheckInAxis.emotional
         ? state.emotionalIntensity
         : state.physicalIntensity;
     if (stateIntensity != null) return stateIntensity;
-    if (outcome != null &&
-        outcome.vertical == axis.other.outcomeVertical &&
-        outcome.secondaryIntensityScore != null) {
-      return outcome.secondaryIntensityScore;
-    }
     final status = axis == CheckInAxis.emotional
         ? state.emotionalStatus
         : state.physicalStatus;
     return status?.defaultIntensity;
+  }
+}
+
+/// Maps legacy and journal category codes to human-readable labels.
+String mapCategoryLabel(String code) {
+  switch (code) {
+    case 'normal':
+    case 'bem_normal':
+      return 'Bem';
+    case 'cabeca_pescoco':
+    case 'cabeca':
+      return 'Cabeça e pescoço';
+    case 'cardiovascular_torax':
+    case 'cardiovascular':
+      return 'Peito';
+    case 'respiratorio':
+      return 'Respiração';
+    case 'gastrointestinal_abdomen':
+    case 'abdomen':
+      return 'Barriga e estômago';
+    case 'coluna_dor_lombar':
+    case 'coluna':
+    case 'coluna_dor_dorsal':
+    case 'coluna_dorsal':
+      return 'Costas';
+    case 'membros_superiores':
+      return 'Braços e mãos';
+    case 'membros_inferiores':
+      return 'Pernas e pés';
+    case 'neurologico':
+      return 'Tontura e equilíbrio';
+    case 'geniturinario_pelvico':
+      return 'Baixo ventre e urina';
+    case 'dermatologico':
+      return 'Pele';
+    case 'muscular_geral_sistemico':
+      return 'Corpo todo';
+    case 'endocrino_metabolico':
+      return 'Energia e apetite';
+    case 'geral_fisico':
+      return 'Registro físico';
+    case 'ansiosa_agitacao':
+    case 'ansiedade':
+      return 'Ansiedade e agitação';
+    case 'depressiva_desanimo':
+    case 'tristeza':
+      return 'Pra baixo';
+    case 'estresse_burnout':
+    case 'estresse':
+      return 'Estressado(a) ou esgotado(a)';
+    case 'cognitiva_foco':
+      return 'Cansaço mental e foco';
+    case 'sono_vigilia':
+    case 'sono':
+      return 'Sono ruim';
+    case 'somatica':
+    case 'somatico':
+    case 'somatizacao_tensao':
+      return 'Emoções sentidas no corpo';
+    case 'autoestima':
+      return 'Autoestima';
+    case 'geral_emocional':
+      return 'Registro emocional';
+    default:
+      return 'Seu registro';
   }
 }

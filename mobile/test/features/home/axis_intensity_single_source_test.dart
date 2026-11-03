@@ -10,9 +10,6 @@ import 'package:dualis_mobile/features/home/domain/axis_intensity_resolver.dart'
 import 'package:dualis_mobile/features/home/domain/trigger_checkin_state.dart';
 import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
 import 'package:dualis_mobile/features/home/presentation/widgets/dual_axis_trigger_card.dart';
-import 'package:dualis_mobile/features/home/presentation/widgets/today_triage_result_tab.dart';
-import 'package:dualis_mobile/features/triage_outcome/domain/triage_outcome_models.dart';
-import 'package:dualis_mobile/features/triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 // ---------------------------------------------------------------------------
@@ -21,9 +18,8 @@ import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 class _FakeSecureStorage extends SecureStorageService {
   Map<String, dynamic>? checkIn;
-  Map<String, dynamic>? outcome;
 
-  _FakeSecureStorage({this.checkIn, this.outcome});
+  _FakeSecureStorage({this.checkIn});
 
   @override
   Future<String?> getUserId() async => 'user-1';
@@ -45,23 +41,6 @@ class _FakeSecureStorage extends SecureStorageService {
   @override
   Future<void> clearDailyCheckIn(String userId) async {
     checkIn = null;
-  }
-
-  @override
-  Future<Map<String, dynamic>?> getTodayTriageOutcome(String userId) async =>
-      outcome;
-
-  @override
-  Future<void> saveTodayTriageOutcome({
-    required String userId,
-    required Map<String, dynamic> data,
-  }) async {
-    outcome = data;
-  }
-
-  @override
-  Future<void> clearTodayTriageOutcome(String userId) async {
-    outcome = null;
   }
 }
 
@@ -120,19 +99,6 @@ TriageHistoryEntry _p1({bool withEmotionalTag = true}) => TriageHistoryEntry(
 
 TriageHistoryEntry get _e1 => _e('e1', 10);
 TriageHistoryEntry get _e2 => _e('e2', 11);
-
-TriageOutcome _stalePhysicalOutcome() => TriageOutcome(
-      id: 'p1',
-      vertical: 'physical',
-      intensityScore: 2,
-      primaryCategory: 'neurologico',
-      categoryLabel: 'Sistema Neurológico',
-      somaticMapping: 'Tontura / Instabilidade postural e equilíbrio',
-      recommendedArticles: const [],
-      recordedAt: _todayAt(12),
-      secondaryCategoryLabel: 'Estresse e Burnout',
-      secondaryIntensityScore: 4,
-    );
 
 Map<String, dynamic> _staleCheckInJson() => TriggerCheckInState(
       isCompletedToday: true,
@@ -340,53 +306,35 @@ void main() {
   });
 
   group('AxisIntensityResolver.resolveDisplayIntensity', () {
-    test('state per-axis intensity beats the derived secondary score', () {
-      final outcome = _stalePhysicalOutcome();
-      const state = TriggerCheckInState(emotionalIntensity: 3);
-      expect(
-          AxisIntensityResolver.resolveDisplayIntensity(
-              axis: CheckInAxis.emotional, state: state, outcome: outcome),
-          3);
-      expect(
-          AxisIntensityResolver.resolveDisplayIntensity(
-              axis: CheckInAxis.physical, state: state, outcome: outcome),
-          2);
-    });
-
-    test('derived secondary is the fallback with an empty state', () {
-      expect(
-          AxisIntensityResolver.resolveDisplayIntensity(
-              axis: CheckInAxis.emotional,
-              state: const TriggerCheckInState(),
-              outcome: _stalePhysicalOutcome()),
-          4);
-    });
-
-    test('status default is the last fallback', () {
-      expect(
-          AxisIntensityResolver.resolveDisplayIntensity(
-              axis: CheckInAxis.emotional,
-              state: const TriggerCheckInState(emotionalStatus: TriggerStatus.soSo)),
-          3);
-    });
-
-    test('own-axis outcome score wins', () {
-      final outcome = TriageOutcome(
-        id: 'e1',
-        vertical: 'emotional',
-        intensityScore: 3,
-        primaryCategory: 'estresse_burnout',
-        categoryLabel: 'Estresse e Burnout',
-        somaticMapping: '',
-        recommendedArticles: const [],
-        recordedAt: _todayAt(10),
+    test('state per-axis intensity is returned', () {
+      const state = TriggerCheckInState(
+        emotionalIntensity: 3,
+        physicalIntensity: 2,
       );
       expect(
-          AxisIntensityResolver.resolveDisplayIntensity(
-              axis: CheckInAxis.emotional,
-              state: const TriggerCheckInState(emotionalIntensity: 5),
-              outcome: outcome),
-          3);
+        AxisIntensityResolver.resolveDisplayIntensity(
+          axis: CheckInAxis.emotional,
+          state: state,
+        ),
+        3,
+      );
+      expect(
+        AxisIntensityResolver.resolveDisplayIntensity(
+          axis: CheckInAxis.physical,
+          state: state,
+        ),
+        2,
+      );
+    });
+
+    test('status default is the fallback', () {
+      expect(
+        AxisIntensityResolver.resolveDisplayIntensity(
+          axis: CheckInAxis.emotional,
+          state: const TriggerCheckInState(emotionalStatus: TriggerStatus.soSo),
+        ),
+        3,
+      );
     });
   });
 
@@ -394,7 +342,6 @@ void main() {
     test('remote records override stale local per-axis intensity', () async {
       final storage = _FakeSecureStorage(
         checkIn: _staleCheckInJson(),
-        outcome: _stalePhysicalOutcome().toJson(),
       );
       final container =
           _container(storage, [_p1(withEmotionalTag: false), _e1, _e2]);
@@ -410,41 +357,6 @@ void main() {
       expect(state.isEmotionalCompleted, isTrue);
       expect(state.isPhysicalCompleted, isTrue);
     });
-
-    test('markCompletedWithOutcome keeps an already-completed other axis', () {
-      final container = _container(_FakeSecureStorage(), const []);
-      addTearDown(container.dispose);
-      final notifier = container.read(triggerCheckInProvider.notifier);
-
-      notifier.markCompletedWithOutcome(TriageOutcome(
-        id: 'e1',
-        vertical: 'emotional',
-        intensityScore: 3,
-        primaryCategory: 'estresse_burnout',
-        categoryLabel: 'Estresse e Burnout',
-        somaticMapping: '',
-        recommendedArticles: const [],
-        recordedAt: DateTime.now(),
-      ));
-      notifier.markCompletedWithOutcome(_stalePhysicalOutcome());
-
-      final state = container.read(triggerCheckInProvider);
-      expect(state.emotionalIntensity, 3);
-      expect(state.emotionalStatus, TriggerStatus.soSo);
-      expect(state.physicalIntensity, 2);
-    });
-
-    test('markCompletedWithOutcome still seeds the other axis from secondary on a fresh state', () {
-      final container = _container(_FakeSecureStorage(), const []);
-      addTearDown(container.dispose);
-      final notifier = container.read(triggerCheckInProvider.notifier);
-
-      notifier.markCompletedWithOutcome(_stalePhysicalOutcome());
-
-      final state = container.read(triggerCheckInProvider);
-      expect(state.emotionalIntensity, 4);
-      expect(state.emotionalStatus, TriggerStatus.badSick);
-    });
   });
 
   group('Home DualAxisTriggerCard end-to-end', () {
@@ -452,7 +364,6 @@ void main() {
         (tester) async {
       final storage = _FakeSecureStorage(
         checkIn: _staleCheckInJson(),
-        outcome: _stalePhysicalOutcome().toJson(),
       );
       final container =
           _container(storage, [_p1(withEmotionalTag: false), _e1, _e2]);
@@ -461,7 +372,6 @@ void main() {
       await tester.pumpWidget(_harness(container, const DualAxisTriggerCard()));
       await tester.pumpAndSettle();
 
-      // Chip removed: the completed card's background color is the tier signal.
       final emotionalCard = tester.widget<Container>(
         find.byKey(const Key('psicoemocional_completed_card')),
       );
@@ -477,74 +387,6 @@ void main() {
         (physicalCard.decoration as BoxDecoration).color,
         AppColors.intensityMildBg,
       );
-    });
-  });
-
-  group('Resultado do Dia (TodayTriageResultTab) end-to-end', () {
-    testWidgets('associated emotional card shows Moderada (3), physical shows Leve (1-2)',
-        (tester) async {
-      final storage = _FakeSecureStorage(
-        checkIn: _staleCheckInJson(),
-        outcome: _stalePhysicalOutcome().toJson(),
-      );
-      final container =
-          _container(storage, [_p1(withEmotionalTag: false), _e1, _e2]);
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(
-        _harness(container, TodayTriageResultTab(onGoToCheckIn: () {})),
-      );
-      await tester.pumpAndSettle();
-
-      expect(container.read(triageOutcomeProvider).outcome?.intensityScore, 2);
-      expect(find.text('2. Eixo Avaliação Psico-emocional'), findsOneWidget);
-      // Single source of truth: the freshly-resolved trigger-state summary
-      // (mapCategoryLabel('estresse_burnout')) wins over the stale
-      // outcome.secondaryCategoryLabel persisted in _stalePhysicalOutcome().
-      expect(find.text('Estressado(a) ou esgotado(a)'), findsOneWidget);
-      expect(find.text('Moderada (3)'), findsNothing);
-      expect(find.text('Leve (1-2)'), findsNothing);
-      expect(find.text('Intensa (4-5)'), findsNothing);
-      for (final entry in {
-        '1. Eixo Avaliação Física': AppColors.intensityMildBg,
-        '2. Eixo Avaliação Psico-emocional': AppColors.intensityModerateBg,
-      }.entries) {
-        final card = tester.widget<Container>(find.ancestor(
-          of: find.text(entry.key),
-          matching: find.byType(Container),
-        ).first);
-        expect((card.decoration as BoxDecoration).color, entry.value);
-      }
-    });
-  });
-
-  group('TriageOutcomeNotifier rebuild from history', () {
-    test('emotional cross-vertical record rebuilds as an emotional outcome', () async {
-      final container = _container(_FakeSecureStorage(), [_e1]);
-      addTearDown(container.dispose);
-
-      await container.read(triageOutcomeProvider.notifier).loadTodayOutcome();
-      await _flush();
-
-      final outcome = container.read(triageOutcomeProvider).outcome;
-      expect(outcome, isNotNull);
-      expect(outcome!.vertical, 'emotional');
-      expect(outcome.primaryCategory, 'estresse_burnout');
-      expect(outcome.secondaryCategoryLabel, mapCategoryLabel('neurologico'));
-    });
-
-    test('secondary score comes from the other axis own record', () async {
-      final container = _container(_FakeSecureStorage(), [_p1(), _e1]);
-      addTearDown(container.dispose);
-
-      await container.read(triageOutcomeProvider.notifier).loadTodayOutcome();
-      await _flush();
-
-      final outcome = container.read(triageOutcomeProvider).outcome;
-      expect(outcome, isNotNull);
-      expect(outcome!.vertical, 'physical');
-      expect(outcome.intensityScore, 2);
-      expect(outcome.secondaryIntensityScore, 3);
     });
   });
 }

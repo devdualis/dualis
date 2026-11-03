@@ -5,7 +5,6 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AppModule } from '../../src/app.module';
 import { AuthService } from '../../src/modules/auth/auth.service';
-import { TriageOutcomeService } from '../../src/modules/triage/services/triage-outcome.service';
 import { AntiburlaService } from '../../src/modules/triage/services/antiburla.service';
 import { TriageHistoryService } from '../../src/modules/triage/services/triage-history.service';
 import { defaultPrimaryProfileId, stubProfileAccess } from './support/profile-access.stub';
@@ -14,6 +13,7 @@ import { defaultPrimaryProfileId, stubProfileAccess } from './support/profile-ac
  * Contract 4: every /v1/triage/* handler is also served under /v1/journal/*, the
  * antiburla check also as /v1/journal/recurrence-check. Old and new paths must reach the
  * same handler with the same rules. AI tagging was removed: its routes no longer exist.
+ * The legacy outcome and daily-checkin endpoints are retired and return 404.
  */
 describe('Journal route aliases E2E', () => {
   let app: NestFastifyApplication;
@@ -25,8 +25,6 @@ describe('Journal route aliases E2E', () => {
 
   beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({ imports: [AppModule] })
-      .overrideProvider(TriageOutcomeService)
-      .useValue({ processOutcome: vi.fn(), recordDailyCheckIn: vi.fn() })
       .overrideProvider(AntiburlaService)
       .useValue({ checkHistoricalConsistency: vi.fn() })
       .overrideProvider(TriageHistoryService)
@@ -53,8 +51,6 @@ describe('Journal route aliases E2E', () => {
     app.inject({ method, url, payload, headers: auth ? { authorization: `Bearer ${token}` } : {} });
 
   const postRoutes = [
-    ['/v1/triage/outcome', '/v1/journal/outcome'],
-    ['/v1/triage/daily-checkin', '/v1/journal/daily-checkin'],
     ['/v1/triage/antiburla-check', '/v1/journal/antiburla-check', '/v1/journal/recurrence-check'],
   ];
 
@@ -62,6 +58,18 @@ describe('Journal route aliases E2E', () => {
     for (const url of urls) {
       expect((await inject('POST', url, {}, false)).statusCode, url).toBe(401);
       expect((await inject('POST', url, {})).statusCode, url).toBe(400);
+    }
+  });
+
+  it('retired endpoints return 404 on both prefixes: outcome and daily-checkin', async () => {
+    for (const url of [
+      '/v1/journal/outcome',
+      '/v1/triage/outcome',
+      '/v1/journal/daily-checkin',
+      '/v1/triage/daily-checkin',
+    ]) {
+      const res = await inject('POST', url, { vertical: 'physical' });
+      expect(res.statusCode, url).toBe(404);
     }
   });
 

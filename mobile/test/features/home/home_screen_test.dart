@@ -1,3 +1,5 @@
+import 'package:dualis_mobile/features/home/domain/trigger_checkin_state.dart';
+import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,13 +13,11 @@ import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/home/domain/home_greeting.dart';
 import 'package:dualis_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:dualis_mobile/features/hydration/presentation/hydration_reminder_offer.dart';
-import 'package:dualis_mobile/features/triage_outcome/domain/triage_outcome_models.dart';
-import 'package:dualis_mobile/features/triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 Widget createHomeTestApp({
   AuthState? initialAuthState,
-  TriageOutcome? initialOutcome,
+  TriggerCheckInState? initialCheckInState,
   DateTime? now,
   bool hydrationOfferPending = false,
 }) {
@@ -73,9 +73,9 @@ Widget createHomeTestApp({
         authControllerProvider.overrideWith(
           () => _TestAuthController(initialAuthState),
         ),
-      if (initialOutcome != null)
-        triageOutcomeProvider.overrideWith(
-          () => _TestTriageOutcomeController(initialOutcome),
+      if (initialCheckInState != null)
+        triggerCheckInProvider.overrideWith(
+          () => _TestTriggerCheckInController(initialCheckInState),
         ),
     ],
     child: MaterialApp.router(
@@ -104,16 +104,16 @@ class _FakeHydrationOffer extends HydrationReminderOffer {
   }
 }
 
-class _TestTriageOutcomeController extends TriageOutcomeNotifier {
-  final TriageOutcome _outcome;
-  _TestTriageOutcomeController(this._outcome);
+class _TestTriggerCheckInController extends TriggerCheckInNotifier {
+  final TriggerCheckInState _initial;
+  _TestTriggerCheckInController(this._initial);
 
   @override
-  TriageOutcomeState build() => TriageOutcomeState(outcome: _outcome);
+  TriggerCheckInState build() => _initial;
 
   @override
-  Future<void> loadTodayOutcome() async {
-    state = state.copyWith(outcome: _outcome);
+  Future<void> loadTodayCheckIn([DateTime? now]) async {
+    state = _initial;
   }
 }
 
@@ -182,6 +182,25 @@ void main() {
       expect(find.text('Triage Screen'), findsOneWidget);
     });
 
+    testWidgets('Shows the completed stage card on the main home tab; Meu Dia is not in the nav',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createHomeTestApp(
+        initialCheckInState: const TriggerCheckInState(
+          isPhysicalCompleted: true,
+          physicalIntensity: 5,
+          physicalSummary: 'Peito',
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      // Verify physical stage card is marked completed, NOT displaying uncompleted start button
+      expect(find.byKey(const Key('fisica_completed_card')), findsOneWidget);
+      expect(find.byKey(const Key('start_fisica_triage_button')), findsNothing);
+
+      // "Meu Dia" is no longer a bottom-nav destination.
+      expect(find.byKey(const Key('nav_destination_today_outcome')), findsNothing);
+    });
+
     testWidgets('Tapping settings button navigates to /settings screen',
         (WidgetTester tester) async {
       const mockUser = UserProfile(
@@ -207,30 +226,6 @@ void main() {
       expect(find.text('Settings Screen'), findsOneWidget);
     });
 
-    testWidgets('Shows the completed stage card on the main home tab; Meu Dia is not in the nav',
-        (WidgetTester tester) async {
-      final mockOutcome = TriageOutcome(
-        id: 'checkin-chest-1',
-        vertical: 'physical',
-        intensityScore: 5,
-        primaryCategory: 'cardiovascular_torax',
-        categoryLabel: 'Peito',
-        somaticMapping: 'Aperto no peito e coração acelerado',
-        recommendedArticles: const [],
-        recordedAt: DateTime.now(),
-        aiMappedLayTerm: 'Dor e aperto no peito',
-      );
-
-      await tester.pumpWidget(createHomeTestApp(initialOutcome: mockOutcome));
-      await tester.pumpAndSettle();
-
-      // Verify physical stage card is marked completed, NOT displaying uncompleted start button
-      expect(find.byKey(const Key('fisica_completed_card')), findsOneWidget);
-      expect(find.byKey(const Key('start_fisica_triage_button')), findsNothing);
-
-      // "Meu Dia" is no longer a bottom-nav destination.
-      expect(find.byKey(const Key('nav_destination_today_outcome')), findsNothing);
-    });
     const greetUser = UserProfile(
       id: 'usr-1',
       name: 'Ana Maria Souza',

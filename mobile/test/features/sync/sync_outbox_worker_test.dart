@@ -7,29 +7,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dualis_mobile/core/database/app_database.dart';
 import 'package:dualis_mobile/core/network/connectivity_service.dart';
+import 'package:dualis_mobile/features/journal/data/journal_repository.dart';
 import 'package:dualis_mobile/features/sync/data/triage_outbox_repository.dart';
 import 'package:dualis_mobile/features/sync/presentation/controllers/sync_outbox_worker.dart';
 import 'package:dualis_mobile/features/sync/presentation/widgets/offline_indicator_banner.dart';
-import 'package:dualis_mobile/features/triage_outcome/data/triage_outcome_remote_data_source.dart';
-import 'package:dualis_mobile/features/triage_outcome/domain/triage_outcome_models.dart';
-import 'package:dualis_mobile/features/triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
-class MockTriageOutcomeRemoteDataSource extends Mock
-    implements TriageOutcomeRemoteDataSource {}
+class MockJournalRepository extends Mock implements JournalRepository {}
 
 class MockConnectivityService extends Mock implements ConnectivityService {}
 
 void main() {
   late AppDatabase db;
   late TriageOutboxRepository repository;
-  late MockTriageOutcomeRemoteDataSource mockDataSource;
+  late MockJournalRepository mockJournalRepo;
   late MockConnectivityService mockConnectivity;
 
   setUp(() {
     db = AppDatabase(NativeDatabase.memory());
     repository = TriageOutboxRepository(db);
-    mockDataSource = MockTriageOutcomeRemoteDataSource();
+    mockJournalRepo = MockJournalRepository();
     mockConnectivity = MockConnectivityService();
   });
 
@@ -38,38 +35,20 @@ void main() {
   });
 
   group('SyncOutboxWorker & Offline Sync Tests (SYNC-01)', () {
-    test('drains pending items and marks them synced upon successful transmission', () async {
+    test('legacy triage/daily-checkin outbox items are dropped permanently with no error loop', () async {
       await repository.enqueueTriageCheckIn(
         vertical: 'physical',
         answers: {0: 'cabeca', 1: 'ha_alguns_dias'},
-        clientSessionId: 'session-1',
+        clientSessionId: 'legacy-session-1',
       );
 
       await repository.enqueueTriageCheckIn(
         vertical: 'emotional',
         answers: {0: 'ansiedade_agitacao', 1: 'comecou_hoje'},
-        clientSessionId: 'session-2',
+        clientSessionId: 'legacy-session-2',
       );
 
-      final dummyOutcome = TriageOutcome(
-        id: 'out-1',
-        vertical: 'physical',
-        intensityScore: 3,
-        primaryCategory: 'cabeca',
-        categoryLabel: 'Cabeça',
-        somaticMapping: 'Cabeça',
-        recommendedArticles: [],
-        recordedAt: DateTime.now(),
-      );
-
-      when(() => mockDataSource.submitTriage(
-            vertical: any(named: 'vertical'),
-            answers: any(named: 'answers'),
-            narrative: any(named: 'narrative'),
-            token: any(named: 'token'),
-            clientSessionId: any(named: 'clientSessionId'),
-          )).thenAnswer((_) async => dummyOutcome);
-
+      when(() => mockJournalRepo.syncPending()).thenAnswer((_) async => 0);
       when(() => mockConnectivity.isOnlineStream)
           .thenAnswer((_) => Stream.value(true));
 
@@ -77,15 +56,17 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           triageOutboxRepositoryProvider.overrideWithValue(repository),
-          triageOutcomeDataSourceProvider.overrideWithValue(mockDataSource),
+          journalRepositoryProvider.overrideWithValue(mockJournalRepo),
           connectivityServiceProvider.overrideWithValue(mockConnectivity),
         ],
       );
+      addTearDown(container.dispose);
 
       final worker = container.read(syncOutboxWorkerProvider.notifier);
       final syncedCount = await worker.syncPendingOutbox();
 
-      expect(syncedCount, equals(2));
+      // Legacy items are discarded, not counted as synced journal entries.
+      expect(syncedCount, equals(0));
 
       final pendingAfter = await repository.getPendingOutboxItems();
       expect(pendingAfter, isEmpty);
@@ -94,21 +75,14 @@ void main() {
       expect(allRecords, isEmpty);
     });
 
-    test('marks item failed and increments attempts when transmission fails', () async {
-      final item = await repository.enqueueTriageCheckIn(
+    test('legacy outbox item is discarded and journal item still syncs', () async {
+      await repository.enqueueTriageCheckIn(
         vertical: 'physical',
         answers: {0: 'costas'},
-        clientSessionId: 'failing-session',
+        clientSessionId: 'legacy-item',
       );
 
-      when(() => mockDataSource.submitTriage(
-            vertical: any(named: 'vertical'),
-            answers: any(named: 'answers'),
-            narrative: any(named: 'narrative'),
-            token: any(named: 'token'),
-            clientSessionId: any(named: 'clientSessionId'),
-          )).thenThrow(Exception('Simulated 503 Service Unavailable'));
-
+      when(() => mockJournalRepo.syncPending()).thenAnswer((_) async => 1);
       when(() => mockConnectivity.isOnlineStream)
           .thenAnswer((_) => Stream.value(true));
 
@@ -116,78 +90,24 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
           triageOutboxRepositoryProvider.overrideWithValue(repository),
-          triageOutcomeDataSourceProvider.overrideWithValue(mockDataSource),
-          connectivityServiceProvider.overrideWithValue(mockConnectivity),
-        ],
-      );
-
-      final worker = container.read(syncOutboxWorkerProvider.notifier);
-      final syncedCount = await worker.syncPendingOutbox();
-
-      expect(syncedCount, equals(0));
-
-      final updatedRecord = await (db.select(db.triageOutbox)
-            ..where((tbl) => tbl.id.equals(item.id)))
-          .getSingle();
-
-      expect(updatedRecord.status, equals('failed'));
-      expect(updatedRecord.attempts, equals(1));
-      expect(updatedRecord.lastError, contains('503 Service Unavailable'));
-    });
-
-    test('sends stored profileId explicitly via submitTriageForProfile when outbox item has profileId', () async {
-      await repository.enqueueTriageCheckIn(
-        vertical: 'physical',
-        answers: {0: 'dor_de_cabeca'},
-        clientSessionId: 'session-profile-1',
-        profileId: 'profile-dep-123',
-      );
-
-      final dummyOutcome = TriageOutcome(
-        id: 'out-profile-1',
-        vertical: 'physical',
-        intensityScore: 3,
-        primaryCategory: 'cabeca',
-        categoryLabel: 'Cabeça',
-        somaticMapping: 'Cabeça',
-        recommendedArticles: [],
-        recordedAt: DateTime.now(),
-      );
-
-      when(() => mockDataSource.submitTriageForProfile(
-            vertical: any(named: 'vertical'),
-            answers: any(named: 'answers'),
-            narrative: any(named: 'narrative'),
-            token: any(named: 'token'),
-            clientSessionId: any(named: 'clientSessionId'),
-            language: any(named: 'language'),
-            profileId: any(named: 'profileId'),
-          )).thenAnswer((_) async => dummyOutcome);
-
-      final container = ProviderContainer(
-        overrides: [
-          appDatabaseProvider.overrideWithValue(db),
-          triageOutboxRepositoryProvider.overrideWithValue(repository),
-          triageOutcomeDataSourceProvider.overrideWithValue(mockDataSource),
+          journalRepositoryProvider.overrideWithValue(mockJournalRepo),
           connectivityServiceProvider.overrideWithValue(mockConnectivity),
         ],
       );
       addTearDown(container.dispose);
 
       final worker = container.read(syncOutboxWorkerProvider.notifier);
-      final count = await worker.syncPendingOutbox();
-      expect(count, equals(1));
+      final syncedCount = await worker.syncPendingOutbox();
 
-      verify(() => mockDataSource.submitTriageForProfile(
-            vertical: 'physical',
-            answers: {0: 'dor_de_cabeca'},
-            narrative: null,
-            clientSessionId: 'session-profile-1',
-            profileId: 'profile-dep-123',
-          )).called(1);
+      // The journal entry synced successfully (count = 1).
+      expect(syncedCount, equals(1));
+      verify(() => mockJournalRepo.syncPending()).called(1);
 
-      final pending = await repository.getPendingOutboxItems();
-      expect(pending, isEmpty);
+      // The legacy outbox item was purged from the outbox.
+      final pendingAfter = await repository.getPendingOutboxItems();
+      expect(pendingAfter, isEmpty);
+      final allLegacy = await db.select(db.triageOutbox).get();
+      expect(allLegacy, isEmpty);
     });
 
     testWidgets('OfflineIndicatorBanner shows offline state and pending sync count', (tester) async {

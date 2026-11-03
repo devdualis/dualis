@@ -23,16 +23,10 @@ import {
   ProfileContextGuard,
 } from '../profiles/profile-context';
 import { CheckAntiburlaDto, AntiburlaCheckResponseDto } from './dto/antiburla.dto';
-import { SubmitTriageDto, TriageOutcomeResponseDto } from './dto/triage-outcome.dto';
-import {
-  SubmitDailyCheckInDto,
-  DailyCheckInResponseDto,
-} from './dto/daily-checkin.dto';
 import {
   GetTriageHistoryQueryDto,
   TriageHistoryResponseDto,
 } from './dto/triage-history.dto';
-import { TriageOutcomeService } from './services/triage-outcome.service';
 import { AntiburlaService } from './services/antiburla.service';
 import { TriageHistoryService } from './services/triage-history.service';
 
@@ -41,55 +35,11 @@ import { TriageHistoryService } from './services/triage-history.service';
 @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
 export class TriageController {
   constructor(
-    @Inject(TriageOutcomeService)
-    private readonly triageOutcomeService: TriageOutcomeService,
     @Inject(AntiburlaService)
     private readonly antiburlaService: AntiburlaService,
     @Inject(TriageHistoryService)
     private readonly triageHistoryService: TriageHistoryService,
   ) {}
-
-  @Post('outcome')
-  @HttpCode(HttpStatus.OK)
-  @ProfileAccess('write')
-  @UseGuards(JwtAuthGuard, ProfileContextGuard)
-  @UsePipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      expectedType: SubmitTriageDto,
-    }),
-  )
-  async createOutcome(
-    @Request() req: any,
-    @ActiveProfile() profile: ProfileContext,
-    @Body() dto: SubmitTriageDto,
-  ): Promise<TriageOutcomeResponseDto> {
-    const userId = req.user?.id || req.user?.userId || req.user?.sub;
-    return this.triageOutcomeService.processOutcome(userId, profile.profileId, dto);
-  }
-
-  @Post('daily-checkin')
-  @HttpCode(HttpStatus.OK)
-  @ProfileAccess('write')
-  @UseGuards(JwtAuthGuard, ProfileContextGuard)
-  @UsePipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      expectedType: SubmitDailyCheckInDto,
-    }),
-  )
-  async createDailyCheckIn(
-    @Request() req: any,
-    @ActiveProfile() profile: ProfileContext,
-    @Body() dto: SubmitDailyCheckInDto,
-  ): Promise<DailyCheckInResponseDto> {
-    const userId = req.user?.id || req.user?.userId || req.user?.sub;
-    return this.triageOutcomeService.recordDailyCheckIn(userId, profile.profileId, dto);
-  }
 
   @Post(['recurrence-check', 'antiburla-check'])
   @HttpCode(HttpStatus.OK)

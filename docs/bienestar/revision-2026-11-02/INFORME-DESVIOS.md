@@ -97,7 +97,8 @@ Ya decididos y documentados. No se implementan como los pidió el cliente.
 
 ## 6. Riesgo regulatorio residual (no lo pidió el cliente, pero salió en la revisión)
 
-- `backend/src/modules/triage/triage.controller.ts:52` (`outcome`) y `:73` (`daily-checkin`) siguen activos, escriben un código de sistema corporal o dimensión emocional y recomiendan artículos según esa categoría. El flujo actual no los llama; la cola offline antigua sí puede hacerlo. **Recomendación:** apagarlos o hacer que devuelvan 410 cuando se vacíe la cola, y quitarlos de `api_endpoints.dart`.
+- **Eliminación completada (2026-11-02):** Se eliminaron definitivamente del backend los endpoints `POST /v1/journal/outcome`, `POST /v1/journal/daily-checkin` y sus alias `/v1/triage/*` en `triage.controller.ts`, junto con sus DTOs (`triage-outcome.dto.ts`, `daily-checkin.dto.ts`), el servicio `TriageOutcomeService` y los servicios/seeds de artículos recomendados (`articles-catalog.service.ts`, `article-embedding.service.ts`, `articles-vector.service.ts`, seeds). Ahora responden 404. Se conservaron `GET history`, `DELETE history/:id` y `POST recurrence-check|antiburla-check` con sus servicios bajo ambos prefijos (`/v1/journal/` y `/v1/triage/`).
+- En la app móvil, se eliminaron los llamadores (`api_endpoints.dart`, el feature `triage_outcome`, `TriggerCheckInController`, `DualAxisTriggerCard`, `TodayTriageResultTab`, `AxisIntensityResolver` y `triage_vertical.dart`). El `SyncOutboxWorker` descarta de forma permanente e inocua cualquier ítem pendiente en cola de los endpoints antiguos sin errores ni reintentos, manteniendo la sincronización normal de entradas de diario v2.
 - Ayuda a ≤1 toque: **se cumple** en todas las pantallas del diario.
 
 ---
@@ -129,4 +130,4 @@ Hay que aclararlas con el cliente antes de tocar el texto:
 
 **Comunicar por escrito al cliente:** la sección 3, con la razón regulatoria. Los cuadrantes (D17) se implementaron como "Como você se sentiu", sin etiquetas clínicas: explicar al cliente por qué no llevan los nombres que pidió.
 
-**Técnico:** apagar los endpoints antiguos de triaje (sección 6).
+**Técnico:** endpoints antiguos de triaje eliminados (sección 6, 2026-11-02).

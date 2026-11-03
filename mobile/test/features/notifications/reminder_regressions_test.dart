@@ -19,7 +19,6 @@ import 'package:dualis_mobile/features/dashboard/domain/models/triage_history_mo
 import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
 import 'package:dualis_mobile/features/hydration/domain/models/hydration_settings.dart';
 import 'package:dualis_mobile/features/triage/domain/triage_vertical.dart';
-import 'package:dualis_mobile/features/triage_outcome/domain/triage_outcome_models.dart';
 
 class MockFlutterLocalNotificationsPlugin extends Mock
     implements FlutterLocalNotificationsPlugin {}
@@ -288,21 +287,6 @@ void main() {
         await expectRearmedFromTomorrow();
       });
 
-      test('markCompletedWithOutcome', () async {
-        container.read(triggerCheckInProvider.notifier).markCompletedWithOutcome(
-              TriageOutcome(
-                id: 'o-1',
-                vertical: 'physical',
-                intensityScore: 2,
-                primaryCategory: 'cabeca_pescoco',
-                categoryLabel: 'Cabeça e Pescoço',
-                somaticMapping: 'Cabeça',
-                recommendedArticles: const [],
-                recordedAt: DateTime.now(),
-              ),
-            );
-        await expectRearmedFromTomorrow();
-      });
     });
   });
 

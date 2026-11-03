@@ -29,7 +29,7 @@ void main() {
       );
 
       final options = RequestOptions(
-        path: '/v1/triage/outcome',
+        path: '/v1/journal/entries',
         headers: {'X-Profile-Id': 'explicit-profile-999'},
       );
       final handler = RequestInterceptorHandler();
@@ -46,7 +46,7 @@ void main() {
       );
 
       final options = RequestOptions(
-        path: '/v1/triage/outcome',
+        path: '/v1/journal/entries',
         headers: {'x-profile-id': 'explicit-profile-888'},
       );
       final handler = RequestInterceptorHandler();

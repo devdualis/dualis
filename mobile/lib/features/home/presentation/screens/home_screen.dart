@@ -22,7 +22,6 @@ import '../../../care/presentation/screens/premium_promo_screen.dart';
 import 'dart:async';
 import '../../../dashboard/presentation/screens/historical_dashboard_screen.dart';
 import '../../../journal_insights/presentation/controllers/journal_insights_controller.dart';
-import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import '../../../../core/notifications/hydration_notification_service.dart';
 import '../../../../core/notifications/daily_checkin_notification_service.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
@@ -80,7 +79,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
       ref.read(triggerCheckInProvider.notifier).checkAndResetIfNewDay();
       ref.read(triggerCheckInProvider.notifier).loadTodayCheckIn();
-      ref.read(triageOutcomeProvider.notifier).loadTodayOutcome();
       ref.read(hydrationControllerProvider.notifier).loadData();
       if (ref.read(premiumProfilesEnabledProvider)) {
         ref.read(habitsControllerProvider.notifier).loadData();

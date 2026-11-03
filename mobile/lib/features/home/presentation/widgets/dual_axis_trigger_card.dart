@@ -9,7 +9,6 @@ import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../journal/presentation/controllers/journal_flow_state.dart';
 import '../../../journal/presentation/screens/journal_flow_screen.dart';
-import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import '../../domain/axis_intensity_resolver.dart';
 import '../../domain/trigger_checkin_state.dart';
 import '../controllers/trigger_checkin_controller.dart';
@@ -20,68 +19,28 @@ class DualAxisTriggerCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(triggerCheckInProvider);
-    final outcomeState = ref.watch(triageOutcomeProvider);
-    final outcome = outcomeState.outcome;
     final notifier = ref.read(triggerCheckInProvider.notifier);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final hasSecondaryEmotional = outcome != null &&
-        (outcome.vertical == 'physical' && outcome.secondaryCategoryLabel != null);
-    final isEmotionalFromOutcome = outcome != null &&
-        (outcome.vertical == 'emotional' || hasSecondaryEmotional);
-
-    final hasSecondaryPhysical = outcome != null &&
-        (outcome.vertical == 'emotional' && outcome.secondaryCategoryLabel != null);
-    final isPhysicalFromOutcome = outcome != null &&
-        (outcome.vertical == 'physical' || hasSecondaryPhysical);
-
-    final isEmotionalCompleted = state.isEmotionalCompleted || isEmotionalFromOutcome;
-    final isPhysicalCompleted = state.isPhysicalCompleted || isPhysicalFromOutcome;
+    final isEmotionalCompleted = state.isEmotionalCompleted;
+    final isPhysicalCompleted = state.isPhysicalCompleted;
 
     final emotionalIntensity = AxisIntensityResolver.resolveDisplayIntensity(
       axis: CheckInAxis.emotional,
       state: state,
-      outcome: outcome,
     );
 
     final physicalIntensity = AxisIntensityResolver.resolveDisplayIntensity(
       axis: CheckInAxis.physical,
       state: state,
-      outcome: outcome,
     );
 
-    final emotionalStatus = state.emotionalStatus ??
-        (outcome != null
-            ? (outcome.vertical == 'emotional'
-                ? triggerStatusFromIntensity(outcome.intensityScore)
-                : (hasSecondaryEmotional
-                    ? triggerStatusFromIntensity(outcome.secondaryIntensityScore ?? emotionalIntensity)
-                    : null))
-            : null);
+    final emotionalStatus = state.emotionalStatus;
+    final physicalStatus = state.physicalStatus;
 
-    final physicalStatus = state.physicalStatus ??
-        (outcome != null
-            ? (outcome.vertical == 'physical'
-                ? triggerStatusFromIntensity(outcome.intensityScore)
-                : (hasSecondaryPhysical
-                    ? triggerStatusFromIntensity(outcome.secondaryIntensityScore ?? physicalIntensity)
-                    : null))
-            : null);
-
-    final emotionalSummary = state.emotionalSummary ??
-        (outcome != null
-            ? (outcome.vertical == 'emotional'
-                ? outcome.categoryLabel
-                : outcome.secondaryCategoryLabel)
-            : null);
-
-    final physicalSummary = state.physicalSummary ??
-        (outcome != null
-            ? (outcome.vertical == 'physical'
-                ? outcome.categoryLabel
-                : outcome.secondaryCategoryLabel)
-            : null);
+    final emotionalSummary = state.emotionalSummary;
+    final physicalSummary = state.physicalSummary;
 
     final viewOnly = activeProfileIsViewOnly(ref);
 

@@ -1,10 +1,7 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/constants/api_endpoints.dart';
-import '../../../../core/network/api_client.dart';
 import '../../../../core/notifications/daily_checkin_notification_service.dart';
 import '../../../../core/security/secure_storage_service.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -20,12 +17,8 @@ import '../../../journal/presentation/journal_item_text.dart';
 import '../../../journal/presentation/journal_labels.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../../triage/domain/triage_vertical.dart';
-import '../../../triage_outcome/domain/triage_outcome_models.dart';
-import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import '../../domain/axis_intensity_resolver.dart';
 import '../../domain/trigger_checkin_state.dart';
-
-const Object _keepNarrative = Object();
 
 class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
   SecureStorageService get _storage => ref.read(secureStorageServiceProvider);
@@ -57,15 +50,6 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     );
     if (_lastProfileId != activeProfileId) {
       _lastProfileId = activeProfileId;
-      Future.microtask(() {
-        if (_isDisposed) return;
-        try {
-          if (ref.exists(triageOutcomeProvider)) {
-            ref.read(triageOutcomeProvider.notifier).reset();
-            ref.read(triageOutcomeProvider.notifier).loadTodayOutcome();
-          }
-        } catch (_) {}
-      });
     }
 
     // Pending reminders carry the language they were scheduled in: re-arm
@@ -295,7 +279,6 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
           textTouched: false,
         );
         await _persistCurrentState();
-        ref.read(triageOutcomeProvider.notifier).loadTodayOutcome();
       }
     } catch (_) {}
   }
@@ -396,105 +379,6 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
       checkInDate: _getTodayDateString(),
     );
     _persistCurrentState();
-  }
-
-  /// [narrative] is the free text the user typed in the triage that produced
-  /// [outcome]. Pass it — even as `null` — only when submitting that triage.
-  /// Omitting it (replaying a stored or remote outcome) keeps the axis's
-  /// current narrative, which the history sync owns.
-  void markCompletedWithOutcome(
-    TriageOutcome outcome, {
-    Object? narrative = _keepNarrative,
-  }) {
-    // Quick daily check-ins persist intensity 0; axis state lives in stepAnswers.
-    if (outcome.intensityScore <= 0) {
-      return;
-    }
-
-    final today = _getTodayDateString(outcome.recordedAt);
-    final isPhysical = outcome.vertical == 'physical';
-
-    TriggerStatus emotionalStatus;
-    TriggerStatus physicalStatus;
-    int? emotionalIntensity;
-    int? physicalIntensity;
-
-    // The derived secondary score must never overwrite the other axis when it
-    // is already completed today with a known (record-backed) intensity.
-    final keepEmotional =
-        state.isEmotionalCompleted && state.emotionalIntensity != null;
-    final keepPhysical =
-        state.isPhysicalCompleted && state.physicalIntensity != null;
-
-    if (isPhysical) {
-      physicalIntensity = outcome.intensityScore;
-      physicalStatus = triggerStatusFromIntensity(outcome.intensityScore);
-      if (keepEmotional) {
-        emotionalIntensity = state.emotionalIntensity;
-        emotionalStatus = state.emotionalStatus ??
-            triggerStatusFromIntensity(state.emotionalIntensity);
-      } else if (outcome.secondaryCategoryLabel != null) {
-        final secScore = outcome.secondaryIntensityScore ?? outcome.intensityScore;
-        emotionalIntensity = secScore;
-        emotionalStatus = triggerStatusFromIntensity(secScore);
-      } else {
-        emotionalIntensity = state.emotionalIntensity;
-        emotionalStatus = state.emotionalStatus ?? TriggerStatus.goodNormal;
-      }
-    } else {
-      emotionalIntensity = outcome.intensityScore;
-      emotionalStatus = triggerStatusFromIntensity(outcome.intensityScore);
-      if (keepPhysical) {
-        physicalIntensity = state.physicalIntensity;
-        physicalStatus = state.physicalStatus ??
-            triggerStatusFromIntensity(state.physicalIntensity);
-      } else if (outcome.secondaryCategoryLabel != null) {
-        final secScore = outcome.secondaryIntensityScore ?? outcome.intensityScore;
-        physicalIntensity = secScore;
-        physicalStatus = triggerStatusFromIntensity(secScore);
-      } else {
-        physicalIntensity = state.physicalIntensity;
-        physicalStatus = state.physicalStatus ?? TriggerStatus.goodNormal;
-      }
-    }
-
-    final summary = outcome.categoryLabel.isNotEmpty ? outcome.categoryLabel : (isPhysical ? 'Registro físico' : 'Psicoemocional');
-    // The AI's mapped lay term is never used here: it is not the user's text.
-    final isSubmission = !identical(narrative, _keepNarrative);
-    final typed = isSubmission ? (narrative as String?)?.trim() : null;
-    final cleanNarrative =
-        (typed != null && typed.isNotEmpty && int.tryParse(typed) == null)
-            ? typed
-            : null;
-    final axisNarrative = isSubmission
-        ? cleanNarrative
-        : (isPhysical ? state.physicalNarrative : state.emotionalNarrative);
-
-    state = state.copyWith(
-      isCompletedToday: true,
-      isEmotionalCompleted: isPhysical ? state.isEmotionalCompleted : true,
-      isPhysicalCompleted: isPhysical ? true : state.isPhysicalCompleted,
-      emotionalSummary: isPhysical ? state.emotionalSummary : summary,
-      physicalSummary: isPhysical ? summary : state.physicalSummary,
-      emotionalNarrative: isPhysical ? state.emotionalNarrative : axisNarrative,
-      physicalNarrative: isPhysical ? axisNarrative : state.physicalNarrative,
-      completedAt: outcome.recordedAt,
-      checkInDate: today,
-      isModifiedAfterCompletion: false,
-      emotionalStatus: emotionalStatus,
-      physicalStatus: physicalStatus,
-      emotionalIntensity: emotionalIntensity,
-      physicalIntensity: physicalIntensity,
-      naturalLanguageText: cleanNarrative ??
-          (int.tryParse(state.naturalLanguageText.trim()) == null
-              ? state.naturalLanguageText
-              : ''),
-      emotionalTouched: false,
-      physicalTouched: false,
-      textTouched: false,
-    );
-    _persistCurrentState();
-    _syncCheckInReminders();
   }
 
   void completeStage({
@@ -766,79 +650,10 @@ class TriggerCheckInNotifier extends Notifier<TriggerCheckInState> {
     );
     _persistCurrentState();
     _syncCheckInReminders();
-
-    final isSymptomCheckIn = state.emotionalStatus != TriggerStatus.goodNormal ||
-        state.physicalStatus != TriggerStatus.goodNormal ||
-        state.naturalLanguageText.trim().isNotEmpty;
-
-    final existingOutcome = ref.read(triageOutcomeProvider).outcome;
-    if (isSymptomCheckIn && existingOutcome == null) {
-      final intensity = (state.emotionalStatus == TriggerStatus.badSick ||
-              state.physicalStatus == TriggerStatus.badSick)
-          ? 4
-          : ((state.emotionalStatus == TriggerStatus.soSo ||
-                  state.physicalStatus == TriggerStatus.soSo)
-              ? 3
-              : 1);
-      ref.read(triageOutcomeProvider.notifier).setOutcomeFromCheckIn(
-            id: 'checkin-${DateTime.now().millisecondsSinceEpoch}',
-            intensity: intensity,
-            emotionalStatus: state.emotionalStatus?.name ?? 'goodNormal',
-            physicalStatus: state.physicalStatus?.name ?? 'goodNormal',
-            naturalLanguageText: state.naturalLanguageText,
-          );
-    }
-
-    _syncCheckInToRemote();
-  }
-
-  Future<void> _syncCheckInToRemote() async {
-    try {
-      final token = await _storage.getAccessToken();
-      if (token == null || token.isEmpty) return;
-      final apiClient = ref.read(apiClientProvider);
-      final response = await apiClient.post(
-        ApiEndpoints.dailyCheckIn,
-        data: {
-          'emotionalStatus': state.emotionalStatus?.name ?? 'goodNormal',
-          'physicalStatus': state.physicalStatus?.name ?? 'goodNormal',
-          if (state.naturalLanguageText.isNotEmpty)
-            'naturalLanguageText': state.naturalLanguageText,
-        },
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
-      );
-
-      if (response.data is Map<String, dynamic>) {
-        final data = response.data as Map<String, dynamic>;
-        final id = data['id'] as String? ?? 'checkin-${DateTime.now().millisecondsSinceEpoch}';
-        final intensity = (data['intensity'] as num?)?.toInt() ?? 1;
-        List<RecommendedArticle>? articles;
-        if (data['recommendedArticles'] is List) {
-          articles = (data['recommendedArticles'] as List)
-              .map((e) => RecommendedArticle.fromJson(e as Map<String, dynamic>))
-              .toList();
-        }
-
-        final isSymptomCheckIn = state.emotionalStatus != TriggerStatus.goodNormal ||
-            state.physicalStatus != TriggerStatus.goodNormal ||
-            state.naturalLanguageText.trim().isNotEmpty;
-
-        final existingOutcome = ref.read(triageOutcomeProvider).outcome;
-        if (isSymptomCheckIn && existingOutcome == null) {
-          ref.read(triageOutcomeProvider.notifier).setOutcomeFromCheckIn(
-                id: id,
-                intensity: intensity,
-                emotionalStatus: state.emotionalStatus?.name ?? 'goodNormal',
-                physicalStatus: state.physicalStatus?.name ?? 'goodNormal',
-                naturalLanguageText: state.naturalLanguageText,
-                articles: articles,
-              );
-        }
-      }
-    } catch (_) {}
   }
 
   void checkAndResetIfNewDay([DateTime? currentDateTime]) {
+
     final today = _getTodayDateString(currentDateTime);
     if (state.checkInDate != null && state.checkInDate != today) {
       reset();

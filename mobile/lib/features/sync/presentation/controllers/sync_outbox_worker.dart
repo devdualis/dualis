@@ -1,10 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/connectivity_service.dart';
 import '../../../journal/data/journal_repository.dart';
-import '../../../triage_outcome/data/triage_outcome_remote_data_source.dart';
-import '../../../triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import '../../data/triage_outbox_repository.dart';
 
 class SyncState {
@@ -33,12 +30,10 @@ class SyncState {
 
 class SyncOutboxWorker extends Notifier<SyncState> {
   late final TriageOutboxRepository _repository;
-  late final TriageOutcomeRemoteDataSource _dataSource;
 
   @override
   SyncState build() {
     _repository = ref.watch(triageOutboxRepositoryProvider);
-    _dataSource = ref.watch(triageOutcomeDataSourceProvider);
 
     // Device wifi restored.
     ref.listen(isOnlineProvider, (previous, next) {
@@ -67,42 +62,14 @@ class SyncOutboxWorker extends Notifier<SyncState> {
     int successfullySynced = 0;
 
     try {
-      final pendingItems = await _repository.getPendingOutboxItems();
-
-      for (final item in pendingItems) {
-        await _repository.updateOutboxStatus(item.id, 'syncing');
-
+      // Legacy triage / daily-checkin outbox items: the endpoints were retired.
+      // Devices may still hold queued items; drop them permanently with no
+      // retry loop, no crash and no error banner.
+      final pendingLegacyItems = await _repository.getPendingOutboxItems();
+      for (final item in pendingLegacyItems) {
         try {
-          final Map<String, dynamic> rawAnswers = jsonDecode(item.stepAnswersJson);
-          final answers = rawAnswers.map((k, v) => MapEntry(int.parse(k), v.toString()));
-
-          if (item.profileId != null && item.profileId!.isNotEmpty) {
-            await _dataSource.submitTriageForProfile(
-              vertical: item.vertical,
-              answers: answers,
-              narrative: item.narrative,
-              clientSessionId: item.clientSessionId,
-              profileId: item.profileId,
-            );
-          } else {
-            await _dataSource.submitTriage(
-              vertical: item.vertical,
-              answers: answers,
-              narrative: item.narrative,
-              clientSessionId: item.clientSessionId,
-            );
-          }
-
           await _repository.markOutboxItemSynced(item.id);
-          successfullySynced++;
-        } catch (e) {
-          await _repository.updateOutboxStatus(
-            item.id,
-            'failed',
-            lastError: e.toString(),
-            incrementAttempt: true,
-          );
-        }
+        } catch (_) {}
       }
 
       // Journal v2 entries saved offline (idempotent by clientId).

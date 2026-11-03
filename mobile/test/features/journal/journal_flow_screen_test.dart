@@ -1,4 +1,3 @@
-import 'package:dualis_mobile/features/home/presentation/controllers/trigger_checkin_controller.dart';
 import 'package:dualis_mobile/features/journal/domain/journal_keys.dart';
 import 'package:dualis_mobile/features/journal/domain/journal_models.dart';
 import 'package:dualis_mobile/features/journal/presentation/controllers/journal_flow_controller.dart';
@@ -122,10 +121,7 @@ void main() {
     expect(body['clientId'], isNotEmpty);
     expect(body.containsKey('coping'), isFalse);
     expect(body.containsKey('helpers'), isFalse);
-    // Only the emotional axis is done on Home.
-    final home = containerOf(tester).read(triggerCheckInProvider);
-    expect(home.isEmotionalCompleted, isTrue);
-    expect(home.isPhysicalCompleted, isFalse);
+
   });
 
   testWidgets('Bem from the physical card completes only the physical axis', (tester) async {
@@ -135,9 +131,7 @@ void main() {
     await tapKey(tester, 'jv2_mood_bem');
 
     expect(h.remote.requestBodies.single['area'], 'physical');
-    final home = containerOf(tester).read(triggerCheckInProvider);
-    expect(home.isPhysicalCompleted, isTrue);
-    expect(home.isEmotionalCompleted, isFalse);
+
   });
 
   testWidgets('emotional path: time, branch, multi-select, custom, triggers, note', (tester) async {
@@ -387,9 +381,7 @@ void main() {
     expect(items.every((i) => !i.containsKey('sensation')), isTrue);
     expect(items.last['customLabel'], 'Peso no cóccix');
     expect(items.every((i) => i['kind'] == 'physical'), isTrue);
-    final home = containerOf(tester).read(triggerCheckInProvider);
-    expect(home.isPhysicalCompleted, isTrue);
-    expect(home.isEmotionalCompleted, isFalse);
+
   });
 
   testWidgets('head on the back side: pressão and nuca, never eyes/mouth/throat', (tester) async {
@@ -672,9 +664,7 @@ void main() {
         {'kind': 'positive', 'optionKey': 'presente.calma.paz'},
         {'kind': 'positive', 'optionKey': 'presente.custom', 'customLabel': 'Almoço com a avó'},
       ]);
-      final home = containerOf(tester).read(triggerCheckInProvider);
-      expect(home.isEmotionalCompleted, isTrue);
-      expect(home.isPhysicalCompleted, isFalse);
+
     });
 
     testWidgets('back from the good-moments question returns to the mood screen', (tester) async {
@@ -1001,8 +991,7 @@ void main() {
       expect(reading['diastolic'], 80);
       expect(reading['measuredAt'], isA<String>());
       expect(body.toString(), isNot(contains('Hipertensão')));
-      final home = containerOf(tester).read(triggerCheckInProvider);
-      expect(home.isPhysicalCompleted, isTrue);
+
     });
 
     testWidgets('Premium: "Salvar sem medições" saves Bem with no items', (tester) async {
