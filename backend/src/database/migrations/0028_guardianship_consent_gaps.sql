@@ -307,3 +307,144 @@ CREATE POLICY symptom_logs_profile_delete ON symptom_logs
     (emotional_dimension IS NULL OR app_can_write_profile_category(profile_id, 'emotional_journal'))
     AND ((anatomical_system IS NULL AND emotional_dimension IS NOT NULL) OR app_can_write_profile_category(profile_id, 'physical_journal'))
   );
+
+-- D. Habits, care and owner-only safety policies
+
+-- water_intake_logs: 'habits'
+DROP POLICY IF EXISTS water_intake_logs_profile_select ON water_intake_logs;
+CREATE POLICY water_intake_logs_profile_select ON water_intake_logs
+  FOR SELECT
+  USING (app_can_read_profile_category(profile_id, 'habits'));
+
+DROP POLICY IF EXISTS water_intake_logs_profile_insert ON water_intake_logs;
+CREATE POLICY water_intake_logs_profile_insert ON water_intake_logs
+  FOR INSERT
+  WITH CHECK (
+    app_can_write_profile_category(profile_id, 'habits')
+    AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+  );
+
+DROP POLICY IF EXISTS water_intake_logs_profile_update ON water_intake_logs;
+CREATE POLICY water_intake_logs_profile_update ON water_intake_logs
+  FOR UPDATE
+  USING (app_can_write_profile_category(profile_id, 'habits'))
+  WITH CHECK (app_can_write_profile_category(profile_id, 'habits'));
+
+DROP POLICY IF EXISTS water_intake_logs_profile_delete ON water_intake_logs;
+CREATE POLICY water_intake_logs_profile_delete ON water_intake_logs
+  FOR DELETE
+  USING (app_can_write_profile_category(profile_id, 'habits'));
+
+-- daily_habits: 'habits'
+DROP POLICY IF EXISTS daily_habits_profile_select ON daily_habits;
+CREATE POLICY daily_habits_profile_select ON daily_habits
+  FOR SELECT
+  USING (app_can_read_profile_category(profile_id, 'habits'));
+
+DROP POLICY IF EXISTS daily_habits_profile_insert ON daily_habits;
+CREATE POLICY daily_habits_profile_insert ON daily_habits
+  FOR INSERT
+  WITH CHECK (
+    app_can_write_profile_category(profile_id, 'habits')
+    AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+  );
+
+DROP POLICY IF EXISTS daily_habits_profile_update ON daily_habits;
+CREATE POLICY daily_habits_profile_update ON daily_habits
+  FOR UPDATE
+  USING (app_can_write_profile_category(profile_id, 'habits'))
+  WITH CHECK (app_can_write_profile_category(profile_id, 'habits'));
+
+DROP POLICY IF EXISTS daily_habits_profile_delete ON daily_habits;
+CREATE POLICY daily_habits_profile_delete ON daily_habits
+  FOR DELETE
+  USING (app_can_write_profile_category(profile_id, 'habits'));
+
+-- care_records: 'care'
+DROP POLICY IF EXISTS care_records_profile_select ON care_records;
+CREATE POLICY care_records_profile_select ON care_records
+  FOR SELECT USING (app_can_read_profile_category(profile_id, 'care'));
+
+DROP POLICY IF EXISTS care_records_profile_insert ON care_records;
+CREATE POLICY care_records_profile_insert ON care_records
+  FOR INSERT WITH CHECK (
+    app_can_write_profile_category(profile_id, 'care')
+    AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+  );
+
+DROP POLICY IF EXISTS care_records_profile_update ON care_records;
+CREATE POLICY care_records_profile_update ON care_records
+  FOR UPDATE
+  USING (app_can_write_profile_category(profile_id, 'care'))
+  WITH CHECK (app_can_write_profile_category(profile_id, 'care'));
+
+DROP POLICY IF EXISTS care_records_profile_delete ON care_records;
+CREATE POLICY care_records_profile_delete ON care_records
+  FOR DELETE USING (app_can_write_profile_category(profile_id, 'care'));
+
+-- care_documents: 'care'
+DROP POLICY IF EXISTS care_documents_profile_select ON care_documents;
+CREATE POLICY care_documents_profile_select ON care_documents
+  FOR SELECT USING (app_can_read_profile_category(profile_id, 'care'));
+
+DROP POLICY IF EXISTS care_documents_profile_insert ON care_documents;
+CREATE POLICY care_documents_profile_insert ON care_documents
+  FOR INSERT WITH CHECK (
+    app_can_write_profile_category(profile_id, 'care')
+    AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+  );
+
+DROP POLICY IF EXISTS care_documents_profile_update ON care_documents;
+CREATE POLICY care_documents_profile_update ON care_documents
+  FOR UPDATE
+  USING (app_can_write_profile_category(profile_id, 'care'))
+  WITH CHECK (app_can_write_profile_category(profile_id, 'care'));
+
+DROP POLICY IF EXISTS care_documents_profile_delete ON care_documents;
+CREATE POLICY care_documents_profile_delete ON care_documents
+  FOR DELETE USING (app_can_write_profile_category(profile_id, 'care'));
+
+-- care_document_requests is keyed by user, not by profile (0023): unchanged.
+
+-- safety_resource_events: SELECT/UPDATE/DELETE by the profile owner only. The INSERT
+-- policy from 0015 stays as it is: read access is enough to insert, so a grantee's
+-- category scope never blocks a help event.
+DROP POLICY IF EXISTS safety_resource_events_profile_select ON safety_resource_events;
+CREATE POLICY safety_resource_events_profile_select ON safety_resource_events
+  FOR SELECT
+  USING (app_owns_profile(profile_id));
+
+DROP POLICY IF EXISTS safety_resource_events_profile_update ON safety_resource_events;
+CREATE POLICY safety_resource_events_profile_update ON safety_resource_events
+  FOR UPDATE
+  USING (app_owns_profile(profile_id))
+  WITH CHECK (app_owns_profile(profile_id));
+
+DROP POLICY IF EXISTS safety_resource_events_profile_delete ON safety_resource_events;
+CREATE POLICY safety_resource_events_profile_delete ON safety_resource_events
+  FOR DELETE
+  USING (app_owns_profile(profile_id));
+
+-- triage_emergency_events: 0015 folds it into safety_resource_events and drops it.
+-- Only a database where it still exists gets the same owner-only rules.
+DO $$
+BEGIN
+  IF to_regclass('public.triage_emergency_events') IS NOT NULL THEN
+    DROP POLICY IF EXISTS triage_emergency_events_profile_select ON triage_emergency_events;
+    CREATE POLICY triage_emergency_events_profile_select ON triage_emergency_events
+      FOR SELECT
+      USING (app_owns_profile(profile_id));
+
+    DROP POLICY IF EXISTS triage_emergency_events_profile_update ON triage_emergency_events;
+    CREATE POLICY triage_emergency_events_profile_update ON triage_emergency_events
+      FOR UPDATE
+      USING (app_owns_profile(profile_id))
+      WITH CHECK (app_owns_profile(profile_id));
+
+    DROP POLICY IF EXISTS triage_emergency_events_profile_delete ON triage_emergency_events;
+    CREATE POLICY triage_emergency_events_profile_delete ON triage_emergency_events
+      FOR DELETE
+      USING (app_owns_profile(profile_id));
+  END IF;
+END
+$$;

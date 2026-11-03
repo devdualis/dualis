@@ -2,6 +2,7 @@ import { pgTable, uuid, text, integer, timestamp, pgPolicy, index, uniqueIndex, 
 import { sql } from 'drizzle-orm';
 import { users } from './users.schema';
 import { profiles } from './profiles.schema';
+import type { ShareCategory } from './shared-access-grants.schema';
 
 /**
  * Premium "Meus cuidados" (migration 0021). Stores what the person entered or confirmed;
@@ -22,18 +23,21 @@ export type CareDocumentKind = (typeof CARE_DOCUMENT_KINDS)[number];
 export const CARE_DOCUMENT_STATUSES = ['archived', 'processing', 'review', 'ready', 'failed'] as const;
 export type CareDocumentStatus = (typeof CARE_DOCUMENT_STATUSES)[number];
 
-const profilePolicies = (table: string) => [
-  pgPolicy(`${table}_profile_select`, { for: 'select', using: sql`app_can_read_profile(profile_id)` }),
+// Category-scoped policies (migration 0028); category is a fixed literal, never user input.
+const profilePolicies = (table: string, category: ShareCategory) => [
+  pgPolicy(`${table}_profile_select`, { for: 'select', using: sql.raw(`app_can_read_profile_category(profile_id, '${category}')`) }),
   pgPolicy(`${table}_profile_insert`, {
     for: 'insert',
-    withCheck: sql`app_can_write_profile(profile_id) AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`,
+    withCheck: sql.raw(
+      `app_can_write_profile_category(profile_id, '${category}') AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`,
+    ),
   }),
   pgPolicy(`${table}_profile_update`, {
     for: 'update',
-    using: sql`app_can_write_profile(profile_id)`,
-    withCheck: sql`app_can_write_profile(profile_id)`,
+    using: sql.raw(`app_can_write_profile_category(profile_id, '${category}')`),
+    withCheck: sql.raw(`app_can_write_profile_category(profile_id, '${category}')`),
   }),
-  pgPolicy(`${table}_profile_delete`, { for: 'delete', using: sql`app_can_write_profile(profile_id)` }),
+  pgPolicy(`${table}_profile_delete`, { for: 'delete', using: sql.raw(`app_can_write_profile_category(profile_id, '${category}')`) }),
 ];
 
 export const careRecords = pgTable(
@@ -56,7 +60,7 @@ export const careRecords = pgTable(
     index('idx_care_records_profile_kind').on(table.profileId, table.kind, table.occursAt.desc()),
     index('idx_care_records_parent').on(table.parentId),
     check('care_records_kind_check', sql`kind IN ('vaccine_dose', 'allergy', 'medication', 'medication_intake', 'appointment')`),
-    ...profilePolicies('care_records'),
+    ...profilePolicies('care_records', 'care'),
   ],
 );
 
@@ -83,7 +87,7 @@ export const careDocuments = pgTable(
     uniqueIndex('uq_care_documents_profile_file_hmac').on(table.profileId, table.fileHmac),
     check('care_documents_kind_check', sql`kind IN ('lab', 'prescription', 'other')`),
     check('care_documents_status_check', sql`status IN ('archived', 'processing', 'review', 'ready', 'failed')`),
-    ...profilePolicies('care_documents'),
+    ...profilePolicies('care_documents', 'care'),
   ],
 );
 

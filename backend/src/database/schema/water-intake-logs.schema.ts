@@ -22,20 +22,20 @@ export const waterIntakeLogs = pgTable(
     index('idx_water_intake_logs_profile_recorded').on(table.profileId, table.recordedAt.desc()),
     pgPolicy('water_intake_logs_profile_select', {
       for: 'select',
-      using: sql`app_can_read_profile(profile_id)`,
+      using: sql`app_can_read_profile_category(profile_id, 'habits')`,
     }),
     pgPolicy('water_intake_logs_profile_insert', {
       for: 'insert',
-      withCheck: sql`app_can_write_profile(profile_id) AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`,
+      withCheck: sql`app_can_write_profile_category(profile_id, 'habits') AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`,
     }),
     pgPolicy('water_intake_logs_profile_update', {
       for: 'update',
-      using: sql`app_can_write_profile(profile_id)`,
-      withCheck: sql`app_can_write_profile(profile_id)`,
+      using: sql`app_can_write_profile_category(profile_id, 'habits')`,
+      withCheck: sql`app_can_write_profile_category(profile_id, 'habits')`,
     }),
     pgPolicy('water_intake_logs_profile_delete', {
       for: 'delete',
-      using: sql`app_can_write_profile(profile_id)`,
+      using: sql`app_can_write_profile_category(profile_id, 'habits')`,
     }),
   ],
 );

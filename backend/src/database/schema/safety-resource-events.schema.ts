@@ -27,9 +27,10 @@ export const safetyResourceEvents = pgTable(
     index('idx_safety_resource_events_profile_created').on(table.profileId, table.createdAt.desc()),
     check('safety_resource_events_action_check', sql`action IN ('opened_resources', 'call_started')`),
     check('safety_resource_events_profile_required', sql`user_id IS NULL OR profile_id IS NOT NULL`),
+    // Owner only (Phase 11.1, D2): safety events are never shared through grants.
     pgPolicy('safety_resource_events_profile_select', {
       for: 'select',
-      using: sql`app_can_read_profile(profile_id)`,
+      using: sql`app_owns_profile(profile_id)`,
     }),
     // Read access is enough: reaching the help resources must never be blocked by a permission level.
     pgPolicy('safety_resource_events_profile_insert', {
@@ -38,12 +39,12 @@ export const safetyResourceEvents = pgTable(
     }),
     pgPolicy('safety_resource_events_profile_update', {
       for: 'update',
-      using: sql`app_can_write_profile(profile_id)`,
-      withCheck: sql`app_can_write_profile(profile_id)`,
+      using: sql`app_owns_profile(profile_id)`,
+      withCheck: sql`app_owns_profile(profile_id)`,
     }),
     pgPolicy('safety_resource_events_profile_delete', {
       for: 'delete',
-      using: sql`app_can_write_profile(profile_id)`,
+      using: sql`app_owns_profile(profile_id)`,
     }),
   ],
 );
