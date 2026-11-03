@@ -33,3 +33,9 @@ export class CreateDependentDto {
   @MaxLength(2000)
   lgpdLegalBasisNotes?: string;
 }
+
+/** Body of POST /v1/profiles/:id/legal-basis-confirmation (Art. 11, I re-confirmation, A3). */
+export class ConfirmLegalBasisDto {
+  @Equals(true, { message: 'Consentimento LGPD é obrigatório.' })
+  lgpdConsent!: boolean;
+}

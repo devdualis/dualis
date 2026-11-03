@@ -583,6 +583,9 @@ describe('Profiles & Family Sharing E2E (PREM-06, PREM-07)', () => {
         payload: { ...dependentPayload, relationshipType: 'spouse' },
       });
       expect(unknown.statusCode).toBe(400);
+      expect(JSON.parse(unknown.payload).message).toContain(
+        'Tipo de vínculo deve ser parent, legal_guardian, curator ou supported_decision.',
+      );
       expect(e2eStore.dependentCreates).toBe(beforeCreates);
     });
 

@@ -16,10 +16,15 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CreateDependentDto } from './dto/create-dependent.dto';
+import { ConfirmLegalBasisDto, CreateDependentDto } from './dto/create-dependent.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfileResponseDto } from './dto/profile-response.dto';
 import { ProfilesService } from './profiles.service';
+
+// expectedType: the test build does not emit decorator metadata (same as the family-sharing
+// controller), so a pipe without it would skip body validation there.
+const validate = (expectedType: new () => object) =>
+  new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true, expectedType });
 
 @Controller({ path: 'profiles', version: '1' })
 @UseGuards(JwtAuthGuard)
@@ -41,10 +46,22 @@ export class ProfilesController {
   @HttpCode(HttpStatus.CREATED)
   async createDependent(
     @Request() req: any,
-    @Body() dto: CreateDependentDto,
+    @Body(validate(CreateDependentDto)) dto: CreateDependentDto,
   ): Promise<ProfileResponseDto> {
     const userId = req.user?.id || req.user?.userId || req.user?.sub;
     return this.profilesService.createDependent(userId, dto);
+  }
+
+  /** Guardian re-confirms an adult dependent's consent under LGPD Art. 11, I (A3). */
+  @Post(':id/legal-basis-confirmation')
+  @HttpCode(HttpStatus.OK)
+  async confirmLegalBasis(
+    @Request() req: any,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body(validate(ConfirmLegalBasisDto)) dto: ConfirmLegalBasisDto,
+  ): Promise<ProfileResponseDto> {
+    const userId = req.user?.id || req.user?.userId || req.user?.sub;
+    return this.profilesService.confirmLegalBasis(userId, id, dto.lgpdConsent);
   }
 
   @Put(':id')
@@ -52,7 +69,7 @@ export class ProfilesController {
   async updateProfile(
     @Request() req: any,
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() dto: UpdateProfileDto,
+    @Body(validate(UpdateProfileDto)) dto: UpdateProfileDto,
   ): Promise<ProfileResponseDto> {
     const userId = req.user?.id || req.user?.userId || req.user?.sub;
     return this.profilesService.updateProfile(userId, id, dto);

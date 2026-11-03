@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -11,6 +12,7 @@ import { profiles, ProfileType } from '../../database/schema/profiles.schema';
 import {
   legalGuardianships,
   ADULT_RELATIONSHIPS,
+  MINOR_RELATIONSHIPS,
   LgpdLegalBasis,
   RelationshipType,
 } from '../../database/schema/legal-guardianships.schema';
@@ -73,6 +75,24 @@ export function ageInYears(dateOfBirth: string, now: Date = new Date()): number 
     now.getUTCMonth() + 1 < month || (now.getUTCMonth() + 1 === month && now.getUTCDate() < day);
   if (beforeBirthday) age -= 1;
   return age;
+}
+
+function profileTypeForAge(age: number): ProfileType {
+  return age < ADULT_AGE_YEARS ? 'dependent_minor' : 'dependent_adult';
+}
+
+/**
+ * Legal representation must match the dependent's age: minors are under poder familiar
+ * (parent) or tutela (legal_guardian); adults under curatela (curator) or tomada de
+ * decisão apoiada (supported_decision). Throws 400 otherwise.
+ */
+export function assertRelationshipFitsAge(relationshipType: RelationshipType, age: number): void {
+  if (age >= ADULT_AGE_YEARS && !(ADULT_RELATIONSHIPS as readonly string[]).includes(relationshipType)) {
+    throw new BadRequestException('Para maiores de 18 anos, escolha curatela ou tomada de decisão apoiada.');
+  }
+  if (age < ADULT_AGE_YEARS && !(MINOR_RELATIONSHIPS as readonly string[]).includes(relationshipType)) {
+    throw new BadRequestException('Para menores de 18 anos, escolha poder familiar ou tutela.');
+  }
 }
 
 @Injectable()
@@ -157,7 +177,8 @@ export class ProfilesService {
     if (Number.isNaN(age) || age < 0) {
       throw new BadRequestException('Data de nascimento inválida.');
     }
-    const profileType: ProfileType = age < ADULT_AGE_YEARS ? 'dependent_minor' : 'dependent_adult';
+    assertRelationshipFitsAge(dto.relationshipType, age);
+    const profileType = profileTypeForAge(age);
     // Minors: LGPD Art. 14. Adults (curatela, tomada de decisão apoiada): Art. 11, I.
     const lgpdLegalBasis: LgpdLegalBasis = age < ADULT_AGE_YEARS ? 'lgpd_art_14' : 'lgpd_art_11_i';
 
@@ -199,14 +220,19 @@ export class ProfilesService {
     return this.databaseService.withRls(userId, async (tx) => {
       const profile = await this.findProfile(tx, profileId);
 
+      const isOwner = profile.accountOwnerId === userId;
+      const isDependent = profile.profileType !== 'primary';
+
       let access = OWNER_ACCESS;
-      if (profile.accountOwnerId !== userId) {
+      if (!isOwner) {
         const grantAccess = await this.getGrantAccess(tx, userId, profileId);
         if (grantAccess?.accessLevel !== 'CO_MANAGE') {
           throw new ForbiddenException('Sem permissão para editar este perfil.');
         }
         access = grantAccess;
       }
+
+      const guardianship = isOwner && isDependent ? await this.findOpenGuardianship(tx, userId, profileId) : undefined;
 
       const changes: Partial<typeof profiles.$inferInsert> = {};
       if (dto.name !== undefined) changes.name = dto.name.trim();
@@ -215,12 +241,20 @@ export class ProfilesService {
         if (Number.isNaN(age) || age < 0) {
           throw new BadRequestException('Data de nascimento inválida.');
         }
+        if (isDependent) {
+          // A8: a co-manager could otherwise push a minor to 18 and trigger the hand-over.
+          if (!isOwner) {
+            throw new ForbiddenException('Apenas quem cadastrou o perfil pode alterar a data de nascimento.');
+          }
+          if (guardianship) assertRelationshipFitsAge(guardianship.relationshipType, age);
+          changes.profileType = profileTypeForAge(age);
+        }
         changes.dateOfBirth = dto.dateOfBirth.slice(0, 10);
       }
       if (dto.gender !== undefined) changes.gender = dto.gender;
 
       if (Object.keys(changes).length === 0) {
-        return this.toResponse(profile, userId, access);
+        return this.toResponse(profile, userId, access, guardianship);
       }
 
       const [updated] = await tx
@@ -233,7 +267,51 @@ export class ProfilesService {
         throw new NotFoundException(`Profile with id ${profileId} not found.`);
       }
 
-      return this.toResponse(updated, userId, access);
+      return this.toResponse(updated, userId, access, guardianship);
+    });
+  }
+
+  /**
+   * The guardian re-confirms an adult dependent's consent under LGPD Art. 11, I (A3):
+   * Phase 11 recorded every guardianship under Art. 14.
+   */
+  async confirmLegalBasis(userId: string, profileId: string, lgpdConsent: boolean): Promise<ProfileResponseDto> {
+    this.assertUserId(userId);
+    if (lgpdConsent !== true) {
+      throw new BadRequestException('Consentimento LGPD é obrigatório.');
+    }
+
+    return this.databaseService.withRls(userId, async (tx) => {
+      const profile = await this.findProfile(tx, profileId);
+      const guardianship =
+        profile.accountOwnerId === userId ? await this.findOpenGuardianship(tx, userId, profileId) : undefined;
+      if (!guardianship) {
+        throw new ForbiddenException('Apenas quem cadastrou o perfil pode confirmar a base legal.');
+      }
+
+      const age = profile.dateOfBirth ? ageInYears(profile.dateOfBirth) : Number.NaN;
+      if (
+        !(age >= ADULT_AGE_YEARS) ||
+        !(ADULT_RELATIONSHIPS as readonly string[]).includes(guardianship.relationshipType)
+      ) {
+        throw new ConflictException(
+          'A confirmação pelo Art. 11, I vale só para maiores de 18 anos com curatela ou tomada de decisão apoiada.',
+        );
+      }
+
+      const [updated] = await tx
+        .update(legalGuardianships)
+        .set({ lgpdLegalBasis: 'lgpd_art_11_i', lgpdConsentRecordedAt: new Date() })
+        .where(eq(legalGuardianships.id, guardianship.id))
+        .returning({
+          relationshipType: legalGuardianships.relationshipType,
+          lgpdLegalBasis: legalGuardianships.lgpdLegalBasis,
+        });
+      if (!updated) {
+        throw new NotFoundException(`Profile with id ${profileId} not found.`);
+      }
+
+      return this.toResponse(profile, userId, OWNER_ACCESS, updated);
     });
   }
 
@@ -302,6 +380,30 @@ export class ProfilesService {
     return profile;
   }
 
+  /** The caller's open guardianship on a dependent, if any (RLS: guardian rows only). */
+  private async findOpenGuardianship(
+    tx: DrizzleTransaction,
+    userId: string,
+    profileId: string,
+  ): Promise<(GuardianshipInfo & { id: string }) | undefined> {
+    const [row] = await tx
+      .select({
+        id: legalGuardianships.id,
+        relationshipType: legalGuardianships.relationshipType,
+        lgpdLegalBasis: legalGuardianships.lgpdLegalBasis,
+      })
+      .from(legalGuardianships)
+      .where(
+        and(
+          eq(legalGuardianships.dependentProfileId, profileId),
+          eq(legalGuardianships.guardianUserId, userId),
+          isNull(legalGuardianships.closedAt),
+        ),
+      )
+      .limit(1);
+    return row;
+  }
+
   private async getGrantAccess(
     tx: DrizzleTransaction,
     userId: string,
@@ -335,10 +437,15 @@ export class ProfilesService {
           ? 'own'
           : 'dependent';
 
+    // D3: a dependent's type always follows the date of birth, so a stored value never goes stale.
+    const age = profile.dateOfBirth ? ageInYears(profile.dateOfBirth) : Number.NaN;
+    const profileType =
+      profile.profileType === 'primary' || Number.isNaN(age) ? profile.profileType : profileTypeForAge(age);
+
     return {
       id: profile.id,
       name: profile.name,
-      profileType: profile.profileType,
+      profileType,
       dateOfBirth: profile.dateOfBirth ?? null,
       gender: profile.gender ?? null,
       ownership,
