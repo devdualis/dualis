@@ -90,7 +90,7 @@ class HistorySegmented<T> extends StatelessWidget {
   Widget _wrap(Widget child) => compact ? child : Expanded(child: child);
 }
 
-/// Period chips: 7 / 30 / 90 dias.
+/// Period chips: 7 / 14 / 30 dias.
 class HistoryPeriodChips extends StatelessWidget {
   final int selected;
   final ValueChanged<int> onChanged;

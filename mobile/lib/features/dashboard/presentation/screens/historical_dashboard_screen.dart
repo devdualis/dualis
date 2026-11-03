@@ -12,6 +12,7 @@ import '../../../journal/domain/journal_keys.dart';
 import '../../../journal_insights/domain/chart_data.dart';
 import '../../../journal_insights/domain/history_series.dart';
 import '../../../journal_insights/domain/journal_insights_models.dart';
+import '../../../journal_insights/domain/period_report.dart';
 import '../../../journal_insights/presentation/controllers/journal_insights_controller.dart';
 import '../../../journal_insights/presentation/widgets/body_marker_map.dart';
 import '../../../journal_insights/presentation/widgets/entry_details.dart';
@@ -19,6 +20,7 @@ import '../../../journal_insights/presentation/widgets/combined_calendar.dart';
 import '../../../journal_insights/presentation/widgets/habits_charts.dart';
 import '../../../journal_insights/presentation/widgets/history_widgets.dart';
 import '../../../journal_insights/presentation/widgets/journal_overview_widgets.dart';
+import '../../../journal_insights/presentation/widgets/period_report_widgets.dart';
 import '../../../journal_insights/presentation/widgets/record_series_chart.dart';
 import '../../../journal_insights/presentation/widgets/temporal_pie.dart';
 import '../../../journal_insights/presentation/widgets/water_charts.dart';
@@ -26,15 +28,17 @@ import '../../../journal_insights/presentation/widgets/wellbeing_cards.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 
-/// History of the last 7 / 30 days (handoff "Dualis | Gráficos do aplicativo"
+/// History of the last 7 / 14 / 30 days (handoff "Dualis | Gráficos do aplicativo"
 /// v2.0): what the person recorded, counted and drawn, never interpreted.
 /// Everything is computed on the device from one filtered base.
 ///
-/// Emoções: E1 pie, E2 lines per time, E3 answers per time.
+/// Emoções: period summary and weekdays (D16), "Como você se sentiu" (D17),
+/// E1 pie, E2 lines per time, E3 answers per time.
 /// Corpo: F1 body map, F2 lines per region, F3 answers per region.
 /// Água: H1 ring and H2 steps of the picked day, H3 bars, H4 calendar.
 /// Hábitos: sono, movimento, ciclo menstrual (contagens apenas).
-/// Juntos: C1 combined calendar. No crossing of times × regions.
+/// Juntos: same-day emotional choice and body region (D15), described as
+/// days only, and C1 combined calendar.
 class HistoricalDashboardScreen extends ConsumerWidget {
   final bool isEmbedded;
   const HistoricalDashboardScreen({super.key, this.isEmbedded = false});
@@ -125,7 +129,7 @@ class _DashboardBody extends ConsumerStatefulWidget {
 
 class _DashboardBodyState extends ConsumerState<_DashboardBody> {
   HistoryTab _tab = HistoryTab.emotions;
-  int _days = 30;
+  int _days = defaultHistoryPeriod;
 
   /// Region picked on F3 from "Ver evolução" on the body map.
   String? _bodyRegion;
@@ -215,7 +219,21 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
     final series = emotionalSeries(l10n, points);
     final hasIntensity = points.any((p) => p.intensity != null);
     final summary = JournalSummary.compute(entries);
+    final feelings = EverydayFeelingCounts.compute(entries);
     return [
+      if (entries.isNotEmpty)
+        InsightsCard(
+          key: const Key('period_summary_card'),
+          title: l10n.histPeriodSummaryTitle,
+          child: PeriodSummary(entries: entries, days: _days),
+        ),
+      if (!feelings.isEmpty)
+        InsightsCard(
+          key: const Key('feelings_card'),
+          title: l10n.histFeelingsTitle,
+          subtitle: l10n.histFeelingsSubtitle,
+          child: EverydayFeelingsSummary(counts: feelings),
+        ),
       InsightsCard(
         title: l10n.gxPieTitle,
         subtitle: l10n.gxPieSubtitle,
@@ -433,7 +451,17 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
         for (final d in _periodDates(ref.watch(habitsControllerProvider)))
           d: true,
     };
+    final coincidences = bodyMindCoincidences(entries);
     return [
+      if (BodyMindCoincidenceList.labelled(l10n, coincidences).isNotEmpty)
+        InsightsCard(
+          key: const Key('coincidence_card'),
+          title: l10n.histCoincidenceTitle,
+          child: BodyMindCoincidenceList(
+            coincidences: coincidences,
+            days: _days,
+          ),
+        ),
       InsightsCard(
         title: l10n.gxCalendarTitle,
         subtitle: l10n.gxCalendarSubtitle,

@@ -2541,6 +2541,105 @@
   "gxWaterLogged": "Água registrada",
   "gxDayNothing": "Nenhum registro neste dia.",
   "gxSameDayNote": "Estar no mesmo dia não indica relação entre os itens.",
+  "histPeriodSummaryTitle": "Resumo do período",
+  "histNotWellTimeSummary": "Nos últimos {days} dias, {count} de {total, plural, =1{1 registro} other{{total} registros}} de “não tão bem” {count, plural, =1{foi} other{foram}} sobre {time, select, passado{o passado} presente{o presente} futuro{o futuro} other{outro tempo}}.",
+  "@histNotWellTimeSummary": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "histWeekdayMost": "Você registrou mais {days}.",
+  "@histWeekdayMost": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "histWeekdayOn": "{day, select, mon{nas segundas} tue{nas terças} wed{nas quartas} thu{nas quintas} fri{nas sextas} sat{nos sábados} sun{nos domingos} other{}}",
+  "@histWeekdayOn": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "histListAnd": "{first} e {last}",
+  "@histListAnd": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      }
+    }
+  },
+  "histWeekdayBar": "{day}: {count, plural, =1{1 registro} other{{count} registros}}",
+  "@histWeekdayBar": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "histFeelingsTitle": "Como você se sentiu",
+  "histFeelingsSubtitle": "Registros com alguma escolha em cada linha. Um registro pode aparecer em mais de uma linha.",
+  "histFeelingPesado": "Pesado / desanimado",
+  "histFeelingAgitado": "Agitado / preocupado",
+  "histFeelingIrritado": "Irritado / sem paciência",
+  "histFeelingTranquilo": "Tranquilo / bem",
+  "histFeelingCount": "{count} de {total, plural, =1{1 registro} other{{total} registros}}",
+  "@histFeelingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "histCoincidenceTitle": "No mesmo dia",
+  "histCoincidenceLine": "Em {count} dos últimos {days} dias você registrou, no mesmo dia, “{emotion}” e “{body}”.",
+  "@histCoincidenceLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      },
+      "emotion": {
+        "type": "String"
+      },
+      "body": {
+        "type": "String"
+      }
+    }
+  },
+  "histCoincidenceMore": "{count, plural, =1{e mais 1 combinação} other{e mais {count} combinações}}",
+  "@histCoincidenceMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "gxGoalPercent": "{percent}% da meta escolhida ({goal} ml)",
   "@gxGoalPercent": {
     "placeholders": {

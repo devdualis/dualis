@@ -341,6 +341,32 @@ Old entries and offline outbox items from v2.2 to v2.4 still carry these keys. T
 
 Transition phrases: physical phrases stay keyed by region (`region.<region>`, or the shared `region` pool), so merged branches keep a phrase. The 7 `presente.solidao` phrases were removed with the branch.
 
+## History: period summary, "Como você se sentiu" and same-day pairs (2026-11-02, Free)
+
+Client spec items D15, D16 and D17 (`revision-2026-11-02/INFORME-DESVIOS.md`). Everything is computed on the device from the entries of the selected period (`mobile/lib/features/journal_insights/domain/period_report.dart`). It only describes what the person recorded about themself: records, days and weekdays. No score, no threshold, no message triggered by content, no cause, no clinical names, no advice. The backend is unchanged; `/summary.cooccurrence` stays as documented above.
+
+### Period
+Chips 7 / 14 / 30 dias; **14 is the default**. The app still fetches 30 days once and filters on the device.
+
+### Resumo do período (D16, Emoções tab)
+- One sentence per most-present time among "não tão bem" records (one sentence per time when tied): "Nos últimos {days} dias, {count} de {total} registros de “não tão bem” foram sobre {o passado | o presente | o futuro}." `total` = records with mood `nao_tao_bem` in the period; `count` = those with at least one emotional item of that time (written items count by their time). Hidden when no such record has a time.
+- Records per weekday: a row of 7 bars (Monday first, one colour, number above each bar) and "Você registrou mais {nas terças e nas quintas}." The sentence names every weekday tied for the most records; it is hidden when every weekday has the same count.
+
+### Como você se sentiu (D17, Emoções tab)
+Four rows of everyday words, always in this order, never ranked, one colour for every bar. Each row reads "{count} de {total} registros": `count` = records of the period with at least one choice that maps to the row; `total` = records with at least one choice that maps to any row. One record can appear in more than one row (said in the card subtitle). Hidden when `total` = 0.
+
+| Row (pt / en / es) | Counted from |
+|---|---|
+| Pesado / desanimado · Heavy / low · Pesado / desanimado | branches `passado.tristeza`, `passado.memoria`, `presente.energia`, legacy `presente.solidao` |
+| Agitado / preocupado · Restless / worried · Agitado / preocupado | branches `futuro.mente`, `futuro.medo` |
+| Irritado / sem paciência · Irritated / impatient · Irritado / sin paciencia | branch `presente.sobrecarga` |
+| Tranquilo / bem · Calm / good · Tranquilo / bien | entries with mood `bem` and every `kind = positive` item |
+
+Mapping is at branch level (`<time>.<branch>` of the option key). Written items (`<time>.custom`), physical and condition items, legacy text, mood `normal` and branches not in the table count in no row. A new branch only counts once it is added to this table and to `everydayFeelingByBranch`.
+
+### No mesmo dia (D15, Juntos tab)
+Pairs of an emotional choice (branch, or the time for a written item) and a body region or whole-body area recorded on the same local day, in any entries of that day. Counted in days, most days first, at most 5 lines plus "e mais N combinações". Line: "Em {count} dos últimos {days} dias você registrou, no mesmo dia, “{emotional label}” e “{region label}”." Always followed by "Estar no mesmo dia não indica relação entre os itens." No order between the two, no "por causa de", no intensity, no `sensation`. Triggers and good moments are not paired here. Pairs whose keys have no text in the app are left out. Hidden when there is no pair.
+
 ## Removed
 - Mobile: `RedFlagEvaluator`, `SafetyNoticeKind`, inline safety notice banner, any conditional emergency UI, `SymptomClassification*`, `ApiEndpoints.tagEntry`.
 - Backend: any self-harm / warning-sign detection used to change output, AI tagging endpoints (`/v1/ai/tag-entry`, `/v1/ai/classify-symptom`), `AiTaggingService`, `IdiomDictionaryService`, `symptom_knowledge` table.

@@ -44,9 +44,9 @@ Orden por impacto en lo que el cliente ve.
 | D12 | Opciones de pelvis que nadie pidió | — | **Hecho (2026-11-02).** Se quitaron "Dificuldade ou fluxo fraco ao fazer xixi" y "Urina escura ou com cheiro forte". Los registros antiguos que las tienen siguen mostrando su texto y el backend las sigue aceptando como claves legacy | 03 |
 | D13 | Textos físicos acortados | Texto del cliente | **Hecho (2026-11-02).** Se restauraron "Garganta arranhando, seca ou dificuldade de engolir", "Coração acelerado, batedeira ou palpitação" y "Queimação subindo para a garganta ou refluxo ácido". §7 y la prueba de vocabulario no los prohíben. Los demás recortes siguen igual | 03 |
 | D14 | PDF "Resumo dos meus registros" | Exportar para llevar a un profesional | Solo en Premium. La estrategia lo ponía en Free; en Free queda solo el JSON de LGPD | 04 |
-| D15 | Coincidencias físico-emocionales | Correlación | Se calculan en backend y app, pero **ninguna pantalla las muestra** | 04 |
-| D16 | Reporte de tendencia | 14 días + frase resumen + día de la semana | 7 o 30 días, sin frase, sin conteo por día de la semana (este último es compatible con bienestar) | 04 |
-| D17 | Cuadrantes de tendencia (4, incluido el positivo) | Sí | No existen. Lo positivo se registra de otra forma (momentos buenos, qué ayudó), pero ningún documento descarta los cuadrantes | 04 |
+| D15 | Coincidencias físico-emocionales | Correlación | **Hecho (2026-11-02).** Tarjeta "No mesmo dia" en la pestaña Juntos: días con una rama emocional y una región en el mismo día, solo conteo, con la nota "Estar no mesmo dia não indica relação". Ver CONTRATO, sección History | 04 |
+| D16 | Reporte de tendencia | 14 días + frase resumen + día de la semana | **Hecho (2026-11-02).** Períodos 7/14/30, 14 por defecto. Tarjeta "Resumo do período": frase de "não tão bem" por tiempo y barras por día de la semana con "Você registrou mais nas…". Sin umbrales ni interpretación | 04 |
+| D17 | Cuadrantes de tendencia (4, incluido el positivo) | Sí | **Hecho como "Como você se sentiu" (2026-11-02).** 4 grupos con palabras cotidianas (Pesado, Agitado, Irritado, Tranquilo), conteo de registros por rama con tabla fija en el CONTRATO. Sin nombres clínicos ("internalizante" etc.), sin puntaje ni colores por gravedad | 04 |
 
 ---
 
@@ -119,8 +119,8 @@ Hay que aclararlas con el cliente antes de tocar el texto:
 **Decidir con el cliente:**
 - Recortar las zonas y opciones extra del flujo físico para cumplir "pocas opciones" (sección 4).
 - El PDF de resumen: ¿Free o Premium? (D14)
-- Mostrar las coincidencias físico-emocionales y el conteo por día de la semana, redactados en lenguaje descriptivo y sin interpretar (D15, D16).
+- Mostrar las coincidencias físico-emocionales y el conteo por día de la semana, redactados en lenguaje descriptivo y sin interpretar (D15, D16). **Hecho.**
 
-**Comunicar por escrito al cliente:** la sección 3, con la razón regulatoria, más el descarte de los cuadrantes (D17), o bien implementarlos como "cómo te sentiste", sin etiquetas clínicas.
+**Comunicar por escrito al cliente:** la sección 3, con la razón regulatoria. Los cuadrantes (D17) se implementaron como "Como você se sentiu", sin etiquetas clínicas: explicar al cliente por qué no llevan los nombres que pidió.
 
 **Técnico:** apagar los endpoints antiguos de triaje (sección 6).

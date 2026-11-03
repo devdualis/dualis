@@ -7000,6 +7000,102 @@ abstract class AppLocalizations {
   /// **'Estar no mesmo dia não indica relação entre os itens.'**
   String get gxSameDayNote;
 
+  /// No description provided for @histPeriodSummaryTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resumo do período'**
+  String get histPeriodSummaryTitle;
+
+  /// No description provided for @histNotWellTimeSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nos últimos {days} dias, {count} de {total, plural, =1{1 registro} other{{total} registros}} de “não tão bem” {count, plural, =1{foi} other{foram}} sobre {time, select, passado{o passado} presente{o presente} futuro{o futuro} other{outro tempo}}.'**
+  String histNotWellTimeSummary(int days, int count, int total, String time);
+
+  /// No description provided for @histWeekdayMost.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você registrou mais {days}.'**
+  String histWeekdayMost(String days);
+
+  /// No description provided for @histWeekdayOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'{day, select, mon{nas segundas} tue{nas terças} wed{nas quartas} thu{nas quintas} fri{nas sextas} sat{nos sábados} sun{nos domingos} other{}}'**
+  String histWeekdayOn(String day);
+
+  /// No description provided for @histListAnd.
+  ///
+  /// In pt, this message translates to:
+  /// **'{first} e {last}'**
+  String histListAnd(String first, String last);
+
+  /// No description provided for @histWeekdayBar.
+  ///
+  /// In pt, this message translates to:
+  /// **'{day}: {count, plural, =1{1 registro} other{{count} registros}}'**
+  String histWeekdayBar(String day, int count);
+
+  /// No description provided for @histFeelingsTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como você se sentiu'**
+  String get histFeelingsTitle;
+
+  /// No description provided for @histFeelingsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registros com alguma escolha em cada linha. Um registro pode aparecer em mais de uma linha.'**
+  String get histFeelingsSubtitle;
+
+  /// No description provided for @histFeelingPesado.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pesado / desanimado'**
+  String get histFeelingPesado;
+
+  /// No description provided for @histFeelingAgitado.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agitado / preocupado'**
+  String get histFeelingAgitado;
+
+  /// No description provided for @histFeelingIrritado.
+  ///
+  /// In pt, this message translates to:
+  /// **'Irritado / sem paciência'**
+  String get histFeelingIrritado;
+
+  /// No description provided for @histFeelingTranquilo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tranquilo / bem'**
+  String get histFeelingTranquilo;
+
+  /// No description provided for @histFeelingCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} de {total, plural, =1{1 registro} other{{total} registros}}'**
+  String histFeelingCount(int count, int total);
+
+  /// No description provided for @histCoincidenceTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'No mesmo dia'**
+  String get histCoincidenceTitle;
+
+  /// No description provided for @histCoincidenceLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em {count} dos últimos {days} dias você registrou, no mesmo dia, “{emotion}” e “{body}”.'**
+  String histCoincidenceLine(int count, int days, String emotion, String body);
+
+  /// No description provided for @histCoincidenceMore.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{e mais 1 combinação} other{e mais {count} combinações}}'**
+  String histCoincidenceMore(int count);
+
   /// No description provided for @gxGoalPercent.
   ///
   /// In pt, this message translates to:
