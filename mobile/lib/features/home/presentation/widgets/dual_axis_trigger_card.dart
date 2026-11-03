@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
+import '../../../profile/domain/models/share_category.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../journal/presentation/controllers/journal_flow_state.dart';
@@ -43,6 +44,17 @@ class DualAxisTriggerCard extends ConsumerWidget {
     final physicalSummary = state.physicalSummary;
 
     final viewOnly = activeProfileIsViewOnly(ref);
+    // On a shared profile each area follows its journal category: unreadable
+    // shows the not-shared text, readable but not writable hides the starts.
+    // Help and the emergency path are never gated here.
+    final canReadEmotional =
+        activeProfileCanRead(ref, ShareCategory.emotionalJournal);
+    final canReadPhysical =
+        activeProfileCanRead(ref, ShareCategory.physicalJournal);
+    final emotionalViewOnly =
+        viewOnly || !activeProfileCanWrite(ref, ShareCategory.emotionalJournal);
+    final physicalViewOnly =
+        viewOnly || !activeProfileCanWrite(ref, ShareCategory.physicalJournal);
 
     return Card(
       elevation: 0,
@@ -108,6 +120,14 @@ class DualAxisTriggerCard extends ConsumerWidget {
             if (viewOnly) const ActiveProfileReadOnlyNote(),
 
             // Etapa 1: Psicoemocional
+            if (!canReadEmotional)
+              _AreaNotShared(
+                areaKey: 'emotional',
+                title: 'Psicoemocional',
+                icon: Icons.psychology_rounded,
+                isDark: isDark,
+              )
+            else
             _buildStageCard(
               context: context,
               title: 'Psicoemocional',
@@ -138,12 +158,20 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 );
               },
               isDark: isDark,
-              viewOnly: viewOnly,
+              viewOnly: emotionalViewOnly,
             ),
 
             const SizedBox(height: 16),
 
             // Etapa 2: Físico
+            if (!canReadPhysical)
+              _AreaNotShared(
+                areaKey: 'physical',
+                title: 'Físico',
+                icon: Icons.accessibility_new_rounded,
+                isDark: isDark,
+              )
+            else
             _buildStageCard(
               context: context,
               title: 'Físico',
@@ -172,7 +200,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 );
               },
               isDark: isDark,
-              viewOnly: viewOnly,
+              viewOnly: physicalViewOnly,
             ),
             if (state.conditionsSummary != null &&
                 state.conditionsSummary!.isNotEmpty) ...[
@@ -418,6 +446,70 @@ class DualAxisTriggerCard extends ConsumerWidget {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Compact stand-in for a check-in area the shared profile did not grant, so
+/// an empty area never reads as "nothing recorded today".
+class _AreaNotShared extends StatelessWidget {
+  const _AreaNotShared({
+    required this.areaKey,
+    required this.title,
+    required this.icon,
+    required this.isDark,
+  });
+
+  final String areaKey;
+  final String title;
+  final IconData icon;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final secondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    return Container(
+      key: ValueKey('home-area-not-shared-$areaKey'),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 22, color: secondary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimaryLight,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  AppLocalizations.of(context).profileCategoryNotSharedTitle,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    color: secondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.lock_outline_rounded, size: 18, color: secondary),
         ],
       ),
     );
