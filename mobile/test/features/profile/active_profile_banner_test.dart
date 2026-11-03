@@ -142,4 +142,10 @@ void main() {
 
     expect(find.byKey(const ValueKey('active-profile-readonly-note')), findsNothing);
   });
+
+  test('profileContextSubtitle: a shared primary profile is not "Titular"', () {
+    final l10n = lookupAppLocalizations(const Locale('pt'));
+    expect(profileContextSubtitle(primary, l10n), 'Titular');
+    expect(profileContextSubtitle(sharedViewOnly, l10n), 'Somente leitura');
+  });
 }

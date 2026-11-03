@@ -47,13 +47,14 @@ bool activeProfileCanWrite(WidgetRef ref, ShareCategory category) {
 }
 
 String profileContextSubtitle(Profile profile, AppLocalizations l10n) {
-  if (profile.isPrimary) {
-    return l10n.profileSwitcherBadgePrimary;
-  }
+  // Shared first: someone else's primary profile is not "Titular" here.
   if (profile.ownership == ProfileOwnership.shared) {
     return profile.accessLevel == ProfileAccessLevel.viewOnly
         ? l10n.profileSwitcherBadgeViewOnly
         : l10n.profileSwitcherBadgeCoManage;
+  }
+  if (profile.isPrimary) {
+    return l10n.profileSwitcherBadgePrimary;
   }
   if (profile.profileType == ProfileType.dependentMinor) {
     return l10n.profileSwitcherBadgeMinor;
