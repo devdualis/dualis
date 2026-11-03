@@ -26,11 +26,21 @@ const userB = UserProfile(
   isEmailVerified: true,
 );
 
-const _users = [userA, userB];
+/// The young adult who claims the profile Ana managed until 18 (T-11.1-D).
+const userC = UserProfile(
+  id: 'user-c',
+  name: 'Clara Jovem',
+  email: 'clara@example.test',
+  gender: Gender.feminino,
+  dateOfBirth: '2008-01-10',
+  isEmailVerified: true,
+);
+
+const _users = [userA, userB, userC];
 
 String tokenFor(UserProfile user) => 'fake-token-${user.id}';
 
-/// Fake auth backend: a token or email maps to user A or B.
+/// Fake auth backend: a token or email maps to one of the fake users.
 class FakeAuthRepository implements AuthRepository {
   UserProfile _byToken(String token) =>
       _users.firstWhere((u) => tokenFor(u) == token);
@@ -203,7 +213,13 @@ class _FakeGrant {
 
 /// In-memory stand-in for the Wave 1 profile/guardianship API, shared by both
 /// users. Rules mirrored from the backend:
-///  * a dependent needs LGPD Art. 14 consent;
+///  * a dependent needs LGPD consent, and the relationship must match the
+///    age (parent / legal_guardian under 18, curator / supported_decision
+///    from 18), like 11.1-06;
+///  * invites need at least one category; a dependent's invite needs the
+///    guardian's confirmation; grantees see only the grant's categories;
+///  * a dependent who turned 18 gets a hand-over code, and the claim moves
+///    the profile to the claiming account as its primary profile;
 ///  * only the owner can invite, and not for their primary profile's peers;
 ///  * an invite is single-use, not for its own creator, and expires in 48h;
 ///  * VIEW_ONLY grantees cannot rename or delete;
@@ -247,11 +263,11 @@ class FakeProfileBackend {
     return {
       'id': p.id,
       'name': p.name,
-      'profileType': switch (p.type) {
-        ProfileType.primary => 'primary',
-        ProfileType.dependentMinor => 'dependent_minor',
-        ProfileType.dependentAdult => 'dependent_adult',
-      },
+      // Like the API, a dependent's type is recomputed from the birth date
+      // on every read (D3), so a minor who turned 18 reads as an adult.
+      'profileType': p.type == ProfileType.primary
+          ? 'primary'
+          : (p.isAdult ? 'dependent_adult' : 'dependent_minor'),
       'ownership': _ownershipApi(userId, p),
       'accessLevel': p.ownerUserId == userId
           ? 'OWNER'
@@ -304,9 +320,16 @@ class FakeProfileBackend {
         'categories': [for (final c in g.categories) c.apiValue],
       };
 
-  List<_FakeProfile> _visibleTo(String userId) => _profiles
-      .where((p) => p.ownerUserId == userId || _activeGrant(userId, p.id) != null)
-      .toList();
+  /// Same order as GET /v1/profiles: own primary, own dependents, then
+  /// shared profiles (the app falls back to the first primary in the list).
+  List<_FakeProfile> _visibleTo(String userId) => [
+        ..._profiles.where(
+            (p) => p.ownerUserId == userId && p.type == ProfileType.primary),
+        ..._profiles.where(
+            (p) => p.ownerUserId == userId && p.type != ProfileType.primary),
+        ..._profiles.where((p) =>
+            p.ownerUserId != userId && _activeGrant(userId, p.id) != null),
+      ];
 
   _FakeProfile _writable(String userId, String profileId) {
     final p = _profiles.where((p) => p.id == profileId).firstOrNull;
@@ -320,6 +343,61 @@ class FakeProfileBackend {
           statusCode: 403);
     }
     return p;
+  }
+
+  /// Stored audit note of a profile (lgpdLegalBasisNotes), for assertions.
+  String? notesOf(String profileId) =>
+      _profiles.firstWhere((p) => p.id == profileId).lgpdLegalBasisNotes;
+
+  /// Stored LGPD basis of a dependent, for assertions.
+  String? legalBasisOf(String profileId) =>
+      _profiles.firstWhere((p) => p.id == profileId).lgpdLegalBasis;
+
+  /// Seeds a dependent of [ownerUserId] under parental authority who turned
+  /// 18 yesterday, so its hand-over is due. The create rules refuse a
+  /// `parent` relationship for an adult, so this state only comes from
+  /// someone registered as a child who grew up.
+  String seedHandoverDueDependent(String ownerUserId, String name) {
+    final now = DateTime.now();
+    final p = _FakeProfile(
+      id: 'profile-dep-${_profiles.length + 1}',
+      ownerUserId: ownerUserId,
+      name: name,
+      type: ProfileType.dependentMinor,
+      dateOfBirth: DateTime(now.year - 18, now.month, now.day - 1),
+      gender: 'feminino',
+      relationshipType: 'parent',
+      lgpdLegalBasis: 'lgpd_art_14',
+    );
+    _profiles.add(p);
+    return p.id;
+  }
+
+  /// Seeds an ACCEPTED grant from [ownerUserId]'s primary profile to
+  /// [granteeUserId] with [categories], as if the invite was already used.
+  String seedAcceptedGrant({
+    required String ownerUserId,
+    required String granteeUserId,
+    required ProfileShareLevel level,
+    required GrantRelationship relationship,
+    required List<ShareCategory> categories,
+  }) {
+    final g =
+        _FakeGrant(
+            id: 'grant-${_grants.length + 1}',
+            ownerUserId: ownerUserId,
+            targetProfileId: 'profile-$ownerUserId',
+            level: level,
+            inviteCode: _nextCode(),
+            expiresAt: DateTime.now().add(const Duration(hours: 48)),
+            relationship: relationship,
+            categories: categories,
+          )
+          ..status = 'ACCEPTED'
+          ..granteeUserId = granteeUserId
+          ..acceptedAt = DateTime.now();
+    _grants.add(g);
+    return g.targetProfileId;
   }
 
   String _nextCode() {
@@ -368,14 +446,26 @@ class FakeProfileRepository implements ProfileRepository {
   }) =>
       _respond(() {
         if (!lgpdConsent) {
-          throw const ProfileApiException(
-              'Consentimento LGPD Art. 14 obrigatório.',
+          throw const ProfileApiException('Consentimento LGPD é obrigatório.',
               statusCode: 400);
         }
         final now = DateTime.now();
-        final adult = DateTime(dateOfBirth.year + 18, dateOfBirth.month,
+        final adult = !DateTime(dateOfBirth.year + 18, dateOfBirth.month,
                 dateOfBirth.day)
-            .isBefore(now);
+            .isAfter(now);
+        // Age × relationship, same messages as profiles.service.ts.
+        const adultRelationships = ['curator', 'supported_decision'];
+        const minorRelationships = ['parent', 'legal_guardian'];
+        if (adult && !adultRelationships.contains(relationshipType)) {
+          throw const ProfileApiException(
+              'Para maiores de 18 anos, escolha curatela ou tomada de decisão apoiada.',
+              statusCode: 400);
+        }
+        if (!adult && !minorRelationships.contains(relationshipType)) {
+          throw const ProfileApiException(
+              'Para menores de 18 anos, escolha poder familiar ou tutela.',
+              statusCode: 400);
+        }
         final p = _FakeProfile(
           id: 'profile-dep-${_db._profiles.length + 1}',
           ownerUserId: _uid,
