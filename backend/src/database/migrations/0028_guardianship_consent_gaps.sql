@@ -20,6 +20,10 @@
 -- The backfill runs only in the run that creates the categories column, so a re-run
 -- never overwrites categories the owner edited later.
 --
+-- WARNING: never re-apply 0026_journal_v2_2_wellness.sql after this file in production
+-- without re-applying this file right after it. 0026 recreates the daily_habits policies
+-- with the all-or-nothing helpers and would silently undo the habits category checks.
+--
 -- Recursion note: the new helpers follow the 0013 rule. app_has_profile_grant_category
 -- reads only shared_access_grants; no shared_access_grants SELECT/UPDATE policy reads
 -- profiles, so profiles <-> shared_access_grants has no policy cycle even when the
