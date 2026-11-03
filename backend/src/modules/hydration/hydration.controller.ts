@@ -70,7 +70,7 @@ export class HydrationController {
 
   @Post('log')
   @HttpCode(HttpStatus.CREATED)
-  @ProfileAccess('write')
+  @ProfileAccess('write', { category: 'habits' })
   @UsePipes(
     new ValidationPipe({
       whitelist: true,
@@ -90,7 +90,7 @@ export class HydrationController {
 
   @Get('today')
   @HttpCode(HttpStatus.OK)
-  @ProfileAccess('read')
+  @ProfileAccess('read', { category: 'habits' })
   async getToday(
     @Request() req: any,
     @ActiveProfile() profile: ProfileContext,
@@ -107,7 +107,7 @@ export class HydrationController {
 
   @Get('history')
   @HttpCode(HttpStatus.OK)
-  @ProfileAccess('read')
+  @ProfileAccess('read', { category: 'habits' })
   async getHistory(
     @Request() req: any,
     @ActiveProfile() profile: ProfileContext,
@@ -119,7 +119,7 @@ export class HydrationController {
 
   @Delete('log/:id')
   @HttpCode(HttpStatus.OK)
-  @ProfileAccess('write')
+  @ProfileAccess('write', { category: 'habits' })
   async deleteLog(
     @Request() req: any,
     @ActiveProfile() profile: ProfileContext,

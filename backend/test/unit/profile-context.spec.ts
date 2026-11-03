@@ -19,6 +19,10 @@ import {
 } from '../../src/modules/profiles/profile-context';
 import { profiles } from '../../src/database/schema/profiles.schema';
 import { SHARE_CATEGORIES } from '../../src/database/schema/shared-access-grants.schema';
+import { HabitsController } from '../../src/modules/habits/habits.controller';
+import { HydrationController } from '../../src/modules/hydration/hydration.controller';
+import { CareController } from '../../src/modules/care/care.controller';
+import { JournalController } from '../../src/modules/journal/journal.controller';
 
 const USER_ID = '11111111-1111-4111-8111-111111111111';
 const PRIMARY_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -411,6 +415,68 @@ describe('ProfileContextGuard', () => {
       expect(() => assertCategory(profile, 'write', 'emotional_journal')).toThrow(NOT_SHARED);
       expect(() => assertCategory(profile, 'read', 'care')).toThrow(ForbiddenException);
       expect(() => assertCategory(owner(PRIMARY_ID), 'write', 'care')).not.toThrow();
+    });
+  });
+});
+
+describe('route categories (Phase 11.1, PREM-07)', () => {
+  const reflector = new Reflector();
+  const accessOf = (handler: unknown) =>
+    reflector.get<{ mode: string; category?: unknown } | undefined>('profileAccess', handler as () => void);
+
+  it('declares the category on one route per controller', () => {
+    expect(accessOf(HabitsController.prototype.putDay)).toEqual({ mode: 'write', category: 'habits' });
+    expect(accessOf(HydrationController.prototype.getToday)).toEqual({ mode: 'read', category: 'habits' });
+    expect(accessOf(CareController.prototype.listDocuments)).toEqual({ mode: 'read', category: 'care' });
+    expect(accessOf(JournalController.prototype.updateCondition)).toEqual({ mode: 'write', category: 'conditions' });
+    expect(accessOf(JournalController.prototype.listConditionReadings)).toEqual({ mode: 'read', category: 'conditions' });
+  });
+
+  it('leaves account-scoped and mixed-category routes without a category', () => {
+    expect(accessOf(HydrationController.prototype.getSettings)).toBeUndefined();
+    expect(accessOf(JournalController.prototype.listEntries)).toEqual({ mode: 'read' });
+    expect(accessOf(JournalController.prototype.summary)).toEqual({ mode: 'read' });
+    expect(accessOf(JournalController.prototype.deleteEntry)).toEqual({ mode: 'write' });
+  });
+
+  describe('journal writes check the branch category before the service', () => {
+    const coManager: ProfileContext = {
+      profileId: DEPENDENT_ID,
+      accessLevel: 'CO_MANAGE',
+      readableCategories: ['habits', 'physical_journal', 'emotional_journal'],
+      writableCategories: ['habits', 'physical_journal'],
+    };
+    const req = { user: { id: USER_ID } };
+    const make = () => {
+      const journalService = { createEntry: vi.fn(async () => ({ id: 'entry' })) };
+      const journalSuggest = { suggest: vi.fn(async () => ({ optionKey: null })) };
+      const controller = new JournalController(journalService as any, journalSuggest as any);
+      return { controller, journalService, journalSuggest };
+    };
+
+    it('rejects an emotional (or legacy, no area) entry without emotional_journal and never calls the service', async () => {
+      for (const area of ['emotional', undefined]) {
+        const { controller, journalService } = make();
+        expect(() => controller.createEntry(req, coManager, { area } as any)).toThrow(NOT_SHARED);
+        expect(journalService.createEntry).not.toHaveBeenCalled();
+      }
+    });
+
+    it('accepts a physical entry with physical_journal', async () => {
+      const { controller, journalService } = make();
+      await controller.createEntry(req, coManager, { area: 'physical' } as any);
+      expect(journalService.createEntry).toHaveBeenCalledWith(USER_ID, DEPENDENT_ID, { area: 'physical' });
+    });
+
+    it('never sends emotional text to the suggester without emotional_journal', async () => {
+      const { controller, journalSuggest } = make();
+      expect(() =>
+        controller.suggestOption(req, coManager, { text: 'texto', kind: 'emotional', branch: 'x' } as any),
+      ).toThrow(NOT_SHARED);
+      expect(journalSuggest.suggest).not.toHaveBeenCalled();
+
+      await controller.suggestOption(req, coManager, { text: 'texto', kind: 'physical', branch: 'x' } as any);
+      expect(journalSuggest.suggest).toHaveBeenCalledTimes(1);
     });
   });
 });

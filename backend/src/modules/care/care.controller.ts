@@ -47,20 +47,20 @@ export class CareController {
   constructor(@Inject(CareService) private readonly care: CareService) {}
 
   @Get('records')
-  @ProfileAccess('read')
+  @ProfileAccess('read', { category: 'care' })
   list(@Request() req: any, @ActiveProfile() profile: ProfileContext, @Query() query: ListCareRecordsQueryDto) {
     return this.care.listRecords(userIdOf(req), profile.profileId, query);
   }
 
   @Post('records')
   @HttpCode(HttpStatus.CREATED)
-  @ProfileAccess('write')
+  @ProfileAccess('write', { category: 'care' })
   create(@Request() req: any, @ActiveProfile() profile: ProfileContext, @Body() dto: CreateCareRecordDto) {
     return this.care.createRecord(userIdOf(req), profile.profileId, dto);
   }
 
   @Patch('records/:id')
-  @ProfileAccess('write')
+  @ProfileAccess('write', { category: 'care' })
   update(
     @Request() req: any,
     @ActiveProfile() profile: ProfileContext,
@@ -71,14 +71,14 @@ export class CareController {
   }
 
   @Delete('records/:id')
-  @ProfileAccess('write')
+  @ProfileAccess('write', { category: 'care' })
   remove(@Request() req: any, @ActiveProfile() profile: ProfileContext, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.care.deleteRecord(userIdOf(req), profile.profileId, id);
   }
 
   @Post('medications/:id/intakes')
   @HttpCode(HttpStatus.CREATED)
-  @ProfileAccess('write')
+  @ProfileAccess('write', { category: 'care' })
   logIntake(
     @Request() req: any,
     @ActiveProfile() profile: ProfileContext,
@@ -89,27 +89,27 @@ export class CareController {
   }
 
   @Get('documents')
-  @ProfileAccess('read')
+  @ProfileAccess('read', { category: 'care' })
   listDocuments(@Request() req: any, @ActiveProfile() profile: ProfileContext, @Query() query: ListDocumentsQueryDto) {
     return this.care.listDocuments(userIdOf(req), profile.profileId, query.kind);
   }
 
   @Post('documents')
   @HttpCode(HttpStatus.CREATED)
-  @ProfileAccess('write')
+  @ProfileAccess('write', { category: 'care' })
   @BodyLimit(15 * 1024 * 1024) // base64 of a 10 MB document
   upload(@Request() req: any, @ActiveProfile() profile: ProfileContext, @Body() dto: UploadDocumentDto) {
     return this.care.uploadDocument(userIdOf(req), profile.profileId, dto);
   }
 
   @Get('documents/:id')
-  @ProfileAccess('read')
+  @ProfileAccess('read', { category: 'care' })
   getDocument(@Request() req: any, @ActiveProfile() profile: ProfileContext, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.care.getDocument(userIdOf(req), profile.profileId, id);
   }
 
   @Get('documents/:id/file')
-  @ProfileAccess('read')
+  @ProfileAccess('read', { category: 'care' })
   async getDocumentFile(
     @Request() req: any,
     @ActiveProfile() profile: ProfileContext,
@@ -121,7 +121,7 @@ export class CareController {
   }
 
   @Put('documents/:id/review')
-  @ProfileAccess('write')
+  @ProfileAccess('write', { category: 'care' })
   review(
     @Request() req: any,
     @ActiveProfile() profile: ProfileContext,
@@ -133,7 +133,7 @@ export class CareController {
 
   @Post('documents/:id/reprocess')
   @HttpCode(HttpStatus.ACCEPTED)
-  @ProfileAccess('write')
+  @ProfileAccess('write', { category: 'care' })
   reprocess(
     @Request() req: any,
     @ActiveProfile() profile: ProfileContext,
@@ -144,7 +144,7 @@ export class CareController {
   }
 
   @Delete('documents/:id')
-  @ProfileAccess('write')
+  @ProfileAccess('write', { category: 'care' })
   removeDocument(@Request() req: any, @ActiveProfile() profile: ProfileContext, @Param('id', new ParseUUIDPipe()) id: string) {
     return this.care.deleteDocument(userIdOf(req), profile.profileId, id);
   }
