@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,6 +25,11 @@ class ProfileSelectionSheet extends ConsumerWidget {
   const ProfileSelectionSheet({super.key});
 
   static Future<void> show(BuildContext context) {
+    // Pull the latest grants so changes made by the other person (new
+    // categories, revocation) show without logging out. Never throws.
+    unawaited(ProviderScope.containerOf(context, listen: false)
+        .read(activeProfileControllerProvider.notifier)
+        .refresh());
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,

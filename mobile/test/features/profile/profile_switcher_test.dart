@@ -19,6 +19,10 @@ class FakeActiveProfileController extends ActiveProfileController {
   String? renamedNewName;
   String? deletedId;
   final handoverCodeRequests = <String>[];
+  int refreshCalls = 0;
+
+  @override
+  Future<void> refresh() async => refreshCalls++;
   final legalBasisConfirmed = <String>[];
 
   @override
@@ -338,6 +342,25 @@ void main() {
         find.byKey(const ValueKey('profile-delete-p-1')),
         findsNothing,
       );
+    });
+
+    testWidgets('opening the switcher reloads profiles and grants',
+        (tester) async {
+      final fake = FakeActiveProfileController(
+        const ActiveProfileState(
+          profiles: [primaryProfile, sharedViewOnly],
+          activeProfileId: 'p-1',
+        ),
+      );
+
+      await tester.pumpWidget(_buildHost(fakeController: fake));
+      await tester.pumpAndSettle();
+      expect(fake.refreshCalls, 0);
+
+      await tester.tap(find.byKey(const ValueKey('profile-app-bar-pill')));
+      await tester.pumpAndSettle();
+
+      expect(fake.refreshCalls, 1);
     });
 
     testWidgets(
