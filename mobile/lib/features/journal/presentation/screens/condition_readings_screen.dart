@@ -5,7 +5,10 @@ import 'package:intl/intl.dart' show DateFormat;
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../profile/domain/models/share_category.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
+import '../../../profile/presentation/widgets/active_profile_banner.dart';
+import '../../../profile/presentation/widgets/not_shared_placeholder.dart';
 import '../../domain/journal_keys.dart';
 import '../../domain/journal_models.dart';
 import '../controllers/condition_readings_controller.dart';
@@ -46,6 +49,24 @@ class _ConditionReadingsScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    if (!activeProfileCanRead(ref, ShareCategory.conditions)) {
+      // This screen only reads; adding readings happens in the journal.
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            l10n.chronicHistoryTitle,
+            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
+          ),
+        ),
+        body: SafeArea(
+          child: NotSharedPlaceholder(
+            profileName: ref.watch(activeProfileControllerProvider
+                    .select((s) => s.activeProfile?.name)) ??
+                '',
+          ),
+        ),
+      );
+    }
     final history = ref.watch(conditionReadingsProvider(widget.conditionId));
     final conditions = ref.watch(userConditionsProvider).value ?? const [];
     UserCondition? condition;

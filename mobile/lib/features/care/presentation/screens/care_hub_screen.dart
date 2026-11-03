@@ -6,6 +6,10 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../journal/presentation/controllers/journal_flow_controller.dart' show userConditionsProvider;
+import '../../../profile/domain/models/share_category.dart';
+import '../../../profile/presentation/controllers/active_profile_controller.dart';
+import '../../../profile/presentation/widgets/active_profile_banner.dart';
+import '../../../profile/presentation/widgets/not_shared_placeholder.dart';
 import '../../domain/care_models.dart';
 import '../care_providers.dart';
 import '../care_routes.dart';
@@ -31,12 +35,20 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final meds = ref.watch(medicationsProvider).value ?? const <Medication>[];
-    final doses = ref.watch(careRecordsProvider(CareKind.vaccineDose)).value;
-    final allergies = ref.watch(careRecordsProvider(CareKind.allergy)).value;
-    final conditions = ref.watch(userConditionsProvider).value;
-    final appts = ref.watch(careRecordsProvider(CareKind.appointment)).value;
-    final allDocs = ref.watch(careDocumentsProvider).value;
+    // Care entries need the care category; the conditions row needs
+    // conditions. Nothing is fetched for an area that was not shared.
+    final canReadCare = activeProfileCanRead(ref, ShareCategory.care);
+    final canReadConditions = activeProfileCanRead(ref, ShareCategory.conditions);
+    final profileName = ref.watch(activeProfileControllerProvider).activeProfile?.name ?? '';
+    if (!canReadCare && !canReadConditions) {
+      return NotSharedPlaceholder(profileName: profileName);
+    }
+    final meds = canReadCare ? ref.watch(medicationsProvider).value ?? const <Medication>[] : const <Medication>[];
+    final doses = canReadCare ? ref.watch(careRecordsProvider(CareKind.vaccineDose)).value : null;
+    final allergies = canReadCare ? ref.watch(careRecordsProvider(CareKind.allergy)).value : null;
+    final conditions = canReadConditions ? ref.watch(userConditionsProvider).value : null;
+    final appts = canReadCare ? ref.watch(careRecordsProvider(CareKind.appointment)).value : null;
+    final allDocs = canReadCare ? ref.watch(careDocumentsProvider).value : null;
     final docs = allDocs?.where((d) => d.kind != DocumentKind.prescription).length;
     final prescriptions = allDocs?.where((d) => d.kind == DocumentKind.prescription).length;
 
@@ -59,115 +71,122 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
         key: const Key('care_hub_list'),
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              gradient: const LinearGradient(colors: [AppColors.dualisNavy, AppColors.dualisSymbolBlue]),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(l10n.careHubToday, style: careBody().copyWith(color: Colors.white70)),
-                      const SizedBox(height: 2),
-                      Text(
-                        todaySlots.isEmpty ? l10n.careHubNoRemindersToday : l10n.careHubRemindersToday(todaySlots.length),
-                        style: careTitle(19).copyWith(color: Colors.white),
-                      ),
-                      if (next != null) ...[
-                        const SizedBox(height: 4),
-                        Text(l10n.careHubNext(next.$1.title, careTime(next.$2)), style: careBody().copyWith(color: Colors.white70)),
+          if (!canReadCare) NotSharedPlaceholder(profileName: profileName),
+          if (canReadCare) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                gradient: const LinearGradient(colors: [AppColors.dualisNavy, AppColors.dualisSymbolBlue]),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(l10n.careHubToday, style: careBody().copyWith(color: Colors.white70)),
+                        const SizedBox(height: 2),
+                        Text(
+                          todaySlots.isEmpty ? l10n.careHubNoRemindersToday : l10n.careHubRemindersToday(todaySlots.length),
+                          style: careTitle(19).copyWith(color: Colors.white),
+                        ),
+                        if (next != null) ...[
+                          const SizedBox(height: 4),
+                          Text(l10n.careHubNext(next.$1.title, careTime(next.$2)), style: careBody().copyWith(color: Colors.white70)),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-                const Icon(Icons.task_alt_rounded, color: Colors.white, size: 40),
-              ],
+                  const Icon(Icons.task_alt_rounded, color: Colors.white, size: 40),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          CareRow(
-            key: const Key('care_hub_vaccines'),
-            leading: const CareIconTile(Icons.vaccines_outlined),
-            title: l10n.careVaccinesTitle,
-            subtitle: doses == null ? null : l10n.careHubVaccinesSubtitle(doses.length),
-            onTap: () => context.push(CarePaths.vaccines),
-          ),
-          const SizedBox(height: 10),
-          CareRow(
-            key: const Key('care_hub_allergies'),
-            leading: const CareIconTile(Icons.no_food_outlined, background: CareColors.amberBg, foreground: CareColors.amber),
-            title: l10n.careAllergiesTitle,
-            subtitle: allergies == null
-                ? null
-                : allergies.isEmpty
-                    ? l10n.careHubNone
-                    : allergies.map((a) => a.str('name')).whereType<String>().take(3).join(', '),
-            onTap: () => context.push(CarePaths.allergies),
-          ),
-          const SizedBox(height: 10),
-          CareRow(
-            key: const Key('care_hub_conditions'),
-            leading: const CareIconTile(Icons.healing_outlined, background: CareColors.slateBg, foreground: AppColors.clinicalTeal),
-            title: l10n.careConditionsTitle,
-            subtitle: conditions == null
-                ? null
-                : conditions.isEmpty
-                    ? l10n.careHubNone
-                    : conditions.map((c) => c.label).take(3).join(', '),
-            onTap: () => context.push(RoutePaths.myConditions),
-          ),
-          const SizedBox(height: 10),
-          CareRow(
-            key: const Key('care_hub_medications'),
-            leading: const CareIconTile(Icons.medication_outlined, background: AppColors.softIndigoLight, foreground: AppColors.dualisNavy),
-            title: l10n.careMedicationsTitle,
-            subtitle: [
-              l10n.careHubMedsActive(meds.where((m) => m.active).length),
-              if (lowStock > 0) l10n.careHubLowStock(lowStock),
-            ].join(' · '),
-            onTap: () => context.push(CarePaths.medications),
-          ),
-          const SizedBox(height: 10),
-          CareRow(
-            key: const Key('care_hub_prescriptions'),
-            leading: const CareIconTile(Icons.receipt_long_outlined, background: AppColors.softIndigoLight, foreground: AppColors.dualisNavy),
-            title: l10n.careExamSectionPrescriptions,
-            subtitle: prescriptions == null ? null : l10n.careHubPrescriptions(prescriptions),
-            onTap: () => context.push(CarePaths.prescriptions),
-          ),
-          const SizedBox(height: 10),
-          CareRow(
-            key: const Key('care_hub_appointments'),
-            leading: const CareIconTile(Icons.event_outlined, background: CareColors.greenBg, foreground: CareColors.green),
-            title: l10n.careAppointmentsTitle,
-            subtitle: upcoming.isEmpty
-                ? l10n.careHubNoUpcoming
-                : l10n.careHubNextAppointment(
-                    careDate(context, upcoming.first.occursAt!),
-                    upcoming.first.str('professional') ?? upcoming.first.str('specialty') ?? '',
-                  ),
-            onTap: () => context.push(CarePaths.appointments),
-          ),
-          const SizedBox(height: 10),
-          CareRow(
-            key: const Key('care_hub_exams'),
-            leading: const CareIconTile(Icons.science_outlined, background: CareColors.slateBg, foreground: CareColors.slate),
-            title: l10n.careExamsTitle,
-            subtitle: docs == null ? null : l10n.careHubDocuments(docs),
-            onTap: () => context.push(CarePaths.exams),
-          ),
-          const SizedBox(height: 10),
-          CareRow(
-            key: const Key('care_hub_summary'),
-            leading: const CareIconTile(Icons.picture_as_pdf_outlined),
-            title: l10n.careSummaryTitle,
-            subtitle: l10n.careHubSummarySubtitle,
-            onTap: () => context.push(CarePaths.summary),
-          ),
+            const SizedBox(height: 12),
+            CareRow(
+              key: const Key('care_hub_vaccines'),
+              leading: const CareIconTile(Icons.vaccines_outlined),
+              title: l10n.careVaccinesTitle,
+              subtitle: doses == null ? null : l10n.careHubVaccinesSubtitle(doses.length),
+              onTap: () => context.push(CarePaths.vaccines),
+            ),
+            const SizedBox(height: 10),
+            CareRow(
+              key: const Key('care_hub_allergies'),
+              leading: const CareIconTile(Icons.no_food_outlined, background: CareColors.amberBg, foreground: CareColors.amber),
+              title: l10n.careAllergiesTitle,
+              subtitle: allergies == null
+                  ? null
+                  : allergies.isEmpty
+                      ? l10n.careHubNone
+                      : allergies.map((a) => a.str('name')).whereType<String>().take(3).join(', '),
+              onTap: () => context.push(CarePaths.allergies),
+            ),
+            const SizedBox(height: 10),
+          ],
+          if (canReadConditions) ...[
+            CareRow(
+              key: const Key('care_hub_conditions'),
+              leading: const CareIconTile(Icons.healing_outlined, background: CareColors.slateBg, foreground: AppColors.clinicalTeal),
+              title: l10n.careConditionsTitle,
+              subtitle: conditions == null
+                  ? null
+                  : conditions.isEmpty
+                      ? l10n.careHubNone
+                      : conditions.map((c) => c.label).take(3).join(', '),
+              onTap: () => context.push(RoutePaths.myConditions),
+            ),
+            const SizedBox(height: 10),
+          ],
+          if (canReadCare) ...[
+            CareRow(
+              key: const Key('care_hub_medications'),
+              leading: const CareIconTile(Icons.medication_outlined, background: AppColors.softIndigoLight, foreground: AppColors.dualisNavy),
+              title: l10n.careMedicationsTitle,
+              subtitle: [
+                l10n.careHubMedsActive(meds.where((m) => m.active).length),
+                if (lowStock > 0) l10n.careHubLowStock(lowStock),
+              ].join(' · '),
+              onTap: () => context.push(CarePaths.medications),
+            ),
+            const SizedBox(height: 10),
+            CareRow(
+              key: const Key('care_hub_prescriptions'),
+              leading: const CareIconTile(Icons.receipt_long_outlined, background: AppColors.softIndigoLight, foreground: AppColors.dualisNavy),
+              title: l10n.careExamSectionPrescriptions,
+              subtitle: prescriptions == null ? null : l10n.careHubPrescriptions(prescriptions),
+              onTap: () => context.push(CarePaths.prescriptions),
+            ),
+            const SizedBox(height: 10),
+            CareRow(
+              key: const Key('care_hub_appointments'),
+              leading: const CareIconTile(Icons.event_outlined, background: CareColors.greenBg, foreground: CareColors.green),
+              title: l10n.careAppointmentsTitle,
+              subtitle: upcoming.isEmpty
+                  ? l10n.careHubNoUpcoming
+                  : l10n.careHubNextAppointment(
+                      careDate(context, upcoming.first.occursAt!),
+                      upcoming.first.str('professional') ?? upcoming.first.str('specialty') ?? '',
+                    ),
+              onTap: () => context.push(CarePaths.appointments),
+            ),
+            const SizedBox(height: 10),
+            CareRow(
+              key: const Key('care_hub_exams'),
+              leading: const CareIconTile(Icons.science_outlined, background: CareColors.slateBg, foreground: CareColors.slate),
+              title: l10n.careExamsTitle,
+              subtitle: docs == null ? null : l10n.careHubDocuments(docs),
+              onTap: () => context.push(CarePaths.exams),
+            ),
+            const SizedBox(height: 10),
+            CareRow(
+              key: const Key('care_hub_summary'),
+              leading: const CareIconTile(Icons.picture_as_pdf_outlined),
+              title: l10n.careSummaryTitle,
+              subtitle: l10n.careHubSummarySubtitle,
+              onTap: () => context.push(CarePaths.summary),
+            ),
+          ],
         ],
       ),
     );

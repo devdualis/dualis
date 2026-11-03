@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../profile/domain/models/share_category.dart';
+import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../domain/care_models.dart';
 import '../care_providers.dart';
 import '../care_routes.dart';
@@ -85,10 +87,14 @@ class _PrescriptionReviewScreenState extends ConsumerState<PrescriptionReviewScr
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final async = ref.watch(careDocumentProvider(widget.documentId));
+    // Reading stays open to anyone the care area is shared with; changes
+    // (delete, re-read, field edits, reminders) need care write access.
+    final canEdit = activeProfileCanWrite(ref, ShareCategory.care);
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: careAppBar(context, l10n.careRxTitle, actions: [
-        IconButton(
+        if (canEdit) IconButton(
+          key: const Key('rx_delete'),
           onPressed: () async {
             if (!await confirmCareDelete(context)) return;
             await ref.read(careActionsProvider).deleteDocument(widget.documentId);
@@ -116,10 +122,10 @@ class _PrescriptionReviewScreenState extends ConsumerState<PrescriptionReviewScr
               const SizedBox(height: 10),
               if (doc.status == DocumentStatus.failed) CareNote(l10n.careExamFailedHint),
               const SizedBox(height: 10),
-              DocumentActions(doc: doc),
+              if (canEdit) DocumentActions(doc: doc),
               if (items.isEmpty && doc.status != DocumentStatus.failed) CareEmpty(l10n.careRxNothingRead, icon: Icons.receipt_long_outlined),
               // Nothing read: the file may be an exam uploaded as a prescription.
-              if (items.isEmpty && (doc.status == DocumentStatus.review || doc.status == DocumentStatus.failed)) ...[
+              if (canEdit && items.isEmpty && (doc.status == DocumentStatus.review || doc.status == DocumentStatus.failed)) ...[
                 const SizedBox(height: 10),
                 CareNote(l10n.careRxMaybeExam, icon: Icons.science_outlined),
                 const SizedBox(height: 8),
@@ -139,14 +145,14 @@ class _PrescriptionReviewScreenState extends ConsumerState<PrescriptionReviewScr
                         Row(children: [
                           Expanded(
                             child: InkWell(
-                              onTap: () => _edit(i, field),
+                              onTap: canEdit ? () => _edit(i, field) : null,
                               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                                 Text(label, style: careBody(11)),
                                 Text(value, style: careTitle()),
                               ]),
                             ),
                           ),
-                          Checkbox(
+                          if (canEdit) Checkbox(
                             key: Key('rx_${i}_$field'),
                             shape: const CircleBorder(),
                             value: _checked[i]?.contains(field) ?? false,
@@ -155,6 +161,7 @@ class _PrescriptionReviewScreenState extends ConsumerState<PrescriptionReviewScr
                         ]),
                         const Divider(height: 16),
                       ],
+                      if (canEdit) ...[
                       Text(l10n.careRxTimesYouChoose, style: careBody(12)),
                       const SizedBox(height: 10),
                       if (_created.contains(i))
@@ -166,6 +173,7 @@ class _PrescriptionReviewScreenState extends ConsumerState<PrescriptionReviewScr
                           onPressed: _allChecked(i) ? () => _createReminder(i) : null,
                           child: Text(_allChecked(i) ? l10n.careRxCreateReminder : l10n.careRxCheckFirst),
                         ),
+                      ],
                     ],
                   ),
                 ),

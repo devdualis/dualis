@@ -230,6 +230,7 @@ void main() {
           gender: any(named: 'gender'),
           relationshipType: any(named: 'relationshipType'),
           lgpdConsent: any(named: 'lgpdConsent'),
+          lgpdLegalBasisNotes: any(named: 'lgpdLegalBasisNotes'),
         )).thenAnswer((_) async => child);
     serve([primary, child]);
 
@@ -239,9 +240,18 @@ void main() {
       gender: 'feminino',
       relationshipType: 'parent',
       lgpdConsent: true,
+      lgpdLegalBasisNotes: 'Processo 123',
     );
 
     expect(created.id, 'child');
+    verify(() => repo.createDependent(
+          name: 'Ana',
+          dateOfBirth: DateTime(2018, 3, 9),
+          gender: 'feminino',
+          relationshipType: 'parent',
+          lgpdConsent: true,
+          lgpdLegalBasisNotes: 'Processo 123',
+        )).called(1);
     expect(current().profiles.map((p) => p.id), ['primary', 'child']);
     expect(current().activeProfile?.id, 'child');
     verify(() => repo.saveActiveProfileId('u1', 'child')).called(1);
@@ -309,11 +319,19 @@ void main() {
     when(() => repo.createInvite(
           targetProfileId: 'child',
           accessLevel: ProfileShareLevel.viewOnly,
+          relationship: GrantRelationship.caregiver,
+          categories: [ShareCategory.habits, ShareCategory.care],
+          dependentShareConfirmed: true,
           targetProfileName: 'Ana',
         )).thenAnswer((_) async => pendingGrant);
 
     final grant = await notifier().createInvite(
-        targetProfileId: 'child', accessLevel: ProfileShareLevel.viewOnly);
+      targetProfileId: 'child',
+      accessLevel: ProfileShareLevel.viewOnly,
+      relationship: GrantRelationship.caregiver,
+      categories: [ShareCategory.habits, ShareCategory.care],
+      dependentShareConfirmed: true,
+    );
 
     expect(grant.inviteCode, 'NEW123');
     expect(current().outgoingGrants.first.id, 'g-new');
@@ -363,5 +381,97 @@ void main() {
     expect(current().outgoingGrants.single.status, GrantStatus.revoked);
     expect(current().outgoingGrants.single.isActive, isFalse);
     expect(current().profiles, hasLength(2));
+  });
+
+  group('hand-over at 18', () {
+    const claimed = Profile(
+      id: 'claimed',
+      name: 'Ana',
+      profileType: ProfileType.primary,
+      ownership: ProfileOwnership.own,
+      accessLevel: ProfileAccessLevel.owner,
+    );
+
+    test('claimProfile makes the claimed profile active and own', () async {
+      serve([primary]);
+      await start(signedIn('young'));
+      when(() => repo.claimProfile('HANDOVER01'))
+          .thenAnswer((_) async => claimed);
+      // The API replaces the empty primary with the claimed profile.
+      serve([claimed]);
+
+      final result = await notifier().claimProfile(' handover01 ');
+
+      expect(result.id, 'claimed');
+      expect(current().activeProfileId, 'claimed');
+      expect(current().activeProfile?.ownership, ProfileOwnership.own);
+      expect(current().activeProfile?.isPrimary, isTrue);
+      expect(current().profiles.map((p) => p.id), ['claimed']);
+      verify(() => repo.saveActiveProfileId('young', 'claimed')).called(1);
+    });
+
+    test('claimProfile errors are rethrown with the claim reason', () async {
+      serve([primary]);
+      await start(signedIn('young'));
+      when(() => repo.claimProfile(any())).thenThrow(
+        const ProfileClaimException(
+          ProfileClaimError.accountHasData,
+          'Esta conta já tem registros.',
+          statusCode: 409,
+          code: 'CLAIM_ACCOUNT_HAS_DATA',
+        ),
+      );
+
+      await expectLater(
+        notifier().claimProfile('HANDOVER01'),
+        throwsA(isA<ProfileClaimException>().having(
+            (e) => e.reason, 'reason', ProfileClaimError.accountHasData)),
+      );
+      expect(current().activeProfile?.id, 'primary');
+    });
+
+    test('createHandoverCode returns the code and reloads the list', () async {
+      serve([primary, child]);
+      await start(signedIn('u1'));
+      final expires = DateTime(2026, 11, 5, 10);
+      when(() => repo.createHandoverCode('child'))
+          .thenAnswer((_) async => (code: 'HANDOVER01', expiresAt: expires));
+
+      final code = await notifier().createHandoverCode('child');
+
+      expect(code.code, 'HANDOVER01');
+      expect(code.expiresAt, expires);
+      verify(() => repo.fetchProfiles()).called(2);
+    });
+
+    test('confirmLegalBasis calls the API and reloads', () async {
+      serve([primary, child]);
+      await start(signedIn('u1'));
+      when(() => repo.confirmLegalBasis('child'))
+          .thenAnswer((_) async => child);
+
+      await notifier().confirmLegalBasis('child');
+
+      verify(() => repo.confirmLegalBasis('child')).called(1);
+      verify(() => repo.fetchProfiles()).called(2);
+    });
+  });
+
+  test('after a hand-over the guardian falls back to the primary (Pitfall 7)',
+      () async {
+    when(() => repo.readActiveProfileId('guardian'))
+        .thenAnswer((_) async => 'child');
+    serve([primary, child]);
+    await start(signedIn('guardian'));
+    expect(current().activeProfileId, 'child');
+
+    // The young adult claimed 'child': it is gone from the guardian's list.
+    serve([primary]);
+    await notifier().refresh();
+
+    expect(current().profiles.map((p) => p.id), ['primary']);
+    expect(current().activeProfileId, isNull);
+    expect(current().activeProfile?.id, 'primary');
+    verify(() => repo.saveActiveProfileId('guardian', null)).called(1);
   });
 }

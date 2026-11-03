@@ -129,8 +129,10 @@ class ActiveProfileController extends Notifier<ActiveProfileState> {
     required String name,
     required DateTime dateOfBirth,
     required String gender,
-    required String relationshipType, // parent | legal_guardian | curator
+    // parent | legal_guardian (under 18) or curator | supported_decision (18+)
+    required String relationshipType,
     required bool lgpdConsent,
+    String? lgpdLegalBasisNotes,
   }) async {
     final session = _requireSession();
     final profile = await _repository.createDependent(
@@ -139,6 +141,7 @@ class ActiveProfileController extends Notifier<ActiveProfileState> {
       gender: gender,
       relationshipType: relationshipType,
       lgpdConsent: lgpdConsent,
+      lgpdLegalBasisNotes: lgpdLegalBasisNotes,
     );
     if (!_isCurrent(session)) return profile;
     state = state.copyWith(
@@ -180,6 +183,9 @@ class ActiveProfileController extends Notifier<ActiveProfileState> {
   Future<SharedAccessGrant> createInvite({
     required String targetProfileId,
     required ProfileShareLevel accessLevel,
+    required GrantRelationship relationship,
+    required List<ShareCategory> categories,
+    bool dependentShareConfirmed = false,
   }) async {
     final session = _requireSession();
     final targetName = state.profiles
@@ -190,6 +196,9 @@ class ActiveProfileController extends Notifier<ActiveProfileState> {
     final grant = await _repository.createInvite(
       targetProfileId: targetProfileId,
       accessLevel: accessLevel,
+      relationship: relationship,
+      categories: categories,
+      dependentShareConfirmed: dependentShareConfirmed,
       targetProfileName: targetName,
     );
     if (_isCurrent(session)) {
@@ -198,11 +207,69 @@ class ActiveProfileController extends Notifier<ActiveProfileState> {
     return grant;
   }
 
+  /// Changes what an outgoing grant shares, then reloads the lists.
+  /// Throws [ProfileApiException] (e.g. 409 GRANT_SCOPE_LOCKED) on failure.
+  Future<SharedAccessGrant> updateGrant(
+    String grantId, {
+    List<ShareCategory>? categories,
+    GrantRelationship? relationship,
+    bool dependentShareConfirmed = false,
+  }) async {
+    final session = _requireSession();
+    final previous =
+        state.outgoingGrants.where((g) => g.id == grantId).firstOrNull;
+    final updated = await _repository.updateGrant(
+      grantId,
+      categories: categories,
+      relationship: relationship,
+      dependentShareConfirmed: dependentShareConfirmed,
+      targetProfileName: previous?.targetProfileName ?? '',
+    );
+    if (!_isCurrent(session)) return updated;
+    state = state.copyWith(outgoingGrants: [
+      for (final g in state.outgoingGrants) g.id == grantId ? updated : g,
+    ]);
+    await refresh();
+    return updated;
+  }
+
   /// Accepts an invite code and refreshes, so the shared profile appears.
   /// Throws [ProfileApiException] (e.g. invalid/expired code) on failure.
   Future<void> acceptInvite(String inviteCode) async {
     final session = _requireSession();
     await _repository.acceptInvite(inviteCode.trim());
+    if (!_isCurrent(session)) return;
+    await refresh();
+  }
+
+  /// The young adult claims a profile with a transfer code. Reloads the list
+  /// (the account's empty primary is replaced by the claimed profile) and
+  /// makes the claimed profile active. Returns it.
+  /// Throws [ProfileClaimException] on failure.
+  Future<Profile> claimProfile(String code) async {
+    final session = _requireSession();
+    final claimed = await _repository.claimProfile(code.trim().toUpperCase());
+    if (!_isCurrent(session)) return claimed;
+    await refresh();
+    if (_isCurrent(session)) selectProfile(claimed.id);
+    return claimed;
+  }
+
+  /// The guardian generates (or regenerates) a transfer code for a dependent
+  /// who turned 18. Reloads so the profile shows the active code.
+  /// Throws [ProfileApiException] on failure.
+  Future<HandoverCode> createHandoverCode(String profileId) async {
+    final session = _requireSession();
+    final code = await _repository.createHandoverCode(profileId);
+    if (_isCurrent(session)) await refresh();
+    return code;
+  }
+
+  /// The guardian re-confirms an adult dependent's legal basis under LGPD
+  /// Art. 11, I, then reloads. Throws [ProfileApiException] on failure.
+  Future<void> confirmLegalBasis(String profileId) async {
+    final session = _requireSession();
+    await _repository.confirmLegalBasis(profileId);
     if (!_isCurrent(session)) return;
     await refresh();
   }

@@ -717,7 +717,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addDependentRelationshipCurator =>
-      'Court-appointed curator of an incapacitated adult';
+      'Court-appointed curator of an adult (curatorship)';
 
   @override
   String get addDependentRelationshipLegalGuardian =>
@@ -726,6 +726,29 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get addDependentLgpdArt14Consent =>
       'I declare, under penalty of law, that I am the parent or legal representative of this dependent and expressly authorize the collection and processing of their wellness data on the DualisCheckUp platform, in strict compliance with Article 14 of the LGPD (Law 13.709/2018).';
+
+  @override
+  String get addDependentRelationshipSupportedDecision =>
+      'Supporter under supported decision-making';
+
+  @override
+  String get addDependentRelationshipMinorHint =>
+      'For people under 18: parental authority or guardianship.';
+
+  @override
+  String get addDependentRelationshipAdultHint =>
+      'For people 18 or older: curatorship or supported decision-making.';
+
+  @override
+  String get addDependentPickBirthDateFirst =>
+      'Enter the date of birth to see the possible relationships.';
+
+  @override
+  String get addDependentLgpdArt11Consent =>
+      'I declare, under penalty of law, that I am the curator or supporter of this person, under the court decision or the support agreement, and expressly authorize the collection and processing of their wellness data on the DualisCheckUp platform, under Article 11, item I, of the LGPD (Law 13.709/2018).';
+
+  @override
+  String get addDependentNotesLabel => 'Case number / notes (optional)';
 
   @override
   String get addDependentSubmit => 'Register Dependent';
@@ -785,7 +808,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSwitcherBadgeMinor => 'Minor';
 
   @override
-  String get profileSwitcherBadgeAdult => 'Adult dependent';
+  String get profileSwitcherBadgeAdult => 'Adult with legal representative';
 
   @override
   String get profileSwitcherBadgeViewOnly => 'View only';
@@ -5662,4 +5685,165 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get jv24SummaryDetailsTitle => 'What you recorded';
+
+  @override
+  String get familySharingRelationshipLabel => 'Who is this person to you?';
+
+  @override
+  String get familySharingRelationshipSpousePartner => 'Spouse or partner';
+
+  @override
+  String get familySharingRelationshipSibling => 'Brother or sister';
+
+  @override
+  String get familySharingRelationshipParent => 'Father or mother';
+
+  @override
+  String get familySharingRelationshipChild => 'Son or daughter';
+
+  @override
+  String get familySharingRelationshipOtherFamily => 'Other family member';
+
+  @override
+  String get familySharingRelationshipCaregiver => 'Caregiver';
+
+  @override
+  String get familySharingRelationshipFriend => 'Friend';
+
+  @override
+  String get familySharingRelationshipOther => 'Other';
+
+  @override
+  String get familySharingRelationshipUnknown => 'Not specified';
+
+  @override
+  String get familySharingCategoriesLabel =>
+      'What this person will be able to see';
+
+  @override
+  String get familySharingCategoryHabits => 'Habits (water, sleep, movement)';
+
+  @override
+  String get familySharingCategoryPhysicalJournal => 'Body journal';
+
+  @override
+  String get familySharingCategoryEmotionalJournal => 'Emotional journal';
+
+  @override
+  String get familySharingCategoryConditions => 'Conditions and measurements';
+
+  @override
+  String get familySharingCategoryCare =>
+      'Care (medications, appointments, tests)';
+
+  @override
+  String get familySharingCategoriesRequired => 'Choose at least one category.';
+
+  @override
+  String get familySharingEmotionalExplanation =>
+      'The emotional journal holds what you feel and write. Tick it only if you fully trust this person.';
+
+  @override
+  String get familySharingSafetyNeverShared =>
+      'Help requests are never shared.';
+
+  @override
+  String get familySharingDependentConfirm =>
+      'I am the legal guardian of this profile and I authorize sharing the selected categories with this person.';
+
+  @override
+  String get familySharingEditCategories => 'Edit what is shared';
+
+  @override
+  String get familySharingSave => 'Save';
+
+  @override
+  String get familySharingEditError =>
+      'Could not save the changes. Please try again.';
+
+  @override
+  String get profileClaimEntry => 'I have a transfer code';
+
+  @override
+  String get profileClaimTitle => 'Receive my profile';
+
+  @override
+  String get profileClaimBody =>
+      'Enter the code your guardian created in their app. Your history moves to this account.';
+
+  @override
+  String get profileClaimCodeLabel => 'Transfer code';
+
+  @override
+  String get profileClaimSubmit => 'Receive profile';
+
+  @override
+  String get profileClaimSuccess => 'Profile received. It is yours now.';
+
+  @override
+  String get profileClaimErrorInvalid => 'Invalid or expired code.';
+
+  @override
+  String get profileClaimErrorGuardian =>
+      'This code must be used in the account of the person who turned 18.';
+
+  @override
+  String get profileClaimErrorNotAdult =>
+      'The transfer is only possible from age 18.';
+
+  @override
+  String get profileClaimErrorAccountHasData =>
+      'This account already has entries. Use a new account to receive the profile.';
+
+  @override
+  String get profileClaimErrorTooMany =>
+      'Too many attempts. Try again in a few minutes.';
+
+  @override
+  String profileHandoverDueBanner(String name) {
+    return '$name turned 18. The profile can move to their own account.';
+  }
+
+  @override
+  String get profileHandoverGenerate => 'Create transfer code';
+
+  @override
+  String get profileHandoverCodeTitle => 'Transfer code';
+
+  @override
+  String profileHandoverCodeBody(String name, String date) {
+    return 'Give this code to $name. Valid until $date. Until the transfer, you keep access.';
+  }
+
+  @override
+  String get profileHandoverCopy => 'Copy code';
+
+  @override
+  String profileHandoverCodeActive(String date) {
+    return 'Code active until $date';
+  }
+
+  @override
+  String profileLegalBasisBanner(String name) {
+    return 'Confirm the legal basis for $name\'s registration.';
+  }
+
+  @override
+  String get profileLegalBasisConfirm => 'Confirm';
+
+  @override
+  String get profileCategoryNotSharedTitle => 'Not shared with you';
+
+  @override
+  String profileCategoryNotSharedBody(String name) {
+    return '$name has not shared this area with you.';
+  }
+
+  @override
+  String get historyOnlyPhysicalShared =>
+      'You only see this profile\'s body journal.';
+
+  @override
+  String get historyOnlyEmotionalShared =>
+      'You only see this profile\'s emotional journal.';
 }

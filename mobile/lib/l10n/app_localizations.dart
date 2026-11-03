@@ -1357,7 +1357,7 @@ abstract class AppLocalizations {
   /// No description provided for @addDependentRelationshipCurator.
   ///
   /// In pt, this message translates to:
-  /// **'Curador(a) de maior incapaz (Curatela)'**
+  /// **'Curador(a) de pessoa maior (Curatela)'**
   String get addDependentRelationshipCurator;
 
   /// No description provided for @addDependentRelationshipLegalGuardian.
@@ -1371,6 +1371,42 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Declaro, sob as penas da lei, que sou pai, mãe ou representante legal deste dependente e autorizo expressamente a coleta e tratamento dos seus dados de bem-estar na plataforma DualisCheckUp, em estrita conformidade com o Artigo 14 da LGPD (Lei 13.709/2018).'**
   String get addDependentLgpdArt14Consent;
+
+  /// No description provided for @addDependentRelationshipSupportedDecision.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apoiador(a) em tomada de decisão apoiada'**
+  String get addDependentRelationshipSupportedDecision;
+
+  /// No description provided for @addDependentRelationshipMinorHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para menores de 18 anos: poder familiar ou tutela.'**
+  String get addDependentRelationshipMinorHint;
+
+  /// No description provided for @addDependentRelationshipAdultHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para maiores de 18 anos: curatela ou tomada de decisão apoiada.'**
+  String get addDependentRelationshipAdultHint;
+
+  /// No description provided for @addDependentPickBirthDateFirst.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe a data de nascimento para ver os vínculos possíveis.'**
+  String get addDependentPickBirthDateFirst;
+
+  /// No description provided for @addDependentLgpdArt11Consent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Declaro, sob as penas da lei, que sou curador(a) ou apoiador(a) desta pessoa, nos termos da decisão judicial ou do termo de apoio, e autorizo expressamente a coleta e o tratamento dos seus dados de bem-estar na plataforma DualisCheckUp, conforme o Artigo 11, inciso I, da LGPD (Lei 13.709/2018).'**
+  String get addDependentLgpdArt11Consent;
+
+  /// No description provided for @addDependentNotesLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Número do processo / observações (opcional)'**
+  String get addDependentNotesLabel;
 
   /// No description provided for @addDependentSubmit.
   ///
@@ -1483,7 +1519,7 @@ abstract class AppLocalizations {
   /// Badge for dependent adult
   ///
   /// In pt, this message translates to:
-  /// **'Maior sob tutela'**
+  /// **'Maior com representação legal'**
   String get profileSwitcherBadgeAdult;
 
   /// Badge for view-only shared access
@@ -9549,6 +9585,282 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'O que você registrou'**
   String get jv24SummaryDetailsTitle;
+
+  /// No description provided for @familySharingRelationshipLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quem é essa pessoa para você?'**
+  String get familySharingRelationshipLabel;
+
+  /// No description provided for @familySharingRelationshipSpousePartner.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cônjuge ou parceiro(a)'**
+  String get familySharingRelationshipSpousePartner;
+
+  /// No description provided for @familySharingRelationshipSibling.
+  ///
+  /// In pt, this message translates to:
+  /// **'Irmão ou irmã'**
+  String get familySharingRelationshipSibling;
+
+  /// No description provided for @familySharingRelationshipParent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pai ou mãe'**
+  String get familySharingRelationshipParent;
+
+  /// No description provided for @familySharingRelationshipChild.
+  ///
+  /// In pt, this message translates to:
+  /// **'Filho ou filha'**
+  String get familySharingRelationshipChild;
+
+  /// No description provided for @familySharingRelationshipOtherFamily.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outro familiar'**
+  String get familySharingRelationshipOtherFamily;
+
+  /// No description provided for @familySharingRelationshipCaregiver.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cuidador(a)'**
+  String get familySharingRelationshipCaregiver;
+
+  /// No description provided for @familySharingRelationshipFriend.
+  ///
+  /// In pt, this message translates to:
+  /// **'Amigo(a)'**
+  String get familySharingRelationshipFriend;
+
+  /// No description provided for @familySharingRelationshipOther.
+  ///
+  /// In pt, this message translates to:
+  /// **'Outro'**
+  String get familySharingRelationshipOther;
+
+  /// No description provided for @familySharingRelationshipUnknown.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não informado'**
+  String get familySharingRelationshipUnknown;
+
+  /// No description provided for @familySharingCategoriesLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que essa pessoa poderá ver'**
+  String get familySharingCategoriesLabel;
+
+  /// No description provided for @familySharingCategoryHabits.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hábitos (água, sono, movimento)'**
+  String get familySharingCategoryHabits;
+
+  /// No description provided for @familySharingCategoryPhysicalJournal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Diário do corpo'**
+  String get familySharingCategoryPhysicalJournal;
+
+  /// No description provided for @familySharingCategoryEmotionalJournal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Diário emocional'**
+  String get familySharingCategoryEmotionalJournal;
+
+  /// No description provided for @familySharingCategoryConditions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Condições e medições'**
+  String get familySharingCategoryConditions;
+
+  /// No description provided for @familySharingCategoryCare.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cuidados (medicamentos, consultas, exames)'**
+  String get familySharingCategoryCare;
+
+  /// No description provided for @familySharingCategoriesRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha ao menos uma categoria.'**
+  String get familySharingCategoriesRequired;
+
+  /// No description provided for @familySharingEmotionalExplanation.
+  ///
+  /// In pt, this message translates to:
+  /// **'O diário emocional guarda o que você sente e escreve. Marque só se confia plenamente nessa pessoa.'**
+  String get familySharingEmotionalExplanation;
+
+  /// No description provided for @familySharingSafetyNeverShared.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pedidos de ajuda nunca são compartilhados.'**
+  String get familySharingSafetyNeverShared;
+
+  /// No description provided for @familySharingDependentConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sou responsável legal por este perfil e autorizo compartilhar as categorias marcadas com essa pessoa.'**
+  String get familySharingDependentConfirm;
+
+  /// No description provided for @familySharingEditCategories.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar o que é compartilhado'**
+  String get familySharingEditCategories;
+
+  /// No description provided for @familySharingSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar'**
+  String get familySharingSave;
+
+  /// No description provided for @familySharingEditError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível salvar as alterações. Tente novamente.'**
+  String get familySharingEditError;
+
+  /// No description provided for @profileClaimEntry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tenho um código de transferência'**
+  String get profileClaimEntry;
+
+  /// No description provided for @profileClaimTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receber meu perfil'**
+  String get profileClaimTitle;
+
+  /// No description provided for @profileClaimBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o código que a pessoa responsável gerou no app dela. Seu histórico passa para esta conta.'**
+  String get profileClaimBody;
+
+  /// No description provided for @profileClaimCodeLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de transferência'**
+  String get profileClaimCodeLabel;
+
+  /// No description provided for @profileClaimSubmit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receber perfil'**
+  String get profileClaimSubmit;
+
+  /// No description provided for @profileClaimSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Perfil recebido. Agora ele é seu.'**
+  String get profileClaimSuccess;
+
+  /// No description provided for @profileClaimErrorInvalid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código inválido ou expirado.'**
+  String get profileClaimErrorInvalid;
+
+  /// No description provided for @profileClaimErrorGuardian.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este código deve ser usado na conta da pessoa que fez 18 anos.'**
+  String get profileClaimErrorGuardian;
+
+  /// No description provided for @profileClaimErrorNotAdult.
+  ///
+  /// In pt, this message translates to:
+  /// **'A transferência só é possível a partir dos 18 anos.'**
+  String get profileClaimErrorNotAdult;
+
+  /// No description provided for @profileClaimErrorAccountHasData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta conta já tem registros. Use uma conta nova para receber o perfil.'**
+  String get profileClaimErrorAccountHasData;
+
+  /// No description provided for @profileClaimErrorTooMany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Muitas tentativas. Tente de novo em alguns minutos.'**
+  String get profileClaimErrorTooMany;
+
+  /// No description provided for @profileHandoverDueBanner.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} fez 18 anos. O perfil pode passar para a conta própria.'**
+  String profileHandoverDueBanner(String name);
+
+  /// No description provided for @profileHandoverGenerate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerar código de transferência'**
+  String get profileHandoverGenerate;
+
+  /// No description provided for @profileHandoverCodeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de transferência'**
+  String get profileHandoverCodeTitle;
+
+  /// No description provided for @profileHandoverCodeBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entregue este código para {name}. Vale até {date}. Até a transferência, você continua com acesso.'**
+  String profileHandoverCodeBody(String name, String date);
+
+  /// No description provided for @profileHandoverCopy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar código'**
+  String get profileHandoverCopy;
+
+  /// No description provided for @profileHandoverCodeActive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código ativo até {date}'**
+  String profileHandoverCodeActive(String date);
+
+  /// No description provided for @profileLegalBasisBanner.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirme a base legal do cadastro de {name}.'**
+  String profileLegalBasisBanner(String name);
+
+  /// No description provided for @profileLegalBasisConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar'**
+  String get profileLegalBasisConfirm;
+
+  /// No description provided for @profileCategoryNotSharedTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não compartilhado com você'**
+  String get profileCategoryNotSharedTitle;
+
+  /// No description provided for @profileCategoryNotSharedBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} não compartilhou esta área com você.'**
+  String profileCategoryNotSharedBody(String name);
+
+  /// No description provided for @historyOnlyPhysicalShared.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você vê apenas o diário do corpo deste perfil.'**
+  String get historyOnlyPhysicalShared;
+
+  /// No description provided for @historyOnlyEmotionalShared.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você vê apenas o diário emocional deste perfil.'**
+  String get historyOnlyEmotionalShared;
 }
 
 class _AppLocalizationsDelegate

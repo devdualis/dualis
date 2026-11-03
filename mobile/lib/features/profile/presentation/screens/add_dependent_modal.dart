@@ -10,12 +10,25 @@ import '../../../../core/utils/date_input_formatter.dart';
 import '../../../auth/domain/form_validators.dart';
 import '../../../auth/domain/user_profile.dart';
 import '../../../auth/presentation/widgets/biological_sex_selector.dart';
+import '../../data/profile_repository.dart';
 import '../../domain/models/profile.dart';
 import '../controllers/active_profile_controller.dart';
 
 const _relationshipParent = 'parent';
 const _relationshipLegalGuardian = 'legal_guardian';
 const _relationshipCurator = 'curator';
+const _relationshipSupportedDecision = 'supported_decision';
+
+/// Same rule as the backend (`ADULT_AGE_YEARS` in profiles.service.ts):
+/// a person is an adult once their 18th birthday has been reached.
+const _adultAgeYears = 18;
+
+/// Relationships the backend accepts per age bracket (11.1 CONTEXT gap 3).
+const _minorRelationships = [_relationshipParent, _relationshipLegalGuardian];
+const _adultRelationships = [
+  _relationshipCurator,
+  _relationshipSupportedDecision,
+];
 
 Future<Profile?> showAddDependentModal(BuildContext context) {
   return showModalBottomSheet<Profile?>(
@@ -38,6 +51,7 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _dobController = TextEditingController();
+  final _notesController = TextEditingController();
 
   Gender _selectedGender = Gender.masculino;
   String? _relationshipType;
@@ -45,11 +59,52 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
   bool _lgpdConsent = false;
   bool _isSubmitting = false;
 
+  /// Age bracket of the current date of birth: null while no valid date is
+  /// entered, true for 18 or older, false for under 18.
+  bool? _isAdult;
+
   @override
   void dispose() {
     _nameController.dispose();
     _dobController.dispose();
+    _notesController.dispose();
     super.dispose();
+  }
+
+  List<String> get _allowedRelationships => switch (_isAdult) {
+        true => _adultRelationships,
+        false => _minorRelationships,
+        null => const <String>[],
+      };
+
+  static int _ageInYears(DateTime date, DateTime today) {
+    var age = today.year - date.year;
+    if (today.month < date.month ||
+        (today.month == date.month && today.day < date.day)) {
+      age--;
+    }
+    return age;
+  }
+
+  /// Recomputes the age bracket after the date of birth changed. A bracket
+  /// change clears the consent (the text shown changes with it) and drops a
+  /// relationship the new bracket does not allow.
+  void _syncAgeBracket() {
+    final dob = _resolveDateOfBirth();
+    bool? isAdult;
+    if (dob != null && _validateDependentDateOfBirth(dob) == null) {
+      final now = DateTime.now();
+      isAdult = _ageInYears(dob, DateTime(now.year, now.month, now.day)) >=
+          _adultAgeYears;
+    }
+    if (isAdult != _isAdult) {
+      _isAdult = isAdult;
+      _lgpdConsent = false;
+    }
+    if (_relationshipType != null &&
+        !_allowedRelationships.contains(_relationshipType)) {
+      _relationshipType = null;
+    }
   }
 
   void _onFieldChanged() => setState(() {});
@@ -84,7 +139,8 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
   bool get _isFormReady {
     final nameOk = FormValidators.validateName(_nameController.text) == null;
     final dobOk = _validateDependentDateOfBirth(_resolveDateOfBirth()) == null;
-    final relationshipOk = _relationshipType != null;
+    final relationshipOk = _relationshipType != null &&
+        _allowedRelationships.contains(_relationshipType);
     return nameOk && dobOk && relationshipOk && _lgpdConsent && !_isSubmitting;
   }
 
@@ -99,12 +155,7 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
     if (picked.isAfter(today)) {
       return l10n.addDependentDobFuture;
     }
-    int age = today.year - picked.year;
-    if (today.month < picked.month ||
-        (today.month == picked.month && today.day < picked.day)) {
-      age--;
-    }
-    if (age > 120) {
+    if (_ageInYears(picked, today) > 120) {
       return l10n.addDependentDobInvalid;
     }
     return null;
@@ -128,6 +179,7 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
         _selectedDate = picked;
         _dobController.text =
             '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+        _syncAgeBracket();
       });
     }
   }
@@ -140,6 +192,8 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
         return l10n.addDependentRelationshipCurator;
       case _relationshipLegalGuardian:
         return l10n.addDependentRelationshipLegalGuardian;
+      case _relationshipSupportedDecision:
+        return l10n.addDependentRelationshipSupportedDecision;
       default:
         return value;
     }
@@ -150,6 +204,7 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
     final l10n = AppLocalizations.of(context);
     final dob = _resolveDateOfBirth();
     if (dob == null) return;
+    final notes = _notesController.text.trim();
 
     setState(() => _isSubmitting = true);
     try {
@@ -159,6 +214,7 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
             gender: _selectedGender.value,
             relationshipType: _relationshipType!,
             lgpdConsent: true,
+            lgpdLegalBasisNotes: notes.isEmpty ? null : notes,
           );
       if (!mounted) return;
       Navigator.of(context).pop(profile);
@@ -168,10 +224,14 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
           backgroundColor: AppColors.clinicalTealDark,
         ),
       );
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
-      final message = ref.read(activeProfileControllerProvider).errorMessage ??
-          l10n.addDependentGenericError;
+      // Backend 400s (e.g. relationship does not match the age) arrive as
+      // ProfileApiException and are shown as sent.
+      final message = e is ProfileApiException && e.message.isNotEmpty
+          ? e.message
+          : ref.read(activeProfileControllerProvider).errorMessage ??
+              l10n.addDependentGenericError;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
@@ -254,8 +314,10 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
                         keyboardType: TextInputType.number,
                         inputFormatters: [DateInputFormatter()],
                         onChanged: (_) {
-                          _selectedDate = null;
-                          _onFieldChanged();
+                          setState(() {
+                            _selectedDate = null;
+                            _syncAgeBracket();
+                          });
                         },
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.calendar_today_outlined),
@@ -283,30 +345,69 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
                       const SizedBox(height: 8),
                       Column(
                         key: const ValueKey('add-dependent-relationship'),
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          for (final value in [
-                            _relationshipParent,
-                            _relationshipCurator,
-                            _relationshipLegalGuardian,
-                          ])
-                            _RelationshipOptionTile(
-                              label: _relationshipLabel(l10n, value),
-                              selected: _relationshipType == value,
-                              onTap: _isSubmitting
-                                  ? null
-                                  : () => setState(() => _relationshipType = value),
+                          if (_isAdult == null)
+                            _RelationshipHint(
+                              key: const ValueKey(
+                                  'add-dependent-pick-birth-date-first'),
+                              text: l10n.addDependentPickBirthDateFirst,
+                            )
+                          else ...[
+                            _RelationshipHint(
+                              text: _isAdult!
+                                  ? l10n.addDependentRelationshipAdultHint
+                                  : l10n.addDependentRelationshipMinorHint,
                             ),
+                            for (final value in _allowedRelationships)
+                              _RelationshipOptionTile(
+                                key: ValueKey('relationship-$value'),
+                                label: _relationshipLabel(l10n, value),
+                                selected: _relationshipType == value,
+                                onTap: _isSubmitting
+                                    ? null
+                                    : () => setState(
+                                        () => _relationshipType = value),
+                              ),
+                          ],
                         ],
                       ),
-                      const SizedBox(height: 20),
-                      _LgpdGuardianConsentBlock(
-                        value: _lgpdConsent,
-                        consentText: l10n.addDependentLgpdArt14Consent,
-                        onChanged: _isSubmitting
-                            ? null
-                            : (v) {
-                                setState(() => _lgpdConsent = v ?? false);
-                              },
+                      if (_isAdult != null) ...[
+                        const SizedBox(height: 20),
+                        // Adults: LGPD Art. 11, I via curator or supporter.
+                        // Minors: Art. 14 (key kept for the 11-VALIDATION e2e).
+                        _LgpdGuardianConsentBlock(
+                          checkboxKey: ValueKey(_isAdult!
+                              ? 'lgpd-art11-consent'
+                              : 'lgpd-art14-consent'),
+                          value: _lgpdConsent,
+                          consentText: _isAdult!
+                              ? l10n.addDependentLgpdArt11Consent
+                              : l10n.addDependentLgpdArt14Consent,
+                          onChanged: _isSubmitting
+                              ? null
+                              : (v) {
+                                  setState(() => _lgpdConsent = v ?? false);
+                                },
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      // Optional audit note (D1: self-declaration, no upload).
+                      TextField(
+                        key: const ValueKey('add-dependent-notes'),
+                        controller: _notesController,
+                        enabled: !_isSubmitting,
+                        minLines: 2,
+                        maxLines: 4,
+                        maxLength: 2000,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: InputDecoration(
+                          labelText: l10n.addDependentNotesLabel,
+                          alignLabelWithHint: true,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 24),
                       DualisPrimaryButton(
@@ -328,12 +429,34 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
   }
 }
 
+class _RelationshipHint extends StatelessWidget {
+  final String text;
+
+  const _RelationshipHint({super.key, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        text,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 13,
+          height: 1.4,
+          color: AppColors.textSecondaryLight,
+        ),
+      ),
+    );
+  }
+}
+
 class _RelationshipOptionTile extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback? onTap;
 
   const _RelationshipOptionTile({
+    super.key,
     required this.label,
     required this.selected,
     required this.onTap,
@@ -383,11 +506,13 @@ class _RelationshipOptionTile extends StatelessWidget {
 }
 
 class _LgpdGuardianConsentBlock extends StatelessWidget {
+  final Key checkboxKey;
   final bool value;
   final String consentText;
   final ValueChanged<bool?>? onChanged;
 
   const _LgpdGuardianConsentBlock({
+    required this.checkboxKey,
     required this.value,
     required this.consentText,
     required this.onChanged,
@@ -406,7 +531,7 @@ class _LgpdGuardianConsentBlock extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Checkbox(
-            key: const ValueKey('lgpd-art14-consent'),
+            key: checkboxKey,
             value: value,
             onChanged: onChanged,
             activeColor: AppColors.softIndigo,

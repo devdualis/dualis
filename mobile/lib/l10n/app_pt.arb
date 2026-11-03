@@ -740,9 +740,15 @@
   "addDependentRelationshipLabel": "Grau de Parentesco / Representação",
   "addDependentRelationshipHint": "Selecione o vínculo legal",
   "addDependentRelationshipParent": "Filho(a) menor de idade (Poder Familiar)",
-  "addDependentRelationshipCurator": "Curador(a) de maior incapaz (Curatela)",
+  "addDependentRelationshipCurator": "Curador(a) de pessoa maior (Curatela)",
   "addDependentRelationshipLegalGuardian": "Tutor(a) legal de menor (Tutela)",
   "addDependentLgpdArt14Consent": "Declaro, sob as penas da lei, que sou pai, mãe ou representante legal deste dependente e autorizo expressamente a coleta e tratamento dos seus dados de bem-estar na plataforma DualisCheckUp, em estrita conformidade com o Artigo 14 da LGPD (Lei 13.709/2018).",
+  "addDependentRelationshipSupportedDecision": "Apoiador(a) em tomada de decisão apoiada",
+  "addDependentRelationshipMinorHint": "Para menores de 18 anos: poder familiar ou tutela.",
+  "addDependentRelationshipAdultHint": "Para maiores de 18 anos: curatela ou tomada de decisão apoiada.",
+  "addDependentPickBirthDateFirst": "Informe a data de nascimento para ver os vínculos possíveis.",
+  "addDependentLgpdArt11Consent": "Declaro, sob as penas da lei, que sou curador(a) ou apoiador(a) desta pessoa, nos termos da decisão judicial ou do termo de apoio, e autorizo expressamente a coleta e o tratamento dos seus dados de bem-estar na plataforma DualisCheckUp, conforme o Artigo 11, inciso I, da LGPD (Lei 13.709/2018).",
+  "addDependentNotesLabel": "Número do processo / observações (opcional)",
   "addDependentSubmit": "Cadastrar Dependente",
   "addDependentSuccess": "Dependente cadastrado com sucesso.",
   "addDependentGenericError": "Não foi possível cadastrar o dependente. Tente novamente.",
@@ -811,7 +817,7 @@
   "@profileSwitcherBadgeMinor": {
     "description": "Badge for dependent minor"
   },
-  "profileSwitcherBadgeAdult": "Maior sob tutela",
+  "profileSwitcherBadgeAdult": "Maior com representação legal",
   "@profileSwitcherBadgeAdult": {
     "description": "Badge for dependent adult"
   },
@@ -3334,5 +3340,89 @@
     }
   },
   "jv24SummaryBodyTitle": "Onde você marcou",
-  "jv24SummaryDetailsTitle": "O que você registrou"
+  "jv24SummaryDetailsTitle": "O que você registrou",
+  "familySharingRelationshipLabel": "Quem é essa pessoa para você?",
+  "familySharingRelationshipSpousePartner": "Cônjuge ou parceiro(a)",
+  "familySharingRelationshipSibling": "Irmão ou irmã",
+  "familySharingRelationshipParent": "Pai ou mãe",
+  "familySharingRelationshipChild": "Filho ou filha",
+  "familySharingRelationshipOtherFamily": "Outro familiar",
+  "familySharingRelationshipCaregiver": "Cuidador(a)",
+  "familySharingRelationshipFriend": "Amigo(a)",
+  "familySharingRelationshipOther": "Outro",
+  "familySharingRelationshipUnknown": "Não informado",
+  "familySharingCategoriesLabel": "O que essa pessoa poderá ver",
+  "familySharingCategoryHabits": "Hábitos (água, sono, movimento)",
+  "familySharingCategoryPhysicalJournal": "Diário do corpo",
+  "familySharingCategoryEmotionalJournal": "Diário emocional",
+  "familySharingCategoryConditions": "Condições e medições",
+  "familySharingCategoryCare": "Cuidados (medicamentos, consultas, exames)",
+  "familySharingCategoriesRequired": "Escolha ao menos uma categoria.",
+  "familySharingEmotionalExplanation": "O diário emocional guarda o que você sente e escreve. Marque só se confia plenamente nessa pessoa.",
+  "familySharingSafetyNeverShared": "Pedidos de ajuda nunca são compartilhados.",
+  "familySharingDependentConfirm": "Sou responsável legal por este perfil e autorizo compartilhar as categorias marcadas com essa pessoa.",
+  "familySharingEditCategories": "Editar o que é compartilhado",
+  "familySharingSave": "Salvar",
+  "familySharingEditError": "Não foi possível salvar as alterações. Tente novamente.",
+  "profileClaimEntry": "Tenho um código de transferência",
+  "profileClaimTitle": "Receber meu perfil",
+  "profileClaimBody": "Digite o código que a pessoa responsável gerou no app dela. Seu histórico passa para esta conta.",
+  "profileClaimCodeLabel": "Código de transferência",
+  "profileClaimSubmit": "Receber perfil",
+  "profileClaimSuccess": "Perfil recebido. Agora ele é seu.",
+  "profileClaimErrorInvalid": "Código inválido ou expirado.",
+  "profileClaimErrorGuardian": "Este código deve ser usado na conta da pessoa que fez 18 anos.",
+  "profileClaimErrorNotAdult": "A transferência só é possível a partir dos 18 anos.",
+  "profileClaimErrorAccountHasData": "Esta conta já tem registros. Use uma conta nova para receber o perfil.",
+  "profileClaimErrorTooMany": "Muitas tentativas. Tente de novo em alguns minutos.",
+  "profileHandoverDueBanner": "{name} fez 18 anos. O perfil pode passar para a conta própria.",
+  "@profileHandoverDueBanner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "profileHandoverGenerate": "Gerar código de transferência",
+  "profileHandoverCodeTitle": "Código de transferência",
+  "profileHandoverCodeBody": "Entregue este código para {name}. Vale até {date}. Até a transferência, você continua com acesso.",
+  "@profileHandoverCodeBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "profileHandoverCopy": "Copiar código",
+  "profileHandoverCodeActive": "Código ativo até {date}",
+  "@profileHandoverCodeActive": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "profileLegalBasisBanner": "Confirme a base legal do cadastro de {name}.",
+  "@profileLegalBasisBanner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "profileLegalBasisConfirm": "Confirmar",
+  "profileCategoryNotSharedTitle": "Não compartilhado com você",
+  "profileCategoryNotSharedBody": "{name} não compartilhou esta área com você.",
+  "@profileCategoryNotSharedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "historyOnlyPhysicalShared": "Você vê apenas o diário do corpo deste perfil.",
+  "historyOnlyEmotionalShared": "Você vê apenas o diário emocional deste perfil."
 }

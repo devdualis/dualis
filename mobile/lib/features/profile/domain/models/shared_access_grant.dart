@@ -1,3 +1,6 @@
+import 'share_category.dart';
+export 'share_category.dart';
+
 enum GrantStatus { pending, accepted, revoked, expired }
 
 enum GrantDirection { outgoing, incoming }
@@ -14,6 +17,9 @@ class SharedAccessGrant {
   final DateTime? acceptedAt;
   final String? granteeName; // outgoing only: who accepted the invite
   final String? granteeEmail; // outgoing only
+  /// Null for grants created before relationships existed ("não informado").
+  final GrantRelationship? relationship;
+  final List<ShareCategory> categories;
 
   const SharedAccessGrant({
     required this.id,
@@ -27,6 +33,8 @@ class SharedAccessGrant {
     this.acceptedAt,
     this.granteeName,
     this.granteeEmail,
+    this.relationship,
+    this.categories = const [],
   });
 
   /// [fallbackTargetProfileName] fills in responses that omit the name
@@ -54,6 +62,8 @@ class SharedAccessGrant {
       acceptedAt: _parseDate(json['acceptedAt']),
       granteeName: json['granteeName'] as String?,
       granteeEmail: json['granteeEmail'] as String?,
+      relationship: GrantRelationship.parse(json['relationship']),
+      categories: ShareCategory.parseList(json['categories']),
     );
   }
 

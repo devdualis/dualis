@@ -135,11 +135,16 @@ class AlreadyPromptedStore implements NotificationPermissionPromptStore {
 
 class _FakeProfile {
   final String id;
-  final String ownerUserId;
+  String ownerUserId;
   String name;
-  final ProfileType type;
+  ProfileType type;
   final DateTime? dateOfBirth;
   final String? gender;
+  String? relationshipType;
+  final String? lgpdLegalBasisNotes;
+  String? lgpdLegalBasis;
+  String? handoverCode;
+  DateTime? handoverCodeExpiresAt;
 
   _FakeProfile({
     required this.id,
@@ -148,7 +153,27 @@ class _FakeProfile {
     required this.type,
     this.dateOfBirth,
     this.gender,
+    this.relationshipType,
+    this.lgpdLegalBasisNotes,
+    this.lgpdLegalBasis,
   });
+
+  bool get isAdult {
+    final dob = dateOfBirth;
+    if (dob == null) return false;
+    final now = DateTime.now();
+    return !DateTime(dob.year + 18, dob.month, dob.day).isAfter(now);
+  }
+
+  /// A minor's guardianship (parent / legal guardian) whose dependent is 18+.
+  bool get handoverDue =>
+      type != ProfileType.primary &&
+      (relationshipType == 'parent' || relationshipType == 'legal_guardian') &&
+      isAdult;
+
+  bool get handoverCodeActive =>
+      handoverCode != null &&
+      (handoverCodeExpiresAt?.isAfter(DateTime.now()) ?? false);
 }
 
 class _FakeGrant {
@@ -156,6 +181,8 @@ class _FakeGrant {
   final String ownerUserId;
   final String targetProfileId;
   final ProfileShareLevel level;
+  GrantRelationship? relationship;
+  List<ShareCategory> categories;
   final String inviteCode;
   final DateTime expiresAt;
   String status = 'PENDING';
@@ -169,6 +196,8 @@ class _FakeGrant {
     required this.level,
     required this.inviteCode,
     required this.expiresAt,
+    this.relationship,
+    this.categories = const [],
   });
 }
 
@@ -213,6 +242,8 @@ class FakeProfileBackend {
 
   Map<String, dynamic> _profileJson(String userId, _FakeProfile p) {
     final grant = _activeGrant(userId, p.id);
+    final ownedDependent =
+        p.ownerUserId == userId && p.type != ProfileType.primary;
     return {
       'id': p.id,
       'name': p.name,
@@ -227,6 +258,34 @@ class FakeProfileBackend {
           : shareLevelToApi(grant!.level),
       if (p.dateOfBirth != null) 'dateOfBirth': formatApiDate(p.dateOfBirth!),
       'gender': p.gender,
+      'handoverStatus': !ownedDependent || !p.handoverDue
+          ? 'none'
+          : (p.handoverCodeActive ? 'code_active' : 'due'),
+      'handoverCodeExpiresAt': ownedDependent && p.handoverCodeActive
+          ? p.handoverCodeExpiresAt!.toUtc().toIso8601String()
+          : null,
+      'relationshipType': ownedDependent ? p.relationshipType : null,
+      'lgpdLegalBasis': ownedDependent ? p.lgpdLegalBasis : null,
+      'legalBasisNeedsConfirmation': ownedDependent &&
+          (p.relationshipType == 'curator' ||
+              p.relationshipType == 'supported_decision') &&
+          p.lgpdLegalBasis == 'lgpd_art_14',
+      // Owners get every area; a grantee gets the grant's categories, and
+      // writes only on CO_MANAGE grants (GET /v1/profiles, 11.1-05).
+      'readableCategories': [
+        for (final c in p.ownerUserId == userId
+            ? ShareCategory.values
+            : grant!.categories)
+          c.apiValue,
+      ],
+      'writableCategories': [
+        for (final c in p.ownerUserId == userId
+            ? ShareCategory.values
+            : grant!.level == ProfileShareLevel.coManage
+                ? grant.categories
+                : const <ShareCategory>[])
+          c.apiValue,
+      ],
     };
   }
 
@@ -241,6 +300,8 @@ class FakeProfileBackend {
         'expiresAt': g.expiresAt.toUtc().toIso8601String(),
         if (g.acceptedAt != null)
           'acceptedAt': g.acceptedAt!.toUtc().toIso8601String(),
+        'relationship': g.relationship?.apiValue,
+        'categories': [for (final c in g.categories) c.apiValue],
       };
 
   List<_FakeProfile> _visibleTo(String userId) => _profiles
@@ -303,6 +364,7 @@ class FakeProfileRepository implements ProfileRepository {
     required String gender,
     required String relationshipType,
     required bool lgpdConsent,
+    String? lgpdLegalBasisNotes,
   }) =>
       _respond(() {
         if (!lgpdConsent) {
@@ -321,6 +383,9 @@ class FakeProfileRepository implements ProfileRepository {
           type: adult ? ProfileType.dependentAdult : ProfileType.dependentMinor,
           dateOfBirth: dateOfBirth,
           gender: gender,
+          relationshipType: relationshipType,
+          lgpdLegalBasisNotes: lgpdLegalBasisNotes,
+          lgpdLegalBasis: adult ? 'lgpd_art_11_i' : 'lgpd_art_14',
         );
         _db._profiles.add(p);
         return Profile.fromJson(_db._profileJson(_uid, p));
@@ -365,6 +430,9 @@ class FakeProfileRepository implements ProfileRepository {
   Future<SharedAccessGrant> createInvite({
     required String targetProfileId,
     required ProfileShareLevel accessLevel,
+    required GrantRelationship relationship,
+    required List<ShareCategory> categories,
+    bool dependentShareConfirmed = false,
     String targetProfileName = '',
   }) =>
       _respond(() {
@@ -375,6 +443,17 @@ class FakeProfileRepository implements ProfileRepository {
               'Só o responsável pode compartilhar este perfil.',
               statusCode: 403);
         }
+        if (categories.isEmpty) {
+          throw const ProfileApiException('Escolha ao menos uma categoria.',
+              statusCode: 400);
+        }
+        final target =
+            _db._profiles.firstWhere((p) => p.id == targetProfileId);
+        if (target.type != ProfileType.primary && !dependentShareConfirmed) {
+          throw const ProfileApiException(
+              'Confirme o compartilhamento do perfil dependente.',
+              statusCode: 400);
+        }
         final g = _FakeGrant(
           id: 'grant-${_db._grants.length + 1}',
           ownerUserId: _uid,
@@ -382,6 +461,8 @@ class FakeProfileRepository implements ProfileRepository {
           level: accessLevel,
           inviteCode: _db._nextCode(),
           expiresAt: DateTime.now().add(const Duration(hours: 48)),
+          relationship: relationship,
+          categories: categories,
         );
         _db._grants.add(g);
         // Like the API: no targetProfileName in the create response.
@@ -389,6 +470,48 @@ class FakeProfileRepository implements ProfileRepository {
           ..remove('targetProfileName');
         return SharedAccessGrant.fromJson(json, GrantDirection.outgoing,
             fallbackTargetProfileName: targetProfileName);
+      });
+
+  @override
+  Future<SharedAccessGrant> updateGrant(
+    String grantId, {
+    List<ShareCategory>? categories,
+    GrantRelationship? relationship,
+    bool dependentShareConfirmed = false,
+    String targetProfileName = '',
+  }) =>
+      _respond(() {
+        final g = _db._grants.where((g) => g.id == grantId).firstOrNull;
+        if (g == null ||
+            (g.ownerUserId != _uid && g.granteeUserId != _uid)) {
+          throw const ProfileApiException('Compartilhamento não encontrado.',
+              statusCode: 404);
+        }
+        if (g.ownerUserId != _uid) {
+          throw const ProfileApiException(
+              'Só quem compartilhou pode alterar este acesso.',
+              statusCode: 403);
+        }
+        if (g.status != 'PENDING' && g.status != 'ACCEPTED') {
+          throw const ProfileApiException(
+              'Este compartilhamento não pode mais ser alterado.',
+              statusCode: 409);
+        }
+        if (categories != null && categories.isEmpty) {
+          throw const ProfileApiException('Escolha ao menos uma categoria.',
+              statusCode: 400);
+        }
+        final target =
+            _db._profiles.firstWhere((p) => p.id == g.targetProfileId);
+        if (target.type != ProfileType.primary && !dependentShareConfirmed) {
+          throw const ProfileApiException(
+              'Confirme o compartilhamento do perfil dependente.',
+              statusCode: 400);
+        }
+        if (categories != null) g.categories = categories;
+        if (relationship != null) g.relationship = relationship;
+        return SharedAccessGrant.fromJson(
+            _db._grantJson(g, outgoing: true), GrantDirection.outgoing);
       });
 
   @override
@@ -417,6 +540,70 @@ class FakeProfileRepository implements ProfileRepository {
               statusCode: 404);
         }
         g.status = 'REVOKED';
+      });
+
+  /// Fixed 10-char transfer code, like the API's invite alphabet and length.
+  static const handoverCodeValue = 'HANDOVER01';
+
+  @override
+  Future<HandoverCode> createHandoverCode(String profileId) => _respond(() {
+        final p = _db._profiles.where((p) => p.id == profileId).firstOrNull;
+        if (p == null || p.ownerUserId != _uid || !p.handoverDue) {
+          throw const ProfileApiException(
+              'A transferência ainda não está disponível para este perfil.',
+              statusCode: 409,
+              code: 'HANDOVER_NOT_DUE');
+        }
+        p
+          ..handoverCode = handoverCodeValue
+          ..handoverCodeExpiresAt =
+              DateTime.now().add(const Duration(hours: 72));
+        return (code: handoverCodeValue, expiresAt: p.handoverCodeExpiresAt!);
+      });
+
+  @override
+  Future<Profile> claimProfile(String code) => _respond(() {
+        final normalized = code.trim().toUpperCase();
+        final p = _db._profiles
+            .where((p) => p.handoverCode == normalized && p.handoverCodeActive)
+            .firstOrNull;
+        if (p == null) {
+          throw const ProfileClaimException(ProfileClaimError.invalidCode,
+              'Código inválido ou expirado.',
+              statusCode: 404, code: 'CLAIM_INVALID_CODE');
+        }
+        if (p.ownerUserId == _uid) {
+          throw const ProfileClaimException(ProfileClaimError.byGuardian,
+              'Use o código na conta da pessoa que fez 18 anos.',
+              statusCode: 403, code: 'CLAIM_BY_GUARDIAN');
+        }
+        if (!p.isAdult) {
+          throw const ProfileClaimException(ProfileClaimError.notAdult,
+              'O perfil ainda não tem 18 anos.',
+              statusCode: 409, code: 'CLAIM_NOT_ADULT');
+        }
+        // The caller's empty primary is replaced by the claimed profile.
+        _db._profiles.removeWhere(
+            (o) => o.ownerUserId == _uid && o.type == ProfileType.primary);
+        p
+          ..ownerUserId = _uid
+          ..type = ProfileType.primary
+          ..relationshipType = null
+          ..lgpdLegalBasis = null
+          ..handoverCode = null
+          ..handoverCodeExpiresAt = null;
+        return Profile.fromJson(_db._profileJson(_uid, p));
+      });
+
+  @override
+  Future<Profile> confirmLegalBasis(String profileId) => _respond(() {
+        final p = _db._profiles.where((p) => p.id == profileId).firstOrNull;
+        if (p == null || p.ownerUserId != _uid) {
+          throw const ProfileApiException('Perfil não encontrado.',
+              statusCode: 404);
+        }
+        p.lgpdLegalBasis = 'lgpd_art_11_i';
+        return Profile.fromJson(_db._profileJson(_uid, p));
       });
 
   @override

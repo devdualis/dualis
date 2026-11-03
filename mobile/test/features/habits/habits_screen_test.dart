@@ -1,3 +1,4 @@
+import 'package:dualis_mobile/core/config/feature_flags.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/auth/domain/auth_state.dart';
@@ -6,6 +7,8 @@ import 'package:dualis_mobile/features/habits/data/habits_repository.dart';
 import 'package:dualis_mobile/features/habits/domain/models/habit_day.dart';
 import 'package:dualis_mobile/features/habits/presentation/screens/habits_screen.dart';
 import 'package:dualis_mobile/features/home/domain/home_greeting.dart';
+import 'package:dualis_mobile/features/profile/domain/models/profile.dart';
+import 'package:dualis_mobile/features/profile/domain/models/share_category.dart';
 import 'package:dualis_mobile/features/profile/presentation/controllers/active_profile_controller.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 import 'package:dualis_mobile/shared/widgets/urgent_help_button.dart';
@@ -30,8 +33,12 @@ class _MemStorage extends SecureStorageService {
 }
 
 class _TestActiveProfileController extends ActiveProfileController {
+  _TestActiveProfileController([this._initial = const ActiveProfileState()]);
+
+  final ActiveProfileState _initial;
+
   @override
-  ActiveProfileState build() => const ActiveProfileState();
+  ActiveProfileState build() => _initial;
 }
 
 class _TestAuthController extends AuthController {
@@ -43,6 +50,7 @@ Widget createHabitsTestWidget({
   required HabitsRepository repository,
   required SecureStorageService storage,
   DateTime? clock,
+  ActiveProfileState? profiles,
 }) {
   final router = GoRouter(
     initialLocation: '/habits',
@@ -63,8 +71,11 @@ Widget createHabitsTestWidget({
       habitsRepositoryProvider.overrideWithValue(repository),
       secureStorageServiceProvider.overrideWithValue(storage),
       homeClockProvider.overrideWithValue(() => clock ?? DateTime(2026, 10, 31, 12, 0)),
+      if (profiles != null) premiumProfilesEnabledProvider.overrideWithValue(true),
       activeProfileControllerProvider.overrideWith(
-        () => _TestActiveProfileController(),
+        () => profiles == null
+            ? _TestActiveProfileController()
+            : _TestActiveProfileController(profiles),
       ),
       authControllerProvider.overrideWith(
         () => _TestAuthController(),
@@ -310,6 +321,161 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Não foi possível salvar. Tente de novo.'), findsOneWidget);
+    });
+  });
+  group('HabitsScreen on a shared profile', () {
+    const primary = Profile(
+      id: 'p-1',
+      name: 'Maria Silva',
+      profileType: ProfileType.primary,
+      ownership: ProfileOwnership.own,
+      accessLevel: ProfileAccessLevel.owner,
+    );
+
+    ActiveProfileState sharedWith(Profile shared) => ActiveProfileState(
+          profiles: [primary, shared],
+          activeProfileId: shared.id,
+        );
+
+    void stubRepository() {
+      when(() => repository.getHabits(
+          days: 60, profileId: any(named: 'profileId')))
+          .thenAnswer((_) async => []);
+      when(() => repository.getTrackMenstrualCycleSetting(
+          profileId: any(named: 'profileId'))).thenAnswer((_) async => false);
+      when(() => repository.syncPending(profileId: any(named: 'profileId')))
+          .thenAnswer((_) async {});
+      when(() => repository.saveHabitDay(any(),
+              profileId: any(named: 'profileId')))
+          .thenAnswer((inv) async => inv.positionalArguments.first as HabitDay);
+    }
+
+    testWidgets('habits not shared: placeholder, no habit controls',
+        (tester) async {
+      stubRepository();
+      final shared = Profile.fromJson(const {
+        'id': 'shared-1',
+        'name': 'Carlos Oliveira',
+        'profileType': 'primary',
+        'ownership': 'shared',
+        'accessLevel': 'CO_MANAGE',
+        'readableCategories': ['care'],
+        'writableCategories': ['care'],
+      });
+
+      await tester.pumpWidget(createHabitsTestWidget(
+        repository: repository,
+        storage: storage,
+        profiles: sharedWith(shared),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('category-not-shared')), findsOneWidget);
+      expect(find.text('Não compartilhado com você'), findsOneWidget);
+      expect(
+        find.text('Carlos Oliveira não compartilhou esta área com você.'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('habits_sleep_bem')), findsNothing);
+      expect(find.byKey(const Key('habits_tab_today')), findsNothing);
+      expect(find.byKey(const Key('urgent_help_button')), findsOneWidget);
+    });
+
+    testWidgets('habits shared VIEW_ONLY: content visible, saving disabled',
+        (tester) async {
+      stubRepository();
+      final shared = Profile.fromJson(const {
+        'id': 'shared-1',
+        'name': 'Carlos Oliveira',
+        'profileType': 'primary',
+        'ownership': 'shared',
+        'accessLevel': 'VIEW_ONLY',
+        'readableCategories': ['habits'],
+        'writableCategories': <String>[],
+      });
+      expect(shared.canRead(ShareCategory.habits), isTrue);
+      expect(shared.canWrite(ShareCategory.habits), isFalse);
+
+      await tester.pumpWidget(createHabitsTestWidget(
+        repository: repository,
+        storage: storage,
+        profiles: sharedWith(shared),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('category-not-shared')), findsNothing);
+      final bem = find.byKey(const Key('habits_sleep_bem'));
+      expect(bem, findsOneWidget);
+      await tester.tap(bem);
+      await tester.pumpAndSettle();
+      verifyNever(() => repository.saveHabitDay(any(),
+          profileId: any(named: 'profileId')));
+    });
+
+    testWidgets('CO_MANAGE without habits writable: saving disabled',
+        (tester) async {
+      stubRepository();
+      final shared = Profile.fromJson(const {
+        'id': 'shared-1',
+        'name': 'Carlos Oliveira',
+        'profileType': 'primary',
+        'ownership': 'shared',
+        'accessLevel': 'CO_MANAGE',
+        'readableCategories': ['habits', 'care'],
+        'writableCategories': ['care'],
+      });
+
+      await tester.pumpWidget(createHabitsTestWidget(
+        repository: repository,
+        storage: storage,
+        profiles: sharedWith(shared),
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('habits_sleep_bem')));
+      await tester.pumpAndSettle();
+      verifyNever(() => repository.saveHabitDay(any(),
+          profileId: any(named: 'profileId')));
+    });
+
+    testWidgets('own primary profile: unchanged, saving works', (tester) async {
+      stubRepository();
+
+      await tester.pumpWidget(createHabitsTestWidget(
+        repository: repository,
+        storage: storage,
+        profiles: const ActiveProfileState(
+          profiles: [primary],
+          activeProfileId: 'p-1',
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('category-not-shared')), findsNothing);
+      await tester.tap(find.byKey(const Key('habits_sleep_bem')));
+      await tester.pumpAndSettle();
+      verify(() => repository.saveHabitDay(any(),
+          profileId: any(named: 'profileId'))).called(1);
+    });
+
+    test('missing category keys: owners get every area, grantees none', () {
+      final owned = Profile.fromJson(const {
+        'id': 'd-1',
+        'profileType': 'dependent_minor',
+        'ownership': 'dependent',
+        'accessLevel': 'OWNER',
+      });
+      final shared = Profile.fromJson(const {
+        'id': 's-1',
+        'ownership': 'shared',
+        'accessLevel': 'CO_MANAGE',
+      });
+      for (final c in ShareCategory.values) {
+        expect(owned.canRead(c), isTrue);
+        expect(owned.canWrite(c), isTrue);
+        expect(shared.canRead(c), isFalse);
+        expect(shared.canWrite(c), isFalse);
+      }
     });
   });
 }
