@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:dualis_mobile/core/config/feature_flags.dart';
 import 'package:dualis_mobile/core/database/app_database.dart';
 import 'package:dualis_mobile/core/network/api_client.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
@@ -14,6 +15,9 @@ import 'package:dualis_mobile/features/journal/data/journal_local_store.dart';
 import 'package:dualis_mobile/features/journal/domain/journal_models.dart';
 import 'package:dualis_mobile/features/journal_insights/data/journal_insights_remote_data_source.dart';
 import 'package:dualis_mobile/features/journal_insights/domain/journal_insights_models.dart';
+import 'package:dualis_mobile/features/profile/domain/models/profile.dart';
+import 'package:dualis_mobile/features/profile/domain/models/share_category.dart';
+import 'package:dualis_mobile/features/profile/presentation/controllers/active_profile_controller.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 final DateTime today = DateTime(2026, 10, 27, 15);
@@ -47,6 +51,42 @@ class FakeJournalDataSource extends JournalInsightsRemoteDataSource {
   }
 }
 
+class FixedProfiles extends ActiveProfileController {
+  final ActiveProfileState initial;
+  FixedProfiles(this.initial);
+
+  @override
+  ActiveProfileState build() => initial;
+}
+
+const ownPrimary = Profile(
+  id: 'p-1',
+  name: 'Maria Silva',
+  profileType: ProfileType.primary,
+  ownership: ProfileOwnership.own,
+  accessLevel: ProfileAccessLevel.owner,
+);
+
+Profile sharedWith(
+  List<ShareCategory> categories, {
+  ProfileAccessLevel access = ProfileAccessLevel.coManage,
+}) =>
+    Profile(
+      id: 'shared-1',
+      name: 'Carlos Oliveira',
+      profileType: ProfileType.primary,
+      ownership: ProfileOwnership.shared,
+      accessLevel: access,
+      readableCategories: categories,
+      writableCategories:
+          access == ProfileAccessLevel.coManage ? categories : const [],
+    );
+
+ActiveProfileState activeShared(Profile shared) => ActiveProfileState(
+      profiles: [ownPrimary, shared],
+      activeProfileId: shared.id,
+    );
+
 class FixedHydration extends HydrationController {
   final HydrationState initial;
   FixedHydration(this.initial);
@@ -64,9 +104,11 @@ JournalEntryView entry(
   List<JournalItemView> items, {
   List<String> triggers = const [],
   bool legacy = false,
+  String? area,
 }) {
   return JournalEntryView(
     id: id,
+    area: area,
     recordedAt: today.subtract(Duration(days: daysAgo)),
     mood: 'nao_tao_bem',
     triggers: triggers,
@@ -95,6 +137,7 @@ Future<FakeJournalDataSource> pumpDashboard(
   JournalSummary? summary,
   Map<DateTime, int> water = const {},
   AppDatabase? database,
+  ActiveProfileState? profiles,
 }) async {
   tester.view.physicalSize = const Size(900, 4000);
   tester.view.devicePixelRatio = 1.0;
@@ -112,6 +155,12 @@ Future<FakeJournalDataSource> pumpDashboard(
         homeClockProvider.overrideWithValue(() => today),
         journalInsightsDataSourceProvider.overrideWithValue(dataSource),
         waterLogsForDayProvider.overrideWith((ref, day) async => const []),
+        if (profiles != null) ...[
+          premiumProfilesEnabledProvider.overrideWithValue(true),
+          activeProfileControllerProvider.overrideWith(
+            () => FixedProfiles(profiles),
+          ),
+        ],
         hydrationControllerProvider.overrideWith(
           () => FixedHydration(
             HydrationState(
@@ -591,6 +640,91 @@ void main() {
         find.byKey(const Key('journal_entry_delete_offline-entry-1')),
         findsNothing,
       );
+    });
+  });
+
+  group('HistoricalDashboardScreen on a shared profile (categories)', () {
+    final physicalEntry = entry('ph-1', 0, [head], area: 'physical');
+    final emotionalEntry = entry('em-1', 1, [mind], area: 'emotional');
+
+    testWidgets('physical-only grantee sees the partial-share hint',
+        (tester) async {
+      await pumpDashboard(
+        tester,
+        [physicalEntry],
+        profiles: activeShared(sharedWith([ShareCategory.physicalJournal])),
+      );
+      expect(find.byKey(const ValueKey('history-partial-share-hint')),
+          findsOneWidget);
+      expect(find.text('Você vê apenas o diário do corpo deste perfil.'),
+          findsOneWidget);
+    });
+
+    testWidgets('emotional-only grantee sees the emotional hint text',
+        (tester) async {
+      await pumpDashboard(
+        tester,
+        [emotionalEntry],
+        profiles: activeShared(sharedWith([ShareCategory.emotionalJournal])),
+      );
+      expect(find.text('Você vê apenas o diário emocional deste perfil.'),
+          findsOneWidget);
+    });
+
+    testWidgets('both journals readable: no hint', (tester) async {
+      await pumpDashboard(
+        tester,
+        [physicalEntry, emotionalEntry],
+        profiles: activeShared(sharedWith([
+          ShareCategory.physicalJournal,
+          ShareCategory.emotionalJournal,
+        ])),
+      );
+      expect(find.byKey(const ValueKey('history-partial-share-hint')),
+          findsNothing);
+      expect(find.byKey(const Key('journal_entry_delete_ph-1')), findsOneWidget);
+      expect(find.byKey(const Key('journal_entry_delete_em-1')), findsOneWidget);
+    });
+
+    testWidgets('owner on the own profile: no hint, delete as before',
+        (tester) async {
+      await pumpDashboard(
+        tester,
+        [physicalEntry, emotionalEntry],
+        profiles: const ActiveProfileState(
+          profiles: [ownPrimary],
+          activeProfileId: 'p-1',
+        ),
+      );
+      expect(find.byKey(const ValueKey('history-partial-share-hint')),
+          findsNothing);
+      expect(find.byKey(const Key('journal_entry_delete_ph-1')), findsOneWidget);
+      expect(find.byKey(const Key('journal_entry_delete_em-1')), findsOneWidget);
+    });
+
+    testWidgets('physical-only co-manager cannot delete an emotional entry',
+        (tester) async {
+      await pumpDashboard(
+        tester,
+        [physicalEntry, emotionalEntry],
+        profiles: activeShared(sharedWith([ShareCategory.physicalJournal])),
+      );
+      expect(find.byKey(const Key('journal_entry_delete_ph-1')), findsOneWidget);
+      expect(find.byKey(const Key('journal_entry_delete_em-1')), findsNothing);
+    });
+
+    testWidgets('view-only grantee with both journals cannot delete',
+        (tester) async {
+      await pumpDashboard(
+        tester,
+        [physicalEntry, emotionalEntry],
+        profiles: activeShared(sharedWith(
+          [ShareCategory.physicalJournal, ShareCategory.emotionalJournal],
+          access: ProfileAccessLevel.viewOnly,
+        )),
+      );
+      expect(find.byKey(const Key('journal_entry_delete_ph-1')), findsNothing);
+      expect(find.byKey(const Key('journal_entry_delete_em-1')), findsNothing);
     });
   });
 }

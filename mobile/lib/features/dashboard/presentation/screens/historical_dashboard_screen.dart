@@ -25,6 +25,7 @@ import '../../../journal_insights/presentation/widgets/record_series_chart.dart'
 import '../../../journal_insights/presentation/widgets/temporal_pie.dart';
 import '../../../journal_insights/presentation/widgets/water_charts.dart';
 import '../../../journal_insights/presentation/widgets/wellbeing_cards.dart';
+import '../../../profile/domain/models/share_category.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 
@@ -152,6 +153,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       children: [
         const ActiveProfileBanner(),
+        ..._partialShareHint(l10n),
         HistorySegmented<HistoryTab>(
           keyPrefix: 'history_tab',
           options: [
@@ -196,6 +198,44 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
           ),
       ],
     );
+  }
+
+  /// On a shared profile with only one journal branch readable, say so, so
+  /// the missing branch never reads as "nothing recorded".
+  List<Widget> _partialShareHint(AppLocalizations l10n) {
+    if (!showsDelegatedActiveProfile(ref)) return const [];
+    final physical = activeProfileCanRead(ref, ShareCategory.physicalJournal);
+    final emotional = activeProfileCanRead(ref, ShareCategory.emotionalJournal);
+    if (physical == emotional) return const [];
+    return [
+      Padding(
+        key: const ValueKey('history-partial-share-hint'),
+        padding: const EdgeInsets.only(top: 8, bottom: 4),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.lock_outline_rounded,
+              size: 16,
+              color: AppColors.textSecondaryLight,
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                physical
+                    ? l10n.historyOnlyPhysicalShared
+                    : l10n.historyOnlyEmotionalShared,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondaryLight,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 8),
+    ];
   }
 
   Set<DateTime> _periodDates(HabitsState habits) {
@@ -544,7 +584,13 @@ class _EntriesList extends ConsumerWidget {
         ),
       );
     }
-    final canDelete = !activeProfileIsViewOnly(ref);
+    // Delete also needs write access to the entry's journal branch
+    // (physical entries: physical journal; everything else: emotional).
+    final viewOnly = activeProfileIsViewOnly(ref);
+    final canDeletePhysical =
+        !viewOnly && activeProfileCanWrite(ref, ShareCategory.physicalJournal);
+    final canDeleteEmotional =
+        !viewOnly && activeProfileCanWrite(ref, ShareCategory.emotionalJournal);
     final locale = Localizations.localeOf(context).toLanguageTag();
     final dateFormat = DateFormat.yMd(locale).add_Hm();
     return Column(
@@ -590,7 +636,11 @@ class _EntriesList extends ConsumerWidget {
                     ],
                   ),
                 ),
-                if (canDelete && !entry.legacy && !entry.pendingSync)
+                if ((entry.area == JournalKeys.areaPhysical
+                        ? canDeletePhysical
+                        : canDeleteEmotional) &&
+                    !entry.legacy &&
+                    !entry.pendingSync)
                   IconButton(
                     key: Key('journal_entry_delete_${entry.id}'),
                     tooltip: l10n.xv2DashDeleteTitle,
