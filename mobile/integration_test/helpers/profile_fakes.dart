@@ -135,13 +135,16 @@ class AlreadyPromptedStore implements NotificationPermissionPromptStore {
 
 class _FakeProfile {
   final String id;
-  final String ownerUserId;
+  String ownerUserId;
   String name;
-  final ProfileType type;
+  ProfileType type;
   final DateTime? dateOfBirth;
   final String? gender;
-  final String? relationshipType;
+  String? relationshipType;
   final String? lgpdLegalBasisNotes;
+  String? lgpdLegalBasis;
+  String? handoverCode;
+  DateTime? handoverCodeExpiresAt;
 
   _FakeProfile({
     required this.id,
@@ -152,7 +155,25 @@ class _FakeProfile {
     this.gender,
     this.relationshipType,
     this.lgpdLegalBasisNotes,
+    this.lgpdLegalBasis,
   });
+
+  bool get isAdult {
+    final dob = dateOfBirth;
+    if (dob == null) return false;
+    final now = DateTime.now();
+    return !DateTime(dob.year + 18, dob.month, dob.day).isAfter(now);
+  }
+
+  /// A minor's guardianship (parent / legal guardian) whose dependent is 18+.
+  bool get handoverDue =>
+      type != ProfileType.primary &&
+      (relationshipType == 'parent' || relationshipType == 'legal_guardian') &&
+      isAdult;
+
+  bool get handoverCodeActive =>
+      handoverCode != null &&
+      (handoverCodeExpiresAt?.isAfter(DateTime.now()) ?? false);
 }
 
 class _FakeGrant {
@@ -221,6 +242,8 @@ class FakeProfileBackend {
 
   Map<String, dynamic> _profileJson(String userId, _FakeProfile p) {
     final grant = _activeGrant(userId, p.id);
+    final ownedDependent =
+        p.ownerUserId == userId && p.type != ProfileType.primary;
     return {
       'id': p.id,
       'name': p.name,
@@ -235,6 +258,18 @@ class FakeProfileBackend {
           : shareLevelToApi(grant!.level),
       if (p.dateOfBirth != null) 'dateOfBirth': formatApiDate(p.dateOfBirth!),
       'gender': p.gender,
+      'handoverStatus': !ownedDependent || !p.handoverDue
+          ? 'none'
+          : (p.handoverCodeActive ? 'code_active' : 'due'),
+      'handoverCodeExpiresAt': ownedDependent && p.handoverCodeActive
+          ? p.handoverCodeExpiresAt!.toUtc().toIso8601String()
+          : null,
+      'relationshipType': ownedDependent ? p.relationshipType : null,
+      'lgpdLegalBasis': ownedDependent ? p.lgpdLegalBasis : null,
+      'legalBasisNeedsConfirmation': ownedDependent &&
+          (p.relationshipType == 'curator' ||
+              p.relationshipType == 'supported_decision') &&
+          p.lgpdLegalBasis == 'lgpd_art_14',
     };
   }
 
@@ -334,6 +369,7 @@ class FakeProfileRepository implements ProfileRepository {
           gender: gender,
           relationshipType: relationshipType,
           lgpdLegalBasisNotes: lgpdLegalBasisNotes,
+          lgpdLegalBasis: adult ? 'lgpd_art_11_i' : 'lgpd_art_14',
         );
         _db._profiles.add(p);
         return Profile.fromJson(_db._profileJson(_uid, p));
@@ -488,6 +524,70 @@ class FakeProfileRepository implements ProfileRepository {
               statusCode: 404);
         }
         g.status = 'REVOKED';
+      });
+
+  /// Fixed 10-char transfer code, like the API's invite alphabet and length.
+  static const handoverCodeValue = 'HANDOVER01';
+
+  @override
+  Future<HandoverCode> createHandoverCode(String profileId) => _respond(() {
+        final p = _db._profiles.where((p) => p.id == profileId).firstOrNull;
+        if (p == null || p.ownerUserId != _uid || !p.handoverDue) {
+          throw const ProfileApiException(
+              'A transferência ainda não está disponível para este perfil.',
+              statusCode: 409,
+              code: 'HANDOVER_NOT_DUE');
+        }
+        p
+          ..handoverCode = handoverCodeValue
+          ..handoverCodeExpiresAt =
+              DateTime.now().add(const Duration(hours: 72));
+        return (code: handoverCodeValue, expiresAt: p.handoverCodeExpiresAt!);
+      });
+
+  @override
+  Future<Profile> claimProfile(String code) => _respond(() {
+        final normalized = code.trim().toUpperCase();
+        final p = _db._profiles
+            .where((p) => p.handoverCode == normalized && p.handoverCodeActive)
+            .firstOrNull;
+        if (p == null) {
+          throw const ProfileClaimException(ProfileClaimError.invalidCode,
+              'Código inválido ou expirado.',
+              statusCode: 404, code: 'CLAIM_INVALID_CODE');
+        }
+        if (p.ownerUserId == _uid) {
+          throw const ProfileClaimException(ProfileClaimError.byGuardian,
+              'Use o código na conta da pessoa que fez 18 anos.',
+              statusCode: 403, code: 'CLAIM_BY_GUARDIAN');
+        }
+        if (!p.isAdult) {
+          throw const ProfileClaimException(ProfileClaimError.notAdult,
+              'O perfil ainda não tem 18 anos.',
+              statusCode: 409, code: 'CLAIM_NOT_ADULT');
+        }
+        // The caller's empty primary is replaced by the claimed profile.
+        _db._profiles.removeWhere(
+            (o) => o.ownerUserId == _uid && o.type == ProfileType.primary);
+        p
+          ..ownerUserId = _uid
+          ..type = ProfileType.primary
+          ..relationshipType = null
+          ..lgpdLegalBasis = null
+          ..handoverCode = null
+          ..handoverCodeExpiresAt = null;
+        return Profile.fromJson(_db._profileJson(_uid, p));
+      });
+
+  @override
+  Future<Profile> confirmLegalBasis(String profileId) => _respond(() {
+        final p = _db._profiles.where((p) => p.id == profileId).firstOrNull;
+        if (p == null || p.ownerUserId != _uid) {
+          throw const ProfileApiException('Perfil não encontrado.',
+              statusCode: 404);
+        }
+        p.lgpdLegalBasis = 'lgpd_art_11_i';
+        return Profile.fromJson(_db._profileJson(_uid, p));
       });
 
   @override

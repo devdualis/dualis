@@ -1641,5 +1641,16 @@
   "familySharingDependentConfirm": "I am the legal guardian of this profile and I authorize sharing the selected categories with this person.",
   "familySharingEditCategories": "Edit what is shared",
   "familySharingSave": "Save",
-  "familySharingEditError": "Could not save the changes. Please try again."
+  "familySharingEditError": "Could not save the changes. Please try again.",
+  "profileClaimEntry": "I have a transfer code",
+  "profileClaimTitle": "Receive my profile",
+  "profileClaimBody": "Enter the code your guardian created in their app. Your history moves to this account.",
+  "profileClaimCodeLabel": "Transfer code",
+  "profileClaimSubmit": "Receive profile",
+  "profileClaimSuccess": "Profile received. It is yours now.",
+  "profileClaimErrorInvalid": "Invalid or expired code.",
+  "profileClaimErrorGuardian": "This code must be used in the account of the person who turned 18.",
+  "profileClaimErrorNotAdult": "The transfer is only possible from age 18.",
+  "profileClaimErrorAccountHasData": "This account already has entries. Use a new account to receive the profile.",
+  "profileClaimErrorTooMany": "Too many attempts. Try again in a few minutes."
 }

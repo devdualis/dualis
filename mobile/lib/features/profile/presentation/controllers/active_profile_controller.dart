@@ -242,6 +242,38 @@ class ActiveProfileController extends Notifier<ActiveProfileState> {
     await refresh();
   }
 
+  /// The young adult claims a profile with a transfer code. Reloads the list
+  /// (the account's empty primary is replaced by the claimed profile) and
+  /// makes the claimed profile active. Returns it.
+  /// Throws [ProfileClaimException] on failure.
+  Future<Profile> claimProfile(String code) async {
+    final session = _requireSession();
+    final claimed = await _repository.claimProfile(code.trim().toUpperCase());
+    if (!_isCurrent(session)) return claimed;
+    await refresh();
+    if (_isCurrent(session)) selectProfile(claimed.id);
+    return claimed;
+  }
+
+  /// The guardian generates (or regenerates) a transfer code for a dependent
+  /// who turned 18. Reloads so the profile shows the active code.
+  /// Throws [ProfileApiException] on failure.
+  Future<HandoverCode> createHandoverCode(String profileId) async {
+    final session = _requireSession();
+    final code = await _repository.createHandoverCode(profileId);
+    if (_isCurrent(session)) await refresh();
+    return code;
+  }
+
+  /// The guardian re-confirms an adult dependent's legal basis under LGPD
+  /// Art. 11, I, then reloads. Throws [ProfileApiException] on failure.
+  Future<void> confirmLegalBasis(String profileId) async {
+    final session = _requireSession();
+    await _repository.confirmLegalBasis(profileId);
+    if (!_isCurrent(session)) return;
+    await refresh();
+  }
+
   /// Revokes a grant (outgoing or incoming) and refreshes in the same session;
   /// if the active profile was the revoked shared one, falls back to primary.
   /// Throws [ProfileApiException] on failure.

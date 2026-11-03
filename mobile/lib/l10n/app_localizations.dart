@@ -9723,6 +9723,72 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não foi possível salvar as alterações. Tente novamente.'**
   String get familySharingEditError;
+
+  /// No description provided for @profileClaimEntry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tenho um código de transferência'**
+  String get profileClaimEntry;
+
+  /// No description provided for @profileClaimTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receber meu perfil'**
+  String get profileClaimTitle;
+
+  /// No description provided for @profileClaimBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o código que a pessoa responsável gerou no app dela. Seu histórico passa para esta conta.'**
+  String get profileClaimBody;
+
+  /// No description provided for @profileClaimCodeLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código de transferência'**
+  String get profileClaimCodeLabel;
+
+  /// No description provided for @profileClaimSubmit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receber perfil'**
+  String get profileClaimSubmit;
+
+  /// No description provided for @profileClaimSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Perfil recebido. Agora ele é seu.'**
+  String get profileClaimSuccess;
+
+  /// No description provided for @profileClaimErrorInvalid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Código inválido ou expirado.'**
+  String get profileClaimErrorInvalid;
+
+  /// No description provided for @profileClaimErrorGuardian.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este código deve ser usado na conta da pessoa que fez 18 anos.'**
+  String get profileClaimErrorGuardian;
+
+  /// No description provided for @profileClaimErrorNotAdult.
+  ///
+  /// In pt, this message translates to:
+  /// **'A transferência só é possível a partir dos 18 anos.'**
+  String get profileClaimErrorNotAdult;
+
+  /// No description provided for @profileClaimErrorAccountHasData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta conta já tem registros. Use uma conta nova para receber o perfil.'**
+  String get profileClaimErrorAccountHasData;
+
+  /// No description provided for @profileClaimErrorTooMany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Muitas tentativas. Tente de novo em alguns minutos.'**
+  String get profileClaimErrorTooMany;
 }
 
 class _AppLocalizationsDelegate

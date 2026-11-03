@@ -382,4 +382,78 @@ void main() {
     expect(current().outgoingGrants.single.isActive, isFalse);
     expect(current().profiles, hasLength(2));
   });
+
+  group('hand-over at 18', () {
+    const claimed = Profile(
+      id: 'claimed',
+      name: 'Ana',
+      profileType: ProfileType.primary,
+      ownership: ProfileOwnership.own,
+      accessLevel: ProfileAccessLevel.owner,
+    );
+
+    test('claimProfile makes the claimed profile active and own', () async {
+      serve([primary]);
+      await start(signedIn('young'));
+      when(() => repo.claimProfile('HANDOVER01'))
+          .thenAnswer((_) async => claimed);
+      // The API replaces the empty primary with the claimed profile.
+      serve([claimed]);
+
+      final result = await notifier().claimProfile(' handover01 ');
+
+      expect(result.id, 'claimed');
+      expect(current().activeProfileId, 'claimed');
+      expect(current().activeProfile?.ownership, ProfileOwnership.own);
+      expect(current().activeProfile?.isPrimary, isTrue);
+      expect(current().profiles.map((p) => p.id), ['claimed']);
+      verify(() => repo.saveActiveProfileId('young', 'claimed')).called(1);
+    });
+
+    test('claimProfile errors are rethrown with the claim reason', () async {
+      serve([primary]);
+      await start(signedIn('young'));
+      when(() => repo.claimProfile(any())).thenThrow(
+        const ProfileClaimException(
+          ProfileClaimError.accountHasData,
+          'Esta conta já tem registros.',
+          statusCode: 409,
+          code: 'CLAIM_ACCOUNT_HAS_DATA',
+        ),
+      );
+
+      await expectLater(
+        notifier().claimProfile('HANDOVER01'),
+        throwsA(isA<ProfileClaimException>().having(
+            (e) => e.reason, 'reason', ProfileClaimError.accountHasData)),
+      );
+      expect(current().activeProfile?.id, 'primary');
+    });
+
+    test('createHandoverCode returns the code and reloads the list', () async {
+      serve([primary, child]);
+      await start(signedIn('u1'));
+      final expires = DateTime(2026, 11, 5, 10);
+      when(() => repo.createHandoverCode('child'))
+          .thenAnswer((_) async => (code: 'HANDOVER01', expiresAt: expires));
+
+      final code = await notifier().createHandoverCode('child');
+
+      expect(code.code, 'HANDOVER01');
+      expect(code.expiresAt, expires);
+      verify(() => repo.fetchProfiles()).called(2);
+    });
+
+    test('confirmLegalBasis calls the API and reloads', () async {
+      serve([primary, child]);
+      await start(signedIn('u1'));
+      when(() => repo.confirmLegalBasis('child'))
+          .thenAnswer((_) async => child);
+
+      await notifier().confirmLegalBasis('child');
+
+      verify(() => repo.confirmLegalBasis('child')).called(1);
+      verify(() => repo.fetchProfiles()).called(2);
+    });
+  });
 }

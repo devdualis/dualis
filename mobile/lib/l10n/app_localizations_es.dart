@@ -5777,4 +5777,42 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get familySharingEditError =>
       'No se pudieron guardar los cambios. Inténtalo de nuevo.';
+
+  @override
+  String get profileClaimEntry => 'Tengo un código de transferencia';
+
+  @override
+  String get profileClaimTitle => 'Recibir mi perfil';
+
+  @override
+  String get profileClaimBody =>
+      'Escribe el código que la persona responsable generó en su app. Tu historial pasa a esta cuenta.';
+
+  @override
+  String get profileClaimCodeLabel => 'Código de transferencia';
+
+  @override
+  String get profileClaimSubmit => 'Recibir perfil';
+
+  @override
+  String get profileClaimSuccess => 'Perfil recibido. Ahora es tuyo.';
+
+  @override
+  String get profileClaimErrorInvalid => 'Código inválido o vencido.';
+
+  @override
+  String get profileClaimErrorGuardian =>
+      'Este código debe usarse en la cuenta de la persona que cumplió 18 años.';
+
+  @override
+  String get profileClaimErrorNotAdult =>
+      'La transferencia solo es posible a partir de los 18 años.';
+
+  @override
+  String get profileClaimErrorAccountHasData =>
+      'Esta cuenta ya tiene registros. Usa una cuenta nueva para recibir el perfil.';
+
+  @override
+  String get profileClaimErrorTooMany =>
+      'Demasiados intentos. Inténtalo de nuevo en unos minutos.';
 }

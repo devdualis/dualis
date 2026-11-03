@@ -3363,5 +3363,16 @@
   "familySharingDependentConfirm": "Sou responsável legal por este perfil e autorizo compartilhar as categorias marcadas com essa pessoa.",
   "familySharingEditCategories": "Editar o que é compartilhado",
   "familySharingSave": "Salvar",
-  "familySharingEditError": "Não foi possível salvar as alterações. Tente novamente."
+  "familySharingEditError": "Não foi possível salvar as alterações. Tente novamente.",
+  "profileClaimEntry": "Tenho um código de transferência",
+  "profileClaimTitle": "Receber meu perfil",
+  "profileClaimBody": "Digite o código que a pessoa responsável gerou no app dela. Seu histórico passa para esta conta.",
+  "profileClaimCodeLabel": "Código de transferência",
+  "profileClaimSubmit": "Receber perfil",
+  "profileClaimSuccess": "Perfil recebido. Agora ele é seu.",
+  "profileClaimErrorInvalid": "Código inválido ou expirado.",
+  "profileClaimErrorGuardian": "Este código deve ser usado na conta da pessoa que fez 18 anos.",
+  "profileClaimErrorNotAdult": "A transferência só é possível a partir dos 18 anos.",
+  "profileClaimErrorAccountHasData": "Esta conta já tem registros. Use uma conta nova para receber o perfil.",
+  "profileClaimErrorTooMany": "Muitas tentativas. Tente de novo em alguns minutos."
 }
