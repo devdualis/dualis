@@ -1635,5 +1635,11 @@
   "familySharingCategoryEmotionalJournal": "Emotional journal",
   "familySharingCategoryConditions": "Conditions and measurements",
   "familySharingCategoryCare": "Care (medications, appointments, tests)",
-  "familySharingCategoriesRequired": "Choose at least one category."
+  "familySharingCategoriesRequired": "Choose at least one category.",
+  "familySharingEmotionalExplanation": "The emotional journal holds what you feel and write. Tick it only if you fully trust this person.",
+  "familySharingSafetyNeverShared": "Help requests are never shared.",
+  "familySharingDependentConfirm": "I am the legal guardian of this profile and I authorize sharing the selected categories with this person.",
+  "familySharingEditCategories": "Edit what is shared",
+  "familySharingSave": "Save",
+  "familySharingEditError": "Could not save the changes. Please try again."
 }

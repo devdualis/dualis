@@ -7,4 +7,5 @@ class ProfileEndpoints {
   static const String accept = '/v1/family-sharing/accept';
   static String revoke(String grantId) => '/v1/family-sharing/revoke/$grantId';
   static const String grants = '/v1/family-sharing/grants';
+  static String grant(String grantId) => '/v1/family-sharing/grants/$grantId';
 }

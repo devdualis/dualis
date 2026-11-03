@@ -395,6 +395,13 @@ class FakeProfileRepository implements ProfileRepository {
           throw const ProfileApiException('Escolha ao menos uma categoria.',
               statusCode: 400);
         }
+        final target =
+            _db._profiles.firstWhere((p) => p.id == targetProfileId);
+        if (target.type != ProfileType.primary && !dependentShareConfirmed) {
+          throw const ProfileApiException(
+              'Confirme o compartilhamento do perfil dependente.',
+              statusCode: 400);
+        }
         final g = _FakeGrant(
           id: 'grant-${_db._grants.length + 1}',
           ownerUserId: _uid,
@@ -411,6 +418,48 @@ class FakeProfileRepository implements ProfileRepository {
           ..remove('targetProfileName');
         return SharedAccessGrant.fromJson(json, GrantDirection.outgoing,
             fallbackTargetProfileName: targetProfileName);
+      });
+
+  @override
+  Future<SharedAccessGrant> updateGrant(
+    String grantId, {
+    List<ShareCategory>? categories,
+    GrantRelationship? relationship,
+    bool dependentShareConfirmed = false,
+    String targetProfileName = '',
+  }) =>
+      _respond(() {
+        final g = _db._grants.where((g) => g.id == grantId).firstOrNull;
+        if (g == null ||
+            (g.ownerUserId != _uid && g.granteeUserId != _uid)) {
+          throw const ProfileApiException('Compartilhamento não encontrado.',
+              statusCode: 404);
+        }
+        if (g.ownerUserId != _uid) {
+          throw const ProfileApiException(
+              'Só quem compartilhou pode alterar este acesso.',
+              statusCode: 403);
+        }
+        if (g.status != 'PENDING' && g.status != 'ACCEPTED') {
+          throw const ProfileApiException(
+              'Este compartilhamento não pode mais ser alterado.',
+              statusCode: 409);
+        }
+        if (categories != null && categories.isEmpty) {
+          throw const ProfileApiException('Escolha ao menos uma categoria.',
+              statusCode: 400);
+        }
+        final target =
+            _db._profiles.firstWhere((p) => p.id == g.targetProfileId);
+        if (target.type != ProfileType.primary && !dependentShareConfirmed) {
+          throw const ProfileApiException(
+              'Confirme o compartilhamento do perfil dependente.',
+              statusCode: 400);
+        }
+        if (categories != null) g.categories = categories;
+        if (relationship != null) g.relationship = relationship;
+        return SharedAccessGrant.fromJson(
+            _db._grantJson(g, outgoing: true), GrantDirection.outgoing);
       });
 
   @override

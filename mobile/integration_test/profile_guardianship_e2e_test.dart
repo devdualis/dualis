@@ -187,6 +187,8 @@ void main() {
     await _tap(tester, _key('family-share-scope-viewOnly'));
     await _tap(tester, _key('family-share-relationship'));
     await _tap(tester, _key('family-share-relationship-caregiver').last);
+    // The invite is for the dependent: the guardian confirms (gap 9).
+    await _tap(tester, _key('family-share-dependent-confirm'));
     await _tap(tester, _key('family-share-invite-generate'));
     await _waitFor(tester, _key('family-share-invite-code'));
     final code =

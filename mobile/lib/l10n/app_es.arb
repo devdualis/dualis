@@ -1635,5 +1635,11 @@
   "familySharingCategoryEmotionalJournal": "Diario emocional",
   "familySharingCategoryConditions": "Condiciones y mediciones",
   "familySharingCategoryCare": "Cuidados (medicamentos, consultas, exámenes)",
-  "familySharingCategoriesRequired": "Elige al menos una categoría."
+  "familySharingCategoriesRequired": "Elige al menos una categoría.",
+  "familySharingEmotionalExplanation": "El diario emocional guarda lo que sientes y escribes. Márcalo solo si confías plenamente en esta persona.",
+  "familySharingSafetyNeverShared": "Las solicitudes de ayuda nunca se comparten.",
+  "familySharingDependentConfirm": "Soy responsable legal de este perfil y autorizo compartir las categorías marcadas con esta persona.",
+  "familySharingEditCategories": "Editar lo que se comparte",
+  "familySharingSave": "Guardar",
+  "familySharingEditError": "No se pudieron guardar los cambios. Inténtalo de nuevo."
 }

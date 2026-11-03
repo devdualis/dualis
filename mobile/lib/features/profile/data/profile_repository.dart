@@ -168,6 +168,33 @@ class ProfileRepository {
     );
   }
 
+  /// Owner edits what an outgoing grant shares (PATCH). Dependent targets
+  /// need [dependentShareConfirmed]. 409 GRANT_SCOPE_LOCKED once the grant
+  /// is revoked or expired.
+  Future<SharedAccessGrant> updateGrant(
+    String grantId, {
+    List<ShareCategory>? categories,
+    GrantRelationship? relationship,
+    bool dependentShareConfirmed = false,
+    String targetProfileName = '',
+  }) async {
+    final data = await _send((options) => _apiClient.patch<dynamic>(
+          ProfileEndpoints.grant(grantId),
+          data: {
+            if (categories != null)
+              'categories': [for (final c in categories) c.apiValue],
+            if (relationship != null) 'relationship': relationship.apiValue,
+            'dependentShareConfirmed': dependentShareConfirmed,
+          },
+          options: options,
+        ));
+    return SharedAccessGrant.fromJson(
+      _asMap(data),
+      GrantDirection.outgoing,
+      fallbackTargetProfileName: targetProfileName,
+    );
+  }
+
   Future<void> acceptInvite(String inviteCode) async {
     await _send((options) => _apiClient.post<dynamic>(
           ProfileEndpoints.accept,

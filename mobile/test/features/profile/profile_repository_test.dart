@@ -284,6 +284,56 @@ void main() {
     expect(adapter.requests[2].method, 'POST');
   });
 
+  test('updateGrant sends a PATCH with the new category set', () async {
+    adapter.enqueue(200, {
+      'id': 'g1',
+      'targetProfileId': 'p1',
+      'targetProfileName': 'Ana',
+      'accessLevel': 'VIEW_ONLY',
+      'status': 'ACCEPTED',
+      'expiresAt': '2026-10-16T12:00:00.000Z',
+      'relationship': 'caregiver',
+      'categories': ['habits', 'care', 'unknown_future_value'],
+    });
+
+    final grant = await repository.updateGrant(
+      'g1',
+      categories: [ShareCategory.habits, ShareCategory.care],
+      dependentShareConfirmed: true,
+    );
+
+    expect(adapter.requests.single.path, '/v1/family-sharing/grants/g1');
+    expect(adapter.requests.single.method, 'PATCH');
+    expect(adapter.bodies.single, {
+      'categories': ['habits', 'care'],
+      'dependentShareConfirmed': true,
+    });
+    expect(grant.relationship, GrantRelationship.caregiver);
+    expect(grant.categories, [ShareCategory.habits, ShareCategory.care]);
+  });
+
+  test('legacy grant without relationship parses as null', () async {
+    adapter.enqueue(200, {
+      'outgoing': [
+        {
+          'id': 'g-old',
+          'targetProfileId': 'p1',
+          'accessLevel': 'VIEW_ONLY',
+          'status': 'ACCEPTED',
+          'expiresAt': '2026-10-16T12:00:00.000Z',
+          'relationship': null,
+          'categories': ['habits', 'physical_journal'],
+        },
+      ],
+      'incoming': [],
+    });
+
+    final out = (await repository.fetchGrants()).outgoing.single;
+    expect(out.relationship, isNull);
+    expect(out.categories,
+        [ShareCategory.habits, ShareCategory.physicalJournal]);
+  });
+
   test('surfaces the backend message of a 403 as ProfileApiException',
       () async {
     adapter.enqueue(403, {

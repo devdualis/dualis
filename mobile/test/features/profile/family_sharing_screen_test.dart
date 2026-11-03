@@ -36,13 +36,14 @@ SharedAccessGrant _grant(
   String? code,
   String? granteeName,
   String? granteeEmail,
+  String? targetProfileId,
   GrantRelationship? relationship,
   List<ShareCategory> categories = const [],
 }) =>
     SharedAccessGrant(
       id: id,
       direction: direction,
-      targetProfileId: 'target-$id',
+      targetProfileId: targetProfileId ?? 'target-$id',
       targetProfileName: name,
       accessLevel: ProfileShareLevel.viewOnly,
       status: status,
@@ -70,6 +71,9 @@ class _FakeController extends ActiveProfileController {
     bool dependentShareConfirmed,
   })? lastInvite;
   Object? acceptError;
+  Object? updateError;
+  ({String grantId, List<ShareCategory>? categories, bool dependentShareConfirmed})?
+      lastUpdate;
 
   @override
   ActiveProfileState build() => _initial;
@@ -106,6 +110,38 @@ class _FakeController extends ActiveProfileController {
     );
     state = state.copyWith(outgoingGrants: [...state.outgoingGrants, invite]);
     return invite;
+  }
+
+  @override
+  Future<SharedAccessGrant> updateGrant(
+    String grantId, {
+    List<ShareCategory>? categories,
+    GrantRelationship? relationship,
+    bool dependentShareConfirmed = false,
+  }) async {
+    lastUpdate = (
+      grantId: grantId,
+      categories: categories,
+      dependentShareConfirmed: dependentShareConfirmed,
+    );
+    if (updateError != null) throw updateError!;
+    final old = state.outgoingGrants.firstWhere((g) => g.id == grantId);
+    final updated = SharedAccessGrant(
+      id: old.id,
+      direction: old.direction,
+      targetProfileId: old.targetProfileId,
+      targetProfileName: old.targetProfileName,
+      accessLevel: old.accessLevel,
+      status: old.status,
+      expiresAt: old.expiresAt,
+      acceptedAt: old.acceptedAt,
+      relationship: relationship ?? old.relationship,
+      categories: categories ?? old.categories,
+    );
+    state = state.copyWith(outgoingGrants: [
+      for (final g in state.outgoingGrants) g.id == grantId ? updated : g,
+    ]);
+    return updated;
   }
 
   @override
@@ -246,6 +282,12 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('family-share-scope-coManage')));
     await tester.pumpAndSettle();
     await _pickRelationship(tester, 'friend');
+    final confirm =
+        find.byKey(const ValueKey('family-share-dependent-confirm'));
+    await tester.ensureVisible(confirm);
+    await tester.pumpAndSettle();
+    await tester.tap(confirm);
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('family-share-invite-generate')));
     await tester.pumpAndSettle();
 
@@ -348,6 +390,156 @@ void main() {
     expect(find.text('Pai ou mãe'), findsOneWidget);
     expect(find.byKey(const ValueKey('grant-category-g3-physical_journal')),
         findsOneWidget);
+  });
+
+  testWidgets('emotional journal is unchecked and explained; help never shared',
+      (tester) async {
+    final controller = _FakeController(_state());
+    await tester.pumpWidget(_app(controller));
+    await tester.pumpAndSettle();
+    await _openInviteDialog(tester);
+
+    final emotional = tester.widget<CheckboxListTile>(find
+        .byKey(const ValueKey('family-share-category-emotional_journal')));
+    expect(emotional.value, isFalse);
+    expect(find.byKey(const ValueKey('family-share-emotional-explanation')),
+        findsOneWidget);
+    expect(
+        find.text('O diário emocional guarda o que você sente e escreve. '
+            'Marque só se confia plenamente nessa pessoa.'),
+        findsOneWidget);
+    expect(find.text('Pedidos de ajuda nunca são compartilhados.'),
+        findsOneWidget);
+    // Primary profile: no guardian confirmation.
+    expect(find.byKey(const ValueKey('family-share-dependent-confirm')),
+        findsNothing);
+  });
+
+  testWidgets('dependent target blocks Generate until the guardian confirms',
+      (tester) async {
+    final controller = _FakeController(_state());
+    await tester.pumpWidget(_app(controller));
+    await tester.pumpAndSettle();
+    await _openInviteDialog(tester);
+
+    await tester.tap(find.byKey(const ValueKey('family-share-invite-profile')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lucas').last);
+    await tester.pumpAndSettle();
+    await _pickRelationship(tester, 'caregiver');
+
+    final confirm =
+        find.byKey(const ValueKey('family-share-dependent-confirm'));
+    expect(confirm, findsOneWidget);
+    expect(_generateButton(tester).onPressed, isNull);
+
+    await tester.ensureVisible(confirm);
+    await tester.pumpAndSettle();
+    await tester.tap(confirm);
+    await tester.pumpAndSettle();
+    expect(_generateButton(tester).onPressed, isNotNull);
+
+    await tester.tap(find.byKey(const ValueKey('family-share-invite-generate')));
+    await tester.pumpAndSettle();
+    expect(controller.lastInvite?.targetProfileId, 'p-kid');
+    expect(controller.lastInvite?.dependentShareConfirmed, isTrue);
+  });
+
+  testWidgets('owner edits categories of an active grant (PATCH)',
+      (tester) async {
+    final controller = _FakeController(_state(outgoing: [
+      _grant('g1', GrantDirection.outgoing, 'Ricardo',
+          targetProfileId: 'p-me',
+          relationship: GrantRelationship.sibling,
+          categories: [ShareCategory.habits]),
+    ]));
+    await tester.pumpWidget(_app(controller));
+    await tester.pumpAndSettle();
+
+    await tester
+        .tap(find.byKey(const ValueKey('grant-edit-categories-g1')));
+    await tester.pumpAndSettle();
+    expect(find.text('Editar o que é compartilhado'), findsWidgets);
+    expect(
+        tester
+            .widget<CheckboxListTile>(
+                find.byKey(const ValueKey('family-share-category-habits')))
+            .value,
+        isTrue);
+
+    final care = find.byKey(const ValueKey('family-share-category-care'));
+    await tester.ensureVisible(care);
+    await tester.pumpAndSettle();
+    await tester.tap(care);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('family-share-edit-save')));
+    await tester.pumpAndSettle();
+
+    expect(controller.lastUpdate?.grantId, 'g1');
+    expect(controller.lastUpdate?.categories,
+        [ShareCategory.habits, ShareCategory.care]);
+    expect(controller.lastUpdate?.dependentShareConfirmed, isFalse);
+    expect(find.byKey(const ValueKey('grant-category-g1-care')), findsOneWidget);
+  });
+
+  testWidgets('editing a dependent grant needs the confirmation; 409 shown',
+      (tester) async {
+    final controller = _FakeController(_state(outgoing: [
+      _grant('g1', GrantDirection.outgoing, 'Lucas',
+          targetProfileId: 'p-kid', categories: [ShareCategory.habits]),
+    ]))
+      ..updateError = const ProfileApiException(
+          'Este compartilhamento não pode mais ser alterado.',
+          statusCode: 409);
+    await tester.pumpWidget(_app(controller));
+    await tester.pumpAndSettle();
+
+    await tester
+        .tap(find.byKey(const ValueKey('grant-edit-categories-g1')));
+    await tester.pumpAndSettle();
+    final save = find.byKey(const ValueKey('family-share-edit-save'));
+    expect(tester.widget<FilledButton>(save).onPressed, isNull);
+
+    final confirm =
+        find.byKey(const ValueKey('family-share-dependent-confirm'));
+    await tester.ensureVisible(confirm);
+    await tester.pumpAndSettle();
+    await tester.tap(confirm);
+    await tester.pumpAndSettle();
+    await tester.tap(save);
+    await tester.pumpAndSettle();
+
+    expect(controller.lastUpdate?.dependentShareConfirmed, isTrue);
+    expect(find.text('Este compartilhamento não pode mais ser alterado.'),
+        findsOneWidget);
+  });
+
+  testWidgets('incoming grants and expired invites have no edit action',
+      (tester) async {
+    final controller = _FakeController(_state(
+      outgoing: [
+        _grant('g2', GrantDirection.outgoing, 'Pedro',
+            status: GrantStatus.pending,
+            code: 'ZZ99YY',
+            expiresAt: DateTime.now().subtract(const Duration(hours: 1))),
+        _grant('g4', GrantDirection.outgoing, 'Ana',
+            status: GrantStatus.pending, code: 'AA11BB22CC'),
+      ],
+      incoming: [
+        _grant('g3', GrantDirection.incoming, 'Marta',
+            categories: [ShareCategory.habits]),
+      ],
+    ));
+    await tester.pumpWidget(_app(controller));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('grant-edit-categories-g2')), findsNothing);
+    expect(find.byKey(const ValueKey('grant-edit-categories-g4')),
+        findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('family-share-tab-incoming')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('grant-edit-categories-g3')), findsNothing);
   });
 
   testWidgets('accept sheet uppercases the code and calls acceptInvite',

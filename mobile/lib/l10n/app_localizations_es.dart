@@ -5755,4 +5755,26 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get familySharingCategoriesRequired => 'Elige al menos una categoría.';
+
+  @override
+  String get familySharingEmotionalExplanation =>
+      'El diario emocional guarda lo que sientes y escribes. Márcalo solo si confías plenamente en esta persona.';
+
+  @override
+  String get familySharingSafetyNeverShared =>
+      'Las solicitudes de ayuda nunca se comparten.';
+
+  @override
+  String get familySharingDependentConfirm =>
+      'Soy responsable legal de este perfil y autorizo compartir las categorías marcadas con esta persona.';
+
+  @override
+  String get familySharingEditCategories => 'Editar lo que se comparte';
+
+  @override
+  String get familySharingSave => 'Guardar';
+
+  @override
+  String get familySharingEditError =>
+      'No se pudieron guardar los cambios. Inténtalo de nuevo.';
 }

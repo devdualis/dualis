@@ -36,6 +36,18 @@ String shareCategoryLabel(AppLocalizations l10n, ShareCategory c) =>
       ShareCategory.care => l10n.familySharingCategoryCare,
     };
 
+/// Guardian confirmation required to share a dependent's data (gap 9).
+Widget _dependentConfirmTile(
+        AppLocalizations l10n, bool value, ValueChanged<bool> onChanged) =>
+    CheckboxListTile(
+      key: const ValueKey('family-share-dependent-confirm'),
+      contentPadding: EdgeInsets.zero,
+      controlAffinity: ListTileControlAffinity.leading,
+      value: value,
+      title: Text(l10n.familySharingDependentConfirm),
+      onChanged: (v) => onChanged(v == true),
+    );
+
 /// One checkbox per category (D2), keyed `family-share-category-<apiValue>`.
 class FamilySharingCategoryChecklist extends StatelessWidget {
   final Set<ShareCategory> selected;
@@ -56,7 +68,7 @@ class FamilySharingCategoryChecklist extends StatelessWidget {
       children: [
         Text(l10n.familySharingCategoriesLabel,
             style: Theme.of(context).textTheme.labelLarge),
-        for (final c in ShareCategory.values)
+        for (final c in ShareCategory.values) ...[
           CheckboxListTile(
             key: ValueKey('family-share-category-${c.apiValue}'),
             contentPadding: EdgeInsets.zero,
@@ -68,9 +80,26 @@ class FamilySharingCategoryChecklist extends StatelessWidget {
                 ? {...selected, c}
                 : selected.where((x) => x != c).toSet()),
           ),
+          // Opt-in only, explained (D2).
+          if (c == ShareCategory.emotionalJournal)
+            Padding(
+              padding: const EdgeInsets.only(left: 48, bottom: 4),
+              child: Text(
+                l10n.familySharingEmotionalExplanation,
+                key: const ValueKey('family-share-emotional-explanation'),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+        ],
         if (selected.isEmpty)
           Text(l10n.familySharingCategoriesRequired,
               style: const TextStyle(color: AppColors.emergencyCrimson)),
+        const SizedBox(height: 8),
+        Text(
+          l10n.familySharingSafetyNeverShared,
+          key: const ValueKey('family-share-safety-never-shared'),
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
       ],
     );
   }
@@ -91,6 +120,7 @@ class _FamilySharingInviteDialogState
   ProfileShareLevel _level = ProfileShareLevel.viewOnly;
   GrantRelationship? _relationship;
   Set<ShareCategory> _categories = {...ShareCategory.defaults};
+  bool _dependentConfirmed = false;
   bool _submitting = false;
   bool _failed = false;
   SharedAccessGrant? _invite;
@@ -106,11 +136,18 @@ class _FamilySharingInviteDialogState
         : (own.isEmpty ? null : own.first.id);
   }
 
+  /// Any owned profile other than the primary one is a dependent.
+  bool get _isDependentTarget => ref
+      .read(activeProfileControllerProvider)
+      .ownProfiles
+      .any((p) => p.id == _profileId && !p.isPrimary);
+
   bool get _canGenerate =>
       !_submitting &&
       _profileId != null &&
       _relationship != null &&
-      _categories.isNotEmpty;
+      _categories.isNotEmpty &&
+      (!_isDependentTarget || _dependentConfirmed);
 
   Future<void> _generate() async {
     final profileId = _profileId;
@@ -134,6 +171,7 @@ class _FamilySharingInviteDialogState
               for (final c in ShareCategory.values)
                 if (_categories.contains(c)) c,
             ],
+            dependentShareConfirmed: _isDependentTarget && _dependentConfirmed,
           );
       if (mounted) setState(() => _invite = invite);
     } catch (_) {
@@ -190,7 +228,11 @@ class _FamilySharingInviteDialogState
             for (final p in own)
               DropdownMenuItem(value: p.id, child: Text(p.name)),
           ],
-          onChanged: (id) => setState(() => _profileId = id),
+          // A new target needs a fresh confirmation.
+          onChanged: (id) => setState(() {
+            _profileId = id;
+            _dependentConfirmed = false;
+          }),
         ),
         const SizedBox(height: 16),
         Text(l10n.familySharingInviteScopeLabel,
@@ -222,6 +264,9 @@ class _FamilySharingInviteDialogState
           selected: _categories,
           onChanged: (next) => setState(() => _categories = next),
         ),
+        if (_isDependentTarget)
+          _dependentConfirmTile(l10n, _dependentConfirmed,
+              (v) => setState(() => _dependentConfirmed = v)),
         if (_failed)
           Padding(
             padding: const EdgeInsets.only(top: 8),
@@ -285,6 +330,85 @@ class _FamilySharingInviteDialogState
             messenger.showSnackBar(
                 SnackBar(content: Text(l10n.familySharingCodeCopied)));
           },
+        ),
+      ],
+    );
+  }
+}
+
+/// Result of [FamilySharingEditCategoriesDialog].
+typedef FamilySharingCategoryEdit = ({
+  List<ShareCategory> categories,
+  bool dependentShareConfirmed,
+});
+
+/// Owner changes which categories an outgoing grant shares. Pops a
+/// [FamilySharingCategoryEdit]; the caller sends the PATCH.
+class FamilySharingEditCategoriesDialog extends StatefulWidget {
+  final SharedAccessGrant grant;
+  final bool isDependentTarget;
+
+  const FamilySharingEditCategoriesDialog({
+    super.key,
+    required this.grant,
+    required this.isDependentTarget,
+  });
+
+  @override
+  State<FamilySharingEditCategoriesDialog> createState() =>
+      _FamilySharingEditCategoriesDialogState();
+}
+
+class _FamilySharingEditCategoriesDialogState
+    extends State<FamilySharingEditCategoriesDialog> {
+  late Set<ShareCategory> _categories = {...widget.grant.categories};
+  bool _dependentConfirmed = false;
+
+  bool get _canSave =>
+      _categories.isNotEmpty &&
+      (!widget.isDependentTarget || _dependentConfirmed);
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.familySharingEditCategories),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(widget.grant.targetProfileName,
+                style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 8),
+            FamilySharingCategoryChecklist(
+              selected: _categories,
+              onChanged: (next) => setState(() => _categories = next),
+            ),
+            if (widget.isDependentTarget)
+              _dependentConfirmTile(l10n, _dependentConfirmed,
+                  (v) => setState(() => _dependentConfirmed = v)),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.familySharingCancel),
+        ),
+        FilledButton(
+          key: const ValueKey('family-share-edit-save'),
+          onPressed: _canSave
+              ? () => Navigator.of(context).pop<FamilySharingCategoryEdit>((
+                    categories: [
+                      for (final c in ShareCategory.values)
+                        if (_categories.contains(c)) c,
+                    ],
+                    dependentShareConfirmed:
+                        widget.isDependentTarget && _dependentConfirmed,
+                  ))
+              : null,
+          child: Text(l10n.familySharingSave),
         ),
       ],
     );

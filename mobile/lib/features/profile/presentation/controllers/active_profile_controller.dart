@@ -207,6 +207,32 @@ class ActiveProfileController extends Notifier<ActiveProfileState> {
     return grant;
   }
 
+  /// Changes what an outgoing grant shares, then reloads the lists.
+  /// Throws [ProfileApiException] (e.g. 409 GRANT_SCOPE_LOCKED) on failure.
+  Future<SharedAccessGrant> updateGrant(
+    String grantId, {
+    List<ShareCategory>? categories,
+    GrantRelationship? relationship,
+    bool dependentShareConfirmed = false,
+  }) async {
+    final session = _requireSession();
+    final previous =
+        state.outgoingGrants.where((g) => g.id == grantId).firstOrNull;
+    final updated = await _repository.updateGrant(
+      grantId,
+      categories: categories,
+      relationship: relationship,
+      dependentShareConfirmed: dependentShareConfirmed,
+      targetProfileName: previous?.targetProfileName ?? '',
+    );
+    if (!_isCurrent(session)) return updated;
+    state = state.copyWith(outgoingGrants: [
+      for (final g in state.outgoingGrants) g.id == grantId ? updated : g,
+    ]);
+    await refresh();
+    return updated;
+  }
+
   /// Accepts an invite code and refreshes, so the shared profile appears.
   /// Throws [ProfileApiException] (e.g. invalid/expired code) on failure.
   Future<void> acceptInvite(String inviteCode) async {

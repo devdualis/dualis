@@ -9687,6 +9687,42 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Escolha ao menos uma categoria.'**
   String get familySharingCategoriesRequired;
+
+  /// No description provided for @familySharingEmotionalExplanation.
+  ///
+  /// In pt, this message translates to:
+  /// **'O diário emocional guarda o que você sente e escreve. Marque só se confia plenamente nessa pessoa.'**
+  String get familySharingEmotionalExplanation;
+
+  /// No description provided for @familySharingSafetyNeverShared.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pedidos de ajuda nunca são compartilhados.'**
+  String get familySharingSafetyNeverShared;
+
+  /// No description provided for @familySharingDependentConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sou responsável legal por este perfil e autorizo compartilhar as categorias marcadas com essa pessoa.'**
+  String get familySharingDependentConfirm;
+
+  /// No description provided for @familySharingEditCategories.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar o que é compartilhado'**
+  String get familySharingEditCategories;
+
+  /// No description provided for @familySharingSave.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar'**
+  String get familySharingSave;
+
+  /// No description provided for @familySharingEditError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível salvar as alterações. Tente novamente.'**
+  String get familySharingEditError;
 }
 
 class _AppLocalizationsDelegate

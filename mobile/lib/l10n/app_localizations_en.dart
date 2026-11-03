@@ -5738,4 +5738,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familySharingCategoriesRequired => 'Choose at least one category.';
+
+  @override
+  String get familySharingEmotionalExplanation =>
+      'The emotional journal holds what you feel and write. Tick it only if you fully trust this person.';
+
+  @override
+  String get familySharingSafetyNeverShared =>
+      'Help requests are never shared.';
+
+  @override
+  String get familySharingDependentConfirm =>
+      'I am the legal guardian of this profile and I authorize sharing the selected categories with this person.';
+
+  @override
+  String get familySharingEditCategories => 'Edit what is shared';
+
+  @override
+  String get familySharingSave => 'Save';
+
+  @override
+  String get familySharingEditError =>
+      'Could not save the changes. Please try again.';
 }
