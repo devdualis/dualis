@@ -735,6 +735,30 @@ class AppLocalizationsPt extends AppLocalizations {
       'Declaro, sob as penas da lei, que sou pai, mãe ou representante legal deste dependente e autorizo expressamente a coleta e tratamento dos seus dados de bem-estar na plataforma DualisCheckUp, em estrita conformidade com o Artigo 14 da LGPD (Lei 13.709/2018).';
 
   @override
+  String get addDependentRelationshipSupportedDecision =>
+      'Apoiador(a) em tomada de decisão apoiada';
+
+  @override
+  String get addDependentRelationshipMinorHint =>
+      'Para menores de 18 anos: poder familiar ou tutela.';
+
+  @override
+  String get addDependentRelationshipAdultHint =>
+      'Para maiores de 18 anos: curatela ou tomada de decisão apoiada.';
+
+  @override
+  String get addDependentPickBirthDateFirst =>
+      'Informe a data de nascimento para ver os vínculos possíveis.';
+
+  @override
+  String get addDependentLgpdArt11Consent =>
+      'Declaro, sob as penas da lei, que sou curador(a) ou apoiador(a) desta pessoa, nos termos da decisão judicial ou do termo de apoio, e autorizo expressamente a coleta e o tratamento dos seus dados de bem-estar na plataforma DualisCheckUp, conforme o Artigo 11, inciso I, da LGPD (Lei 13.709/2018).';
+
+  @override
+  String get addDependentNotesLabel =>
+      'Número do processo / observações (opcional)';
+
+  @override
   String get addDependentSubmit => 'Cadastrar Dependente';
 
   @override

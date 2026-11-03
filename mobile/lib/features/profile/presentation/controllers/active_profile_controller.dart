@@ -129,8 +129,10 @@ class ActiveProfileController extends Notifier<ActiveProfileState> {
     required String name,
     required DateTime dateOfBirth,
     required String gender,
-    required String relationshipType, // parent | legal_guardian | curator
+    // parent | legal_guardian (under 18) or curator | supported_decision (18+)
+    required String relationshipType,
     required bool lgpdConsent,
+    String? lgpdLegalBasisNotes,
   }) async {
     final session = _requireSession();
     final profile = await _repository.createDependent(
@@ -139,6 +141,7 @@ class ActiveProfileController extends Notifier<ActiveProfileState> {
       gender: gender,
       relationshipType: relationshipType,
       lgpdConsent: lgpdConsent,
+      lgpdLegalBasisNotes: lgpdLegalBasisNotes,
     );
     if (!_isCurrent(session)) return profile;
     state = state.copyWith(

@@ -140,6 +140,8 @@ class _FakeProfile {
   final ProfileType type;
   final DateTime? dateOfBirth;
   final String? gender;
+  final String? relationshipType;
+  final String? lgpdLegalBasisNotes;
 
   _FakeProfile({
     required this.id,
@@ -148,6 +150,8 @@ class _FakeProfile {
     required this.type,
     this.dateOfBirth,
     this.gender,
+    this.relationshipType,
+    this.lgpdLegalBasisNotes,
   });
 }
 
@@ -303,6 +307,7 @@ class FakeProfileRepository implements ProfileRepository {
     required String gender,
     required String relationshipType,
     required bool lgpdConsent,
+    String? lgpdLegalBasisNotes,
   }) =>
       _respond(() {
         if (!lgpdConsent) {
@@ -321,6 +326,8 @@ class FakeProfileRepository implements ProfileRepository {
           type: adult ? ProfileType.dependentAdult : ProfileType.dependentMinor,
           dateOfBirth: dateOfBirth,
           gender: gender,
+          relationshipType: relationshipType,
+          lgpdLegalBasisNotes: lgpdLegalBasisNotes,
         );
         _db._profiles.add(p);
         return Profile.fromJson(_db._profileJson(_uid, p));

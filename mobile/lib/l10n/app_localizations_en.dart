@@ -728,6 +728,29 @@ class AppLocalizationsEn extends AppLocalizations {
       'I declare, under penalty of law, that I am the parent or legal representative of this dependent and expressly authorize the collection and processing of their wellness data on the DualisCheckUp platform, in strict compliance with Article 14 of the LGPD (Law 13.709/2018).';
 
   @override
+  String get addDependentRelationshipSupportedDecision =>
+      'Supporter under supported decision-making';
+
+  @override
+  String get addDependentRelationshipMinorHint =>
+      'For people under 18: parental authority or guardianship.';
+
+  @override
+  String get addDependentRelationshipAdultHint =>
+      'For people 18 or older: curatorship or supported decision-making.';
+
+  @override
+  String get addDependentPickBirthDateFirst =>
+      'Enter the date of birth to see the possible relationships.';
+
+  @override
+  String get addDependentLgpdArt11Consent =>
+      'I declare, under penalty of law, that I am the curator or supporter of this person, under the court decision or the support agreement, and expressly authorize the collection and processing of their wellness data on the DualisCheckUp platform, under Article 11, item I, of the LGPD (Law 13.709/2018).';
+
+  @override
+  String get addDependentNotesLabel => 'Case number / notes (optional)';
+
+  @override
   String get addDependentSubmit => 'Register Dependent';
 
   @override

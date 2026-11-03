@@ -88,7 +88,9 @@ class ProfileRepository {
     required String gender,
     required String relationshipType,
     required bool lgpdConsent,
+    String? lgpdLegalBasisNotes,
   }) async {
+    final notes = lgpdLegalBasisNotes?.trim();
     final data = await _send((options) => _apiClient.post<dynamic>(
           ProfileEndpoints.dependents,
           data: {
@@ -97,6 +99,7 @@ class ProfileRepository {
             'gender': gender,
             'relationshipType': relationshipType,
             'lgpdConsent': lgpdConsent,
+            if (notes != null && notes.isNotEmpty) 'lgpdLegalBasisNotes': notes,
           },
           options: options,
         ));

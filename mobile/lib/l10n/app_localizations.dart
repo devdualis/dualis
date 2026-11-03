@@ -1372,6 +1372,42 @@ abstract class AppLocalizations {
   /// **'Declaro, sob as penas da lei, que sou pai, mãe ou representante legal deste dependente e autorizo expressamente a coleta e tratamento dos seus dados de bem-estar na plataforma DualisCheckUp, em estrita conformidade com o Artigo 14 da LGPD (Lei 13.709/2018).'**
   String get addDependentLgpdArt14Consent;
 
+  /// No description provided for @addDependentRelationshipSupportedDecision.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apoiador(a) em tomada de decisão apoiada'**
+  String get addDependentRelationshipSupportedDecision;
+
+  /// No description provided for @addDependentRelationshipMinorHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para menores de 18 anos: poder familiar ou tutela.'**
+  String get addDependentRelationshipMinorHint;
+
+  /// No description provided for @addDependentRelationshipAdultHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para maiores de 18 anos: curatela ou tomada de decisão apoiada.'**
+  String get addDependentRelationshipAdultHint;
+
+  /// No description provided for @addDependentPickBirthDateFirst.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe a data de nascimento para ver os vínculos possíveis.'**
+  String get addDependentPickBirthDateFirst;
+
+  /// No description provided for @addDependentLgpdArt11Consent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Declaro, sob as penas da lei, que sou curador(a) ou apoiador(a) desta pessoa, nos termos da decisão judicial ou do termo de apoio, e autorizo expressamente a coleta e o tratamento dos seus dados de bem-estar na plataforma DualisCheckUp, conforme o Artigo 11, inciso I, da LGPD (Lei 13.709/2018).'**
+  String get addDependentLgpdArt11Consent;
+
+  /// No description provided for @addDependentNotesLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Número do processo / observações (opcional)'**
+  String get addDependentNotesLabel;
+
   /// No description provided for @addDependentSubmit.
   ///
   /// In pt, this message translates to:

@@ -230,6 +230,7 @@ void main() {
           gender: any(named: 'gender'),
           relationshipType: any(named: 'relationshipType'),
           lgpdConsent: any(named: 'lgpdConsent'),
+          lgpdLegalBasisNotes: any(named: 'lgpdLegalBasisNotes'),
         )).thenAnswer((_) async => child);
     serve([primary, child]);
 
@@ -239,9 +240,18 @@ void main() {
       gender: 'feminino',
       relationshipType: 'parent',
       lgpdConsent: true,
+      lgpdLegalBasisNotes: 'Processo 123',
     );
 
     expect(created.id, 'child');
+    verify(() => repo.createDependent(
+          name: 'Ana',
+          dateOfBirth: DateTime(2018, 3, 9),
+          gender: 'feminino',
+          relationshipType: 'parent',
+          lgpdConsent: true,
+          lgpdLegalBasisNotes: 'Processo 123',
+        )).called(1);
     expect(current().profiles.map((p) => p.id), ['primary', 'child']);
     expect(current().activeProfile?.id, 'child');
     verify(() => repo.saveActiveProfileId('u1', 'child')).called(1);
