@@ -12,8 +12,8 @@ import {
   TriageHistoryResponseDto,
   TriageLogItemDto,
 } from '../dto/triage-history.dto';
-import { HIGH_REPORTED_INTENSITY } from '../constants/intensity-tier.constant';
 
+const HIGH_REPORTED_INTENSITY = 4;
 const JOURNAL_PATTERN_WINDOW_DAYS = 10;
 const JOURNAL_PATTERN_MIN_COUNT = 2;
 

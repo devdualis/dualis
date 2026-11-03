@@ -11,13 +11,10 @@ import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/home/domain/home_greeting.dart';
 import 'package:dualis_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:dualis_mobile/features/hydration/presentation/hydration_reminder_offer.dart';
-import 'package:dualis_mobile/features/triage_outcome/domain/triage_outcome_models.dart';
-import 'package:dualis_mobile/features/triage_outcome/presentation/controllers/triage_outcome_controller.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 Widget createHomeTestApp({
   AuthState? initialAuthState,
-  TriageOutcome? initialOutcome,
   DateTime? now,
   bool hydrationOfferPending = false,
 }) {
@@ -73,10 +70,6 @@ Widget createHomeTestApp({
         authControllerProvider.overrideWith(
           () => _TestAuthController(initialAuthState),
         ),
-      if (initialOutcome != null)
-        triageOutcomeProvider.overrideWith(
-          () => _TestTriageOutcomeController(initialOutcome),
-        ),
     ],
     child: MaterialApp.router(
       routerConfig: router,
@@ -101,19 +94,6 @@ class _FakeHydrationOffer extends HydrationReminderOffer {
     final value = pending;
     pending = false;
     return value;
-  }
-}
-
-class _TestTriageOutcomeController extends TriageOutcomeNotifier {
-  final TriageOutcome _outcome;
-  _TestTriageOutcomeController(this._outcome);
-
-  @override
-  TriageOutcomeState build() => TriageOutcomeState(outcome: _outcome);
-
-  @override
-  Future<void> loadTodayOutcome() async {
-    state = state.copyWith(outcome: _outcome);
   }
 }
 
@@ -163,23 +143,6 @@ void main() {
       expect(find.byKey(const Key('home_profile_card')), findsOneWidget);
       expect(find.byKey(const Key('home_hydration_nav_button')), findsNothing);
       expect(find.byKey(const Key('nav_destination_hydration')), findsOneWidget);
-
-      // Verify Stage Buttons
-      expect(find.byKey(const Key('start_psicoemocional_triage_button')), findsOneWidget);
-      expect(find.byKey(const Key('start_fisica_triage_button')), findsOneWidget);
-    });
-
-    testWidgets('Tapping stage buttons navigates to /triage screen',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(createHomeTestApp());
-      await tester.pumpAndSettle();
-
-      await tester.ensureVisible(find.byKey(const Key('start_psicoemocional_triage_button')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('start_psicoemocional_triage_button')));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Triage Screen'), findsOneWidget);
     });
 
     testWidgets('Tapping settings button navigates to /settings screen',
@@ -207,30 +170,6 @@ void main() {
       expect(find.text('Settings Screen'), findsOneWidget);
     });
 
-    testWidgets('Shows the completed stage card on the main home tab; Meu Dia is not in the nav',
-        (WidgetTester tester) async {
-      final mockOutcome = TriageOutcome(
-        id: 'checkin-chest-1',
-        vertical: 'physical',
-        intensityScore: 5,
-        primaryCategory: 'cardiovascular_torax',
-        categoryLabel: 'Peito',
-        somaticMapping: 'Aperto no peito e coração acelerado',
-        recommendedArticles: const [],
-        recordedAt: DateTime.now(),
-        aiMappedLayTerm: 'Dor e aperto no peito',
-      );
-
-      await tester.pumpWidget(createHomeTestApp(initialOutcome: mockOutcome));
-      await tester.pumpAndSettle();
-
-      // Verify physical stage card is marked completed, NOT displaying uncompleted start button
-      expect(find.byKey(const Key('fisica_completed_card')), findsOneWidget);
-      expect(find.byKey(const Key('start_fisica_triage_button')), findsNothing);
-
-      // "Meu Dia" is no longer a bottom-nav destination.
-      expect(find.byKey(const Key('nav_destination_today_outcome')), findsNothing);
-    });
     const greetUser = UserProfile(
       id: 'usr-1',
       name: 'Ana Maria Souza',

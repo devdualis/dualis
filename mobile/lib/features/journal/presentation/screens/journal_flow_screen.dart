@@ -14,7 +14,6 @@ import '../../../profile/presentation/controllers/active_profile_controller.dart
 import '../../../voice/presentation/voice_widgets.dart';
 import '../../../dashboard/presentation/screens/check_in_summary_screen.dart';
 import '../../../home/domain/home_greeting.dart' as greeting;
-import '../../../home/presentation/controllers/trigger_checkin_controller.dart';
 import '../../data/journal_repository.dart';
 import '../../domain/journal_keys.dart';
 import '../../domain/journal_models.dart';
@@ -96,7 +95,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     try {
       final entry = await _controller.save(isMale: _isMale);
       if (!mounted) return;
-      _updateHome(l10n, entry);
       if (entry.pendingSync) {
         messenger.showSnackBar(SnackBar(content: Text(l10n.jv2SavedOffline)));
       }
@@ -112,11 +110,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       if (!mounted) return;
       messenger.showSnackBar(SnackBar(content: Text(l10n.jv2SaveError)));
     }
-  }
-
-  /// Marks today's check-in as done on Home, with the user's own words.
-  void _updateHome(AppLocalizations l10n, JournalEntry entry) {
-    ref.read(triggerCheckInProvider.notifier).applyJournalEntry(l10n, entry);
   }
 
   @override

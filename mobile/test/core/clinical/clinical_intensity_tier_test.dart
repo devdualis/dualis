@@ -1,4 +1,4 @@
-import 'package:dualis_mobile/features/home/domain/trigger_checkin_state.dart';
+import 'package:dualis_mobile/core/clinical/clinical_intensity_tier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -76,37 +76,6 @@ void main() {
       expect(ClinicalIntensityTier.intense.containsScore(4), isTrue);
       expect(ClinicalIntensityTier.intense.containsScore(5), isTrue);
       expect(ClinicalIntensityTier.intense.containsScore(3), isFalse);
-    });
-
-    test('TriggerStatusTierExtension bridges trigger status to clinical tier', () {
-      expect(TriggerStatus.goodNormal.defaultIntensity, 0);
-      expect(TriggerStatus.goodNormal.tier, ClinicalIntensityTier.none);
-
-      expect(TriggerStatus.soSo.defaultIntensity, 3);
-      expect(TriggerStatus.soSo.tier, ClinicalIntensityTier.moderate);
-
-      expect(TriggerStatus.badSick.defaultIntensity, 4);
-      expect(TriggerStatus.badSick.tier, ClinicalIntensityTier.intense);
-    });
-
-    test('TriggerCheckInState resolves tiers via Single Source of Truth', () {
-      const stateWithIntensities = TriggerCheckInState(
-        emotionalStatus: TriggerStatus.soSo,
-        emotionalIntensity: 1, // explicit mild intensity overrides default 3
-        physicalStatus: TriggerStatus.badSick,
-        physicalIntensity: 5,
-      );
-
-      expect(stateWithIntensities.resolvedEmotionalTier, ClinicalIntensityTier.mild);
-      expect(stateWithIntensities.resolvedPhysicalTier, ClinicalIntensityTier.intense);
-
-      const stateWithoutIntensities = TriggerCheckInState(
-        emotionalStatus: TriggerStatus.goodNormal,
-        physicalStatus: TriggerStatus.soSo,
-      );
-
-      expect(stateWithoutIntensities.resolvedEmotionalTier, ClinicalIntensityTier.none);
-      expect(stateWithoutIntensities.resolvedPhysicalTier, ClinicalIntensityTier.moderate);
     });
   });
 }
