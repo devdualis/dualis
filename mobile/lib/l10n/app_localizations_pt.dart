@@ -4103,6 +4103,117 @@ class AppLocalizationsPt extends AppLocalizations {
       'Estar no mesmo dia não indica relação entre os itens.';
 
   @override
+  String get histPeriodSummaryTitle => 'Resumo do período';
+
+  @override
+  String histNotWellTimeSummary(int days, int count, int total, String time) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total registros',
+      one: '1 registro',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'foram',
+      one: 'foi',
+    );
+    String _temp2 = intl.Intl.selectLogic(time, {
+      'passado': 'o passado',
+      'presente': 'o presente',
+      'futuro': 'o futuro',
+      'other': 'outro tempo',
+    });
+    return 'Nos últimos $days dias, $count de $_temp0 de “não tão bem” $_temp1 sobre $_temp2.';
+  }
+
+  @override
+  String histWeekdayMost(String days) {
+    return 'Você registrou mais $days.';
+  }
+
+  @override
+  String histWeekdayOn(String day) {
+    String _temp0 = intl.Intl.selectLogic(day, {
+      'mon': 'nas segundas',
+      'tue': 'nas terças',
+      'wed': 'nas quartas',
+      'thu': 'nas quintas',
+      'fri': 'nas sextas',
+      'sat': 'nos sábados',
+      'sun': 'nos domingos',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String histListAnd(String first, String last) {
+    return '$first e $last';
+  }
+
+  @override
+  String histWeekdayBar(String day, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count registros',
+      one: '1 registro',
+    );
+    return '$day: $_temp0';
+  }
+
+  @override
+  String get histFeelingsTitle => 'Como você se sentiu';
+
+  @override
+  String get histFeelingsSubtitle =>
+      'Registros com alguma escolha em cada linha. Um registro pode aparecer em mais de uma linha.';
+
+  @override
+  String get histFeelingPesado => 'Pesado / desanimado';
+
+  @override
+  String get histFeelingAgitado => 'Agitado / preocupado';
+
+  @override
+  String get histFeelingIrritado => 'Irritado / sem paciência';
+
+  @override
+  String get histFeelingTranquilo => 'Tranquilo / bem';
+
+  @override
+  String histFeelingCount(int count, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total registros',
+      one: '1 registro',
+    );
+    return '$count de $_temp0';
+  }
+
+  @override
+  String get histCoincidenceTitle => 'No mesmo dia';
+
+  @override
+  String histCoincidenceLine(int count, int days, String emotion, String body) {
+    return 'Em $count dos últimos $days dias você registrou, no mesmo dia, “$emotion” e “$body”.';
+  }
+
+  @override
+  String histCoincidenceMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'e mais $count combinações',
+      one: 'e mais 1 combinação',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String gxGoalPercent(int percent, int goal) {
     return '$percent% da meta escolhida ($goal ml)';
   }

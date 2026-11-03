@@ -3,9 +3,12 @@ import '../../journal/domain/journal_keys.dart';
 import '../../journal/presentation/journal_labels.dart';
 import 'journal_insights_models.dart';
 
-/// Periods offered on the history screen (chips 7 / 30 dias; Free shows
-/// up to 30 days).
-const List<int> historyPeriods = [7, 30];
+/// Periods offered on the history screen (chips 7 / 14 / 30 dias; Free
+/// shows up to 30 days).
+const List<int> historyPeriods = [7, 14, 30];
+
+/// Period selected when the history screen opens (client spec D16).
+const int defaultHistoryPeriod = 14;
 
 /// Body regions and whole-body areas, in display order.
 List<String> get historyRegions => JournalLabels.regions;

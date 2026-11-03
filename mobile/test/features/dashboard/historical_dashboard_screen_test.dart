@@ -140,16 +140,17 @@ int visibleLineCount(WidgetTester tester) {
 
 void main() {
   group('HistoricalDashboardScreen (Emoções | Corpo | Água | Juntos)', () {
-    testWidgets('loads 30 days once and starts on 30 dias, Emoções',
+    testWidgets('loads 30 days once and starts on 14 dias, Emoções',
         (tester) async {
       final ds = await pumpDashboard(tester, [entry('e1', 0, [head])]);
       expect(ds.requestedEntryDays, 30);
       expect(ds.requestedSummaryDays, isNull);
-      expect(find.text('Seus registros dos últimos 30 dias'), findsOneWidget);
+      expect(find.text('Seus registros dos últimos 14 dias'), findsOneWidget);
       for (final tab in ['Emoções', 'Corpo', 'Água', 'Juntos']) {
         expect(find.text(tab), findsWidgets);
       }
       expect(find.byKey(const Key('history_period_7')), findsOneWidget);
+      expect(find.byKey(const Key('history_period_14')), findsOneWidget);
       expect(find.byKey(const Key('history_period_30')), findsOneWidget);
       // Free shows up to 30 days (handoff v2.0).
       expect(find.byKey(const Key('history_period_90')), findsNothing);
@@ -198,12 +199,138 @@ void main() {
               kind: 'emotional', optionKey: 'passado.memoria.magoa', intensity: 2),
         ]),
       ]);
+      // 14 days by default: the 20-day-old entry is outside.
+      expect(find.byKey(const Key('emotional_chip_passado')), findsNothing);
+      expect(find.byKey(const Key('journal_entry_older')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('history_period_30')));
+      await tester.pumpAndSettle();
+      expect(find.text('Seus registros dos últimos 30 dias'), findsOneWidget);
       expect(find.byKey(const Key('emotional_chip_passado')), findsOneWidget);
+      expect(find.byKey(const Key('journal_entry_older')), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('history_period_7')));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('emotional_chip_passado')), findsNothing);
       expect(find.byKey(const Key('journal_entry_older')), findsNothing);
+    });
+
+    testWidgets('Emoções: period summary, weekdays and "Como você se sentiu"',
+        (tester) async {
+      // today = Tuesday 27/10/2026.
+      await pumpDashboard(tester, [
+        entry('e1', 0, [mind, head]),
+        entry('e2', 7, [
+          const JournalItemView(
+              kind: 'emotional', optionKey: 'futuro.medo.evitar', intensity: 2),
+        ]),
+        entry('e3', 2, [
+          const JournalItemView(
+              kind: 'emotional',
+              optionKey: 'presente.sobrecarga.paciencia',
+              intensity: 3),
+        ]),
+        JournalEntryView(
+          id: 'good',
+          recordedAt: today.subtract(const Duration(days: 1)),
+          mood: 'bem',
+          items: const [
+            JournalItemView(kind: 'positive', optionKey: 'presente.calma.paz'),
+          ],
+        ),
+        // Outside 14 days: not counted.
+        entry('old', 20, [
+          const JournalItemView(
+              kind: 'emotional', optionKey: 'passado.tristeza.culpa'),
+        ]),
+      ]);
+
+      expect(find.byKey(const Key('period_summary_card')), findsOneWidget);
+      expect(
+        find.text('Nos últimos 14 dias, 2 de 3 registros de “não tão bem” '
+            'foram sobre o futuro.'),
+        findsOneWidget,
+      );
+      expect(find.text('Você registrou mais nas terças.'), findsOneWidget);
+      expect(find.byKey(const Key('period_weekday_bars')), findsOneWidget);
+
+      expect(find.byKey(const Key('feelings_card')), findsOneWidget);
+      expect(find.text('Como você se sentiu'), findsOneWidget);
+      Finder count(String feeling) =>
+          find.byKey(Key('feeling_count_$feeling'));
+      expect(tester.widget<Text>(count('pesado')).data, '0 de 4 registros');
+      expect(tester.widget<Text>(count('agitado')).data, '2 de 4 registros');
+      expect(tester.widget<Text>(count('irritado')).data, '1 de 4 registros');
+      expect(tester.widget<Text>(count('tranquilo')).data, '1 de 4 registros');
+    });
+
+    testWidgets('no records: no period summary, feelings or coincidences',
+        (tester) async {
+      await pumpDashboard(tester, const []);
+      expect(find.byKey(const Key('period_summary_card')), findsNothing);
+      expect(find.byKey(const Key('feelings_card')), findsNothing);
+      await tester.tap(find.byKey(const Key('history_tab_HistoryTab.together')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('coincidence_card')), findsNothing);
+      expect(find.byKey(const Key('combined_calendar')), findsOneWidget);
+    });
+
+    testWidgets('old entries (no area, sensation or known keys) do not break',
+        (tester) async {
+      await pumpDashboard(tester, [
+        entry('legacy', 1, const [
+          JournalItemView(kind: 'emotional', legacyLabel: 'Cansado antigo'),
+        ], legacy: true),
+        entry('custom', 2, const [
+          JournalItemView(
+              kind: 'emotional', optionKey: 'futuro.custom', customLabel: 'x'),
+          JournalItemView(
+              kind: 'physical',
+              optionKey: 'peito.respiracao.curta',
+              sensation: 'dor'),
+        ]),
+        entry('unknown', 3, const [
+          JournalItemView(kind: 'emotional', optionKey: 'presente.ramo_novo.y'),
+          JournalItemView(kind: 'physical', optionKey: 'peito.respiracao.tosse'),
+        ]),
+        JournalEntryView(
+          id: 'normal',
+          recordedAt: today.subtract(const Duration(days: 4)),
+          mood: 'normal',
+        ),
+      ]);
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(const Key('period_summary_card')), findsOneWidget);
+      // Only written or unknown branches: nothing to count.
+      expect(find.byKey(const Key('feelings_card')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('history_tab_HistoryTab.together')));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      // The written item still pairs by its time; the unknown branch has no
+      // text and is left out.
+      expect(find.byKey(const Key('coincidence_presente.ramo_novo_peito')),
+          findsNothing);
+      expect(find.byKey(const Key('coincidence_futuro_peito')), findsOneWidget);
+    });
+
+    testWidgets('Juntos: same-day emotional choice and body region as days',
+        (tester) async {
+      await pumpDashboard(tester, [
+        entry('e1', 0, [mind, head]),
+        entry('e2', 3, [mind]),
+        entry('e3', 3, [head]),
+        entry('e4', 5, [mind]),
+      ]);
+      await tester.tap(find.byKey(const Key('history_tab_HistoryTab.together')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('coincidence_card')), findsOneWidget);
+      expect(
+        find.text('Em 2 dos últimos 14 dias você registrou, no mesmo dia, '
+            '“Mente acelerada” e “Cabeça e pescoço”.'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('combined_calendar')), findsOneWidget);
     });
 
     testWidgets('Corpo: markers count days, sheet lists marks and opens F3',
