@@ -41,6 +41,32 @@ class _Ana extends ActiveProfileController {
       );
 }
 
+/// Signed-in Ana viewing Carlos's shared profile without the conditions area.
+class _CarlosWithoutConditions extends ActiveProfileController {
+  @override
+  ActiveProfileState build() => ActiveProfileState(
+        profiles: [
+          const Profile(
+            id: 'p1',
+            name: 'Ana',
+            profileType: ProfileType.primary,
+            ownership: ProfileOwnership.own,
+            accessLevel: ProfileAccessLevel.owner,
+          ),
+          Profile.fromJson(const {
+            'id': 'shared-1',
+            'name': 'Carlos',
+            'profileType': 'primary',
+            'ownership': 'shared',
+            'accessLevel': 'CO_MANAGE',
+            'readableCategories': ['habits', 'care'],
+            'writableCategories': ['habits', 'care'],
+          }),
+        ],
+        activeProfileId: 'shared-1',
+      );
+}
+
 void main() {
   final pt = AppLocalizationsPt();
   setUpAll(() => initializeDateFormatting('pt'));
@@ -266,6 +292,39 @@ void main() {
     expect(find.byKey(const Key('chronic_history_offline')), findsOneWidget);
     expect(find.text('127/84 mmHg'), findsOneWidget);
     expect(find.text('120/80 mmHg · pulso 72 bpm'), findsNothing);
+  });
+
+  testWidgets('shared profile without conditions: not shared placeholder, no readings',
+      (tester) async {
+    tallView(tester);
+    final h = JournalHarness(conditions: const [condition]);
+    h.remote.readings = serverReadings();
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        ...h.overrides,
+        premiumProfilesEnabledProvider.overrideWithValue(true),
+        activeProfileControllerProvider.overrideWith(_CarlosWithoutConditions.new),
+      ],
+      child: MaterialApp(
+        theme: AppTheme.lightTheme,
+        locale: const Locale('pt'),
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const ConditionReadingsScreen(conditionId: 'c1'),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('category-not-shared')), findsOneWidget);
+    expect(find.text(pt.profileCategoryNotSharedTitle), findsOneWidget);
+    expect(find.text(pt.profileCategoryNotSharedBody('Carlos')), findsOneWidget);
+    expect(find.byKey(const Key('chronic_history_list')), findsNothing);
+    expect(find.byType(ReadingsChart), findsNothing);
   });
 
   testWidgets('empty period says so', (tester) async {
