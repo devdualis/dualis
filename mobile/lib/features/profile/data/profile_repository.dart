@@ -13,7 +13,11 @@ class ProfileApiException implements Exception {
   final String message;
   final int? statusCode;
 
-  const ProfileApiException(this.message, {this.statusCode});
+  /// Machine-readable error `code` from the API body (e.g.
+  /// `CLAIM_INVALID_CODE`), when the backend sends one.
+  final String? code;
+
+  const ProfileApiException(this.message, {this.statusCode, this.code});
 
   /// No HTTP response at all (offline, timeout, server down).
   bool get isNetworkError => statusCode == null;
@@ -25,13 +29,16 @@ class ProfileApiException implements Exception {
     final response = e.response;
     final data = response?.data;
     if (data is Map) {
+      final rawCode = data['code'];
+      final code = rawCode is String && rawCode.isNotEmpty ? rawCode : null;
       final message = data['message'];
       if (message is List && message.isNotEmpty) {
         return ProfileApiException(message.join('\n'),
-            statusCode: response?.statusCode);
+            statusCode: response?.statusCode, code: code);
       }
       if (message is String && message.isNotEmpty) {
-        return ProfileApiException(message, statusCode: response?.statusCode);
+        return ProfileApiException(message,
+            statusCode: response?.statusCode, code: code);
       }
     }
     if (response == null) {
@@ -45,6 +52,58 @@ class ProfileApiException implements Exception {
     );
   }
 }
+
+/// Why a profile claim failed, so the UI can show a localized message.
+enum ProfileClaimError {
+  /// Unknown, expired or already used code (404 `CLAIM_INVALID_CODE`).
+  invalidCode,
+
+  /// The guardian tried to use their own code (403 `CLAIM_BY_GUARDIAN`).
+  byGuardian,
+
+  /// The profile is not 18 yet (409 `CLAIM_NOT_ADULT`).
+  notAdult,
+
+  /// This account's own profile already has entries (409
+  /// `CLAIM_ACCOUNT_HAS_DATA`); profiles are never merged.
+  accountHasData,
+
+  /// Too many failed codes (429).
+  tooManyAttempts,
+
+  /// Anything else (offline, server error).
+  other,
+}
+
+/// A failed `POST /v1/profiles/claim`. Still a [ProfileApiException].
+class ProfileClaimException extends ProfileApiException {
+  final ProfileClaimError reason;
+
+  const ProfileClaimException(
+    this.reason,
+    super.message, {
+    super.statusCode,
+    super.code,
+  });
+
+  factory ProfileClaimException.from(ProfileApiException e) {
+    final reason = switch ((e.statusCode, e.code)) {
+      (429, _) => ProfileClaimError.tooManyAttempts,
+      (_, 'CLAIM_INVALID_CODE') => ProfileClaimError.invalidCode,
+      (_, 'CLAIM_BY_GUARDIAN') => ProfileClaimError.byGuardian,
+      (_, 'CLAIM_NOT_ADULT') => ProfileClaimError.notAdult,
+      (_, 'CLAIM_ACCOUNT_HAS_DATA') => ProfileClaimError.accountHasData,
+      // 400 is a malformed code (length/alphabet), 404 an unknown one.
+      (400 || 404, _) => ProfileClaimError.invalidCode,
+      _ => ProfileClaimError.other,
+    };
+    return ProfileClaimException(reason, e.message,
+        statusCode: e.statusCode, code: e.code);
+  }
+}
+
+/// A transfer code the guardian hands to the young adult.
+typedef HandoverCode = ({String code, DateTime expiresAt});
 
 class FamilySharingGrants {
   final List<SharedAccessGrant> outgoing;
@@ -88,7 +147,9 @@ class ProfileRepository {
     required String gender,
     required String relationshipType,
     required bool lgpdConsent,
+    String? lgpdLegalBasisNotes,
   }) async {
+    final notes = lgpdLegalBasisNotes?.trim();
     final data = await _send((options) => _apiClient.post<dynamic>(
           ProfileEndpoints.dependents,
           data: {
@@ -97,6 +158,7 @@ class ProfileRepository {
             'gender': gender,
             'relationshipType': relationshipType,
             'lgpdConsent': lgpdConsent,
+            if (notes != null && notes.isNotEmpty) 'lgpdLegalBasisNotes': notes,
           },
           options: options,
         ));
@@ -142,6 +204,9 @@ class ProfileRepository {
   Future<SharedAccessGrant> createInvite({
     required String targetProfileId,
     required ProfileShareLevel accessLevel,
+    required GrantRelationship relationship,
+    required List<ShareCategory> categories,
+    bool dependentShareConfirmed = false,
     String targetProfileName = '',
   }) async {
     final data = await _send((options) => _apiClient.post<dynamic>(
@@ -149,11 +214,41 @@ class ProfileRepository {
           data: {
             'targetProfileId': targetProfileId,
             'accessLevel': shareLevelToApi(accessLevel),
+            'relationship': relationship.apiValue,
+            'categories': [for (final c in categories) c.apiValue],
+            'dependentShareConfirmed': dependentShareConfirmed,
           },
           options: options,
         ));
     return SharedAccessGrant.fromJson(
       {'status': 'PENDING', ..._asMap(data)},
+      GrantDirection.outgoing,
+      fallbackTargetProfileName: targetProfileName,
+    );
+  }
+
+  /// Owner edits what an outgoing grant shares (PATCH). Dependent targets
+  /// need [dependentShareConfirmed]. 409 GRANT_SCOPE_LOCKED once the grant
+  /// is revoked or expired.
+  Future<SharedAccessGrant> updateGrant(
+    String grantId, {
+    List<ShareCategory>? categories,
+    GrantRelationship? relationship,
+    bool dependentShareConfirmed = false,
+    String targetProfileName = '',
+  }) async {
+    final data = await _send((options) => _apiClient.patch<dynamic>(
+          ProfileEndpoints.grant(grantId),
+          data: {
+            if (categories != null)
+              'categories': [for (final c in categories) c.apiValue],
+            if (relationship != null) 'relationship': relationship.apiValue,
+            'dependentShareConfirmed': dependentShareConfirmed,
+          },
+          options: options,
+        ));
+    return SharedAccessGrant.fromJson(
+      _asMap(data),
       GrantDirection.outgoing,
       fallbackTargetProfileName: targetProfileName,
     );
@@ -172,6 +267,55 @@ class ProfileRepository {
           ProfileEndpoints.revoke(grantId),
           options: options,
         ));
+  }
+
+  /// The young adult claims a profile with the guardian's transfer code. The
+  /// returned profile is now this account's own primary profile.
+  /// Throws [ProfileClaimException]. The code is never logged.
+  Future<Profile> claimProfile(String code) async {
+    try {
+      final data = await _send((options) => _apiClient.post<dynamic>(
+            ProfileEndpoints.claim,
+            data: {'claimCode': code.trim().toUpperCase()},
+            options: options,
+          ));
+      return Profile.fromJson(_asMap(data));
+    } on ProfileClaimException {
+      rethrow;
+    } on ProfileApiException catch (e) {
+      throw ProfileClaimException.from(e);
+    }
+  }
+
+  /// The guardian generates (or regenerates) a transfer code for a dependent
+  /// who turned 18. 409 `HANDOVER_NOT_DUE` otherwise.
+  Future<HandoverCode> createHandoverCode(String profileId) async {
+    final data = _asMap(await _send((options) => _apiClient.post<dynamic>(
+          ProfileEndpoints.handoverCode(profileId),
+          options: options,
+        )));
+    final code = data['claimCode'];
+    final expiresAt = data['expiresAt'];
+    final parsedExpiry =
+        expiresAt is String ? DateTime.tryParse(expiresAt)?.toLocal() : null;
+    if (code is! String || code.isEmpty || parsedExpiry == null) {
+      throw const ProfileApiException(
+        'Resposta inesperada do servidor.',
+        statusCode: 200,
+      );
+    }
+    return (code: code, expiresAt: parsedExpiry);
+  }
+
+  /// The guardian re-confirms an adult dependent's registration under LGPD
+  /// Art. 11, I. Returns the updated profile.
+  Future<Profile> confirmLegalBasis(String profileId) async {
+    final data = await _send((options) => _apiClient.post<dynamic>(
+          ProfileEndpoints.legalBasisConfirmation(profileId),
+          data: {'lgpdConsent': true},
+          options: options,
+        ));
+    return Profile.fromJson(_asMap(data));
   }
 
   /// Selected profile, stored per signed-in user.

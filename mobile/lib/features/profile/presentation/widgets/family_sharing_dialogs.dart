@@ -10,6 +10,101 @@ import '../controllers/active_profile_controller.dart';
 
 final familySharingDateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
+String relationshipLabel(AppLocalizations l10n, GrantRelationship? r) =>
+    switch (r) {
+      GrantRelationship.spousePartner =>
+        l10n.familySharingRelationshipSpousePartner,
+      GrantRelationship.sibling => l10n.familySharingRelationshipSibling,
+      GrantRelationship.parent => l10n.familySharingRelationshipParent,
+      GrantRelationship.child => l10n.familySharingRelationshipChild,
+      GrantRelationship.otherFamily =>
+        l10n.familySharingRelationshipOtherFamily,
+      GrantRelationship.caregiver => l10n.familySharingRelationshipCaregiver,
+      GrantRelationship.friend => l10n.familySharingRelationshipFriend,
+      GrantRelationship.other => l10n.familySharingRelationshipOther,
+      null => l10n.familySharingRelationshipUnknown,
+    };
+
+String shareCategoryLabel(AppLocalizations l10n, ShareCategory c) =>
+    switch (c) {
+      ShareCategory.habits => l10n.familySharingCategoryHabits,
+      ShareCategory.physicalJournal =>
+        l10n.familySharingCategoryPhysicalJournal,
+      ShareCategory.emotionalJournal =>
+        l10n.familySharingCategoryEmotionalJournal,
+      ShareCategory.conditions => l10n.familySharingCategoryConditions,
+      ShareCategory.care => l10n.familySharingCategoryCare,
+    };
+
+/// Guardian confirmation required to share a dependent's data (gap 9).
+Widget _dependentConfirmTile(
+        AppLocalizations l10n, bool value, ValueChanged<bool> onChanged) =>
+    CheckboxListTile(
+      key: const ValueKey('family-share-dependent-confirm'),
+      contentPadding: EdgeInsets.zero,
+      controlAffinity: ListTileControlAffinity.leading,
+      value: value,
+      title: Text(l10n.familySharingDependentConfirm),
+      onChanged: (v) => onChanged(v == true),
+    );
+
+/// One checkbox per category (D2), keyed `family-share-category-<apiValue>`.
+class FamilySharingCategoryChecklist extends StatelessWidget {
+  final Set<ShareCategory> selected;
+  final ValueChanged<Set<ShareCategory>> onChanged;
+
+  const FamilySharingCategoryChecklist({
+    super.key,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(l10n.familySharingCategoriesLabel,
+            style: Theme.of(context).textTheme.labelLarge),
+        for (final c in ShareCategory.values) ...[
+          CheckboxListTile(
+            key: ValueKey('family-share-category-${c.apiValue}'),
+            contentPadding: EdgeInsets.zero,
+            dense: true,
+            controlAffinity: ListTileControlAffinity.leading,
+            value: selected.contains(c),
+            title: Text(shareCategoryLabel(l10n, c)),
+            onChanged: (checked) => onChanged(checked == true
+                ? {...selected, c}
+                : selected.where((x) => x != c).toSet()),
+          ),
+          // Opt-in only, explained (D2).
+          if (c == ShareCategory.emotionalJournal)
+            Padding(
+              padding: const EdgeInsets.only(left: 48, bottom: 4),
+              child: Text(
+                l10n.familySharingEmotionalExplanation,
+                key: const ValueKey('family-share-emotional-explanation'),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+        ],
+        if (selected.isEmpty)
+          Text(l10n.familySharingCategoriesRequired,
+              style: const TextStyle(color: AppColors.emergencyCrimson)),
+        const SizedBox(height: 8),
+        Text(
+          l10n.familySharingSafetyNeverShared,
+          key: const ValueKey('family-share-safety-never-shared'),
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
+    );
+  }
+}
+
 /// Invite dialog: pick one of my own profiles + scope, then show the code.
 class FamilySharingInviteDialog extends ConsumerStatefulWidget {
   const FamilySharingInviteDialog({super.key});
@@ -23,6 +118,9 @@ class _FamilySharingInviteDialogState
     extends ConsumerState<FamilySharingInviteDialog> {
   String? _profileId;
   ProfileShareLevel _level = ProfileShareLevel.viewOnly;
+  GrantRelationship? _relationship;
+  Set<ShareCategory> _categories = {...ShareCategory.defaults};
+  bool _dependentConfirmed = false;
   bool _submitting = false;
   bool _failed = false;
   SharedAccessGrant? _invite;
@@ -38,9 +136,25 @@ class _FamilySharingInviteDialogState
         : (own.isEmpty ? null : own.first.id);
   }
 
+  /// Any owned profile other than the primary one is a dependent.
+  bool get _isDependentTarget => ref
+      .read(activeProfileControllerProvider)
+      .ownProfiles
+      .any((p) => p.id == _profileId && !p.isPrimary);
+
+  bool get _canGenerate =>
+      !_submitting &&
+      _profileId != null &&
+      _relationship != null &&
+      _categories.isNotEmpty &&
+      (!_isDependentTarget || _dependentConfirmed);
+
   Future<void> _generate() async {
     final profileId = _profileId;
-    if (profileId == null) return;
+    final relationship = _relationship;
+    if (profileId == null || relationship == null || _categories.isEmpty) {
+      return;
+    }
     setState(() {
       _submitting = true;
       _failed = false;
@@ -48,7 +162,17 @@ class _FamilySharingInviteDialogState
     try {
       final invite = await ref
           .read(activeProfileControllerProvider.notifier)
-          .createInvite(targetProfileId: profileId, accessLevel: _level);
+          .createInvite(
+            targetProfileId: profileId,
+            accessLevel: _level,
+            relationship: relationship,
+            // Enum order keeps the payload stable.
+            categories: [
+              for (final c in ShareCategory.values)
+                if (_categories.contains(c)) c,
+            ],
+            dependentShareConfirmed: _isDependentTarget && _dependentConfirmed,
+          );
       if (mounted) setState(() => _invite = invite);
     } catch (_) {
       if (mounted) setState(() => _failed = true);
@@ -74,8 +198,7 @@ class _FamilySharingInviteDialogState
               ),
               FilledButton(
                 key: const ValueKey('family-share-invite-generate'),
-                onPressed:
-                    _submitting || _profileId == null ? null : _generate,
+                onPressed: _canGenerate ? _generate : null,
                 child: Text(l10n.familySharingInviteGenerate),
               ),
             ]
@@ -105,7 +228,11 @@ class _FamilySharingInviteDialogState
             for (final p in own)
               DropdownMenuItem(value: p.id, child: Text(p.name)),
           ],
-          onChanged: (id) => setState(() => _profileId = id),
+          // A new target needs a fresh confirmation.
+          onChanged: (id) => setState(() {
+            _profileId = id;
+            _dependentConfirmed = false;
+          }),
         ),
         const SizedBox(height: 16),
         Text(l10n.familySharingInviteScopeLabel,
@@ -115,6 +242,31 @@ class _FamilySharingInviteDialogState
             l10n.familySharingScopeViewOnlyOption, Icons.visibility_outlined),
         _scopeOption(ProfileShareLevel.coManage,
             l10n.familySharingScopeCoManageOption, Icons.edit_note),
+        const SizedBox(height: 16),
+        DropdownButtonFormField<GrantRelationship>(
+          key: const ValueKey('family-share-relationship'),
+          initialValue: _relationship,
+          isExpanded: true,
+          decoration:
+              InputDecoration(labelText: l10n.familySharingRelationshipLabel),
+          items: [
+            for (final r in GrantRelationship.values)
+              DropdownMenuItem(
+                key: ValueKey('family-share-relationship-${r.apiValue}'),
+                value: r,
+                child: Text(relationshipLabel(l10n, r)),
+              ),
+          ],
+          onChanged: (r) => setState(() => _relationship = r),
+        ),
+        const SizedBox(height: 16),
+        FamilySharingCategoryChecklist(
+          selected: _categories,
+          onChanged: (next) => setState(() => _categories = next),
+        ),
+        if (_isDependentTarget)
+          _dependentConfirmTile(l10n, _dependentConfirmed,
+              (v) => setState(() => _dependentConfirmed = v)),
         if (_failed)
           Padding(
             padding: const EdgeInsets.only(top: 8),
@@ -184,6 +336,85 @@ class _FamilySharingInviteDialogState
   }
 }
 
+/// Result of [FamilySharingEditCategoriesDialog].
+typedef FamilySharingCategoryEdit = ({
+  List<ShareCategory> categories,
+  bool dependentShareConfirmed,
+});
+
+/// Owner changes which categories an outgoing grant shares. Pops a
+/// [FamilySharingCategoryEdit]; the caller sends the PATCH.
+class FamilySharingEditCategoriesDialog extends StatefulWidget {
+  final SharedAccessGrant grant;
+  final bool isDependentTarget;
+
+  const FamilySharingEditCategoriesDialog({
+    super.key,
+    required this.grant,
+    required this.isDependentTarget,
+  });
+
+  @override
+  State<FamilySharingEditCategoriesDialog> createState() =>
+      _FamilySharingEditCategoriesDialogState();
+}
+
+class _FamilySharingEditCategoriesDialogState
+    extends State<FamilySharingEditCategoriesDialog> {
+  late Set<ShareCategory> _categories = {...widget.grant.categories};
+  bool _dependentConfirmed = false;
+
+  bool get _canSave =>
+      _categories.isNotEmpty &&
+      (!widget.isDependentTarget || _dependentConfirmed);
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.familySharingEditCategories),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(widget.grant.targetProfileName,
+                style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 8),
+            FamilySharingCategoryChecklist(
+              selected: _categories,
+              onChanged: (next) => setState(() => _categories = next),
+            ),
+            if (widget.isDependentTarget)
+              _dependentConfirmTile(l10n, _dependentConfirmed,
+                  (v) => setState(() => _dependentConfirmed = v)),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.familySharingCancel),
+        ),
+        FilledButton(
+          key: const ValueKey('family-share-edit-save'),
+          onPressed: _canSave
+              ? () => Navigator.of(context).pop<FamilySharingCategoryEdit>((
+                    categories: [
+                      for (final c in ShareCategory.values)
+                        if (_categories.contains(c)) c,
+                    ],
+                    dependentShareConfirmed:
+                        widget.isDependentTarget && _dependentConfirmed,
+                  ))
+              : null,
+          child: Text(l10n.familySharingSave),
+        ),
+      ],
+    );
+  }
+}
+
 /// Bottom sheet to enter and accept a 10-char invite code. Pops `true` on success.
 class FamilySharingAcceptSheet extends ConsumerStatefulWidget {
   const FamilySharingAcceptSheet({super.key});
@@ -200,6 +431,7 @@ class _FamilySharingAcceptSheetState
   bool _submitting = false;
   bool _failed = false;
   bool _tooManyAttempts = false;
+  bool _ownCode = false;
 
   @override
   void dispose() {
@@ -223,6 +455,8 @@ class _FamilySharingAcceptSheetState
           _failed = true;
           // The server caps failed codes per account (429 for 15 minutes).
           _tooManyAttempts = e is ProfileApiException && e.statusCode == 429;
+          _ownCode =
+              e is ProfileApiException && e.code == 'INVITE_OWN_PROFILE';
         });
       }
     } finally {
@@ -259,10 +493,13 @@ class _FamilySharingAcceptSheetState
             ],
             decoration: InputDecoration(
               labelText: l10n.familySharingAcceptFieldLabel,
+              errorMaxLines: 3,
               errorText: _failed
                   ? (_tooManyAttempts
                       ? l10n.familySharingAcceptTooMany
-                      : l10n.familySharingAcceptError)
+                      : _ownCode
+                          ? l10n.familySharingAcceptOwnCode
+                          : l10n.familySharingAcceptError)
                   : null,
             ),
             onChanged: (_) => setState(() => _failed = false),

@@ -13,7 +13,10 @@ import '../../../house_ads/presentation/house_ad_card.dart';
 import '../../../journal_insights/domain/chart_data.dart';
 import '../../../journal_insights/domain/history_series.dart' show periodStart;
 import '../../../journal_insights/presentation/widgets/water_charts.dart';
+import '../../../profile/domain/models/share_category.dart';
+import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
+import '../../../profile/presentation/widgets/not_shared_placeholder.dart';
 import '../controllers/hydration_controller.dart';
 import '../widgets/hydration_visuals.dart';
 import '../widgets/water_intake_modal.dart';
@@ -52,7 +55,10 @@ class _HydrationDashboardScreenState
     final l10n = AppLocalizations.of(context);
     final state = ref.watch(hydrationControllerProvider);
     final notifier = ref.read(hydrationControllerProvider.notifier);
-    final viewOnly = activeProfileIsViewOnly(ref);
+    // Water is part of the habits category.
+    final canRead = activeProfileCanRead(ref, ShareCategory.habits);
+    final viewOnly = activeProfileIsViewOnly(ref) ||
+        !activeProfileCanWrite(ref, ShareCategory.habits);
 
     ref.listen<HydrationState>(hydrationControllerProvider, (prev, next) {
       if (prev != null &&
@@ -62,7 +68,23 @@ class _HydrationDashboardScreenState
       }
     });
 
-    final content = state.isLoading
+    final content = !canRead
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const ActiveProfileBanner(),
+              Expanded(
+                child: NotSharedPlaceholder(
+                  profileName: ref
+                          .watch(activeProfileControllerProvider)
+                          .activeProfile
+                          ?.name ??
+                      '',
+                ),
+              ),
+            ],
+          )
+        : state.isLoading
         ? const Center(child: CircularProgressIndicator())
         : state.loadError != null
         ? LoadErrorView(error: state.loadError!, onRetry: () => notifier.loadData())

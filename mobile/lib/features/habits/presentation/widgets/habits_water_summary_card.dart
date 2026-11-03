@@ -9,6 +9,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../hydration/presentation/screens/hydration_dashboard_screen.dart';
 import '../../../hydration/presentation/widgets/water_intake_modal.dart';
+import '../../../profile/domain/models/share_category.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 
 /// Premium "Hábitos" tab: today's water at a glance, quick logging, and a link
@@ -21,7 +22,8 @@ class HabitsWaterSummaryCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final water = ref.watch(hydrationControllerProvider);
     if (!water.settings.trackingEnabled) return const SizedBox.shrink();
-    final viewOnly = activeProfileIsViewOnly(ref);
+    final viewOnly = activeProfileIsViewOnly(ref) ||
+        !activeProfileCanWrite(ref, ShareCategory.habits);
 
     Widget chip(String key, String emoji, String label, VoidCallback onTap) {
       return Expanded(

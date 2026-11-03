@@ -14,6 +14,7 @@ import { Reflector } from '@nestjs/core';
 import { and, eq, sql } from 'drizzle-orm';
 import { DatabaseService, DrizzleTransaction } from '../../database/database.service';
 import { profiles } from '../../database/schema/profiles.schema';
+import { SHARE_CATEGORIES, ShareCategory } from '../../database/schema/shared-access-grants.schema';
 import { users } from '../../database/schema/users.schema';
 
 /** Optional request header selecting whose clinical data the request reads or writes. */
@@ -24,7 +25,36 @@ export type ProfileAccessMode = 'read' | 'write';
 export type ProfileContext = {
   profileId: string;
   accessLevel: 'OWNER' | 'CO_MANAGE' | 'VIEW_ONLY';
+  /** Categories the caller may read on this profile, in SHARE_CATEGORIES order (all for OWNER). */
+  readableCategories: ShareCategory[];
+  /** Categories the caller may write on this profile, in SHARE_CATEGORIES order (all for OWNER). */
+  writableCategories: ShareCategory[];
 };
+
+export const CATEGORY_NOT_SHARED_MESSAGE = 'Esta categoria não foi compartilhada com você.';
+
+/** Category of a journal entry from its area; same rule as app_journal_area_category (0028). */
+export function journalAreaCategory(area?: string | null): ShareCategory {
+  return area === 'physical' ? 'physical_journal' : 'emotional_journal';
+}
+
+/**
+ * 403 unless the caller may use the category in this mode. For handlers whose category
+ * depends on the body (journal entries, option suggestions). RLS stays the authority.
+ */
+export function assertCategory(profile: ProfileContext, mode: ProfileAccessMode, category: ShareCategory): void {
+  const allowed = mode === 'write' ? profile.writableCategories : profile.readableCategories;
+  if (!allowed.includes(category)) {
+    throw new ForbiddenException(CATEGORY_NOT_SHARED_MESSAGE);
+  }
+}
+
+const ownerContext = (profileId: string): ProfileContext => ({
+  profileId,
+  accessLevel: 'OWNER',
+  readableCategories: [...SHARE_CATEGORIES],
+  writableCategories: [...SHARE_CATEGORIES],
+});
 
 export interface ProfileAccessOptions {
   /**
@@ -39,11 +69,23 @@ export interface ProfileAccessOptions {
    * the profile on screen (help-resource events).
    */
   ownProfilesOnly?: boolean;
+  /**
+   * Data category (or categories, all required) the route touches. A shared profile whose
+   * grants do not open it in this mode gets 403 CATEGORY_NOT_SHARED_MESSAGE instead of the
+   * empty result RLS would give. Leave unset for routes that mix categories.
+   */
+  category?: ShareCategory | ShareCategory[];
 }
 
 const PROFILE_ACCESS_KEY = 'profileAccess';
 
 type ProfileAccessMetadata = ProfileAccessOptions & { mode: ProfileAccessMode };
+
+/** SHARE_CATEGORIES (in order) present in a DB array; unknown values are dropped. */
+function knownCategories(value: unknown): ShareCategory[] {
+  const values = Array.isArray(value) ? value : [];
+  return SHARE_CATEGORIES.filter((category) => values.includes(category));
+}
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -65,6 +107,7 @@ export const ActiveProfile = createParamDecorator(
  * - ownProfilesOnly: a header naming a profile the caller does not own falls back to
  *   the primary profile.
  * - 'write' mode rejects VIEW_ONLY.
+ * - options.category must be readable (or writable, in 'write' mode) on the profile.
  */
 @Injectable()
 export class ProfileContextGuard implements CanActivate {
@@ -112,23 +155,43 @@ export class ProfileContextGuard implements CanActivate {
       throw new ForbiddenException('Acesso somente leitura a este perfil.');
     }
 
+    if (metadata?.category !== undefined) {
+      const categories = Array.isArray(metadata.category) ? metadata.category : [metadata.category];
+      for (const category of categories) {
+        assertCategory(profileContext, mode, category);
+      }
+    }
+
     request.profileContext = profileContext;
     return true;
   }
 
   private async resolveRequested(tx: DrizzleTransaction, profileId: string): Promise<ProfileContext> {
+    const categories = sql`ARRAY[${sql.join(
+      SHARE_CATEGORIES.map((category) => sql`${category}`),
+      sql`, `,
+    )}]::text[]`;
     const result = await tx.execute(sql`
       SELECT app_owns_profile(${profileId}::uuid) AS is_owner,
              app_has_profile_grant(${profileId}::uuid, false) AS can_read,
-             app_has_profile_grant(${profileId}::uuid, true) AS can_co_manage
+             app_has_profile_grant(${profileId}::uuid, true) AS can_co_manage,
+             ARRAY(SELECT c FROM unnest(${categories}) AS c
+                   WHERE app_can_read_profile_category(${profileId}::uuid, c)) AS readable,
+             ARRAY(SELECT c FROM unnest(${categories}) AS c
+                   WHERE app_can_write_profile_category(${profileId}::uuid, c)) AS writable
     `);
-    const row = (result as unknown as { rows: Array<Record<string, boolean>> }).rows[0];
+    const row = (result as unknown as { rows: Array<Record<string, unknown>> }).rows[0];
 
-    if (row?.is_owner) return { profileId, accessLevel: 'OWNER' };
-    if (row?.can_co_manage) return { profileId, accessLevel: 'CO_MANAGE' };
-    if (row?.can_read) return { profileId, accessLevel: 'VIEW_ONLY' };
+    if (row?.is_owner) return ownerContext(profileId);
+    const accessLevel = row?.can_co_manage ? 'CO_MANAGE' : row?.can_read ? 'VIEW_ONLY' : undefined;
     // Same answer for unknown and foreign profiles: no enumeration.
-    throw new ForbiddenException('Sem acesso a este perfil.');
+    if (!accessLevel) throw new ForbiddenException('Sem acesso a este perfil.');
+    return {
+      profileId,
+      accessLevel,
+      readableCategories: knownCategories(row?.readable),
+      writableCategories: knownCategories(row?.writable),
+    };
   }
 
   private async resolveOwnedOrPrimary(
@@ -145,7 +208,7 @@ export class ProfileContextGuard implements CanActivate {
 
   private async resolvePrimary(tx: DrizzleTransaction, userId: string): Promise<ProfileContext> {
     const existing = await this.findPrimaryId(tx, userId);
-    if (existing) return { profileId: existing, accessLevel: 'OWNER' };
+    if (existing) return ownerContext(existing);
 
     const [user] = await tx
       .select({ name: users.name, gender: users.gender, dateOfBirth: users.dateOfBirth })
@@ -174,7 +237,7 @@ export class ProfileContextGuard implements CanActivate {
     if (!profileId) {
       throw new NotFoundException('Primary profile not found.');
     }
-    return { profileId, accessLevel: 'OWNER' };
+    return ownerContext(profileId);
   }
 
   private async findPrimaryId(tx: DrizzleTransaction, userId: string): Promise<string | undefined> {

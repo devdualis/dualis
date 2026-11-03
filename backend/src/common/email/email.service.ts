@@ -1,7 +1,7 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
-import { EMAIL_LOGO_ATTACHMENT, renderCodeEmail } from './email-template';
+import { EMAIL_LOGO_ATTACHMENT, escapeHtml, renderCodeEmail } from './email-template';
 
 const RESEND_API_URL = 'https://api.resend.com/emails';
 const SEND_TIMEOUT_MS = 10_000;
@@ -155,6 +155,39 @@ export class EmailService {
       normalizedEmail,
       `${code} é seu código de redefinição de senha DualisCheckUp`,
       `Olá${firstName ? ` ${firstName}` : ''}, seu código de redefinição de senha do DualisCheckUp é: ${code}. Ele expira em 15 minutos. Se você não solicitou, ignore esta mensagem.`,
+      htmlContent,
+    );
+  }
+
+  /**
+   * Hand-over notice (D3): sent once to the guardian when a dependent under their care
+   * turns 18. It carries no code and no link; the guardian generates the transfer code
+   * in the app.
+   */
+  async sendHandoverDueEmail(to: string, guardianName: string, dependentFirstName: string): Promise<void> {
+    const normalizedEmail = to.toLowerCase().trim();
+    const firstName = guardianName?.trim().split(' ')[0];
+    const dependent = dependentFirstName.trim();
+
+    // No code in this notice; in simulation mode log it so local QA can see it was sent once.
+    if (!this.apiKey && process.env.NODE_ENV !== 'production') {
+      this.logger.log(
+        `[EmailService] Simulação: aviso de transferência aos 18 anos para ${normalizedEmail} (${dependent})`,
+      );
+    }
+
+    const htmlContent = renderCodeEmail({
+      preheader: `${escapeHtml(dependent)} completou 18 anos e o perfil pode passar para a conta própria.`,
+      title: 'Hora de transferir o perfil',
+      firstName,
+      intro: `<strong>${escapeHtml(dependent)}</strong> completou 18 anos. O perfil de ${escapeHtml(dependent)} no <strong>Dualis CheckUp</strong> pode passar para a conta própria dessa pessoa. Para isso, abra o app, vá em <strong>Perfis</strong> e gere um código de transferência. Até a transferência, você continua com acesso ao perfil.`,
+      ignoreNote: 'Este aviso é enviado uma única vez. O código de transferência só aparece no app, nunca por e-mail.',
+    });
+
+    await this.deliver(
+      normalizedEmail,
+      `O perfil de ${dependent} pode passar para a conta própria`,
+      `Olá${firstName ? ` ${firstName}` : ''}, ${dependent} completou 18 anos. O perfil de ${dependent} no Dualis CheckUp pode passar para a conta própria dessa pessoa. Abra o app, vá em Perfis e gere um código de transferência. Até a transferência, você continua com acesso ao perfil.`,
       htmlContent,
     );
   }

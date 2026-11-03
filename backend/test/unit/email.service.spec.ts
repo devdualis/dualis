@@ -84,6 +84,44 @@ describe('EmailService (Resend)', () => {
     }
   });
 
+  it('sends the hand-over notice to the guardian in pt-BR, without any code or link', async () => {
+    await new EmailService().sendHandoverDueEmail(' Ana@Example.com ', 'Ana Souza', '<i>Lucas</i>');
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.to).toEqual(['ana@example.com']);
+    expect(body.subject).toBe('O perfil de <i>Lucas</i> pode passar para a conta própria');
+    for (const part of [body.text, body.html]) {
+      expect(part).toContain('18 anos');
+      expect(part).toContain('Perfis');
+      expect(part).toMatch(/c[óo]digo de transferência/);
+    }
+    expect(body.text).toContain('Ana');
+    expect(body.html).toContain('&#60;i&#62;Lucas');
+    expect(body.html).not.toContain('<i>Lucas');
+    expect(body.html).not.toContain('Seu código');
+    expect(`${body.text}\n${body.html}`).not.toMatch(/https?:\/\/(?!www\.w3\.org)/);
+    expect(findBannedVocabulary(`${body.subject}\n${body.text}\n${body.html}`)).toEqual([]);
+  });
+
+  it('logs the hand-over notice in simulation mode (no API key, not production)', async () => {
+    delete process.env.RESEND_API_KEY;
+    const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+
+    await new EmailService().sendHandoverDueEmail('ana@example.com', 'Ana', 'Lucas');
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(log).toHaveBeenCalledWith(
+      expect.stringContaining('Simulação: aviso de transferência aos 18 anos para ana@example.com (Lucas)'),
+    );
+  });
+
+  it('does not send the hand-over notice under NODE_ENV test', async () => {
+    process.env.NODE_ENV = 'test';
+    await new EmailService().sendHandoverDueEmail('ana@example.com', 'Ana', 'Lucas');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('does not call Resend without an API key', async () => {
     delete process.env.RESEND_API_KEY;
     const service = new EmailService();

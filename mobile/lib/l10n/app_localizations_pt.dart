@@ -682,6 +682,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get familySharingAcceptError => 'Código inválido ou expirado.';
 
   @override
+  String get familySharingAcceptOwnCode =>
+      'Este código é seu. Envie-o para a pessoa que vai acompanhar você.';
+
+  @override
   String get familySharingAcceptTooMany =>
       'Muitas tentativas. Aguarde 15 minutos e tente de novo.';
 
@@ -724,7 +728,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get addDependentRelationshipCurator =>
-      'Curador(a) de maior incapaz (Curatela)';
+      'Curador(a) de pessoa maior (Curatela)';
 
   @override
   String get addDependentRelationshipLegalGuardian =>
@@ -733,6 +737,30 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get addDependentLgpdArt14Consent =>
       'Declaro, sob as penas da lei, que sou pai, mãe ou representante legal deste dependente e autorizo expressamente a coleta e tratamento dos seus dados de bem-estar na plataforma DualisCheckUp, em estrita conformidade com o Artigo 14 da LGPD (Lei 13.709/2018).';
+
+  @override
+  String get addDependentRelationshipSupportedDecision =>
+      'Apoiador(a) em tomada de decisão apoiada';
+
+  @override
+  String get addDependentRelationshipMinorHint =>
+      'Para menores de 18 anos: poder familiar ou tutela.';
+
+  @override
+  String get addDependentRelationshipAdultHint =>
+      'Para maiores de 18 anos: curatela ou tomada de decisão apoiada.';
+
+  @override
+  String get addDependentPickBirthDateFirst =>
+      'Informe a data de nascimento para ver os vínculos possíveis.';
+
+  @override
+  String get addDependentLgpdArt11Consent =>
+      'Declaro, sob as penas da lei, que sou curador(a) ou apoiador(a) desta pessoa, nos termos da decisão judicial ou do termo de apoio, e autorizo expressamente a coleta e o tratamento dos seus dados de bem-estar na plataforma DualisCheckUp, conforme o Artigo 11, inciso I, da LGPD (Lei 13.709/2018).';
+
+  @override
+  String get addDependentNotesLabel =>
+      'Número do processo / observações (opcional)';
 
   @override
   String get addDependentSubmit => 'Cadastrar Dependente';
@@ -793,7 +821,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get profileSwitcherBadgeMinor => 'Menor de idade';
 
   @override
-  String get profileSwitcherBadgeAdult => 'Maior sob tutela';
+  String get profileSwitcherBadgeAdult => 'Maior com representação legal';
 
   @override
   String get profileSwitcherBadgeViewOnly => 'Somente leitura';
@@ -5675,4 +5703,165 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get jv24SummaryDetailsTitle => 'O que você registrou';
+
+  @override
+  String get familySharingRelationshipLabel => 'Quem é essa pessoa para você?';
+
+  @override
+  String get familySharingRelationshipSpousePartner => 'Cônjuge ou parceiro(a)';
+
+  @override
+  String get familySharingRelationshipSibling => 'Irmão ou irmã';
+
+  @override
+  String get familySharingRelationshipParent => 'Pai ou mãe';
+
+  @override
+  String get familySharingRelationshipChild => 'Filho ou filha';
+
+  @override
+  String get familySharingRelationshipOtherFamily => 'Outro familiar';
+
+  @override
+  String get familySharingRelationshipCaregiver => 'Cuidador(a)';
+
+  @override
+  String get familySharingRelationshipFriend => 'Amigo(a)';
+
+  @override
+  String get familySharingRelationshipOther => 'Outro';
+
+  @override
+  String get familySharingRelationshipUnknown => 'Não informado';
+
+  @override
+  String get familySharingCategoriesLabel => 'O que essa pessoa poderá ver';
+
+  @override
+  String get familySharingCategoryHabits => 'Hábitos (água, sono, movimento)';
+
+  @override
+  String get familySharingCategoryPhysicalJournal => 'Diário do corpo';
+
+  @override
+  String get familySharingCategoryEmotionalJournal => 'Diário emocional';
+
+  @override
+  String get familySharingCategoryConditions => 'Condições e medições';
+
+  @override
+  String get familySharingCategoryCare =>
+      'Cuidados (medicamentos, consultas, exames)';
+
+  @override
+  String get familySharingCategoriesRequired =>
+      'Escolha ao menos uma categoria.';
+
+  @override
+  String get familySharingEmotionalExplanation =>
+      'O diário emocional guarda o que você sente e escreve. Marque só se confia plenamente nessa pessoa.';
+
+  @override
+  String get familySharingSafetyNeverShared =>
+      'Pedidos de ajuda nunca são compartilhados.';
+
+  @override
+  String get familySharingDependentConfirm =>
+      'Sou responsável legal por este perfil e autorizo compartilhar as categorias marcadas com essa pessoa.';
+
+  @override
+  String get familySharingEditCategories => 'Editar o que é compartilhado';
+
+  @override
+  String get familySharingSave => 'Salvar';
+
+  @override
+  String get familySharingEditError =>
+      'Não foi possível salvar as alterações. Tente novamente.';
+
+  @override
+  String get profileClaimEntry => 'Tenho um código de transferência';
+
+  @override
+  String get profileClaimTitle => 'Receber meu perfil';
+
+  @override
+  String get profileClaimBody =>
+      'Digite o código que a pessoa responsável gerou no app dela. Seu histórico passa para esta conta.';
+
+  @override
+  String get profileClaimCodeLabel => 'Código de transferência';
+
+  @override
+  String get profileClaimSubmit => 'Receber perfil';
+
+  @override
+  String get profileClaimSuccess => 'Perfil recebido. Agora ele é seu.';
+
+  @override
+  String get profileClaimErrorInvalid => 'Código inválido ou expirado.';
+
+  @override
+  String get profileClaimErrorGuardian =>
+      'Este código deve ser usado na conta da pessoa que fez 18 anos.';
+
+  @override
+  String get profileClaimErrorNotAdult =>
+      'A transferência só é possível a partir dos 18 anos.';
+
+  @override
+  String get profileClaimErrorAccountHasData =>
+      'Esta conta já tem registros. Use uma conta nova para receber o perfil.';
+
+  @override
+  String get profileClaimErrorTooMany =>
+      'Muitas tentativas. Tente de novo em alguns minutos.';
+
+  @override
+  String profileHandoverDueBanner(String name) {
+    return '$name fez 18 anos. O perfil pode passar para a conta própria.';
+  }
+
+  @override
+  String get profileHandoverGenerate => 'Gerar código de transferência';
+
+  @override
+  String get profileHandoverCodeTitle => 'Código de transferência';
+
+  @override
+  String profileHandoverCodeBody(String name, String date) {
+    return 'Entregue este código para $name. Vale até $date. Até a transferência, você continua com acesso.';
+  }
+
+  @override
+  String get profileHandoverCopy => 'Copiar código';
+
+  @override
+  String profileHandoverCodeActive(String date) {
+    return 'Código ativo até $date';
+  }
+
+  @override
+  String profileLegalBasisBanner(String name) {
+    return 'Confirme a base legal do cadastro de $name.';
+  }
+
+  @override
+  String get profileLegalBasisConfirm => 'Confirmar';
+
+  @override
+  String get profileCategoryNotSharedTitle => 'Não compartilhado com você';
+
+  @override
+  String profileCategoryNotSharedBody(String name) {
+    return '$name não compartilhou esta área com você.';
+  }
+
+  @override
+  String get historyOnlyPhysicalShared =>
+      'Você vê apenas o diário do corpo deste perfil.';
+
+  @override
+  String get historyOnlyEmotionalShared =>
+      'Você vê apenas o diário emocional deste perfil.';
 }

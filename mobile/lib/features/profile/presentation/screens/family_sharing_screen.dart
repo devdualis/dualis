@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../data/profile_repository.dart';
 import '../../domain/models/shared_access_grant.dart';
 import '../controllers/active_profile_controller.dart';
 import '../widgets/family_sharing_dialogs.dart';
@@ -141,6 +142,36 @@ class _FamilySharingBodyState extends ConsumerState<_FamilySharingBody>
     }
   }
 
+  Future<void> _editCategories(SharedAccessGrant grant) async {
+    final l10n = AppLocalizations.of(context);
+    final isDependentTarget = ref
+        .read(activeProfileControllerProvider)
+        .ownProfiles
+        .any((p) => p.id == grant.targetProfileId && !p.isPrimary);
+    final edit = await showDialog<FamilySharingCategoryEdit>(
+      context: context,
+      builder: (_) => FamilySharingEditCategoriesDialog(
+        grant: grant,
+        isDependentTarget: isDependentTarget,
+      ),
+    );
+    if (edit == null || !mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(activeProfileControllerProvider.notifier).updateGrant(
+            grant.id,
+            categories: edit.categories,
+            dependentShareConfirmed: edit.dependentShareConfirmed,
+          );
+    } catch (e) {
+      // e.g. 409 GRANT_SCOPE_LOCKED: the backend message says why.
+      messenger.showSnackBar(SnackBar(
+          content: Text(e is ProfileApiException && e.message.isNotEmpty
+              ? e.message
+              : l10n.familySharingEditError)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -183,6 +214,7 @@ class _FamilySharingBodyState extends ConsumerState<_FamilySharingBody>
                   onAction: _openInvite,
                   emptyText: l10n.familySharingEmptyOutgoing,
                   onRevoke: _confirmRevoke,
+                  onEditCategories: _editCategories,
                 ),
                 _GrantList(
                   grants: state.incomingGrants,
@@ -210,6 +242,8 @@ class _GrantList extends StatelessWidget {
   final VoidCallback onAction;
   final String emptyText;
   final ValueChanged<SharedAccessGrant> onRevoke;
+  /// Outgoing list only; incoming grants are read-only.
+  final ValueChanged<SharedAccessGrant>? onEditCategories;
 
   const _GrantList({
     required this.grants,
@@ -219,6 +253,7 @@ class _GrantList extends StatelessWidget {
     required this.onAction,
     required this.emptyText,
     required this.onRevoke,
+    this.onEditCategories,
   });
 
   @override
@@ -253,6 +288,9 @@ class _GrantList extends StatelessWidget {
                 ? 'family-share-revoke'
                 : 'family-share-revoke-${g.id}'),
             onRevoke: () => onRevoke(g),
+            onEditCategories: onEditCategories == null
+                ? null
+                : () => onEditCategories!(g),
           ),
       ],
     );
@@ -263,11 +301,13 @@ class _GrantTile extends StatelessWidget {
   final SharedAccessGrant grant;
   final Key revokeKey;
   final VoidCallback onRevoke;
+  final VoidCallback? onEditCategories;
 
   const _GrantTile({
     required this.grant,
     required this.revokeKey,
     required this.onRevoke,
+    this.onEditCategories,
   });
 
   bool get _isExpired =>
@@ -344,12 +384,50 @@ class _GrantTile extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 8),
+            Text(
+              relationshipLabel(l10n, grant.relationship),
+              key: ValueKey('grant-relationship-${grant.id}'),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            if (grant.categories.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: [
+                  for (final c in grant.categories)
+                    Chip(
+                      key: ValueKey('grant-category-${grant.id}-${c.apiValue}'),
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      labelStyle: Theme.of(context).textTheme.labelSmall,
+                      label: Text(shareCategoryLabel(l10n, c)),
+                    ),
+                ],
+              ),
+            ],
             if (grantee != null) ...[
               const SizedBox(height: 8),
               Text(
                 l10n.familySharingSharedWith(grantee),
                 key: ValueKey('family-share-grantee-${grant.id}'),
                 style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+            // The PATCH accepts PENDING and ACCEPTED grants only.
+            if (onEditCategories != null &&
+                (grant.isActive ||
+                    (grant.status == GrantStatus.pending && !_isExpired))) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  key: ValueKey('grant-edit-categories-${grant.id}'),
+                  onPressed: onEditCategories,
+                  icon: const Icon(Icons.tune, size: 18),
+                  label: Text(l10n.familySharingEditCategories),
+                ),
               ),
             ],
             if (grant.isActive) ...[

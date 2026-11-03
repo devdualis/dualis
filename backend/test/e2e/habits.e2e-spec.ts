@@ -84,6 +84,29 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)('Daily habits HTTP with real loc
     }
     expect((await app.inject({ method: 'GET', url: '/v1/habits', headers: headers(f.stranger, f.dependent) })).statusCode).toBe(403);
   });
+  it('returns 403 with a clear message when the grant does not include habits (Phase 11.1)', async () => {
+    await f.admin.query("UPDATE shared_access_grants SET categories = ARRAY['care']::text[] WHERE grantee_user_id = $1", [f.manager]);
+    try {
+      for (const request of [
+        { method: 'GET' as const, url: '/v1/habits' },
+        { method: 'PUT' as const, url: `/v1/habits/${today}`, payload: { period: true } },
+      ]) {
+        const response = await app.inject({ ...request, headers: headers(f.manager, f.dependent) });
+        expect(response.statusCode, response.body).toBe(403);
+        expect(response.json().message).toBe('Esta categoria não foi compartilhada com você.');
+      }
+      // RLS itself (0028 category policies), not only the guard: the rows exist but the grantee reads none and writes none.
+      const count = (userId: string) => f.asUser(userId, async (client) =>
+        (await client.query('SELECT count(*)::int AS n FROM daily_habits WHERE profile_id = $1', [f.dependent])).rows[0].n);
+      expect(await count(f.owner)).toBeGreaterThan(0);
+      expect(await count(f.manager)).toBe(0);
+      await expect(f.asUser(f.manager, (client) => client.query(
+        'INSERT INTO daily_habits (profile_id, day, user_id) VALUES ($1, $2, $3)', [f.dependent, dayAgo(3), f.manager],
+      ))).rejects.toThrow(/row-level security/);
+    } finally {
+      await f.admin.query("UPDATE shared_access_grants SET categories = ARRAY['habits']::text[] WHERE grantee_user_id = $1", [f.manager]);
+    }
+  });
   it('exports only owned profiles habits, including records authored by a co-manager', async () => {
     await f.habits.putDay(f.stranger, f.foreign, today, { sleepQuality: 'mal' });
     const exported = await auth.exportUserData(f.owner);

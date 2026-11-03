@@ -20,6 +20,8 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
   ActiveProfile,
+  assertCategory,
+  journalAreaCategory,
   ProfileAccess,
   ProfileContext,
   ProfileContextGuard,
@@ -69,6 +71,9 @@ export class JournalController {
     @ActiveProfile() profile: ProfileContext,
     @Body() dto: CreateJournalEntryDto,
   ): Promise<JournalEntryDto> {
+    // Before the service: its clientId replay lookup runs under RLS, and a hidden entry
+    // would otherwise surface as a 409 that reveals it exists (11.1 RESEARCH Pitfall 4).
+    assertCategory(profile, 'write', journalAreaCategory(dto.area));
     return this.journalService.createEntry(userIdOf(req), profile.profileId, dto);
   }
 
@@ -101,8 +106,11 @@ export class JournalController {
   @validate(SuggestJournalOptionDto)
   suggestOption(
     @Request() req: any,
+    @ActiveProfile() profile: ProfileContext,
     @Body() dto: SuggestJournalOptionDto,
   ): Promise<SuggestJournalOptionResponseDto> {
+    // No text leaves the backend for a branch the caller may not write on this profile.
+    assertCategory(profile, 'write', dto.kind === 'physical' ? 'physical_journal' : 'emotional_journal');
     return this.journalSuggest.suggest(dto.text, dto.kind, dto.branch, dto.bodySide, userIdOf(req));
   }
 
@@ -118,7 +126,7 @@ export class JournalController {
   }
 
   @Get('conditions')
-  @ProfileAccess('read')
+  @ProfileAccess('read', { category: 'conditions' })
   listConditions(
     @Request() req: any,
     @ActiveProfile() profile: ProfileContext,
@@ -128,7 +136,7 @@ export class JournalController {
 
   @Post('conditions')
   @HttpCode(HttpStatus.CREATED)
-  @ProfileAccess('write')
+  @ProfileAccess('write', { category: 'conditions' })
   @validate(CreateConditionDto)
   createCondition(
     @Request() req: any,
@@ -139,7 +147,7 @@ export class JournalController {
   }
 
   @Patch('conditions/:id')
-  @ProfileAccess('write')
+  @ProfileAccess('write', { category: 'conditions' })
   updateCondition(
     @Request() req: any,
     @ActiveProfile() profile: ProfileContext,
@@ -151,7 +159,7 @@ export class JournalController {
 
   /** Readings of one condition, newest first, as typed (v2.4). Not sent anywhere else. */
   @Get('conditions/:id/readings')
-  @ProfileAccess('read')
+  @ProfileAccess('read', { category: 'conditions' })
   listConditionReadings(
     @Request() req: any,
     @ActiveProfile() profile: ProfileContext,
@@ -163,7 +171,7 @@ export class JournalController {
 
   @Delete('conditions/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ProfileAccess('write')
+  @ProfileAccess('write', { category: 'conditions' })
   async archiveCondition(
     @Request() req: any,
     @ActiveProfile() profile: ProfileContext,

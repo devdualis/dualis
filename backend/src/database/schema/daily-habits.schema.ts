@@ -22,13 +22,13 @@ export const dailyHabits = pgTable('daily_habits', {
   check('daily_habits_sleep_hours_check', sql`${table.sleepHours} IN ('menos_5', '5_6', '7_8', '9_mais')`),
   check('daily_habits_movement_minutes_check', sql`${table.movementMinutes} IN ('ate_15', '15_30', '30_60', 'mais_60')`),
   check('daily_habits_movement_check', sql`${table.movementMinutes} IS NULL OR ${table.moved} IS TRUE`),
-  pgPolicy('daily_habits_profile_select', { for: 'select', using: sql`app_can_read_profile(profile_id)` }),
+  pgPolicy('daily_habits_profile_select', { for: 'select', using: sql`app_can_read_profile_category(profile_id, 'habits')` }),
   pgPolicy('daily_habits_profile_insert', {
     for: 'insert',
-    withCheck: sql`app_can_write_profile(profile_id) AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`,
+    withCheck: sql`app_can_write_profile_category(profile_id, 'habits') AND user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`,
   }),
   pgPolicy('daily_habits_profile_update', {
-    for: 'update', using: sql`app_can_write_profile(profile_id)`, withCheck: sql`app_can_write_profile(profile_id)`,
+    for: 'update', using: sql`app_can_write_profile_category(profile_id, 'habits')`, withCheck: sql`app_can_write_profile_category(profile_id, 'habits')`,
   }),
-  pgPolicy('daily_habits_profile_delete', { for: 'delete', using: sql`app_can_write_profile(profile_id)` }),
+  pgPolicy('daily_habits_profile_delete', { for: 'delete', using: sql`app_can_write_profile_category(profile_id, 'habits')` }),
 ]);

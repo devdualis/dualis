@@ -133,9 +133,9 @@ describe('Security Regression: 0017 journal v2 (journal_entries, journal_items, 
     );
     await adminPool.query(
       `INSERT INTO shared_access_grants
-         (granter_user_id, target_profile_id, grantee_user_id, access_level, invite_code, status, expires_at, accepted_at)
-       VALUES ($1, $2, $3, 'VIEW_ONLY', 'JRNV21', 'ACCEPTED', now() + interval '72 hours', now()),
-              ($1, $2, $4, 'CO_MANAGE', 'JRNV22', 'ACCEPTED', now() + interval '72 hours', now())`,
+         (granter_user_id, target_profile_id, grantee_user_id, access_level, invite_code, status, expires_at, accepted_at, categories)
+       VALUES ($1, $2, $3, 'VIEW_ONLY', 'JRNV21', 'ACCEPTED', now() + interval '72 hours', now(), ARRAY['physical_journal', 'emotional_journal', 'conditions']::text[]),
+              ($1, $2, $4, 'CO_MANAGE', 'JRNV22', 'ACCEPTED', now() + interval '72 hours', now(), ARRAY['physical_journal', 'emotional_journal', 'conditions']::text[])`,
       [ownerA, dependentId, viewerB, coManagerC],
     );
     await adminPool.query(

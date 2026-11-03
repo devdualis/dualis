@@ -1,0 +1,7 @@
+## PATCH categories on revoked grant (Lucas)
+{"statusCode":409,"code":"GRANT_SCOPE_LOCKED","message":"Este compartilhamento foi encerrado e não pode mais ser alterado."} [HTTP 409]
+## Ana creates invite and accepts her own code
+{"id":"af02d490-a3d6-4b29-ba5b-d02c62e0eb57","inviteCode":"K3AAADGBTH","accessLevel":"VIEW_ONLY","targetProfileId":"868f
+{"message":"Cannot share access with yourself","error":"Bad Request","statusCode":400} [HTTP 400]
+## invalid code
+{"message":"Invite not found or expired","error":"Not Found","statusCode":404} [HTTP 404]

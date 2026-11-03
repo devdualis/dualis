@@ -1,0 +1,1 @@
+[2026-11-03 01:33:40.880 -0300] INFO: [EmailService] Simulação: aviso de transferência aos 18 anos para ana.qa111@example.com (Lucas) {"req":{"id":"req-2","method":"GET","url":"/v1/profiles","query":{

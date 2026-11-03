@@ -1,4 +1,5 @@
 import 'package:dualis_mobile/core/config/feature_flags.dart';
+import 'package:dualis_mobile/features/profile/data/profile_repository.dart';
 import 'package:dualis_mobile/features/profile/domain/models/profile.dart';
 import 'package:dualis_mobile/features/profile/presentation/controllers/active_profile_controller.dart';
 import 'package:dualis_mobile/features/profile/presentation/widgets/profile_app_bar_pill.dart';
@@ -17,9 +18,39 @@ class FakeActiveProfileController extends ActiveProfileController {
   String? renamedId;
   String? renamedNewName;
   String? deletedId;
+  final handoverCodeRequests = <String>[];
+  int refreshCalls = 0;
+
+  @override
+  Future<void> refresh() async => refreshCalls++;
+  final legalBasisConfirmed = <String>[];
 
   @override
   ActiveProfileState build() => _initialState;
+
+  @override
+  Future<HandoverCode> createHandoverCode(String profileId) async {
+    handoverCodeRequests.add(profileId);
+    return (code: 'HANDOVER01', expiresAt: DateTime(2026, 11, 5, 14, 30));
+  }
+
+  @override
+  Future<void> confirmLegalBasis(String profileId) async {
+    legalBasisConfirmed.add(profileId);
+    state = state.copyWith(profiles: [
+      for (final p in state.profiles)
+        p.id == profileId
+            ? Profile(
+                id: p.id,
+                name: p.name,
+                profileType: p.profileType,
+                ownership: p.ownership,
+                accessLevel: p.accessLevel,
+                lgpdLegalBasis: 'lgpd_art_11_i',
+              )
+            : p,
+    ]);
+  }
 
   @override
   void selectProfile(String profileId) {
@@ -313,6 +344,49 @@ void main() {
       );
     });
 
+    testWidgets('opening the switcher reloads profiles and grants',
+        (tester) async {
+      final fake = FakeActiveProfileController(
+        const ActiveProfileState(
+          profiles: [primaryProfile, sharedViewOnly],
+          activeProfileId: 'p-1',
+        ),
+      );
+
+      await tester.pumpWidget(_buildHost(fakeController: fake));
+      await tester.pumpAndSettle();
+      expect(fake.refreshCalls, 0);
+
+      await tester.tap(find.byKey(const ValueKey('profile-app-bar-pill')));
+      await tester.pumpAndSettle();
+
+      expect(fake.refreshCalls, 1);
+    });
+
+    testWidgets(
+        'a shared primary profile shows its access level, not "Titular"',
+        (tester) async {
+      final fake = FakeActiveProfileController(
+        const ActiveProfileState(
+          profiles: [primaryProfile, sharedViewOnly, sharedCoManage],
+          activeProfileId: 'p-1',
+        ),
+      );
+
+      await tester.pumpWidget(
+        _buildHost(
+          fakeController: fake,
+          child: const Scaffold(body: ProfileSelectionSheet()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Only the caller's own primary profile is "Titular".
+      expect(find.text('Titular'), findsOneWidget);
+      expect(find.text('Somente leitura'), findsOneWidget);
+      expect(find.text('Co-gestão'), findsOneWidget);
+    });
+
     testWidgets('the two driver keys exist: add-dependent and manage-sharing',
         (tester) async {
       final fake = FakeActiveProfileController(
@@ -403,6 +477,165 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(fake.deletedId, equals('dep-1'));
+    });
+  });
+
+  group('Hand-over and legal basis notices', () {
+    final adultChild = Profile(
+      id: 'dep-18',
+      name: 'Enzo Silva',
+      profileType: ProfileType.dependentMinor,
+      ownership: ProfileOwnership.dependent,
+      accessLevel: ProfileAccessLevel.owner,
+      dateOfBirth: DateTime(2008, 1, 10),
+      relationshipType: 'parent',
+      lgpdLegalBasis: 'lgpd_art_14',
+      handoverStatus: HandoverStatus.due,
+    );
+
+    Future<FakeActiveProfileController> pumpSheet(
+      WidgetTester tester,
+      List<Profile> profiles, {
+      bool premiumEnabled = true,
+    }) async {
+      final fake = FakeActiveProfileController(
+        ActiveProfileState(profiles: profiles, activeProfileId: 'p-1'),
+      );
+      await tester.pumpWidget(
+        _buildHost(
+          fakeController: fake,
+          premiumEnabled: premiumEnabled,
+          child: const Scaffold(body: ProfileSelectionSheet()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return fake;
+    }
+
+    testWidgets('due banner generates a code shown in a dialog with expiry',
+        (tester) async {
+      final fake = await pumpSheet(tester, [primaryProfile, adultChild]);
+
+      expect(find.byKey(const ValueKey('handover-banner-dep-18')),
+          findsOneWidget);
+      expect(
+        find.text(
+            'Enzo Silva fez 18 anos. O perfil pode passar para a conta própria.'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byKey(const ValueKey('handover-generate-dep-18')));
+      await tester.pumpAndSettle();
+
+      expect(fake.handoverCodeRequests, ['dep-18']);
+      expect(find.byKey(const ValueKey('handover-code-dialog')),
+          findsOneWidget);
+      final code = tester.widget<SelectableText>(
+          find.byKey(const ValueKey('handover-code-value')));
+      expect(code.data, 'HANDOVER01');
+      expect(
+        find.text('Entregue este código para Enzo Silva. Vale até '
+            '05/11/2026 14:30. Até a transferência, você continua com acesso.'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('handover-code-copy')), findsOneWidget);
+    });
+
+    testWidgets('codeActive shows the expiry and can regenerate',
+        (tester) async {
+      final withCode = Profile(
+        id: 'dep-18',
+        name: 'Enzo Silva',
+        profileType: ProfileType.dependentMinor,
+        ownership: ProfileOwnership.dependent,
+        accessLevel: ProfileAccessLevel.owner,
+        handoverStatus: HandoverStatus.codeActive,
+        handoverCodeExpiresAt: DateTime(2026, 11, 4, 9, 15),
+      );
+      final fake = await pumpSheet(tester, [primaryProfile, withCode]);
+
+      expect(find.text('Código ativo até 04/11/2026 09:15'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('handover-generate-dep-18')));
+      await tester.pumpAndSettle();
+      expect(fake.handoverCodeRequests, ['dep-18']);
+    });
+
+    testWidgets('no hand-over notice for minors, shared or none status',
+        (tester) async {
+      const sharedDue = Profile(
+        id: 'shared-due',
+        name: 'Carlos',
+        profileType: ProfileType.primary,
+        ownership: ProfileOwnership.shared,
+        accessLevel: ProfileAccessLevel.coManage,
+        handoverStatus: HandoverStatus.due,
+      );
+      await pumpSheet(tester, [primaryProfile, dependentMinor, sharedDue]);
+
+      expect(find.byKey(const ValueKey('handover-banner-dep-1')), findsNothing);
+      expect(find.byKey(const ValueKey('handover-banner-shared-due')),
+          findsNothing);
+    });
+
+    testWidgets('legal basis banner confirms after the Art. 11 declaration',
+        (tester) async {
+      const curated = Profile(
+        id: 'dep-adult',
+        name: 'Joana',
+        profileType: ProfileType.dependentAdult,
+        ownership: ProfileOwnership.dependent,
+        accessLevel: ProfileAccessLevel.owner,
+        relationshipType: 'curator',
+        lgpdLegalBasis: 'lgpd_art_14',
+        legalBasisNeedsConfirmation: true,
+      );
+      final fake = await pumpSheet(tester, [primaryProfile, curated]);
+
+      expect(find.byKey(const ValueKey('legal-basis-banner-dep-adult')),
+          findsOneWidget);
+      expect(find.text('Confirme a base legal do cadastro de Joana.'),
+          findsOneWidget);
+
+      await tester
+          .tap(find.byKey(const ValueKey('legal-basis-confirm-dep-adult')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('legal-basis-dialog')), findsOneWidget);
+      expect(find.textContaining('Artigo 11, inciso I'), findsOneWidget);
+      final submit = find.byKey(const ValueKey('legal-basis-confirm-submit'));
+      expect(tester.widget<FilledButton>(submit).onPressed, isNull);
+
+      await tester
+          .tap(find.byKey(const ValueKey('legal-basis-consent-checkbox')));
+      await tester.pumpAndSettle();
+      await tester.tap(submit);
+      await tester.pumpAndSettle();
+
+      expect(fake.legalBasisConfirmed, ['dep-adult']);
+      expect(find.byKey(const ValueKey('legal-basis-dialog')), findsNothing);
+      expect(find.byKey(const ValueKey('legal-basis-banner-dep-adult')),
+          findsNothing);
+    });
+
+    testWidgets('claim entry opens the claim sheet',
+        (tester) async {
+      await pumpSheet(tester, [primaryProfile]);
+
+      expect(find.byKey(const ValueKey('profile-claim-entry')), findsOneWidget);
+      expect(find.text('Tenho um código de transferência'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('profile-claim-entry')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Receber meu perfil'), findsOneWidget);
+      expect(find.byKey(const ValueKey('claim-code-field')), findsOneWidget);
+    });
+
+    testWidgets('claim entry hidden when the premium flag is off',
+        (tester) async {
+      await pumpSheet(tester, [primaryProfile], premiumEnabled: false);
+
+      expect(find.byKey(const ValueKey('profile-claim-entry')), findsNothing);
     });
   });
 }

@@ -1,0 +1,11 @@
+  usename   | application_name | state  
+------------+------------------+--------
+ dualis_app |                  | idle
+ postgres   | psql             | active
+(2 rows)
+
+  rolname   | rolsuper | rolbypassrls 
+------------+----------+--------------
+ dualis_app | f        | f
+(1 row)
+

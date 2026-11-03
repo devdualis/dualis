@@ -6,6 +6,7 @@ import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/profile.dart';
+import '../../domain/models/share_category.dart';
 import '../controllers/active_profile_controller.dart';
 
 Profile? _ownPrimaryProfile(ActiveProfileState state) {
@@ -31,14 +32,29 @@ bool activeProfileIsViewOnly(WidgetRef ref) {
   return profile != null && !profile.canEdit;
 }
 
+/// True on the own primary profile or with premium off, so builds without
+/// premium profiles behave as before.
+bool activeProfileCanRead(WidgetRef ref, ShareCategory category) {
+  if (!showsDelegatedActiveProfile(ref)) return true;
+  final profile = ref.watch(activeProfileControllerProvider).activeProfile;
+  return profile != null && profile.canRead(category);
+}
+
+bool activeProfileCanWrite(WidgetRef ref, ShareCategory category) {
+  if (!showsDelegatedActiveProfile(ref)) return true;
+  final profile = ref.watch(activeProfileControllerProvider).activeProfile;
+  return profile != null && profile.canWrite(category);
+}
+
 String profileContextSubtitle(Profile profile, AppLocalizations l10n) {
-  if (profile.isPrimary) {
-    return l10n.profileSwitcherBadgePrimary;
-  }
+  // Shared first: someone else's primary profile is not "Titular" here.
   if (profile.ownership == ProfileOwnership.shared) {
     return profile.accessLevel == ProfileAccessLevel.viewOnly
         ? l10n.profileSwitcherBadgeViewOnly
         : l10n.profileSwitcherBadgeCoManage;
+  }
+  if (profile.isPrimary) {
+    return l10n.profileSwitcherBadgePrimary;
   }
   if (profile.profileType == ProfileType.dependentMinor) {
     return l10n.profileSwitcherBadgeMinor;

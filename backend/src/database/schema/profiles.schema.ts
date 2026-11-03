@@ -40,7 +40,17 @@ export const profiles = pgTable(
       as: 'restrictive',
       for: 'update',
       using: sql`true`,
-      withCheck: sql`account_owner_id = app_profile_owner_id(id)`,
+      withCheck: sql`account_owner_id = app_profile_owner_id(id) OR (app_claimable_profile(id) AND app_in_claim_function())`,
+    }),
+    // Hand-over at 18 (0028): only inside claim_dependent_profile, with a live claim code.
+    pgPolicy('profiles_claim_select', {
+      for: 'select',
+      using: sql`app_claimable_profile(id) AND app_in_claim_function()`,
+    }),
+    pgPolicy('profiles_claim_update', {
+      for: 'update',
+      using: sql`app_claimable_profile(id) AND app_in_claim_function()`,
+      withCheck: sql`account_owner_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid`,
     }),
   ],
 );

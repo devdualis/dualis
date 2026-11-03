@@ -1,10 +1,17 @@
-import { AccessLevel, GrantStatus } from '../../../database/schema/shared-access-grants.schema';
+import {
+  AccessLevel,
+  GrantRelationship,
+  GrantStatus,
+  ShareCategory,
+} from '../../../database/schema/shared-access-grants.schema';
 
 export class InviteCreatedResponseDto {
   id!: string;
   inviteCode!: string;
   accessLevel!: AccessLevel;
   targetProfileId!: string;
+  relationship!: GrantRelationship | null;
+  categories!: ShareCategory[];
   expiresAt!: Date | string;
 }
 
@@ -33,6 +40,9 @@ export class OutgoingGrantItemDto {
   targetProfileId!: string;
   targetProfileName!: string;
   accessLevel!: AccessLevel;
+  /** NULL on grants created before Phase 11.1 ("não informado", A7). */
+  relationship!: GrantRelationship | null;
+  categories!: ShareCategory[];
   status!: GrantStatus;
   inviteCode!: string;
   granteeUserId!: string | null;
@@ -51,6 +61,8 @@ export class IncomingGrantItemDto {
   targetProfileId!: string;
   targetProfileName!: string;
   accessLevel!: AccessLevel;
+  relationship!: GrantRelationship | null;
+  categories!: ShareCategory[];
   status!: GrantStatus;
   expiresAt!: Date | string;
   acceptedAt!: Date | string | null;

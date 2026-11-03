@@ -1,0 +1,32 @@
+## Ana GET /profiles names
+"name":"Ana Guardiã Teste"
+"name":"Sofia Tutelada Teste"
+"name":"Roberto Curatelado Teste"
+"name":"Helena Apoiada Teste"
+## Ana GET /habits with X-Profile-Id=Lucas
+{"message":"Sem acesso a este perfil.","error":"Forbidden","statusCode":403} [HTTP 403]
+## DB as dualis_app, user=Ana
+BEGIN
+              set_config              
+--------------------------------------
+ 20ad47ac-1743-4d89-b005-42a253895dec
+(1 row)
+
+ lucas_visible_to_ana 
+----------------------
+                    0
+(1 row)
+
+COMMIT
+## guardianship row (kept, closed)
+ relationship_type | closed | closed_reason 
+-------------------+--------+---------------
+ parent            | t      | handed_over
+(1 row)
+
+## grants on Lucas
+ status  | count 
+---------+-------
+ REVOKED |     1
+(1 row)
+

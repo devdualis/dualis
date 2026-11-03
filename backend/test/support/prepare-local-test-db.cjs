@@ -26,12 +26,15 @@ async function prepareLocalDatabase(connectionString) {
     const directory = join(__dirname, '../../src/database/migrations');
     const migrations = readdirSync(directory).filter((f) => /^\d{4}_.*\.sql$/.test(f)).sort();
     for (const file of migrations) await pool.query(readFileSync(join(directory, file), 'utf8'));
+    // Idempotency check: 0026 must survive a second run. That replay recreates the daily_habits
+    // policies without categories, so 0028 is replayed right after it to restore production order.
     await pool.query(readFileSync(join(directory, '0026_journal_v2_2_wellness.sql'), 'utf8'));
+    await pool.query(readFileSync(join(directory, '0028_guardianship_consent_gaps.sql'), 'utf8'));
     const privilege = await pool.query("SELECT bool_and(has_table_privilege('dualis_app', 'daily_habits', privilege)) AS ok FROM unnest(ARRAY['SELECT', 'INSERT', 'UPDATE', 'DELETE']) AS privilege");
     if (!privilege.rows[0].ok) throw new Error('Migration did not grant the runtime role habits access.');
     // Existing migrations do not provision runtime privileges on older tables.
     await pool.query('GRANT USAGE ON SCHEMA public TO dualis_app; GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO dualis_app');
-    console.log(`${migrations.length} migrations applied; 0026 replay passed; dualis_app habits grant verified.`);
+    console.log(`${migrations.length} migrations applied; 0026 and 0028 replays passed; dualis_app habits grant verified.`);
   } finally {
     await pool.end();
   }

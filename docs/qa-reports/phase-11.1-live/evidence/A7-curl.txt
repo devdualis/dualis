@@ -1,0 +1,4 @@
+## parent for 40-year-old
+{"message":"Para maiores de 18 anos, escolha curatela ou tomada de decisão apoiada.","error":"Bad Request","statusCode":400} [HTTP 400]
+## curator for 10-year-old
+{"message":"Para menores de 18 anos, escolha poder familiar ou tutela.","error":"Bad Request","statusCode":400} [HTTP 400]

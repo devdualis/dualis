@@ -14,7 +14,7 @@ export class HabitsController {
   constructor(@Inject(HabitsService) private readonly habits: HabitsService) {}
 
   @Get()
-  @ProfileAccess('read')
+  @ProfileAccess('read', { category: 'habits' })
   listDays(@Request() req: any, @ActiveProfile() profile: ProfileContext,
     @Query(validate(HabitDaysQueryDto)) query: HabitDaysQueryDto): Promise<{ days: HabitDayDto[] }> {
     return this.habits.listDays(userIdOf(req), profile.profileId, query.days);
@@ -22,7 +22,7 @@ export class HabitsController {
 
   @Put(':day')
   @HttpCode(HttpStatus.OK)
-  @ProfileAccess('write')
+  @ProfileAccess('write', { category: 'habits' })
   putDay(@Request() req: any, @ActiveProfile() profile: ProfileContext, @Param('day') day: string,
     @Body(validate(PutHabitDayDto)) dto: PutHabitDayDto): Promise<HabitDayDto> {
     return this.habits.putDay(userIdOf(req), profile.profileId, day, dto);
@@ -30,7 +30,7 @@ export class HabitsController {
 
   @Delete(':day')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ProfileAccess('write')
+  @ProfileAccess('write', { category: 'habits' })
   deleteDay(@Request() req: any, @ActiveProfile() profile: ProfileContext, @Param('day') day: string): Promise<void> {
     return this.habits.deleteDay(userIdOf(req), profile.profileId, day);
   }

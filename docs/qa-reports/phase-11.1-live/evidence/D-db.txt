@@ -1,0 +1,5 @@
+           name           | relationship_type | lgpd_legal_basis 
+--------------------------+-------------------+------------------
+ Roberto Curatelado Teste | curator           | lgpd_art_11_i
+(1 row)
+

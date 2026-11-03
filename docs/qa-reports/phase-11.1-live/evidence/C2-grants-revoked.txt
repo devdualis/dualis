@@ -1,0 +1,9 @@
+## grants on Sofia before claim
+ACCEPTED|1
+REVOKED|1
+## Elisa (fresh account) claims
+{"id":"93701df0-0c0e-4952-bc05-47784060c8d2","name":"Sofia Tutelada Teste","profileType":"primary","dateOfBirth":"2007-01-10","gender":"masc
+## grants on Sofia after claim
+REVOKED|2
+## Bruno reads Sofia habits
+{"message":"Sem acesso a este perfil.","error":"Forbidden","statusCode":403} [HTTP 403]

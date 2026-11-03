@@ -125,6 +125,40 @@ void main() {
     expect(profile.id, 'p1');
   });
 
+  test('createDependent sends lgpdLegalBasisNotes only when provided',
+      () async {
+    adapter.enqueue(201, profileJson);
+    adapter.enqueue(201, profileJson);
+
+    await repository.createDependent(
+      name: 'Rui',
+      dateOfBirth: DateTime(1980, 5, 2),
+      gender: 'masculino',
+      relationshipType: 'supported_decision',
+      lgpdConsent: true,
+      lgpdLegalBasisNotes: '  Processo 0001234-56.2025.8.26.0100 ',
+    );
+    await repository.createDependent(
+      name: 'Rui',
+      dateOfBirth: DateTime(1980, 5, 2),
+      gender: 'masculino',
+      relationshipType: 'curator',
+      lgpdConsent: true,
+      lgpdLegalBasisNotes: '   ',
+    );
+
+    expect(adapter.bodies[0], {
+      'name': 'Rui',
+      'dateOfBirth': '1980-05-02',
+      'gender': 'masculino',
+      'relationshipType': 'supported_decision',
+      'lgpdConsent': true,
+      'lgpdLegalBasisNotes': 'Processo 0001234-56.2025.8.26.0100',
+    });
+    expect((adapter.bodies[1] as Map).containsKey('lgpdLegalBasisNotes'),
+        isFalse);
+  });
+
   test('updateProfileName uses PUT and deleteProfile uses DELETE', () async {
     adapter.enqueue(200, {...profileJson, 'name': 'Ana Clara'});
     adapter.enqueue(204);
@@ -226,14 +260,21 @@ void main() {
     final grant = await repository.createInvite(
       targetProfileId: 'p1',
       accessLevel: ProfileShareLevel.coManage,
+      relationship: GrantRelationship.sibling,
+      categories: [ShareCategory.habits, ShareCategory.emotionalJournal],
       targetProfileName: 'Ana',
     );
     await repository.acceptInvite('XYZ789');
     await repository.revokeGrant('g1');
 
     expect(adapter.requests[0].path, '/v1/family-sharing/invite');
-    expect(adapter.bodies[0],
-        {'targetProfileId': 'p1', 'accessLevel': 'CO_MANAGE'});
+    expect(adapter.bodies[0], {
+      'targetProfileId': 'p1',
+      'accessLevel': 'CO_MANAGE',
+      'relationship': 'sibling',
+      'categories': ['habits', 'emotional_journal'],
+      'dependentShareConfirmed': false,
+    });
     expect(grant.status, GrantStatus.pending);
     expect(grant.inviteCode, 'XYZ789');
     expect(grant.targetProfileName, 'Ana');
@@ -241,6 +282,56 @@ void main() {
     expect(adapter.bodies[1], {'inviteCode': 'XYZ789'});
     expect(adapter.requests[2].path, '/v1/family-sharing/revoke/g1');
     expect(adapter.requests[2].method, 'POST');
+  });
+
+  test('updateGrant sends a PATCH with the new category set', () async {
+    adapter.enqueue(200, {
+      'id': 'g1',
+      'targetProfileId': 'p1',
+      'targetProfileName': 'Ana',
+      'accessLevel': 'VIEW_ONLY',
+      'status': 'ACCEPTED',
+      'expiresAt': '2026-10-16T12:00:00.000Z',
+      'relationship': 'caregiver',
+      'categories': ['habits', 'care', 'unknown_future_value'],
+    });
+
+    final grant = await repository.updateGrant(
+      'g1',
+      categories: [ShareCategory.habits, ShareCategory.care],
+      dependentShareConfirmed: true,
+    );
+
+    expect(adapter.requests.single.path, '/v1/family-sharing/grants/g1');
+    expect(adapter.requests.single.method, 'PATCH');
+    expect(adapter.bodies.single, {
+      'categories': ['habits', 'care'],
+      'dependentShareConfirmed': true,
+    });
+    expect(grant.relationship, GrantRelationship.caregiver);
+    expect(grant.categories, [ShareCategory.habits, ShareCategory.care]);
+  });
+
+  test('legacy grant without relationship parses as null', () async {
+    adapter.enqueue(200, {
+      'outgoing': [
+        {
+          'id': 'g-old',
+          'targetProfileId': 'p1',
+          'accessLevel': 'VIEW_ONLY',
+          'status': 'ACCEPTED',
+          'expiresAt': '2026-10-16T12:00:00.000Z',
+          'relationship': null,
+          'categories': ['habits', 'physical_journal'],
+        },
+      ],
+      'incoming': [],
+    });
+
+    final out = (await repository.fetchGrants()).outgoing.single;
+    expect(out.relationship, isNull);
+    expect(out.categories,
+        [ShareCategory.habits, ShareCategory.physicalJournal]);
   });
 
   test('surfaces the backend message of a 403 as ProfileApiException',
@@ -301,4 +392,96 @@ void main() {
         .called(1);
     verify(() => storage.delete(key: 'dualis_active_profile_u1')).called(1);
   });
+
+  test('parses hand-over and legal basis fields; older payloads default',
+      () async {
+    adapter.enqueue(200, [
+      {
+        ...profileJson,
+        'handoverStatus': 'code_active',
+        'handoverCodeExpiresAt': '2026-11-05T12:00:00.000Z',
+        'relationshipType': 'parent',
+        'lgpdLegalBasis': 'lgpd_art_14',
+        'legalBasisNeedsConfirmation': false,
+      },
+      {
+        ...profileJson,
+        'id': 'p2',
+        'handoverStatus': 'something_new',
+        'legalBasisNeedsConfirmation': true,
+      },
+      {'id': 'p3', 'name': 'Old', 'profileType': 'primary'},
+    ]);
+
+    final profiles = await repository.fetchProfiles();
+
+    expect(profiles[0].handoverStatus, HandoverStatus.codeActive);
+    expect(profiles[0].handoverCodeExpiresAt,
+        DateTime.utc(2026, 11, 5, 12).toLocal());
+    expect(profiles[0].relationshipType, 'parent');
+    expect(profiles[0].lgpdLegalBasis, 'lgpd_art_14');
+    expect(profiles[1].handoverStatus, HandoverStatus.none);
+    expect(profiles[1].legalBasisNeedsConfirmation, isTrue);
+    expect(profiles[2].handoverStatus, HandoverStatus.none);
+    expect(profiles[2].handoverCodeExpiresAt, isNull);
+    expect(profiles[2].relationshipType, isNull);
+    expect(profiles[2].legalBasisNeedsConfirmation, isFalse);
+  });
+
+  test('claim, handover-code and legal-basis routes', () async {
+    adapter.enqueue(201, {
+      'id': 'p1',
+      'name': 'Ana',
+      'profileType': 'primary',
+      'ownership': 'own',
+      'accessLevel': 'OWNER',
+    });
+    adapter.enqueue(201, {
+      'claimCode': 'HANDOVER01',
+      'expiresAt': '2026-11-05T12:00:00.000Z',
+    });
+    adapter.enqueue(201, {...profileJson, 'lgpdLegalBasis': 'lgpd_art_11_i'});
+
+    final claimed = await repository.claimProfile(' handover01 ');
+    final code = await repository.createHandoverCode('p1');
+    final confirmed = await repository.confirmLegalBasis('p1');
+
+    expect(adapter.requests[0].path, '/v1/profiles/claim');
+    expect(adapter.bodies[0], {'claimCode': 'HANDOVER01'});
+    expect(claimed.isPrimary, isTrue);
+    expect(claimed.ownership, ProfileOwnership.own);
+    expect(adapter.requests[1].path, '/v1/profiles/p1/handover-code');
+    expect(adapter.requests[1].method, 'POST');
+    expect(code.code, 'HANDOVER01');
+    expect(code.expiresAt, DateTime.utc(2026, 11, 5, 12).toLocal());
+    expect(adapter.requests[2].path,
+        '/v1/profiles/p1/legal-basis-confirmation');
+    expect(adapter.bodies[2], {'lgpdConsent': true});
+    expect(confirmed.lgpdLegalBasis, 'lgpd_art_11_i');
+  });
+
+  for (final (status, code, reason) in [
+    (404, 'CLAIM_INVALID_CODE', ProfileClaimError.invalidCode),
+    (403, 'CLAIM_BY_GUARDIAN', ProfileClaimError.byGuardian),
+    (409, 'CLAIM_NOT_ADULT', ProfileClaimError.notAdult),
+    (409, 'CLAIM_ACCOUNT_HAS_DATA', ProfileClaimError.accountHasData),
+    (429, null, ProfileClaimError.tooManyAttempts),
+    (400, null, ProfileClaimError.invalidCode),
+    (500, null, ProfileClaimError.other),
+  ]) {
+    test('claim error $status ${code ?? ''} maps to $reason', () async {
+      adapter.enqueue(status, {
+        'statusCode': status,
+        'message': 'Mensagem do servidor',
+        if (code != null) 'code': code,
+      });
+
+      await expectLater(
+        repository.claimProfile('HANDOVER01'),
+        throwsA(isA<ProfileClaimException>()
+            .having((e) => e.reason, 'reason', reason)
+            .having((e) => e.statusCode, 'statusCode', status)),
+      );
+    });
+  }
 }

@@ -86,9 +86,9 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)('Condition readings: real runtim
     );
     await admin.query(
       `INSERT INTO shared_access_grants
-         (granter_user_id, target_profile_id, grantee_user_id, access_level, invite_code, status, expires_at, accepted_at)
-       VALUES ($1, $2, $3, 'VIEW_ONLY', 'RDGV23', 'ACCEPTED', now() + interval '72 hours', now()),
-              ($1, $2, $4, 'CO_MANAGE', 'RDGM23', 'ACCEPTED', now() + interval '72 hours', now())`,
+         (granter_user_id, target_profile_id, grantee_user_id, access_level, invite_code, status, expires_at, accepted_at, categories)
+       VALUES ($1, $2, $3, 'VIEW_ONLY', 'RDGV23', 'ACCEPTED', now() + interval '72 hours', now(), ARRAY['physical_journal', 'conditions']::text[]),
+              ($1, $2, $4, 'CO_MANAGE', 'RDGM23', 'ACCEPTED', now() + interval '72 hours', now(), ARRAY['physical_journal', 'conditions']::text[])`,
       [owner, dependent, viewer, manager],
     );
   });
