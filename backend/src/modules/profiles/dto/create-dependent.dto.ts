@@ -21,11 +21,11 @@ export class CreateDependentDto {
   gender!: string;
 
   @IsIn(RELATIONSHIP_TYPES, {
-    message: 'Tipo de vínculo deve ser parent, legal_guardian ou curator.',
+    message: 'Tipo de vínculo deve ser parent, legal_guardian, curator ou supported_decision.',
   })
   relationshipType!: RelationshipType;
 
-  @Equals(true, { message: 'Consentimento LGPD Art. 14 é obrigatório.' })
+  @Equals(true, { message: 'Consentimento LGPD é obrigatório.' })
   lgpdConsent!: boolean;
 
   @IsOptional()

@@ -120,6 +120,9 @@ function toProfileResponse(
     ownership,
     accessLevel,
     ...categoriesFor(profile.id, viewerId, accessLevel),
+    relationshipType: null,
+    lgpdLegalBasis: null,
+    legalBasisNeedsConfirmation: false,
   };
 }
 
@@ -193,7 +196,7 @@ class E2EProfilesService {
 
   async createDependent(userId: string, dto: CreateDependentDto): Promise<ProfileResponseDto> {
     if (dto.lgpdConsent !== true) {
-      throw new BadRequestException('Consentimento LGPD Art. 14 é obrigatório.');
+      throw new BadRequestException('Consentimento LGPD é obrigatório.');
     }
     e2eStore.dependentCreates += 1;
     ensurePrimary(userId, 'Guardian A');

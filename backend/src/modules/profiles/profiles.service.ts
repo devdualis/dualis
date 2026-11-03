@@ -8,7 +8,12 @@ import {
 import { and, eq, isNull } from 'drizzle-orm';
 import { DatabaseService, DrizzleTransaction } from '../../database/database.service';
 import { profiles, ProfileType } from '../../database/schema/profiles.schema';
-import { legalGuardianships } from '../../database/schema/legal-guardianships.schema';
+import {
+  legalGuardianships,
+  ADULT_RELATIONSHIPS,
+  LgpdLegalBasis,
+  RelationshipType,
+} from '../../database/schema/legal-guardianships.schema';
 import {
   sharedAccessGrants,
   AccessLevel,
@@ -28,6 +33,12 @@ type ProfileAccess = {
   accessLevel: ProfileAccessLevel;
   readableCategories: ShareCategory[];
   writableCategories: ShareCategory[];
+};
+
+/** Open guardianship of the caller on an owned dependent, as returned to the app. */
+type GuardianshipInfo = {
+  relationshipType: RelationshipType;
+  lgpdLegalBasis: LgpdLegalBasis;
 };
 
 const OWNER_ACCESS: ProfileAccess = {
@@ -111,9 +122,22 @@ export class ProfilesService {
         shared.set(row.profile.id, entry);
       }
 
+      const guardianships = new Map<string, GuardianshipInfo>();
+      if (dependents.length > 0) {
+        const rows = await tx
+          .select({
+            dependentProfileId: legalGuardianships.dependentProfileId,
+            relationshipType: legalGuardianships.relationshipType,
+            lgpdLegalBasis: legalGuardianships.lgpdLegalBasis,
+          })
+          .from(legalGuardianships)
+          .where(and(eq(legalGuardianships.guardianUserId, userId), isNull(legalGuardianships.closedAt)));
+        for (const row of rows) guardianships.set(row.dependentProfileId, row);
+      }
+
       return [
         this.toResponse(primary, userId, OWNER_ACCESS),
-        ...dependents.map((p) => this.toResponse(p, userId, OWNER_ACCESS)),
+        ...dependents.map((p) => this.toResponse(p, userId, OWNER_ACCESS, guardianships.get(p.id))),
         ...[...shared.values()].map((s) => this.toResponse(s.profile, userId, mergeGrants(s.grants)!)),
       ];
     });
@@ -123,9 +147,9 @@ export class ProfilesService {
     this.assertUserId(userId);
 
     // Defense in depth: the DTO already enforces this, but the service must never
-    // persist a dependent without explicit LGPD Art. 14 consent.
+    // persist a dependent without explicit LGPD consent (Art. 14 or Art. 11, I).
     if (dto.lgpdConsent !== true) {
-      throw new BadRequestException('Consentimento LGPD Art. 14 é obrigatório.');
+      throw new BadRequestException('Consentimento LGPD é obrigatório.');
     }
 
     const now = new Date();
@@ -134,6 +158,8 @@ export class ProfilesService {
       throw new BadRequestException('Data de nascimento inválida.');
     }
     const profileType: ProfileType = age < ADULT_AGE_YEARS ? 'dependent_minor' : 'dependent_adult';
+    // Minors: LGPD Art. 14. Adults (curatela, tomada de decisão apoiada): Art. 11, I.
+    const lgpdLegalBasis: LgpdLegalBasis = age < ADULT_AGE_YEARS ? 'lgpd_art_14' : 'lgpd_art_11_i';
 
     return this.databaseService.withRls(userId, async (tx) => {
       const [profile] = await tx
@@ -152,10 +178,14 @@ export class ProfilesService {
         dependentProfileId: profile.id,
         relationshipType: dto.relationshipType,
         lgpdConsentRecordedAt: now,
+        lgpdLegalBasis,
         lgpdLegalBasisNotes: dto.lgpdLegalBasisNotes ?? null,
       });
 
-      return this.toResponse(profile, userId, OWNER_ACCESS);
+      return this.toResponse(profile, userId, OWNER_ACCESS, {
+        relationshipType: dto.relationshipType,
+        lgpdLegalBasis,
+      });
     });
   }
 
@@ -292,7 +322,12 @@ export class ProfilesService {
     return mergeGrants(grants);
   }
 
-  private toResponse(profile: ProfileRow, userId: string, access: ProfileAccess): ProfileResponseDto {
+  private toResponse(
+    profile: ProfileRow,
+    userId: string,
+    access: ProfileAccess,
+    guardianship?: GuardianshipInfo,
+  ): ProfileResponseDto {
     const ownership =
       profile.accountOwnerId !== userId
         ? 'shared'
@@ -310,6 +345,12 @@ export class ProfilesService {
       accessLevel: access.accessLevel,
       readableCategories: access.readableCategories,
       writableCategories: access.writableCategories,
+      relationshipType: guardianship?.relationshipType ?? null,
+      lgpdLegalBasis: guardianship?.lgpdLegalBasis ?? null,
+      legalBasisNeedsConfirmation:
+        guardianship !== undefined &&
+        (ADULT_RELATIONSHIPS as readonly string[]).includes(guardianship.relationshipType) &&
+        guardianship.lgpdLegalBasis === 'lgpd_art_14',
     };
   }
 

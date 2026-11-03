@@ -159,7 +159,77 @@ describe('ProfilesService Unit Tests', () => {
         accessLevel: 'OWNER',
         readableCategories: [...SHARE_CATEGORIES],
         writableCategories: [...SHARE_CATEGORIES],
+        relationshipType: 'parent',
+        lgpdLegalBasis: 'lgpd_art_14',
+        legalBasisNeedsConfirmation: false,
       });
+    });
+
+    it('stores an adult under supported decision with LGPD Art. 11, I and the notes', async () => {
+      const dateOfBirth = `${new Date().getUTCFullYear() - 40}-01-01`;
+      const created = profileRow({
+        id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        profileType: 'dependent_adult',
+        name: 'Carlos Souza',
+        dateOfBirth,
+      });
+      const { tx, calls } = createTx({ insert: [[created], []] });
+      runWith(tx);
+
+      const result = await service.createDependent(
+        USER_ID,
+        validDependent({
+          name: 'Carlos Souza',
+          dateOfBirth,
+          relationshipType: 'supported_decision',
+          lgpdLegalBasisNotes: 'Processo 123',
+        }),
+      );
+
+      expect((calls.insertValues[0] as any).profileType).toBe('dependent_adult');
+      const guardianship = calls.insertValues[1] as any;
+      expect(guardianship.relationshipType).toBe('supported_decision');
+      expect(guardianship.lgpdLegalBasis).toBe('lgpd_art_11_i');
+      expect(guardianship.lgpdLegalBasisNotes).toBe('Processo 123');
+      expect(result).toMatchObject({
+        profileType: 'dependent_adult',
+        relationshipType: 'supported_decision',
+        lgpdLegalBasis: 'lgpd_art_11_i',
+        legalBasisNeedsConfirmation: false,
+      });
+    });
+
+    it('stores a minor under tutela with LGPD Art. 14', async () => {
+      const dateOfBirth = `${new Date().getUTCFullYear() - 10}-01-01`;
+      const { tx, calls } = createTx({ insert: [[profileRow({ profileType: 'dependent_minor', dateOfBirth })], []] });
+      runWith(tx);
+
+      await service.createDependent(USER_ID, validDependent({ dateOfBirth, relationshipType: 'legal_guardian' }));
+
+      expect((calls.insertValues[1] as any).lgpdLegalBasis).toBe('lgpd_art_14');
+    });
+
+    it('accepts supported_decision and uses a basis-neutral consent message at the validation layer', async () => {
+      const pipe = new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true });
+
+      await expect(
+        pipe.transform(validDependent({ relationshipType: 'supported_decision' }), {
+          type: 'body',
+          metatype: CreateDependentDto,
+        }),
+      ).resolves.toMatchObject({ relationshipType: 'supported_decision' });
+
+      const error = await pipe
+        .transform({ ...validDependent(), lgpdConsent: false }, { type: 'body', metatype: CreateDependentDto })
+        .catch((e: BadRequestException) => e);
+      expect(JSON.stringify((error as BadRequestException).getResponse())).toContain('Consentimento LGPD é obrigatório.');
+
+      await expect(
+        pipe.transform(validDependent({ lgpdLegalBasisNotes: 'x'.repeat(2001) }), {
+          type: 'body',
+          metatype: CreateDependentDto,
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
 
     it('classifies under-18 as dependent_minor and 18+ as dependent_adult', async () => {
@@ -225,6 +295,9 @@ describe('ProfilesService Unit Tests', () => {
         [dependent.id, 'dependent', 'OWNER'],
         [sharedProfile.id, 'shared', 'CO_MANAGE'],
       ]);
+      // No guardianship row returned for the dependent: nothing to show, nothing to confirm.
+      expect(result[1]).toMatchObject({ relationshipType: null, lgpdLegalBasis: null, legalBasisNeedsConfirmation: false });
+      expect(result[2]).toMatchObject({ relationshipType: null, lgpdLegalBasis: null, legalBasisNeedsConfirmation: false });
       // A stored picture link is never served: the app would load it on every phone.
       expect(result.every((p) => !('avatarUrl' in p))).toBe(true);
       expect(tx.insert).not.toHaveBeenCalled();
@@ -273,6 +346,35 @@ describe('ProfilesService Unit Tests', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({ id: racedPrimary.id, ownership: 'own' });
+    });
+  });
+
+  describe('getProfilesForUser legal basis (Phase 11.1, PREM-06)', () => {
+    it('returns relationship and basis of the open guardianship and flags adults still under Art. 14', async () => {
+      const primary = profileRow();
+      const curated = profileRow({ id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', profileType: 'dependent_adult', dateOfBirth: '1960-01-01' });
+      const supported = profileRow({ id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', profileType: 'dependent_adult', dateOfBirth: '1970-01-01' });
+      const minor = profileRow({ id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd', profileType: 'dependent_minor', dateOfBirth: '2018-01-01' });
+      const { tx } = createTx({
+        select: [
+          [primary, curated, supported, minor],
+          [],
+          [
+            { dependentProfileId: curated.id, relationshipType: 'curator', lgpdLegalBasis: 'lgpd_art_14' },
+            { dependentProfileId: supported.id, relationshipType: 'supported_decision', lgpdLegalBasis: 'lgpd_art_11_i' },
+            { dependentProfileId: minor.id, relationshipType: 'parent', lgpdLegalBasis: 'lgpd_art_14' },
+          ],
+        ],
+      });
+      runWith(tx);
+
+      const result = await service.getProfilesForUser(USER_ID);
+      const byId = new Map(result.map((p) => [p.id, p]));
+
+      expect(byId.get(primary.id)).toMatchObject({ relationshipType: null, lgpdLegalBasis: null, legalBasisNeedsConfirmation: false });
+      expect(byId.get(curated.id)).toMatchObject({ relationshipType: 'curator', lgpdLegalBasis: 'lgpd_art_14', legalBasisNeedsConfirmation: true });
+      expect(byId.get(supported.id)).toMatchObject({ relationshipType: 'supported_decision', lgpdLegalBasis: 'lgpd_art_11_i', legalBasisNeedsConfirmation: false });
+      expect(byId.get(minor.id)).toMatchObject({ relationshipType: 'parent', lgpdLegalBasis: 'lgpd_art_14', legalBasisNeedsConfirmation: false });
     });
   });
 
