@@ -8,19 +8,38 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import {
+  assertCategory,
+  journalAreaCategory,
   ProfileAccess,
   ProfileAccessMode,
   ProfileAccessOptions,
+  ProfileContext,
   ProfileContextGuard,
   PROFILE_HEADER,
 } from '../../src/modules/profiles/profile-context';
 import { profiles } from '../../src/database/schema/profiles.schema';
+import { SHARE_CATEGORIES } from '../../src/database/schema/shared-access-grants.schema';
 
 const USER_ID = '11111111-1111-4111-8111-111111111111';
 const PRIMARY_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const DEPENDENT_ID = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
 
-type AccessRow = { is_owner: boolean; can_read: boolean; can_co_manage: boolean };
+type AccessRow = {
+  is_owner: boolean;
+  can_read: boolean;
+  can_co_manage: boolean;
+  readable?: string[];
+  writable?: string[];
+};
+
+const ALL = [...SHARE_CATEGORIES];
+const NOT_SHARED = 'Esta categoria não foi compartilhada com você.';
+const owner = (profileId: string): ProfileContext => ({
+  profileId,
+  accessLevel: 'OWNER',
+  readableCategories: ALL,
+  writableCategories: ALL,
+});
 
 /** Chainable Drizzle-like tx: awaiting a select/insert chain resolves the next queued result. */
 function createTx(opts: { select?: unknown[][]; insert?: unknown[][]; access?: AccessRow } = {}) {
@@ -104,7 +123,7 @@ describe('ProfileContextGuard', () => {
       const { ctx, request } = contextFor(s.handler, s.cls, authed());
 
       await expect(s.guard.canActivate(ctx)).resolves.toBe(true);
-      expect(request.profileContext).toEqual({ profileId: PRIMARY_ID, accessLevel: 'OWNER' });
+      expect(request.profileContext).toEqual(owner(PRIMARY_ID));
       expect(s.databaseService.withRls).toHaveBeenCalledWith(USER_ID, expect.any(Function));
       expect(s.tx.insert).not.toHaveBeenCalled();
     });
@@ -126,7 +145,7 @@ describe('ProfileContextGuard', () => {
         dateOfBirth: '1990-04-12',
       });
       expect(s.calls.onConflict).toBe(1);
-      expect(request.profileContext).toEqual({ profileId: PRIMARY_ID, accessLevel: 'OWNER' });
+      expect(request.profileContext).toEqual(owner(PRIMARY_ID));
     });
 
     it('re-reads the primary profile when a concurrent request created it first', async () => {
@@ -166,7 +185,7 @@ describe('ProfileContextGuard', () => {
       );
 
       await s.guard.canActivate(ctx);
-      expect(request.profileContext).toEqual({ profileId: DEPENDENT_ID, accessLevel: 'OWNER' });
+      expect(request.profileContext).toEqual(owner(DEPENDENT_ID));
       expect(s.tx.execute).toHaveBeenCalledTimes(1);
     });
 
@@ -175,7 +194,12 @@ describe('ProfileContextGuard', () => {
       const { ctx, request } = contextFor(s.handler, s.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
 
       await expect(s.guard.canActivate(ctx)).resolves.toBe(true);
-      expect(request.profileContext).toEqual({ profileId: DEPENDENT_ID, accessLevel: 'CO_MANAGE' });
+      expect(request.profileContext).toEqual({
+        profileId: DEPENDENT_ID,
+        accessLevel: 'CO_MANAGE',
+        readableCategories: [],
+        writableCategories: [],
+      });
     });
 
     it('resolves VIEW_ONLY and allows read', async () => {
@@ -183,7 +207,7 @@ describe('ProfileContextGuard', () => {
       const { ctx, request } = contextFor(s.handler, s.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
 
       await expect(s.guard.canActivate(ctx)).resolves.toBe(true);
-      expect(request.profileContext).toEqual({ profileId: DEPENDENT_ID, accessLevel: 'VIEW_ONLY' });
+      expect(request.profileContext).toMatchObject({ profileId: DEPENDENT_ID, accessLevel: 'VIEW_ONLY' });
     });
 
     it('rejects VIEW_ONLY with 403 in write mode', async () => {
@@ -215,7 +239,7 @@ describe('ProfileContextGuard', () => {
       const { ctx, request } = contextFor(s.handler, s.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
 
       await s.guard.canActivate(ctx);
-      expect(request.profileContext).toEqual({ profileId: DEPENDENT_ID, accessLevel: 'OWNER' });
+      expect(request.profileContext).toEqual(owner(DEPENDENT_ID));
       expect(s.tx.select).not.toHaveBeenCalled();
     });
 
@@ -228,7 +252,7 @@ describe('ProfileContextGuard', () => {
         const { ctx, request } = contextFor(s.handler, s.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
 
         await expect(s.guard.canActivate(ctx)).resolves.toBe(true);
-        expect(request.profileContext).toEqual({ profileId: PRIMARY_ID, accessLevel: 'OWNER' });
+        expect(request.profileContext).toEqual(owner(PRIMARY_ID));
       }
     });
 
@@ -240,7 +264,7 @@ describe('ProfileContextGuard', () => {
       const { ctx, request } = contextFor(s.handler, s.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
 
       await expect(s.guard.canActivate(ctx)).resolves.toBe(true);
-      expect(request.profileContext).toEqual({ profileId: PRIMARY_ID, accessLevel: 'OWNER' });
+      expect(request.profileContext).toEqual(owner(PRIMARY_ID));
     });
 
     it('still rejects a malformed header with 400', async () => {
@@ -271,6 +295,122 @@ describe('ProfileContextGuard', () => {
       const { ctx, request } = contextFor(s.handler, s.cls, { headers: { [PROFILE_HEADER]: DEPENDENT_ID } });
       await expect(s.guard.canActivate(ctx)).resolves.toBe(true);
       expect(request.profileContext).toBeUndefined();
+    });
+  });
+  describe('categories (Phase 11.1, PREM-07)', () => {
+    const grantee = (readable: string[], writable: string[], coManage = writable.length > 0): AccessRow => ({
+      is_owner: false,
+      can_read: true,
+      can_co_manage: coManage,
+      readable,
+      writable,
+    });
+
+    it('gives an OWNER every category for reading and writing', async () => {
+      const s = setup({ access: { is_owner: true, can_read: false, can_co_manage: false, readable: [], writable: [] } }, {
+        mode: 'write',
+        options: { category: ['habits', 'care', 'emotional_journal'] },
+      });
+      const { ctx, request } = contextFor(s.handler, s.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
+
+      await expect(s.guard.canActivate(ctx)).resolves.toBe(true);
+      expect(request.profileContext).toEqual(owner(DEPENDENT_ID));
+    });
+
+    it('gives the primary profile (no header) every category', async () => {
+      const s = setup({ select: [[{ id: PRIMARY_ID }]] }, { mode: 'write', options: { category: 'conditions' } });
+      const { ctx, request } = contextFor(s.handler, s.cls, authed());
+      await expect(s.guard.canActivate(ctx)).resolves.toBe(true);
+      expect(request.profileContext).toEqual(owner(PRIMARY_ID));
+    });
+
+    it('resolves a grantee\'s categories in one statement, ordered as SHARE_CATEGORIES', async () => {
+      const s = setup({ access: grantee(['care', 'habits', 'unknown'], ['habits']) }, { mode: 'read' });
+      const { ctx, request } = contextFor(s.handler, s.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
+
+      await s.guard.canActivate(ctx);
+      expect(request.profileContext).toEqual({
+        profileId: DEPENDENT_ID,
+        accessLevel: 'CO_MANAGE',
+        readableCategories: ['habits', 'care'],
+        writableCategories: ['habits'],
+      });
+      expect(s.tx.execute).toHaveBeenCalledTimes(1);
+    });
+
+    it('allows reading a granted category', async () => {
+      const s = setup({ access: grantee(['habits'], [], false) }, { mode: 'read', options: { category: 'habits' } });
+      const { ctx } = contextFor(s.handler, s.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
+      await expect(s.guard.canActivate(ctx)).resolves.toBe(true);
+    });
+
+    it('rejects writing a read-only granted category as VIEW_ONLY (403)', async () => {
+      const s = setup({ access: grantee(['habits'], [], false) }, { mode: 'write', options: { category: 'habits' } });
+      const { ctx, request } = contextFor(s.handler, s.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
+      await expect(s.guard.canActivate(ctx)).rejects.toThrow('Acesso somente leitura a este perfil.');
+      expect(request.profileContext).toBeUndefined();
+    });
+
+    it('rejects reading a category that was not shared with 403 and a clear message', async () => {
+      const s = setup({ access: grantee(['habits'], [], false) }, { mode: 'read', options: { category: 'care' } });
+      const { ctx, request } = contextFor(s.handler, s.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
+
+      const error = await s.guard.canActivate(ctx).catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(ForbiddenException);
+      expect((error as Error).message).toBe(NOT_SHARED);
+      expect(request.profileContext).toBeUndefined();
+    });
+
+    it('rejects a CO_MANAGE write on a category that is only readable (mixed grants)', async () => {
+      const s = setup(
+        { access: grantee(['habits', 'emotional_journal'], ['habits']) },
+        { mode: 'write', options: { category: 'emotional_journal' } },
+      );
+      const { ctx } = contextFor(s.handler, s.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
+      await expect(s.guard.canActivate(ctx)).rejects.toThrow(NOT_SHARED);
+    });
+
+    it('requires every category when given an array', async () => {
+      const both = setup({ access: grantee(['habits', 'care'], [], false) }, {
+        mode: 'read',
+        options: { category: ['habits', 'care'] },
+      });
+      const okCtx = contextFor(both.handler, both.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
+      await expect(both.guard.canActivate(okCtx.ctx)).resolves.toBe(true);
+
+      const partial = setup({ access: grantee(['habits'], [], false) }, {
+        mode: 'read',
+        options: { category: ['habits', 'care'] },
+      });
+      const badCtx = contextFor(partial.handler, partial.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
+      await expect(partial.guard.canActivate(badCtx.ctx)).rejects.toThrow(NOT_SHARED);
+    });
+
+    it('does not check categories on routes without one (mixed routes, RLS filters rows)', async () => {
+      const s = setup({ access: grantee([], [], false) }, { mode: 'read' });
+      const { ctx } = contextFor(s.handler, s.cls, authed({ [PROFILE_HEADER]: DEPENDENT_ID }));
+      await expect(s.guard.canActivate(ctx)).resolves.toBe(true);
+    });
+
+    it('maps journal areas like app_journal_area_category', () => {
+      expect(journalAreaCategory('physical')).toBe('physical_journal');
+      expect(journalAreaCategory('emotional')).toBe('emotional_journal');
+      expect(journalAreaCategory(undefined)).toBe('emotional_journal');
+      expect(journalAreaCategory(null)).toBe('emotional_journal');
+    });
+
+    it('assertCategory checks the mode-specific list', () => {
+      const profile: ProfileContext = {
+        profileId: DEPENDENT_ID,
+        accessLevel: 'CO_MANAGE',
+        readableCategories: ['habits', 'emotional_journal'],
+        writableCategories: ['habits'],
+      };
+      expect(() => assertCategory(profile, 'read', 'emotional_journal')).not.toThrow();
+      expect(() => assertCategory(profile, 'write', 'habits')).not.toThrow();
+      expect(() => assertCategory(profile, 'write', 'emotional_journal')).toThrow(NOT_SHARED);
+      expect(() => assertCategory(profile, 'read', 'care')).toThrow(ForbiddenException);
+      expect(() => assertCategory(owner(PRIMARY_ID), 'write', 'care')).not.toThrow();
     });
   });
 });

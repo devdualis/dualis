@@ -2,6 +2,7 @@ import { ForbiddenException } from '@nestjs/common';
 import { TestingModule } from '@nestjs/testing';
 import { vi } from 'vitest';
 import { DatabaseService } from '../../../src/database/database.service';
+import { SHARE_CATEGORIES, ShareCategory } from '../../../src/database/schema/shared-access-grants.schema';
 import {
   ProfileContext,
   ProfileContextGuard,
@@ -9,10 +10,18 @@ import {
 
 export type StubAccessLevel = ProfileContext['accessLevel'];
 
-/** Per user: the primary profile id and the other profiles the user can reach. */
+/**
+ * Per user: the primary profile id, the other profiles the user can reach and, optionally,
+ * the categories each shared profile opens (default: all five). Like a single grant in the
+ * database, a CO_MANAGE profile can write its categories and a VIEW_ONLY profile none.
+ */
 export type ProfileAccessStubConfig = Record<
   string,
-  { primary: string; profiles?: Record<string, StubAccessLevel> }
+  {
+    primary: string;
+    profiles?: Record<string, StubAccessLevel>;
+    categories?: Record<string, ShareCategory[]>;
+  }
 >;
 
 /** Deterministic primary profile id for users not listed in the stub config. */
@@ -35,24 +44,39 @@ export function stubProfileAccess(moduleRef: TestingModule, config: ProfileAcces
 
   const guardPrototype = ProfileContextGuard.prototype as any;
   vi.spyOn(guardPrototype, 'resolvePrimary').mockImplementation(
-    async (_tx: any, userId: string): Promise<ProfileContext> => ({
-      profileId: primaryOf(userId),
-      accessLevel: 'OWNER',
-    }),
+    async (_tx: any, userId: string): Promise<ProfileContext> => ownerStub(primaryOf(userId)),
   );
   vi.spyOn(guardPrototype, 'resolveRequested').mockImplementation(
     async (tx: any, profileId: string): Promise<ProfileContext> => {
       const userId: string = tx.stubUserId;
       if (profileId === primaryOf(userId)) {
-        return { profileId, accessLevel: 'OWNER' };
+        return ownerStub(profileId);
       }
       const accessLevel = config[userId]?.profiles?.[profileId];
       if (!accessLevel) {
         throw new ForbiddenException('Sem acesso a este perfil.');
       }
-      return { profileId, accessLevel };
+      if (accessLevel === 'OWNER') return ownerStub(profileId);
+      const readable = SHARE_CATEGORIES.filter(
+        (category) => (config[userId]?.categories?.[profileId] ?? SHARE_CATEGORIES).includes(category),
+      );
+      return {
+        profileId,
+        accessLevel,
+        readableCategories: readable,
+        writableCategories: accessLevel === 'CO_MANAGE' ? [...readable] : [],
+      };
     },
   );
+}
+
+function ownerStub(profileId: string): ProfileContext {
+  return {
+    profileId,
+    accessLevel: 'OWNER',
+    readableCategories: [...SHARE_CATEGORIES],
+    writableCategories: [...SHARE_CATEGORIES],
+  };
 }
 
 /** Profiles reachable by the e2e caller, one per access path. */
