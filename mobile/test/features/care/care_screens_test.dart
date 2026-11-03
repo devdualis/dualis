@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:dualis_mobile/core/config/feature_flags.dart';
 import 'package:dualis_mobile/core/theme/app_theme.dart';
 import 'package:dualis_mobile/features/care/data/care_api.dart';
 import 'package:dualis_mobile/features/care/data/care_notifications.dart';
@@ -21,6 +22,7 @@ import 'package:dualis_mobile/features/home/presentation/widgets/dualis_bottom_n
 import 'package:dualis_mobile/features/care/presentation/screens/premium_promo_screen.dart';
 import 'package:dualis_mobile/features/house_ads/domain/house_ad.dart';
 import 'package:dualis_mobile/features/profile/domain/models/profile.dart';
+import 'package:dualis_mobile/features/profile/domain/models/share_category.dart';
 import 'package:dualis_mobile/features/profile/presentation/controllers/active_profile_controller.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 import 'package:dualis_mobile/l10n/app_localizations_pt.dart';
@@ -118,12 +120,34 @@ class _NoopNotifications implements CareNotificationService {
 }
 
 class _Profile extends ActiveProfileController {
-  _Profile(this.profile);
+  _Profile(this.profile, {this.ownPrimary});
   final Profile profile;
+  final Profile? ownPrimary;
 
   @override
-  ActiveProfileState build() => ActiveProfileState(profiles: [profile], activeProfileId: profile.id);
+  ActiveProfileState build() => ActiveProfileState(
+        profiles: [if (ownPrimary != null) ownPrimary!, profile],
+        activeProfileId: profile.id,
+      );
 }
+
+/// Someone else's profile seen through a grant: [writable] are the categories
+/// a CO_MANAGE grant lets this account change.
+Profile _shared({
+  ProfileAccessLevel access = ProfileAccessLevel.coManage,
+  List<ShareCategory> readable = ShareCategory.values,
+  List<ShareCategory> writable = ShareCategory.values,
+}) =>
+    Profile(
+      id: 'shared-1',
+      name: 'Carlos',
+      profileType: ProfileType.primary,
+      ownership: ProfileOwnership.shared,
+      accessLevel: access,
+      dateOfBirth: DateTime(1985, 3, 1),
+      readableCategories: readable,
+      writableCategories: access == ProfileAccessLevel.coManage ? writable : const [],
+    );
 
 Profile _me({ProfileAccessLevel access = ProfileAccessLevel.owner, DateTime? birth}) => Profile(
       id: 'p1',
@@ -150,7 +174,10 @@ void main() {
         },
       );
 
+  /// A [profile] with shared ownership is shown as a grantee: premium on and
+  /// the signed-in account's own primary profile in the list.
   Future<FakeCareApi> pump(WidgetTester tester, Widget screen, {FakeCareApi? api, Profile? profile, PlacePicker? placePicker}) async {
+    final delegated = profile?.ownership == ProfileOwnership.shared;
     tester.view.physicalSize = const Size(1000, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -160,7 +187,8 @@ void main() {
       overrides: [
         careApiProvider.overrideWithValue(fake),
         careNotificationServiceProvider.overrideWithValue(_NoopNotifications()),
-        activeProfileControllerProvider.overrideWith(() => _Profile(profile ?? _me())),
+        activeProfileControllerProvider.overrideWith(() => _Profile(profile ?? _me(), ownPrimary: delegated ? _me() : null)),
+        if (delegated) premiumProfilesEnabledProvider.overrideWithValue(true),
         if (placePicker != null) placePickerProvider.overrideWithValue(placePicker),
       ],
       child: MaterialApp(
@@ -212,8 +240,68 @@ void main() {
   });
 
   testWidgets('view-only profile cannot add records', (tester) async {
-    await pump(tester, const AllergiesScreen(), profile: _me(access: ProfileAccessLevel.viewOnly));
+    await pump(tester, const AllergiesScreen(), profile: _shared(access: ProfileAccessLevel.viewOnly));
     expect(find.byKey(const Key('allergies_add')), findsNothing);
+  });
+
+  testWidgets('care shared VIEW_ONLY shows no care write buttons, even with other areas writable', (tester) async {
+    // CO_MANAGE for habits and the journals, but care only readable: the API
+    // would refuse every care change, so no screen offers one.
+    final careReadOnly = _shared(
+      writable: const [ShareCategory.habits, ShareCategory.physicalJournal, ShareCategory.emotionalJournal],
+    );
+    CareDocument doc(String id, DocumentKind kind, DocumentStatus status, Map<String, dynamic> data) =>
+        CareDocument(id: id, kind: kind, mime: 'application/pdf', status: status, createdAt: DateTime(2026, 11, 1), data: data);
+    final api = FakeCareApi()
+      ..add(CareKind.allergy, {'type': 'food', 'name': 'Camarão', 'showOnProfile': true})
+      ..add(CareKind.medication, {
+        'name': 'Losartana',
+        'strength': '50 mg',
+        'amountPerIntake': '1 comprimido',
+        'times': ['23:59'],
+        'weekdays': <int>[],
+        'active': true,
+      });
+    api.docs
+      ..add(doc('d1', DocumentKind.lab, DocumentStatus.failed, const {}))
+      ..add(doc('rx1', DocumentKind.prescription, DocumentStatus.review, const {
+        'medications': [
+          {'name': 'Enalapril', 'strength': '10 mg'},
+        ],
+      }));
+
+    await pump(tester, const AllergiesScreen(), api: api, profile: careReadOnly);
+    expect(find.text('Camarão'), findsOneWidget);
+    expect(find.byKey(const Key('allergies_add')), findsNothing);
+    expect(find.byType(FloatingActionButton), findsNothing);
+
+    await pump(tester, const MedicationsScreen(), api: api, profile: careReadOnly);
+    expect(find.text('Losartana 50 mg'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate((w) => w.key is ValueKey<String> && (w.key! as ValueKey<String>).value.startsWith('slot_taken_')),
+      findsNothing,
+    );
+    expect(find.byType(FloatingActionButton), findsNothing);
+
+    for (final screen in const [VaccinesScreen(), AppointmentsScreen(), ExamsScreen()]) {
+      await pump(tester, screen, api: api, profile: careReadOnly);
+      expect(find.byType(FloatingActionButton), findsNothing, reason: '${screen.runtimeType}');
+    }
+
+    await pump(tester, const ExamReviewScreen(documentId: 'd1'), api: api, profile: careReadOnly);
+    expect(find.byKey(const Key('document_reprocess')), findsNothing);
+    expect(find.byKey(const Key('document_delete')), findsNothing);
+
+    await pump(tester, const PrescriptionReviewScreen(documentId: 'rx1'), api: api, profile: careReadOnly);
+    expect(find.text('Enalapril'), findsOneWidget);
+    expect(find.byKey(const Key('rx_delete')), findsNothing);
+    expect(find.byKey(const Key('rx_create_0')), findsNothing);
+    expect(find.byKey(const Key('document_delete')), findsNothing);
+  });
+
+  testWidgets('care shared CO_MANAGE keeps the care write buttons', (tester) async {
+    await pump(tester, const AllergiesScreen(), profile: _shared());
+    expect(find.byKey(const Key('allergies_add')), findsOneWidget);
   });
 
   testWidgets('"Tomei" logs the intake for that scheduled time', (tester) async {

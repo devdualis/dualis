@@ -6,6 +6,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
+import '../../../profile/domain/models/share_category.dart';
+import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../domain/care_models.dart';
 import '../../domain/pni_calendar.dart';
 import '../care_providers.dart';
@@ -31,7 +33,7 @@ class _VaccinesScreenState extends ConsumerState<VaccinesScreen> {
     final profile = ref.watch(activeProfileControllerProvider).activeProfile;
     final stage = _stage ?? pniStageFor(profile?.dateOfBirth);
     final dosesAsync = ref.watch(careRecordsProvider(CareKind.vaccineDose));
-    final canEdit = profile?.canEdit ?? true;
+    final canEdit = activeProfileCanWrite(ref, ShareCategory.care);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,

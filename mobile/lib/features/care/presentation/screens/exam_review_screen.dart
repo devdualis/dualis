@@ -8,7 +8,8 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../profile/presentation/controllers/active_profile_controller.dart';
+import '../../../profile/domain/models/share_category.dart';
+import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../domain/care_models.dart';
 import '../care_providers.dart';
 import '../care_routes.dart';
@@ -609,7 +610,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final canEdit = ref.watch(activeProfileControllerProvider).activeProfile?.canEdit ?? true;
+    final canEdit = activeProfileCanWrite(ref, ShareCategory.care);
     final async = ref.watch(careDocumentProvider(widget.documentId));
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,

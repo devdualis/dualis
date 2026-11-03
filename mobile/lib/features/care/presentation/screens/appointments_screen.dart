@@ -5,7 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../profile/presentation/controllers/active_profile_controller.dart';
+import '../../../profile/domain/models/share_category.dart';
+import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../domain/care_models.dart';
 import '../../domain/specialties.dart';
 import '../care_providers.dart';
@@ -26,7 +27,7 @@ class AppointmentsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final canEdit = ref.watch(activeProfileControllerProvider).activeProfile?.canEdit ?? true;
+    final canEdit = activeProfileCanWrite(ref, ShareCategory.care);
     final async = ref.watch(careRecordsProvider(CareKind.appointment));
 
     return Scaffold(

@@ -11,7 +11,8 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/security/secure_storage_service.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../profile/presentation/controllers/active_profile_controller.dart';
+import '../../../profile/domain/models/share_category.dart';
+import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../domain/care_models.dart';
 import '../care_providers.dart';
 import '../care_routes.dart';
@@ -200,7 +201,7 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final canEdit = ref.watch(activeProfileControllerProvider).activeProfile?.canEdit ?? true;
+    final canEdit = activeProfileCanWrite(ref, ShareCategory.care);
     final rxOnly = widget.prescriptions;
     final async = ref.watch(careDocumentsProvider);
     async.whenData((docs) => WidgetsBinding.instance.addPostFrameCallback((_) {
