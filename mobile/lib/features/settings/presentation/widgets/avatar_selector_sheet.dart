@@ -121,16 +121,29 @@ class UserAvatar extends StatelessWidget {
     );
   }
 
+  Widget _circleImage(ImageProvider provider) {
+    return Container(
+      width: radius * 2,
+      height: radius * 2,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.clinicalTealLight,
+        image: DecorationImage(
+          image: provider,
+          fit: BoxFit.cover,
+          // Top-third alignment (35% height in portrait photos) so the head is kept
+          alignment: const Alignment(0, -0.3),
+          onError: (_, __) {},
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // 1. In-memory bytes for locally picked images during active session
     if (localImageBytes != null && localImageBytes!.isNotEmpty) {
-      return CircleAvatar(
-        radius: radius,
-        backgroundImage: MemoryImage(localImageBytes!),
-        onBackgroundImageError: (_, __) {},
-        child: null,
-      );
+      return _circleImage(MemoryImage(localImageBytes!));
     }
 
     if (picture != null && picture!.isNotEmpty) {
@@ -141,23 +154,13 @@ class UserAvatar extends StatelessWidget {
           final base64Str =
               commaIndex != -1 ? picture!.substring(commaIndex + 1) : picture!;
           final bytes = base64Decode(base64Str);
-          return CircleAvatar(
-            radius: radius,
-            backgroundImage: MemoryImage(bytes),
-            onBackgroundImageError: (_, __) {},
-            child: null,
-          );
+          return _circleImage(MemoryImage(bytes));
         } catch (_) {}
       }
 
       // 3. Network URL (from Cloud / Supabase Storage CDN)
       if (picture!.startsWith('http://') || picture!.startsWith('https://')) {
-        return CircleAvatar(
-          radius: radius,
-          backgroundImage: NetworkImage(picture!),
-          onBackgroundImageError: (_, __) {},
-          child: null,
-        );
+        return _circleImage(NetworkImage(picture!));
       }
 
       // 4. Preset avatar from design system
