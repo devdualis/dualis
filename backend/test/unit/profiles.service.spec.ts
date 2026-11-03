@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { BadRequestException, ForbiddenException, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, ValidationPipe } from '@nestjs/common';
 import { ProfilesService, ageInYears } from '../../src/modules/profiles/profiles.service';
-import { CreateDependentDto } from '../../src/modules/profiles/dto/create-dependent.dto';
+import { ConfirmLegalBasisDto, CreateDependentDto } from '../../src/modules/profiles/dto/create-dependent.dto';
 import { UpdateProfileDto } from '../../src/modules/profiles/dto/update-profile.dto';
 import { profiles } from '../../src/database/schema/profiles.schema';
 import { legalGuardianships } from '../../src/database/schema/legal-guardianships.schema';
@@ -9,6 +9,14 @@ import { SHARE_CATEGORIES } from '../../src/database/schema/shared-access-grants
 
 const USER_ID = '11111111-1111-4111-8111-111111111111';
 const OTHER_USER_ID = '22222222-2222-4222-8222-222222222222';
+
+const ADULT_MESSAGE = 'Para maiores de 18 anos, escolha curatela ou tomada de decisão apoiada.';
+const MINOR_MESSAGE = 'Para menores de 18 anos, escolha poder familiar ou tutela.';
+
+/** YYYY-MM-DD for someone who turned `years` on 1 January of this year. */
+function bornYearsAgo(years: number): string {
+  return `${new Date().getUTCFullYear() - years}-01-01`;
+}
 
 function profileRow(overrides: Record<string, unknown> = {}) {
   return {
@@ -530,6 +538,194 @@ describe('ProfilesService Unit Tests', () => {
 
       const result = await service.updateProfile(USER_ID, own.id, { gender: 'outro' });
       expect(result).toMatchObject({ gender: 'outro', ownership: 'dependent', accessLevel: 'OWNER' });
+    });
+  });
+
+  describe('age × relationship rule (Phase 11.1, PREM-06)', () => {
+    it('refuses parent for a 40-year-old with 400 and opens no transaction', async () => {
+      const promise = service.createDependent(
+        USER_ID,
+        validDependent({ dateOfBirth: bornYearsAgo(40), relationshipType: 'parent' }),
+      );
+      await expect(promise).rejects.toBeInstanceOf(BadRequestException);
+      await expect(promise).rejects.toThrow(ADULT_MESSAGE);
+      expect(mockDatabaseService.withRls).not.toHaveBeenCalled();
+    });
+
+    it('refuses curator for a 10-year-old with 400', async () => {
+      await expect(
+        service.createDependent(USER_ID, validDependent({ dateOfBirth: bornYearsAgo(10), relationshipType: 'curator' })),
+      ).rejects.toThrow(MINOR_MESSAGE);
+      expect(mockDatabaseService.withRls).not.toHaveBeenCalled();
+    });
+
+    it('refuses a DOB change that makes a parent-dependent an adult', async () => {
+      const dependent = profileRow({ profileType: 'dependent_minor', dateOfBirth: bornYearsAgo(10) });
+      const { tx } = createTx({ select: [[dependent], [{ relationshipType: 'parent' }]] });
+      runWith(tx);
+
+      await expect(
+        service.updateProfile(USER_ID, dependent.id, { dateOfBirth: bornYearsAgo(30) }),
+      ).rejects.toThrow(ADULT_MESSAGE);
+      expect(tx.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses a DOB change that makes a curator-dependent a minor', async () => {
+      const dependent = profileRow({ profileType: 'dependent_adult', dateOfBirth: bornYearsAgo(50) });
+      const { tx } = createTx({ select: [[dependent], [{ relationshipType: 'curator' }]] });
+      runWith(tx);
+
+      await expect(
+        service.updateProfile(USER_ID, dependent.id, { dateOfBirth: bornYearsAgo(5) }),
+      ).rejects.toThrow(MINOR_MESSAGE);
+      expect(tx.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses a DOB change by a CO_MANAGE grantee on a dependent with 403 (A8)', async () => {
+      const dependent = profileRow({
+        accountOwnerId: OTHER_USER_ID,
+        profileType: 'dependent_minor',
+        dateOfBirth: bornYearsAgo(17),
+      });
+      const { tx } = createTx({ select: [[dependent], [{ accessLevel: 'CO_MANAGE', categories: ['habits'] }]] });
+      runWith(tx);
+
+      const promise = service.updateProfile(USER_ID, dependent.id, { dateOfBirth: bornYearsAgo(19) });
+      await expect(promise).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(promise).rejects.toThrow('Apenas quem cadastrou o perfil pode alterar a data de nascimento.');
+      expect(tx.update).not.toHaveBeenCalled();
+    });
+
+    it('stores the profileType recomputed from a valid new DOB', async () => {
+      const dependent = profileRow({ profileType: 'dependent_minor', dateOfBirth: bornYearsAgo(60) });
+      const updated = { ...dependent, profileType: 'dependent_adult', dateOfBirth: bornYearsAgo(55) };
+      const { tx, calls } = createTx({
+        select: [[dependent], [{ relationshipType: 'curator' }]],
+        update: [[updated]],
+      });
+      runWith(tx);
+
+      const result = await service.updateProfile(USER_ID, dependent.id, { dateOfBirth: bornYearsAgo(55) });
+
+      expect((calls.updateSets[0] as any).profileType).toBe('dependent_adult');
+      expect((calls.updateSets[0] as any).dateOfBirth).toBe(bornYearsAgo(55));
+      expect(result.profileType).toBe('dependent_adult');
+    });
+
+    it('never changes the profileType of a primary profile', async () => {
+      const primary = profileRow({ dateOfBirth: '1990-04-12' });
+      const { tx, calls } = createTx({ select: [[primary]], update: [[{ ...primary, dateOfBirth: '1991-04-12' }]] });
+      runWith(tx);
+
+      const result = await service.updateProfile(USER_ID, primary.id, { dateOfBirth: '1991-04-12' });
+
+      expect((calls.updateSets[0] as any).profileType).toBeUndefined();
+      expect(result.profileType).toBe('primary');
+    });
+  });
+
+  describe('derived profileType (D3)', () => {
+    it('derives profileType from the DOB for dependents even when the stored value is stale', async () => {
+      const primary = profileRow();
+      const stale = profileRow({
+        id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        profileType: 'dependent_minor',
+        dateOfBirth: bornYearsAgo(19),
+      });
+      const shared = profileRow({
+        id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+        accountOwnerId: OTHER_USER_ID,
+        profileType: 'dependent_adult',
+        dateOfBirth: bornYearsAgo(8),
+      });
+      const { tx } = createTx({
+        select: [[primary, stale], [{ profile: shared, accessLevel: 'VIEW_ONLY', categories: ['habits'] }], []],
+      });
+      runWith(tx);
+
+      const result = await service.getProfilesForUser(USER_ID);
+
+      expect(result.map((p) => p.profileType)).toEqual(['primary', 'dependent_adult', 'dependent_minor']);
+    });
+  });
+
+  describe('confirmLegalBasis (A3)', () => {
+    const adult = profileRow({
+      id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      profileType: 'dependent_adult',
+      dateOfBirth: bornYearsAgo(45),
+    });
+    const guardianship = {
+      id: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
+      relationshipType: 'curator',
+      lgpdLegalBasis: 'lgpd_art_14',
+    };
+
+    it('moves the guardian\'s adult curator dependent to Art. 11, I with a new consent timestamp', async () => {
+      const { tx, calls } = createTx({
+        select: [[adult], [guardianship]],
+        update: [[{ ...guardianship, lgpdLegalBasis: 'lgpd_art_11_i' }]],
+      });
+      runWith(tx);
+
+      const before = Date.now();
+      const result = await service.confirmLegalBasis(USER_ID, adult.id, true);
+
+      const set = calls.updateSets[0] as any;
+      expect(set.lgpdLegalBasis).toBe('lgpd_art_11_i');
+      expect(set.lgpdConsentRecordedAt).toBeInstanceOf(Date);
+      expect(set.lgpdConsentRecordedAt.getTime()).toBeGreaterThanOrEqual(before);
+      expect(result).toMatchObject({
+        id: adult.id,
+        ownership: 'dependent',
+        relationshipType: 'curator',
+        lgpdLegalBasis: 'lgpd_art_11_i',
+        legalBasisNeedsConfirmation: false,
+      });
+    });
+
+    it('refuses anyone but the guardian with 403', async () => {
+      const notMine = { ...adult, accountOwnerId: OTHER_USER_ID };
+      const { tx } = createTx({ select: [[notMine], []] });
+      runWith(tx);
+
+      await expect(service.confirmLegalBasis(USER_ID, adult.id, true)).rejects.toBeInstanceOf(ForbiddenException);
+      expect(tx.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses the owner without an open guardianship with 403', async () => {
+      const { tx } = createTx({ select: [[adult], []] });
+      runWith(tx);
+
+      await expect(service.confirmLegalBasis(USER_ID, adult.id, true)).rejects.toBeInstanceOf(ForbiddenException);
+      expect(tx.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses a minor with 409', async () => {
+      const minor = { ...adult, profileType: 'dependent_minor', dateOfBirth: bornYearsAgo(12) };
+      const { tx } = createTx({ select: [[minor], [{ ...guardianship, relationshipType: 'parent' }]] });
+      runWith(tx);
+
+      await expect(service.confirmLegalBasis(USER_ID, adult.id, true)).rejects.toBeInstanceOf(ConflictException);
+      expect(tx.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses without lgpdConsent true with 400 and opens no transaction', async () => {
+      await expect(
+        service.confirmLegalBasis(USER_ID, adult.id, false as unknown as true),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(mockDatabaseService.withRls).not.toHaveBeenCalled();
+
+      const pipe = new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true });
+      await expect(pipe.transform({}, { type: 'body', metatype: ConfirmLegalBasisDto })).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+      await expect(
+        pipe.transform({ lgpdConsent: false }, { type: 'body', metatype: ConfirmLegalBasisDto }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      await expect(
+        pipe.transform({ lgpdConsent: true }, { type: 'body', metatype: ConfirmLegalBasisDto }),
+      ).resolves.toMatchObject({ lgpdConsent: true });
     });
   });
 

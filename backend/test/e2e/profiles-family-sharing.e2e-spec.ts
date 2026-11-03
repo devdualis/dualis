@@ -17,7 +17,11 @@ import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'node:crypto';
 import { AppModule } from '../../src/app.module';
 import { AuthService } from '../../src/modules/auth/auth.service';
-import { ProfilesService } from '../../src/modules/profiles/profiles.service';
+import {
+  ProfilesService,
+  ageInYears,
+  assertRelationshipFitsAge,
+} from '../../src/modules/profiles/profiles.service';
 import { FamilySharingService } from '../../src/modules/profiles/family-sharing.service';
 import { CreateDependentDto } from '../../src/modules/profiles/dto/create-dependent.dto';
 import { UpdateProfileDto } from '../../src/modules/profiles/dto/update-profile.dto';
@@ -26,6 +30,11 @@ import {
   ProfileResponseDto,
 } from '../../src/modules/profiles/dto/profile-response.dto';
 import { ProfileType } from '../../src/database/schema/profiles.schema';
+import {
+  ADULT_RELATIONSHIPS,
+  LgpdLegalBasis,
+  RelationshipType,
+} from '../../src/database/schema/legal-guardianships.schema';
 import {
   AccessLevel,
   GrantRelationship,
@@ -66,8 +75,16 @@ type StoredGrant = {
   dependentShareConfirmedAt: Date | null;
 };
 
+type StoredGuardianship = {
+  guardianUserId: string;
+  relationshipType: RelationshipType;
+  lgpdLegalBasis: LgpdLegalBasis;
+};
+
 const e2eStore = {
   profiles: new Map<string, StoredProfile>(),
+  /** Open guardianship per dependent profile id. */
+  guardianships: new Map<string, StoredGuardianship>(),
   grants: new Map<string, StoredGrant>(),
   dependentCreates: 0,
 };
@@ -120,9 +137,21 @@ function toProfileResponse(
     ownership,
     accessLevel,
     ...categoriesFor(profile.id, viewerId, accessLevel),
-    relationshipType: null,
-    lgpdLegalBasis: null,
-    legalBasisNeedsConfirmation: false,
+    ...guardianshipFor(profile.id, viewerId),
+  };
+}
+
+/** Same rule as ProfilesService: only the guardian sees relationship and basis. */
+function guardianshipFor(profileId: string, viewerId: string) {
+  const g = e2eStore.guardianships.get(profileId);
+  if (!g || g.guardianUserId !== viewerId) {
+    return { relationshipType: null, lgpdLegalBasis: null, legalBasisNeedsConfirmation: false };
+  }
+  return {
+    relationshipType: g.relationshipType,
+    lgpdLegalBasis: g.lgpdLegalBasis,
+    legalBasisNeedsConfirmation:
+      (ADULT_RELATIONSHIPS as readonly string[]).includes(g.relationshipType) && g.lgpdLegalBasis === 'lgpd_art_14',
   };
 }
 
@@ -198,18 +227,41 @@ class E2EProfilesService {
     if (dto.lgpdConsent !== true) {
       throw new BadRequestException('Consentimento LGPD é obrigatório.');
     }
+    // Real age × relationship rule from ProfilesService.
+    const age = ageInYears(dto.dateOfBirth);
+    assertRelationshipFitsAge(dto.relationshipType, age);
     e2eStore.dependentCreates += 1;
     ensurePrimary(userId, 'Guardian A');
 
     const profile: StoredProfile = {
       id: crypto.randomUUID(),
       accountOwnerId: userId,
-      profileType: 'dependent_minor',
+      profileType: age < 18 ? 'dependent_minor' : 'dependent_adult',
       name: dto.name.trim(),
       dateOfBirth: dto.dateOfBirth.slice(0, 10),
       gender: dto.gender,
     };
     e2eStore.profiles.set(profile.id, profile);
+    e2eStore.guardianships.set(profile.id, {
+      guardianUserId: userId,
+      relationshipType: dto.relationshipType,
+      lgpdLegalBasis: age < 18 ? 'lgpd_art_14' : 'lgpd_art_11_i',
+    });
+    return toProfileResponse(profile, userId, 'OWNER');
+  }
+
+  async confirmLegalBasis(userId: string, profileId: string, lgpdConsent: boolean): Promise<ProfileResponseDto> {
+    if (lgpdConsent !== true) throw new BadRequestException('Consentimento LGPD é obrigatório.');
+    const profile = e2eStore.profiles.get(profileId);
+    if (!profile) throw new NotFoundException(`Profile with id ${profileId} not found.`);
+    const g = e2eStore.guardianships.get(profileId);
+    if (profile.accountOwnerId !== userId || !g || g.guardianUserId !== userId) {
+      throw new ForbiddenException('Apenas quem cadastrou o perfil pode confirmar a base legal.');
+    }
+    if (!(ADULT_RELATIONSHIPS as readonly string[]).includes(g.relationshipType)) {
+      throw new ConflictException('A confirmação pelo Art. 11, I vale só para maiores de 18 anos.');
+    }
+    g.lgpdLegalBasis = 'lgpd_art_11_i';
     return toProfileResponse(profile, userId, 'OWNER');
   }
 
@@ -394,6 +446,7 @@ describe('Profiles & Family Sharing E2E (PREM-06, PREM-07)', () => {
     { method: 'POST', url: '/v1/profiles/dependents' },
     { method: 'PUT', url: '/v1/profiles/c0000000-0000-0000-0000-000000000001' },
     { method: 'DELETE', url: '/v1/profiles/c0000000-0000-0000-0000-000000000001' },
+    { method: 'POST', url: '/v1/profiles/c0000000-0000-0000-0000-000000000001/legal-basis-confirmation' },
     { method: 'POST', url: '/v1/family-sharing/invite' },
     { method: 'POST', url: '/v1/family-sharing/accept' },
     {
@@ -406,6 +459,7 @@ describe('Profiles & Family Sharing E2E (PREM-06, PREM-07)', () => {
 
   beforeAll(async () => {
     e2eStore.profiles.clear();
+    e2eStore.guardianships.clear();
     e2eStore.grants.clear();
     e2eStore.dependentCreates = 0;
 
@@ -496,6 +550,40 @@ describe('Profiles & Family Sharing E2E (PREM-06, PREM-07)', () => {
       expect(list.statusCode).toBe(200);
       const profiles = JSON.parse(list.payload) as ProfileResponseDto[];
       expect(profiles.some((p) => p.ownership === 'dependent')).toBe(false);
+    });
+
+    it('refuses a relationship that does not fit the age with 400 and persists nothing', async () => {
+      const beforeCreates = e2eStore.dependentCreates;
+      const year = new Date().getUTCFullYear();
+
+      const adultParent = await app.inject({
+        method: 'POST',
+        url: '/v1/profiles/dependents',
+        headers: { authorization: `Bearer ${tokenA}` },
+        payload: { ...dependentPayload, dateOfBirth: `${year - 40}-01-01`, relationshipType: 'parent' },
+      });
+      expect(adultParent.statusCode).toBe(400);
+      expect(JSON.parse(adultParent.payload).message).toBe(
+        'Para maiores de 18 anos, escolha curatela ou tomada de decisão apoiada.',
+      );
+
+      const minorCurator = await app.inject({
+        method: 'POST',
+        url: '/v1/profiles/dependents',
+        headers: { authorization: `Bearer ${tokenA}` },
+        payload: { ...dependentPayload, dateOfBirth: `${year - 10}-01-01`, relationshipType: 'curator' },
+      });
+      expect(minorCurator.statusCode).toBe(400);
+      expect(JSON.parse(minorCurator.payload).message).toBe('Para menores de 18 anos, escolha poder familiar ou tutela.');
+
+      const unknown = await app.inject({
+        method: 'POST',
+        url: '/v1/profiles/dependents',
+        headers: { authorization: `Bearer ${tokenA}` },
+        payload: { ...dependentPayload, relationshipType: 'spouse' },
+      });
+      expect(unknown.statusCode).toBe(400);
+      expect(e2eStore.dependentCreates).toBe(beforeCreates);
     });
 
     it('creates dependent with consent and lists it with ownership dependent', async () => {
@@ -740,6 +828,73 @@ describe('Profiles & Family Sharing E2E (PREM-06, PREM-07)', () => {
       });
       expect(byGrantee.statusCode).toBe(403);
       expect(e2eStore.grants.get(id)?.categories).toEqual(['habits', 'care']);
+    });
+
+    it('POST /profiles/:id/legal-basis-confirmation re-confirms an adult dependent under Art. 11, I', async () => {
+      // Phase 11 dependent: curatela recorded under Art. 14 before 0028.
+      const legacy: StoredProfile = {
+        id: crypto.randomUUID(),
+        accountOwnerId: USER_A,
+        profileType: 'dependent_adult',
+        name: 'Carlos Curatelado',
+        dateOfBirth: '1960-03-01',
+        gender: 'masculino',
+      };
+      e2eStore.profiles.set(legacy.id, legacy);
+      e2eStore.guardianships.set(legacy.id, {
+        guardianUserId: USER_A,
+        relationshipType: 'curator',
+        lgpdLegalBasis: 'lgpd_art_14',
+      });
+      const url = `/v1/profiles/${legacy.id}/legal-basis-confirmation`;
+
+      const list = await app.inject({ method: 'GET', url: '/v1/profiles', headers: { authorization: `Bearer ${tokenA}` } });
+      expect((JSON.parse(list.payload) as ProfileResponseDto[]).find((p) => p.id === legacy.id)).toMatchObject({
+        relationshipType: 'curator',
+        lgpdLegalBasis: 'lgpd_art_14',
+        legalBasisNeedsConfirmation: true,
+      });
+
+      for (const payload of [{}, { lgpdConsent: false }, { lgpdConsent: true, extra: 1 }]) {
+        const bad = await app.inject({ method: 'POST', url, headers: { authorization: `Bearer ${tokenA}` }, payload });
+        expect(bad.statusCode).toBe(400);
+      }
+      const badId = await app.inject({
+        method: 'POST',
+        url: '/v1/profiles/not-a-uuid/legal-basis-confirmation',
+        headers: { authorization: `Bearer ${tokenA}` },
+        payload: { lgpdConsent: true },
+      });
+      expect(badId.statusCode).toBe(400);
+
+      const byOther = await app.inject({
+        method: 'POST',
+        url,
+        headers: { authorization: `Bearer ${tokenB}` },
+        payload: { lgpdConsent: true },
+      });
+      expect(byOther.statusCode).toBe(403);
+
+      const confirmed = await app.inject({
+        method: 'POST',
+        url,
+        headers: { authorization: `Bearer ${tokenA}` },
+        payload: { lgpdConsent: true },
+      });
+      expect(confirmed.statusCode).toBe(200);
+      expect(JSON.parse(confirmed.payload)).toMatchObject({
+        id: legacy.id,
+        lgpdLegalBasis: 'lgpd_art_11_i',
+        legalBasisNeedsConfirmation: false,
+      });
+
+      const onMinor = await app.inject({
+        method: 'POST',
+        url: `/v1/profiles/${dependentProfileId}/legal-basis-confirmation`,
+        headers: { authorization: `Bearer ${tokenA}` },
+        payload: { lgpdConsent: true },
+      });
+      expect(onMinor.statusCode).toBe(409);
     });
 
     it('PATCH on a revoked grant answers 409 GRANT_SCOPE_LOCKED', async () => {
