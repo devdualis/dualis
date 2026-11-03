@@ -32,9 +32,13 @@ class _FakeProfiles extends ActiveProfileController {
   _FakeProfiles(this._initial);
 
   final ActiveProfileState _initial;
+  static int refreshCalls = 0;
 
   @override
   ActiveProfileState build() => _initial;
+
+  @override
+  Future<void> refresh() async => refreshCalls++;
 }
 
 void main() {
@@ -106,6 +110,28 @@ void main() {
     expect(find.byKey(const Key('start_fisica_triage_button')), findsNothing);
     expect(find.byKey(const ValueKey('active-profile-banner')), findsOneWidget);
     expect(find.byKey(const Key('nav_destination_emergency')), findsOneWidget);
+  });
+
+  testWidgets('history refresh button also reloads profiles and grants',
+      (tester) async {
+    await tester.pumpWidget(
+      buildApp(
+        const ActiveProfileState(
+          profiles: [primary, sharedViewOnly],
+          activeProfileId: 'shared-view',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('nav_destination_history')));
+    // The history tab keeps a loading animation running: no pumpAndSettle.
+    await tester.pump(const Duration(milliseconds: 500));
+    _FakeProfiles.refreshCalls = 0;
+
+    await tester.tap(find.byKey(const Key('home_refresh_history_button')));
+    await tester.pump();
+
+    expect(_FakeProfiles.refreshCalls, 1);
   });
 
   testWidgets('primary active profile keeps legacy greeting and triage buttons',

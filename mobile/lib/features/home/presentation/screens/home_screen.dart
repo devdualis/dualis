@@ -187,7 +187,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           icon: Icons.refresh_rounded,
           color: AppColors.clinicalTealDark,
           tooltip: 'Atualizar',
-          onTap: () => ref.read(journalInsightsControllerProvider.notifier).refresh(),
+          onTap: () {
+            ref.read(journalInsightsControllerProvider.notifier).refresh();
+            // Shared profiles: also pick up categories the owner changed.
+            if (ref.read(premiumProfilesEnabledProvider)) {
+              ref.read(activeProfileControllerProvider.notifier).refresh();
+            }
+          },
         ),
         const SizedBox(width: 4),
         _AppBarIconButton(
