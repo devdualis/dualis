@@ -9,7 +9,12 @@ import { and, eq, isNull } from 'drizzle-orm';
 import { DatabaseService, DrizzleTransaction } from '../../database/database.service';
 import { profiles, ProfileType } from '../../database/schema/profiles.schema';
 import { legalGuardianships } from '../../database/schema/legal-guardianships.schema';
-import { sharedAccessGrants, AccessLevel } from '../../database/schema/shared-access-grants.schema';
+import {
+  sharedAccessGrants,
+  AccessLevel,
+  SHARE_CATEGORIES,
+  ShareCategory,
+} from '../../database/schema/shared-access-grants.schema';
 import { users } from '../../database/schema/users.schema';
 import { CreateDependentDto } from './dto/create-dependent.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -18,6 +23,34 @@ import { ProfileAccessLevel, ProfileResponseDto } from './dto/profile-response.d
 type ProfileRow = typeof profiles.$inferSelect;
 
 const ADULT_AGE_YEARS = 18;
+
+type ProfileAccess = {
+  accessLevel: ProfileAccessLevel;
+  readableCategories: ShareCategory[];
+  writableCategories: ShareCategory[];
+};
+
+const OWNER_ACCESS: ProfileAccess = {
+  accessLevel: 'OWNER',
+  readableCategories: [...SHARE_CATEGORIES],
+  writableCategories: [...SHARE_CATEGORIES],
+};
+
+/**
+ * Access from several grants on one profile, matching the RLS helpers (EXISTS across
+ * grants): read = union of all grants' categories, write = union of CO_MANAGE grants'.
+ * Null when there is no grant.
+ */
+function mergeGrants(grants: Array<{ accessLevel: AccessLevel; categories: ShareCategory[] | null }>): ProfileAccess | null {
+  if (grants.length === 0) return null;
+  const readable = new Set(grants.flatMap((g) => g.categories ?? []));
+  const writable = new Set(grants.filter((g) => g.accessLevel === 'CO_MANAGE').flatMap((g) => g.categories ?? []));
+  return {
+    accessLevel: grants.some((g) => g.accessLevel === 'CO_MANAGE') ? 'CO_MANAGE' : 'VIEW_ONLY',
+    readableCategories: SHARE_CATEGORIES.filter((c) => readable.has(c)),
+    writableCategories: SHARE_CATEGORIES.filter((c) => writable.has(c)),
+  };
+}
 
 /**
  * Full years between a YYYY-MM-DD birth date and the reference instant (UTC calendar).
@@ -54,7 +87,11 @@ export class ProfilesService {
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
       const sharedRows = await tx
-        .select({ profile: profiles, accessLevel: sharedAccessGrants.accessLevel })
+        .select({
+          profile: profiles,
+          accessLevel: sharedAccessGrants.accessLevel,
+          categories: sharedAccessGrants.categories,
+        })
         .from(sharedAccessGrants)
         .innerJoin(profiles, eq(sharedAccessGrants.targetProfileId, profiles.id))
         .where(
@@ -65,20 +102,19 @@ export class ProfilesService {
           ),
         );
 
-      // Several grants may target the same profile: keep the strongest access level.
-      const shared = new Map<string, { profile: ProfileRow; accessLevel: AccessLevel }>();
+      // Several grants may target the same profile: merge them (strongest level, category unions).
+      const shared = new Map<string, { profile: ProfileRow; grants: typeof sharedRows }>();
       for (const row of sharedRows) {
         if (row.profile.accountOwnerId === userId) continue;
-        const existing = shared.get(row.profile.id);
-        if (!existing || row.accessLevel === 'CO_MANAGE') {
-          shared.set(row.profile.id, row);
-        }
+        const entry = shared.get(row.profile.id) ?? { profile: row.profile, grants: [] };
+        entry.grants.push(row);
+        shared.set(row.profile.id, entry);
       }
 
       return [
-        this.toResponse(primary, userId, 'OWNER'),
-        ...dependents.map((p) => this.toResponse(p, userId, 'OWNER')),
-        ...[...shared.values()].map((s) => this.toResponse(s.profile, userId, s.accessLevel)),
+        this.toResponse(primary, userId, OWNER_ACCESS),
+        ...dependents.map((p) => this.toResponse(p, userId, OWNER_ACCESS)),
+        ...[...shared.values()].map((s) => this.toResponse(s.profile, userId, mergeGrants(s.grants)!)),
       ];
     });
   }
@@ -119,7 +155,7 @@ export class ProfilesService {
         lgpdLegalBasisNotes: dto.lgpdLegalBasisNotes ?? null,
       });
 
-      return this.toResponse(profile, userId, 'OWNER');
+      return this.toResponse(profile, userId, OWNER_ACCESS);
     });
   }
 
@@ -133,13 +169,13 @@ export class ProfilesService {
     return this.databaseService.withRls(userId, async (tx) => {
       const profile = await this.findProfile(tx, profileId);
 
-      let accessLevel: ProfileAccessLevel = 'OWNER';
+      let access = OWNER_ACCESS;
       if (profile.accountOwnerId !== userId) {
-        const grantLevel = await this.getGrantAccessLevel(tx, userId, profileId);
-        if (grantLevel !== 'CO_MANAGE') {
+        const grantAccess = await this.getGrantAccess(tx, userId, profileId);
+        if (grantAccess?.accessLevel !== 'CO_MANAGE') {
           throw new ForbiddenException('Sem permissão para editar este perfil.');
         }
-        accessLevel = grantLevel;
+        access = grantAccess;
       }
 
       const changes: Partial<typeof profiles.$inferInsert> = {};
@@ -154,7 +190,7 @@ export class ProfilesService {
       if (dto.gender !== undefined) changes.gender = dto.gender;
 
       if (Object.keys(changes).length === 0) {
-        return this.toResponse(profile, userId, accessLevel);
+        return this.toResponse(profile, userId, access);
       }
 
       const [updated] = await tx
@@ -167,7 +203,7 @@ export class ProfilesService {
         throw new NotFoundException(`Profile with id ${profileId} not found.`);
       }
 
-      return this.toResponse(updated, userId, accessLevel);
+      return this.toResponse(updated, userId, access);
     });
   }
 
@@ -236,13 +272,13 @@ export class ProfilesService {
     return profile;
   }
 
-  private async getGrantAccessLevel(
+  private async getGrantAccess(
     tx: DrizzleTransaction,
     userId: string,
     profileId: string,
-  ): Promise<ProfileAccessLevel | null> {
+  ): Promise<ProfileAccess | null> {
     const grants = await tx
-      .select({ accessLevel: sharedAccessGrants.accessLevel })
+      .select({ accessLevel: sharedAccessGrants.accessLevel, categories: sharedAccessGrants.categories })
       .from(sharedAccessGrants)
       .where(
         and(
@@ -253,15 +289,10 @@ export class ProfilesService {
         ),
       );
 
-    if (grants.length === 0) return null;
-    return grants.some((g) => g.accessLevel === 'CO_MANAGE') ? 'CO_MANAGE' : 'VIEW_ONLY';
+    return mergeGrants(grants);
   }
 
-  private toResponse(
-    profile: ProfileRow,
-    userId: string,
-    accessLevel: ProfileAccessLevel,
-  ): ProfileResponseDto {
+  private toResponse(profile: ProfileRow, userId: string, access: ProfileAccess): ProfileResponseDto {
     const ownership =
       profile.accountOwnerId !== userId
         ? 'shared'
@@ -276,7 +307,9 @@ export class ProfilesService {
       dateOfBirth: profile.dateOfBirth ?? null,
       gender: profile.gender ?? null,
       ownership,
-      accessLevel,
+      accessLevel: access.accessLevel,
+      readableCategories: access.readableCategories,
+      writableCategories: access.writableCategories,
     };
   }
 

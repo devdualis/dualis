@@ -30,6 +30,7 @@ import {
   AccessLevel,
   GrantRelationship,
   GrantStatus,
+  SHARE_CATEGORIES,
   ShareCategory,
 } from '../../src/database/schema/shared-access-grants.schema';
 import { InviteScope } from '../../src/modules/profiles/family-sharing.service';
@@ -118,6 +119,20 @@ function toProfileResponse(
     gender: profile.gender,
     ownership,
     accessLevel,
+    ...categoriesFor(profile.id, viewerId, accessLevel),
+  };
+}
+
+/** Same rule as ProfilesService: owners all; grantees read the union, write the CO_MANAGE union. */
+function categoriesFor(profileId: string, viewerId: string, accessLevel: ProfileAccessLevel) {
+  if (accessLevel === 'OWNER') {
+    return { readableCategories: [...SHARE_CATEGORIES], writableCategories: [...SHARE_CATEGORIES] };
+  }
+  const grants = activeAcceptedGrantsForGrantee(viewerId).filter((g) => g.targetProfileId === profileId);
+  const has = (list: StoredGrant[]) => (c: ShareCategory) => list.some((g) => g.categories.includes(c));
+  return {
+    readableCategories: SHARE_CATEGORIES.filter(has(grants)),
+    writableCategories: SHARE_CATEGORIES.filter(has(grants.filter((g) => g.accessLevel === 'CO_MANAGE'))),
   };
 }
 

@@ -157,6 +157,8 @@ describe('ProfilesService Unit Tests', () => {
         gender: 'masculino',
         ownership: 'dependent',
         accessLevel: 'OWNER',
+        readableCategories: [...SHARE_CATEGORIES],
+        writableCategories: [...SHARE_CATEGORIES],
       });
     });
 
