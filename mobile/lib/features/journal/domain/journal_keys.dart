@@ -232,15 +232,106 @@ class JournalKeys {
     triggerClima,
   };
 
+  /// Everyday factors offered next to each physical option (v2.6). A body
+  /// option only lists factors people commonly connect with it in general
+  /// health education (no "screens" for the lower back, no "family" for an
+  /// itchy eye). It only narrows the list on screen: nothing is inferred,
+  /// scored or shown as a cause. Research notes:
+  /// `docs/bienestar/JOURNAL-TRIGGERS-BY-OPTION.md`.
+  static const Map<String, Set<String>> optionTriggers = {
+    // Head and face.
+    'cabeca.pressao.temporas': {'trabalho', 'familia', 'sono', 'dinheiro', 'telas', 'ciclo', 'alimentacao', 'esforco', 'queda', 'medicamento', 'clima'},
+    'cabeca.pressao.latejando': {'trabalho', 'familia', 'sono', 'dinheiro', 'telas', 'ciclo', 'alimentacao', 'esforco', 'queda', 'medicamento', 'clima'},
+    'cabeca.pressao.tontura': {'trabalho', 'familia', 'sono', 'dinheiro', 'ciclo', 'alimentacao', 'esforco', 'queda', 'medicamento', 'clima'},
+    'cabeca.pressao.mandibula': {'trabalho', 'familia', 'sono', 'dinheiro', 'queda', 'medicamento'},
+    'cabeca.sentidos.garganta': {'trabalho', 'sono', 'alimentacao', 'medicamento', 'clima'},
+    'cabeca.sentidos.olhos': {'trabalho', 'sono', 'telas', 'medicamento', 'clima'},
+    'cabeca.sentidos.nariz': {'medicamento', 'clima'},
+    'cabeca.sentidos.ouvido': {'queda', 'medicamento', 'clima'},
+    'cabeca.nuca.rigida': {'trabalho', 'familia', 'sono', 'dinheiro', 'telas', 'esforco', 'queda'},
+    'cabeca.nuca.pontada': {'trabalho', 'familia', 'sono', 'dinheiro', 'telas', 'esforco', 'queda'},
+    // Chest.
+    'peito.respiracao.curta': {'trabalho', 'familia', 'dinheiro', 'esforco', 'medicamento', 'clima'},
+    'peito.respiracao.tosse': {'alimentacao', 'esforco', 'medicamento', 'clima'},
+    'peito.incomodo.batedeira': {'trabalho', 'familia', 'sono', 'dinheiro', 'ciclo', 'alimentacao', 'esforco', 'medicamento'},
+    'peito.incomodo.costelas': {'esforco', 'queda'},
+    // Belly.
+    'barriga.queimacao.subindo': {'trabalho', 'familia', 'sono', 'dinheiro', 'alimentacao', 'medicamento'},
+    'barriga.queimacao.enjoo': {'trabalho', 'familia', 'sono', 'dinheiro', 'ciclo', 'alimentacao', 'medicamento', 'clima'},
+    'barriga.colica.gases': {'trabalho', 'familia', 'dinheiro', 'ciclo', 'alimentacao', 'medicamento'},
+    'barriga.colica.pontadas': {'trabalho', 'familia', 'dinheiro', 'ciclo', 'alimentacao', 'esforco', 'medicamento'},
+    'barriga.colica.preso': {'trabalho', 'familia', 'dinheiro', 'ciclo', 'alimentacao', 'medicamento'},
+    'barriga.colica.solto': {'trabalho', 'familia', 'dinheiro', 'ciclo', 'alimentacao', 'medicamento'},
+    'barriga.colica.menstrual': {'ciclo'},
+    // Pelvis and lower belly.
+    'pelve.xixi_intima.ardencia': {'ciclo', 'alimentacao', 'medicamento', 'clima'},
+    'pelve.xixi_intima.vontade': {'trabalho', 'familia', 'dinheiro', 'alimentacao', 'medicamento', 'clima'},
+    'pelve.xixi_intima.coceira': {'ciclo', 'medicamento', 'clima'},
+    'pelve.xixi_intima.inchaco': {'ciclo', 'medicamento', 'clima'},
+    'pelve.baixo_ventre.colica': {'trabalho', 'familia', 'dinheiro', 'ciclo', 'alimentacao', 'medicamento'},
+    'pelve.baixo_ventre.peso': {'ciclo', 'alimentacao', 'esforco'},
+    'pelve.baixo_ventre.menstrual': {'ciclo'},
+    // Back. "Pescoço e ombros duros" keeps screens (neck bent over a
+    // phone); the lower back and the sharp pains do not.
+    'costas.rigidez.ombros': {'trabalho', 'familia', 'sono', 'dinheiro', 'telas', 'esforco', 'queda'},
+    'costas.rigidez.lombar': {'trabalho', 'sono', 'ciclo', 'esforco', 'queda'},
+    'costas.fisgada.irradia': {'trabalho', 'sono', 'esforco', 'queda'},
+    'costas.fisgada.ao_mexer': {'trabalho', 'sono', 'esforco', 'queda'},
+    // Arms and legs.
+    'membros.cansaco.juntas': {'trabalho', 'sono', 'esforco', 'queda', 'medicamento', 'clima'},
+    'membros.cansaco.pesados': {'trabalho', 'sono', 'ciclo', 'alimentacao', 'esforco', 'medicamento', 'clima'},
+    'membros.formigamento.dormentes': {'trabalho', 'sono', 'esforco', 'queda', 'medicamento', 'clima'},
+    'membros.formigamento.choque': {'trabalho', 'sono', 'esforco', 'queda'},
+    // Skin.
+    'pele.coceira.coceira': {'trabalho', 'familia', 'dinheiro', 'alimentacao', 'medicamento', 'clima'},
+    'pele.coceira.ardencia': {'medicamento', 'clima'},
+    'pele.aparencia.vermelhidao': {'trabalho', 'familia', 'dinheiro', 'alimentacao', 'esforco', 'medicamento', 'clima'},
+    'pele.aparencia.manchas': {'ciclo', 'medicamento', 'clima'},
+    // Muscles.
+    'musculos.tensao.rigidez': {'trabalho', 'familia', 'sono', 'dinheiro', 'esforco', 'queda', 'medicamento'},
+    'musculos.tensao.caibra': {'sono', 'alimentacao', 'esforco', 'medicamento', 'clima'},
+    'musculos.cansaco.fraqueza': {'sono', 'ciclo', 'alimentacao', 'esforco', 'medicamento', 'clima'},
+    'musculos.cansaco.dolorido': {'trabalho', 'sono', 'esforco', 'queda', 'medicamento'},
+    // Temperature and appetite.
+    'hormonios.temperatura.calorao': {'trabalho', 'familia', 'dinheiro', 'ciclo', 'alimentacao', 'esforco', 'medicamento', 'clima'},
+    'hormonios.temperatura.frio': {'sono', 'alimentacao', 'medicamento', 'clima'},
+    'hormonios.apetite.sede': {'alimentacao', 'esforco', 'medicamento', 'clima'},
+    'hormonios.apetite.fome': {'trabalho', 'familia', 'sono', 'dinheiro', 'ciclo', 'alimentacao', 'esforco', 'medicamento'},
+  };
+
+  /// Factors of one physical option. A written item (`<region>.custom`) or a
+  /// removed old key gets every factor of its region; an unknown region gets
+  /// every factor.
+  static Set<String> triggersOfOption(String optionKey) {
+    final key = currentOptionKey(optionKey);
+    final direct = optionTriggers[key];
+    if (direct != null) return direct;
+    final region = rootOf(key);
+    final ofRegion = {
+      for (final e in optionTriggers.entries)
+        if (rootOf(e.key) == region) ...e.value,
+    };
+    return ofRegion.isEmpty ? triggers.toSet() : ofRegion;
+  }
+
+  /// Factors offered on the triggers screen. Without a physical option (an
+  /// emotional entry, or conditions only) it is the general list; with
+  /// physical options it is the factors of those options together.
+  /// "Não sei" and "Outro" are always there; "Ciclo menstrual" never for men.
   static List<String> triggersFor({
-    required bool hasPhysicalItem,
+    Iterable<String> physicalOptionKeys = const [],
     bool isMale = false,
-  }) => [
-    for (final t in triggers)
-      if ((hasPhysicalItem || !physicalOnlyTriggers.contains(t)) &&
-          (!isMale || t != triggerCiclo))
-        t,
-  ];
+  }) {
+    final Set<String> allowed = physicalOptionKeys.isEmpty
+        ? {for (final t in triggers) if (!physicalOnlyTriggers.contains(t)) t}
+        : {for (final k in physicalOptionKeys) ...triggersOfOption(k)};
+    return [
+      for (final t in triggers)
+        if ((allowed.contains(t) || t == triggerNaoSei || t == triggerOutro) &&
+            (!isMale || t != triggerCiclo))
+          t,
+    ];
+  }
 
   // Closing questions of a "não tão bem" entry (v2.2, both optional).
   static const List<String> copings = ['consegui', 'esperei', 'dificil'];

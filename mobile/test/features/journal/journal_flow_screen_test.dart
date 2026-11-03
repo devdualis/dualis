@@ -361,7 +361,8 @@ void main() {
     await fillIntensity(tester, 4, 2);
     await tapKey(tester, 'jv2_continue');
 
-    // Physical item present: every trigger is offered. Skip clears choices.
+    // Temples, dizziness, lower back and a written back item: together
+    // they reach every factor. Skip clears choices.
     expect((await allTriggerKeys(tester)).toSet(), JournalKeys.triggers.toSet());
     await tapKey(tester, 'jv2_trigger_esforco');
     await tapKey(tester, 'jv2_skip');
@@ -748,11 +749,11 @@ void main() {
       await fillIntensity(tester, 3, 3);
       await tapKey(tester, 'jv2_continue');
 
-      // Physical entry: every trigger, in topic order.
+      // Physical entry: only the factors of the chosen options, in topic
+      // order (no sleep, screens, effort or fall for nose and bowels).
       expect(await allTriggerKeys(tester), [
-        ...JournalKeys.triggerTopics.values.expand((t) => t),
-        'nao_sei',
-        'outro',
+        'trabalho', 'alimentacao', 'familia', 'dinheiro',
+        'ciclo', 'medicamento', 'clima', 'nao_sei', 'outro',
       ]);
       await tapKey(tester, 'jv2_trigger_ciclo');
       await tapKey(tester, 'jv2_continue');

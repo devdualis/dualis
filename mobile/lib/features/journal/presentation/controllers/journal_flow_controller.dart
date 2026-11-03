@@ -482,7 +482,7 @@ class JournalFlowController extends Notifier<JournalFlowState> {
   JournalEntry buildEntry({DateTime? now, bool isMale = false}) {
     final quick = state.mood != JournalKeys.moodNaoTaoBem;
     final offered = JournalKeys.triggersFor(
-      hasPhysicalItem: state.hasPhysicalItem,
+      physicalOptionKeys: state.physicalOptionKeys,
       isMale: isMale,
     );
     final triggers = quick

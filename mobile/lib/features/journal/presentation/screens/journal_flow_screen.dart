@@ -1188,7 +1188,10 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
   /// Triggers in three tabs of icon cards (v2.3). "Não sei" and "Outro"
   /// sit below the tabs.
   Widget _triggersStep(AppLocalizations l10n, JournalFlowState state) {
-    final offered = JournalKeys.triggersFor(hasPhysicalItem: state.hasPhysicalItem, isMale: _isMale);
+    final offered = JournalKeys.triggersFor(
+      physicalOptionKeys: state.physicalOptionKeys,
+      isMale: _isMale,
+    );
     final topics = [
       for (final e in JournalKeys.triggerTopics.entries)
         (e.key, [for (final t in e.value) if (offered.contains(t)) t]),

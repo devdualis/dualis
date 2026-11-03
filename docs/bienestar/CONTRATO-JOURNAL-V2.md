@@ -341,6 +341,12 @@ Old entries and offline outbox items from v2.2 to v2.4 still carry these keys. T
 
 Transition phrases: physical phrases stay keyed by region (`region.<region>`, or the shared `region` pool), so merged branches keep a phrase. The 7 `presente.solidao` phrases were removed with the branch.
 
+## v2.6: triggers follow the chosen body options (2026-11-03, client only)
+
+Same screens, same keys, same payload. The triggers screen of a physical entry no longer shows every trigger: it shows the triggers of the physical options the person chose, together (`JournalKeys.optionTriggers` in `mobile/lib/features/journal/domain/journal_keys.dart`, one set per option of the v2.5 tree; reasons per option in `JOURNAL-TRIGGERS-BY-OPTION.md`). Example: "Peso na lombar" offers trabalho, sono, ciclo, esforco, queda; it no longer offers telas, familia or dinheiro. A written item (`<region>.custom`) and a removed legacy key get every trigger of their region; a moved legacy key gets the triggers of its new key. `nao_sei` and `outro` are always offered, `ciclo` never for men, and a topic tab with no trigger is hidden. Entries with no physical item (emotional, or conditions only) keep the general list (`trabalho`, `familia`, `sono`, `dinheiro`, `telas`, `ciclo`).
+
+The list only narrows what is shown. It is not stored, it says nothing about a cause, and the backend is unchanged: it still accepts any trigger key, with the physical-only rule above.
+
 ## History: period summary, "Como você se sentiu" and same-day pairs (2026-11-02, Free)
 
 Client spec items D15, D16 and D17 (`revision-2026-11-02/INFORME-DESVIOS.md`). Everything is computed on the device from the entries of the selected period (`mobile/lib/features/journal_insights/domain/period_report.dart`). It only describes what the person recorded about themself: records, days and weekdays. No score, no threshold, no message triggered by content, no cause, no clinical names, no advice. The backend is unchanged; `/summary.cooccurrence` stays as documented above.
