@@ -26,7 +26,9 @@ import '../../../journal_insights/presentation/widgets/temporal_pie.dart';
 import '../../../journal_insights/presentation/widgets/water_charts.dart';
 import '../../../journal_insights/presentation/widgets/wellbeing_cards.dart';
 import '../../../profile/domain/models/share_category.dart';
+import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
+import '../../../profile/presentation/widgets/not_shared_placeholder.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 
 /// History of the last 7 / 14 / 30 days (handoff "Dualis | Gráficos do aplicativo"
@@ -185,13 +187,25 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
           ),
         ),
         ...switch (_tab) {
+          _ when !_tabReadable(_tab) => [
+              NotSharedPlaceholder(
+                profileName: ref
+                        .watch(activeProfileControllerProvider)
+                        .activeProfile
+                        ?.name ??
+                    '',
+              ),
+            ],
           HistoryTab.emotions => _emotionsTab(l10n, entries, start),
           HistoryTab.body => _bodyTab(l10n, entries, start),
           HistoryTab.water => _waterTab(l10n, today, start),
           HistoryTab.habits => _habitsTab(l10n, today, start),
           HistoryTab.together => _togetherTab(l10n, entries, start),
         },
-        if (_tab != HistoryTab.water && _tab != HistoryTab.habits)
+        // The list mixes both journals: hide it only when neither is shared.
+        if (_tab != HistoryTab.water &&
+            _tab != HistoryTab.habits &&
+            _tabReadable(HistoryTab.together))
           InsightsCard(
             title: l10n.xv2DashEntriesTitle,
             child: _EntriesList(entries: entries),
@@ -199,6 +213,21 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
       ],
     );
   }
+
+  /// False when the shared profile granted none of the tab's categories, so
+  /// the tab shows "not shared" instead of reading as "nothing recorded".
+  bool _tabReadable(HistoryTab tab) => switch (tab) {
+        HistoryTab.emotions =>
+          activeProfileCanRead(ref, ShareCategory.emotionalJournal),
+        HistoryTab.body =>
+          activeProfileCanRead(ref, ShareCategory.physicalJournal),
+        HistoryTab.water ||
+        HistoryTab.habits =>
+          activeProfileCanRead(ref, ShareCategory.habits),
+        HistoryTab.together =>
+          activeProfileCanRead(ref, ShareCategory.emotionalJournal) ||
+              activeProfileCanRead(ref, ShareCategory.physicalJournal),
+      };
 
   /// On a shared profile with only one journal branch readable, say so, so
   /// the missing branch never reads as "nothing recorded".

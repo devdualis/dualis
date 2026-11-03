@@ -671,6 +671,20 @@ void main() {
           findsOneWidget);
     });
 
+    testWidgets('habits-only grantee: journal tabs say "not shared"',
+        (tester) async {
+      await pumpDashboard(
+        tester,
+        const [],
+        profiles: activeShared(sharedWith([ShareCategory.habits])),
+      );
+      // Emotions is the default tab.
+      expect(find.byKey(const ValueKey('category-not-shared')), findsOneWidget);
+      expect(find.text('Não compartilhado com você'), findsOneWidget);
+      expect(find.text('Você ainda não tem registros neste período.'),
+          findsNothing);
+    });
+
     testWidgets('both journals readable: no hint', (tester) async {
       await pumpDashboard(
         tester,
