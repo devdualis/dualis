@@ -87,7 +87,7 @@ const e2eStore = {
   guardianships: new Map<string, StoredGuardianship>(),
   grants: new Map<string, StoredGrant>(),
   /** Hand-over code per dependent profile id. */
-  handoverCodes: new Map<string, string>(),
+  handoverCodes: new Map<string, { code: string; expiresAt: Date }>(),
   dependentCreates: 0,
 };
 
@@ -140,7 +140,24 @@ function toProfileResponse(
     accessLevel,
     ...categoriesFor(profile.id, viewerId, accessLevel),
     ...guardianshipFor(profile.id, viewerId),
+    ...handoverFor(profile, viewerId),
   };
+}
+
+/** Same rule as ProfilesService (D3): the guardian of a parent/legal_guardian dependent aged 18+. */
+function handoverFor(profile: StoredProfile, viewerId: string) {
+  const g = e2eStore.guardianships.get(profile.id);
+  const due =
+    g !== undefined &&
+    g.guardianUserId === viewerId &&
+    (g.relationshipType === 'parent' || g.relationshipType === 'legal_guardian') &&
+    profile.dateOfBirth !== null &&
+    ageInYears(profile.dateOfBirth) >= 18;
+  if (!due) return { handoverStatus: 'none' as const, handoverCodeExpiresAt: null };
+  const code = e2eStore.handoverCodes.get(profile.id);
+  return code
+    ? { handoverStatus: 'code_active' as const, handoverCodeExpiresAt: code.expiresAt.toISOString() }
+    : { handoverStatus: 'due' as const, handoverCodeExpiresAt: null };
 }
 
 /** Same rule as ProfilesService: only the guardian sees relationship and basis. */
@@ -302,12 +319,13 @@ class E2EProfilesService {
     if (!profile.dateOfBirth || ageInYears(profile.dateOfBirth) < 18) {
       throw new ConflictException({ statusCode: 409, code: 'HANDOVER_NOT_DUE', message: 'Ainda não.' });
     }
-    e2eStore.handoverCodes.set(profileId, generateHandoverCode());
-    return { claimCode: e2eStore.handoverCodes.get(profileId)!, expiresAt: new Date(Date.now() + INVITE_TTL_MS) };
+    const issued = { code: generateHandoverCode(), expiresAt: new Date(Date.now() + INVITE_TTL_MS) };
+    e2eStore.handoverCodes.set(profileId, issued);
+    return { claimCode: issued.code, expiresAt: issued.expiresAt };
   }
 
   async claimProfile(userId: string, claimCode: string): Promise<ProfileResponseDto> {
-    const entry = [...e2eStore.handoverCodes.entries()].find(([, code]) => code === claimCode.toUpperCase());
+    const entry = [...e2eStore.handoverCodes.entries()].find(([, issued]) => issued.code === claimCode.toUpperCase());
     if (!entry) {
       throw new NotFoundException({ statusCode: 404, code: 'CLAIM_INVALID_CODE', message: 'Código inválido.' });
     }
@@ -977,6 +995,15 @@ describe('Profiles & Family Sharing E2E (PREM-06, PREM-07)', () => {
 
       // Time passes: the dependent turns 18.
       e2eStore.profiles.get(dependent.id)!.dateOfBirth = `${year - 19}-01-01`;
+      const dueList = await app.inject({
+        method: 'GET',
+        url: '/v1/profiles',
+        headers: { authorization: `Bearer ${tokenA}` },
+      });
+      expect((JSON.parse(dueList.payload) as ProfileResponseDto[]).find((p) => p.id === dependent.id)).toMatchObject({
+        handoverStatus: 'due',
+        handoverCodeExpiresAt: null,
+      });
 
       const issued = await app.inject({
         method: 'POST',

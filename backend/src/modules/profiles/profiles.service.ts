@@ -8,7 +8,8 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { EmailService } from '../../common/email/email.service';
 import { HOUR_MS, RateLimiter } from '../../common/http/rate-limiter';
 import { DatabaseService, DrizzleTransaction } from '../../database/database.service';
 import { profiles, ProfileType } from '../../database/schema/profiles.schema';
@@ -35,7 +36,7 @@ import {
 } from './family-sharing.service';
 import { CreateDependentDto } from './dto/create-dependent.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { ProfileAccessLevel, ProfileResponseDto } from './dto/profile-response.dto';
+import { HandoverStatus, ProfileAccessLevel, ProfileResponseDto } from './dto/profile-response.dto';
 
 type ProfileRow = typeof profiles.$inferSelect;
 
@@ -51,6 +52,8 @@ type ProfileAccess = {
 type GuardianshipInfo = {
   relationshipType: RelationshipType;
   lgpdLegalBasis: LgpdLegalBasis;
+  /** Expiry of the current hand-over code, if one was generated (D3). */
+  handoverCodeExpiresAt?: Date | null;
 };
 
 /** Claim refusals raised by claim_dependent_profile (migration 0028) and their HTTP mapping. */
@@ -145,12 +148,14 @@ export class ProfilesService {
   constructor(
     @Inject(DatabaseService)
     private readonly databaseService: DatabaseService,
+    @Inject(EmailService)
+    private readonly emailService: EmailService,
   ) {}
 
   async getProfilesForUser(userId: string): Promise<ProfileResponseDto[]> {
     this.assertUserId(userId);
 
-    return this.databaseService.withRls(userId, async (tx) => {
+    const { list, notices } = await this.databaseService.withRls(userId, async (tx) => {
       const owned = await tx.select().from(profiles).where(eq(profiles.accountOwnerId, userId));
 
       let primary = owned.find((p) => p.profileType === 'primary');
@@ -188,24 +193,79 @@ export class ProfilesService {
       }
 
       const guardianships = new Map<string, GuardianshipInfo>();
+      const unnotifiedDue: string[] = [];
       if (dependents.length > 0) {
         const rows = await tx
           .select({
+            id: legalGuardianships.id,
             dependentProfileId: legalGuardianships.dependentProfileId,
             relationshipType: legalGuardianships.relationshipType,
             lgpdLegalBasis: legalGuardianships.lgpdLegalBasis,
+            handoverCodeExpiresAt: legalGuardianships.handoverCodeExpiresAt,
+            handoverNotifiedAt: legalGuardianships.handoverNotifiedAt,
           })
           .from(legalGuardianships)
           .where(and(eq(legalGuardianships.guardianUserId, userId), isNull(legalGuardianships.closedAt)));
-        for (const row of rows) guardianships.set(row.dependentProfileId, row);
+        const dependentById = new Map(dependents.map((p) => [p.id, p]));
+        for (const row of rows) {
+          guardianships.set(row.dependentProfileId, row);
+          const dependent = dependentById.get(row.dependentProfileId);
+          if (
+            dependent &&
+            !row.handoverNotifiedAt &&
+            isHandoverDue(dependent.dateOfBirth ?? null, row.relationshipType)
+          ) {
+            unnotifiedDue.push(row.id);
+          }
+        }
       }
 
-      return [
+      // D3 notice, no scheduler: the first list that sees a due hand-over marks it.
+      // UPDATE … WHERE handover_notified_at IS NULL RETURNING: of concurrent lists only one
+      // gets the row back, so the guardian gets one email.
+      const notices: Array<{ email: string; name: string; dependentFirstName: string }> = [];
+      if (unnotifiedDue.length > 0) {
+        const marked = await tx
+          .update(legalGuardianships)
+          .set({ handoverNotifiedAt: new Date() })
+          .where(and(inArray(legalGuardianships.id, unnotifiedDue), isNull(legalGuardianships.handoverNotifiedAt)))
+          .returning({ dependentProfileId: legalGuardianships.dependentProfileId });
+        if (marked.length > 0) {
+          const [guardian] = await tx
+            .select({ email: users.email, name: users.name })
+            .from(users)
+            .where(eq(users.id, userId))
+            .limit(1);
+          if (guardian?.email) {
+            for (const row of marked) {
+              const dependent = dependents.find((p) => p.id === row.dependentProfileId);
+              if (!dependent) continue;
+              notices.push({
+                email: guardian.email,
+                name: guardian.name,
+                dependentFirstName: dependent.name.trim().split(/\s+/)[0],
+              });
+            }
+          }
+        }
+      }
+
+      const list = [
         this.toResponse(primary, userId, OWNER_ACCESS),
         ...dependents.map((p) => this.toResponse(p, userId, OWNER_ACCESS, guardianships.get(p.id))),
         ...[...shared.values()].map((s) => this.toResponse(s.profile, userId, mergeGrants(s.grants)!)),
       ];
+      return { list, notices };
     });
+
+    // After commit only: a rolled-back mark sends nothing. deliver() never throws; the
+    // list does not wait for the mail provider.
+    for (const notice of notices) {
+      void this.emailService
+        .sendHandoverDueEmail(notice.email, notice.name, notice.dependentFirstName)
+        .catch(() => undefined);
+    }
+    return list;
   }
 
   async createDependent(userId: string, dto: CreateDependentDto): Promise<ProfileResponseDto> {
@@ -351,6 +411,7 @@ export class ProfilesService {
         .returning({
           relationshipType: legalGuardianships.relationshipType,
           lgpdLegalBasis: legalGuardianships.lgpdLegalBasis,
+          handoverCodeExpiresAt: legalGuardianships.handoverCodeExpiresAt,
         });
       if (!updated) {
         throw new NotFoundException(`Profile with id ${profileId} not found.`);
@@ -538,6 +599,7 @@ export class ProfilesService {
         id: legalGuardianships.id,
         relationshipType: legalGuardianships.relationshipType,
         lgpdLegalBasis: legalGuardianships.lgpdLegalBasis,
+        handoverCodeExpiresAt: legalGuardianships.handoverCodeExpiresAt,
       })
       .from(legalGuardianships)
       .where(
@@ -605,7 +667,23 @@ export class ProfilesService {
         guardianship !== undefined &&
         (ADULT_RELATIONSHIPS as readonly string[]).includes(guardianship.relationshipType) &&
         guardianship.lgpdLegalBasis === 'lgpd_art_14',
+      ...this.handoverFor(profile, guardianship),
     };
+  }
+
+  /** D3 hand-over state of an owned dependent; 'none' without an open guardianship. */
+  private handoverFor(
+    profile: ProfileRow,
+    guardianship?: GuardianshipInfo,
+  ): { handoverStatus: HandoverStatus; handoverCodeExpiresAt: string | null } {
+    if (!guardianship || !isHandoverDue(profile.dateOfBirth ?? null, guardianship.relationshipType)) {
+      return { handoverStatus: 'none', handoverCodeExpiresAt: null };
+    }
+    const expiresAt = guardianship.handoverCodeExpiresAt ? new Date(guardianship.handoverCodeExpiresAt) : null;
+    if (expiresAt && expiresAt.getTime() > Date.now()) {
+      return { handoverStatus: 'code_active', handoverCodeExpiresAt: expiresAt.toISOString() };
+    }
+    return { handoverStatus: 'due', handoverCodeExpiresAt: null };
   }
 
   private assertUserId(userId: string): void {

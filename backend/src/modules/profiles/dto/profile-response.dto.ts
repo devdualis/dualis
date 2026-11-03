@@ -4,6 +4,8 @@ import { ShareCategory } from '../../../database/schema/shared-access-grants.sch
 
 export type ProfileOwnership = 'own' | 'dependent' | 'shared';
 export type ProfileAccessLevel = 'OWNER' | 'VIEW_ONLY' | 'CO_MANAGE';
+/** D3: none, due (dependent under parent/legal_guardian turned 18) or code_active (unexpired transfer code). */
+export type HandoverStatus = 'none' | 'due' | 'code_active';
 
 export class ProfileResponseDto {
   id!: string;
@@ -23,4 +25,8 @@ export class ProfileResponseDto {
   lgpdLegalBasis!: LgpdLegalBasis | null;
   /** True for an adult dependent still recorded under Art. 14: the guardian should re-confirm under Art. 11, I. */
   legalBasisNeedsConfirmation!: boolean;
+  /** Hand-over at 18 (owned dependents only; 'none' otherwise). */
+  handoverStatus!: HandoverStatus;
+  /** Expiry of the active transfer code (ISO 8601) when handoverStatus is 'code_active'; null otherwise. */
+  handoverCodeExpiresAt!: string | null;
 }

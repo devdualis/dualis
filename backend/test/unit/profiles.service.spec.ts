@@ -196,6 +196,8 @@ describe('ProfilesService Unit Tests', () => {
         relationshipType: 'parent',
         lgpdLegalBasis: 'lgpd_art_14',
         legalBasisNeedsConfirmation: false,
+        handoverStatus: 'none',
+        handoverCodeExpiresAt: null,
       });
     });
 
