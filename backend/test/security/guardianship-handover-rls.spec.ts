@@ -450,6 +450,53 @@ describe('Security Regression: 0028 guardianship hand-over at 18 (PREM-06)', () 
     expect(await ownerOf(minorM)).toBe(guardianG);
   });
 
+  it('03T1: a live code set by hand with set_config does not let a session skip claim_dependent_profile', async (ctx) => {
+    if (!isDbAvailable) return ctx.skip();
+    // CODE_M (opened on the 17-year-old in an earlier case) is still live and unexpired.
+    const attempt = (p: Promise<{ rowCount: number | null }>) =>
+      p.then(
+        (r) => ({ rowCount: r.rowCount, code: null as string | null }),
+        (e: { code?: string }) => ({ rowCount: 0, code: e.code ?? null }),
+      );
+    for (const actor of [strangerS, claimerN]) {
+      await asApp(actor, async (c) => {
+        await c.query(`SELECT set_config('app.claiming_code', $1, true)`, [CODE_M]);
+        expect(await countWhere(c, 'profiles', 'id', minorM)).toBe(0);
+        expect(await countWhere(c, 'legal_guardianships', 'id', guardianshipM)).toBe(0);
+        const moved = await attempt(
+          c.query(`UPDATE profiles SET account_owner_id = $1, profile_type = 'primary' WHERE id = $2`, [actor, minorM]),
+        );
+        expect(moved.rowCount).toBe(0);
+        expect([null, '42501']).toContain(moved.code);
+      });
+      await asApp(actor, async (c) => {
+        await c.query(`SELECT set_config('app.claiming_code', $1, true)`, [CODE_M]);
+        const closed = await attempt(
+          c.query(
+            `UPDATE legal_guardianships SET closed_at = now(), closed_reason = 'handed_over', handed_over_to_user_id = $1 WHERE id = $2`,
+            [actor, guardianshipM],
+          ),
+        );
+        expect(closed.rowCount).toBe(0);
+        expect([null, '42501']).toContain(closed.code);
+      });
+    }
+    expect(await ownerOf(minorM)).toBe(guardianG);
+    const guardianship = await adminPool.query(`SELECT closed_at FROM legal_guardianships WHERE id = $1`, [guardianshipM]);
+    expect(guardianship.rows[0].closed_at).toBeNull();
+  });
+
+  it('03T1: the former guardian cannot delete the closed guardianship (audit trail)', async (ctx) => {
+    if (!isDbAvailable) return ctx.skip();
+    await asApp(guardianG, async (c) => {
+      expect(await countWhere(c, 'legal_guardianships', 'id', guardianshipY)).toBe(1);
+      const deleted = await c.query(`DELETE FROM legal_guardianships WHERE id = $1`, [guardianshipY]);
+      expect(deleted.rowCount).toBe(0);
+    });
+    const kept = await adminPool.query(`SELECT count(*)::int AS n FROM legal_guardianships WHERE id = $1`, [guardianshipY]);
+    expect(kept.rows[0].n).toBe(1);
+  });
+
   it('03T1: re-running 0028 after a claim keeps the guardianship closed and the new owner in place', async (ctx) => {
     if (!isDbAvailable) return ctx.skip();
     await adminPool.query(readMigration(HANDOVER_MIGRATION));

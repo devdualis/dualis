@@ -67,7 +67,7 @@ export const sharedAccessGrants = pgTable(
     ),
     pgPolicy('shared_access_grants_participant_select', {
       for: 'select',
-      using: sql`granter_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR grantee_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR invite_code = NULLIF(current_setting('app.accepting_invite_code', true), '')`,
+      using: sql`granter_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR grantee_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR invite_code = NULLIF(current_setting('app.accepting_invite_code', true), '') OR (app_claimable_profile(target_profile_id) AND app_in_claim_function())`,
     }),
     pgPolicy('shared_access_grants_granter_insert', {
       for: 'insert',
@@ -76,8 +76,8 @@ export const sharedAccessGrants = pgTable(
     }),
     pgPolicy('shared_access_grants_participant_update', {
       for: 'update',
-      using: sql`granter_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR grantee_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR (status = 'PENDING' AND invite_code = NULLIF(current_setting('app.accepting_invite_code', true), ''))`,
-      withCheck: sql`granter_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR grantee_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR (status = 'EXPIRED' AND grantee_user_id IS NULL AND invite_code = NULLIF(current_setting('app.accepting_invite_code', true), ''))`,
+      using: sql`granter_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR grantee_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR (status = 'PENDING' AND invite_code = NULLIF(current_setting('app.accepting_invite_code', true), '')) OR (app_claimable_profile(target_profile_id) AND app_in_claim_function())`,
+      withCheck: sql`granter_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR grantee_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid OR (status = 'EXPIRED' AND grantee_user_id IS NULL AND invite_code = NULLIF(current_setting('app.accepting_invite_code', true), '')) OR (status = 'REVOKED' AND app_claimable_profile(target_profile_id) AND app_in_claim_function())`,
     }),
   ],
 );

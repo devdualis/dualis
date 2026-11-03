@@ -563,3 +563,342 @@ DROP TRIGGER IF EXISTS trg_guard_shared_access_grant_update ON shared_access_gra
 CREATE TRIGGER trg_guard_shared_access_grant_update
   BEFORE UPDATE ON shared_access_grants
   FOR EACH ROW EXECUTE FUNCTION app_guard_shared_access_grant_update();
+
+-- ============================================================================
+-- Guardianship section (decision D3, PREM-06): at 18 a dependent profile is handed
+-- over to the young adult's own account through a claim code. Ownership moves, the
+-- guardianship row is closed (never deleted, for audit), every grant on the profile
+-- is revoked, and the former guardian keeps no access.
+--
+-- Recursion note: app_claimable_profile reads only legal_guardianships, and the new
+-- legal_guardianships policies read only the row, settings and pg_proc. So the claim
+-- policies on profiles and shared_access_grants add no policy cycle, even when the
+-- helpers run under RLS with a NOSUPERUSER NOBYPASSRLS owner.
+--
+-- Bypass note: a session can set app.claiming_code itself with set_config. Every claim
+-- policy and trigger branch therefore also requires app_in_claim_function(): the
+-- statement must run as the owner of claim_dependent_profile, which only happens inside
+-- that SECURITY DEFINER function. A direct UPDATE with a valid code changes nothing.
+-- ============================================================================
+
+-- F. Hand-over at 18: claim columns, capability policies and claim_dependent_profile
+
+ALTER TABLE legal_guardianships ADD COLUMN IF NOT EXISTS handover_code varchar(12);
+ALTER TABLE legal_guardianships ADD COLUMN IF NOT EXISTS handover_code_expires_at timestamp with time zone;
+ALTER TABLE legal_guardianships ADD COLUMN IF NOT EXISTS handover_notified_at timestamp with time zone;
+ALTER TABLE legal_guardianships ADD COLUMN IF NOT EXISTS closed_at timestamp with time zone;
+ALTER TABLE legal_guardianships ADD COLUMN IF NOT EXISTS closed_reason varchar(32);
+ALTER TABLE legal_guardianships ADD COLUMN IF NOT EXISTS handed_over_to_user_id uuid REFERENCES users(id) ON DELETE SET NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_legal_guardianships_handover_code
+  ON legal_guardianships(handover_code) WHERE handover_code IS NOT NULL;
+
+-- True when app.claiming_code matches a stored, unexpired code of an open guardianship
+-- on the profile. Reads only legal_guardianships (never profiles or shared_access_grants).
+CREATE OR REPLACE FUNCTION app_claimable_profile(p_profile_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM legal_guardianships lg
+    WHERE lg.dependent_profile_id = p_profile_id
+      AND lg.handover_code = NULLIF(current_setting('app.claiming_code', true), '')
+      AND lg.closed_at IS NULL
+      AND lg.handover_code_expires_at > now()
+  );
+$$;
+
+-- True only inside claim_dependent_profile: the claim setting is present and the
+-- statement runs as the owner of that SECURITY DEFINER function. NOT security definer
+-- on purpose (it must see the caller's current_user). Reads only pg_proc.
+CREATE OR REPLACE FUNCTION app_in_claim_function()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SET search_path = public
+AS $$
+  SELECT NULLIF(current_setting('app.claiming_code', true), '') IS NOT NULL
+    AND COALESCE((
+      SELECT pg_get_userbyid(p.proowner) = current_user
+      FROM pg_proc p
+      WHERE p.oid = to_regprocedure('public.claim_dependent_profile(text)')
+    ), false);
+$$;
+
+-- legal_guardianships: legal_guardianships_guardian_isolation (0013) stays as it is.
+-- The claim path may read the row carrying the code and close it for the caller. The
+-- closed row keeps handover_code so it still passes the SELECT re-check of the UPDATE.
+DROP POLICY IF EXISTS legal_guardianships_claim_select ON legal_guardianships;
+CREATE POLICY legal_guardianships_claim_select ON legal_guardianships
+  FOR SELECT
+  USING (
+    handover_code = NULLIF(current_setting('app.claiming_code', true), '')
+    AND app_in_claim_function()
+  );
+
+DROP POLICY IF EXISTS legal_guardianships_claim_update ON legal_guardianships;
+CREATE POLICY legal_guardianships_claim_update ON legal_guardianships
+  FOR UPDATE
+  USING (
+    handover_code = NULLIF(current_setting('app.claiming_code', true), '')
+    AND app_in_claim_function()
+  )
+  WITH CHECK (
+    closed_at IS NOT NULL
+    AND handed_over_to_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+    AND handover_code = NULLIF(current_setting('app.claiming_code', true), '')
+  );
+
+-- A closed guardianship is the audit record of the hand-over: nobody deletes it through
+-- RLS (the former guardian still matches the 0013 FOR ALL policy). Deleting the profile
+-- itself still cascades.
+DROP POLICY IF EXISTS legal_guardianships_closed_keep ON legal_guardianships;
+CREATE POLICY legal_guardianships_closed_keep ON legal_guardianships
+  AS RESTRICTIVE
+  FOR DELETE
+  USING (closed_at IS NULL);
+
+-- shared_access_grants: 0013 clauses plus the claim path, which revokes every grant on
+-- the claimed profile.
+DROP POLICY IF EXISTS shared_access_grants_participant_select ON shared_access_grants;
+CREATE POLICY shared_access_grants_participant_select ON shared_access_grants
+  FOR SELECT
+  USING (
+    granter_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+    OR grantee_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+    OR invite_code = NULLIF(current_setting('app.accepting_invite_code', true), '')
+    OR (app_claimable_profile(target_profile_id) AND app_in_claim_function())
+  );
+
+DROP POLICY IF EXISTS shared_access_grants_participant_update ON shared_access_grants;
+CREATE POLICY shared_access_grants_participant_update ON shared_access_grants
+  FOR UPDATE
+  USING (
+    granter_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+    OR grantee_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+    OR (status = 'PENDING' AND invite_code = NULLIF(current_setting('app.accepting_invite_code', true), ''))
+    OR (app_claimable_profile(target_profile_id) AND app_in_claim_function())
+  )
+  WITH CHECK (
+    granter_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+    OR grantee_user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+    OR (status = 'EXPIRED' AND grantee_user_id IS NULL AND invite_code = NULLIF(current_setting('app.accepting_invite_code', true), ''))
+    OR (status = 'REVOKED' AND app_claimable_profile(target_profile_id) AND app_in_claim_function())
+  );
+
+-- Grant update guard (section E) plus the claim branch: inside the claim, a caller who is
+-- neither granter nor grantee may only revoke.
+CREATE OR REPLACE FUNCTION app_guard_shared_access_grant_update()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+DECLARE
+  v_user uuid := NULLIF(current_setting('app.current_user_id', true), '')::uuid;
+  v_scope_changed boolean :=
+    NEW.categories IS DISTINCT FROM OLD.categories
+    OR NEW.relationship IS DISTINCT FROM OLD.relationship
+    OR NEW.dependent_share_confirmed_at IS DISTINCT FROM OLD.dependent_share_confirmed_at;
+BEGIN
+  IF NEW.granter_user_id IS DISTINCT FROM OLD.granter_user_id
+    OR NEW.target_profile_id IS DISTINCT FROM OLD.target_profile_id
+    OR NEW.invite_code IS DISTINCT FROM OLD.invite_code
+    OR NEW.created_at IS DISTINCT FROM OLD.created_at THEN
+    RAISE EXCEPTION 'GRANT_IMMUTABLE_COLUMN' USING ERRCODE = 'P0001';
+  END IF;
+
+  IF OLD.status IN ('REVOKED', 'EXPIRED') AND NEW.status IS DISTINCT FROM OLD.status THEN
+    RAISE EXCEPTION 'GRANT_TERMINAL_STATUS' USING ERRCODE = 'P0001';
+  END IF;
+
+  IF v_user IS NOT NULL AND v_user = OLD.grantee_user_id AND v_user <> OLD.granter_user_id THEN
+    IF NEW.access_level IS DISTINCT FROM OLD.access_level
+      OR NEW.grantee_user_id IS DISTINCT FROM OLD.grantee_user_id
+      OR NEW.expires_at IS DISTINCT FROM OLD.expires_at
+      OR NEW.accepted_at IS DISTINCT FROM OLD.accepted_at
+      OR v_scope_changed
+      OR NEW.status NOT IN (OLD.status, 'REVOKED') THEN
+      RAISE EXCEPTION 'GRANTEE_MAY_ONLY_REVOKE' USING ERRCODE = 'P0001';
+    END IF;
+  ELSIF v_user IS NOT NULL AND v_user = OLD.granter_user_id THEN
+    IF NEW.grantee_user_id IS DISTINCT FROM OLD.grantee_user_id
+      OR NEW.accepted_at IS DISTINCT FROM OLD.accepted_at
+      OR NEW.status NOT IN (OLD.status, 'REVOKED', 'EXPIRED') THEN
+      RAISE EXCEPTION 'GRANTER_MAY_ONLY_REVOKE' USING ERRCODE = 'P0001';
+    END IF;
+    IF v_scope_changed AND OLD.status NOT IN ('PENDING', 'ACCEPTED') THEN
+      RAISE EXCEPTION 'GRANT_SCOPE_LOCKED' USING ERRCODE = 'P0001';
+    END IF;
+  ELSIF v_user IS NOT NULL AND app_in_claim_function() AND app_claimable_profile(OLD.target_profile_id) THEN
+    -- Claim path: status -> REVOKED with revoked_at, nothing else.
+    IF NEW.status <> 'REVOKED'
+      OR NEW.revoked_at IS NULL
+      OR NEW.access_level IS DISTINCT FROM OLD.access_level
+      OR NEW.grantee_user_id IS DISTINCT FROM OLD.grantee_user_id
+      OR NEW.expires_at IS DISTINCT FROM OLD.expires_at
+      OR NEW.accepted_at IS DISTINCT FROM OLD.accepted_at
+      OR v_scope_changed THEN
+      RAISE EXCEPTION 'GRANT_INVALID_ACCEPT' USING ERRCODE = 'P0001';
+    END IF;
+  ELSIF v_user IS NOT NULL THEN
+    -- Accept path: PENDING -> ACCEPTED by the caller, or PENDING -> EXPIRED.
+    IF OLD.status <> 'PENDING'
+      OR NEW.access_level IS DISTINCT FROM OLD.access_level
+      OR NEW.expires_at IS DISTINCT FROM OLD.expires_at
+      OR NEW.revoked_at IS DISTINCT FROM OLD.revoked_at
+      OR v_scope_changed
+      OR NOT (
+        (NEW.status = 'ACCEPTED' AND NEW.grantee_user_id = v_user AND NEW.accepted_at IS NOT NULL)
+        OR (NEW.status = 'EXPIRED' AND NEW.grantee_user_id IS NULL)
+      ) THEN
+      RAISE EXCEPTION 'GRANT_INVALID_ACCEPT' USING ERRCODE = 'P0001';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_guard_shared_access_grant_update ON shared_access_grants;
+CREATE TRIGGER trg_guard_shared_access_grant_update
+  BEFORE UPDATE ON shared_access_grants
+  FOR EACH ROW EXECUTE FUNCTION app_guard_shared_access_grant_update();
+
+-- profiles: the claim path may read and take over the claimable profile.
+DROP POLICY IF EXISTS profiles_claim_select ON profiles;
+CREATE POLICY profiles_claim_select ON profiles
+  FOR SELECT
+  USING (app_claimable_profile(id) AND app_in_claim_function());
+
+DROP POLICY IF EXISTS profiles_claim_update ON profiles;
+CREATE POLICY profiles_claim_update ON profiles
+  FOR UPDATE
+  USING (app_claimable_profile(id) AND app_in_claim_function())
+  WITH CHECK (account_owner_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid);
+
+-- profiles: ownership stays immutable (0013), except inside the claim.
+DROP POLICY IF EXISTS profiles_owner_immutable ON profiles;
+CREATE POLICY profiles_owner_immutable ON profiles
+  AS RESTRICTIVE
+  FOR UPDATE
+  USING (true)
+  WITH CHECK (
+    account_owner_id = app_profile_owner_id(id)
+    OR (app_claimable_profile(id) AND app_in_claim_function())
+  );
+
+-- profiles: the same rule as a trigger, so it also holds for roles that bypass RLS
+-- (for example a BYPASSRLS service role). Raises 42501 like an RLS rejection.
+CREATE OR REPLACE FUNCTION app_guard_profile_owner_change()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT app_in_claim_function() OR NOT app_claimable_profile(OLD.id) THEN
+    RAISE EXCEPTION 'PROFILE_OWNER_IMMUTABLE' USING ERRCODE = '42501';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_guard_profile_owner_change ON profiles;
+CREATE TRIGGER trg_guard_profile_owner_change
+  BEFORE UPDATE OF account_owner_id ON profiles
+  FOR EACH ROW
+  WHEN (NEW.account_owner_id IS DISTINCT FROM OLD.account_owner_id)
+  EXECUTE FUNCTION app_guard_profile_owner_change();
+
+-- Claim of a dependent profile by the young adult's own account (D3, A4, A5, A6).
+-- Runs as definer because the caller cannot see the profile before claiming it; the code
+-- is the capability. Returns the claimed profile id, or NULL when the code is unknown,
+-- already used or expired. Raises SQLSTATE P0001 with CLAIM_BY_GUARDIAN,
+-- CLAIM_NOT_ADULT or CLAIM_ACCOUNT_HAS_DATA (no merge of an existing primary).
+CREATE OR REPLACE FUNCTION claim_dependent_profile(p_code text)
+RETURNS uuid
+LANGUAGE plpgsql
+VOLATILE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_user uuid := NULLIF(current_setting('app.current_user_id', true), '')::uuid;
+  v_code text := upper(btrim(p_code));
+  v_guardianship legal_guardianships%ROWTYPE;
+  v_profile profiles%ROWTYPE;
+  v_primary uuid;
+BEGIN
+  IF v_user IS NULL OR v_code IS NULL OR v_code = '' THEN
+    RETURN NULL;
+  END IF;
+
+  PERFORM set_config('app.claiming_code', v_code, true);
+
+  SELECT * INTO v_guardianship
+  FROM legal_guardianships
+  WHERE handover_code = v_code
+    AND closed_at IS NULL
+    AND handover_code_expires_at > now()
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    PERFORM set_config('app.claiming_code', '', true);
+    RETURN NULL;
+  END IF;
+
+  SELECT * INTO v_profile FROM profiles WHERE id = v_guardianship.dependent_profile_id FOR UPDATE;
+  IF NOT FOUND THEN
+    PERFORM set_config('app.claiming_code', '', true);
+    RETURN NULL;
+  END IF;
+
+  IF v_guardianship.guardian_user_id = v_user OR v_profile.account_owner_id = v_user THEN
+    RAISE EXCEPTION 'CLAIM_BY_GUARDIAN' USING ERRCODE = 'P0001';
+  END IF;
+
+  IF v_profile.date_of_birth IS NULL OR v_profile.date_of_birth > current_date - interval '18 years' THEN
+    RAISE EXCEPTION 'CLAIM_NOT_ADULT' USING ERRCODE = 'P0001';
+  END IF;
+
+  SELECT id INTO v_primary
+  FROM profiles
+  WHERE account_owner_id = v_user AND profile_type = 'primary';
+
+  IF v_primary IS NOT NULL THEN
+    IF EXISTS (SELECT 1 FROM journal_entries WHERE profile_id = v_primary)
+      OR EXISTS (SELECT 1 FROM daily_habits WHERE profile_id = v_primary)
+      OR EXISTS (SELECT 1 FROM water_intake_logs WHERE profile_id = v_primary)
+      OR EXISTS (SELECT 1 FROM symptom_logs WHERE profile_id = v_primary)
+      OR EXISTS (SELECT 1 FROM user_conditions WHERE profile_id = v_primary)
+      OR EXISTS (SELECT 1 FROM condition_readings WHERE profile_id = v_primary)
+      OR EXISTS (SELECT 1 FROM care_records WHERE profile_id = v_primary)
+      OR EXISTS (SELECT 1 FROM care_documents WHERE profile_id = v_primary)
+      OR EXISTS (SELECT 1 FROM safety_resource_events WHERE profile_id = v_primary) THEN
+      RAISE EXCEPTION 'CLAIM_ACCOUNT_HAS_DATA' USING ERRCODE = 'P0001';
+    END IF;
+    -- The empty primary (often created lazily at first login) gives way to the claimed profile.
+    DELETE FROM profiles WHERE id = v_primary;
+  END IF;
+
+  UPDATE profiles
+  SET account_owner_id = v_user, profile_type = 'primary', updated_at = now()
+  WHERE id = v_profile.id;
+
+  -- Before closing the guardianship: the claim policies depend on app_claimable_profile.
+  UPDATE shared_access_grants
+  SET status = 'REVOKED', revoked_at = now()
+  WHERE target_profile_id = v_profile.id AND status IN ('PENDING', 'ACCEPTED');
+
+  -- Closed, never deleted. handover_code stays so the row passes the UPDATE re-check.
+  UPDATE legal_guardianships
+  SET closed_at = now(), closed_reason = 'handed_over', handed_over_to_user_id = v_user
+  WHERE id = v_guardianship.id;
+
+  PERFORM set_config('app.claiming_code', '', true);
+  RETURN v_profile.id;
+END;
+$$;
