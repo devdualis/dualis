@@ -51,6 +51,16 @@ void main() {
       expect(PremiumAccents.iconGradient.end, const Alignment(0.4, 1.0));
       expect(PremiumAccents.champagne, const Color(0xFFC9A35B));
     });
+
+    test('gradientFor keeps the icon accent in the middle stop', () {
+      const green = AppColors.dualisSymbolGreen;
+      final gradient = PremiumAccents.gradientFor(green);
+      expect(gradient.colors, hasLength(3));
+      expect(gradient.colors[1], green);
+      expect(gradient.colors.first, Color.lerp(green, Colors.white, 0.3));
+      expect(gradient.colors.last, Color.lerp(green, Colors.black, 0.3));
+      expect(gradient.stops, PremiumAccents.iconGradient.stops);
+    });
   });
 
   group('PremiumGradientIcon', () {

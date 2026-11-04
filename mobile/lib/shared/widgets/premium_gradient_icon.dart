@@ -16,9 +16,25 @@ abstract final class PremiumAccents {
     colors: [gradientTop, gradientMid, gradientBottom],
     stops: [0.0, 0.5, 1.0],
   );
+
+  /// Same gradient shape built around [accent], so each icon keeps the
+  /// colour the original design gives it (green, indigo, teal...) and only
+  /// gains depth: lighter at the top, the accent itself in the middle,
+  /// darker at the bottom.
+  static LinearGradient gradientFor(Color accent) => LinearGradient(
+    begin: iconGradient.begin,
+    end: iconGradient.end,
+    colors: [
+      Color.lerp(accent, Colors.white, 0.3)!,
+      accent,
+      Color.lerp(accent, Colors.black, 0.3)!,
+    ],
+    stops: iconGradient.stops,
+  );
 }
 
-/// Paints [icon] with [PremiumAccents.iconGradient]. The glyph, size and
+/// Paints [icon] with a gradient built from its own colour (see
+/// [PremiumAccents.gradientFor]). The glyph, size and
 /// semantics come from [icon] untouched, so the layout matches the Free build.
 class PremiumGradientIcon extends StatelessWidget {
   final Icon icon;
@@ -36,7 +52,13 @@ class PremiumGradientIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final mask = ShaderMask(
       blendMode: BlendMode.srcIn,
-      shaderCallback: (bounds) => PremiumAccents.iconGradient.createShader(bounds),
+      shaderCallback: (bounds) {
+        final accent = icon.color;
+        final gradient = accent == null
+            ? PremiumAccents.iconGradient
+            : PremiumAccents.gradientFor(accent);
+        return gradient.createShader(bounds);
+      },
       child: icon,
     );
     if (!showActiveDot) return mask;
