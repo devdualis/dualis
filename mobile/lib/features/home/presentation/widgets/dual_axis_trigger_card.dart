@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../profile/domain/models/share_category.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/premium_gradient_icon.dart';
 import '../../../journal/presentation/controllers/journal_flow_state.dart';
 import '../../../journal/presentation/screens/journal_flow_screen.dart';
 import '../../domain/axis_intensity_resolver.dart';
@@ -23,6 +25,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
     final notifier = ref.read(triggerCheckInProvider.notifier);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final premium = ref.watch(premiumProfilesEnabledProvider);
 
     final isEmotionalCompleted = state.isEmotionalCompleted;
     final isPhysicalCompleted = state.isPhysicalCompleted;
@@ -159,6 +162,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
               },
               isDark: isDark,
               viewOnly: emotionalViewOnly,
+              premium: premium,
             ),
 
             const SizedBox(height: 16),
@@ -201,6 +205,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
               },
               isDark: isDark,
               viewOnly: physicalViewOnly,
+              premium: premium,
             ),
             if (state.conditionsSummary != null &&
                 state.conditionsSummary!.isNotEmpty) ...[
@@ -234,6 +239,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
     required VoidCallback onRetake,
     required bool isDark,
     required bool viewOnly,
+    required bool premium,
   }) {
     if (isCompleted) {
       final tier = intensity != null
@@ -263,7 +269,9 @@ class DualAxisTriggerCard extends ConsumerWidget {
                     color: accentColor.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: accentColor, size: 20),
+                  child: premium
+                      ? PremiumGradientIcon(icon: Icon(icon, color: accentColor, size: 20))
+                      : Icon(icon, color: accentColor, size: 20),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -388,7 +396,9 @@ class DualAxisTriggerCard extends ConsumerWidget {
                   color: accentColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: accentColor, size: 22),
+                child: premium
+                    ? PremiumGradientIcon(icon: Icon(icon, color: accentColor, size: 22))
+                    : Icon(icon, color: accentColor, size: 22),
               ),
               const SizedBox(width: 12),
               Expanded(
