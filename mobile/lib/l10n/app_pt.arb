@@ -3429,5 +3429,17 @@
   "loginPremiumLabel": "Premium",
   "@loginPremiumLabel": {
     "description": "Discreet tier label under the logo on the login screen, Premium builds only."
+  },
+  "settingsPlanFree": "Plano: Gratuito",
+  "@settingsPlanFree": {
+    "description": "Plan row in settings, Free builds"
+  },
+  "settingsPlanPremium": "Plano: Premium",
+  "@settingsPlanPremium": {
+    "description": "Plan row in settings, Premium builds"
+  },
+  "settingsPlanSeePremium": "Ver Premium",
+  "@settingsPlanSeePremium": {
+    "description": "Link from the Free plan row to the Premium page"
   }
 }

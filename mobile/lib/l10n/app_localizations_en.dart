@@ -5853,4 +5853,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginPremiumLabel => 'Premium';
+
+  @override
+  String get settingsPlanFree => 'Plan: Free';
+
+  @override
+  String get settingsPlanPremium => 'Plan: Premium';
+
+  @override
+  String get settingsPlanSeePremium => 'See Premium';
 }

@@ -5867,4 +5867,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get loginPremiumLabel => 'Premium';
+
+  @override
+  String get settingsPlanFree => 'Plano: Gratuito';
+
+  @override
+  String get settingsPlanPremium => 'Plano: Premium';
+
+  @override
+  String get settingsPlanSeePremium => 'Ver Premium';
 }

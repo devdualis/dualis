@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:dualis_mobile/core/config/feature_flags.dart';
+import 'package:dualis_mobile/core/router/route_paths.dart';
+import 'package:dualis_mobile/core/security/biometric_lock_controller.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/auth/data/auth_repository_impl.dart';
 import 'package:dualis_mobile/features/auth/domain/auth_state.dart';
@@ -169,23 +174,40 @@ class _TestAuthController extends AuthController {
   AuthState build() => _initial;
 }
 
-Widget createSettingsTestApp({
+List<Override> _settingsOverrides({
   required FakeAuthRepository repository,
   required UserProfile user,
   FakeSecureStorageService? storage,
+  bool premium = false,
 }) {
   final authState = AuthState(
     isAuthenticated: true,
     user: user,
     accessToken: 'mock-jwt-token',
   );
+  return [
+    authRepositoryProvider.overrideWithValue(repository),
+    secureStorageServiceProvider.overrideWithValue(storage ?? FakeSecureStorageService()),
+    authControllerProvider.overrideWith(() => _TestAuthController(authState)),
+    premiumProfilesEnabledProvider.overrideWithValue(premium),
+    // Keeps the Premium-only BiometricLockTile off the device channel.
+    biometricSupportedProvider.overrideWith((ref) async => false),
+  ];
+}
 
+Widget createSettingsTestApp({
+  required FakeAuthRepository repository,
+  required UserProfile user,
+  FakeSecureStorageService? storage,
+  bool premium = false,
+}) {
   return ProviderScope(
-    overrides: [
-      authRepositoryProvider.overrideWithValue(repository),
-      secureStorageServiceProvider.overrideWithValue(storage ?? FakeSecureStorageService()),
-      authControllerProvider.overrideWith(() => _TestAuthController(authState)),
-    ],
+    overrides: _settingsOverrides(
+      repository: repository,
+      user: user,
+      storage: storage,
+      premium: premium,
+    ),
     child: const MaterialApp(
       localizationsDelegates: [
         AppLocalizations.delegate,
@@ -200,6 +222,61 @@ Widget createSettingsTestApp({
       ],
       locale: Locale('pt', 'BR'),
       home: SettingsScreen(),
+    ),
+  );
+}
+
+/// Same overrides as [createSettingsTestApp], under a GoRouter so
+/// `context.push` from the settings screen can be exercised.
+Widget createSettingsRouterTestApp({
+  required FakeAuthRepository repository,
+  required UserProfile user,
+  FakeSecureStorageService? storage,
+  bool premium = false,
+}) {
+  final router = GoRouter(
+    initialLocation: RoutePaths.settings,
+    routes: [
+      GoRoute(
+        path: RoutePaths.settings,
+        builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.premiumPromo,
+        builder: (context, state) => const Scaffold(
+          body: Center(child: Text('Premium Promo Screen')),
+        ),
+      ),
+      GoRoute(
+        path: RoutePaths.home,
+        builder: (context, state) => const Scaffold(
+          body: Center(child: Text('Home Screen')),
+        ),
+      ),
+    ],
+  );
+
+  return ProviderScope(
+    overrides: _settingsOverrides(
+      repository: repository,
+      user: user,
+      storage: storage,
+      premium: premium,
+    ),
+    child: MaterialApp.router(
+      routerConfig: router,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('pt', 'BR'),
+        Locale('es', ''),
+        Locale('en', ''),
+      ],
+      locale: const Locale('pt', 'BR'),
     ),
   );
 }
@@ -434,6 +511,54 @@ void main() {
       await tester.pumpWidget(createSettingsTestApp(repository: repo, user: customPhotoUser, storage: storage));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('photo_adjust_hint')), findsNothing);
+    });
+
+    testWidgets('9. Free build shows "Plano: Gratuito" with a Ver Premium link to the promo page',
+        (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(createSettingsRouterTestApp(repository: fakeRepo, user: testUser));
+      await tester.pumpAndSettle();
+
+      final planTile = find.byKey(const Key('settings_plan_tile'));
+      await tester.ensureVisible(planTile);
+      await tester.pumpAndSettle();
+      expect(planTile, findsOneWidget);
+      expect(find.text('Plano: Gratuito'), findsOneWidget);
+      expect(find.text('Plano: Premium'), findsNothing);
+
+      final cta = find.byKey(const Key('settings_plan_see_premium'));
+      expect(cta, findsOneWidget);
+      expect(find.text('Ver Premium'), findsOneWidget);
+
+      await tester.ensureVisible(cta);
+      await tester.pumpAndSettle();
+      await tester.tap(cta);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Premium Promo Screen'), findsOneWidget);
+    });
+
+    testWidgets('10. Premium build shows "Plano: Premium" with no CTA', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        createSettingsRouterTestApp(repository: fakeRepo, user: testUser, premium: true),
+      );
+      await tester.pumpAndSettle();
+
+      final planTile = find.byKey(const Key('settings_plan_tile'));
+      await tester.ensureVisible(planTile);
+      await tester.pumpAndSettle();
+      expect(planTile, findsOneWidget);
+      expect(find.text('Plano: Premium'), findsOneWidget);
+      expect(find.text('Plano: Gratuito'), findsNothing);
+      expect(find.byKey(const Key('settings_plan_see_premium')), findsNothing);
+      expect(find.text('Ver Premium'), findsNothing);
     });
   });
 }

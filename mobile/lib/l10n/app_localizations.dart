@@ -9873,6 +9873,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Premium'**
   String get loginPremiumLabel;
+
+  /// Plan row in settings, Free builds
+  ///
+  /// In pt, this message translates to:
+  /// **'Plano: Gratuito'**
+  String get settingsPlanFree;
+
+  /// Plan row in settings, Premium builds
+  ///
+  /// In pt, this message translates to:
+  /// **'Plano: Premium'**
+  String get settingsPlanPremium;
+
+  /// Link from the Free plan row to the Premium page
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver Premium'**
+  String get settingsPlanSeePremium;
 }
 
 class _AppLocalizationsDelegate

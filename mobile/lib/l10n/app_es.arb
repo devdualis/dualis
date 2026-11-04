@@ -1666,5 +1666,8 @@
   "profileCategoryNotSharedBody": "{name} no compartió esta área contigo.",
   "historyOnlyPhysicalShared": "Solo ves el diario del cuerpo de este perfil.",
   "historyOnlyEmotionalShared": "Solo ves el diario emocional de este perfil.",
-  "loginPremiumLabel": "Premium"
+  "loginPremiumLabel": "Premium",
+  "settingsPlanFree": "Plan: Gratuito",
+  "settingsPlanPremium": "Plan: Premium",
+  "settingsPlanSeePremium": "Ver Premium"
 }

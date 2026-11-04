@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/security/secure_storage_service.dart';
 import '../../../../core/router/route_paths.dart';
@@ -449,6 +450,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final l10n = AppLocalizations.of(context);
     final user = ref.watch(authControllerProvider).user;
     final age = _calculateAge(_selectedDateOfBirth);
+    final isPremium = ref.watch(premiumProfilesEnabledProvider);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -1215,6 +1217,48 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         },
                       ),
                     ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Plan row: shows the tier quietly. Free gets a link to the
+              // Premium page; Premium has no call to action.
+              Material(
+                color: AppColors.surfaceLight,
+                borderRadius: BorderRadius.circular(16),
+                clipBehavior: Clip.antiAlias,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.outlineLight),
+                  ),
+                  child: ListTile(
+                    key: const Key('settings_plan_tile'),
+                    leading: const Icon(
+                      Icons.card_membership_outlined,
+                      color: AppColors.clinicalTeal,
+                    ),
+                    title: Text(
+                      isPremium ? l10n.settingsPlanPremium : l10n.settingsPlanFree,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    trailing: isPremium
+                        ? null
+                        : TextButton(
+                            key: const Key('settings_plan_see_premium'),
+                            onPressed: () => context.push(RoutePaths.premiumPromo),
+                            child: Text(
+                              l10n.settingsPlanSeePremium,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.softIndigo,
+                              ),
+                            ),
+                          ),
                   ),
                 ),
               ),
