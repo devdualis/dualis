@@ -9867,6 +9867,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Você vê apenas o diário emocional deste perfil.'**
   String get historyOnlyEmotionalShared;
+
+  /// Discreet tier label under the logo on the login screen, Premium builds only.
+  ///
+  /// In pt, this message translates to:
+  /// **'Premium'**
+  String get loginPremiumLabel;
 }
 
 class _AppLocalizationsDelegate

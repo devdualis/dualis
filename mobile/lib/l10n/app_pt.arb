@@ -3425,5 +3425,9 @@
     }
   },
   "historyOnlyPhysicalShared": "Você vê apenas o diário do corpo deste perfil.",
-  "historyOnlyEmotionalShared": "Você vê apenas o diário emocional deste perfil."
+  "historyOnlyEmotionalShared": "Você vê apenas o diário emocional deste perfil.",
+  "loginPremiumLabel": "Premium",
+  "@loginPremiumLabel": {
+    "description": "Discreet tier label under the logo on the login screen, Premium builds only."
+  }
 }

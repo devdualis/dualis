@@ -5864,4 +5864,7 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get historyOnlyEmotionalShared =>
       'Você vê apenas o diário emocional deste perfil.';
+
+  @override
+  String get loginPremiumLabel => 'Premium';
 }

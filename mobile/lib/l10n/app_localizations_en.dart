@@ -5850,4 +5850,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get historyOnlyEmotionalShared =>
       'You only see this profile\'s emotional journal.';
+
+  @override
+  String get loginPremiumLabel => 'Premium';
 }

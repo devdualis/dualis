@@ -4,6 +4,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:dualis_mobile/core/config/feature_flags.dart';
+import 'package:dualis_mobile/core/constants/app_colors.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/auth/data/auth_repository_impl.dart';
@@ -11,6 +13,7 @@ import 'package:dualis_mobile/features/auth/domain/user_profile.dart';
 import 'package:dualis_mobile/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:dualis_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
+import 'package:dualis_mobile/shared/widgets/urgent_help_button.dart';
 
 class MockAuthRepository implements AuthRepository {
   bool loginCalled = false;
@@ -171,6 +174,8 @@ class MockSecureStorage extends SecureStorageService {
 Widget createLoginTestApp({
   required MockAuthRepository repository,
   Locale locale = const Locale('pt', 'BR'),
+  bool premium = false,
+  bool withHelpOverlay = false,
 }) {
   final router = GoRouter(
     initialLocation: RoutePaths.login,
@@ -203,6 +208,12 @@ Widget createLoginTestApp({
           body: Center(child: Text('Forgot Password Screen')),
         ),
       ),
+      GoRoute(
+        path: RoutePaths.emergency,
+        builder: (context, state) => const Scaffold(
+          body: Center(child: Text('Emergency Screen')),
+        ),
+      ),
     ],
   );
 
@@ -210,9 +221,13 @@ Widget createLoginTestApp({
     overrides: [
       authRepositoryProvider.overrideWithValue(repository),
       secureStorageServiceProvider.overrideWithValue(MockSecureStorage()),
+      premiumProfilesEnabledProvider.overrideWithValue(premium),
     ],
     child: MaterialApp.router(
       routerConfig: router,
+      builder: withHelpOverlay
+          ? (context, child) => UrgentHelpOverlay(router: router, child: child!)
+          : null,
       locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -391,6 +406,73 @@ void main() {
         find.text('No se pudo conectar con el servidor. Verifica tu conexión a internet.'),
         findsOneWidget,
       );
+    });
+
+    testWidgets('6. Free build shows no tier label under the logo', (tester) async {
+      await tester.pumpWidget(createLoginTestApp(repository: mockRepo));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('loginBrandLogo')), findsOneWidget);
+      expect(find.byKey(const Key('loginPremiumLabel')), findsNothing);
+      expect(find.text('Premium'), findsNothing);
+    });
+
+    testWidgets('7. Premium build shows a teal "Premium" label under the logo',
+        (tester) async {
+      await tester.pumpWidget(createLoginTestApp(repository: mockRepo, premium: true));
+      await tester.pumpAndSettle();
+
+      final labelFinder = find.byKey(const Key('loginPremiumLabel'));
+      expect(labelFinder, findsOneWidget);
+      final label = tester.widget<Text>(labelFinder);
+      expect(label.data, 'Premium');
+      expect(label.style?.color, AppColors.clinicalTeal);
+
+      final logoRect = tester.getRect(find.byKey(const Key('loginBrandLogo')));
+      final labelRect = tester.getRect(labelFinder);
+      final titleRect = tester.getRect(find.text('Entrar no DualisCheckUp'));
+      expect(labelRect.top, greaterThanOrEqualTo(logoRect.bottom));
+      expect(labelRect.bottom, lessThanOrEqualTo(titleRect.top));
+    });
+
+    testWidgets(
+        '8. Urgent help keeps the same rect in Free and Premium, is never overlapped and opens help in 1 tap',
+        (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      final rects = <bool, Rect>{};
+      for (final p in [false, true]) {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpWidget(createLoginTestApp(
+          repository: MockAuthRepository(),
+          premium: p,
+          withHelpOverlay: true,
+        ));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        final help = find.byKey(const Key('urgent_help_button'));
+        expect(help, findsOneWidget, reason: 'premium=$p');
+        expect(help.hitTestable(), findsOneWidget, reason: 'premium=$p');
+        final helpRect = tester.getRect(help);
+        rects[p] = helpRect;
+
+        if (p) {
+          final labelRect = tester.getRect(find.byKey(const Key('loginPremiumLabel')));
+          expect(labelRect.overlaps(helpRect), isFalse);
+        } else {
+          expect(find.byKey(const Key('loginPremiumLabel')), findsNothing);
+        }
+
+        await tester.tap(help);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+        expect(find.text('Emergency Screen'), findsOneWidget, reason: 'premium=$p');
+      }
+
+      expect(rects[true], rects[false]);
     });
   });
 }

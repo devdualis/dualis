@@ -1665,5 +1665,6 @@
   "profileCategoryNotSharedTitle": "Not shared with you",
   "profileCategoryNotSharedBody": "{name} has not shared this area with you.",
   "historyOnlyPhysicalShared": "You only see this profile's body journal.",
-  "historyOnlyEmotionalShared": "You only see this profile's emotional journal."
+  "historyOnlyEmotionalShared": "You only see this profile's emotional journal.",
+  "loginPremiumLabel": "Premium"
 }

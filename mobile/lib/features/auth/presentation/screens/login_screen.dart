@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../core/utils/error_message_resolver.dart';
@@ -72,6 +73,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
     final l10n = AppLocalizations.of(context);
+    final isPremium = ref.watch(premiumProfilesEnabledProvider);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -103,6 +105,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                 ),
+                // Discreet tier mark, Premium builds only. Plain text so it
+                // never competes with the urgent-help button.
+                if (isPremium)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(
+                        l10n.loginPremiumLabel,
+                        key: const Key('loginPremiumLabel'),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.2,
+                          color: AppColors.clinicalTeal,
+                        ),
+                      ),
+                    ),
+                  ),
                 Text(
                   l10n.loginTitle,
                   style: GoogleFonts.inter(
