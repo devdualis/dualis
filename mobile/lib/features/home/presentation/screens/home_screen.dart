@@ -304,6 +304,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         showCare: true,
         careLocked: careLocked,
         habitsTab: !careLocked,
+        premiumIcons: !careLocked,
         currentIndex: _currentTabIndex,
         onTap: (index) {
           setState(() => _currentTabIndex = index);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/premium_gradient_icon.dart';
 
 class DualisBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -16,6 +17,9 @@ class DualisBottomNavBar extends StatelessWidget {
   /// Premium build: the water tab becomes "Hábitos" (water lives inside it).
   final bool habitsTab;
 
+  /// Premium build: the selected icon gets the gradient and active dot; unselected icons stay gray.
+  final bool premiumIcons;
+
   const DualisBottomNavBar({
     super.key,
     required this.currentIndex,
@@ -24,6 +28,7 @@ class DualisBottomNavBar extends StatelessWidget {
     this.showCare = false,
     this.careLocked = false,
     this.habitsTab = false,
+    this.premiumIcons = false,
   });
 
   /// Index of the help button, always the last destination.
@@ -68,14 +73,14 @@ class DualisBottomNavBar extends StatelessWidget {
           NavigationDestination(
             key: const Key('nav_destination_home'),
             icon: const Icon(Icons.home_outlined, color: AppColors.textSecondaryLight),
-            selectedIcon: const Icon(Icons.home_rounded, color: AppColors.clinicalTealDark),
+            selectedIcon: _selected(const Icon(Icons.home_rounded, color: AppColors.clinicalTealDark)),
             label: '',
             tooltip: homeLabel,
           ),
           NavigationDestination(
             key: const Key('nav_destination_history'),
             icon: const Icon(Icons.insights_outlined, color: AppColors.textSecondaryLight),
-            selectedIcon: const Icon(Icons.insights_rounded, color: AppColors.clinicalTealDark),
+            selectedIcon: _selected(const Icon(Icons.insights_rounded, color: AppColors.clinicalTealDark)),
             label: '',
             tooltip: historyLabel,
           ),
@@ -83,7 +88,7 @@ class DualisBottomNavBar extends StatelessWidget {
             NavigationDestination(
               key: const Key('nav_destination_habits'),
               icon: const Icon(Icons.wb_twilight_outlined, color: AppColors.textSecondaryLight),
-              selectedIcon: const Icon(Icons.wb_twilight_rounded, color: AppColors.clinicalTealDark),
+              selectedIcon: _selected(const Icon(Icons.wb_twilight_rounded, color: AppColors.clinicalTealDark)),
               label: '',
               tooltip: habitsLabel,
             )
@@ -91,7 +96,7 @@ class DualisBottomNavBar extends StatelessWidget {
             NavigationDestination(
               key: const Key('nav_destination_hydration'),
               icon: const Icon(Icons.water_drop_outlined, color: AppColors.textSecondaryLight),
-              selectedIcon: const Icon(Icons.water_drop_rounded, color: AppColors.clinicalTealDark),
+              selectedIcon: _selected(const Icon(Icons.water_drop_rounded, color: AppColors.clinicalTealDark)),
               label: '',
               tooltip: hydrationLabel,
             ),
@@ -99,7 +104,7 @@ class DualisBottomNavBar extends StatelessWidget {
             NavigationDestination(
               key: const Key('nav_destination_care'),
               icon: _careGlyph(const Icon(Icons.favorite_border_rounded, color: AppColors.textSecondaryLight)),
-              selectedIcon: _careGlyph(const Icon(Icons.favorite_rounded, color: AppColors.clinicalTealDark)),
+              selectedIcon: _careGlyph(_selected(const Icon(Icons.favorite_rounded, color: AppColors.clinicalTealDark))),
               label: '',
               tooltip: careLocked ? (l10n?.navCareLockedTooltip ?? careLabel) : careLabel,
             ),
@@ -113,6 +118,10 @@ class DualisBottomNavBar extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _selected(Icon icon) {
+    return premiumIcons ? PremiumGradientIcon(icon: icon, showActiveDot: true) : icon;
   }
 
   Widget _careGlyph(Widget icon) {
