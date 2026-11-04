@@ -216,6 +216,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 16),
+                // Intended-use statement (wellness app, not a medical device),
+                // same copy as onboarding.
+                Text(
+                  l10n.onboardingIntendedUseNote,
+                  key: const Key('login_intended_use_note'),
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    height: 1.4,
+                    color: AppColors.textSecondaryLight,
+                  ),
+                ),
+                const SizedBox(height: 16),
               ],
             ),
           ),

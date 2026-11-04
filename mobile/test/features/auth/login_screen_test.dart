@@ -474,5 +474,21 @@ void main() {
 
       expect(rects[true], rects[false]);
     });
+
+    testWidgets('9. Free and Premium show the not-a-medical-device note', (tester) async {
+      for (final p in [false, true]) {
+        await tester.pumpWidget(createLoginTestApp(repository: mockRepo, premium: p));
+        await tester.pumpAndSettle();
+
+        final note = find.byKey(const Key('login_intended_use_note'));
+        expect(note, findsOneWidget, reason: 'premium=$p');
+        await tester.ensureVisible(note);
+        expect(
+          tester.widget<Text>(note).data,
+          contains('Não é um dispositivo médico'),
+          reason: 'premium=$p',
+        );
+      }
+    });
   });
 }
