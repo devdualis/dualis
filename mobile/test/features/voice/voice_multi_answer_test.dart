@@ -457,6 +457,25 @@ void main() {
       expect(flow(tester).step, JournalStep.conditions);
     });
 
+    testWidgets('physical "Bem, mas com dor nas costas" saves nothing', (tester) async {
+      await pump(tester, args: physical);
+
+      await say(tester, 'bem, mas com dor nas costas');
+
+      expect(harness.remote.created, isEmpty);
+      expect(find.text('SUMMARY'), findsNothing);
+      expect(flow(tester).step, JournalStep.mood);
+    });
+
+    testWidgets('physical "Bem" said alone still saves at once', (tester) async {
+      await pump(tester, args: physical);
+
+      await say(tester, 'bem');
+
+      expect(harness.remote.created, hasLength(1));
+      expect(find.text('SUMMARY'), findsOneWidget);
+    });
+
     testWidgets('"Só registrar medições" said alone still saves', (tester) async {
       await toConditionsWithReadings(tester);
 

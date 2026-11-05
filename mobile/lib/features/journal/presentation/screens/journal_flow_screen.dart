@@ -324,6 +324,9 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
                 large: true,
                 showCheck: false,
                 enabled: !state.isSaving,
+                // Physical "Bem" may save at once (no tracked conditions):
+                // only said alone, never from a multi-answer phrase.
+                saves: !emotional && mood == JournalKeys.moodBem,
                 onTap: () => _chooseMood(mood),
               ),
           ],
@@ -1820,17 +1823,22 @@ class _ChoiceCard extends StatelessWidget {
     this.showCheck = true,
     this.voice = true,
     this.multi = false,
+    this.saves = false,
     required this.onTap,
   });
 
   /// Several answers can be picked (read aloud as options, not choices).
   final bool multi;
 
+  /// [onTap] may save the entry: a multi-answer phrase never presses it.
+  final bool saves;
+
   @override
   Widget build(BuildContext context) => VoiceTarget(
         labels: [label],
         onSelect: enabled && voice ? onTap : null,
         role: multi ? VoiceTargetRole.option : VoiceTargetRole.choice,
+        saves: saves,
         child: _content(context),
       );
 
