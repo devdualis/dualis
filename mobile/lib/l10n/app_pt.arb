@@ -3205,6 +3205,22 @@
   "voiceNotHeard": "Não ouvi nada. Toque no microfone e fale de novo.",
   "voiceWaterLogged": "Registrado: um copo de água (250 ml).",
   "voiceWaterFailed": "Não foi possível registrar a água. Tente de novo.",
+  "voiceSpeaking": "Lendo a pergunta… toque no microfone para parar",
+  "@voiceSpeaking": {
+    "description": "Voice banner while the app reads the check-in question aloud"
+  },
+  "voiceReadMoreHint": "Ou diga outra opção da tela.",
+  "@voiceReadMoreHint": {
+    "description": "Said after the first options when a step has more options than are read aloud"
+  },
+  "voiceReadAloudTitle": "Ler as perguntas em voz alta",
+  "@voiceReadAloudTitle": {
+    "description": "Settings switch title (Premium voice)"
+  },
+  "voiceReadAloudSubtitle": "No check-in por voz, o app lê a pergunta e as opções antes de ouvir. Funciona sem internet.",
+  "@voiceReadAloudSubtitle": {
+    "description": "Settings switch subtitle (Premium voice)"
+  },
   "voiceAliasHelp": "ajuda|socorro|emergência|samu|cvv|192|188|preciso de ajuda",
   "voiceAliasStop": "parar|pare|chega|parar de ouvir|cancelar|sair da voz",
   "voiceAliasHome": "início|inicio|tela inicial|página inicial",

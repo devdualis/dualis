@@ -187,7 +187,11 @@ void main() {
           ],
           supportedLocales: AppLocalizations.supportedLocales,
           builder: (context, child) => Stack(
-            children: [child!, const Positioned(top: 0, right: 0, child: VoiceMicButton())],
+            children: [
+              child!,
+              const Positioned(top: 0, right: 0, child: VoiceMicButton()),
+              const Positioned(top: 60, left: 0, right: 0, child: Center(child: VoiceStatusBanner())),
+            ],
           ),
         ),
       ),
@@ -336,6 +340,27 @@ void main() {
       expect(voiceState(tester).speaking, isFalse);
       expect(voiceState(tester).handsFree, isFalse);
       await run(tester, steps: 10);
+      expectStoppedWithoutListening(tester);
+    });
+
+    testWidgets('the banner says the question is being read; the mic button stops it',
+        (tester) async {
+      await startSpeaking(tester);
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.text(pt.voiceSpeaking), findsOneWidget);
+      expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
+      // The mic shows it is active, with a stop icon.
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('voice_mic_button')),
+          matching: find.byIcon(Icons.stop_rounded),
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byKey(const Key('voice_mic_button')));
+      await run(tester, steps: 10);
+      expect(find.text(pt.voiceSpeaking), findsNothing);
       expectStoppedWithoutListening(tester);
     });
 

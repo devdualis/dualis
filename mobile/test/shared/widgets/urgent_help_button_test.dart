@@ -25,6 +25,15 @@ import 'package:dualis_mobile/features/sync/presentation/widgets/offline_indicat
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 import 'package:dualis_mobile/main.dart';
 import 'package:dualis_mobile/shared/widgets/urgent_help_button.dart';
+import 'package:dualis_mobile/core/router/app_router.dart';
+import 'package:dualis_mobile/core/voice/voice_input_service.dart';
+import 'package:dualis_mobile/features/auth/domain/auth_state.dart';
+import 'package:dualis_mobile/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:dualis_mobile/features/journal/presentation/screens/journal_flow_screen.dart';
+import 'package:dualis_mobile/features/voice/presentation/voice_controller.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../../features/journal/journal_test_helpers.dart';
 
 class _Storage extends SecureStorageService {
   @override
@@ -49,6 +58,32 @@ class _NoAudit extends EmergencyAuditService {
   _NoAudit() : super(apiClient: null);
   @override
   Future<bool> report(SafetyEventAction action, {String? channel}) async => true;
+}
+
+class _SignedIn extends AuthController {
+  @override
+  AuthState build() => const AuthState(isAuthenticated: true);
+}
+
+/// A mic that never hears anything.
+class _SilentVoiceInput implements VoiceInputService {
+  @override
+  Future<VoiceStartError?> prepare() async => null;
+
+  @override
+  Future<void> listen({
+    required String languageCode,
+    required bool dictation,
+    required void Function(String text, bool isFinal) onResult,
+    required void Function() onDone,
+  }) async =>
+      scheduleMicrotask(onDone);
+
+  @override
+  Future<void> stop() async {}
+
+  @override
+  Future<void> cancel() async {}
 }
 
 /// Real screens under the same global builder used by `main.dart`.
@@ -189,6 +224,63 @@ void main() {
     expect(find.text('sheet'), findsNothing);
     expect(find.byKey(const Key('urgent_help_button')), findsNothing);
     expect(find.byKey(const Key('nav_destination_emergency')), findsOneWidget);
+  });
+
+  testWidgets('help is 1 tap away while a question is read aloud', (tester) async {
+    FlutterSecureStorage.setMockInitialValues({});
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    final harness = JournalHarness()..premium = true;
+    addTearDown(harness.db.close);
+    final output = harness.voiceOutput..hold = const Duration(seconds: 30);
+    final router = GoRouter(
+      initialLocation: RoutePaths.journal,
+      routes: [
+        GoRoute(path: RoutePaths.journal, builder: (_, __) => const JournalFlowScreen()),
+        GoRoute(path: RoutePaths.emergency, builder: (_, __) => const EmergencyScreen()),
+      ],
+    );
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        ...harness.overrides,
+        appRouterProvider.overrideWithValue(router),
+        voiceInputServiceProvider.overrideWithValue(_SilentVoiceInput()),
+        authControllerProvider.overrideWith(_SignedIn.new),
+        deviceRegionProvider.overrideWithValue('BR'),
+        emergencyAuditServiceProvider.overrideWithValue(_NoAudit()),
+      ],
+      child: MaterialApp.router(
+        routerConfig: router,
+        locale: const Locale('pt', 'BR'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        builder: (context, child) => UrgentHelpOverlay(router: router, child: child!),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    // Start the hands-free check-in from the overlay mic: it reads the question.
+    await tester.tap(find.byKey(const Key('voice_mic_button')));
+    await tester.pump(const Duration(milliseconds: 200));
+    final container = ProviderScope.containerOf(tester.element(find.byType(MaterialApp)));
+    expect(container.read(voiceControllerProvider).speaking, isTrue);
+    expect(output.speaking, isTrue);
+    expect(find.byKey(const Key('voice_status_banner')), findsOneWidget);
+
+    // The speaking banner does not cover the help button: one tap opens help.
+    final button = find.byKey(const Key('urgent_help_button')).hitTestable();
+    expect(button, findsOneWidget);
+    await tester.tap(button);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(router.state.matchedLocation, RoutePaths.emergency);
+    expect(find.byType(EmergencyScreen), findsOneWidget);
+    expect(output.log, contains('stop'));
+    expect(output.log.indexOf('stop'), greaterThan(output.log.indexOf('speak')));
+    expect(output.speaking, isFalse);
+    expect(container.read(voiceControllerProvider).speaking, isFalse);
   });
 
   testWidgets('button floats in the top-right corner, away from the bottom nav', (tester) async {

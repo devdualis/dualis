@@ -5254,6 +5254,19 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível registrar a água. Tente de novo.';
 
   @override
+  String get voiceSpeaking => 'Lendo a pergunta… toque no microfone para parar';
+
+  @override
+  String get voiceReadMoreHint => 'Ou diga outra opção da tela.';
+
+  @override
+  String get voiceReadAloudTitle => 'Ler as perguntas em voz alta';
+
+  @override
+  String get voiceReadAloudSubtitle =>
+      'No check-in por voz, o app lê a pergunta e as opções antes de ouvir. Funciona sem internet.';
+
+  @override
   String get voiceAliasHelp =>
       'ajuda|socorro|emergência|samu|cvv|192|188|preciso de ajuda';
 

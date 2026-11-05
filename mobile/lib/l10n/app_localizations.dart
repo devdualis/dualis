@@ -8896,6 +8896,30 @@ abstract class AppLocalizations {
   /// **'Não foi possível registrar a água. Tente de novo.'**
   String get voiceWaterFailed;
 
+  /// Voice banner while the app reads the check-in question aloud
+  ///
+  /// In pt, this message translates to:
+  /// **'Lendo a pergunta… toque no microfone para parar'**
+  String get voiceSpeaking;
+
+  /// Said after the first options when a step has more options than are read aloud
+  ///
+  /// In pt, this message translates to:
+  /// **'Ou diga outra opção da tela.'**
+  String get voiceReadMoreHint;
+
+  /// Settings switch title (Premium voice)
+  ///
+  /// In pt, this message translates to:
+  /// **'Ler as perguntas em voz alta'**
+  String get voiceReadAloudTitle;
+
+  /// Settings switch subtitle (Premium voice)
+  ///
+  /// In pt, this message translates to:
+  /// **'No check-in por voz, o app lê a pergunta e as opções antes de ouvir. Funciona sem internet.'**
+  String get voiceReadAloudSubtitle;
+
   /// No description provided for @voiceAliasHelp.
   ///
   /// In pt, this message translates to:

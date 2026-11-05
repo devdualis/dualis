@@ -43,7 +43,8 @@ class VoiceMicButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (!voiceAvailable(ref)) return const SizedBox.shrink();
     final voice = ref.watch(voiceControllerProvider);
-    final active = voice.listening && !voice.dictating;
+    // Reading a question aloud counts as active: a tap stops the speech.
+    final active = (voice.listening && !voice.dictating) || voice.speaking;
     final l10n = AppLocalizations.of(context);
     return Semantics(
       button: true,
@@ -64,7 +65,11 @@ class VoiceMicButton extends ConsumerWidget {
             width: size,
             height: size,
             child: Icon(
-              active ? Icons.mic_rounded : Icons.mic_none_rounded,
+              voice.speaking
+                  ? Icons.stop_rounded
+                  : active
+                      ? Icons.mic_rounded
+                      : Icons.mic_none_rounded,
               size: size * 0.48,
               color: active ? Colors.white : AppColors.dualisSymbolBlue,
             ),
@@ -129,8 +134,10 @@ void appendDictation(TextEditingController controller, String text) {
   );
 }
 
-/// "Ouvindo…" with what is being heard, then a short note of what was
-/// understood. Drawn above every screen, below the status bar.
+/// "Lendo a pergunta…" while a question is read aloud, "Ouvindo…" with what
+/// is being heard, then a short note of what was understood. Drawn above
+/// every screen, below the status bar, and never takes a tap: the help
+/// button beside it stays one tap away.
 class VoiceStatusBanner extends ConsumerStatefulWidget {
   const VoiceStatusBanner({super.key});
 
@@ -176,7 +183,11 @@ class _VoiceStatusBannerState extends ConsumerState<VoiceStatusBanner> {
 
     String? text;
     var listening = false;
-    if (voice.listening) {
+    var speaking = false;
+    if (voice.speaking) {
+      speaking = true;
+      text = l10n.voiceSpeaking;
+    } else if (voice.listening) {
       listening = true;
       final lead = voice.handsFree ? l10n.voiceListeningHandsFree : l10n.voiceListening;
       text = voice.partial.isEmpty ? lead : '${l10n.voiceListening} ${voice.partial}';
@@ -206,7 +217,11 @@ class _VoiceStatusBannerState extends ConsumerState<VoiceStatusBanner> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        listening ? Icons.graphic_eq_rounded : Icons.record_voice_over_rounded,
+                        speaking
+                            ? Icons.volume_up_rounded
+                            : listening
+                                ? Icons.graphic_eq_rounded
+                                : Icons.record_voice_over_rounded,
                         size: 18,
                         color: Colors.white,
                       ),

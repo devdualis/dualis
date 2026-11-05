@@ -5247,6 +5247,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get voiceWaterFailed => 'Couldn\'t log the water. Please try again.';
 
   @override
+  String get voiceSpeaking => 'Reading the question… tap the mic to stop';
+
+  @override
+  String get voiceReadMoreHint => 'Or say another option on the screen.';
+
+  @override
+  String get voiceReadAloudTitle => 'Read questions aloud';
+
+  @override
+  String get voiceReadAloudSubtitle =>
+      'In the voice check-in, the app reads the question and the options before it listens. Works offline.';
+
+  @override
   String get voiceAliasHelp => 'help|emergency|sos|i need help|192|188';
 
   @override
