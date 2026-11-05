@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../security/secure_storage_service.dart';
 
 /// Text to speech, behind an interface so tests and the simulator QA can
 /// check what is read without a speaker. It reads only what is on screen
@@ -294,3 +295,65 @@ String composeReadOut(AppLocalizations l10n, String question, List<String> optio
   final ends = q.isEmpty || RegExp(r'[.?!:;]$').hasMatch(q);
   return '$q${ends ? '' : '.'} ${labels.join(', ')}.'.trim();
 }
+
+/// "Ler as perguntas em voz alta": on by default for Premium voice users.
+/// A device preference, not personal data; kept in secure storage because
+/// the app does not use SharedPreferences.
+class VoiceReadAloudController extends Notifier<bool> {
+  static const String storageKey = 'dualis_voice_read_aloud';
+
+  bool _loaded = false;
+
+  /// The person changed it here: a late read never overrides that.
+  bool _chosen = false;
+
+  @override
+  bool build() => true;
+
+  /// Longest wait for the saved choice before reading anyway: the
+  /// preference must never hold the mic back.
+  static const Duration readTimeout = Duration(milliseconds: 300);
+
+  /// Reads the saved choice once; a storage error or a slow read keeps
+  /// reading on (a late "off" still applies from the next step).
+  Future<bool> isEnabled() async {
+    if (_loaded) return state;
+    final Future<String?> read;
+    try {
+      read = ref.read(secureStorageServiceProvider).read(key: storageKey);
+    } catch (_) {
+      _apply(true);
+      return state;
+    }
+    try {
+      final saved = await read.timeout(readTimeout);
+      _apply(saved != 'off');
+    } on TimeoutException {
+      _loaded = true;
+      unawaited(read.then((saved) {
+        if (saved == 'off' && !_chosen) _apply(false, late: true);
+      }, onError: (Object _) {}));
+    } catch (_) {
+      _apply(true);
+    }
+    return state;
+  }
+
+  void _apply(bool on, {bool late = false}) {
+    if (!ref.mounted || (_loaded && !late)) return;
+    _loaded = true;
+    state = on;
+  }
+
+  Future<void> set(bool on) async {
+    _loaded = true;
+    _chosen = true;
+    state = on;
+    try {
+      await ref.read(secureStorageServiceProvider).write(key: storageKey, value: on ? 'on' : 'off');
+    } catch (_) {}
+  }
+}
+
+final voiceReadAloudProvider =
+    NotifierProvider<VoiceReadAloudController, bool>(VoiceReadAloudController.new);

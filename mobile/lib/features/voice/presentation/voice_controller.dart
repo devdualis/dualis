@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -98,6 +98,10 @@ class VoiceController extends Notifier<VoiceState> {
   /// step is read once and not again after a phrase not understood.
   String? _lastReadKey;
 
+  /// Set once text to speech was used, so stopping never wakes the engine
+  /// for people who only dictate.
+  bool _outputUsed = false;
+
   /// Gap between the end of the speech and opening the mic, so the mic
   /// never hears the tail of the app's own voice.
   static const Duration speechGap = Duration(milliseconds: 300);
@@ -111,9 +115,13 @@ class VoiceController extends Notifier<VoiceState> {
 
   @override
   VoiceState build() {
+    // In the background nothing is read and the mic closes.
+    final lifecycle = AppLifecycleListener(onPause: stop);
     ref.onDispose(() {
       _session++;
+      lifecycle.dispose();
       _watchedRouter?.routerDelegate.removeListener(_onRouteChanged);
+      // The output provider stops its own speech when it is disposed.
     });
     // The app lock hides the screens but keeps them mounted: voice must not
     // reach them. Same after signing out.
@@ -150,8 +158,10 @@ class VoiceController extends Notifier<VoiceState> {
     state = state.copyWith(feedback: VoiceFeedback(kind, ++_feedbackId, text));
   }
 
-  /// Mic button: start, or stop when already listening.
-  Future<void> toggle() => state.listening ? stop() : startCommands();
+  /// Mic button: start, or stop when listening, reading the question or
+  /// between two answers of the hands-free check-in.
+  Future<void> toggle() =>
+      state.listening || state.speaking || state.handsFree ? stop() : startCommands();
 
   Future<void> startCommands() async {
     if (!_enabled || _locked) return;
@@ -174,9 +184,13 @@ class VoiceController extends Notifier<VoiceState> {
     await _listen();
   }
 
-  /// The help screen opened (red button or "ajuda"): close the mic at once.
+  /// The help screen opened (red button or "ajuda"): close the mic and
+  /// stop reading at once. Leaving the check-in ends hands-free mode too.
   void _onRouteChanged() {
-    if (_location == RoutePaths.emergency && (state.listening || state.handsFree)) {
+    final active = state.listening || state.handsFree || state.speaking;
+    if (_location == RoutePaths.emergency && active) {
+      stop();
+    } else if ((state.handsFree || state.speaking) && !_onJournal) {
       stop();
     }
   }
@@ -195,7 +209,14 @@ class VoiceController extends Notifier<VoiceState> {
     await _stopSession();
     _dictationSink = null;
     _lastReadKey = null;
-    state = state.copyWith(handsFree: false, dictating: false);
+    state = state.copyWith(handsFree: false, dictating: false, speaking: false);
+    if (_outputUsed) await _stopOutput();
+  }
+
+  Future<void> _stopOutput() async {
+    try {
+      await _output.stop();
+    } catch (_) {}
   }
 
   Future<void> _stopSession() async {
@@ -248,6 +269,9 @@ class VoiceController extends Notifier<VoiceState> {
   /// Hands-free check-in: reads the question of the step on screen and up
   /// to [maxReadOptions] of its options, once per step, before listening.
   Future<void> _readStep() async {
+    final session = _session;
+    final readAloud = await ref.read(voiceReadAloudProvider.notifier).isEnabled();
+    if (!readAloud || session != _session || !_onJournal) return;
     final registry = ref.read(voiceTargetRegistryProvider);
     final prompt = registry.activePrompt;
     if (prompt == null) return;
@@ -256,7 +280,7 @@ class VoiceController extends Notifier<VoiceState> {
     if (key == _lastReadKey) return;
     _lastReadKey = key;
     final text = composeReadOut(_l10n, prompt.text, registry.readableOptions);
-    final session = _session;
+    _outputUsed = true;
     state = state.copyWith(speaking: true);
     try {
       await _output.prepare(ref.read(localeProvider).languageCode);
