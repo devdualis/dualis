@@ -21,13 +21,14 @@ export type SupportedLanguage = 'pt-BR' | 'es' | 'en';
  * appointments, exam and prescription reading with Google Cloud Vision) and
  * users outside Brazil. 2026.4 = conditions the person names and the readings they
  * note on them (blood pressure, glucose, weight) in the privacy policy.
+ * 2026.5 = AI journal suggestions with specific consent (privacy policy section 7).
  * Bumping it forces every user to accept the new texts again.
  * Env overrides (TERMS_VERSION, PRIVACY_VERSION, DISCLAIMER_VERSION) still win.
  */
-export const LEGAL_DOCUMENTS_VERSION = '2026.4';
+export const LEGAL_DOCUMENTS_VERSION = '2026.5';
 
 const LEGAL_DOCUMENTS_EFFECTIVE_DATE = '2026-10-16';
-const LEGAL_DOCUMENTS_LAST_UPDATED = '2026-11-01';
+const LEGAL_DOCUMENTS_LAST_UPDATED = '2026-11-05';
 
 /** Canonical intended-use statement (plan §1.1). Must stay identical everywhere. */
 export const INTENDED_USE_STATEMENT: Record<SupportedLanguage, string> = {
@@ -312,7 +313,7 @@ export class LegalService {
             content:
               'Compartimos datos únicamente con encargados del tratamiento contratados para prestar el servicio. Tratan los datos solo según nuestras instrucciones, con obligaciones de confidencialidad y seguridad:',
             bullets: [
-              'Inteligencia artificial: el texto de "escribir el mío" puede enviarse a un proveedor de IA solo para sugerir una opción ya existente del diario. La IA no evalúa su salud.',
+              'Inteligencia artificial: el texto de "escribir el mío" y de "describir con mis palabras" puede enviarse a un proveedor de IA solo con su consentimiento específico, y solo para sugerir opciones ya existentes del diario (sección 7). La IA no evalúa su salud.',
               'Lectura de documentos: las fotos y PDF de exámenes y recetas que usted elige leer se envían a un proveedor de reconocimiento de texto, y un proveedor de IA ordena ese texto, sin su nombre ni CPF. Antes, la app le pide su consentimiento específico e indica el proveedor y el país donde se tratan los datos. Estos proveedores no pueden usar los datos para entrenar modelos.',
               'Envío de correos: su correo electrónico, su nombre de pila y los códigos de verificación o de restablecimiento de contraseña se envían a un proveedor de correo solo para entregar esos mensajes. No enviamos datos de salud por correo.',
               'Mapa para elegir el lugar de una consulta: al abrir el mapa, el proveedor de mapas recibe el área del mapa que usted está viendo, solo para dibujarlo. La dirección que usted busca y la dirección del punto elegido se obtienen del servicio de direcciones del propio sistema del teléfono. No se envían datos de salud, y la app no lee su ubicación (GPS).',
@@ -338,6 +339,20 @@ export class LegalService {
             title: '6. Comunicaciones y Desuscripción (Opt-Out)',
             content:
               'Solo enviamos notificaciones operativas obligatorias. Las comunicaciones informativas o de bienestar cuentan con un botón de desuscripción y un selector de preferencias en la app.',
+          },
+          {
+            sectionId: '7-sugerencias-ia-diario',
+            title: '7. Sugerencias con IA en el Diario',
+            content:
+              'Si usted lo permite, la app puede usar IA para sugerir opciones del diario a partir de lo que escribe en "escribir el mío" o en "describir con mis palabras". Es un recurso opcional y separado de los términos de uso.',
+            bullets: [
+              'Qué se envía: solo el texto que usted escribió, sin datos que lo identifiquen. Antes de enviarlo, la app quita nombres y números largos; no se envían nombre, CPF, correo electrónico ni otros identificadores suyos o del perfil.',
+              'Para qué: sugerir opciones que ya existen en el diario. Usted revisa y activa cada una; nada se marca sin usted. La IA no evalúa su salud.',
+              'Dónde: un proveedor de IA en la nube trata el texto en Brasil, en la región de São Paulo. El texto no se guarda en los servidores de DualisCheckUp, no se registra en logs y el proveedor no puede usarlo para entrenar modelos.',
+              'Base legal: consentimiento específico (LGPD Art. 11, I), separado de los términos de uso.',
+              'Es opcional: sin él, todo lo demás de la app funciona. Puede revocar el consentimiento en cualquier momento en Ajustes.',
+              'El texto que usted decida guardar como nota se guarda como cualquier otra nota del diario.',
+            ],
           },
         ],
       };
@@ -394,7 +409,7 @@ export class LegalService {
             content:
               'We share data only with processors hired to run the service. They handle data only on our instructions, under confidentiality and security obligations:',
             bullets: [
-              'Artificial intelligence: text from "write my own" may be sent to an AI provider only to suggest an existing diary option. The AI does not assess your health.',
+              'Artificial intelligence: text from "write my own" and "describe in my own words" may be sent to an AI provider only with your specific consent, and only to suggest existing diary options (section 7). The AI does not assess your health.',
               'Document reading: photos and PDFs of exams and prescriptions you choose to read are sent to a text-recognition provider, and an AI provider organizes that text, without your name or CPF. Before that, the app asks for your specific consent and names the provider and the country where the data is processed. These providers may not use the data to train models.',
               'Email delivery: your email address, first name and verification or password-reset codes are sent to an email provider only to deliver those messages. We do not send health data by email.',
               'Map to pick an appointment place: when you open the map, the map provider receives the map area you are viewing, only to draw it. The address you search for and the address of the point you pick come from your phone system\'s own address service. No health data is sent, and the app does not read your location (GPS).',
@@ -420,6 +435,20 @@ export class LegalService {
             title: '6. Communications & Instant Opt-Out',
             content:
               'Educational tips and notification preferences can be toggled on or off at any moment with a single tap in the application settings.',
+          },
+          {
+            sectionId: '7-ai-journal-suggestions',
+            title: '7. AI Suggestions in Your Journal',
+            content:
+              'If you allow it, the app can use AI to suggest diary options from what you write in "write my own" or "describe in my own words". This is optional and separate from the terms of use.',
+            bullets: [
+              'What is sent: only the text you wrote, de-identified. Before sending it, the app removes names and long numbers; no name, ID number (CPF), email address or other identifiers of you or the profile are sent.',
+              'Why: to suggest options that already exist in the diary. You review and turn on each one; nothing is selected without you. The AI does not assess your health.',
+              'Where: a cloud AI provider processes the text in Brazil, in the São Paulo region. The text is not stored on DualisCheckUp servers, is not logged, and the provider may not use it to train models.',
+              'Legal basis: specific consent (LGPD Art. 11, I), separate from the terms of use.',
+              'Optional: everything else in the app works without it. You can withdraw your consent at any time in Settings.',
+              'Any text you choose to keep as a note is stored like any other diary note.',
+            ],
           },
         ],
       };
@@ -477,7 +506,7 @@ export class LegalService {
           content:
             'Compartilhamos dados apenas com operadores contratados para prestar o serviço. Eles tratam os dados só conforme as nossas instruções, com obrigações de confidencialidade e segurança:',
           bullets: [
-            'Inteligência artificial: o texto de "escrever o meu" pode ser enviado a um provedor de IA só para sugerir uma opção já existente do diário. A IA não avalia a sua saúde.',
+            'Inteligência artificial: o texto de "escrever o meu" e de "descrever com minhas palavras" pode ser enviado a um provedor de IA só com o seu consentimento específico, e só para sugerir opções já existentes do diário (seção 7). A IA não avalia a sua saúde.',
             'Leitura de documentos: as fotos e PDFs de exames e receitas que você escolhe ler são enviados a um provedor de reconhecimento de texto, e um provedor de IA organiza esse texto, sem o seu nome nem CPF. Antes, o app pede o seu consentimento específico e informa o provedor e o país onde os dados são tratados. Esses provedores não podem usar os dados para treinar modelos.',
             'Envio de e-mails: o seu e-mail, o seu primeiro nome e os códigos de verificação ou de redefinição de senha são enviados a um provedor de e-mail só para entregar essas mensagens. Não enviamos dados de saúde por e-mail.',
             'Mapa para escolher o local de uma consulta: ao abrir o mapa, o provedor de mapas recebe a área do mapa que você está vendo, só para desenhá-lo. O endereço que você busca e o endereço do ponto escolhido são obtidos pelo serviço de endereços do próprio sistema do celular. Nenhum dado de saúde é enviado, e o app não lê a sua localização (GPS).',
@@ -507,6 +536,20 @@ export class LegalService {
           title: '6. Comunicações, Notificações e Mecanismo de Opt-Out',
           content:
             'As mensagens de rotina (lembretes de água e dicas de bem-estar) exigem consentimento prévio e podem ser ativadas ou desativadas a qualquer instante na tela de Configurações, garantindo liberdade total de descontinuidade de mensagens informativas.',
+        },
+        {
+          sectionId: '7-sugestoes-ia-diario',
+          title: '7. Sugestões com IA no Diário',
+          content:
+            'Se você permitir, o app pode usar IA para sugerir opções do diário a partir do que você escreve em "escrever o meu" ou em "descrever com minhas palavras". É um recurso opcional e separado dos termos de uso.',
+          bullets: [
+            'O que é enviado: só o texto que você escreveu, sem dados que identifiquem você. Antes de enviar, o app tira nomes e números longos; não vão nome, CPF, e-mail nem outros identificadores seus ou do perfil.',
+            'Para quê: sugerir opções que já existem no diário. Você confere e liga cada uma; nada é marcado sem você. A IA não avalia a sua saúde.',
+            'Onde: um provedor de IA em nuvem processa o texto no Brasil, na região de São Paulo. O texto não fica guardado nos servidores do DualisCheckUp, não é registrado em logs e o provedor não pode usá-lo para treinar modelos.',
+            'Base legal: consentimento específico (LGPD Art. 11, I), separado dos termos de uso.',
+            'É opcional: sem ele, todo o resto do app funciona. Você pode revogar o consentimento a qualquer momento em Configurações.',
+            'O texto que você escolher manter como nota é guardado como qualquer outra nota do diário.',
+          ],
         },
       ],
     };
