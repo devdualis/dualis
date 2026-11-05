@@ -9987,6 +9987,54 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Desligado. Nenhum texto é enviado à IA.'**
   String get aiConsentTileOff;
+
+  /// Settings: AI consent status could not be read
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem conexão para ver o estado agora.'**
+  String get aiConsentTileUnknown;
+
+  /// Confirm turning off the AI consent
+  ///
+  /// In pt, this message translates to:
+  /// **'Desligar as sugestões com IA?'**
+  String get aiConsentRevokeTitle;
+
+  /// Confirm turning off the AI consent: body
+  ///
+  /// In pt, this message translates to:
+  /// **'O app deixa de enviar texto à IA. Todo o resto continua igual, e você pode ligar de novo quando quiser.'**
+  String get aiConsentRevokeBody;
+
+  /// Confirm turning off the AI consent: button
+  ///
+  /// In pt, this message translates to:
+  /// **'Desligar'**
+  String get aiConsentRevokeConfirm;
+
+  /// Keep the AI consent on
+  ///
+  /// In pt, this message translates to:
+  /// **'Manter ligado'**
+  String get aiConsentRevokeCancel;
+
+  /// AI consent grant or revoke failed
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível salvar agora. Tente de novo.'**
+  String get aiConsentError;
+
+  /// AI consent status could not be read before an AI feature
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem conexão. As sugestões com IA ficam para depois; siga normalmente.'**
+  String get aiConsentUnavailable;
+
+  /// The server consent version changed; the dialog is shown again
+  ///
+  /// In pt, this message translates to:
+  /// **'O texto da permissão foi atualizado. Leia de novo antes de permitir.'**
+  String get aiConsentUpdated;
 }
 
 class _AppLocalizationsDelegate

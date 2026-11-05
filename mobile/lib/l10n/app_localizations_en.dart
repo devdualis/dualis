@@ -5919,4 +5919,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiConsentTileOff => 'Off. No text is sent to the AI.';
+
+  @override
+  String get aiConsentTileUnknown =>
+      'No connection to check the status right now.';
+
+  @override
+  String get aiConsentRevokeTitle => 'Turn off AI suggestions?';
+
+  @override
+  String get aiConsentRevokeBody =>
+      'The app stops sending text to the AI. Everything else stays the same, and you can turn it back on at any time.';
+
+  @override
+  String get aiConsentRevokeConfirm => 'Turn off';
+
+  @override
+  String get aiConsentRevokeCancel => 'Keep on';
+
+  @override
+  String get aiConsentError => 'Could not save right now. Please try again.';
+
+  @override
+  String get aiConsentUnavailable =>
+      'No connection. AI suggestions can wait; carry on as usual.';
+
+  @override
+  String get aiConsentUpdated =>
+      'The permission text was updated. Please read it again before allowing.';
 }

@@ -3507,5 +3507,37 @@
   "aiConsentTileOff": "Desligado. Nenhum texto é enviado à IA.",
   "@aiConsentTileOff": {
     "description": "Settings: AI consent off"
+  },
+  "aiConsentTileUnknown": "Sem conexão para ver o estado agora.",
+  "@aiConsentTileUnknown": {
+    "description": "Settings: AI consent status could not be read"
+  },
+  "aiConsentRevokeTitle": "Desligar as sugestões com IA?",
+  "@aiConsentRevokeTitle": {
+    "description": "Confirm turning off the AI consent"
+  },
+  "aiConsentRevokeBody": "O app deixa de enviar texto à IA. Todo o resto continua igual, e você pode ligar de novo quando quiser.",
+  "@aiConsentRevokeBody": {
+    "description": "Confirm turning off the AI consent: body"
+  },
+  "aiConsentRevokeConfirm": "Desligar",
+  "@aiConsentRevokeConfirm": {
+    "description": "Confirm turning off the AI consent: button"
+  },
+  "aiConsentRevokeCancel": "Manter ligado",
+  "@aiConsentRevokeCancel": {
+    "description": "Keep the AI consent on"
+  },
+  "aiConsentError": "Não foi possível salvar agora. Tente de novo.",
+  "@aiConsentError": {
+    "description": "AI consent grant or revoke failed"
+  },
+  "aiConsentUnavailable": "Sem conexão. As sugestões com IA ficam para depois; siga normalmente.",
+  "@aiConsentUnavailable": {
+    "description": "AI consent status could not be read before an AI feature"
+  },
+  "aiConsentUpdated": "O texto da permissão foi atualizado. Leia de novo antes de permitir.",
+  "@aiConsentUpdated": {
+    "description": "The server consent version changed; the dialog is shown again"
   }
 }

@@ -5933,4 +5933,31 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get aiConsentTileOff => 'Desligado. Nenhum texto é enviado à IA.';
+
+  @override
+  String get aiConsentTileUnknown => 'Sem conexão para ver o estado agora.';
+
+  @override
+  String get aiConsentRevokeTitle => 'Desligar as sugestões com IA?';
+
+  @override
+  String get aiConsentRevokeBody =>
+      'O app deixa de enviar texto à IA. Todo o resto continua igual, e você pode ligar de novo quando quiser.';
+
+  @override
+  String get aiConsentRevokeConfirm => 'Desligar';
+
+  @override
+  String get aiConsentRevokeCancel => 'Manter ligado';
+
+  @override
+  String get aiConsentError => 'Não foi possível salvar agora. Tente de novo.';
+
+  @override
+  String get aiConsentUnavailable =>
+      'Sem conexão. As sugestões com IA ficam para depois; siga normalmente.';
+
+  @override
+  String get aiConsentUpdated =>
+      'O texto da permissão foi atualizado. Leia de novo antes de permitir.';
 }

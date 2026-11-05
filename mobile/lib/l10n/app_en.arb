@@ -1685,5 +1685,13 @@
   "aiConsentAccept": "Allow",
   "aiConsentTileTitle": "AI suggestions in the journal",
   "aiConsentTileOn": "Allowed on {date}",
-  "aiConsentTileOff": "Off. No text is sent to the AI."
+  "aiConsentTileOff": "Off. No text is sent to the AI.",
+  "aiConsentTileUnknown": "No connection to check the status right now.",
+  "aiConsentRevokeTitle": "Turn off AI suggestions?",
+  "aiConsentRevokeBody": "The app stops sending text to the AI. Everything else stays the same, and you can turn it back on at any time.",
+  "aiConsentRevokeConfirm": "Turn off",
+  "aiConsentRevokeCancel": "Keep on",
+  "aiConsentError": "Could not save right now. Please try again.",
+  "aiConsentUnavailable": "No connection. AI suggestions can wait; carry on as usual.",
+  "aiConsentUpdated": "The permission text was updated. Please read it again before allowing."
 }
