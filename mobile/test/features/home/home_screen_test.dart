@@ -158,6 +158,8 @@ void main() {
 
       // Verify LGPD badge
       expect(find.text('Seus registros estão protegidos'), findsOneWidget);
+      // Free build: no Premium tier mark.
+      expect(find.byKey(const Key('home_premium_label')), findsNothing);
 
       expect(find.byKey(const Key('home_settings_button')), findsOneWidget);
       expect(find.byKey(const Key('home_profile_card')), findsOneWidget);

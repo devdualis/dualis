@@ -35,6 +35,7 @@ import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/premium_gradient_icon.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -426,6 +427,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 2),
+                                if (ref.watch(premiumProfilesEnabledProvider))
+                                  // Discreet tier mark, Premium builds only:
+                                  // same champagne dot as the active nav icon,
+                                  // on the subtitle line so the card keeps its
+                                  // height.
+                                  Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          cardDisplaySubtitle,
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 13,
+                                            color: Colors.white.withValues(alpha: 0.85),
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Row(
+                                        key: const Key('home_premium_label'),
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            width: 6,
+                                            height: 6,
+                                            decoration: const BoxDecoration(
+                                              color: PremiumAccents.champagne,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 5),
+                                          Text(
+                                            AppLocalizations.of(context).loginPremiumLabel,
+                                            style: GoogleFonts.plusJakartaSans(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              letterSpacing: 0.6,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  )
+                                else
                                 Text(
                                   cardDisplaySubtitle,
                                   style: GoogleFonts.plusJakartaSans(

@@ -112,6 +112,33 @@ void main() {
     expect(find.byKey(const Key('nav_destination_emergency')), findsOneWidget);
   });
 
+  testWidgets('Premium build shows the discreet Premium label on the Home card',
+      (tester) async {
+    await tester.pumpWidget(
+      buildApp(
+        const ActiveProfileState(
+          profiles: [primary, sharedViewOnly],
+          activeProfileId: 'shared-view',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final label = find.byKey(const Key('home_premium_label'));
+    expect(label, findsOneWidget);
+    expect(
+      find.descendant(of: label, matching: find.text('Premium')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('home_profile_card')),
+        matching: label,
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('history refresh button also reloads profiles and grants',
       (tester) async {
     await tester.pumpWidget(
