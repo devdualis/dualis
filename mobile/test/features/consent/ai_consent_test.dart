@@ -170,7 +170,7 @@ void main() {
           _textContaining('São Paulo (southamerica-east1)'),
           findsOneWidget,
         );
-        expect(_textContaining('nomes, CPF, e-mails'), findsOneWidget);
+        expect(_textContaining('números longos, como CPF'), findsOneWidget);
         expect(
           _textContaining('não é usado para treinar modelos'),
           findsOneWidget,

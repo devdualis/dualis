@@ -5938,7 +5938,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get aiConsentWhatIsSent =>
-      'Solo va el texto. Antes de enviarlo, la app quita nombres, CPF, correos, teléfonos y otros números. No se envía ningún identificador tuyo ni del perfil.';
+      'Solo va el texto, sin ningún identificador tuyo ni del perfil. Antes de pasar el texto a la IA, nuestro servidor intenta quitar nombres, correos, enlaces y números largos, como el CPF y el teléfono. No es infalible: evita escribir datos personales.';
 
   @override
   String get aiConsentNoTraining =>

@@ -5920,7 +5920,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiConsentWhatIsSent =>
-      'Only the text is sent. Before sending it, the app removes names, CPF, e-mails, phone numbers and other numbers. No identifier of yours or of the profile is sent.';
+      'Only the text is sent, with no identifier of you or the profile. Before the text goes to the AI, our server tries to remove names, e-mails, links and long numbers such as CPF and phone numbers. This is not foolproof: avoid writing personal details.';
 
   @override
   String get aiConsentNoTraining =>

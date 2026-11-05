@@ -1685,7 +1685,7 @@
   "settingsPlanSeePremium": "See Premium",
   "aiConsentTitle": "AI suggestions in the journal",
   "aiConsentIntro": "To suggest journal options from what you write, the app sends that text to Google (Vertex AI, Gemini model). Processing happens in Brazil, in the São Paulo region (southamerica-east1).",
-  "aiConsentWhatIsSent": "Only the text is sent. Before sending it, the app removes names, CPF, e-mails, phone numbers and other numbers. No identifier of yours or of the profile is sent.",
+  "aiConsentWhatIsSent": "Only the text is sent, with no identifier of you or the profile. Before the text goes to the AI, our server tries to remove names, e-mails, links and long numbers such as CPF and phone numbers. This is not foolproof: avoid writing personal details.",
   "aiConsentNoTraining": "The text is not kept on our servers and is not used to train models.",
   "aiConsentOnlyOptions": "The AI only points to options that already exist in the journal. You check and choose; nothing is marked without you. The AI does not assess your health.",
   "aiConsentOptional": "It is optional: without it, everything else in the app works. You can turn it off at any time in Settings. Legal basis: specific consent (LGPD, Art. 11, I).",

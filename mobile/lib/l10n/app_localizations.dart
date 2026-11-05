@@ -9985,7 +9985,7 @@ abstract class AppLocalizations {
   /// AI consent: what is sent
   ///
   /// In pt, this message translates to:
-  /// **'Vai só o texto. Antes de enviar, o app tira nomes, CPF, e-mails, telefones e outros números. Nenhum identificador seu ou do perfil é enviado.'**
+  /// **'Vai só o texto, sem nenhum identificador seu ou do perfil. Antes de passar o texto à IA, o nosso servidor tenta tirar nomes, e-mails, links e números longos, como CPF e telefone. Isso não é infalível: evite escrever dados pessoais.'**
   String get aiConsentWhatIsSent;
 
   /// AI consent: not stored, not used for training
