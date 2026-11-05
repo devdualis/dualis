@@ -216,6 +216,24 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   l10n.privacyPolicySection7Bullet2,
                 ],
               ),
+              const SizedBox(height: 16),
+
+              // Section 8: AI journal suggestions (specific consent, LGPD
+              // Art. 11, I). Mirrors section 7 of the API privacy policy.
+              _PrivacySectionCard(
+                title: l10n.privacyPolicySection8Title,
+                icon: Icons.auto_awesome_outlined,
+                color: AppColors.softIndigo,
+                content: l10n.privacyPolicySection8Body,
+                bullets: [
+                  l10n.privacyPolicySection8Bullet1,
+                  l10n.privacyPolicySection8Bullet2,
+                  l10n.privacyPolicySection8Bullet3,
+                  l10n.privacyPolicySection8Bullet4,
+                  l10n.privacyPolicySection8Bullet5,
+                  l10n.privacyPolicySection8Bullet6,
+                ],
+              ),
               const SizedBox(height: 24),
 
               // Quick Action Button to Privacy Center

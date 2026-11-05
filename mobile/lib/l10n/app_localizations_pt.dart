@@ -1134,7 +1134,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get privacyPolicySection3Bullet1 =>
-      'Inteligência artificial: o texto de \"escrever o meu\" pode ser enviado a um provedor de IA só para sugerir uma opção já existente do diário. A IA não avalia a sua saúde.';
+      'Inteligência artificial: o texto de \"escrever o meu\" e de \"descrever com minhas palavras\" pode ser enviado a um provedor de IA só com o seu consentimento específico, e só para sugerir opções já existentes do diário (seção 8). A IA não avalia a sua saúde.';
 
   @override
   String get privacyPolicySection3Bullet2 =>
@@ -1230,6 +1230,37 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get privacyPolicySection7Bullet2 =>
       'Avisos de segurança e recuperação de conta são de natureza estritamente transacional e protegidos.';
+
+  @override
+  String get privacyPolicySection8Title => '8. Sugestões com IA no diário';
+
+  @override
+  String get privacyPolicySection8Body =>
+      'Se você permitir, o app pode usar IA para sugerir opções do diário a partir do que você escreve em \"escrever o meu\" ou em \"descrever com minhas palavras\". É um recurso opcional e separado dos termos de uso.';
+
+  @override
+  String get privacyPolicySection8Bullet1 =>
+      'O que é enviado: só o texto que você escreveu, sem dados que identifiquem você. Antes de enviar ao provedor de IA, o nosso servidor tira nomes e números longos; não vão nome, CPF, e-mail nem outros identificadores seus ou do perfil.';
+
+  @override
+  String get privacyPolicySection8Bullet2 =>
+      'Para quê: sugerir opções que já existem no diário. Você confere e liga cada uma; nada é marcado sem você. A IA não avalia a sua saúde.';
+
+  @override
+  String get privacyPolicySection8Bullet3 =>
+      'Onde: um provedor de IA em nuvem contratado processa o texto no Brasil, na região de São Paulo. O texto não fica guardado nos servidores do DualisCheckUp, não é registrado em logs e o provedor não pode usá-lo para treinar modelos.';
+
+  @override
+  String get privacyPolicySection8Bullet4 =>
+      'Base legal: consentimento específico (LGPD Art. 11, I), separado dos termos de uso.';
+
+  @override
+  String get privacyPolicySection8Bullet5 =>
+      'É opcional: sem ele, todo o resto do app funciona. Você pode revogar o consentimento a qualquer momento em Configurações.';
+
+  @override
+  String get privacyPolicySection8Bullet6 =>
+      'O texto que você escolher manter como nota é guardado como qualquer outra nota do diário.';
 
   @override
   String get privacyPolicyCtaQuestion =>
@@ -5960,4 +5991,59 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get aiConsentUpdated =>
       'O texto da permissão foi atualizado. Leia de novo antes de permitir.';
+
+  @override
+  String get jv2DescribeTile => 'Descrever com minhas palavras';
+
+  @override
+  String get jv2DescribeTitle => 'Conte com suas palavras';
+
+  @override
+  String get jv2DescribeHint =>
+      'Escreva ou dite como você está. O app sugere opções do diário para você conferir.';
+
+  @override
+  String get jv2DescribeKeepNote => 'Guardar este texto como nota';
+
+  @override
+  String get jv2DescribeSuggest => 'Ver sugestões';
+
+  @override
+  String get jv2DescribeSearching => 'Procurando opções parecidas…';
+
+  @override
+  String get jv2DescribeReviewTitle => 'Opções parecidas com o que você contou';
+
+  @override
+  String get jv2DescribeReviewHint =>
+      'Nada fica marcado até você ligar. Depois você pode mudar tudo nas próximas telas.';
+
+  @override
+  String get jv2DescribeUse => 'Usar as selecionadas';
+
+  @override
+  String get jv2DescribeManual => 'Seguir sem sugestões';
+
+  @override
+  String get jv2DescribeEmpty =>
+      'Não encontrei opções parecidas. Siga pelas telas normais.';
+
+  @override
+  String get jv2DescribeOffline =>
+      'Sem conexão. Seu texto não foi enviado; siga pelas telas normais.';
+
+  @override
+  String get jv2DescribeFailed =>
+      'Não deu para buscar sugestões agora. Siga pelas telas normais.';
+
+  @override
+  String get jv2DescribeBusy =>
+      'Muitas sugestões seguidas. Tente de novo daqui a pouco ou siga pelas telas normais.';
+
+  @override
+  String get jv2DescribeProfileNotAllowed =>
+      'As sugestões com IA funcionam só nos perfis que você administra.';
+
+  @override
+  String get jv2DescribeCancel => 'Cancelar';
 }

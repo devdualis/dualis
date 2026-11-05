@@ -1005,7 +1005,7 @@
   "privacyPolicySection2Bullet4": "Compromisso Ético: É expressamente PROIBIDA a venda, comercialização ou cessão onerosa dos seus dados para corretoras de seguros, anunciantes ou terceiros.",
   "privacyPolicySection3Title": "3. Operadores e Transferência Internacional",
   "privacyPolicySection3Body": "Compartilhamos dados apenas com operadores contratados para prestar o serviço. Eles tratam os dados só conforme as nossas instruções, com obrigações de confidencialidade e segurança:",
-  "privacyPolicySection3Bullet1": "Inteligência artificial: o texto de \"escrever o meu\" pode ser enviado a um provedor de IA só para sugerir uma opção já existente do diário. A IA não avalia a sua saúde.",
+  "privacyPolicySection3Bullet1": "Inteligência artificial: o texto de \"escrever o meu\" e de \"descrever com minhas palavras\" pode ser enviado a um provedor de IA só com o seu consentimento específico, e só para sugerir opções já existentes do diário (seção 8). A IA não avalia a sua saúde.",
   "privacyPolicySection3Bullet2": "Leitura de documentos: as fotos e PDFs de exames e receitas que você escolhe ler são enviados a um provedor de reconhecimento de texto, e um provedor de IA organiza esse texto, sem o seu nome nem CPF. Antes, o app pede o seu consentimento específico e informa o provedor e o país onde os dados são tratados. Esses provedores não podem usar os dados para treinar modelos.",
   "privacyPolicySection3Bullet3": "Envio de e-mails: o seu e-mail, o seu primeiro nome e os códigos de verificação ou de redefinição de senha são enviados a um provedor de e-mail só para entregar essas mensagens. Não enviamos dados de saúde por e-mail.",
   "privacyPolicySection3BulletMap": "Mapa para escolher o local de uma consulta: ao abrir o mapa, o provedor de mapas recebe a área do mapa que você está vendo, só para desenhá-lo. O endereço que você busca e o endereço do ponto escolhido são obtidos pelo serviço de endereços do próprio sistema do celular. Nenhum dado de saúde é enviado, e o app não lê a sua localização (GPS).",
@@ -1030,6 +1030,14 @@
   "privacyPolicySection7Body": "Respeitamos a sua tranquilidade e atenção:",
   "privacyPolicySection7Bullet1": "Você tem liberdade total para desativar lembretes de hidratação ou notificações de dicas de bem-estar na aba de Configurações a qualquer momento.",
   "privacyPolicySection7Bullet2": "Avisos de segurança e recuperação de conta são de natureza estritamente transacional e protegidos.",
+  "privacyPolicySection8Title": "8. Sugestões com IA no diário",
+  "privacyPolicySection8Body": "Se você permitir, o app pode usar IA para sugerir opções do diário a partir do que você escreve em \"escrever o meu\" ou em \"descrever com minhas palavras\". É um recurso opcional e separado dos termos de uso.",
+  "privacyPolicySection8Bullet1": "O que é enviado: só o texto que você escreveu, sem dados que identifiquem você. Antes de enviar ao provedor de IA, o nosso servidor tira nomes e números longos; não vão nome, CPF, e-mail nem outros identificadores seus ou do perfil.",
+  "privacyPolicySection8Bullet2": "Para quê: sugerir opções que já existem no diário. Você confere e liga cada uma; nada é marcado sem você. A IA não avalia a sua saúde.",
+  "privacyPolicySection8Bullet3": "Onde: um provedor de IA em nuvem contratado processa o texto no Brasil, na região de São Paulo. O texto não fica guardado nos servidores do DualisCheckUp, não é registrado em logs e o provedor não pode usá-lo para treinar modelos.",
+  "privacyPolicySection8Bullet4": "Base legal: consentimento específico (LGPD Art. 11, I), separado dos termos de uso.",
+  "privacyPolicySection8Bullet5": "É opcional: sem ele, todo o resto do app funciona. Você pode revogar o consentimento a qualquer momento em Configurações.",
+  "privacyPolicySection8Bullet6": "O texto que você escolher manter como nota é guardado como qualquer outra nota do diário.",
   "privacyPolicyCtaQuestion": "Deseja exportar seus dados ou gerenciar sua conta agora?",
   "privacyPolicyCtaButton": "Ir para a Central de Privacidade",
   "onboardingIntendedUseNote": "O DualisCheckUp é um aplicativo de bem-estar e autoconhecimento. Não é um dispositivo médico e não substitui um profissional de saúde.",
@@ -3539,5 +3547,69 @@
   "aiConsentUpdated": "O texto da permissão foi atualizado. Leia de novo antes de permitir.",
   "@aiConsentUpdated": {
     "description": "The server consent version changed; the dialog is shown again"
+  },
+  "jv2DescribeTile": "Descrever com minhas palavras",
+  "@jv2DescribeTile": {
+    "description": "Journal tile that opens the free description sheet"
+  },
+  "jv2DescribeTitle": "Conte com suas palavras",
+  "@jv2DescribeTitle": {
+    "description": "Title of the free description sheet"
+  },
+  "jv2DescribeHint": "Escreva ou dite como você está. O app sugere opções do diário para você conferir.",
+  "@jv2DescribeHint": {
+    "description": "Hint under the free description title"
+  },
+  "jv2DescribeKeepNote": "Guardar este texto como nota",
+  "@jv2DescribeKeepNote": {
+    "description": "Switch: keep the description as the entry note"
+  },
+  "jv2DescribeSuggest": "Ver sugestões",
+  "@jv2DescribeSuggest": {
+    "description": "Button that asks the AI for options from the description"
+  },
+  "jv2DescribeSearching": "Procurando opções parecidas…",
+  "@jv2DescribeSearching": {
+    "description": "Shown while the suggestion request runs"
+  },
+  "jv2DescribeReviewTitle": "Opções parecidas com o que você contou",
+  "@jv2DescribeReviewTitle": {
+    "description": "Title of the suggestions review list"
+  },
+  "jv2DescribeReviewHint": "Nada fica marcado até você ligar. Depois você pode mudar tudo nas próximas telas.",
+  "@jv2DescribeReviewHint": {
+    "description": "Hint of the review list; nothing is pre-selected"
+  },
+  "jv2DescribeUse": "Usar as selecionadas",
+  "@jv2DescribeUse": {
+    "description": "Applies the options the person turned on"
+  },
+  "jv2DescribeManual": "Seguir sem sugestões",
+  "@jv2DescribeManual": {
+    "description": "Leaves the sheet and continues with the usual screens"
+  },
+  "jv2DescribeEmpty": "Não encontrei opções parecidas. Siga pelas telas normais.",
+  "@jv2DescribeEmpty": {
+    "description": "No option came back"
+  },
+  "jv2DescribeOffline": "Sem conexão. Seu texto não foi enviado; siga pelas telas normais.",
+  "@jv2DescribeOffline": {
+    "description": "Offline: nothing was sent"
+  },
+  "jv2DescribeFailed": "Não deu para buscar sugestões agora. Siga pelas telas normais.",
+  "@jv2DescribeFailed": {
+    "description": "Any other failure of the suggestion request"
+  },
+  "jv2DescribeBusy": "Muitas sugestões seguidas. Tente de novo daqui a pouco ou siga pelas telas normais.",
+  "@jv2DescribeBusy": {
+    "description": "Server answered 429"
+  },
+  "jv2DescribeProfileNotAllowed": "As sugestões com IA funcionam só nos perfis que você administra.",
+  "@jv2DescribeProfileNotAllowed": {
+    "description": "Server answered 403 AI_PROFILE_NOT_ALLOWED"
+  },
+  "jv2DescribeCancel": "Cancelar",
+  "@jv2DescribeCancel": {
+    "description": "Closes the free description sheet"
   }
 }

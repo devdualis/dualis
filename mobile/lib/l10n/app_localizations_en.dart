@@ -1125,7 +1125,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyPolicySection3Bullet1 =>
-      'Artificial intelligence: text from \"write my own\" may be sent to an AI provider only to suggest an existing diary option. The AI does not assess your health.';
+      'Artificial intelligence: text from \"write my own\" and \"describe in my own words\" may be sent to an AI provider only with your specific consent, and only to suggest existing journal options (section 8). The AI does not assess your health.';
 
   @override
   String get privacyPolicySection3Bullet2 =>
@@ -1221,6 +1221,37 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get privacyPolicySection7Bullet2 =>
       'Security and account recovery notices are strictly transactional and protected.';
+
+  @override
+  String get privacyPolicySection8Title => '8. AI suggestions in your journal';
+
+  @override
+  String get privacyPolicySection8Body =>
+      'If you allow it, the app can use AI to suggest journal options from what you write in \"write my own\" or \"describe in my own words\". This is optional and separate from the terms of use.';
+
+  @override
+  String get privacyPolicySection8Bullet1 =>
+      'What is sent: only the text you wrote, de-identified. Before it goes to the AI provider, our server removes names and long numbers; no name, ID number (CPF), email address or other identifiers of you or the profile are sent.';
+
+  @override
+  String get privacyPolicySection8Bullet2 =>
+      'Why: to suggest options that already exist in the journal. You review and turn on each one; nothing is selected without you. The AI does not assess your health.';
+
+  @override
+  String get privacyPolicySection8Bullet3 =>
+      'Where: a contracted cloud AI provider processes the text in Brazil, in the São Paulo region. The text is not stored on DualisCheckUp servers, is not logged, and the provider may not use it to train models.';
+
+  @override
+  String get privacyPolicySection8Bullet4 =>
+      'Legal basis: specific consent (LGPD Art. 11, I), separate from the terms of use.';
+
+  @override
+  String get privacyPolicySection8Bullet5 =>
+      'Optional: everything else in the app works without it. You can withdraw your consent at any time in Settings.';
+
+  @override
+  String get privacyPolicySection8Bullet6 =>
+      'Any text you choose to keep as a note is stored like any other journal note.';
 
   @override
   String get privacyPolicyCtaQuestion =>
@@ -5947,4 +5978,59 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aiConsentUpdated =>
       'The permission text was updated. Please read it again before allowing.';
+
+  @override
+  String get jv2DescribeTile => 'Describe in my own words';
+
+  @override
+  String get jv2DescribeTitle => 'Tell it in your own words';
+
+  @override
+  String get jv2DescribeHint =>
+      'Write or dictate how you feel. The app suggests journal options for you to check.';
+
+  @override
+  String get jv2DescribeKeepNote => 'Keep this text as a note';
+
+  @override
+  String get jv2DescribeSuggest => 'See suggestions';
+
+  @override
+  String get jv2DescribeSearching => 'Looking for similar options…';
+
+  @override
+  String get jv2DescribeReviewTitle => 'Options close to what you shared';
+
+  @override
+  String get jv2DescribeReviewHint =>
+      'Nothing is marked until you turn it on. You can change everything on the next screens.';
+
+  @override
+  String get jv2DescribeUse => 'Use the selected ones';
+
+  @override
+  String get jv2DescribeManual => 'Continue without suggestions';
+
+  @override
+  String get jv2DescribeEmpty =>
+      'No similar options found. Continue with the usual screens.';
+
+  @override
+  String get jv2DescribeOffline =>
+      'No connection. Your text was not sent; continue with the usual screens.';
+
+  @override
+  String get jv2DescribeFailed =>
+      'Could not look for suggestions right now. Continue with the usual screens.';
+
+  @override
+  String get jv2DescribeBusy =>
+      'Many suggestions in a row. Try again in a moment or continue with the usual screens.';
+
+  @override
+  String get jv2DescribeProfileNotAllowed =>
+      'AI suggestions only work on profiles you manage.';
+
+  @override
+  String get jv2DescribeCancel => 'Cancel';
 }

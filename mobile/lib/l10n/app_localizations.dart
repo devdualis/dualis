@@ -2047,7 +2047,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyPolicySection3Bullet1.
   ///
   /// In pt, this message translates to:
-  /// **'Inteligência artificial: o texto de \"escrever o meu\" pode ser enviado a um provedor de IA só para sugerir uma opção já existente do diário. A IA não avalia a sua saúde.'**
+  /// **'Inteligência artificial: o texto de \"escrever o meu\" e de \"descrever com minhas palavras\" pode ser enviado a um provedor de IA só com o seu consentimento específico, e só para sugerir opções já existentes do diário (seção 8). A IA não avalia a sua saúde.'**
   String get privacyPolicySection3Bullet1;
 
   /// No description provided for @privacyPolicySection3Bullet2.
@@ -2193,6 +2193,54 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Avisos de segurança e recuperação de conta são de natureza estritamente transacional e protegidos.'**
   String get privacyPolicySection7Bullet2;
+
+  /// No description provided for @privacyPolicySection8Title.
+  ///
+  /// In pt, this message translates to:
+  /// **'8. Sugestões com IA no diário'**
+  String get privacyPolicySection8Title;
+
+  /// No description provided for @privacyPolicySection8Body.
+  ///
+  /// In pt, this message translates to:
+  /// **'Se você permitir, o app pode usar IA para sugerir opções do diário a partir do que você escreve em \"escrever o meu\" ou em \"descrever com minhas palavras\". É um recurso opcional e separado dos termos de uso.'**
+  String get privacyPolicySection8Body;
+
+  /// No description provided for @privacyPolicySection8Bullet1.
+  ///
+  /// In pt, this message translates to:
+  /// **'O que é enviado: só o texto que você escreveu, sem dados que identifiquem você. Antes de enviar ao provedor de IA, o nosso servidor tira nomes e números longos; não vão nome, CPF, e-mail nem outros identificadores seus ou do perfil.'**
+  String get privacyPolicySection8Bullet1;
+
+  /// No description provided for @privacyPolicySection8Bullet2.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para quê: sugerir opções que já existem no diário. Você confere e liga cada uma; nada é marcado sem você. A IA não avalia a sua saúde.'**
+  String get privacyPolicySection8Bullet2;
+
+  /// No description provided for @privacyPolicySection8Bullet3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Onde: um provedor de IA em nuvem contratado processa o texto no Brasil, na região de São Paulo. O texto não fica guardado nos servidores do DualisCheckUp, não é registrado em logs e o provedor não pode usá-lo para treinar modelos.'**
+  String get privacyPolicySection8Bullet3;
+
+  /// No description provided for @privacyPolicySection8Bullet4.
+  ///
+  /// In pt, this message translates to:
+  /// **'Base legal: consentimento específico (LGPD Art. 11, I), separado dos termos de uso.'**
+  String get privacyPolicySection8Bullet4;
+
+  /// No description provided for @privacyPolicySection8Bullet5.
+  ///
+  /// In pt, this message translates to:
+  /// **'É opcional: sem ele, todo o resto do app funciona. Você pode revogar o consentimento a qualquer momento em Configurações.'**
+  String get privacyPolicySection8Bullet5;
+
+  /// No description provided for @privacyPolicySection8Bullet6.
+  ///
+  /// In pt, this message translates to:
+  /// **'O texto que você escolher manter como nota é guardado como qualquer outra nota do diário.'**
+  String get privacyPolicySection8Bullet6;
 
   /// No description provided for @privacyPolicyCtaQuestion.
   ///
@@ -10035,6 +10083,102 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'O texto da permissão foi atualizado. Leia de novo antes de permitir.'**
   String get aiConsentUpdated;
+
+  /// Journal tile that opens the free description sheet
+  ///
+  /// In pt, this message translates to:
+  /// **'Descrever com minhas palavras'**
+  String get jv2DescribeTile;
+
+  /// Title of the free description sheet
+  ///
+  /// In pt, this message translates to:
+  /// **'Conte com suas palavras'**
+  String get jv2DescribeTitle;
+
+  /// Hint under the free description title
+  ///
+  /// In pt, this message translates to:
+  /// **'Escreva ou dite como você está. O app sugere opções do diário para você conferir.'**
+  String get jv2DescribeHint;
+
+  /// Switch: keep the description as the entry note
+  ///
+  /// In pt, this message translates to:
+  /// **'Guardar este texto como nota'**
+  String get jv2DescribeKeepNote;
+
+  /// Button that asks the AI for options from the description
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver sugestões'**
+  String get jv2DescribeSuggest;
+
+  /// Shown while the suggestion request runs
+  ///
+  /// In pt, this message translates to:
+  /// **'Procurando opções parecidas…'**
+  String get jv2DescribeSearching;
+
+  /// Title of the suggestions review list
+  ///
+  /// In pt, this message translates to:
+  /// **'Opções parecidas com o que você contou'**
+  String get jv2DescribeReviewTitle;
+
+  /// Hint of the review list; nothing is pre-selected
+  ///
+  /// In pt, this message translates to:
+  /// **'Nada fica marcado até você ligar. Depois você pode mudar tudo nas próximas telas.'**
+  String get jv2DescribeReviewHint;
+
+  /// Applies the options the person turned on
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar as selecionadas'**
+  String get jv2DescribeUse;
+
+  /// Leaves the sheet and continues with the usual screens
+  ///
+  /// In pt, this message translates to:
+  /// **'Seguir sem sugestões'**
+  String get jv2DescribeManual;
+
+  /// No option came back
+  ///
+  /// In pt, this message translates to:
+  /// **'Não encontrei opções parecidas. Siga pelas telas normais.'**
+  String get jv2DescribeEmpty;
+
+  /// Offline: nothing was sent
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem conexão. Seu texto não foi enviado; siga pelas telas normais.'**
+  String get jv2DescribeOffline;
+
+  /// Any other failure of the suggestion request
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deu para buscar sugestões agora. Siga pelas telas normais.'**
+  String get jv2DescribeFailed;
+
+  /// Server answered 429
+  ///
+  /// In pt, this message translates to:
+  /// **'Muitas sugestões seguidas. Tente de novo daqui a pouco ou siga pelas telas normais.'**
+  String get jv2DescribeBusy;
+
+  /// Server answered 403 AI_PROFILE_NOT_ALLOWED
+  ///
+  /// In pt, this message translates to:
+  /// **'As sugestões com IA funcionam só nos perfis que você administra.'**
+  String get jv2DescribeProfileNotAllowed;
+
+  /// Closes the free description sheet
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar'**
+  String get jv2DescribeCancel;
 }
 
 class _AppLocalizationsDelegate
