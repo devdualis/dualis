@@ -34,6 +34,8 @@ class VoiceMatcher {
     // es
     'el', 'la', 'los', 'las', 'del', 'y', 'yo', 'estoy', 'siento', 'mi',
     'en', 'con', 'quiero', 'opcion',
+    // Words said before a value ("intensidade três", "level 3").
+    'intensidade', 'intensidad', 'intensity', 'nivel', 'level',
   };
 
   /// Lower case, no accents, no emoji or punctuation, single spaces.
@@ -112,6 +114,22 @@ class VoiceMatcher {
         for (final part in normalize(spoken).split(RegExp(r'\s(?:e|y|and|tambem|also)\s')))
           if (part.trim().isNotEmpty) part.trim(),
       ];
+
+  /// Splits a phrase that may answer several steps ("cansado e ansioso,
+  /// começou hoje, intensidade três"): first on punctuation and line breaks,
+  /// then on connectors. Each part comes back normalized.
+  static List<String> phraseSegments(String spoken) => [
+        for (final part in spoken.split(RegExp(r'[,;.!?\r\n]+'))) ...segments(part),
+      ];
+
+  /// Normalized words of [spoken].
+  static List<String> words(String spoken) => _words(normalize(spoken));
+
+  /// True for a word that carries no choice ("eu", "intensidade").
+  static bool isFiller(String word) => _filler.contains(normalize(word));
+
+  /// True when [segment] has no word that could pick anything ("eu estou").
+  static bool isFillerOnly(String segment) => words(segment).every(_filler.contains);
 
   /// Pipe-separated alias list from the translations ("continuar|próximo").
   static List<String> aliases(String pipeList) => [

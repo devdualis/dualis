@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -47,12 +48,16 @@ class VoiceTargetEntry {
   /// Only targets of the route on top (not the screens under it or behind
   /// a dialog), of the step on screen (not the one sliding out) and that
   /// can be tapped right now.
-  bool get isActive =>
-      onSelect != null &&
-      (route?.isCurrent ?? true) &&
-      (step == null || step == _registry.activeStep);
+  bool get isActive => onSelect != null && isOnStep;
 
-  void remove() => _registry._targets.remove(this);
+  /// On the route on top and the step on screen, enabled or not.
+  bool get isOnStep =>
+      (route?.isCurrent ?? true) && (step == null || step == _registry.activeStep);
+
+  void remove() {
+    _registry._targets.remove(this);
+    _registry._revision++;
+  }
 }
 
 /// A free-text field on screen; speech that is not a command goes there.
@@ -100,20 +105,48 @@ class VoiceTargetMatch {
   final String label;
 }
 
+/// A target matched by a span of words inside a longer phrase. The words
+/// before and after the span are left for other answers.
+class VoiceSpanMatch {
+  const VoiceSpanMatch(this.entry, this.score, this.label, this.before, this.after);
+  final VoiceTargetEntry entry;
+  final double score;
+  final String label;
+  final String before;
+  final String after;
+}
+
 /// Everything that can be picked by voice on the screen right now.
 class VoiceTargetRegistry {
   final List<VoiceTargetEntry> _targets = [];
   final List<VoiceTextSinkEntry> _sinks = [];
   final List<VoicePromptEntry> _prompts = [];
   int _order = 0;
+  int _revision = 0;
+
+  /// Longest span of words tried against one label.
+  static const int maxSpanWords = 10;
+
+  /// Changes whenever a target is added or removed, changes its labels,
+  /// action, role or step, or another step comes on screen. A phrase
+  /// carried to the next step waits for it to change.
+  int get revision => _revision;
+
+  Object? _activeStep;
 
   /// Token of the [VoiceStep] on screen. Targets of another step (one
   /// still animating out) do not answer.
-  Object? activeStep;
+  Object? get activeStep => _activeStep;
+  set activeStep(Object? token) {
+    if (token == _activeStep) return;
+    _activeStep = token;
+    _revision++;
+  }
 
   VoiceTargetEntry addTarget() {
     final entry = VoiceTargetEntry._(this, _order++);
     _targets.add(entry);
+    _revision++;
     return entry;
   }
 
@@ -168,10 +201,12 @@ class VoiceTargetRegistry {
   }
 
   /// Best target for [spoken]; on a tie the newest one wins (the screen
-  /// that just slid in, not the one sliding out).
-  VoiceTargetMatch? bestMatch(String spoken) {
+  /// that just slid in, not the one sliding out). [roles] limits the
+  /// targets that may answer.
+  VoiceTargetMatch? bestMatch(String spoken, {Set<VoiceTargetRole>? roles}) {
     VoiceTargetMatch? best;
     for (final t in activeTargets) {
+      if (roles != null && !roles.contains(t.role)) continue;
       for (final label in t.labels) {
         final s = VoiceMatcher.score(spoken, label);
         if (s < VoiceMatcher.threshold) continue;
@@ -183,6 +218,74 @@ class VoiceTargetRegistry {
       }
     }
     return best;
+  }
+
+  /// Best target of [roles] named by a run of consecutive words of
+  /// [segment] ("comecou hoje" inside "comecou hoje intensidade tres").
+  /// Highest score wins; on a tie the longer run, then the earlier one,
+  /// then the newest target. A run never ends on a filler word unless it
+  /// is the label as written. With [disabledAdvance], an advance button
+  /// that is still disabled also counts (it is enabled by the answer just
+  /// given, after the next frame).
+  VoiceSpanMatch? bestSpanMatch(
+    String segment,
+    Set<VoiceTargetRole> roles, {
+    bool disabledAdvance = false,
+  }) {
+    final words = VoiceMatcher.words(segment);
+    if (words.isEmpty) return null;
+    final targets = [
+      for (final t in _targets)
+        if (roles.contains(t.role) &&
+            (t.isActive ||
+                (disabledAdvance && t.role == VoiceTargetRole.advance && t.isOnStep)))
+          t,
+    ];
+    if (targets.isEmpty) return null;
+    VoiceTargetEntry? bestEntry;
+    var bestScore = 0.0;
+    var bestLabel = '';
+    var bestStart = 0;
+    var bestEnd = 0;
+    for (var start = 0; start < words.length; start++) {
+      for (var end = start + 1;
+          end <= words.length && end - start <= maxSpanWords;
+          end++) {
+        final window = words.sublist(start, end).join(' ');
+        final endsOnFiller = VoiceMatcher.isFiller(words[end - 1]);
+        for (final t in targets) {
+          for (final label in t.labels) {
+            if (endsOnFiller && VoiceMatcher.normalize(label) != window) continue;
+            final s = VoiceMatcher.score(window, label);
+            if (s < VoiceMatcher.threshold) continue;
+            final length = end - start;
+            final bestLength = bestEnd - bestStart;
+            final better = bestEntry == null ||
+                s > bestScore ||
+                (s == bestScore &&
+                    (length > bestLength ||
+                        (length == bestLength &&
+                            (start < bestStart ||
+                                (start == bestStart && t.order > bestEntry.order)))));
+            if (better) {
+              bestEntry = t;
+              bestScore = s;
+              bestLabel = label;
+              bestStart = start;
+              bestEnd = end;
+            }
+          }
+        }
+      }
+    }
+    if (bestEntry == null) return null;
+    return VoiceSpanMatch(
+      bestEntry,
+      bestScore,
+      bestLabel,
+      words.sublist(0, bestStart).join(' '),
+      words.sublist(bestEnd).join(' '),
+    );
   }
 }
 
@@ -250,9 +353,17 @@ class _VoiceTargetState extends State<VoiceTarget> {
     if (_entry == null && container.read(premiumProfilesEnabledProvider)) {
       _entry = container.read(voiceTargetRegistryProvider).addTarget();
     }
-    _entry
-      ?..route = ModalRoute.of(context)
-      ..step = VoiceStep.tokenOf(context);
+    final entry = _entry;
+    if (entry != null) {
+      final route = ModalRoute.of(context);
+      final step = VoiceStep.tokenOf(context);
+      if (route != entry.route || step != entry.step) {
+        entry
+          ..route = route
+          ..step = step;
+        entry._registry._revision++;
+      }
+    }
     _sync();
   }
 
@@ -265,11 +376,15 @@ class _VoiceTargetState extends State<VoiceTarget> {
   void _sync() {
     final entry = _entry;
     if (entry == null) return;
+    final changed = !listEquals(entry.labels, widget.labels) ||
+        entry.onSelect != widget.onSelect ||
+        entry.role != widget.role;
     entry
       ..labels = widget.labels
       ..onSelect = widget.onSelect
       ..role = widget.role
       ..spokenLabel = widget.spokenLabel;
+    if (changed) entry._registry._revision++;
   }
 
   @override

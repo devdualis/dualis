@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -113,12 +114,36 @@ class VoiceController extends Notifier<VoiceState> {
   /// Glass logged by "registrar água".
   static const int glassMl = 250;
 
+  /// Most steps one phrase may go through (multi-answer replays).
+  static const int maxCarryPasses = 12;
+
+  /// Roles a multi-answer phrase may pick: answers and "Continuar". Never
+  /// "Salvar", "Pular", "Voltar" or anything else.
+  static const Set<VoiceTargetRole> carryRoles = {
+    VoiceTargetRole.option,
+    VoiceTargetRole.choice,
+    VoiceTargetRole.advance,
+  };
+
+  /// Words of a multi-answer phrase not used yet, tried on the next step
+  /// once it is on screen. Bound to [_carryToken] and [_carrySession].
+  List<String> _carry = const [];
+  int _carryToken = 0;
+  int _carrySession = 0;
+  int _carryPasses = 0;
+  int _carryRevision = 0;
+  Object? _carryStep;
+  bool _carryAdvance = false;
+  final List<String> _carryLabels = [];
+  Completer<void>? _carryDone;
+
   @override
   VoiceState build() {
     // In the background nothing is read and the mic closes.
     final lifecycle = AppLifecycleListener(onPause: stop);
     ref.onDispose(() {
       _session++;
+      _clearCarry();
       lifecycle.dispose();
       _watchedRouter?.routerDelegate.removeListener(_onRouteChanged);
       // The output provider stops its own speech when it is disposed.
@@ -206,6 +231,7 @@ class VoiceController extends Notifier<VoiceState> {
   }
 
   Future<void> stop() async {
+    _clearCarry();
     await _stopSession();
     _dictationSink = null;
     _lastReadKey = null;
@@ -303,6 +329,10 @@ class VoiceController extends Notifier<VoiceState> {
   Future<void> _afterPhrase(String text) async {
     final session = _session;
     final keepGoing = await handlePhrase(text);
+    // A multi-answer phrase goes on through the next steps first, so the
+    // step it stops on is read once.
+    final carried = _carryDone;
+    if (carried != null) await carried.future;
     if (session != _session) return; // Mic tapped again meanwhile.
     if (keepGoing && state.handsFree && _onJournal && _misses < maxMisses) {
       // Hands-free check-in: listen again while the flow is on screen.
@@ -319,6 +349,8 @@ class VoiceController extends Notifier<VoiceState> {
   /// Acts on one finished phrase. Returns false when listening must stop
   /// (help opened, "parar", or dictation done). Public for tests.
   Future<bool> handlePhrase(String raw) async {
+    // A new phrase replaces whatever an earlier one left to say.
+    _clearCarry();
     final text = raw.trim();
     // On the help screen voice does nothing: no "voltar" may close it.
     if (_location == RoutePaths.emergency) return false;
@@ -363,6 +395,15 @@ class VoiceController extends Notifier<VoiceState> {
       _select(best);
       return true;
     }
+    // "Cansado e ansioso, começou hoje, intensidade três": one phrase that
+    // answers this step and the next ones (daily check-in only).
+    if (_onJournal) {
+      final segments = [
+        for (final s in VoiceMatcher.phraseSegments(text))
+          if (!VoiceMatcher.isFillerOnly(s)) s,
+      ];
+      if (segments.length > 1) return _multiAnswer(text, segments, previousMisses);
+    }
     // "Cansado e ansioso": several options in one answer.
     final parts = VoiceMatcher.segments(text);
     if (parts.length > 1) {
@@ -396,12 +437,206 @@ class VoiceController extends Notifier<VoiceState> {
 
   bool _leftJournalHandsFree() => state.handsFree && !_onJournal;
 
+  /// Several answers in one phrase. The step on screen takes what it can;
+  /// the rest waits for the next step. Nothing is pressed but answers and
+  /// "Continuar", and "Continuar" only after this step took an answer.
+  bool _multiAnswer(String text, List<String> segments, int previousMisses) {
+    final registry = ref.read(voiceTargetRegistryProvider);
+    final pass = _consumeStep(registry, segments);
+    if (pass.labels.isEmpty) {
+      // Nothing on this step was named: the whole phrase as before, but
+      // never "Salvar", "Pular" or "Voltar" (dictation into the note).
+      final match = registry.bestMatch(text, roles: carryRoles);
+      if (match != null) {
+        _select(match);
+        return true;
+      }
+      final textSink = registry.activeSink;
+      if (textSink != null) {
+        textSink.onText?.call(text);
+        _say(VoiceFeedbackKind.noted, text);
+        return true;
+      }
+      _misses = previousMisses + 1;
+      _say(VoiceFeedbackKind.notUnderstood, text);
+      return true;
+    }
+    _carryToken++;
+    _carrySession = _session;
+    _carryPasses = 1;
+    _carryDone = Completer<void>();
+    _afterPass(registry, pass);
+    return true;
+  }
+
+  /// Walks [segments] in order on the step on screen. Stops after an
+  /// answer that moves the flow on (a single choice, "Continuar").
+  _CarryPass _consumeStep(VoiceTargetRegistry registry, List<String> segments) {
+    final queue = [...segments];
+    final leftover = <String>[];
+    final labels = <String>[];
+    final picked = <VoiceTargetEntry>{};
+    var movedOn = false;
+    var advance = false;
+    while (queue.isNotEmpty) {
+      final segment = queue.removeAt(0);
+      if (movedOn) {
+        leftover.add(segment);
+        continue;
+      }
+      final match = registry.bestSpanMatch(segment, carryRoles, disabledAdvance: true);
+      if (match == null) {
+        leftover.add(segment);
+        continue;
+      }
+      final entry = match.entry;
+      if (entry.role == VoiceTargetRole.advance) {
+        movedOn = true;
+        // "Continuar" said after an answer is still disabled until the
+        // next frame: pressed then.
+        if (entry.onSelect == null) {
+          advance = true;
+        } else {
+          entry.onSelect!.call();
+          labels.add(match.label);
+        }
+      } else {
+        // The same option named twice is picked once, never toggled off.
+        if (picked.add(entry)) {
+          entry.onSelect?.call();
+          labels.add(match.label);
+        }
+        if (entry.role == VoiceTargetRole.choice) movedOn = true;
+      }
+      queue.insertAll(0, [
+        if (match.before.isNotEmpty && !VoiceMatcher.isFillerOnly(match.before)) match.before,
+        if (match.after.isNotEmpty && !VoiceMatcher.isFillerOnly(match.after)) match.after,
+      ]);
+    }
+    final implicit = !movedOn && leftover.isNotEmpty && labels.isNotEmpty;
+    return _CarryPass(
+      labels: labels,
+      leftover: leftover,
+      advance: advance || implicit,
+      implicitAdvance: implicit,
+    );
+  }
+
+  /// After a pass that took answers: say what was heard, then wait for the
+  /// next frame to go on with what is left.
+  void _afterPass(VoiceTargetRegistry registry, _CarryPass pass) {
+    _carryLabels.addAll(pass.labels);
+    if (_carryLabels.isNotEmpty) {
+      _say(VoiceFeedbackKind.heard, _carryLabels.join(', '));
+    }
+    _carry = pass.leftover;
+    if (_carry.isEmpty) {
+      _finishCarry();
+      return;
+    }
+    // Words that name "Salvar", "Pular", "Voltar" or another button of this
+    // step were meant for this step: never pressed, and the flow does not
+    // move on without the person.
+    if (pass.implicitAdvance && _namesOtherButton(registry, _carry)) {
+      _notUnderstoodCarry();
+      return;
+    }
+    _carryAdvance = pass.advance;
+    _carryStep = registry.activeStep;
+    _carryRevision = registry.revision;
+    _scheduleReplay();
+  }
+
+  bool _namesOtherButton(VoiceTargetRegistry registry, List<String> segments) {
+    const others = {
+      VoiceTargetRole.save,
+      VoiceTargetRole.skip,
+      VoiceTargetRole.back,
+      VoiceTargetRole.other,
+    };
+    return segments.any((s) => registry.bestSpanMatch(s, others) != null);
+  }
+
+  void _scheduleReplay() {
+    final token = _carryToken;
+    SchedulerBinding.instance
+      ..addPostFrameCallback((_) => _replay(token))
+      ..ensureVisualUpdate();
+  }
+
+  /// Next frame of a multi-answer phrase: press "Continuar" if the last
+  /// pass asked for it, or try what is left on the step now on screen.
+  void _replay(int token) {
+    if (token != _carryToken || _carryDone == null) return;
+    if (_carrySession != _session ||
+        !_onJournal ||
+        _locked ||
+        _location == RoutePaths.emergency) {
+      _clearCarry();
+      return;
+    }
+    final registry = ref.read(voiceTargetRegistryProvider);
+    if (_carryAdvance) {
+      _carryAdvance = false;
+      if (registry.activeStep == _carryStep) {
+        VoiceTargetEntry? advance;
+        for (final t in registry.activeTargets) {
+          if (t.role == VoiceTargetRole.advance) advance = t;
+        }
+        if (advance == null) {
+          _notUnderstoodCarry();
+          return;
+        }
+        advance.onSelect!.call();
+        _carryRevision = registry.revision;
+        _scheduleReplay();
+        return;
+      }
+    }
+    if (registry.revision == _carryRevision || _carryPasses >= maxCarryPasses) {
+      _notUnderstoodCarry();
+      return;
+    }
+    _carryPasses++;
+    final pass = _consumeStep(registry, _carry);
+    if (pass.labels.isEmpty && !pass.advance) {
+      _notUnderstoodCarry();
+      return;
+    }
+    _afterPass(registry, pass);
+  }
+
+  /// What is left of the phrase matched nothing: say so with those words.
+  /// What was already picked stays.
+  void _notUnderstoodCarry() {
+    _say(VoiceFeedbackKind.notUnderstood, _carry.join(', '));
+    _finishCarry();
+  }
+
+  void _finishCarry() {
+    _carry = const [];
+    _carryAdvance = false;
+    _carryStep = null;
+    _carryLabels.clear();
+    final done = _carryDone;
+    _carryDone = null;
+    if (done != null && !done.isCompleted) done.complete();
+  }
+
+  /// Drops a pending multi-answer phrase (new phrase, stop, help, lock,
+  /// sign-out, leaving the check-in).
+  void _clearCarry() {
+    _carryToken++;
+    _finishCarry();
+  }
+
   void _select(VoiceTargetMatch match) {
     match.entry.onSelect?.call();
     _say(VoiceFeedbackKind.heard, match.label);
   }
 
   void _openHelp() {
+    _clearCarry();
     if (_location != RoutePaths.emergency) _push(RoutePaths.emergency);
   }
 
@@ -462,3 +697,26 @@ class VoiceController extends Notifier<VoiceState> {
 
 final voiceControllerProvider =
     NotifierProvider<VoiceController, VoiceState>(VoiceController.new);
+
+/// What one step took from a multi-answer phrase.
+class _CarryPass {
+  const _CarryPass({
+    required this.labels,
+    required this.leftover,
+    required this.advance,
+    required this.implicitAdvance,
+  });
+
+  /// Labels of the answers picked, for the "heard" feedback.
+  final List<String> labels;
+
+  /// Segments not used, in phrase order.
+  final List<String> leftover;
+
+  /// "Continuar" is pressed on the next frame (said while still disabled,
+  /// or words are left after this step took its answers).
+  final bool advance;
+
+  /// [advance] comes from words left over, not from "Continuar" said.
+  final bool implicitAdvance;
+}
