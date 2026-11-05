@@ -556,3 +556,22 @@ export class SuggestJournalOptionDto {
 export class SuggestJournalOptionResponseDto {
   optionKey: string | null;
 }
+
+/** Longest free description accepted by the entry suggestion. */
+export const SUGGEST_ENTRY_TEXT_MAX = 1000;
+
+/** Free description of how the person feels, in their own words, for one area. */
+export class SuggestJournalEntryDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(SUGGEST_ENTRY_TEXT_MAX)
+  text!: string;
+
+  @IsIn(['emotional', 'physical'])
+  area!: 'emotional' | 'physical';
+}
+
+/** Zero to four existing option keys of the area; the person turns each one on in the app. */
+export class SuggestJournalEntryResponseDto {
+  optionKeys: string[];
+}

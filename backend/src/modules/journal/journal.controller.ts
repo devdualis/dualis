@@ -36,6 +36,8 @@ import {
   JournalEntriesResponseDto,
   JournalEntryDto,
   JournalSummaryDto,
+  SuggestJournalEntryDto,
+  SuggestJournalEntryResponseDto,
   SuggestJournalOptionDto,
   SuggestJournalOptionResponseDto,
   UpdateConditionDto,
@@ -117,6 +119,25 @@ export class JournalController {
     // In the handler, not a guard: pipes must answer 400 for an invalid body first.
     await this.aiConsent.assertAllowed(userIdOf(req), profile);
     return this.journalSuggest.suggest(dto.text, dto.kind, dto.branch, dto.bodySide, userIdOf(req));
+  }
+
+  /**
+   * Free description in the person's own words → up to four existing options of the area,
+   * which the person turns on one by one in the app. Same gates as suggest-option, in order:
+   * body validation (400), area shared (403), AI consent and own or dependent profile (403).
+   */
+  @Post('suggest-entry')
+  @HttpCode(HttpStatus.OK)
+  @ProfileAccess('write')
+  @validate(SuggestJournalEntryDto)
+  async suggestEntry(
+    @Request() req: any,
+    @ActiveProfile() profile: ProfileContext,
+    @Body() dto: SuggestJournalEntryDto,
+  ): Promise<SuggestJournalEntryResponseDto> {
+    assertCategory(profile, 'write', journalAreaCategory(dto.area));
+    await this.aiConsent.assertAllowed(userIdOf(req), profile);
+    return this.journalSuggest.suggestEntry(dto.text, dto.area, userIdOf(req));
   }
 
   @Get('summary')

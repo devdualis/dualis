@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import {
@@ -20,6 +20,28 @@ import {
 import { AuthService } from '../../src/modules/auth/auth.service';
 import { JournalService } from '../../src/modules/journal/journal.service';
 import { buildJournalSummary } from '../../src/modules/journal/journal-summary';
+import { GeminiService } from '../../src/common/ai/gemini.service';
+import {
+  AI_CONSENT_REQUIRED,
+  AI_PROFILE_NOT_ALLOWED,
+  AiConsentService,
+  aiConsentRequiredError,
+  aiProfileNotAllowedError,
+} from '../../src/modules/consents/ai-consent.service';
+import { CATEGORY_NOT_SHARED_MESSAGE, ProfileContext } from '../../src/modules/profiles/profile-context';
+import { SHARE_CATEGORIES } from '../../src/database/schema/shared-access-grants.schema';
+
+/** AI consent stand-in with the real error factories; `granted` is switched per test. */
+const aiConsent = {
+  granted: true,
+  assertAllowed: vi.fn(async (_userId: string, profile: ProfileContext) => {
+    if (profile.accessLevel !== 'OWNER') throw aiProfileNotAllowedError();
+    if (!aiConsent.granted) throw aiConsentRequiredError();
+  }),
+};
+const gemini = { isAvailable: true, generateJson: vi.fn() };
+/** CO_MANAGE grant that opens the emotional journal only (no physical_journal). */
+const SHARED_NO_PHYSICAL = 'c0000000-0000-4000-8000-000000000002';
 
 /** In-memory stand-in keyed by profile, like the real service's profile filter. */
 @Injectable()
@@ -132,9 +154,18 @@ describe('Journal v2 E2E (/v1/journal/entries, conditions, summary, /v1/house-ad
     const moduleRef: TestingModule = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(JournalService)
       .useClass(MockJournalService)
+      .overrideProvider(GeminiService)
+      .useValue(gemini)
+      .overrideProvider(AiConsentService)
+      .useValue(aiConsent)
       .compile();
 
-    stubProfileAccess(moduleRef, familyAccessFor(mockUserId));
+    const access = familyAccessFor(mockUserId);
+    access[mockUserId].profiles![SHARED_NO_PHYSICAL] = 'CO_MANAGE';
+    access[mockUserId].categories = {
+      [SHARED_NO_PHYSICAL]: SHARE_CATEGORIES.filter((c) => c !== 'physical_journal'),
+    };
+    stubProfileAccess(moduleRef, access);
 
     app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
     app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
@@ -352,5 +383,79 @@ describe('Journal v2 E2E (/v1/journal/entries, conditions, summary, /v1/house-ad
       const res = await app.inject({ method: 'GET', url: `/v1/${prefix}/history?days=500`, headers: auth() });
       expect(res.statusCode, prefix).toBe(400); // reached the legacy controller's validation (max 30)
     }
+  });
+  describe('POST /v1/journal/suggest-entry (free description)', () => {
+    const suggestEntry = (payload: unknown, profileId?: string) => post('/v1/journal/suggest-entry', payload, profileId);
+
+    beforeEach(() => {
+      aiConsent.granted = true;
+      aiConsent.assertAllowed.mockClear();
+      gemini.generateJson.mockReset();
+    });
+
+    it('requires authentication', async () => {
+      const res = await app.inject({ method: 'POST', url: '/v1/journal/suggest-entry', payload: { text: 'x', area: 'emotional' } });
+      expect(res.statusCode).toBe(401);
+    });
+
+    it('answers 400 for an invalid body before any consent check or model call', async () => {
+      for (const body of [
+        { text: 'um dia bom', area: 'positive' },
+        { area: 'emotional' },
+        { text: '', area: 'emotional' },
+        { text: 'a'.repeat(1001), area: 'emotional' },
+        { text: 'sem ânimo', area: 'emotional', extra: true },
+        { text: 'sem ânimo', area: 'emotional', branch: 'futuro.medo' },
+      ]) {
+        expect((await suggestEntry(body)).statusCode, JSON.stringify(body).slice(0, 60)).toBe(400);
+      }
+      expect(aiConsent.assertAllowed).not.toHaveBeenCalled();
+      expect(gemini.generateJson).not.toHaveBeenCalled();
+    });
+
+    it('answers 403 AI_CONSENT_REQUIRED without consent and never calls the model', async () => {
+      aiConsent.granted = false;
+      const res = await suggestEntry({ text: 'ando sem ânimo com tudo', area: 'emotional' });
+      expect(res.statusCode).toBe(403);
+      expect(res.json().code).toBe(AI_CONSENT_REQUIRED);
+      expect(gemini.generateJson).not.toHaveBeenCalled();
+    });
+
+    it('answers 403 AI_PROFILE_NOT_ALLOWED on a profile shared by another account', async () => {
+      const res = await suggestEntry({ text: 'ando sem ânimo com tudo', area: 'emotional' }, TEST_PROFILES.sharedCoManage);
+      expect(res.statusCode).toBe(403);
+      expect(res.json().code).toBe(AI_PROFILE_NOT_ALLOWED);
+      expect(gemini.generateJson).not.toHaveBeenCalled();
+    });
+
+    it('answers the category 403 when the shared profile does not open that area', async () => {
+      const res = await suggestEntry({ text: 'cabeça latejando', area: 'physical' }, SHARED_NO_PHYSICAL);
+      expect(res.statusCode).toBe(403);
+      expect(res.json().message).toBe(CATEGORY_NOT_SHARED_MESSAGE);
+      expect(aiConsent.assertAllowed).not.toHaveBeenCalled();
+      expect(gemini.generateJson).not.toHaveBeenCalled();
+    });
+
+    it('answers 200 with existing keys of the area only, on the own and the dependent profile', async () => {
+      gemini.generateJson.mockResolvedValue({
+        optionKeys: ['cabeca.pressao.latejando', 'futuro.medo.desanimo', 'inventada', 'cabeca.nuca.rigida', 'cabeca.custom'],
+      });
+      for (const profileId of [undefined, TEST_PROFILES.dependent]) {
+        const res = await suggestEntry({ text: 'Sou a Maria e minha cabeça lateja, nuca dura', area: 'physical' }, profileId);
+        expect(res.statusCode, res.body).toBe(200);
+        expect(res.json()).toEqual({ optionKeys: ['cabeca.pressao.latejando', 'cabeca.nuca.rigida'] });
+      }
+      const call = gemini.generateJson.mock.calls[0][0];
+      expect(call.prompt).toBe('Sou a [nome] e minha cabeça lateja, nuca dura');
+      expect(JSON.stringify(call)).not.toContain(mockUserId);
+      expect(aiConsent.assertAllowed).toHaveBeenCalledWith(mockUserId, expect.objectContaining({ accessLevel: 'OWNER' }));
+    });
+
+    it('a model failure still answers 200 with an empty list', async () => {
+      gemini.generateJson.mockRejectedValue(new Error('deadline exceeded'));
+      const res = await suggestEntry({ text: 'ando sem ânimo com tudo', area: 'emotional' });
+      expect(res.statusCode).toBe(200);
+      expect(res.json()).toEqual({ optionKeys: [] });
+    });
   });
 });
