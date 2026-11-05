@@ -418,6 +418,86 @@ void main() {
       expect(harness.remote.created, isEmpty);
     });
   });
+  group('Carried words pick only what they name exactly (CR-02)', () {
+    /// Says [phrase] on the options step; the flow must stop on intensity
+    /// with no level set and the words in "not understood".
+    Future<void> expectNoIntensity(WidgetTester tester, String phrase, String rest) async {
+      await pump(tester);
+      await toOptions(tester);
+
+      await say(tester, phrase);
+
+      final state = flow(tester);
+      expect(state.step, JournalStep.intensity);
+      expect(state.items.single.persistence, JournalKeys.persistenceHoje);
+      expect(state.items.single.intensity, isNull);
+      expect(feedback(tester)?.kind, VoiceFeedbackKind.notUnderstood);
+      expect(feedback(tester)?.text, rest);
+      expect(harness.remote.created, isEmpty);
+    }
+
+    testWidgets('"<option>, começou hoje muito cedo": "muito" is not "Muito forte"',
+        (tester) async {
+      await expectNoIntensity(tester, '$optionLabel, começou hoje muito cedo', 'muito cedo');
+    });
+
+    testWidgets('"<option>, começou hoje, forte": a level name is not a number', (tester) async {
+      await expectNoIntensity(tester, '$optionLabel, começou hoje, forte', 'forte');
+    });
+
+    testWidgets('"<option>, começou hoje, dor forte": no level from a description',
+        (tester) async {
+      await expectNoIntensity(tester, '$optionLabel, começou hoje, dor forte', 'dor forte');
+    });
+
+    testWidgets('"<option>, começou hoje, dois dias": a number inside other words is no level',
+        (tester) async {
+      await expectNoIntensity(tester, '$optionLabel, começou hoje, dois dias', 'dois dias');
+    });
+
+    testWidgets('"<option>, começou hoje, um pouco": "um" as an article is no level',
+        (tester) async {
+      await expectNoIntensity(tester, '$optionLabel, começou hoje, um pouco', 'um pouco');
+    });
+
+    testWidgets('"<option>, hoje, intensidade três": "hoje" alone is not "Começou hoje"',
+        (tester) async {
+      await pump(tester);
+      await toOptions(tester);
+
+      await say(tester, '$optionLabel, hoje, intensidade três');
+
+      final state = flow(tester);
+      expect(state.step, JournalStep.persistence);
+      expect(state.items.single.persistence, isNull);
+      expect(state.items.single.intensity, isNull);
+      expect(feedback(tester)?.kind, VoiceFeedbackKind.notUnderstood);
+    });
+
+    testWidgets('"<option>, começou hoje, 4" sets the number said', (tester) async {
+      await pump(tester);
+      await toOptions(tester);
+
+      await say(tester, '$optionLabel, começou hoje, 4');
+
+      final state = flow(tester);
+      expect(state.step, JournalStep.intensity);
+      expect(state.items.single.intensity, 4);
+    });
+
+    testWidgets('"hoje" said alone on the persistence step still answers it', (tester) async {
+      await pump(tester);
+      await toOptions(tester);
+      await say(tester, optionLabel);
+      await say(tester, 'continuar');
+      expect(flow(tester).step, JournalStep.persistence);
+
+      await say(tester, 'hoje');
+
+      expect(flow(tester).items.single.persistence, JournalKeys.persistenceHoje);
+    });
+  });
+
   group('Buttons that save (CR-01, WR-05)', () {
     const bp = UserCondition(
       id: 'c1',

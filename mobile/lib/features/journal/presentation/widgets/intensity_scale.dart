@@ -59,13 +59,21 @@ String intensityTitle(AppLocalizations l10n, int level) =>
 /// What can be said to pick [level]: the number, its words ("três") and
 /// its description ("Forte").
 List<String> intensityVoiceLabels(AppLocalizations l10n, int level, {required bool physical}) {
+  return [
+    ...intensityNumberLabels(l10n, level),
+    intensityName(l10n, level),
+    intensityText(l10n, level, physical: physical),
+  ];
+}
+
+/// What picks [level] in a phrase carried from an earlier step: only its
+/// number ("3", "três", "3 de 5"), never a word of its description.
+List<String> intensityNumberLabels(AppLocalizations l10n, int level) {
   final words = VoiceMatcher.aliases(l10n.voiceNumberWords);
   return [
     '$level',
     if (level <= words.length) ...words[level - 1].split(','),
     l10n.jv2IntensityLevel(level),
-    intensityName(l10n, level),
-    intensityText(l10n, level, physical: physical),
   ];
 }
 
@@ -100,6 +108,7 @@ class IntensityScaleFull extends StatelessWidget {
         for (var level = 1; level <= 5; level++)
           VoiceTarget(
             labels: intensityVoiceLabels(l10n, level, physical: physical),
+            carryLabels: intensityNumberLabels(l10n, level),
             onSelect: voice ? () => onChanged(level) : null,
             child: const SizedBox.shrink(),
           ),
@@ -182,6 +191,7 @@ class IntensityScaleCompact extends StatelessWidget {
         for (var level = 1; level <= 5; level++)
           VoiceTarget(
             labels: intensityVoiceLabels(l10n, level, physical: physical),
+            carryLabels: intensityNumberLabels(l10n, level),
             onSelect: voice ? () => onChanged(level) : null,
             child: const SizedBox.shrink(),
           ),

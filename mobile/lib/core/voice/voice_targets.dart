@@ -53,6 +53,12 @@ class VoiceTargetEntry {
   /// Read aloud instead of `labels.first` when set.
   String? spokenLabel;
 
+  /// Labels that count in a phrase carried over from an earlier step,
+  /// and only when one is all its segment says (filler words aside). The
+  /// intensity levels keep their numbers here, so "muito cedo" or "dois
+  /// dias" never set a level. Null: [labels], said exactly.
+  List<String>? carryLabels;
+
   /// Only targets of the route on top (not the screens under it or behind
   /// a dialog), of the step on screen (not the one sliding out) and that
   /// can be tapped right now.
@@ -235,10 +241,16 @@ class VoiceTargetRegistry {
   /// is the label as written. With [disabledAdvance], an advance button
   /// that is still disabled also counts (it is enabled by the answer just
   /// given, after the next frame).
+  ///
+  /// With [carried] (words left from an earlier step) only an exact label
+  /// counts, never part of one ("hoje" is not "Começou hoje", "muito" is
+  /// not "Muito forte"), and a target with [VoiceTargetEntry.carryLabels]
+  /// answers only to those, as a whole segment.
   VoiceSpanMatch? bestSpanMatch(
     String segment,
     Set<VoiceTargetRole> roles, {
     bool disabledAdvance = false,
+    bool carried = false,
   }) {
     final words = VoiceMatcher.words(segment);
     if (words.isEmpty) return null;
@@ -261,11 +273,15 @@ class VoiceTargetRegistry {
           end++) {
         final window = words.sublist(start, end).join(' ');
         final endsOnFiller = VoiceMatcher.isFiller(words[end - 1]);
+        final alone = words.sublist(0, start).every(VoiceMatcher.isFiller) &&
+            words.sublist(end).every(VoiceMatcher.isFiller);
         for (final t in targets) {
-          for (final label in t.labels) {
+          final strict = carried ? t.carryLabels : null;
+          if (strict != null && !alone) continue;
+          for (final label in strict ?? t.labels) {
             if (endsOnFiller && VoiceMatcher.normalize(label) != window) continue;
             final s = VoiceMatcher.score(window, label);
-            if (s < VoiceMatcher.threshold) continue;
+            if (s < VoiceMatcher.threshold || (carried && s < 1)) continue;
             final length = end - start;
             final bestLength = bestEnd - bestStart;
             final better = bestEntry == null ||
@@ -337,6 +353,7 @@ class VoiceTarget extends StatefulWidget {
     this.role = VoiceTargetRole.option,
     this.saves = false,
     this.spokenLabel,
+    this.carryLabels,
     required this.child,
   });
 
@@ -349,6 +366,9 @@ class VoiceTarget extends StatefulWidget {
 
   /// Read aloud instead of the first label (hands-free check-in).
   final String? spokenLabel;
+
+  /// The only labels that count in a carried multi-answer phrase.
+  final List<String>? carryLabels;
   final Widget child;
 
   @override
@@ -391,12 +411,14 @@ class _VoiceTargetState extends State<VoiceTarget> {
     final changed = !listEquals(entry.labels, widget.labels) ||
         entry.onSelect != widget.onSelect ||
         entry.role != widget.role ||
-        entry.saves != widget.saves;
+        entry.saves != widget.saves ||
+        !listEquals(entry.carryLabels, widget.carryLabels);
     entry
       ..labels = widget.labels
       ..onSelect = widget.onSelect
       ..role = widget.role
       ..saves = widget.saves
+      ..carryLabels = widget.carryLabels
       ..spokenLabel = widget.spokenLabel;
     if (changed) entry._registry._revision++;
   }

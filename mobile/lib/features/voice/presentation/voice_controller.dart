@@ -489,7 +489,13 @@ class VoiceController extends Notifier<VoiceState> {
 
   /// Walks [segments] in order on the step on screen. Stops after an
   /// answer that moves the flow on (a single choice, "Continuar").
-  _CarryPass _consumeStep(VoiceTargetRegistry registry, List<String> segments) {
+  /// [carried]: words left from an earlier step, which only pick what they
+  /// name exactly (an intensity only by its number).
+  _CarryPass _consumeStep(
+    VoiceTargetRegistry registry,
+    List<String> segments, {
+    bool carried = false,
+  }) {
     final queue = [...segments];
     final leftover = <String>[];
     final labels = <String>[];
@@ -502,7 +508,12 @@ class VoiceController extends Notifier<VoiceState> {
         leftover.add(segment);
         continue;
       }
-      final match = registry.bestSpanMatch(segment, carryRoles, disabledAdvance: true);
+      final match = registry.bestSpanMatch(
+        segment,
+        carryRoles,
+        disabledAdvance: true,
+        carried: carried,
+      );
       if (match == null) {
         leftover.add(segment);
         continue;
@@ -616,7 +627,7 @@ class VoiceController extends Notifier<VoiceState> {
       return;
     }
     _carryPasses++;
-    final pass = _consumeStep(registry, _carry);
+    final pass = _consumeStep(registry, _carry, carried: true);
     if (pass.labels.isEmpty && !pass.advance) {
       _notUnderstoodCarry();
       return;
