@@ -13,9 +13,12 @@ import 'package:dualis_mobile/features/auth/data/auth_repository_impl.dart';
 import 'package:dualis_mobile/features/auth/domain/auth_state.dart';
 import 'package:dualis_mobile/features/auth/domain/user_profile.dart';
 import 'package:dualis_mobile/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:dualis_mobile/features/consent/data/ai_consent_repository.dart';
 import 'package:dualis_mobile/features/settings/presentation/screens/settings_screen.dart';
 import 'package:dualis_mobile/features/settings/presentation/widgets/avatar_selector_sheet.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
+
+import '../consent/fake_ai_consent_repository.dart';
 
 class FakeSecureStorageService extends SecureStorageService {
   String? persistedAccessToken;
@@ -182,6 +185,7 @@ List<Override> _settingsOverrides({
   required UserProfile user,
   FakeSecureStorageService? storage,
   bool premium = false,
+  AiConsentRepository? aiConsent,
 }) {
   final authState = AuthState(
     isAuthenticated: true,
@@ -195,6 +199,8 @@ List<Override> _settingsOverrides({
     premiumProfilesEnabledProvider.overrideWithValue(premium),
     // Keeps the Premium-only BiometricLockTile off the device channel.
     biometricSupportedProvider.overrideWith((ref) async => false),
+    // Keeps the AI consent tile off the network.
+    aiConsentRepositoryProvider.overrideWithValue(aiConsent ?? FakeAiConsentRepository()),
   ];
 }
 
@@ -203,6 +209,7 @@ Widget createSettingsTestApp({
   required UserProfile user,
   FakeSecureStorageService? storage,
   bool premium = false,
+  AiConsentRepository? aiConsent,
 }) {
   return ProviderScope(
     overrides: _settingsOverrides(
@@ -210,6 +217,7 @@ Widget createSettingsTestApp({
       user: user,
       storage: storage,
       premium: premium,
+      aiConsent: aiConsent,
     ),
     child: const MaterialApp(
       localizationsDelegates: [
@@ -236,6 +244,7 @@ Widget createSettingsRouterTestApp({
   required UserProfile user,
   FakeSecureStorageService? storage,
   bool premium = false,
+  AiConsentRepository? aiConsent,
 }) {
   final router = GoRouter(
     initialLocation: RoutePaths.settings,
@@ -265,6 +274,7 @@ Widget createSettingsRouterTestApp({
       user: user,
       storage: storage,
       premium: premium,
+      aiConsent: aiConsent,
     ),
     child: MaterialApp.router(
       routerConfig: router,

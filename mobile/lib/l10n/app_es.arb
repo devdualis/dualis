@@ -1674,5 +1674,16 @@
   "loginPremiumLabel": "Premium",
   "settingsPlanFree": "Plan: Gratuito",
   "settingsPlanPremium": "Plan: Premium",
-  "settingsPlanSeePremium": "Ver Premium"
+  "settingsPlanSeePremium": "Ver Premium",
+  "aiConsentTitle": "Sugerencias con IA en el diario",
+  "aiConsentIntro": "Para sugerir opciones del diario a partir de lo que escribas, la app envía ese texto a Google (Vertex AI, modelo Gemini). El procesamiento ocurre en Brasil, en la región de São Paulo (southamerica-east1).",
+  "aiConsentWhatIsSent": "Solo va el texto. Antes de enviarlo, la app quita nombres, CPF, correos, teléfonos y otros números. No se envía ningún identificador tuyo ni del perfil.",
+  "aiConsentNoTraining": "El texto no se guarda en nuestros servidores y no se usa para entrenar modelos.",
+  "aiConsentOnlyOptions": "La IA solo señala opciones que ya existen en el diario. Tú revisas y eliges; nada se marca sin ti. La IA no evalúa tu salud.",
+  "aiConsentOptional": "Es opcional: sin permitirlo, todo lo demás de la app funciona. Puedes desactivarlo cuando quieras en Ajustes. Base legal: consentimiento específico (LGPD, art. 11, I).",
+  "aiConsentDecline": "Ahora no",
+  "aiConsentAccept": "Permitir",
+  "aiConsentTileTitle": "Sugerencias con IA en el diario",
+  "aiConsentTileOn": "Permitido el {date}",
+  "aiConsentTileOff": "Desactivado. No se envía ningún texto a la IA."
 }

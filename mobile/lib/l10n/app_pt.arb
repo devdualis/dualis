@@ -3458,5 +3458,54 @@
   "settingsPlanSeePremium": "Ver Premium",
   "@settingsPlanSeePremium": {
     "description": "Link from the Free plan row to the Premium page"
+  },
+  "aiConsentTitle": "Sugestões com IA no diário",
+  "@aiConsentTitle": {
+    "description": "AI-processing consent dialog title (LGPD Art. 11, I)"
+  },
+  "aiConsentIntro": "Para sugerir opções do diário a partir do que você escrever, o app envia esse texto ao Google (Vertex AI, modelo Gemini). O processamento acontece no Brasil, na região de São Paulo (southamerica-east1).",
+  "@aiConsentIntro": {
+    "description": "AI consent: provider and region"
+  },
+  "aiConsentWhatIsSent": "Vai só o texto. Antes de enviar, o app tira nomes, CPF, e-mails, telefones e outros números. Nenhum identificador seu ou do perfil é enviado.",
+  "@aiConsentWhatIsSent": {
+    "description": "AI consent: what is sent"
+  },
+  "aiConsentNoTraining": "O texto não fica guardado nos nossos servidores e não é usado para treinar modelos.",
+  "@aiConsentNoTraining": {
+    "description": "AI consent: not stored, not used for training"
+  },
+  "aiConsentOnlyOptions": "A IA só aponta opções que já existem no diário. Você confere e escolhe; nada é marcado sem você. A IA não avalia a sua saúde.",
+  "@aiConsentOnlyOptions": {
+    "description": "AI consent: what the AI does"
+  },
+  "aiConsentOptional": "É opcional: sem permitir, todo o resto do app funciona. Você pode desligar quando quiser em Configurações. Base legal: consentimento específico (LGPD, art. 11, I).",
+  "@aiConsentOptional": {
+    "description": "AI consent: optional, revocable, legal basis"
+  },
+  "aiConsentDecline": "Agora não",
+  "@aiConsentDecline": {
+    "description": "AI consent dialog: decline button"
+  },
+  "aiConsentAccept": "Permitir",
+  "@aiConsentAccept": {
+    "description": "AI consent dialog: accept button"
+  },
+  "aiConsentTileTitle": "Sugestões com IA no diário",
+  "@aiConsentTileTitle": {
+    "description": "Settings: AI consent switch title"
+  },
+  "aiConsentTileOn": "Permitido em {date}",
+  "@aiConsentTileOn": {
+    "description": "Settings: AI consent granted, with the date (dd/MM/yyyy)",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "aiConsentTileOff": "Desligado. Nenhum texto é enviado à IA.",
+  "@aiConsentTileOff": {
+    "description": "Settings: AI consent off"
   }
 }

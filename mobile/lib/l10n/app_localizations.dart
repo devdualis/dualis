@@ -9921,6 +9921,72 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ver Premium'**
   String get settingsPlanSeePremium;
+
+  /// AI-processing consent dialog title (LGPD Art. 11, I)
+  ///
+  /// In pt, this message translates to:
+  /// **'Sugestões com IA no diário'**
+  String get aiConsentTitle;
+
+  /// AI consent: provider and region
+  ///
+  /// In pt, this message translates to:
+  /// **'Para sugerir opções do diário a partir do que você escrever, o app envia esse texto ao Google (Vertex AI, modelo Gemini). O processamento acontece no Brasil, na região de São Paulo (southamerica-east1).'**
+  String get aiConsentIntro;
+
+  /// AI consent: what is sent
+  ///
+  /// In pt, this message translates to:
+  /// **'Vai só o texto. Antes de enviar, o app tira nomes, CPF, e-mails, telefones e outros números. Nenhum identificador seu ou do perfil é enviado.'**
+  String get aiConsentWhatIsSent;
+
+  /// AI consent: not stored, not used for training
+  ///
+  /// In pt, this message translates to:
+  /// **'O texto não fica guardado nos nossos servidores e não é usado para treinar modelos.'**
+  String get aiConsentNoTraining;
+
+  /// AI consent: what the AI does
+  ///
+  /// In pt, this message translates to:
+  /// **'A IA só aponta opções que já existem no diário. Você confere e escolhe; nada é marcado sem você. A IA não avalia a sua saúde.'**
+  String get aiConsentOnlyOptions;
+
+  /// AI consent: optional, revocable, legal basis
+  ///
+  /// In pt, this message translates to:
+  /// **'É opcional: sem permitir, todo o resto do app funciona. Você pode desligar quando quiser em Configurações. Base legal: consentimento específico (LGPD, art. 11, I).'**
+  String get aiConsentOptional;
+
+  /// AI consent dialog: decline button
+  ///
+  /// In pt, this message translates to:
+  /// **'Agora não'**
+  String get aiConsentDecline;
+
+  /// AI consent dialog: accept button
+  ///
+  /// In pt, this message translates to:
+  /// **'Permitir'**
+  String get aiConsentAccept;
+
+  /// Settings: AI consent switch title
+  ///
+  /// In pt, this message translates to:
+  /// **'Sugestões com IA no diário'**
+  String get aiConsentTileTitle;
+
+  /// Settings: AI consent granted, with the date (dd/MM/yyyy)
+  ///
+  /// In pt, this message translates to:
+  /// **'Permitido em {date}'**
+  String aiConsentTileOn(String date);
+
+  /// Settings: AI consent off
+  ///
+  /// In pt, this message translates to:
+  /// **'Desligado. Nenhum texto é enviado à IA.'**
+  String get aiConsentTileOff;
 }
 
 class _AppLocalizationsDelegate

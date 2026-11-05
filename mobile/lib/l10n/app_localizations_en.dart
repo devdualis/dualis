@@ -5879,4 +5879,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsPlanSeePremium => 'See Premium';
+
+  @override
+  String get aiConsentTitle => 'AI suggestions in the journal';
+
+  @override
+  String get aiConsentIntro =>
+      'To suggest journal options from what you write, the app sends that text to Google (Vertex AI, Gemini model). Processing happens in Brazil, in the São Paulo region (southamerica-east1).';
+
+  @override
+  String get aiConsentWhatIsSent =>
+      'Only the text is sent. Before sending it, the app removes names, CPF, e-mails, phone numbers and other numbers. No identifier of yours or of the profile is sent.';
+
+  @override
+  String get aiConsentNoTraining =>
+      'The text is not kept on our servers and is not used to train models.';
+
+  @override
+  String get aiConsentOnlyOptions =>
+      'The AI only points to options that already exist in the journal. You check and choose; nothing is marked without you. The AI does not assess your health.';
+
+  @override
+  String get aiConsentOptional =>
+      'It is optional: without it, everything else in the app works. You can turn it off at any time in Settings. Legal basis: specific consent (LGPD, Art. 11, I).';
+
+  @override
+  String get aiConsentDecline => 'Not now';
+
+  @override
+  String get aiConsentAccept => 'Allow';
+
+  @override
+  String get aiConsentTileTitle => 'AI suggestions in the journal';
+
+  @override
+  String aiConsentTileOn(String date) {
+    return 'Allowed on $date';
+  }
+
+  @override
+  String get aiConsentTileOff => 'Off. No text is sent to the AI.';
 }

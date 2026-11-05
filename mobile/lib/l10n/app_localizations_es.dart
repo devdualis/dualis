@@ -5897,4 +5897,45 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsPlanSeePremium => 'Ver Premium';
+
+  @override
+  String get aiConsentTitle => 'Sugerencias con IA en el diario';
+
+  @override
+  String get aiConsentIntro =>
+      'Para sugerir opciones del diario a partir de lo que escribas, la app envía ese texto a Google (Vertex AI, modelo Gemini). El procesamiento ocurre en Brasil, en la región de São Paulo (southamerica-east1).';
+
+  @override
+  String get aiConsentWhatIsSent =>
+      'Solo va el texto. Antes de enviarlo, la app quita nombres, CPF, correos, teléfonos y otros números. No se envía ningún identificador tuyo ni del perfil.';
+
+  @override
+  String get aiConsentNoTraining =>
+      'El texto no se guarda en nuestros servidores y no se usa para entrenar modelos.';
+
+  @override
+  String get aiConsentOnlyOptions =>
+      'La IA solo señala opciones que ya existen en el diario. Tú revisas y eliges; nada se marca sin ti. La IA no evalúa tu salud.';
+
+  @override
+  String get aiConsentOptional =>
+      'Es opcional: sin permitirlo, todo lo demás de la app funciona. Puedes desactivarlo cuando quieras en Ajustes. Base legal: consentimiento específico (LGPD, art. 11, I).';
+
+  @override
+  String get aiConsentDecline => 'Ahora no';
+
+  @override
+  String get aiConsentAccept => 'Permitir';
+
+  @override
+  String get aiConsentTileTitle => 'Sugerencias con IA en el diario';
+
+  @override
+  String aiConsentTileOn(String date) {
+    return 'Permitido el $date';
+  }
+
+  @override
+  String get aiConsentTileOff =>
+      'Desactivado. No se envía ningún texto a la IA.';
 }

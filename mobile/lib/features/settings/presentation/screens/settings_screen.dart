@@ -14,6 +14,7 @@ import '../../../../core/utils/error_message_resolver.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../l10n/locale_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../consent/presentation/ai_consent_widgets.dart';
 import '../widgets/avatar_selector_sheet.dart';
 import '../widgets/biometric_lock_tile.dart';
 import '../widgets/voice_read_aloud_tile.dart';
@@ -1102,6 +1103,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       // Premium only; render nothing on Free builds.
                       const BiometricLockTile(),
                       const VoiceReadAloudTile(),
+                      // Every signed-in person: LGPD Art. 11, I choice.
+                      const AiConsentTile(),
                       ListTile(
                         key: const Key('settings_privacy_tile'),
                         leading: const Icon(Icons.shield_outlined, color: AppColors.clinicalTeal),
