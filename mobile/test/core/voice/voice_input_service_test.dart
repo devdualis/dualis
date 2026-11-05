@@ -95,4 +95,13 @@ void main() {
 
     expect(options.localeId, 'es_MX');
   });
+
+  test('Android commands wait for the recognizer, not a 3 s silence timer', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+
+    final options = await listenOnce(SpeechToTextVoiceInputService(speech: speech));
+
+    expect(options.pauseFor, isNull);
+  });
 }

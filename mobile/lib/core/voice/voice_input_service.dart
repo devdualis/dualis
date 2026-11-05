@@ -109,6 +109,16 @@ class SpeechToTextVoiceInputService implements VoiceInputService {
     return _localeId;
   }
 
+  /// Silence that ends a session. The plugin's timer also runs before the
+  /// first word, and Android needs 1-2 s just to notice speech, so a 3 s
+  /// limit cut people off before they spoke. For commands on Android the
+  /// recognizer's own end-of-speech detection decides instead.
+  static Duration? _pauseFor(bool dictation) {
+    if (dictation) return const Duration(seconds: 4);
+    if (defaultTargetPlatform == TargetPlatform.android) return null;
+    return const Duration(seconds: 3);
+  }
+
   @override
   Future<void> listen({
     required String languageCode,
@@ -135,7 +145,7 @@ class SpeechToTextVoiceInputService implements VoiceInputService {
           cancelOnError: true,
           listenMode: dictation ? ListenMode.dictation : ListenMode.confirmation,
           listenFor: Duration(seconds: dictation ? 60 : 20),
-          pauseFor: Duration(seconds: dictation ? 4 : 3),
+          pauseFor: _pauseFor(dictation),
         ),
       );
     } catch (_) {
