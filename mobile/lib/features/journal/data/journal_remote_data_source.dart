@@ -16,7 +16,12 @@ class JournalEndpoints {
   static String conditionReadings(String id) =>
       '/v1/journal/conditions/$id/readings';
   static const String suggestOption = '/v1/journal/suggest-option';
+  static const String suggestEntry = '/v1/journal/suggest-entry';
 }
+
+/// How long the app waits for free-description suggestions before it
+/// falls back to the normal steps.
+const Duration suggestEntryTimeout = Duration(seconds: 8);
 
 final journalRemoteDataSourceProvider = Provider<JournalRemoteDataSource>((
   ref,
@@ -170,5 +175,29 @@ class JournalRemoteDataSource {
     final key = _map(response.data)['optionKey'];
     if (key is! String || key.isEmpty) return null;
     return key;
+  }
+
+  /// Existing option keys of [area] (`emotional` | `physical`) for a free
+  /// description, at most 4. Nothing else comes back. The person reviews
+  /// every key before anything is selected.
+  Future<List<String>> suggestEntry({
+    required String text,
+    required String area,
+  }) async {
+    final options = await _options();
+    final response = await _apiClient.post(
+      JournalEndpoints.suggestEntry,
+      data: {'text': text, 'area': area},
+      options: options.copyWith(
+        sendTimeout: suggestEntryTimeout,
+        receiveTimeout: suggestEntryTimeout,
+      ),
+    );
+    final raw = _map(response.data)['optionKeys'];
+    if (raw is! List) return const [];
+    return [
+      for (final key in raw)
+        if (key is String && key.isNotEmpty) key,
+    ];
   }
 }

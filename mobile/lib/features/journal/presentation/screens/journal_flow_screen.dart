@@ -26,6 +26,7 @@ import '../journal_item_text.dart';
 import '../journal_labels.dart';
 import '../widgets/body_region_map.dart';
 import '../widgets/condition_readings_card.dart';
+import '../widgets/describe_sheet.dart';
 import '../widgets/intensity_scale.dart';
 
 /// Starting point when the flow is opened from a Home card.
@@ -517,8 +518,39 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             label: JournalLabels.root(l10n, time),
             onTap: () => _controller.chooseTime(time),
           ),
+        if (describeAvailable(ref)) _describeTile(l10n),
       ],
     );
+  }
+
+  /// "Descrever com minhas palavras" (Premium): an action row like
+  /// "Escrever o meu".
+  Widget _describeTile(AppLocalizations l10n) {
+    final isMale = _isMale;
+    return _ChoiceTile(
+      key: const Key('jv2_describe'),
+      emoji: '💬',
+      label: l10n.jv2DescribeTile,
+      accent: true,
+      voiceRole: VoiceTargetRole.other,
+      onTap: () => _describe(isMale: isMale),
+    );
+  }
+
+  /// Opens the free description. Only the options the person turned on
+  /// reach the entry; the text becomes the note only when they asked.
+  Future<void> _describe({required bool isMale}) async {
+    final area = ref.read(journalFlowControllerProvider).area;
+    final result = await showDescribeSheet(context, area: area, isMale: isMale);
+    if (!mounted || result == null) return;
+    if (result.keepAsNote && result.text.isNotEmpty) {
+      final note = JournalKeys.limitChars(result.text, describeTextMaxLength);
+      _noteController.text = note;
+      _controller.setNote(note);
+    }
+    if (result.keys.isNotEmpty) {
+      _controller.applySuggestedOptions(result.keys, isMale: isMale);
+    }
   }
 
   /// Screen 2: the branches of the time picked on screen 1.

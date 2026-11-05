@@ -304,6 +304,28 @@ class JournalRepository {
     }
   }
 
+  /// Option keys suggested for a free description of [area]
+  /// (`emotional` | `physical`), as the server sent them. The caller checks
+  /// them again against the local tree before showing any.
+  ///
+  /// Throws [AiSuggestException] in every failure case, including offline
+  /// (no request is sent then).
+  Future<List<String>> suggestEntry({
+    required String text,
+    required String area,
+  }) async {
+    if (!await _isOnline()) {
+      throw const AiSuggestException(AiSuggestFailure.offline);
+    }
+    try {
+      return await _remote.suggestEntry(text: text, area: area);
+    } on DioException catch (e) {
+      throw AiSuggestException(aiSuggestFailureOf(e));
+    } catch (_) {
+      throw const AiSuggestException(AiSuggestFailure.unavailable);
+    }
+  }
+
   /// 409 is success only when the server returns the existing entry
   /// (idempotent replay of the same `clientId`).
   bool _isIdempotentReplay(DioException e) {

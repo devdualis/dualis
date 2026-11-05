@@ -42,6 +42,13 @@ class FakeJournalRemote implements JournalRemoteDataSource {
   DioException? suggestOptionError;
   final List<Map<String, String?>> suggestRequests = [];
 
+  /// Keys answered by [suggestEntry] (free description).
+  List<String> suggestedEntryKeys = const [];
+
+  /// Thrown by [suggestEntry] after recording the request.
+  Object? suggestEntryError;
+  final List<Map<String, String>> suggestEntryRequests = [];
+
   FakeJournalRemote({this.conditions = const []});
 
   DioException _offline() => DioException(
@@ -144,6 +151,18 @@ class FakeJournalRemote implements JournalRemoteDataSource {
     final error = suggestOptionError;
     if (error != null) throw error;
     return suggestedOptionKey;
+  }
+
+  @override
+  Future<List<String>> suggestEntry({
+    required String text,
+    required String area,
+  }) async {
+    if (fail) throw _offline();
+    suggestEntryRequests.add({'text': text, 'area': area});
+    final error = suggestEntryError;
+    if (error != null) throw error;
+    return suggestedEntryKeys;
   }
 }
 
@@ -248,6 +267,27 @@ DioException suggestForbidden(String code) {
       data: {'statusCode': 403, 'error': 'Forbidden', 'code': code},
     ),
     type: DioExceptionType.badResponse,
+  );
+}
+
+/// An error answer from `POST /v1/journal/suggest-entry`: [status] with
+/// an optional stable [code], or a Dio [type] with no answer (timeouts).
+DioException suggestEntryFailure({
+  int? status,
+  String? code,
+  DioExceptionType type = DioExceptionType.badResponse,
+}) {
+  final request = RequestOptions(path: JournalEndpoints.suggestEntry);
+  return DioException(
+    requestOptions: request,
+    response: status == null
+        ? null
+        : Response(
+            requestOptions: request,
+            statusCode: status,
+            data: {'statusCode': status, if (code != null) 'code': code},
+          ),
+    type: type,
   );
 }
 

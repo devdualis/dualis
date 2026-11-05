@@ -8,6 +8,7 @@ import '../../data/journal_repository.dart';
 import '../../domain/journal_keys.dart';
 import '../../domain/journal_models.dart';
 import '../journal_labels.dart';
+import '../widgets/body_region_map.dart';
 import 'journal_flow_state.dart';
 
 /// Source of randomness for transition phrases; overridden in tests.
@@ -21,6 +22,60 @@ final lastPhraseProvider = Provider<Map<String, int>>((ref) => {});
 final userConditionsProvider = FutureProvider.autoDispose<List<UserCondition>>(
   (ref) => ref.watch(journalRepositoryProvider).conditions(),
 );
+
+/// Most keys one free description may turn into (same cap as the server).
+const int describeMaxKeys = 4;
+
+/// The sides a suggested physical [optionKey] can be recorded on: `[null]`
+/// for a whole-body area, otherwise the sides whose body map shows the
+/// region with that branch. Empty when the key cannot be recorded.
+List<String?> describeKeySides(String optionKey, {required bool isMale}) {
+  final parts = optionKey.split('.');
+  if (parts.length != 3) return const [];
+  final region = parts[0];
+  final branch = parts[1];
+  final option = parts[2];
+  if (!JournalKeys.physicalTree.containsKey(region)) return const [];
+  if (JournalKeys.isWholeBody(region)) {
+    final options = JournalKeys.branchesFor(region, null, isMale: isMale)[branch];
+    return options != null && options.contains(option) ? const [null] : const [];
+  }
+  return [
+    for (final side in [JournalKeys.sideFront, JournalKeys.sideBack])
+      if (BodyRegionMap.regionsFor(side).contains(region) &&
+          (JournalKeys.branchesFor(region, side, isMale: isMale)[branch]
+                  ?.contains(option) ??
+              false))
+        side,
+  ];
+}
+
+/// The keys of a free-description suggestion the flow may use, in the
+/// server's order: existing option keys of [area] only, no custom keys, no
+/// menstrual keys on male profiles, no repeats, at most [describeMaxKeys].
+/// The server answer is untrusted; the review list and
+/// [JournalFlowController.applySuggestedOptions] both use this filter.
+List<String> describeUsableKeys(
+  Iterable<String> keys, {
+  required JournalArea area,
+  required bool isMale,
+}) {
+  final valid = JournalKeys.allOptionKeys;
+  final result = <String>[];
+  for (final key in keys) {
+    if (result.length >= describeMaxKeys) break;
+    if (result.contains(key)) continue;
+    if (!valid.contains(key) || JournalKeys.isCustomKey(key)) continue;
+    final root = JournalKeys.rootOf(key);
+    if (area == JournalArea.emotional) {
+      if (!JournalKeys.emotionalTree.containsKey(root)) continue;
+    } else {
+      if (describeKeySides(key, isMale: isMale).isEmpty) continue;
+    }
+    result.add(key);
+  }
+  return result;
+}
 
 final journalFlowControllerProvider =
     NotifierProvider.autoDispose<JournalFlowController, JournalFlowState>(
@@ -363,6 +418,39 @@ class JournalFlowController extends Notifier<JournalFlowState> {
     } else {
       _go(_finish(cleared));
     }
+  }
+
+  // ---- Free description (Premium) ---------------------------------------
+
+  /// Puts the options the person turned on in the review list of
+  /// "Descrever com minhas palavras" in the entry, then goes on as after
+  /// the last question (persistence, intensity). Keys are checked again with
+  /// [describeUsableKeys]. Returns false and changes nothing when none is
+  /// left. Back returns to the screen the description started from.
+  bool applySuggestedOptions(List<String> keys, {required bool isMale}) {
+    final area = state.area;
+    final usable = describeUsableKeys(keys, area: area, isMale: isMale);
+    if (usable.isEmpty) return false;
+    final added = [
+      for (final key in usable)
+        if (area == JournalArea.emotional)
+          JournalItem(kind: JournalKeys.kindEmotional, optionKey: key)
+        else
+          JournalItem(
+            kind: JournalKeys.kindPhysical,
+            optionKey: key,
+            bodySide: _sideForSuggested(key, isMale: isMale),
+          ),
+    ];
+    _go(_finish(state.copyWith(items: _merge(state.items, added))));
+    return true;
+  }
+
+  /// The only side the key fits, or the side on screen when both do.
+  String? _sideForSuggested(String key, {required bool isMale}) {
+    final sides = describeKeySides(key, isMale: isMale);
+    if (sides.length == 1) return sides.first;
+    return sides.contains(state.bodySide) ? state.bodySide : sides.first;
   }
 
   // ---- Persistence and intensity ----------------------------------------
