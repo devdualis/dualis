@@ -73,6 +73,10 @@
         <intent>
             <action android:name="android.speech.RecognitionService" />
         </intent>
+        <!-- Text to speech (Premium hands-free check-in reads the question) -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
         <!-- Telephony dialer intent -->
         <intent>
             <action android:name="android.intent.action.DIAL" />

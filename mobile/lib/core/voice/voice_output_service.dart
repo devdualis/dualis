@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show MissingPluginException;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
@@ -35,6 +36,18 @@ abstract class TtsEngine {
   Future<void> setLanguage(String languageTag);
   Future<void> setSpeechRate(double rate);
   Future<void> setPitch(double pitch);
+
+  /// Android: name, locale and network_required ("0" works offline).
+  Future<List<Map<String, String>>> getVoices();
+  Future<void> setVoice(Map<String, String> voice);
+
+  /// iOS: share the app's audio session with speech recognition.
+  Future<void> setSharedInstance(bool shared);
+  Future<void> setIosAudioCategory(
+    IosTextToSpeechAudioCategory category,
+    List<IosTextToSpeechAudioCategoryOptions> options,
+    IosTextToSpeechAudioMode mode,
+  );
 
   void setStartHandler(VoidCallback handler);
   void setCompletionHandler(VoidCallback handler);
@@ -71,6 +84,30 @@ class FlutterTtsEngine implements TtsEngine {
 
   @override
   Future<void> setPitch(double pitch) => _tts.setPitch(pitch);
+
+  @override
+  Future<List<Map<String, String>>> getVoices() async {
+    final raw = await _tts.getVoices;
+    if (raw is! List) return const [];
+    return [
+      for (final v in raw)
+        if (v is Map) {for (final e in v.entries) '${e.key}': '${e.value}'},
+    ];
+  }
+
+  @override
+  Future<void> setVoice(Map<String, String> voice) => _tts.setVoice(voice);
+
+  @override
+  Future<void> setSharedInstance(bool shared) => _tts.setSharedInstance(shared);
+
+  @override
+  Future<void> setIosAudioCategory(
+    IosTextToSpeechAudioCategory category,
+    List<IosTextToSpeechAudioCategoryOptions> options,
+    IosTextToSpeechAudioMode mode,
+  ) =>
+      _tts.setIosAudioCategory(category, options, mode);
 
   @override
   void setStartHandler(VoidCallback handler) => _tts.setStartHandler(handler);
@@ -123,6 +160,10 @@ class FlutterTtsVoiceOutputService implements VoiceOutputService {
   /// the new one: a cancel counts only once the new speech has started.
   bool _started = false;
 
+  /// No platform plugin (widget tests, unsupported platform): nothing is
+  /// read and every call returns at once.
+  bool _unavailable = false;
+
   Future<void> _ensureInit() => _init ??= _initialize();
 
   Future<void> _initialize() async {
@@ -134,6 +175,22 @@ class FlutterTtsVoiceOutputService implements VoiceOutputService {
       })
       ..setErrorHandler((_) => _finish());
     await _guard(() => _engine.awaitSpeakCompletion(false));
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // speech_to_text switches the session to playAndRecord while it
+      // listens; speaking in the same category keeps the loudspeaker and
+      // Bluetooth after a listen, and is not muted by the silent switch.
+      await _guard(() => _engine.setSharedInstance(true));
+      await _guard(() => _engine.setIosAudioCategory(
+            IosTextToSpeechAudioCategory.playAndRecord,
+            const [
+              IosTextToSpeechAudioCategoryOptions.defaultToSpeaker,
+              IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+              IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+              IosTextToSpeechAudioCategoryOptions.mixWithOthers,
+            ],
+            IosTextToSpeechAudioMode.voicePrompt,
+          ));
+    }
   }
 
   @override
@@ -145,6 +202,7 @@ class FlutterTtsVoiceOutputService implements VoiceOutputService {
       final available = await _guard(() => _engine.isLanguageAvailable(tag)) ?? false;
       if (available) {
         await _guard(() => _engine.setLanguage(tag));
+        if (defaultTargetPlatform == TargetPlatform.android) await _pickOfflineVoice(tag);
         break;
       }
     }
@@ -152,10 +210,26 @@ class FlutterTtsVoiceOutputService implements VoiceOutputService {
     await _guard(() => _engine.setPitch(pitch));
   }
 
+  /// Android: some engines default to a voice that needs the network; a
+  /// voice of the same locale marked network_required "0" works offline.
+  Future<void> _pickOfflineVoice(String tag) async {
+    final voices = await _guard(_engine.getVoices) ?? const <Map<String, String>>[];
+    String norm(String? locale) => (locale ?? '').replaceAll('_', '-').toLowerCase();
+    for (final v in voices) {
+      final name = v['name'] ?? '';
+      if (name.isEmpty) continue;
+      if (norm(v['locale']) == tag.toLowerCase() && v['network_required'] == '0') {
+        await _guard(() => _engine.setVoice({'name': name, 'locale': v['locale']!}));
+        return;
+      }
+    }
+  }
+
   @override
   Future<void> speak(String text) async {
     if (text.trim().isEmpty) return;
     await _ensureInit();
+    if (_unavailable) return;
     _finish();
     await _guard(_engine.stop);
     final done = Completer<void>();
@@ -163,7 +237,7 @@ class FlutterTtsVoiceOutputService implements VoiceOutputService {
     _started = false;
     _timer = Timer(timeoutBase + perCharacter * text.length, () => _finish(done));
     final accepted = await _guard(() => _engine.speak(text)) ?? false;
-    if (!accepted) _finish(done);
+    if (!accepted || _unavailable) _finish(done);
     return done.future;
   }
 
@@ -184,9 +258,13 @@ class FlutterTtsVoiceOutputService implements VoiceOutputService {
   }
 
   /// Plugin failures never reach the caller.
-  static Future<T?> _guard<T>(Future<T> Function() call) async {
+  Future<T?> _guard<T>(Future<T> Function() call) async {
+    if (_unavailable) return null;
     try {
       return await call();
+    } on MissingPluginException {
+      _unavailable = true;
+      return null;
     } catch (error) {
       debugPrint('VoiceOutput: $error');
       return null;
