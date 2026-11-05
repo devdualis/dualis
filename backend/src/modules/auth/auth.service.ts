@@ -15,6 +15,7 @@ import * as schema from '../../database/schema';
 import {
   users,
   userDisclaimerConsents,
+  userAiConsents,
   symptomLogs,
   safetyResourceEvents,
   waterIntakeLogs,
@@ -293,6 +294,14 @@ export class AuthService {
         .from(userDisclaimerConsents)
         .where(eq(userDisclaimerConsents.userId, userId));
 
+      // AI-processing consents (LGPD Art. 11, I): every grant and revocation, oldest first.
+      const aiConsentRecords = (
+        await tx
+          .select()
+          .from(userAiConsents)
+          .where(eq(userAiConsents.userId, userId))
+      ).sort((a, b) => a.grantedAt.getTime() - b.grantedAt.getTime());
+
       // Clinical data belongs to profiles. The export covers every profile this
       // account owns: the primary profile (top level) and its dependents (grouped).
       // Profiles shared with the caller by other accounts are not the caller's data.
@@ -477,7 +486,7 @@ export class AuthService {
       return {
         metadata: {
           exportDate: new Date().toISOString(),
-          formatVersion: '1.5',
+          formatVersion: '1.6',
           legalBasis: 'LGPD Art. 18, V (Portabilidade de Dados)',
           dataController: 'WGI (Brothers Baum Ltda.)',
           legacyFieldsNote:
@@ -501,6 +510,15 @@ export class AuthService {
           acceptedAt: c.acceptedAt.toISOString(),
           ipAddressHash: c.ipAddressHash,
           userAgent: c.userAgent,
+        })),
+        aiConsents: aiConsentRecords.map((c) => ({
+          id: c.id,
+          purpose: c.purpose,
+          consentVersion: c.consentVersion,
+          grantedAt: c.grantedAt.toISOString(),
+          revokedAt: c.revokedAt ? c.revokedAt.toISOString() : null,
+          ipAddressHash: c.ipAddressHash,
+          userAgent: c.userAgent ?? null,
         })),
         ...clinicalDataFor(primaryProfile?.id),
         dependentProfiles: dependentProfiles.map((p) => ({

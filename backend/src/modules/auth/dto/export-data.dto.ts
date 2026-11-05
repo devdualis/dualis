@@ -17,6 +17,17 @@ export interface ExportedConsentDto {
   userAgent: string | null;
 }
 
+/** One AI-processing consent row (LGPD Art. 11, I). revokedAt is null while active. */
+export interface ExportedAiConsentDto {
+  id: string;
+  purpose: string;
+  consentVersion: string;
+  grantedAt: string;
+  revokedAt: string | null;
+  ipAddressHash: string;
+  userAgent: string | null;
+}
+
 export interface ExportedSymptomLogDto {
   id: string;
   intensity: number;
@@ -170,6 +181,7 @@ export interface UserDataExportResponseDto {
   };
   profile: ExportedProfileDto;
   consents: ExportedConsentDto[];
+  aiConsents: ExportedAiConsentDto[];
   symptomLogs: ExportedSymptomLogDto[];
   safetyResourceEvents: ExportedSafetyResourceEventDto[];
   waterIntakeLogs: ExportedWaterIntakeLogDto[];

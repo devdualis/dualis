@@ -45,7 +45,7 @@ class MockAuthService {
     return {
       metadata: {
         exportDate: new Date().toISOString(),
-        formatVersion: '1.5',
+        formatVersion: '1.6',
         legalBasis: 'LGPD Art. 18, V (Portabilidade de Dados)',
         dataController: 'WGI (Brothers Baum Ltda.)',
         legacyFieldsNote: 'Os campos em "legacy" vêm de uma versão anterior do app e não são mais gravados.',
@@ -65,6 +65,17 @@ class MockAuthService {
           id: 'consent-e2e-1',
           disclaimerVersion: '2026.1',
           acceptedAt: '2026-01-01T10:00:00.000Z',
+          ipAddressHash: 'hash999',
+          userAgent: 'Flutter/macOS',
+        },
+      ],
+      aiConsents: [
+        {
+          id: 'ai-consent-e2e-1',
+          purpose: 'journal_ai_suggestions',
+          consentVersion: '2026.1',
+          grantedAt: '2026-11-01T10:00:00.000Z',
+          revokedAt: null,
           ipAddressHash: 'hash999',
           userAgent: 'Flutter/macOS',
         },
@@ -210,6 +221,10 @@ describe('Auth LGPD Data Sovereignty E2E (SEC-03)', () => {
       expect(data.profile.id).toBe(testUserId);
       expect(data.profile.email).toBe(testUserEmail);
       expect(data.consents).toHaveLength(1);
+      expect(data.metadata.formatVersion).toBe('1.6');
+      expect(data.aiConsents).toEqual([
+        expect.objectContaining({ purpose: 'journal_ai_suggestions', consentVersion: '2026.1', revokedAt: null }),
+      ]);
       expect(data.symptomLogs).toHaveLength(1);
       expect(data.symptomLogs[0].decryptedNarrative).toBe('Leve desconforto respiratório matinal');
       expect(data.safetyResourceEvents).toEqual([]);

@@ -151,6 +151,7 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       mockSelectSequence([
         [mockUser],
         [consent],
+        [], // AI consents
         ownedProfiles,
         [symptomRow('log-1', primaryProfileId)],
         [
@@ -198,6 +199,7 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       mockSelectSequence([
         [mockUser],
         [consent],
+        [], // AI consents
         ownedProfiles,
         [symptomRow('log-own', primaryProfileId), symptomRow('log-lucas', dependentProfileId)],
         [],
@@ -251,6 +253,7 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       mockSelectSequence([
         [mockUser],
         [consent],
+        [], // AI consents
         ownedProfiles,
         [],
         [],
@@ -280,7 +283,7 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
 
       const result = await authService.exportUserData(mockUserId);
 
-      expect(result.metadata.formatVersion).toBe('1.5');
+      expect(result.metadata.formatVersion).toBe('1.6');
       expect(result.journalEntries.map((e) => e.id)).toEqual(['entry-new', 'entry-old']);
       expect(result.journalEntries[0]).toEqual({
         coping: null,
@@ -349,6 +352,7 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       mockSelectSequence([
         [mockUser],
         [consent],
+        [], // AI consents
         ownedProfiles,
         [], // symptom logs
         [], // safety events
@@ -380,7 +384,7 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
 
       const result = await authService.exportUserData(mockUserId);
 
-      expect(result.metadata.formatVersion).toBe('1.5');
+      expect(result.metadata.formatVersion).toBe('1.6');
       expect(result.metadata.careDocumentsNote).toContain('arquivos originais');
       // Newest first by date of the record (dose, intake, appointment), else by creation.
       expect(result.careRecords.map((r) => r.id)).toEqual(['intake-1', 'med-1', 'vac-1']);
@@ -419,12 +423,63 @@ describe('AuthService - LGPD Data Sovereignty & Account Deletion (SEC-03)', () =
       expect(documentColumns).not.toContain('fileHmac');
     });
 
-    it('skips clinical queries when the account owns no profile yet', async () => {
-      mockSelectSequence([[mockUser], [], []]);
+    it('exports every AI-processing consent row, active and revoked, with ISO dates', async () => {
+      const aiRow = (id: string, grantedAt: string, revokedAt: string | null, consentVersion: string) => ({
+        id,
+        userId: mockUserId,
+        purpose: 'journal_ai_suggestions',
+        consentVersion,
+        grantedAt: new Date(grantedAt),
+        revokedAt: revokedAt ? new Date(revokedAt) : null,
+        ipAddressHash: 'hmac-ip',
+        userAgent: 'Flutter/iOS',
+      });
+      mockSelectSequence([
+        [mockUser],
+        [consent],
+        // Returned newest first on purpose: the export lists them oldest first.
+        [
+          aiRow('ai-active', '2026-11-04T10:00:00Z', null, '2026.1'),
+          aiRow('ai-revoked', '2026-11-01T10:00:00Z', '2026-11-02T08:30:00Z', '2026.1'),
+        ],
+        [],
+      ]);
 
       const result = await authService.exportUserData(mockUserId);
 
-      expect(mockTxSelect).toHaveBeenCalledTimes(3);
+      expect(result.metadata.formatVersion).toBe('1.6');
+      expect(result.consents).toHaveLength(1);
+      expect(result.aiConsents).toEqual([
+        {
+          id: 'ai-revoked',
+          purpose: 'journal_ai_suggestions',
+          consentVersion: '2026.1',
+          grantedAt: '2026-11-01T10:00:00.000Z',
+          revokedAt: '2026-11-02T08:30:00.000Z',
+          ipAddressHash: 'hmac-ip',
+          userAgent: 'Flutter/iOS',
+        },
+        {
+          id: 'ai-active',
+          purpose: 'journal_ai_suggestions',
+          consentVersion: '2026.1',
+          grantedAt: '2026-11-04T10:00:00.000Z',
+          revokedAt: null,
+          ipAddressHash: 'hmac-ip',
+          userAgent: 'Flutter/iOS',
+        },
+      ]);
+      // The consent rows are read inside the RLS transaction for this user.
+      expect(mockTxExecute).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips clinical queries when the account owns no profile yet', async () => {
+      mockSelectSequence([[mockUser], [], [], []]);
+
+      const result = await authService.exportUserData(mockUserId);
+
+      expect(mockTxSelect).toHaveBeenCalledTimes(4);
+      expect(result.aiConsents).toEqual([]);
       expect(result.symptomLogs).toEqual([]);
       expect(result.safetyResourceEvents).toEqual([]);
       expect(result.waterIntakeLogs).toEqual([]);
