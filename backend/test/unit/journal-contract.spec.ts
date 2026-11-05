@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import { HttpException } from '@nestjs/common';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { getTableConfig } from 'drizzle-orm/pg-core';
@@ -8,6 +9,9 @@ import { JournalService } from '../../src/modules/journal/journal.service';
 import { buildJournalSummary, dayMarkers } from '../../src/modules/journal/journal-summary';
 import { houseAdsFor } from '../../src/modules/journal/house-ads';
 import { BANNED_VOCABULARY, findBannedVocabulary } from '../../scripts/banned-vocabulary';
+import { JournalSuggestService, catalogKeys } from '../../src/modules/journal/journal-suggest.service';
+import { aiConsentRequiredError, aiProfileNotAllowedError } from '../../src/modules/consents/ai-consent.service';
+import { assertCategory } from '../../src/modules/profiles/profile-context';
 
 // Contract hard rules (CONTRATO-JOURNAL-V2.md): no field, column, constant or comment with
 // grouping, assessment or disorder names in the journal v2 schema and API.
@@ -218,3 +222,35 @@ describe('Banned vocabulary list (strategy §15)', () => {
     expect(findBannedVocabulary('Vou tocar violão e etiquetar fotos, sem estoque de tagarelice')).toEqual([]);
   });
 });
+
+describe('Journal v2 contract: free-description suggestion', () => {
+  it('the suggest-entry response and its error bodies carry no banned key or word', async () => {
+    const mixed = [...catalogKeys('emotional').slice(0, 3), ...catalogKeys('physical').slice(0, 3)];
+    const generateJson = vi.fn().mockResolvedValue({ optionKeys: mixed });
+    const service = new JournalSuggestService({ isAvailable: true, generateJson } as any);
+
+    for (const area of ['emotional', 'physical'] as const) {
+      const result = await service.suggestEntry('ando cansada e com a cabeça pesada', area, `contract-${area}`);
+      expect(Object.keys(result)).toEqual(['optionKeys']);
+      expect(result.optionKeys.length).toBeGreaterThan(0);
+      for (const key of result.optionKeys) expect(catalogKeys(area)).toContain(key);
+      expectCleanResponse(result);
+    }
+
+    // The 4th call in a minute for one person is the 429 body.
+    let busy: unknown;
+    for (let i = 0; i < 4 && !busy; i++) {
+      busy = await service.suggestEntry('sem ânimo', 'emotional', 'contract-busy').then(() => undefined, (err) => err);
+    }
+    let category: unknown;
+    try {
+      assertCategory({ profileId: 'p', accessLevel: 'CO_MANAGE', readableCategories: [], writableCategories: [] }, 'write', 'physical_journal');
+    } catch (err) {
+      category = err;
+    }
+    const errors = [aiConsentRequiredError(), aiProfileNotAllowedError(), busy, category];
+    expect(errors.map((e) => (e as HttpException).getStatus())).toEqual([403, 403, 429, 403]);
+    for (const err of errors) expectCleanResponse((err as HttpException).getResponse());
+  });
+});
+
