@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { GeminiService } from '../../common/ai/gemini.service';
 import {
   BodySide,
@@ -14,8 +14,36 @@ const NONE = 'none';
 /** At most this many existing options come back for one free description. */
 export const SUGGEST_ENTRY_MAX_KEYS = 4;
 
+export interface SuggestLimits {
+  perMinute: number;
+  perDay: number;
+}
+
 /** Per-person caps on AI suggestions; over them the app gets `null` (no chip), as when offline. */
-export const SUGGEST_LIMITS = { perMinute: 10, perDay: 100 } as const;
+export const SUGGEST_LIMITS: SuggestLimits = { perMinute: 10, perDay: 100 };
+/** Per-person caps on free-description suggestions; over them the route answers 429 AI_BUSY. */
+export const SUGGEST_ENTRY_LIMITS: SuggestLimits = { perMinute: 3, perDay: 20 };
+/**
+ * Model calls per server instance across both suggestion routes, under the project's
+ * Vertex AI quota (about 10 per minute), so a burst from many people cannot use it up.
+ */
+export const GLOBAL_AI_LIMITS: SuggestLimits = { perMinute: 8, perDay: 2000 };
+/** Server budget for one free-description call, under the app's 8 s timeout. */
+export const SUGGEST_ENTRY_TIMEOUT_MS = 6000;
+export const AI_BUSY = 'AI_BUSY';
+const SHARED_KEY = 'all';
+
+function aiBusyError(): HttpException {
+  return new HttpException(
+    {
+      statusCode: HttpStatus.TOO_MANY_REQUESTS,
+      error: 'Too Many Requests',
+      code: AI_BUSY,
+      message: 'Muitas sugestões seguidas. Tente de novo daqui a pouco.',
+    },
+    HttpStatus.TOO_MANY_REQUESTS,
+  );
+}
 const MINUTE_MS = 60 * 1000;
 const DAY_MS = 24 * 60 * MINUTE_MS;
 const MAX_TRACKED_USERS = 10_000;
@@ -35,7 +63,10 @@ interface UsageWindow {
 export class SuggestRateLimiter {
   private readonly usage = new Map<string, UsageWindow>();
 
-  constructor(private readonly now: () => number = Date.now) {}
+  constructor(
+    private readonly limits: SuggestLimits = SUGGEST_LIMITS,
+    private readonly now: () => number = Date.now,
+  ) {}
 
   /** Records one call and returns false when the user is over a limit. */
   tryConsume(userId: string): boolean {
@@ -54,7 +85,7 @@ export class SuggestRateLimiter {
       window.dayStart = now;
       window.dayCount = 0;
     }
-    if (window.minuteCount >= SUGGEST_LIMITS.perMinute || window.dayCount >= SUGGEST_LIMITS.perDay) {
+    if (window.minuteCount >= this.limits.perMinute || window.dayCount >= this.limits.perDay) {
       return false;
     }
     window.minuteCount++;
@@ -274,7 +305,10 @@ function entryInstruction(kind: 'emotional' | 'physical', allowed: string[]): st
 @Injectable()
 export class JournalSuggestService {
   private readonly logger = new Logger(JournalSuggestService.name);
-  private readonly limiter = new SuggestRateLimiter();
+  // Field initializers, not constructor parameters: Nest would try to inject them.
+  private readonly limiter = new SuggestRateLimiter(SUGGEST_LIMITS);
+  private readonly entryLimiter = new SuggestRateLimiter(SUGGEST_ENTRY_LIMITS);
+  private readonly sharedLimiter = new SuggestRateLimiter(GLOBAL_AI_LIMITS);
 
   constructor(@Optional() @Inject(GeminiService) private readonly gemini?: GeminiService) {}
 
@@ -290,6 +324,7 @@ export class JournalSuggestService {
     if (!clean || allowed.length === 0 || !this.gemini?.isAvailable) return { optionKey: null };
     // The route always passes the signed-in user; scripts and evals call without one.
     if (userId && !this.limiter.tryConsume(userId)) return { optionKey: null };
+    if (userId && !this.sharedLimiter.tryConsume(SHARED_KEY)) return { optionKey: null };
 
     try {
       const parsed = await this.gemini.generateJson<{ optionKey?: string }>({
@@ -327,6 +362,11 @@ export class JournalSuggestService {
     const allowed = catalogKeys(area);
     const clean = deidentify(text ?? '');
     if (!clean || allowed.length === 0 || !this.gemini?.isAvailable) return { optionKeys: [] };
+    // Counted only when the model is about to be called. The route always passes the user;
+    // scripts and evals call without one. Outside the try: the 429 must reach the app.
+    if (userId && (!this.entryLimiter.tryConsume(userId) || !this.sharedLimiter.tryConsume(SHARED_KEY))) {
+      throw aiBusyError();
+    }
 
     try {
       const parsed = await this.gemini.generateJson<{ optionKeys?: unknown }>({
@@ -341,6 +381,7 @@ export class JournalSuggestService {
         },
         temperature: 0,
         thinkingBudget: 0,
+        timeoutMs: SUGGEST_ENTRY_TIMEOUT_MS,
       });
       return { optionKeys: keepAllowed(parsed?.optionKeys, allowed) };
     } catch (err) {

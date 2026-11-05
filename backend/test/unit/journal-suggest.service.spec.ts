@@ -1,5 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
+import { HttpException } from '@nestjs/common';
 import {
+  GLOBAL_AI_LIMITS,
+  SUGGEST_ENTRY_LIMITS,
+  SUGGEST_LIMITS,
+  SuggestRateLimiter,
   OPTION_TEXT_PT,
   catalogKeys,
   deidentify,
@@ -230,5 +235,91 @@ describe('JournalSuggestService.suggestEntry (free description)', () => {
         expect(Object.keys(result)).toEqual(['optionKeys']);
       }
     }
+  });
+});
+
+describe('suggestion time budget and limits', () => {
+  const MINUTE = 60 * 1000;
+  const setup = () => {
+    let now = 1_000_000;
+    const clock = { now: () => now, advance: (ms: number) => (now += ms) };
+    const gemini = { isAvailable: true, generateJson: vi.fn().mockResolvedValue({ optionKeys: ['futuro.medo.desanimo'], optionKey: 'futuro.medo.desanimo' }) };
+    const service = new JournalSuggestService(gemini as any);
+    (service as any).limiter = new SuggestRateLimiter(SUGGEST_LIMITS, clock.now);
+    (service as any).entryLimiter = new SuggestRateLimiter(SUGGEST_ENTRY_LIMITS, clock.now);
+    (service as any).sharedLimiter = new SuggestRateLimiter(GLOBAL_AI_LIMITS, clock.now);
+    return { service, gemini, clock };
+  };
+  const busyCode = async (call: Promise<unknown>) => {
+    try {
+      await call;
+      return null;
+    } catch (err) {
+      expect(err).toBeInstanceOf(HttpException);
+      expect((err as HttpException).getStatus()).toBe(429);
+      return ((err as HttpException).getResponse() as any).code;
+    }
+  };
+
+  it('limits are the documented ones; suggest() keeps its own', () => {
+    expect(SUGGEST_LIMITS).toEqual({ perMinute: 10, perDay: 100 });
+    expect(SUGGEST_ENTRY_LIMITS).toEqual({ perMinute: 3, perDay: 20 });
+    expect(GLOBAL_AI_LIMITS).toEqual({ perMinute: 8, perDay: 2000 });
+  });
+
+  it('suggestEntry asks the model for an answer within 6 s; an abort gives an empty list', async () => {
+    const { service, gemini } = setup();
+    gemini.generateJson.mockRejectedValueOnce(Object.assign(new Error('This operation was aborted'), { name: 'AbortError' }));
+    expect(await service.suggestEntry('sem ânimo', 'emotional', 'u1')).toEqual({ optionKeys: [] });
+    expect(gemini.generateJson.mock.calls[0][0].timeoutMs).toBe(6000);
+  });
+
+  it('per person: the 4th call in a minute and the 21st in a day answer 429 AI_BUSY', async () => {
+    const { service, clock } = setup();
+    for (let i = 0; i < 3; i++) expect(await busyCode(service.suggestEntry('sem ânimo', 'emotional', 'u1'))).toBeNull();
+    expect(await busyCode(service.suggestEntry('sem ânimo', 'emotional', 'u1'))).toBe('AI_BUSY');
+    // Someone else is not affected.
+    expect(await busyCode(service.suggestEntry('sem ânimo', 'emotional', 'u2'))).toBeNull();
+
+    clock.advance(MINUTE);
+    let done = 3;
+    while (done < 20) {
+      for (let i = 0; i < 3 && done < 20; i++, done++) {
+        expect(await busyCode(service.suggestEntry('sem ânimo', 'emotional', 'u1'))).toBeNull();
+      }
+      clock.advance(MINUTE);
+    }
+    expect(await busyCode(service.suggestEntry('sem ânimo', 'emotional', 'u1'))).toBe('AI_BUSY');
+    clock.advance(24 * 60 * MINUTE);
+    expect(await busyCode(service.suggestEntry('sem ânimo', 'emotional', 'u1'))).toBeNull();
+  });
+
+  it('shared: 8 model calls in a minute across both routes, then suggestEntry is 429 and suggest() is quiet', async () => {
+    const { service, gemini } = setup();
+    for (let i = 0; i < 4; i++) {
+      expect(await service.suggest('sem ânimo', 'emotional', undefined, undefined, `a${i}`)).toEqual({ optionKey: 'futuro.medo.desanimo' });
+      expect(await service.suggestEntry('sem ânimo', 'emotional', `b${i}`)).toEqual({ optionKeys: ['futuro.medo.desanimo'] });
+    }
+    expect(gemini.generateJson).toHaveBeenCalledTimes(8);
+    const error = await service.suggestEntry('sem ânimo', 'emotional', 'c1').catch((err) => err);
+    expect(error).toBeInstanceOf(HttpException);
+    expect(error.getResponse()).toEqual({
+      statusCode: 429,
+      error: 'Too Many Requests',
+      code: 'AI_BUSY',
+      message: 'Muitas sugestões seguidas. Tente de novo daqui a pouco.',
+    });
+    expect(await service.suggest('sem ânimo', 'emotional', undefined, undefined, 'c2')).toEqual({ optionKey: null });
+    expect(gemini.generateJson).toHaveBeenCalledTimes(8);
+  });
+
+  it('calls that end before the model count nothing', async () => {
+    const { service, gemini } = setup();
+    for (let i = 0; i < 10; i++) expect(await service.suggestEntry('   ', 'emotional', 'u1')).toEqual({ optionKeys: [] });
+    gemini.isAvailable = false;
+    for (let i = 0; i < 10; i++) expect(await service.suggestEntry('sem ânimo', 'emotional', 'u1')).toEqual({ optionKeys: [] });
+    gemini.isAvailable = true;
+    for (let i = 0; i < 3; i++) expect(await busyCode(service.suggestEntry('sem ânimo', 'emotional', 'u1'))).toBeNull();
+    expect(gemini.generateJson).toHaveBeenCalledTimes(3);
   });
 });

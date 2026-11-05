@@ -17,6 +17,11 @@ export interface GenerateJsonOptions {
   temperature?: number;
   /** Thinking tokens; 0 turns thinking off for fast classification. */
   thinkingBudget?: number;
+  /**
+   * Whole-call budget, retries included. When it runs out the request is aborted and no
+   * other attempt starts. Aborting stops the wait, not the provider's billing.
+   */
+  timeoutMs?: number;
 }
 
 /**
@@ -72,6 +77,7 @@ export class GeminiService {
    */
   async generateJson<T = Record<string, unknown>>(opts: GenerateJsonOptions): Promise<T> {
     if (!this.client) throw new Error('Gemini client not configured');
+    const signal = opts.timeoutMs !== undefined ? AbortSignal.timeout(opts.timeoutMs) : undefined;
     const response = await this.withRetry(() => this.client!.models.generateContent({
       model: this.generationModel,
       contents: opts.prompt,
@@ -81,8 +87,9 @@ export class GeminiService {
         responseSchema: opts.schema as any,
         temperature: opts.temperature ?? 0,
         ...(opts.thinkingBudget !== undefined && { thinkingConfig: { thinkingBudget: opts.thinkingBudget } }),
+        ...(signal && { abortSignal: signal }),
       },
-    }));
+    }), RETRY_DELAYS_MS, signal);
     return JSON.parse(response.text || '{}') as T;
   }
 
@@ -91,15 +98,17 @@ export class GeminiService {
    * Google's guidance is to retry with backoff; keep it short so a person waiting
    * in the app gets an answer (or a quiet fallback) within about two seconds.
    */
-  private async withRetry<T>(call: () => Promise<T>, delaysMs = RETRY_DELAYS_MS): Promise<T> {
+  private async withRetry<T>(call: () => Promise<T>, delaysMs = RETRY_DELAYS_MS, signal?: AbortSignal): Promise<T> {
     for (let attempt = 0; ; attempt++) {
       try {
         return await call();
       } catch (err) {
         const status = (err as { status?: number }).status;
         const retryable = status === 429 || status === 503 || /\b(429|503)\b|RESOURCE_EXHAUSTED/.test(String((err as Error).message));
-        if (!retryable || attempt >= delaysMs.length) throw err;
-        await new Promise((resolve) => setTimeout(resolve, delaysMs[attempt] * (0.75 + Math.random() / 2)));
+        // Out of time: answer now rather than start another attempt.
+        if (!retryable || attempt >= delaysMs.length || signal?.aborted) throw err;
+        await sleep(delaysMs[attempt] * (0.75 + Math.random() / 2), signal);
+        if (signal?.aborted) throw err;
       }
     }
   }
@@ -120,4 +129,17 @@ export class GeminiService {
       return null;
     }
   }
+}
+
+/** Waits, ending early when the signal aborts. */
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(done, ms);
+    signal?.addEventListener('abort', done, { once: true });
+    function done() {
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', done);
+      resolve();
+    }
+  });
 }
