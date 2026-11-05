@@ -87,6 +87,16 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)('Profile hand-over at 18 with re
     await appPool?.end().catch(() => {});
     await admin?.end().catch(() => {});
     if (root) {
+      // pool.end() can resolve before the server has closed the backends; a FORCE
+      // drop then kills a closing socket and pg raises it as an uncaught error.
+      for (let i = 0; i < 50; i++) {
+        const { rows } = await root.query(
+          'SELECT count(*)::int AS n FROM pg_stat_activity WHERE datname = $1',
+          [dbName],
+        );
+        if (rows[0].n === 0) break;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
       await root.query(`DROP DATABASE IF EXISTS "${dbName}" WITH (FORCE)`);
       await root.end();
     }
