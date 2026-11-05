@@ -450,8 +450,10 @@ describe('route categories (Phase 11.1, PREM-07)', () => {
     const make = () => {
       const journalService = { createEntry: vi.fn(async () => ({ id: 'entry' })) };
       const journalSuggest = { suggest: vi.fn(async () => ({ optionKey: null })) };
-      const controller = new JournalController(journalService as any, journalSuggest as any);
-      return { controller, journalService, journalSuggest };
+      // Consent and profile-ownership checks have their own specs (ai-consent.*): allow here.
+      const aiConsent = { assertAllowed: vi.fn(async () => undefined) };
+      const controller = new JournalController(journalService as any, journalSuggest as any, aiConsent as any);
+      return { controller, journalService, journalSuggest, aiConsent };
     };
 
     it('rejects an emotional (or legacy, no area) entry without emotional_journal and never calls the service', async () => {
@@ -469,13 +471,15 @@ describe('route categories (Phase 11.1, PREM-07)', () => {
     });
 
     it('never sends emotional text to the suggester without emotional_journal', async () => {
-      const { controller, journalSuggest } = make();
-      expect(() =>
+      const { controller, journalSuggest, aiConsent } = make();
+      await expect(
         controller.suggestOption(req, coManager, { text: 'texto', kind: 'emotional', branch: 'x' } as any),
-      ).toThrow(NOT_SHARED);
+      ).rejects.toThrow(NOT_SHARED);
+      expect(aiConsent.assertAllowed).not.toHaveBeenCalled();
       expect(journalSuggest.suggest).not.toHaveBeenCalled();
 
       await controller.suggestOption(req, coManager, { text: 'texto', kind: 'physical', branch: 'x' } as any);
+      expect(aiConsent.assertAllowed).toHaveBeenCalledWith(USER_ID, coManager);
       expect(journalSuggest.suggest).toHaveBeenCalledTimes(1);
     });
   });

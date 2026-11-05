@@ -45,6 +45,7 @@ import {
 import { HouseAdsResponseDto, houseAdsFor } from './house-ads';
 import { JournalService } from './journal.service';
 import { JournalSuggestService } from './journal-suggest.service';
+import { AiConsentService } from '../consents/ai-consent.service';
 
 const userIdOf = (req: any): string => req.user?.id || req.user?.userId || req.user?.sub;
 
@@ -60,6 +61,7 @@ export class JournalController {
   constructor(
     @Inject(JournalService) private readonly journalService: JournalService,
     @Inject(JournalSuggestService) private readonly journalSuggest: JournalSuggestService,
+    @Inject(AiConsentService) private readonly aiConsent: AiConsentService,
   ) {}
 
   @Post('entries')
@@ -104,13 +106,16 @@ export class JournalController {
   @HttpCode(HttpStatus.OK)
   @ProfileAccess('write')
   @validate(SuggestJournalOptionDto)
-  suggestOption(
+  async suggestOption(
     @Request() req: any,
     @ActiveProfile() profile: ProfileContext,
     @Body() dto: SuggestJournalOptionDto,
   ): Promise<SuggestJournalOptionResponseDto> {
     // No text leaves the backend for a branch the caller may not write on this profile.
     assertCategory(profile, 'write', dto.kind === 'physical' ? 'physical_journal' : 'emotional_journal');
+    // Nor without the holder's AI consent, or on a profile shared by another account.
+    // In the handler, not a guard: pipes must answer 400 for an invalid body first.
+    await this.aiConsent.assertAllowed(userIdOf(req), profile);
     return this.journalSuggest.suggest(dto.text, dto.kind, dto.branch, dto.bodySide, userIdOf(req));
   }
 
