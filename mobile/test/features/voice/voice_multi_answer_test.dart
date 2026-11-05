@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dualis_mobile/core/router/app_router.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
+import 'package:dualis_mobile/core/security/biometric_lock_controller.dart';
 import 'package:dualis_mobile/core/theme/app_theme.dart';
 import 'package:dualis_mobile/core/voice/voice_input_service.dart';
 import 'package:dualis_mobile/features/auth/domain/auth_state.dart';
@@ -18,6 +19,7 @@ import 'package:dualis_mobile/l10n/app_localizations_pt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -63,6 +65,14 @@ class _SignedIn extends AuthController {
   AuthState build() => const AuthState(isAuthenticated: true);
 }
 
+/// Unlocked until the test engages the lock.
+class _TestLock extends BiometricLockController {
+  @override
+  BiometricLockState build() => const BiometricLockState(enabled: true);
+
+  void engage() => state = state.copyWith(locked: true);
+}
+
 void main() {
   final pt = AppLocalizationsPt();
   late JournalHarness harness;
@@ -104,6 +114,7 @@ void main() {
           appRouterProvider.overrideWithValue(router),
           voiceInputServiceProvider.overrideWithValue(voice),
           authControllerProvider.overrideWith(_SignedIn.new),
+          biometricLockControllerProvider.overrideWith(_TestLock.new),
         ],
         child: MaterialApp.router(
           theme: AppTheme.lightTheme,
@@ -148,7 +159,24 @@ void main() {
     expect(flow(tester).step, JournalStep.options);
   }
 
-  setUp(() => voice = _QueuedVoiceInput());
+  setUp(() {
+    voice = _QueuedVoiceInput();
+    FlutterSecureStorage.setMockInitialValues({});
+  });
+
+  VoiceController controller(WidgetTester tester) =>
+      containerOf(tester).read(voiceControllerProvider.notifier);
+
+  /// From the options step to the triggers step, one answer at a time.
+  Future<void> toTriggers(WidgetTester tester) async {
+    await toOptions(tester);
+    for (final phrase in [optionLabel, 'continuar', 'hoje', 'três', 'continuar']) {
+      await say(tester, phrase);
+    }
+    expect(flow(tester).step, JournalStep.triggers);
+  }
+
+  final triggerLabel = JournalLabels.trigger(pt, JournalKeys.triggerTopics.values.first.first);
 
   testWidgets('"<option>, começou hoje, intensidade três" fills three steps and stops on intensity',
       (tester) async {
@@ -205,5 +233,184 @@ void main() {
     final state = flow(tester);
     expect(state.step, JournalStep.options);
     expect(state.selectedOptions, {optionKey});
+  });
+
+  group('Safety rules', () {
+    testWidgets('two items: the first gets "Começou hoje", the flow stops on the second',
+        (tester) async {
+      await pump(tester);
+      await toOptions(tester);
+      final keys = [for (final o in options.take(2)) '$time.$branch.$o'];
+      final labels = [for (final k in keys) JournalLabels.option(pt, k)];
+
+      await say(tester, '${labels[0]} e ${labels[1]}, começou hoje, intensidade três');
+
+      final state = flow(tester);
+      expect(state.step, JournalStep.persistence);
+      expect(state.items.map((i) => i.optionKey), keys);
+      expect(state.items[0].persistence, JournalKeys.persistenceHoje);
+      expect(state.items[1].persistence, isNull);
+      expect(state.items.every((i) => i.intensity == null), isTrue);
+      expect(feedback(tester)?.kind, VoiceFeedbackKind.notUnderstood);
+      expect(feedback(tester)?.text, 'intensidade tres');
+    });
+
+    testWidgets('triggers: "<trigger>, pular" picks the trigger and never skips', (tester) async {
+      await pump(tester);
+      await toTriggers(tester);
+
+      await say(tester, '$triggerLabel, pular');
+
+      final state = flow(tester);
+      expect(state.step, JournalStep.triggers);
+      expect(state.triggers, {JournalKeys.triggerTopics.values.first.first});
+      expect(feedback(tester)?.kind, VoiceFeedbackKind.notUnderstood);
+      expect(feedback(tester)?.text, 'pular');
+    });
+
+    testWidgets('note: "hoje foi longo, salvar" is written as a note and nothing is saved',
+        (tester) async {
+      await pump(tester);
+      await toTriggers(tester);
+      await say(tester, 'pular');
+      await say(tester, 'pular');
+      expect(flow(tester).step, JournalStep.note);
+
+      await say(tester, 'hoje foi longo, salvar');
+
+      expect(harness.remote.created, isEmpty);
+      expect(flow(tester).step, JournalStep.note);
+      final field = tester.widget<TextField>(find.byKey(const Key('jv2_note_field')));
+      expect(field.controller!.text, 'hoje foi longo, salvar');
+      expect(feedback(tester)?.kind, VoiceFeedbackKind.noted);
+    });
+
+    testWidgets('words the next step does not know: "not understood", picks stay', (tester) async {
+      await pump(tester);
+      await toOptions(tester);
+
+      await say(tester, '$optionLabel, abacaxi voador');
+
+      final state = flow(tester);
+      expect(state.step, JournalStep.persistence);
+      expect(state.items.single.optionKey, optionKey);
+      expect(state.items.single.persistence, isNull);
+      expect(feedback(tester)?.kind, VoiceFeedbackKind.notUnderstood);
+      expect(feedback(tester)?.text, 'abacaxi voador');
+    });
+
+    testWidgets('"<option>, ajuda" opens help and nothing else happens', (tester) async {
+      await pump(tester);
+      await toOptions(tester);
+
+      await say(tester, '$optionLabel, começou hoje, ajuda');
+
+      expect(find.text('HELP SCREEN'), findsOneWidget);
+      final state = flow(tester);
+      expect(state.step, JournalStep.options);
+      expect(state.selectedOptions, isEmpty);
+      expect(state.items, isEmpty);
+    });
+
+    testWidgets('help opened while a phrase is carried: the queue is dropped', (tester) async {
+      await pump(tester);
+      await toOptions(tester);
+
+      await controller(tester).handlePhrase('$optionLabel, começou hoje, intensidade três');
+      await controller(tester).handlePhrase('ajuda');
+      await tester.pumpAndSettle();
+
+      expect(find.text('HELP SCREEN'), findsOneWidget);
+      expect(flow(tester).items, isEmpty);
+    });
+
+    testWidgets('the mic (stop) drops the queue', (tester) async {
+      await pump(tester);
+      await toOptions(tester);
+
+      await controller(tester).handlePhrase('$optionLabel, começou hoje, intensidade três');
+      await controller(tester).stop();
+      await tester.pumpAndSettle();
+
+      final state = flow(tester);
+      expect(state.step, JournalStep.options);
+      expect(state.selectedOptions, {optionKey});
+      expect(state.items, isEmpty);
+    });
+
+    testWidgets('the app lock drops the queue', (tester) async {
+      await pump(tester);
+      await toOptions(tester);
+
+      await controller(tester).handlePhrase('$optionLabel, começou hoje, intensidade três');
+      (containerOf(tester).read(biometricLockControllerProvider.notifier) as _TestLock).engage();
+      await tester.pumpAndSettle();
+
+      expect(flow(tester).step, JournalStep.options);
+      expect(flow(tester).items, isEmpty);
+    });
+
+    testWidgets('"voltar" as a new phrase drops the queue', (tester) async {
+      await pump(tester);
+      await toOptions(tester);
+
+      await controller(tester).handlePhrase('$optionLabel, começou hoje, intensidade três');
+      await controller(tester).handlePhrase('voltar');
+      await tester.pumpAndSettle();
+
+      final state = flow(tester);
+      expect(state.step, JournalStep.branch);
+      expect(state.items, isEmpty);
+    });
+
+    testWidgets('a new phrase replaces the queue', (tester) async {
+      await pump(tester);
+      await toOptions(tester);
+      final second = '$time.$branch.${options[1]}';
+
+      await controller(tester).handlePhrase('$optionLabel, começou hoje, intensidade três');
+      await controller(tester).handlePhrase(JournalLabels.option(pt, second));
+      await tester.pumpAndSettle();
+
+      final state = flow(tester);
+      expect(state.step, JournalStep.options);
+      expect(state.selectedOptions, {optionKey, second});
+      expect(state.items, isEmpty);
+    });
+
+    testWidgets('"pular" alone on the triggers step still skips', (tester) async {
+      await pump(tester);
+      await toTriggers(tester);
+
+      await say(tester, 'pular');
+
+      expect(flow(tester).step, JournalStep.closing);
+    });
+
+    testWidgets('hands-free: the carried steps play out before listening again', (tester) async {
+      voice = _QueuedVoiceInput([
+        'não tão bem',
+        JournalLabels.root(pt, time),
+        JournalLabels.branch(pt, '$time.$branch'),
+        '$optionLabel, começou hoje, intensidade três',
+      ]);
+      await pump(tester);
+      await tester.tap(find.byKey(const Key('voice_mic_button')));
+      for (var i = 0; i < 80; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      await tester.pumpAndSettle();
+
+      final state = flow(tester);
+      expect(state.step, JournalStep.intensity);
+      expect(state.items.single.persistence, JournalKeys.persistenceHoje);
+      expect(state.items.single.intensity, 3);
+      final spoken = harness.voiceOutput.spoken;
+      // The persistence step was answered by the phrase, never read; the
+      // intensity step it stopped on was read once.
+      expect(spoken.where((t) => t.contains(pt.jv2PersistenceQuestion)), isEmpty);
+      expect(spoken.where((t) => t.contains(pt.jv2IntensityQuestion)), hasLength(1));
+      expect(harness.remote.created, isEmpty);
+    });
   });
 }
