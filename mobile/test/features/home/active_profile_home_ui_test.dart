@@ -112,7 +112,7 @@ void main() {
     expect(find.byKey(const Key('nav_destination_emergency')), findsOneWidget);
   });
 
-  testWidgets('Premium build shows the discreet Premium label on the Home card',
+  testWidgets('Premium build shows the Premium label under the app logo',
       (tester) async {
     await tester.pumpWidget(
       buildApp(
@@ -131,10 +131,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.descendant(
-        of: find.byKey(const Key('home_profile_card')),
-        matching: label,
-      ),
+      find.descendant(of: find.byType(AppBar), matching: label),
       findsOneWidget,
     );
   });

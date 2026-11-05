@@ -143,7 +143,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     List<Widget> appBarActions = [];
 
     if (_currentTabIndex == 0) {
-      appBarTitle = DualisLogo(
+      final logo = DualisLogo(
         variant: DualisLogoVariant.horizontal,
         width: 160,
         withProtectionArea: false,
@@ -155,6 +155,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           }
         },
       );
+      appBarTitle = ref.watch(premiumProfilesEnabledProvider)
+          // Premium builds: tier mark right under the app logo, the usual
+          // place apps show their plan. Same text as the login label.
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                logo,
+                Row(
+                  key: const Key('home_premium_label'),
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 5,
+                      height: 5,
+                      decoration: const BoxDecoration(
+                        color: PremiumAccents.champagne,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      AppLocalizations.of(context).loginPremiumLabel,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        height: 1.1,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.2,
+                        color: AppColors.clinicalTeal,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            )
+          : logo;
       appBarActions = [
         if (ref.watch(premiumProfilesEnabledProvider)) ...[
           const ProfileAppBarPill(),
@@ -427,52 +463,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 2),
-                                if (ref.watch(premiumProfilesEnabledProvider))
-                                  // Discreet tier mark, Premium builds only:
-                                  // same champagne dot as the active nav icon,
-                                  // on the subtitle line so the card keeps its
-                                  // height.
-                                  Row(
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                          cardDisplaySubtitle,
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 13,
-                                            color: Colors.white.withValues(alpha: 0.85),
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Row(
-                                        key: const Key('home_premium_label'),
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Container(
-                                            width: 6,
-                                            height: 6,
-                                            decoration: const BoxDecoration(
-                                              color: PremiumAccents.champagne,
-                                              shape: BoxShape.circle,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 5),
-                                          Text(
-                                            AppLocalizations.of(context).loginPremiumLabel,
-                                            style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                              letterSpacing: 0.6,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  )
-                                else
                                 Text(
                                   cardDisplaySubtitle,
                                   style: GoogleFonts.plusJakartaSans(
