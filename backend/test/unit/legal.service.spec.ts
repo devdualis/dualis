@@ -6,6 +6,7 @@ import {
   LEGAL_DOCUMENTS_VERSION,
   INTENDED_USE_STATEMENT,
 } from '../../src/modules/legal/legal.service';
+import { findBannedVocabulary } from '../../scripts/banned-vocabulary';
 
 // Terms that would describe the product as a medical device / triage tool (plan §2, L-01..L-07).
 const BANNED_LEGAL_TERMS =
@@ -136,6 +137,51 @@ describe('LegalService - SaaS Legal Foundations', () => {
     });
   });
 
+  describe('AI journal suggestions with specific consent (Phase 17, LGPD-AI-01)', () => {
+    it.each([
+      ['pt-BR', '7-sugestoes-ia-diario', /Configurações/, /nome, CPF/, /treinar modelos/],
+      ['es', '7-sugerencias-ia-diario', /Ajustes/, /nombre, CPF/, /entrenar modelos/],
+      ['en', '7-ai-journal-suggestions', /Settings/, /name, ID number/, /train models/],
+    ])('privacy policy has section 7 on AI journal suggestions (%s)', (lang, sectionId, settings, noIds, noTraining) => {
+      const privacy = service.getPrivacyPolicy(lang);
+      expect(privacy.sections).toHaveLength(7);
+      const section = privacy.sections[6];
+      expect(section.sectionId).toBe(sectionId);
+      const text = JSON.stringify(section);
+      expect(text).toContain('Art. 11, I');
+      expect(text).toContain('São Paulo');
+      expect(text).toMatch(settings);
+      expect(text).toMatch(noIds);
+      expect(text).toMatch(noTraining);
+      expect(section.bullets?.length).toBeGreaterThanOrEqual(4);
+      expect(section.bullets?.length).toBeLessThanOrEqual(6);
+    });
+
+    it.each([
+      ['pt-BR', ['1-dados-coletados', '2-finalidade-tratamento', '3-operadores-transferencia-internacional', '4-pagamentos', '5-direitos-titular-lgpd', '6-comunicacoes-e-opt-out']],
+      ['es', ['1-data-collected', '2-purposes', '3-processors-international-transfer', '4-payments', '5-retention-and-deletion', '6-communications']],
+      ['en', ['1-data-collected', '2-purposes', '3-processors-international-transfer', '4-payments', '5-rights-and-deletion', '6-communications-optout']],
+    ])('keeps section ids 1-6 unchanged (%s)', (lang, ids) => {
+      const privacy = service.getPrivacyPolicy(lang);
+      expect(privacy.sections.slice(0, 6).map((s) => s.sectionId)).toEqual(ids);
+    });
+
+    it.each([
+      ['pt-BR', /"escrever o meu" e de "descrever com minhas palavras".*consentimento específico.*opções já existentes/],
+      ['es', /"escribir el mío" y de "describir con mis palabras".*consentimiento específico.*opciones ya existentes/],
+      ['en', /"write my own" and "describe in my own words".*specific consent.*existing diary options/],
+    ])('section 3 AI bullet covers both features, only with specific consent (%s)', (lang, aiBullet) => {
+      const privacy = service.getPrivacyPolicy(lang);
+      const section3 = privacy.sections.find((s) => s.sectionId.startsWith('3-'));
+      expect(section3?.bullets).toHaveLength(7);
+      expect(section3?.bullets?.[0]).toMatch(aiBullet);
+    });
+
+    it.each(['pt-BR', 'es', 'en'])('privacy policy uses no banned vocabulary (%s)', (lang) => {
+      expect(findBannedVocabulary(JSON.stringify(service.getPrivacyPolicy(lang)))).toEqual([]);
+    });
+  });
+
   describe('Disclaimer & Emergency Contacts', () => {
     it('returns the intended-use statement, LGPD/CDC citations only, and help numbers', () => {
       const disclaimer = service.getMedicalDisclaimer('pt-BR');
@@ -146,9 +192,10 @@ describe('LegalService - SaaS Legal Foundations', () => {
       expect(disclaimer.emergencyContacts.some((c) => c.phone === '188')).toBe(true);
     });
 
-    it('defaults the disclaimer version to the bumped 2026.4 so every user re-consents', () => {
-      expect(LEGAL_DOCUMENTS_VERSION).toBe('2026.4');
-      expect(service.getMedicalDisclaimer('pt-BR').version).toBe('2026.4');
+    it('defaults the disclaimer version to the bumped 2026.5 so every user re-consents', () => {
+      expect(LEGAL_DOCUMENTS_VERSION).toBe('2026.5');
+      expect(service.getMedicalDisclaimer('pt-BR').version).toBe('2026.5');
+      expect(service.getPrivacyPolicy('pt-BR').lastUpdated).toBe('2026-11-05');
     });
 
     it.each([
