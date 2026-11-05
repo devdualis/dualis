@@ -283,6 +283,61 @@ void main() {
     expect(container.read(voiceControllerProvider).speaking, isFalse);
   });
 
+  for (final width in [402.0, 320.0]) {
+    testWidgets('the reading banner leaves the mic and the help button visible '
+        '(${width.toInt()} pt wide)', (tester) async {
+      FlutterSecureStorage.setMockInitialValues({});
+      tester.view.physicalSize = Size(width * 3, 874 * 3);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      final harness = JournalHarness()..premium = true;
+      addTearDown(harness.db.close);
+      harness.voiceOutput.hold = const Duration(seconds: 30);
+      final router = GoRouter(
+        initialLocation: RoutePaths.journal,
+        routes: [
+          GoRoute(path: RoutePaths.journal, builder: (_, __) => const JournalFlowScreen()),
+          GoRoute(path: RoutePaths.emergency, builder: (_, __) => const EmergencyScreen()),
+        ],
+      );
+      await tester.pumpWidget(ProviderScope(
+        overrides: [
+          ...harness.overrides,
+          appRouterProvider.overrideWithValue(router),
+          voiceInputServiceProvider.overrideWithValue(_SilentVoiceInput()),
+          authControllerProvider.overrideWith(_SignedIn.new),
+          deviceRegionProvider.overrideWithValue('BR'),
+          emergencyAuditServiceProvider.overrideWithValue(_NoAudit()),
+        ],
+        child: MaterialApp.router(
+          routerConfig: router,
+          locale: const Locale('pt', 'BR'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          builder: (context, child) => UrgentHelpOverlay(router: router, child: child!),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      final mic = find.byKey(const Key('voice_mic_button'));
+      await tester.tap(mic);
+      await tester.pump(const Duration(milliseconds: 400));
+      final banner = find.byKey(const Key('voice_status_banner'));
+      expect(banner, findsOneWidget);
+      final bannerRect = tester.getRect(banner);
+      // The banner text tells the person to tap the mic: it must not hide it.
+      expect(bannerRect.overlaps(tester.getRect(mic)), isFalse,
+          reason: 'banner $bannerRect covers the mic ${tester.getRect(mic)}');
+      expect(
+          bannerRect.overlaps(tester.getRect(find.byKey(const Key('urgent_help_button')))),
+          isFalse);
+      expect(tester.takeException(), isNull, reason: 'no overflow');
+
+      await tester.tap(mic.hitTestable());
+      await tester.pump(const Duration(milliseconds: 500));
+    });
+  }
+
   testWidgets('button floats in the top-right corner, away from the bottom nav', (tester) async {
     await pump(tester, RoutePaths.login);
     final buttonTopLeft = tester.getTopLeft(find.byKey(const Key('urgent_help_button')));

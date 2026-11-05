@@ -210,14 +210,18 @@ class _UrgentHelpOverlayState extends State<UrgentHelpOverlay> {
               ),
             ),
           ),
-        const Positioned(
+        // On the check-in the banner stops left of the mic (right 64 + 40 +
+        // 8 gap): its text says "tap the mic", so it must never hide it.
+        Positioned(
           top: 0,
           left: 0,
           right: 0,
           child: SafeArea(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(64, 10, 64, 0),
-              child: Center(child: IfProviderScope(child: VoiceStatusBanner())),
+              padding: visible && _onCheckIn()
+                  ? const EdgeInsets.fromLTRB(56, 10, 112, 0)
+                  : const EdgeInsets.fromLTRB(64, 10, 64, 0),
+              child: const Center(child: IfProviderScope(child: VoiceStatusBanner())),
             ),
           ),
         ),
