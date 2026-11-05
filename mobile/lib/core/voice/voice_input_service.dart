@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -30,13 +31,17 @@ abstract class VoiceInputService {
 }
 
 /// Platform speech recognition (Apple Speech / Android SpeechRecognizer).
-/// Recognition runs on the device when the device supports it for the
-/// language; otherwise the platform service is used. Nothing said is
-/// stored or sent to the Dualis backend by this class.
+/// On iOS recognition first asks for on-device only and falls back to the
+/// platform service when the device cannot do it for the language. On
+/// Android the standard recognizer is used from the start: the strict
+/// on-device one (Android 12+) often has no model for the language and
+/// then ends with "no match" as if nothing was said, so voice listened
+/// but never heard anything. Nothing said is stored or sent to the Dualis
+/// backend by this class.
 class SpeechToTextVoiceInputService implements VoiceInputService {
   final SpeechToText _speech;
   bool _ready = false;
-  bool _onDevice = true;
+  bool _onDevice;
   void Function()? _onDone;
   String? _localeId;
   String? _localeLanguage;
@@ -47,8 +52,9 @@ class SpeechToTextVoiceInputService implements VoiceInputService {
   void Function(String, bool)? _lastOnResult;
   bool _gotResult = false;
 
-  SpeechToTextVoiceInputService({SpeechToText? speech})
-      : _speech = speech ?? SpeechToText();
+  SpeechToTextVoiceInputService({SpeechToText? speech, bool? preferOnDevice})
+      : _speech = speech ?? SpeechToText(),
+        _onDevice = preferOnDevice ?? defaultTargetPlatform != TargetPlatform.android;
 
   @override
   Future<VoiceStartError?> prepare() async {
