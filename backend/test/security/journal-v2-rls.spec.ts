@@ -10,6 +10,7 @@ import { DatabaseService } from '../../src/database/database.service';
 import { EncryptionService } from '../../src/common/encryption/encryption.service';
 import { JournalService } from '../../src/modules/journal/journal.service';
 import { CreateJournalEntryDto } from '../../src/modules/journal/dto/journal.dto';
+import { dropTestDatabase } from '../support/drop-test-database';
 
 dotenv.config();
 
@@ -76,7 +77,7 @@ describe('Security Regression: 0017 journal v2 (journal_entries, journal_items, 
 
     const admin = new Pool({ connectionString: rawTestUrl, max: 1, connectionTimeoutMillis: 3000 });
     try {
-      await admin.query(`DROP DATABASE IF EXISTS "${isolatedDb}" WITH (FORCE)`);
+      await dropTestDatabase(admin, isolatedDb);
       await admin.query(`CREATE DATABASE "${isolatedDb}"`);
     } catch (err) {
       console.warn(`[journal-v2-rls.spec.ts] Live PostgreSQL not reachable: ${(err as Error).message}. Skipping.`);

@@ -12,6 +12,7 @@ import { EncryptionService } from '../../src/common/encryption/encryption.servic
 import { EmailService } from '../../src/common/email/email.service';
 import { CareService } from '../../src/modules/care/care.service';
 import { AuthService } from '../../src/modules/auth/auth.service';
+import { dropTestDatabase } from '../support/drop-test-database';
 
 dotenv.config();
 
@@ -65,7 +66,7 @@ describe('Security Regression: 0021 premium care (care_records, care_documents R
 
     const admin = new Pool({ connectionString: rawTestUrl, max: 1, connectionTimeoutMillis: 3000 });
     try {
-      await admin.query(`DROP DATABASE IF EXISTS "${isolatedDb}" WITH (FORCE)`);
+      await dropTestDatabase(admin, isolatedDb);
       await admin.query(`CREATE DATABASE "${isolatedDb}"`);
     } catch (err) {
       console.warn(`[care-rls.spec.ts] Live PostgreSQL not reachable: ${(err as Error).message}. Skipping.`);

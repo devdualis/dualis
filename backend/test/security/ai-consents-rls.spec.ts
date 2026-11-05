@@ -18,6 +18,7 @@ import {
 import { AiConsentController } from '../../src/modules/consents/ai-consent.controller';
 import { SHARE_CATEGORIES } from '../../src/database/schema/shared-access-grants.schema';
 import { ProfileContext } from '../../src/modules/profiles/profile-context';
+import { dropTestDatabase } from '../support/drop-test-database';
 
 // Preparation refuses non-local URLs and never loads a dotenv file.
 const { prepareLocalDatabase } = require('../support/prepare-local-test-db.cjs');
@@ -104,7 +105,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)('AI-processing consents: real ru
     await appPool?.end().catch(() => {});
     await admin?.end().catch(() => {});
     if (root) {
-      await root.query(`DROP DATABASE IF EXISTS "${dbName}" WITH (FORCE)`).catch(() => {});
+      await dropTestDatabase(root, dbName).catch(() => {});
       await root.end();
     }
   });

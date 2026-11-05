@@ -3,6 +3,7 @@ import { Pool, PoolClient } from 'pg';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as dotenv from 'dotenv';
+import { dropTestDatabase } from '../support/drop-test-database';
 
 dotenv.config();
 
@@ -58,7 +59,7 @@ describe('Security Regression: 0015 wellness repositioning (safety_resource_even
 
     const admin = new Pool({ connectionString: rawTestUrl, max: 1, connectionTimeoutMillis: 3000 });
     try {
-      await admin.query(`DROP DATABASE IF EXISTS "${isolatedDb}" WITH (FORCE)`);
+      await dropTestDatabase(admin, isolatedDb);
       await admin.query(`CREATE DATABASE "${isolatedDb}"`);
     } catch (err) {
       console.warn(

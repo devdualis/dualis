@@ -9,6 +9,7 @@ import * as schema from '../../src/database/schema';
 import { EncryptionService } from '../../src/common/encryption/encryption.service';
 import { EmailService } from '../../src/common/email/email.service';
 import { AuthService } from '../../src/modules/auth/auth.service';
+import { dropTestDatabase } from '../support/drop-test-database';
 
 const MIGRATIONS_DIR = join(__dirname, '../../src/database/migrations');
 const APP_ROLE = 'dualis_auth_app';
@@ -49,7 +50,7 @@ describe('Security Regression: auth codes and sessions', () => {
 
     const admin = new Pool({ connectionString: rawTestUrl, max: 1, connectionTimeoutMillis: 3000 });
     try {
-      await admin.query(`DROP DATABASE IF EXISTS "${isolatedDb}" WITH (FORCE)`);
+      await dropTestDatabase(admin, isolatedDb);
       await admin.query(`CREATE DATABASE "${isolatedDb}"`);
     } catch (err) {
       console.warn(`[auth-codes.spec.ts] Live PostgreSQL not reachable: ${(err as Error).message}. Skipping.`);

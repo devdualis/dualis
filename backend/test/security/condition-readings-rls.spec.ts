@@ -9,6 +9,7 @@ import { DatabaseService } from '../../src/database/database.service';
 import { EncryptionService } from '../../src/common/encryption/encryption.service';
 import { JournalService } from '../../src/modules/journal/journal.service';
 import { CreateJournalEntryDto } from '../../src/modules/journal/dto/journal.dto';
+import { dropTestDatabase } from '../support/drop-test-database';
 
 // Preparation refuses non-local URLs and never loads a dotenv file.
 const { prepareLocalDatabase } = require('../support/prepare-local-test-db.cjs');
@@ -97,7 +98,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)('Condition readings: real runtim
     await appPool?.end().catch(() => {});
     await admin?.end().catch(() => {});
     if (root) {
-      await root.query(`DROP DATABASE IF EXISTS "${dbName}" WITH (FORCE)`).catch(() => {});
+      await dropTestDatabase(root, dbName).catch(() => {});
       await root.end();
     }
   });

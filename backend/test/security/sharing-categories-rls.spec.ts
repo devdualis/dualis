@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { Pool, PoolClient } from 'pg';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { dropTestDatabase } from '../support/drop-test-database';
 
 const MIGRATIONS_DIR = join(__dirname, '../../src/database/migrations');
 const CATEGORY_MIGRATION = '0028_guardianship_consent_gaps.sql';
@@ -102,7 +103,7 @@ describe('Security Regression: 0028 category-scoped sharing grants (PREM-07)', (
 
     const admin = new Pool({ connectionString: rawTestUrl, max: 1, connectionTimeoutMillis: 3000 });
     try {
-      await admin.query(`DROP DATABASE IF EXISTS "${isolatedDb}" WITH (FORCE)`);
+      await dropTestDatabase(admin, isolatedDb);
       await admin.query(`CREATE DATABASE "${isolatedDb}"`);
     } catch (err) {
       console.warn(`${SPEC} Live PostgreSQL not reachable: ${(err as Error).message}. Skipping live database assertions.`);
@@ -277,7 +278,7 @@ describe('Security Regression: 0028 category-scoped sharing grants (PREM-07)', (
     if (adminPool) await adminPool.end().catch(() => {});
     if (baseUrl && isolatedDb) {
       const admin = new Pool({ connectionString: baseUrl, max: 1, connectionTimeoutMillis: 3000 });
-      await admin.query(`DROP DATABASE IF EXISTS "${isolatedDb}" WITH (FORCE)`).catch(() => {});
+      await dropTestDatabase(admin, isolatedDb).catch(() => {});
       await admin.end().catch(() => {});
     }
   });
