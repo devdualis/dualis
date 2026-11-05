@@ -10,6 +10,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../hydration/presentation/screens/hydration_dashboard_screen.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
+import '../../../../shared/widgets/premium_gradient_icon.dart';
 import '../controllers/habits_controller.dart';
 import '../../domain/models/habit_day.dart';
 
@@ -75,11 +76,19 @@ class TodayHabitsCard extends ConsumerWidget {
                     color: AppColors.clinicalTeal.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
-                    Icons.wb_twilight_rounded,
-                    color: AppColors.clinicalTeal,
-                    size: 24,
-                  ),
+                  child: premium
+                      ? const PremiumGradientIcon(
+                          icon: Icon(
+                            Icons.wb_twilight_rounded,
+                            color: AppColors.clinicalTeal,
+                            size: 24,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.wb_twilight_rounded,
+                          color: AppColors.clinicalTeal,
+                          size: 24,
+                        ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -138,6 +147,7 @@ class _SleepTile extends ConsumerWidget {
 
     return _HabitTile(
       key: const Key('home_habit_tile_sleep'),
+      premiumIcon: ref.watch(premiumProfilesEnabledProvider),
       background: _sleepBg,
       border: _sleepBorder,
       accent: _sleepAccent,
@@ -192,6 +202,7 @@ class _MovementTile extends ConsumerWidget {
 
     return _HabitTile(
       key: const Key('home_habit_tile_movement'),
+      premiumIcon: ref.watch(premiumProfilesEnabledProvider),
       background: _moveBg,
       border: _moveBorder,
       accent: _moveAccent,
@@ -244,6 +255,7 @@ class _WaterTile extends ConsumerWidget {
 
     return _HabitTile(
       key: const Key('home_habit_tile_water'),
+      premiumIcon: ref.watch(premiumProfilesEnabledProvider),
       background: AppColors.clinicalTealLight,
       border: _waterBorder,
       accent: AppColors.clinicalTeal,
@@ -385,6 +397,9 @@ class _HabitTile extends StatelessWidget {
   final Widget action;
   final VoidCallback onTap;
 
+  /// Premium build: the tile icon gets the teal gradient.
+  final bool premiumIcon;
+
   const _HabitTile({
     super.key,
     required this.background,
@@ -399,6 +414,7 @@ class _HabitTile extends StatelessWidget {
     required this.onTap,
     this.extra,
     this.valueCaption,
+    this.premiumIcon = false,
   });
 
   @override
@@ -425,7 +441,9 @@ class _HabitTile extends StatelessWidget {
                       color: accent.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(icon, color: accent, size: 18),
+                    child: premiumIcon
+                        ? PremiumGradientIcon(icon: Icon(icon, color: accent, size: 18))
+                        : Icon(icon, color: accent, size: 18),
                   ),
                   const Spacer(),
                   if (done)

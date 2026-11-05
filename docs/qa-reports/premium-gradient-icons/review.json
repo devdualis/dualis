@@ -1,0 +1,35 @@
+{
+  "01_premium_home": {
+    "route": "/home",
+    "errors": []
+  },
+  "02_physical_checkin": {
+    "route": "/journal",
+    "errors": []
+  },
+  "03_emotional_checkin": {
+    "route": "/journal",
+    "errors": []
+  },
+  "04_habits_water_added": {
+    "route": "/home",
+    "errors": []
+  },
+  "05_habits_screen": {
+    "route": "/habits",
+    "errors": []
+  },
+  "06_emergency": {
+    "route": "/emergency",
+    "errors": []
+  },
+  "07_history": {
+    "route": "/home",
+    "errors": []
+  },
+  "08_premium_home_final": {
+    "route": "/home",
+    "errors": []
+  },
+  "result": "passed"
+}

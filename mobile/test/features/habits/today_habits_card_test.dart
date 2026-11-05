@@ -137,6 +137,62 @@ void main() {
     verifyNever(() => repository.getHabits(days: any(named: 'days')));
   });
 
+  testWidgets('Premium: header and habit tile icons get the gradient, done marker stays plain',
+      (tester) async {
+    await tester.pumpWidget(_app(premium: true, repository: repository));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('home_habit_moved_yes')));
+    await tester.pumpAndSettle();
+
+    final card = find.byKey(const Key('home_habits_card'));
+    Finder masksAbove(Finder f) =>
+        find.ancestor(of: f, matching: find.byType(ShaderMask));
+
+    for (final (icon, size) in [
+      (Icons.wb_twilight_rounded, 24.0),
+      (Icons.bedtime_rounded, 18.0),
+      (Icons.directions_walk_rounded, 18.0),
+      (Icons.water_drop_rounded, 18.0),
+    ]) {
+      final glyph = find.descendant(of: card, matching: find.byIcon(icon));
+      expect(glyph, findsOneWidget, reason: '$icon');
+      expect(masksAbove(glyph), findsOneWidget, reason: '$icon');
+      expect(tester.widget<Icon>(glyph).size, size);
+    }
+
+    final doneMarker =
+        find.descendant(of: card, matching: find.byIcon(Icons.check_circle_rounded));
+    expect(doneMarker, findsWidgets);
+    for (final element in doneMarker.evaluate()) {
+      expect(
+        find.ancestor(
+          of: find.byWidget(element.widget),
+          matching: find.byType(ShaderMask),
+        ),
+        findsNothing,
+      );
+    }
+    expect(find.descendant(of: card, matching: find.byType(ShaderMask)), findsNWidgets(4));
+    expect(find.byKey(const Key('premium_active_dot')), findsNothing);
+  });
+
+  testWidgets('Free: no gradient in the habits card; header keeps its rect in Premium',
+      (tester) async {
+    await tester.pumpWidget(_app(premium: false, repository: repository));
+    await tester.pumpAndSettle();
+
+    final card = find.byKey(const Key('home_habits_card'));
+    expect(find.descendant(of: card, matching: find.byType(ShaderMask)), findsNothing);
+    expect(find.byKey(const Key('premium_active_dot')), findsNothing);
+    final freeRect = tester.getRect(find.byIcon(Icons.wb_twilight_rounded));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(_app(premium: true, repository: repository));
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byIcon(Icons.wb_twilight_rounded)), freeRect);
+  });
+
   testWidgets('Free build: /habits opens the Premium promo', (tester) async {
     late GoRouter router;
     await tester.pumpWidget(ProviderScope(

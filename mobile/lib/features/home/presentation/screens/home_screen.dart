@@ -35,6 +35,7 @@ import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/premium_gradient_icon.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -142,7 +143,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     List<Widget> appBarActions = [];
 
     if (_currentTabIndex == 0) {
-      appBarTitle = DualisLogo(
+      final logo = DualisLogo(
         variant: DualisLogoVariant.horizontal,
         width: 160,
         withProtectionArea: false,
@@ -154,6 +155,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           }
         },
       );
+      appBarTitle = ref.watch(premiumProfilesEnabledProvider)
+          // Premium builds: tier mark right under the app logo, the usual
+          // place apps show their plan. Same text as the login label.
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                logo,
+                Row(
+                  key: const Key('home_premium_label'),
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 5,
+                      height: 5,
+                      decoration: const BoxDecoration(
+                        color: PremiumAccents.champagne,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      AppLocalizations.of(context).loginPremiumLabel,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        height: 1.1,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.2,
+                        color: AppColors.clinicalTeal,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            )
+          : logo;
       appBarActions = [
         if (ref.watch(premiumProfilesEnabledProvider)) ...[
           const ProfileAppBarPill(),
@@ -304,6 +341,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         showCare: true,
         careLocked: careLocked,
         habitsTab: !careLocked,
+        premiumIcons: !careLocked,
         currentIndex: _currentTabIndex,
         onTap: (index) {
           setState(() => _currentTabIndex = index);
