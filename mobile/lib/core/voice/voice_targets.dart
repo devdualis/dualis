@@ -4,6 +4,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/feature_flags.dart';
 import 'voice_matcher.dart';
 
+/// What a voice target is on screen. Only [option] and [choice] targets are
+/// read aloud as answers; the others are actions or hidden duplicates.
+enum VoiceTargetRole {
+  /// An answer of a multi-select step.
+  option,
+
+  /// An answer of a single-choice step (a tap answers and moves on).
+  choice,
+
+  /// "Continuar" / "Próximo".
+  advance,
+
+  /// "Salvar" / "Só registrar".
+  save,
+
+  /// "Voltar".
+  back,
+
+  /// "Pular".
+  skip,
+
+  /// Anything else: tabs, switches, "+ mais", hidden duplicates.
+  other,
+}
+
 /// Something on screen the person can pick by voice: an option, a button.
 class VoiceTargetEntry {
   VoiceTargetEntry._(this._registry, this.order);
@@ -14,6 +39,10 @@ class VoiceTargetEntry {
   VoidCallback? onSelect;
   ModalRoute<dynamic>? route;
   Object? step;
+  VoiceTargetRole role = VoiceTargetRole.option;
+
+  /// Read aloud instead of `labels.first` when set.
+  String? spokenLabel;
 
   /// Only targets of the route on top (not the screens under it or behind
   /// a dialog), of the step on screen (not the one sliding out) and that
@@ -44,6 +73,25 @@ class VoiceTextSinkEntry {
   void remove() => _registry._sinks.remove(this);
 }
 
+/// The question of the step on screen, read aloud in the hands-free
+/// check-in.
+class VoicePromptEntry {
+  VoicePromptEntry._(this._registry, this.order);
+
+  final VoiceTargetRegistry _registry;
+  final int order;
+  String text = '';
+  ModalRoute<dynamic>? route;
+  Object? step;
+
+  bool get isActive =>
+      text.trim().isNotEmpty &&
+      (route?.isCurrent ?? true) &&
+      (step == null || step == _registry.activeStep);
+
+  void remove() => _registry._prompts.remove(this);
+}
+
 /// A match of what was said against the targets on screen.
 class VoiceTargetMatch {
   const VoiceTargetMatch(this.entry, this.score, this.label);
@@ -56,6 +104,7 @@ class VoiceTargetMatch {
 class VoiceTargetRegistry {
   final List<VoiceTargetEntry> _targets = [];
   final List<VoiceTextSinkEntry> _sinks = [];
+  final List<VoicePromptEntry> _prompts = [];
   int _order = 0;
 
   /// Token of the [VoiceStep] on screen. Targets of another step (one
@@ -73,6 +122,38 @@ class VoiceTargetRegistry {
     _sinks.add(entry);
     return entry;
   }
+
+  VoicePromptEntry addPrompt() {
+    final entry = VoicePromptEntry._(this, _order++);
+    _prompts.add(entry);
+    return entry;
+  }
+
+  /// The newest active prompt: the question of the step on screen.
+  VoicePromptEntry? get activePrompt {
+    VoicePromptEntry? best;
+    for (final p in _prompts) {
+      if (p.isActive && (best == null || p.order > best.order)) best = p;
+    }
+    return best;
+  }
+
+  /// Answers on screen, in build (reading) order.
+  List<VoiceTargetEntry> get readableEntries {
+    final entries = [
+      for (final t in activeTargets)
+        if ((t.role == VoiceTargetRole.option || t.role == VoiceTargetRole.choice) &&
+            _readLabel(t).isNotEmpty)
+          t,
+    ]..sort((a, b) => a.order.compareTo(b.order));
+    return entries;
+  }
+
+  /// Labels of [readableEntries], as they are read aloud.
+  List<String> get readableOptions => [for (final t in readableEntries) _readLabel(t)];
+
+  static String _readLabel(VoiceTargetEntry t) =>
+      (t.spokenLabel ?? (t.labels.isEmpty ? '' : t.labels.first)).trim();
 
   List<VoiceTargetEntry> get activeTargets =>
       [for (final t in _targets) if (t.isActive) t];
@@ -142,11 +223,17 @@ class VoiceTarget extends StatefulWidget {
     super.key,
     required this.labels,
     required this.onSelect,
+    this.role = VoiceTargetRole.option,
+    this.spokenLabel,
     required this.child,
   });
 
   final List<String> labels;
   final VoidCallback? onSelect;
+  final VoiceTargetRole role;
+
+  /// Read aloud instead of the first label (hands-free check-in).
+  final String? spokenLabel;
   final Widget child;
 
   @override
@@ -180,7 +267,9 @@ class _VoiceTargetState extends State<VoiceTarget> {
     if (entry == null) return;
     entry
       ..labels = widget.labels
-      ..onSelect = widget.onSelect;
+      ..onSelect = widget.onSelect
+      ..role = widget.role
+      ..spokenLabel = widget.spokenLabel;
   }
 
   @override
@@ -225,6 +314,51 @@ class _VoiceTextSinkState extends State<VoiceTextSink> {
   void didUpdateWidget(VoiceTextSink oldWidget) {
     super.didUpdateWidget(oldWidget);
     _entry?.onText = widget.onText;
+  }
+
+  @override
+  void dispose() {
+    _entry?.remove();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// The question of a step, read aloud in the hands-free check-in before
+/// listening (Premium builds only). Only the step's own question goes
+/// here, never text the person wrote.
+class VoicePrompt extends StatefulWidget {
+  const VoicePrompt({super.key, required this.text, required this.child});
+
+  final String text;
+  final Widget child;
+
+  @override
+  State<VoicePrompt> createState() => _VoicePromptState();
+}
+
+class _VoicePromptState extends State<VoicePrompt> {
+  VoicePromptEntry? _entry;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final container = ProviderScope.containerOf(context, listen: false);
+    if (_entry == null && container.read(premiumProfilesEnabledProvider)) {
+      _entry = container.read(voiceTargetRegistryProvider).addPrompt();
+    }
+    _entry
+      ?..route = ModalRoute.of(context)
+      ..step = VoiceStep.tokenOf(context)
+      ..text = widget.text;
+  }
+
+  @override
+  void didUpdateWidget(VoicePrompt oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _entry?.text = widget.text;
   }
 
   @override

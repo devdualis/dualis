@@ -10,6 +10,7 @@ import '../../../core/router/route_paths.dart';
 import '../../../core/security/biometric_lock_controller.dart';
 import '../../../core/voice/voice_input_service.dart';
 import '../../../core/voice/voice_matcher.dart';
+import '../../../core/voice/voice_output_service.dart';
 import '../../../core/voice/voice_targets.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/locale_provider.dart';
@@ -46,6 +47,7 @@ class VoiceState {
     this.partial = '',
     this.handsFree = false,
     this.dictating = false,
+    this.speaking = false,
     this.feedback,
   });
 
@@ -57,6 +59,10 @@ class VoiceState {
 
   /// Speech goes to one text field (mic next to the field).
   final bool dictating;
+
+  /// Hands-free check-in: the step's question is being read aloud. The mic
+  /// is closed meanwhile.
+  final bool speaking;
   final VoiceFeedback? feedback;
 
   VoiceState copyWith({
@@ -64,6 +70,7 @@ class VoiceState {
     String? partial,
     bool? handsFree,
     bool? dictating,
+    bool? speaking,
     VoiceFeedback? feedback,
   }) =>
       VoiceState(
@@ -71,6 +78,7 @@ class VoiceState {
         partial: partial ?? this.partial,
         handsFree: handsFree ?? this.handsFree,
         dictating: dictating ?? this.dictating,
+        speaking: speaking ?? this.speaking,
         feedback: feedback ?? this.feedback,
       );
 }
@@ -85,6 +93,14 @@ class VoiceController extends Notifier<VoiceState> {
   int _misses = 0;
   bool _handled = false;
   ValueChanged<String>? _dictationSink;
+
+  /// What was last read aloud in this hands-free run (step, entries), so a
+  /// step is read once and not again after a phrase not understood.
+  String? _lastReadKey;
+
+  /// Gap between the end of the speech and opening the mic, so the mic
+  /// never hears the tail of the app's own voice.
+  static const Duration speechGap = Duration(milliseconds: 300);
 
   /// Silences or phrases not understood in a row before hands-free mode
   /// stops by itself (so a TV or a chat in the room never keeps it going).
@@ -113,6 +129,7 @@ class VoiceController extends Notifier<VoiceState> {
   bool get _locked => ref.read(biometricLockControllerProvider).locked;
 
   VoiceInputService get _service => ref.read(voiceInputServiceProvider);
+  VoiceOutputService get _output => ref.read(voiceOutputServiceProvider);
   GoRouter get _router => ref.read(appRouterProvider);
   AppLocalizations get _l10n => lookupAppLocalizations(ref.read(localeProvider));
 
@@ -138,8 +155,11 @@ class VoiceController extends Notifier<VoiceState> {
 
   Future<void> startCommands() async {
     if (!_enabled || _locked) return;
+    // Route stops (help, leaving the check-in) also cover the reading.
+    _watchRoutes();
     _dictationSink = null;
     _misses = 0;
+    _lastReadKey = null;
     state = state.copyWith(handsFree: _onJournal, dictating: false);
     await _listen();
   }
@@ -174,12 +194,13 @@ class VoiceController extends Notifier<VoiceState> {
   Future<void> stop() async {
     await _stopSession();
     _dictationSink = null;
+    _lastReadKey = null;
     state = state.copyWith(handsFree: false, dictating: false);
   }
 
   Future<void> _stopSession() async {
     _session++;
-    state = state.copyWith(listening: false, partial: '');
+    state = state.copyWith(listening: false, partial: '', speaking: false);
     try {
       await _service.cancel();
     } catch (_) {}
@@ -188,6 +209,11 @@ class VoiceController extends Notifier<VoiceState> {
   Future<void> _listen() async {
     if (_location == RoutePaths.emergency) return;
     _watchRoutes();
+    if (state.handsFree && !state.dictating && _onJournal) {
+      final session = _session;
+      await _readStep();
+      if (session != _session) return; // Stopped while reading.
+    }
     final error = await _service.prepare();
     if (error != null) {
       state = state.copyWith(listening: false, handsFree: false, dictating: false);
@@ -217,6 +243,30 @@ class VoiceController extends Notifier<VoiceState> {
         _endSession(session, lastPartial);
       },
     );
+  }
+
+  /// Hands-free check-in: reads the question of the step on screen and up
+  /// to [maxReadOptions] of its options, once per step, before listening.
+  Future<void> _readStep() async {
+    final registry = ref.read(voiceTargetRegistryProvider);
+    final prompt = registry.activePrompt;
+    if (prompt == null) return;
+    final entries = registry.readableEntries;
+    final key = '${prompt.order}:${[for (final e in entries) e.order].join(',')}';
+    if (key == _lastReadKey) return;
+    _lastReadKey = key;
+    final text = composeReadOut(_l10n, prompt.text, registry.readableOptions);
+    final session = _session;
+    state = state.copyWith(speaking: true);
+    try {
+      await _output.prepare(ref.read(localeProvider).languageCode);
+      if (session != _session || _location == RoutePaths.emergency) return;
+      await _output.speak(text);
+    } finally {
+      if (session == _session) state = state.copyWith(speaking: false);
+    }
+    if (session != _session) return;
+    await Future<void>.delayed(speechGap);
   }
 
   void _endSession(int session, String text) {

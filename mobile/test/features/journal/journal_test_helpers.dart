@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
@@ -6,6 +7,7 @@ import 'package:dualis_mobile/core/config/feature_flags.dart';
 import 'package:dualis_mobile/core/database/app_database.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/core/theme/app_theme.dart';
+import 'package:dualis_mobile/core/voice/voice_output_service.dart';
 import 'package:dualis_mobile/features/dashboard/presentation/screens/check_in_summary_screen.dart';
 import 'package:dualis_mobile/features/journal/data/journal_local_store.dart';
 import 'package:dualis_mobile/features/journal/data/journal_remote_data_source.dart';
@@ -136,6 +138,51 @@ class FakeJournalRemote implements JournalRemoteDataSource {
   }
 }
 
+/// Records what would be read aloud. Log entries: `prepare:<lang>`,
+/// `speak`, `done`, `stop`; [log] can be shared with a fake mic to check
+/// the order. With [hold] > 0 speak() stays pending (until [stop] or the
+/// hold passes), to observe the speaking phase.
+class FakeVoiceOutput implements VoiceOutputService {
+  FakeVoiceOutput({List<String>? log}) : log = log ?? [];
+
+  final List<String> spoken = [];
+  final List<String> log;
+  Duration hold = Duration.zero;
+  Completer<void>? _pending;
+  Timer? _timer;
+
+  bool get speaking => _pending != null;
+
+  @override
+  Future<void> prepare(String languageCode) async => log.add('prepare:$languageCode');
+
+  @override
+  Future<void> speak(String text) async {
+    spoken.add(text);
+    log.add('speak');
+    if (hold > Duration.zero) {
+      final pending = _pending = Completer<void>();
+      _timer = Timer(hold, _release);
+      await pending.future;
+    }
+    log.add('done');
+  }
+
+  void _release() {
+    final pending = _pending;
+    _pending = null;
+    _timer?.cancel();
+    _timer = null;
+    if (pending != null && !pending.isCompleted) pending.complete();
+  }
+
+  @override
+  Future<void> stop() async {
+    log.add('stop');
+    _release();
+  }
+}
+
 class JournalHarness {
   final AppDatabase db;
   final FakeJournalRemote remote;
@@ -147,6 +194,9 @@ class JournalHarness {
   /// the compile-time flag (Free in tests) and adds no override.
   bool? premium;
   late final JournalRepository repository;
+
+  /// Replaces text to speech in every journal and voice test.
+  final FakeVoiceOutput voiceOutput = FakeVoiceOutput();
 
   JournalHarness({List<UserCondition> conditions = const [], bool online = true})
       : this._(AppDatabase(NativeDatabase.memory()), conditions, online);
@@ -168,6 +218,7 @@ class JournalHarness {
         journalRandomProvider.overrideWithValue(Random(7)),
         if (clock != null) homeClockProvider.overrideWithValue(clock!),
         if (premium != null) premiumProfilesEnabledProvider.overrideWithValue(premium!),
+        voiceOutputServiceProvider.overrideWithValue(voiceOutput),
       ];
 }
 

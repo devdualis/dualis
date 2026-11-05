@@ -138,6 +138,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           leading: VoiceTarget(
             labels: [l10n.jv2Back, ...VoiceMatcher.aliases(l10n.voiceAliasBack)],
             onSelect: _back,
+            role: VoiceTargetRole.back,
             child: IconButton(
               key: const Key('jv2_back'),
               tooltip: l10n.jv2Back,
@@ -395,6 +396,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           const SizedBox(height: 4),
           VoiceTarget(
             labels: [l10n.chronicTrackSaveWithout],
+            role: VoiceTargetRole.other,
             onSelect: state.isSaving
                 ? null
                 : () {
@@ -599,6 +601,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             VoiceTarget(
               labels: [moreLabel],
               onSelect: canConfirm ? onMore : null,
+              role: VoiceTargetRole.other,
               child: const SizedBox.shrink(),
             ),
           if (showMore)
@@ -640,6 +643,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             selected: true,
             multi: true,
             semanticsHint: l10n.jv2Remove,
+            voiceRole: VoiceTargetRole.other,
             onTap: () => _controller.removeCustomLabel(label),
           ),
         const SizedBox(height: 8),
@@ -678,6 +682,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
               VoiceTarget(
                 labels: [l10n.jv2WriteMineAdd],
                 onSelect: _suggestingCustom ? null : _addCustom,
+                role: VoiceTargetRole.other,
                 child: const SizedBox.shrink(),
               ),
               FilledButton(
@@ -694,6 +699,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             emoji: '✏️',
             label: l10n.jv2WriteMine,
             accent: true,
+            voiceRole: VoiceTargetRole.other,
             onTap: () => setState(() => _writingCustom = true),
           ),
       ],
@@ -748,6 +754,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             VoiceTarget(
               labels: [l10n.jv2SuggestNo, ...VoiceMatcher.aliases(l10n.voiceAliasNo)],
               onSelect: () => Navigator.of(ctx).pop(false),
+              role: VoiceTargetRole.other,
               child: TextButton(
                 key: const Key('jv2_suggest_no'),
                 onPressed: () => Navigator.of(ctx).pop(false),
@@ -757,6 +764,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             VoiceTarget(
               labels: [l10n.jv2SuggestYes, ...VoiceMatcher.aliases(l10n.voiceAliasYes)],
               onSelect: () => Navigator.of(ctx).pop(true),
+              role: VoiceTargetRole.other,
               child: FilledButton(
                 key: const Key('jv2_suggest_yes'),
                 onPressed: () => Navigator.of(ctx).pop(true),
@@ -829,6 +837,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           VoiceTarget(
             labels: [side == JournalKeys.sideBack ? l10n.jv2BodyBack : l10n.jv2BodyFront],
             onSelect: state.bodySide == side ? null : () => _controller.setBodySide(side),
+            role: VoiceTargetRole.other,
             child: const SizedBox.shrink(),
           ),
         const SizedBox(height: 12),
@@ -1028,6 +1037,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             VoiceTarget(
               labels: [JournalLabels.persistence(l10n, p)],
               onSelect: voice ? () => _controller.setPersistence(item.draftId, p) : null,
+              role: VoiceTargetRole.other,
               child: const SizedBox.shrink(),
             ),
           for (final p in JournalKeys.persistences)
@@ -1238,6 +1248,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
                 emoji: journalEmojis[t],
                 label: JournalLabels.trigger(l10n, t),
                 selected: state.triggers.contains(t),
+                multi: true,
                 onTap: () => _controller.toggleTrigger(t),
               ),
           ],
@@ -1252,6 +1263,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
                 emoji: journalEmojis[t],
                 label: JournalLabels.trigger(l10n, t),
                 selected: state.triggers.contains(t),
+                multi: true,
                 wide: true,
                 onTap: () => _controller.toggleTrigger(t),
               ),
@@ -1297,6 +1309,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         VoiceTarget(
           labels: [l10n.jv2Skip, ...VoiceMatcher.aliases(l10n.voiceAliasSkip)],
           onSelect: onSkip,
+          role: VoiceTargetRole.skip,
           child: const SizedBox.shrink(),
         ),
         Expanded(
@@ -1364,6 +1377,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
                 emoji: journalEmojis[h],
                 label: JournalLabels.helper(l10n, h),
                 selected: state.helpers.contains(h),
+                multi: true,
                 onTap: () => _controller.toggleHelper(h),
               ),
           ],
@@ -1525,12 +1539,16 @@ class _StepLayout extends StatelessWidget {
               ],
               if (question != null) ...[
                 const SizedBox(height: 6),
-                Text(
-                  question!,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    height: 1.25,
+                // Read aloud in the hands-free check-in (Premium).
+                VoicePrompt(
+                  text: question!,
+                  child: Text(
+                    question!,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      height: 1.25,
+                    ),
                   ),
                 ),
               ],
@@ -1740,13 +1758,18 @@ class _ChoiceCard extends StatelessWidget {
     this.wide = false,
     this.showCheck = true,
     this.voice = true,
+    this.multi = false,
     required this.onTap,
   });
+
+  /// Several answers can be picked (read aloud as options, not choices).
+  final bool multi;
 
   @override
   Widget build(BuildContext context) => VoiceTarget(
         labels: [label],
         onSelect: enabled && voice ? onTap : null,
+        role: multi ? VoiceTargetRole.option : VoiceTargetRole.choice,
         child: _content(context),
       );
 
@@ -1853,7 +1876,12 @@ class _TopicTabs extends StatelessWidget {
       child: Row(
         children: [
           for (final t in tabs)
-            VoiceTarget(labels: [t.label], onSelect: t.onTap, child: const SizedBox.shrink()),
+            VoiceTarget(
+              labels: [t.label],
+              onSelect: t.onTap,
+              role: VoiceTargetRole.other,
+              child: const SizedBox.shrink(),
+            ),
           for (final t in tabs)
             Expanded(
               child: Semantics(
@@ -1947,11 +1975,20 @@ class _ChoiceTile extends StatelessWidget {
     this.dense = false,
     this.accent = false,
     this.semanticsHint,
+    this.voiceRole,
     required this.onTap,
   });
 
+  /// Role for voice; by default an option (multi) or a choice.
+  final VoiceTargetRole? voiceRole;
+
   @override
-  Widget build(BuildContext context) => VoiceTarget(labels: [label], onSelect: enabled ? onTap : null, child: _content(context));
+  Widget build(BuildContext context) => VoiceTarget(
+        labels: [label],
+        onSelect: enabled ? onTap : null,
+        role: voiceRole ?? (multi ? VoiceTargetRole.option : VoiceTargetRole.choice),
+        child: _content(context),
+      );
 
   Widget _content(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -2395,7 +2432,12 @@ class _MarkedPill extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => VoiceTarget(labels: [removeLabel], onSelect: onRemove, child: _content(context));
+  Widget build(BuildContext context) => VoiceTarget(
+        labels: [removeLabel],
+        onSelect: onRemove,
+        role: VoiceTargetRole.other,
+        child: _content(context),
+      );
 
   Widget _content(BuildContext context) {
     return Semantics(
@@ -2477,7 +2519,17 @@ class _ContinueButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => VoiceTarget(labels: _voiceLabels(context), onSelect: busy ? null : onPressed, child: _content(context));
+  Widget build(BuildContext context) => VoiceTarget(
+        labels: _voiceLabels(context),
+        onSelect: busy ? null : onPressed,
+        role: _isSave(context) ? VoiceTargetRole.save : VoiceTargetRole.advance,
+        child: _content(context),
+      );
+
+  bool _isSave(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return label == l10n.jv2Save || label == l10n.jv22JustSave;
+  }
 
   /// "Continuar" and "Salvar" also answer to their usual synonyms.
   List<String> _voiceLabels(BuildContext context) {
