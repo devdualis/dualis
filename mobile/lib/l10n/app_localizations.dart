@@ -8878,6 +8878,12 @@ abstract class AppLocalizations {
   /// **'O reconhecimento de voz não está disponível neste aparelho agora.'**
   String get voiceUnavailable;
 
+  /// No description provided for @voiceNotHeard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não ouvi nada. Toque no microfone e fale de novo.'**
+  String get voiceNotHeard;
+
   /// No description provided for @voiceWaterLogged.
   ///
   /// In pt, this message translates to:

@@ -3202,6 +3202,7 @@
   "@voiceNotUnderstood": {"placeholders": {"text": {"type": "String"}}},
   "voicePermissionDenied": "Para usar a voz, permita o microfone e o reconhecimento de fala nos ajustes do aparelho.",
   "voiceUnavailable": "O reconhecimento de voz não está disponível neste aparelho agora.",
+  "voiceNotHeard": "Não ouvi nada. Toque no microfone e fale de novo.",
   "voiceWaterLogged": "Registrado: um copo de água (250 ml).",
   "voiceWaterFailed": "Não foi possível registrar a água. Tente de novo.",
   "voiceAliasHelp": "ajuda|socorro|emergência|samu|cvv|192|188|preciso de ajuda",

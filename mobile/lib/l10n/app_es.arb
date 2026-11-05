@@ -1501,6 +1501,7 @@
   "voiceNotUnderstood": "No encontré \"{text}\" en esta pantalla. Di una opción tal como está escrita.",
   "voicePermissionDenied": "Para usar la voz, permite el micrófono y el reconocimiento de voz en los ajustes del dispositivo.",
   "voiceUnavailable": "El reconocimiento de voz no está disponible en este dispositivo ahora.",
+  "voiceNotHeard": "No te escuché. Toca el micrófono y vuelve a hablar.",
   "voiceWaterLogged": "Registrado: un vaso de agua (250 ml).",
   "voiceWaterFailed": "No se pudo registrar el agua. Inténtalo de nuevo.",
   "voiceAliasHelp": "ayuda|socorro|emergencia|necesito ayuda|192|188",

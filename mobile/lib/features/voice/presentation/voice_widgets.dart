@@ -152,6 +152,7 @@ class _VoiceStatusBannerState extends ConsumerState<VoiceStatusBanner> {
         VoiceFeedbackKind.heard => l10n.voiceHeard(f.text),
         VoiceFeedbackKind.noted => l10n.voiceNoted,
         VoiceFeedbackKind.notUnderstood => l10n.voiceNotUnderstood(f.text),
+        VoiceFeedbackKind.notHeard => l10n.voiceNotHeard,
         VoiceFeedbackKind.permissionDenied => l10n.voicePermissionDenied,
         VoiceFeedbackKind.unavailable => l10n.voiceUnavailable,
         VoiceFeedbackKind.waterLogged => l10n.voiceWaterLogged,

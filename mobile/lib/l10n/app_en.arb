@@ -1501,6 +1501,7 @@
   "voiceNotUnderstood": "\"{text}\" isn't on this screen. Say an option as it is written.",
   "voicePermissionDenied": "To use voice, allow the microphone and speech recognition in your device settings.",
   "voiceUnavailable": "Speech recognition isn't available on this device right now.",
+  "voiceNotHeard": "I didn't hear anything. Tap the mic and speak again.",
   "voiceWaterLogged": "Logged: one glass of water (250 ml).",
   "voiceWaterFailed": "Couldn't log the water. Please try again.",
   "voiceAliasHelp": "help|emergency|sos|i need help|192|188",

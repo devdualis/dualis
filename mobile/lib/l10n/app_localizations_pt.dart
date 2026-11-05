@@ -5243,6 +5243,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'O reconhecimento de voz não está disponível neste aparelho agora.';
 
   @override
+  String get voiceNotHeard =>
+      'Não ouvi nada. Toque no microfone e fale de novo.';
+
+  @override
   String get voiceWaterLogged => 'Registrado: um copo de água (250 ml).';
 
   @override

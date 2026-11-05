@@ -271,6 +271,17 @@ void main() {
       );
     });
 
+    testWidgets('silence changes nothing and says nothing was heard', (tester) async {
+      voice = FakeVoiceInput();
+      await pump(tester, premium: true);
+      await say(tester, '  ');
+      expect(find.byKey(const Key('jv2_mood_nao_tao_bem')), findsOneWidget);
+      expect(
+        containerOf(tester).read(voiceControllerProvider).feedback?.kind,
+        VoiceFeedbackKind.notHeard,
+      );
+    });
+
     testWidgets('dictation writes into the note field', (tester) async {
       voice = FakeVoiceInput(['dormi pouco']);
       await pump(tester, premium: true);

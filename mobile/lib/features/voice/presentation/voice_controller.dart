@@ -22,6 +22,7 @@ enum VoiceFeedbackKind {
   heard,
   noted,
   notUnderstood,
+  notHeard,
   permissionDenied,
   unavailable,
   waterLogged,
@@ -248,7 +249,9 @@ class VoiceController extends Notifier<VoiceState> {
     // On the help screen voice does nothing: no "voltar" may close it.
     if (_location == RoutePaths.emergency) return false;
     if (text.isEmpty) {
+      // Silence, or the recognizer gave no words: say so, never act.
       _misses++;
+      _say(VoiceFeedbackKind.notHeard);
       return true;
     }
     final previousMisses = _misses;

@@ -5237,6 +5237,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Speech recognition isn\'t available on this device right now.';
 
   @override
+  String get voiceNotHeard =>
+      'I didn\'t hear anything. Tap the mic and speak again.';
+
+  @override
   String get voiceWaterLogged => 'Logged: one glass of water (250 ml).';
 
   @override
