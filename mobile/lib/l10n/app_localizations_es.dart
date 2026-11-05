@@ -1243,7 +1243,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get privacyPolicySection8Bullet1 =>
-      'Qué se envía: solo el texto que escribiste, sin datos que te identifiquen. Antes de enviarlo al proveedor de IA, nuestro servidor quita nombres y números largos; no se envían nombre, CPF, correo electrónico ni otros identificadores tuyos o del perfil.';
+      'Qué se envía: solo el texto que escribiste. No se envía ningún identificador tuyo ni del perfil. Antes de pasar el texto al proveedor de IA, nuestro servidor intenta quitar nombres, correos electrónicos, enlaces y números largos (como el CPF y el teléfono); este paso no es infalible, así que evita escribir datos personales.';
 
   @override
   String get privacyPolicySection8Bullet2 =>

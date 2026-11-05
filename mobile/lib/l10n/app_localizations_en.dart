@@ -1231,7 +1231,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyPolicySection8Bullet1 =>
-      'What is sent: only the text you wrote, de-identified. Before it goes to the AI provider, our server removes names and long numbers; no name, ID number (CPF), email address or other identifiers of you or the profile are sent.';
+      'What is sent: only the text you wrote. No identifier of you or the profile is sent. Before the text goes to the AI provider, our server tries to remove names, email addresses, links and long numbers (such as CPF and phone numbers); this step is not foolproof, so avoid writing personal details.';
 
   @override
   String get privacyPolicySection8Bullet2 =>

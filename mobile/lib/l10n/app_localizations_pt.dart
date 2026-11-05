@@ -1240,7 +1240,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get privacyPolicySection8Bullet1 =>
-      'O que é enviado: só o texto que você escreveu, sem dados que identifiquem você. Antes de enviar ao provedor de IA, o nosso servidor tira nomes e números longos; não vão nome, CPF, e-mail nem outros identificadores seus ou do perfil.';
+      'O que é enviado: só o texto que você escreveu. Nenhum identificador seu ou do perfil é enviado. Antes de passar o texto ao provedor de IA, o nosso servidor tenta tirar nomes, e-mails, links e números longos (como CPF e telefone); esse passo não é infalível, então evite escrever dados pessoais.';
 
   @override
   String get privacyPolicySection8Bullet2 =>

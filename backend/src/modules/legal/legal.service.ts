@@ -346,7 +346,7 @@ export class LegalService {
             content:
               'Si usted lo permite, la app puede usar IA para sugerir opciones del diario a partir de lo que escribe en "escribir el mío" o en "describir con mis palabras". Es un recurso opcional y separado de los términos de uso.',
             bullets: [
-              'Qué se envía: solo el texto que usted escribió, sin datos que lo identifiquen. Antes de enviarlo, la app quita nombres y números largos; no se envían nombre, CPF, correo electrónico ni otros identificadores suyos o del perfil.',
+              'Qué se envía: solo el texto que usted escribió. No se envía ningún identificador suyo ni del perfil. Antes de pasar el texto al proveedor de IA, nuestro servidor intenta quitar nombres, correos electrónicos, enlaces y números largos (como CPF y teléfono); este paso no es infalible, así que conviene no escribir datos personales.',
               'Para qué: sugerir opciones que ya existen en el diario. Usted revisa y activa cada una; nada se marca sin usted. La IA no evalúa su salud.',
               'Dónde: un proveedor de IA en la nube trata el texto en Brasil, en la región de São Paulo. El texto no se guarda en los servidores de DualisCheckUp, no se registra en logs y el proveedor no puede usarlo para entrenar modelos.',
               'Base legal: consentimiento específico (LGPD Art. 11, I), separado de los términos de uso.',
@@ -442,7 +442,7 @@ export class LegalService {
             content:
               'If you allow it, the app can use AI to suggest diary options from what you write in "write my own" or "describe in my own words". This is optional and separate from the terms of use.',
             bullets: [
-              'What is sent: only the text you wrote, de-identified. Before sending it, the app removes names and long numbers; no name, ID number (CPF), email address or other identifiers of you or the profile are sent.',
+              'What is sent: only the text you wrote. No identifier of you or the profile is sent. Before the text goes to the AI provider, our server tries to remove names, email addresses, links and long numbers (such as CPF and phone numbers); this step is not foolproof, so avoid writing personal details.',
               'Why: to suggest options that already exist in the diary. You review and turn on each one; nothing is selected without you. The AI does not assess your health.',
               'Where: a cloud AI provider processes the text in Brazil, in the São Paulo region. The text is not stored on DualisCheckUp servers, is not logged, and the provider may not use it to train models.',
               'Legal basis: specific consent (LGPD Art. 11, I), separate from the terms of use.',
@@ -543,7 +543,7 @@ export class LegalService {
           content:
             'Se você permitir, o app pode usar IA para sugerir opções do diário a partir do que você escreve em "escrever o meu" ou em "descrever com minhas palavras". É um recurso opcional e separado dos termos de uso.',
           bullets: [
-            'O que é enviado: só o texto que você escreveu, sem dados que identifiquem você. Antes de enviar, o app tira nomes e números longos; não vão nome, CPF, e-mail nem outros identificadores seus ou do perfil.',
+            'O que é enviado: só o texto que você escreveu. Nenhum identificador seu ou do perfil é enviado. Antes de passar o texto ao provedor de IA, o nosso servidor tenta tirar nomes, e-mails, links e números longos (como CPF e telefone); esse passo não é infalível, então evite escrever dados pessoais.',
             'Para quê: sugerir opções que já existem no diário. Você confere e liga cada uma; nada é marcado sem você. A IA não avalia a sua saúde.',
             'Onde: um provedor de IA em nuvem processa o texto no Brasil, na região de São Paulo. O texto não fica guardado nos servidores do DualisCheckUp, não é registrado em logs e o provedor não pode usá-lo para treinar modelos.',
             'Base legal: consentimento específico (LGPD Art. 11, I), separado dos termos de uso.',

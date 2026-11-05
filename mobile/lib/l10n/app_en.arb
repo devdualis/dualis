@@ -351,7 +351,7 @@
   "privacyPolicySection7Bullet2": "Security and account recovery notices are strictly transactional and protected.",
   "privacyPolicySection8Title": "8. AI suggestions in your journal",
   "privacyPolicySection8Body": "If you allow it, the app can use AI to suggest journal options from what you write in \"write my own\" or \"describe in my own words\". This is optional and separate from the terms of use.",
-  "privacyPolicySection8Bullet1": "What is sent: only the text you wrote, de-identified. Before it goes to the AI provider, our server removes names and long numbers; no name, ID number (CPF), email address or other identifiers of you or the profile are sent.",
+  "privacyPolicySection8Bullet1": "What is sent: only the text you wrote. No identifier of you or the profile is sent. Before the text goes to the AI provider, our server tries to remove names, email addresses, links and long numbers (such as CPF and phone numbers); this step is not foolproof, so avoid writing personal details.",
   "privacyPolicySection8Bullet2": "Why: to suggest options that already exist in the journal. You review and turn on each one; nothing is selected without you. The AI does not assess your health.",
   "privacyPolicySection8Bullet3": "Where: a contracted cloud AI provider processes the text in Brazil, in the São Paulo region. The text is not stored on DualisCheckUp servers, is not logged, and the provider may not use it to train models.",
   "privacyPolicySection8Bullet4": "Legal basis: specific consent (LGPD Art. 11, I), separate from the terms of use.",

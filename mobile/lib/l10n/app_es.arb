@@ -351,7 +351,7 @@
   "privacyPolicySection7Bullet2": "Los avisos de seguridad y de recuperación de cuenta son estrictamente transaccionales y protegidos.",
   "privacyPolicySection8Title": "8. Sugerencias con IA en el diario",
   "privacyPolicySection8Body": "Si lo permites, la app puede usar IA para sugerir opciones del diario a partir de lo que escribes en \"escribir el mío\" o en \"describir con mis palabras\". Es un recurso opcional y separado de los términos de uso.",
-  "privacyPolicySection8Bullet1": "Qué se envía: solo el texto que escribiste, sin datos que te identifiquen. Antes de enviarlo al proveedor de IA, nuestro servidor quita nombres y números largos; no se envían nombre, CPF, correo electrónico ni otros identificadores tuyos o del perfil.",
+  "privacyPolicySection8Bullet1": "Qué se envía: solo el texto que escribiste. No se envía ningún identificador tuyo ni del perfil. Antes de pasar el texto al proveedor de IA, nuestro servidor intenta quitar nombres, correos electrónicos, enlaces y números largos (como el CPF y el teléfono); este paso no es infalible, así que evita escribir datos personales.",
   "privacyPolicySection8Bullet2": "Para qué: sugerir opciones que ya existen en el diario. Tú revisas y activas cada una; nada se marca sin ti. La IA no evalúa tu salud.",
   "privacyPolicySection8Bullet3": "Dónde: un proveedor de IA en la nube contratado trata el texto en Brasil, en la región de São Paulo. El texto no se guarda en los servidores de DualisCheckUp, no se registra en logs y el proveedor no puede usarlo para entrenar modelos.",
   "privacyPolicySection8Bullet4": "Base legal: consentimiento específico (LGPD Art. 11, I), separado de los términos de uso.",

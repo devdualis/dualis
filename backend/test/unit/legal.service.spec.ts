@@ -139,9 +139,9 @@ describe('LegalService - SaaS Legal Foundations', () => {
 
   describe('AI journal suggestions with specific consent (Phase 17, LGPD-AI-01)', () => {
     it.each([
-      ['pt-BR', '7-sugestoes-ia-diario', /Configurações/, /nome, CPF/, /treinar modelos/],
-      ['es', '7-sugerencias-ia-diario', /Ajustes/, /nombre, CPF/, /entrenar modelos/],
-      ['en', '7-ai-journal-suggestions', /Settings/, /name, ID number/, /train models/],
+      ['pt-BR', '7-sugestoes-ia-diario', /Configurações/, /números longos \(como CPF/, /treinar modelos/],
+      ['es', '7-sugerencias-ia-diario', /Ajustes/, /números largos \(como CPF/, /entrenar modelos/],
+      ['en', '7-ai-journal-suggestions', /Settings/, /long numbers \(such as CPF/, /train models/],
     ])('privacy policy has section 7 on AI journal suggestions (%s)', (lang, sectionId, settings, noIds, noTraining) => {
       const privacy = service.getPrivacyPolicy(lang);
       expect(privacy.sections).toHaveLength(7);
