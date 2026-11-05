@@ -10,6 +10,7 @@ import 'package:dualis_mobile/features/profile/presentation/controllers/active_p
 import 'package:dualis_mobile/l10n/app_localizations_pt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'journal_test_helpers.dart';
@@ -616,6 +617,124 @@ void main() {
         .cast<Map<String, dynamic>>();
     expect(items.single['optionKey'], 'futuro.mente.antecipar');
     expect(items.single['customLabel'], isNull);
+  });
+
+  group('AI consent before "Escrever o meu" suggestions', () {
+    setUp(() => FlutterSecureStorage.setMockInitialValues({}));
+
+    Future<void> writeMine(WidgetTester tester, String text) async {
+      await tapKey(tester, 'jv2_write_mine');
+      await tester.enterText(find.byKey(const Key('jv2_custom_field')), text);
+      await tapKey(tester, 'jv2_custom_add');
+    }
+
+    testWidgets('without consent the dialog comes first; "Agora não" keeps the label and sends nothing',
+        (tester) async {
+      final h = JournalHarness();
+      h.consent.granted = false;
+      h.remote.suggestedOptionKey = 'futuro.mente.antecipar';
+      await pumpJournalFlow(tester, h);
+      await startNotSoGood(tester);
+      await pickFeeling(tester, 'futuro', 'mente');
+
+      await writeMine(tester, 'penso demais no amanhã');
+      expect(find.byKey(const Key('ai_consent_dialog')), findsOneWidget);
+      expect(h.remote.suggestRequests, isEmpty);
+      await tapKey(tester, 'ai_consent_decline');
+
+      expect(find.byKey(const Key('jv2_custom_chip_penso demais no amanhã')), findsOneWidget);
+      expect(find.byKey(const Key('jv2_suggest_dialog')), findsNothing);
+      expect(h.remote.suggestRequests, isEmpty);
+      expect(h.consent.calls.where((c) => c.startsWith('grant')), isEmpty);
+
+      // The decline is remembered: a second label goes straight in.
+      await writeMine(tester, 'não durmo direito');
+      expect(find.byKey(const Key('ai_consent_dialog')), findsNothing);
+      expect(find.byKey(const Key('jv2_custom_chip_não durmo direito')), findsOneWidget);
+      expect(h.remote.suggestRequests, isEmpty);
+    });
+
+    testWidgets('accepting grants the consent, then the suggestion is asked as before',
+        (tester) async {
+      final h = JournalHarness();
+      h.consent.granted = false;
+      h.remote.suggestedOptionKey = 'futuro.mente.antecipar';
+      await pumpJournalFlow(tester, h);
+      await startNotSoGood(tester);
+      await pickFeeling(tester, 'futuro', 'mente');
+
+      await writeMine(tester, 'penso demais no amanhã');
+      expect(h.remote.suggestRequests, isEmpty);
+      await tapKey(tester, 'ai_consent_accept');
+
+      expect(h.consent.granted, isTrue);
+      expect(h.consent.calls, contains('grant:2026.1'));
+      expect(h.remote.suggestRequests.single['text'], 'penso demais no amanhã');
+      expect(find.byKey(const Key('jv2_suggest_dialog')), findsOneWidget);
+      await tapKey(tester, 'jv2_suggest_no');
+      expect(find.byKey(const Key('jv2_custom_chip_penso demais no amanhã')), findsOneWidget);
+    });
+
+    testWidgets('server 403 AI_CONSENT_REQUIRED keeps the typed label and reads the consent again',
+        (tester) async {
+      final h = JournalHarness();
+      h.remote.suggestOptionError = suggestForbidden('AI_CONSENT_REQUIRED');
+      await pumpJournalFlow(tester, h);
+      await startNotSoGood(tester);
+      await pickFeeling(tester, 'futuro', 'mente');
+      final readsBefore = h.consent.calls.where((c) => c == 'status').length;
+
+      await writeMine(tester, 'penso demais no amanhã');
+      expect(find.byKey(const Key('jv2_custom_chip_penso demais no amanhã')), findsOneWidget);
+      expect(find.byKey(const Key('jv2_suggest_dialog')), findsNothing);
+      expect(find.byKey(const Key('ai_consent_dialog')), findsNothing);
+      // One read by the gate, one more after the server said no.
+      expect(h.consent.calls.where((c) => c == 'status').length, readsBefore + 2);
+    });
+
+    testWidgets('server 403 AI_PROFILE_NOT_ALLOWED keeps the typed label', (tester) async {
+      final h = JournalHarness();
+      h.remote.suggestOptionError = suggestForbidden('AI_PROFILE_NOT_ALLOWED');
+      await pumpJournalFlow(tester, h);
+      await startNotSoGood(tester);
+      await pickFeeling(tester, 'futuro', 'mente');
+
+      await writeMine(tester, 'penso demais no amanhã');
+      expect(find.byKey(const Key('jv2_custom_chip_penso demais no amanhã')), findsOneWidget);
+      expect(find.byKey(const Key('jv2_suggest_dialog')), findsNothing);
+    });
+
+    testWidgets('offline keeps the typed label with no consent dialog and no request',
+        (tester) async {
+      final h = JournalHarness(online: false);
+      h.consent.granted = false;
+      h.remote.suggestedOptionKey = 'futuro.mente.antecipar';
+      await pumpJournalFlow(tester, h);
+      await startNotSoGood(tester);
+      await pickFeeling(tester, 'futuro', 'mente');
+
+      await writeMine(tester, 'penso demais no amanhã');
+      expect(find.byKey(const Key('jv2_custom_chip_penso demais no amanhã')), findsOneWidget);
+      expect(find.byKey(const Key('ai_consent_dialog')), findsNothing);
+      expect(find.byKey(const Key('jv2_suggest_dialog')), findsNothing);
+      expect(h.remote.suggestRequests, isEmpty);
+      expect(h.consent.calls, isEmpty);
+    });
+
+    testWidgets('good moments never ask for consent and are never sent', (tester) async {
+      final h = JournalHarness();
+      h.consent.granted = false;
+      h.remote.suggestedOptionKey = 'presente.calma.paz';
+      await pumpJournalFlow(tester, h);
+      await tapKey(tester, 'jv2_mood_bem');
+      await tapKey(tester, 'jv2_branch_presente.calma');
+
+      await writeMine(tester, 'Almoço com a avó');
+      expect(find.byKey(const Key('ai_consent_dialog')), findsNothing);
+      expect(find.byKey(const Key('jv2_custom_chip_Almoço com a avó')), findsOneWidget);
+      expect(h.remote.suggestRequests, isEmpty);
+      expect(h.consent.calls, isEmpty);
+    });
   });
 
   testWidgets('back returns to the previous screen with its answers', (tester) async {

@@ -8,6 +8,7 @@ import 'package:dualis_mobile/core/database/app_database.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/core/theme/app_theme.dart';
 import 'package:dualis_mobile/core/voice/voice_output_service.dart';
+import 'package:dualis_mobile/features/consent/data/ai_consent_repository.dart';
 import 'package:dualis_mobile/features/dashboard/presentation/screens/check_in_summary_screen.dart';
 import 'package:dualis_mobile/features/journal/data/journal_local_store.dart';
 import 'package:dualis_mobile/features/journal/data/journal_remote_data_source.dart';
@@ -24,6 +25,8 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import '../consent/fake_ai_consent_repository.dart';
+
 /// In-memory stand-in for the journal API.
 class FakeJournalRemote implements JournalRemoteDataSource {
   final List<JournalEntry> created = [];
@@ -33,6 +36,10 @@ class FakeJournalRemote implements JournalRemoteDataSource {
   int? errorStatus;
   dynamic errorData;
   String? suggestedOptionKey;
+
+  /// Thrown by [suggestOption] after recording the request (the server
+  /// answered with an error, for example 403 AI_CONSENT_REQUIRED).
+  DioException? suggestOptionError;
   final List<Map<String, String?>> suggestRequests = [];
 
   FakeJournalRemote({this.conditions = const []});
@@ -134,6 +141,8 @@ class FakeJournalRemote implements JournalRemoteDataSource {
   }) async {
     if (fail) throw _offline();
     suggestRequests.add({'text': text, 'kind': kind, 'branch': branch});
+    final error = suggestOptionError;
+    if (error != null) throw error;
     return suggestedOptionKey;
   }
 }
@@ -198,6 +207,10 @@ class JournalHarness {
   /// Replaces text to speech in every journal and voice test.
   final FakeVoiceOutput voiceOutput = FakeVoiceOutput();
 
+  /// AI-processing consent server; granted by default so suggestion tests
+  /// run as before. Set `consent.granted = false` to test the consent gate.
+  final FakeAiConsentRepository consent = FakeAiConsentRepository(granted: true);
+
   JournalHarness({List<UserCondition> conditions = const [], bool online = true})
       : this._(AppDatabase(NativeDatabase.memory()), conditions, online);
 
@@ -219,7 +232,23 @@ class JournalHarness {
         if (clock != null) homeClockProvider.overrideWithValue(clock!),
         if (premium != null) premiumProfilesEnabledProvider.overrideWithValue(premium!),
         voiceOutputServiceProvider.overrideWithValue(voiceOutput),
+        aiConsentRepositoryProvider.overrideWithValue(consent),
       ];
+}
+
+/// A 403 answer from the suggestion endpoint with the stable [code]
+/// (for example `AI_CONSENT_REQUIRED`).
+DioException suggestForbidden(String code) {
+  final request = RequestOptions(path: JournalEndpoints.suggestOption);
+  return DioException(
+    requestOptions: request,
+    response: Response(
+      requestOptions: request,
+      statusCode: 403,
+      data: {'statusCode': 403, 'error': 'Forbidden', 'code': code},
+    ),
+    type: DioExceptionType.badResponse,
+  );
 }
 
 /// Pumps the journal flow with a stub summary route that shows what it got.

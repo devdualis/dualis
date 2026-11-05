@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/connectivity_service.dart';
+import '../../consent/data/ai_consent_repository.dart'
+    show aiConsentRequiredCode, aiProfileNotAllowedCode;
 import '../../profile/presentation/controllers/active_profile_controller.dart';
 import '../domain/journal_keys.dart';
 import '../domain/journal_models.dart';
@@ -27,6 +29,68 @@ class JournalOfflineException implements Exception {
 /// Raised when the profile already has the maximum of active conditions.
 class JournalConditionLimitException implements Exception {
   const JournalConditionLimitException();
+}
+
+/// Why an AI journal suggestion did not come back. The caller keeps what
+/// the person wrote in every case.
+enum AiSuggestFailure {
+  /// 403 `AI_CONSENT_REQUIRED`: no active AI consent on the server.
+  consentRequired,
+
+  /// 403 `AI_PROFILE_NOT_ALLOWED`: a profile shared by someone else.
+  profileNotAllowed,
+
+  /// 429: too many suggestions in a row.
+  busy,
+
+  /// No connection; the text was not sent.
+  offline,
+
+  /// The request was sent but the answer took too long.
+  timeout,
+
+  /// Any other error.
+  unavailable,
+}
+
+/// Raised by AI suggestion calls when the server refuses them for a reason
+/// the app reacts to (consent, profile).
+class AiSuggestException implements Exception {
+  const AiSuggestException(this.reason);
+
+  final AiSuggestFailure reason;
+
+  @override
+  String toString() => 'AiSuggestException(${reason.name})';
+}
+
+/// Maps an error of an AI suggestion call onto [AiSuggestFailure].
+AiSuggestFailure aiSuggestFailureOf(Object error) {
+  if (error is AiSuggestException) return error.reason;
+  if (error is JournalOfflineException) return AiSuggestFailure.offline;
+  if (error is! DioException) return AiSuggestFailure.unavailable;
+  final status = error.response?.statusCode;
+  if (status == 403) {
+    final data = error.response?.data;
+    final code = data is Map ? data['code'] : null;
+    if (code == aiConsentRequiredCode) return AiSuggestFailure.consentRequired;
+    if (code == aiProfileNotAllowedCode) {
+      return AiSuggestFailure.profileNotAllowed;
+    }
+    return AiSuggestFailure.unavailable;
+  }
+  if (status == 429) return AiSuggestFailure.busy;
+  switch (error.type) {
+    // The connection never opened, so nothing was sent.
+    case DioExceptionType.connectionError:
+    case DioExceptionType.connectionTimeout:
+      return AiSuggestFailure.offline;
+    case DioExceptionType.sendTimeout:
+    case DioExceptionType.receiveTimeout:
+      return AiSuggestFailure.timeout;
+    default:
+      return AiSuggestFailure.unavailable;
+  }
 }
 
 /// Offline-first access to journal v2. Entries are saved online when
@@ -214,7 +278,14 @@ class JournalRepository {
     return synced;
   }
 
+  /// Whether the server can be reached now (no request is sent).
+  Future<bool> isOnline() => _isOnline();
+
   /// Existing diary chip for [text], or null if none / offline / error.
+  ///
+  /// Throws [AiSuggestException] when the server refuses for lack of AI
+  /// consent ([AiSuggestFailure.consentRequired]) or because the profile is
+  /// not allowed ([AiSuggestFailure.profileNotAllowed]).
   Future<String?> suggestOption({
     required String text,
     required String kind,
@@ -223,7 +294,12 @@ class JournalRepository {
     if (!await _isOnline()) return null;
     try {
       return await _remote.suggestOption(text: text, kind: kind, branch: branch);
-    } catch (_) {
+    } catch (e) {
+      final reason = aiSuggestFailureOf(e);
+      if (reason == AiSuggestFailure.consentRequired ||
+          reason == AiSuggestFailure.profileNotAllowed) {
+        throw AiSuggestException(reason);
+      }
       return null;
     }
   }

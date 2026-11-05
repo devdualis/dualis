@@ -10,6 +10,8 @@ import '../../../../core/voice/voice_targets.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/domain/user_profile.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../consent/presentation/ai_consent_controller.dart';
+import '../../../consent/presentation/ai_consent_widgets.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../../voice/presentation/voice_widgets.dart';
 import '../../../dashboard/presentation/screens/check_in_summary_screen.dart';
@@ -728,14 +730,31 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         ? '${state.currentRegion!.region}.${state.branch}'
         : '${state.time}.${state.branch}';
     setState(() => _suggestingCustom = true);
+    final repository = ref.read(journalRepositoryProvider);
     String? key;
     try {
-      key = await ref.read(journalRepositoryProvider).suggestOption(
-            text: clean,
-            kind: kind,
-            branch: branch,
-          );
-      if (key != null && !key.startsWith('$branch.')) key = null;
+      // Offline the label is kept as typed: no consent dialog, no request.
+      // Without the AI consent (declined now or before on this device)
+      // nothing is sent either.
+      final online = await repository.isOnline();
+      if (!mounted) return;
+      final allowed = online &&
+          await ensureAiConsent(context, ref, ask: AiConsentAsk.unlessDeclined);
+      if (!mounted) return;
+      if (allowed) {
+        key = await repository.suggestOption(
+          text: clean,
+          kind: kind,
+          branch: branch,
+        );
+        if (key != null && !key.startsWith('$branch.')) key = null;
+      }
+    } on AiSuggestException catch (e) {
+      key = null;
+      // The server is the authority: read the consent state again.
+      if (e.reason == AiSuggestFailure.consentRequired && mounted) {
+        await ref.read(aiConsentControllerProvider.notifier).refresh();
+      }
     } catch (_) {
       key = null;
     }
