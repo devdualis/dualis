@@ -284,16 +284,20 @@ final voiceOutputServiceProvider = Provider<VoiceOutputService>((ref) {
 const int maxReadOptions = 6;
 
 /// What is read for a step: its question, then at most [maxReadOptions]
-/// option labels ("Como você está? Bem, Não tão bem."). Nothing else.
+/// option labels ("Como você está? Bem, Não tão bem."), then the short
+/// "Ou diga outra opção da tela." when more options are on screen.
 String composeReadOut(AppLocalizations l10n, String question, List<String> options) {
   final q = question.trim();
-  final labels = [
+  final all = [
     for (final o in options)
       if (o.trim().isNotEmpty) o.trim(),
-  ].take(maxReadOptions).toList();
+  ];
+  final labels = all.take(maxReadOptions).toList();
   if (labels.isEmpty) return q;
   final ends = q.isEmpty || RegExp(r'[.?!:;]$').hasMatch(q);
-  return '$q${ends ? '' : '.'} ${labels.join(', ')}.'.trim();
+  final read = '$q${ends ? '' : '.'} ${labels.join(', ')}.'.trim();
+  // More options on screen than are read: invite the person to say any of them.
+  return all.length > maxReadOptions ? '$read ${l10n.voiceReadMoreHint}' : read;
 }
 
 /// "Ler as perguntas em voz alta": on by default for Premium voice users.

@@ -11,6 +11,7 @@ import 'package:dualis_mobile/core/voice/voice_targets.dart';
 import 'package:dualis_mobile/features/auth/domain/auth_state.dart';
 import 'package:dualis_mobile/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:dualis_mobile/features/journal/domain/journal_keys.dart';
+import 'package:dualis_mobile/features/journal/presentation/controllers/journal_flow_state.dart';
 import 'package:dualis_mobile/features/journal/presentation/journal_labels.dart';
 import 'package:dualis_mobile/features/journal/presentation/screens/journal_flow_screen.dart';
 import 'package:dualis_mobile/features/voice/presentation/voice_controller.dart';
@@ -270,9 +271,51 @@ void main() {
         output().spoken.single,
         composeReadOut(pt, 'Escolha um número', _ManyOptions.labels),
       );
-      expect(output().spoken.single, 'Escolha um número. Um, Dois, Três, Quatro, Cinco, Seis.');
+      expect(
+        output().spoken.single,
+        'Escolha um número. Um, Dois, Três, Quatro, Cinco, Seis. ${pt.voiceReadMoreHint}',
+      );
       expect(output().spoken.single, isNot(contains('Sete')));
       expect(output().spoken.single, isNot(contains('Continuar')));
+    });
+
+    testWidgets(
+        'a physical check-in by voice: the 5 body regions are read without the hint, '
+        'the closing step reads 6 options, then the hint', (tester) async {
+      await pump(
+        tester,
+        journal: const JournalFlowScreen(args: JournalFlowArgs(initialArea: JournalArea.physical)),
+        phrases: [
+          JournalLabels.mood(pt, JournalKeys.moodNaoTaoBem),
+          JournalLabels.root(pt, 'cabeca'),
+          'continuar',
+          JournalLabels.branch(pt, 'cabeca.pressao'),
+          JournalLabels.option(pt, 'cabeca.pressao.temporas'),
+          'continuar',
+          'começou hoje',
+          'continuar',
+          'três',
+          'continuar',
+          'continuar',
+        ],
+      );
+      await tester.tap(find.byKey(const Key('voice_mic_button')));
+      await run(tester, steps: 120);
+
+      final spoken = output().spoken;
+      final body = spoken.firstWhere((t) => t.startsWith(pt.jv2BodyQuestion));
+      expect(body, isNot(contains(pt.voiceReadMoreHint)));
+      final long = spoken.where((t) => t.endsWith(pt.voiceReadMoreHint)).toList();
+      expect(long, hasLength(1));
+      final closing = '${pt.jv23ClosingTitle}.';
+      expect(long.single, startsWith(closing));
+      expect(long.single, endsWith('. Ou diga outra opção da tela.'));
+      // Exactly 6 labels between the question and the hint.
+      final labels = long.single
+          .substring(closing.length, long.single.length - ' Ou diga outra opção da tela.'.length)
+          .trim()
+          .split(', ');
+      expect(labels, hasLength(maxReadOptions));
     });
   });
 
@@ -433,6 +476,18 @@ void main() {
       expect(output().log, isEmpty);
       expect(voice.listenCalls, 0);
     });
+  });
+
+  test('composeReadOut adds the more-options hint only past $maxReadOptions options', () {
+    final six = ['A', 'B', 'C', 'D', 'E', 'F'];
+    expect(composeReadOut(pt, 'Qual?', six), 'Qual? A, B, C, D, E, F.');
+    expect(composeReadOut(pt, 'Qual?', six), isNot(contains(pt.voiceReadMoreHint)));
+    expect(
+      composeReadOut(pt, 'Qual?', [...six, 'G']),
+      'Qual? A, B, C, D, E, F. Ou diga outra opção da tela.',
+    );
+    // Blank labels do not count as options.
+    expect(composeReadOut(pt, 'Qual?', [...six, ' ']), 'Qual? A, B, C, D, E, F.');
   });
 
   test('composeReadOut keeps the question punctuation and reads nothing else', () {
