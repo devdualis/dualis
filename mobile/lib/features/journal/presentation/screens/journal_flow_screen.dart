@@ -952,6 +952,10 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
               ),
           ],
         ),
+        if (describeAvailable(ref)) ...[
+          const SizedBox(height: 12),
+          _describeTile(l10n),
+        ],
       ],
     );
   }

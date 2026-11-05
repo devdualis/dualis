@@ -164,4 +164,14 @@ class FakeJournalBackend implements JournalRemoteDataSource {
     String? branch,
   }) async =>
       null;
+
+  /// Free description (Premium): no suggestion, like [suggestOption].
+  @override
+  Future<List<String>> suggestEntry({
+    required String text,
+    required String area,
+  }) async {
+    _ensureOnline(JournalEndpoints.suggestEntry);
+    return const [];
+  }
 }

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../consent/presentation/ai_consent_controller.dart';
 import '../../../consent/presentation/ai_consent_widgets.dart';
 import '../../../profile/domain/models/profile.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
@@ -146,7 +147,13 @@ class _DescribeSheetState extends ConsumerState<DescribeSheet> {
         area: widget.area.key,
       );
     } on AiSuggestException catch (e) {
-      if (mounted) _show(_failureMessage(l10n, e.reason));
+      if (!mounted) return;
+      if (e.reason == AiSuggestFailure.consentRequired) {
+        // The server is the authority: read the consent state again.
+        await ref.read(aiConsentControllerProvider.notifier).refresh();
+        if (!mounted) return;
+      }
+      _show(_failureMessage(l10n, e.reason));
       return;
     } catch (_) {
       if (mounted) _show(l10n.jv2DescribeFailed);
@@ -166,8 +173,17 @@ class _DescribeSheetState extends ConsumerState<DescribeSheet> {
     });
   }
 
+  /// A calm line for every failure; the normal steps stay as they were.
   String _failureMessage(AppLocalizations l10n, AiSuggestFailure reason) =>
-      l10n.jv2DescribeFailed;
+      switch (reason) {
+        AiSuggestFailure.offline => l10n.jv2DescribeOffline,
+        AiSuggestFailure.busy => l10n.jv2DescribeBusy,
+        AiSuggestFailure.profileNotAllowed => l10n.jv2DescribeProfileNotAllowed,
+        AiSuggestFailure.consentRequired ||
+        AiSuggestFailure.timeout ||
+        AiSuggestFailure.unavailable =>
+          l10n.jv2DescribeFailed,
+      };
 
   @override
   Widget build(BuildContext context) {
