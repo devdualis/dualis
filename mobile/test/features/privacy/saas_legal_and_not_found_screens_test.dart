@@ -7,10 +7,10 @@ import 'package:dualis_mobile/features/privacy/presentation/screens/terms_of_ser
 import 'package:dualis_mobile/features/privacy/presentation/screens/privacy_policy_screen.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
 
-Widget createTestApp(Widget child) {
+Widget createTestApp(Widget child, {Locale locale = const Locale('pt', 'BR')}) {
   return ProviderScope(
     child: MaterialApp(
-      locale: const Locale('pt', 'BR'),
+      locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -93,6 +93,116 @@ void main() {
 
       // Verify shortcut button to Privacy Center
       expect(find.text('Ir para a Central de Privacidade'), findsOneWidget);
+    });
+  });
+
+  group('PrivacyPolicyScreen section 8: AI journal suggestions', () {
+    const locales = {
+      'pt': Locale('pt', 'BR'),
+      'es': Locale('es'),
+      'en': Locale('en'),
+    };
+
+    for (final entry in locales.entries) {
+      testWidgets('${entry.key}: section 8 follows section 7 with the API facts and no brand names',
+          (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1000, 6000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        await tester.pumpWidget(
+          createTestApp(const PrivacyPolicyScreen(), locale: entry.value),
+        );
+        await tester.pumpAndSettle();
+        final l10n = lookupAppLocalizations(entry.value);
+
+        final title8 = find.text(l10n.privacyPolicySection8Title);
+        final title7 = find.text(l10n.privacyPolicySection7Title);
+        expect(title8, findsOneWidget);
+        expect(tester.getTopLeft(title8).dy, greaterThan(tester.getTopLeft(title7).dy));
+        expect(find.text(l10n.privacyPolicySection8Body), findsOneWidget);
+        for (final bullet in [
+          l10n.privacyPolicySection8Bullet1,
+          l10n.privacyPolicySection8Bullet2,
+          l10n.privacyPolicySection8Bullet3,
+          l10n.privacyPolicySection8Bullet4,
+          l10n.privacyPolicySection8Bullet5,
+          l10n.privacyPolicySection8Bullet6,
+        ]) {
+          expect(find.textContaining(bullet), findsOneWidget, reason: bullet);
+        }
+        expect(find.textContaining('Art. 11, I'), findsWidgets);
+        expect(find.textContaining('São Paulo'), findsWidgets);
+
+        for (final brand in ['Google', 'Gemini', 'Vertex']) {
+          expect(find.textContaining(brand), findsNothing, reason: brand);
+        }
+      });
+    }
+
+    test('section 3 AI bullet names both features and the specific consent', () {
+      final pt = lookupAppLocalizations(const Locale('pt'));
+      expect(pt.privacyPolicySection3Bullet1, contains('escrever o meu'));
+      expect(pt.privacyPolicySection3Bullet1, contains('descrever com minhas palavras'));
+      expect(pt.privacyPolicySection3Bullet1, contains('consentimento específico'));
+      final es = lookupAppLocalizations(const Locale('es'));
+      expect(es.privacyPolicySection3Bullet1, contains('describir con mis palabras'));
+      expect(es.privacyPolicySection3Bullet1, contains('consentimiento específico'));
+      final en = lookupAppLocalizations(const Locale('en'));
+      expect(en.privacyPolicySection3Bullet1, contains('describe in my own words'));
+      expect(en.privacyPolicySection3Bullet1, contains('specific consent'));
+    });
+
+    test('section 8 texts carry no provider brand in any language', () {
+      for (final locale in locales.values) {
+        final l = lookupAppLocalizations(locale);
+        final texts = [
+          l.privacyPolicySection3Bullet1,
+          l.privacyPolicySection8Title,
+          l.privacyPolicySection8Body,
+          l.privacyPolicySection8Bullet1,
+          l.privacyPolicySection8Bullet2,
+          l.privacyPolicySection8Bullet3,
+          l.privacyPolicySection8Bullet4,
+          l.privacyPolicySection8Bullet5,
+          l.privacyPolicySection8Bullet6,
+        ];
+        for (final t in texts) {
+          expect(t, isNot(matches(RegExp('Google|Gemini|Vertex'))), reason: t);
+        }
+      }
+    });
+
+    test('describe-flow copy resolves in pt, es and en', () {
+      final pt = lookupAppLocalizations(const Locale('pt'));
+      expect(pt.jv2DescribeTile, 'Descrever com minhas palavras');
+      expect(pt.jv2DescribeOffline,
+          'Sem conexão. Seu texto não foi enviado; siga pelas telas normais.');
+      for (final locale in locales.values) {
+        final l = lookupAppLocalizations(locale);
+        final texts = [
+          l.jv2DescribeTile,
+          l.jv2DescribeTitle,
+          l.jv2DescribeHint,
+          l.jv2DescribeKeepNote,
+          l.jv2DescribeSuggest,
+          l.jv2DescribeSearching,
+          l.jv2DescribeReviewTitle,
+          l.jv2DescribeReviewHint,
+          l.jv2DescribeUse,
+          l.jv2DescribeManual,
+          l.jv2DescribeEmpty,
+          l.jv2DescribeOffline,
+          l.jv2DescribeFailed,
+          l.jv2DescribeBusy,
+          l.jv2DescribeProfileNotAllowed,
+          l.jv2DescribeCancel,
+        ];
+        expect(texts.toSet(), hasLength(16), reason: '$locale');
+        for (final t in texts) {
+          expect(t.trim(), isNotEmpty);
+        }
+      }
     });
   });
 }
