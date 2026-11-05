@@ -199,5 +199,19 @@ void main() {
       );
       expect(await service.getLocalDataOwnerId(), 'user-a');
     });
+
+    test('keeps the device read-aloud choice (a device preference, not personal data)',
+        () async {
+      FlutterSecureStorage.setMockInitialValues({
+        'dualis_access_token': 'access',
+        SecureStorageService.keyVoiceReadAloud: 'off',
+      });
+      final service = SecureStorageService();
+
+      await service.clearSession();
+
+      expect(await service.getAccessToken(), isNull);
+      expect(await service.read(key: SecureStorageService.keyVoiceReadAloud), 'off');
+    });
   });
 }

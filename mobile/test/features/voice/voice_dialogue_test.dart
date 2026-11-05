@@ -14,6 +14,7 @@ import 'package:dualis_mobile/features/journal/domain/journal_keys.dart';
 import 'package:dualis_mobile/features/journal/presentation/controllers/journal_flow_state.dart';
 import 'package:dualis_mobile/features/journal/presentation/journal_labels.dart';
 import 'package:dualis_mobile/features/journal/presentation/screens/journal_flow_screen.dart';
+import 'package:dualis_mobile/features/settings/presentation/widgets/voice_read_aloud_tile.dart';
 import 'package:dualis_mobile/features/voice/presentation/voice_controller.dart';
 import 'package:dualis_mobile/features/voice/presentation/voice_widgets.dart';
 import 'package:dualis_mobile/l10n/app_localizations.dart';
@@ -458,6 +459,36 @@ void main() {
       await tester.tap(find.byKey(const Key('voice_mic_button')));
       await run(tester);
       expect(output().spoken, [moodRead]);
+    });
+
+    testWidgets('the Settings switch turned off: the next hands-free run listens without speaking',
+        (tester) async {
+      final storage = MemoryStorage();
+      await pump(
+        tester,
+        journal: const Scaffold(
+          body: Column(
+            children: [
+              Material(child: VoiceReadAloudTile()),
+              Expanded(child: JournalFlowScreen()),
+            ],
+          ),
+        ),
+        extra: [secureStorageServiceProvider.overrideWithValue(storage)],
+      );
+      final tile = find.byKey(const Key('settings_voice_read_aloud_switch'));
+      expect(tester.widget<SwitchListTile>(tile).value, isTrue);
+
+      await tester.tap(tile);
+      await tester.pumpAndSettle();
+      expect(storage.values[VoiceReadAloudController.storageKey], 'off');
+      expect(containerOf(tester).read(voiceReadAloudProvider), isFalse);
+
+      await tester.tap(find.byKey(const Key('voice_mic_button')));
+      await run(tester);
+      expect(output().spoken, isEmpty);
+      expect(output().log, isNot(contains('speak')));
+      expect(voice.listenCalls, greaterThan(0));
     });
 
     testWidgets('a storage error keeps reading on', (tester) async {

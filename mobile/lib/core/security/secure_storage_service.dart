@@ -23,6 +23,10 @@ class SecureStorageService {
   /// signs in on this device.
   static const String keyHydrationSettings = 'dualis_hydration_settings';
 
+  /// "Ler as perguntas em voz alta" (voice check-in). A device preference,
+  /// not personal data: kept on logout.
+  static const String keyVoiceReadAloud = 'dualis_voice_read_aloud';
+
   /// Set while a settings change has not reached the server yet.
   static const String keyHydrationSettingsPending =
       'dualis_hydration_settings_pending';
@@ -205,6 +209,7 @@ class SecureStorageService {
       _keyLocalDataOwner,
       keyHydrationSettings,
       keyHydrationSettingsPending,
+      keyVoiceReadAloud,
     ];
     final saved = <String, String>{};
     for (final key in kept) {

@@ -304,7 +304,7 @@ String composeReadOut(AppLocalizations l10n, String question, List<String> optio
 /// A device preference, not personal data; kept in secure storage because
 /// the app does not use SharedPreferences.
 class VoiceReadAloudController extends Notifier<bool> {
-  static const String storageKey = 'dualis_voice_read_aloud';
+  static const String storageKey = SecureStorageService.keyVoiceReadAloud;
 
   bool _loaded = false;
 

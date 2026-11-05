@@ -8,6 +8,7 @@ import 'package:dualis_mobile/core/config/feature_flags.dart';
 import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/core/security/biometric_lock_controller.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
+import 'package:dualis_mobile/core/voice/voice_output_service.dart';
 import 'package:dualis_mobile/features/auth/data/auth_repository_impl.dart';
 import 'package:dualis_mobile/features/auth/domain/auth_state.dart';
 import 'package:dualis_mobile/features/auth/domain/user_profile.dart';
@@ -19,6 +20,8 @@ import 'package:dualis_mobile/l10n/app_localizations.dart';
 class FakeSecureStorageService extends SecureStorageService {
   String? persistedAccessToken;
   final Map<String, String> _mem = {};
+
+  Map<String, String> get values => _mem;
 
   @override
   Future<String?> read({required String key}) async => _mem[key];
@@ -559,6 +562,69 @@ void main() {
       expect(find.text('Plano: Gratuito'), findsNothing);
       expect(find.byKey(const Key('settings_plan_see_premium')), findsNothing);
       expect(find.text('Ver Premium'), findsNothing);
+    });
+
+    testWidgets('11. Premium build shows "Ler as perguntas em voz alta" on; turning it off saves off',
+        (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      final storage = FakeSecureStorageService();
+
+      await tester.pumpWidget(
+        createSettingsTestApp(repository: fakeRepo, user: testUser, storage: storage, premium: true),
+      );
+      await tester.pumpAndSettle();
+
+      final tile = find.byKey(const Key('settings_voice_read_aloud_switch'));
+      await tester.ensureVisible(tile);
+      await tester.pumpAndSettle();
+      expect(tile, findsOneWidget);
+      expect(tester.widget<SwitchListTile>(tile).value, isTrue);
+      expect(find.text('Ler as perguntas em voz alta'), findsOneWidget);
+      expect(
+        find.text(
+          'No check-in por voz, o app lê a pergunta e as opções antes de ouvir. Funciona sem internet.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.byIcon(Icons.record_voice_over_outlined), findsOneWidget);
+
+      await tester.tap(tile);
+      await tester.pumpAndSettle();
+      expect(tester.widget<SwitchListTile>(tile).value, isFalse);
+      expect(storage.values[VoiceReadAloudController.storageKey], 'off');
+      final container = ProviderScope.containerOf(tester.element(find.byType(SettingsScreen)));
+      expect(container.read(voiceReadAloudProvider), isFalse);
+    });
+
+    testWidgets('12. The switch shows a saved "off"', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      final storage = FakeSecureStorageService();
+      storage.values[VoiceReadAloudController.storageKey] = 'off';
+
+      await tester.pumpWidget(
+        createSettingsTestApp(repository: fakeRepo, user: testUser, storage: storage, premium: true),
+      );
+      await tester.pumpAndSettle();
+
+      final tile = find.byKey(const Key('settings_voice_read_aloud_switch'));
+      expect(tile, findsOneWidget);
+      expect(tester.widget<SwitchListTile>(tile).value, isFalse);
+    });
+
+    testWidgets('13. Free build shows no read-aloud switch', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(createSettingsTestApp(repository: fakeRepo, user: testUser));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('settings_voice_read_aloud_switch')), findsNothing);
+      expect(find.text('Ler as perguntas em voz alta'), findsNothing);
     });
   });
 }
