@@ -42,6 +42,14 @@ class VoiceTargetEntry {
   Object? step;
   VoiceTargetRole role = VoiceTargetRole.option;
 
+  /// Pressing it saves the entry (a "Bem" card that saves at once). A
+  /// multi-answer phrase never presses it; said alone it still works.
+  bool saves = false;
+
+  /// Role as seen by a multi-answer phrase: a target that saves counts
+  /// as "Salvar", whatever it looks like on screen.
+  VoiceTargetRole get carryRole => saves ? VoiceTargetRole.save : role;
+
   /// Read aloud instead of `labels.first` when set.
   String? spokenLabel;
 
@@ -206,7 +214,7 @@ class VoiceTargetRegistry {
   VoiceTargetMatch? bestMatch(String spoken, {Set<VoiceTargetRole>? roles}) {
     VoiceTargetMatch? best;
     for (final t in activeTargets) {
-      if (roles != null && !roles.contains(t.role)) continue;
+      if (roles != null && !roles.contains(t.carryRole)) continue;
       for (final label in t.labels) {
         final s = VoiceMatcher.score(spoken, label);
         if (s < VoiceMatcher.threshold) continue;
@@ -236,9 +244,9 @@ class VoiceTargetRegistry {
     if (words.isEmpty) return null;
     final targets = [
       for (final t in _targets)
-        if (roles.contains(t.role) &&
+        if (roles.contains(t.carryRole) &&
             (t.isActive ||
-                (disabledAdvance && t.role == VoiceTargetRole.advance && t.isOnStep)))
+                (disabledAdvance && t.carryRole == VoiceTargetRole.advance && t.isOnStep)))
           t,
     ];
     if (targets.isEmpty) return null;
@@ -327,6 +335,7 @@ class VoiceTarget extends StatefulWidget {
     required this.labels,
     required this.onSelect,
     this.role = VoiceTargetRole.option,
+    this.saves = false,
     this.spokenLabel,
     required this.child,
   });
@@ -334,6 +343,9 @@ class VoiceTarget extends StatefulWidget {
   final List<String> labels;
   final VoidCallback? onSelect;
   final VoiceTargetRole role;
+
+  /// Its action saves the entry: never pressed by a multi-answer phrase.
+  final bool saves;
 
   /// Read aloud instead of the first label (hands-free check-in).
   final String? spokenLabel;
@@ -378,11 +390,13 @@ class _VoiceTargetState extends State<VoiceTarget> {
     if (entry == null) return;
     final changed = !listEquals(entry.labels, widget.labels) ||
         entry.onSelect != widget.onSelect ||
-        entry.role != widget.role;
+        entry.role != widget.role ||
+        entry.saves != widget.saves;
     entry
       ..labels = widget.labels
       ..onSelect = widget.onSelect
       ..role = widget.role
+      ..saves = widget.saves
       ..spokenLabel = widget.spokenLabel;
     if (changed) entry._registry._revision++;
   }

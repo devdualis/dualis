@@ -205,6 +205,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           },
           confirmKey: const Key('jv2_save'),
           confirmLabel: l10n.jv2Save,
+          confirmSaves: true,
         );
       case JournalStep.time:
         return _timeStep(l10n, state);
@@ -389,6 +390,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           _ContinueButton(
             key: const Key('chronicTrack_just_log'),
             label: l10n.chronicTrackJustLog,
+            saves: true,
             busy: state.isSaving,
             onPressed: state.hasReadings && !state.isSaving
                 ? () {
@@ -493,6 +495,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         _ContinueButton(
           key: const Key('jv22_just_save'),
           label: l10n.jv22JustSave,
+          saves: true,
           busy: state.isSaving,
           onPressed: state.isSaving ? null : _save,
         ),
@@ -616,6 +619,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     VoidCallback onConfirm, {
     Key? confirmKey,
     String? confirmLabel,
+    bool confirmSaves = false,
     String? moreLabel,
     VoidCallback? onMore,
   }) {
@@ -653,6 +657,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           _ContinueButton(
             key: confirmKey,
             label: confirmLabel ?? l10n.jv2Continue,
+            saves: confirmSaves,
             busy: state.isSaving,
             onPressed: canConfirm ? onConfirm : null,
           ),
@@ -1448,6 +1453,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       bottom: _ContinueButton(
         key: const Key('jv2_save'),
         label: l10n.jv2Save,
+        saves: true,
         busy: state.isSaving,
         onPressed: state.isSaving ? null : _save,
       ),
@@ -2566,25 +2572,26 @@ class _ContinueButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool busy;
 
+  /// [onPressed] saves the entry ("Salvar", "Só registrar", "Só registrar
+  /// medições"): for voice it is "Salvar", never a "Continuar" that a
+  /// multi-answer phrase may press.
+  final bool saves;
+
   const _ContinueButton({
     super.key,
     required this.label,
     required this.onPressed,
     this.busy = false,
+    this.saves = false,
   });
 
   @override
   Widget build(BuildContext context) => VoiceTarget(
         labels: _voiceLabels(context),
         onSelect: busy ? null : onPressed,
-        role: _isSave(context) ? VoiceTargetRole.save : VoiceTargetRole.advance,
+        role: saves ? VoiceTargetRole.save : VoiceTargetRole.advance,
         child: _content(context),
       );
-
-  bool _isSave(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return label == l10n.jv2Save || label == l10n.jv22JustSave;
-  }
 
   /// "Continuar" and "Salvar" also answer to their usual synonyms.
   List<String> _voiceLabels(BuildContext context) {

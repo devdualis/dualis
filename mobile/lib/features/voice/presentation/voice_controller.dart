@@ -118,7 +118,8 @@ class VoiceController extends Notifier<VoiceState> {
   static const int maxCarryPasses = 12;
 
   /// Roles a multi-answer phrase may pick: answers and "Continuar". Never
-  /// "Salvar", "Pular", "Voltar" or anything else.
+  /// "Salvar", "Pular", "Voltar" or anything else, and never a target
+  /// whose action saves the entry (see [VoiceTargetEntry.carryRole]).
   static const Set<VoiceTargetRole> carryRoles = {
     VoiceTargetRole.option,
     VoiceTargetRole.choice,
@@ -507,7 +508,7 @@ class VoiceController extends Notifier<VoiceState> {
         continue;
       }
       final entry = match.entry;
-      if (entry.role == VoiceTargetRole.advance) {
+      if (entry.carryRole == VoiceTargetRole.advance) {
         movedOn = true;
         // "Continuar" said after an answer is still disabled until the
         // next frame: pressed then.
@@ -598,7 +599,7 @@ class VoiceController extends Notifier<VoiceState> {
       if (registry.activeStep == _carryStep) {
         VoiceTargetEntry? advance;
         for (final t in registry.activeTargets) {
-          if (t.role == VoiceTargetRole.advance) advance = t;
+          if (t.carryRole == VoiceTargetRole.advance) advance = t;
         }
         if (advance == null) {
           _notUnderstoodCarry();

@@ -8,6 +8,7 @@ import 'package:dualis_mobile/core/voice/voice_input_service.dart';
 import 'package:dualis_mobile/features/auth/domain/auth_state.dart';
 import 'package:dualis_mobile/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:dualis_mobile/features/journal/domain/journal_keys.dart';
+import 'package:dualis_mobile/features/journal/domain/journal_models.dart';
 import 'package:dualis_mobile/features/journal/presentation/controllers/journal_flow_controller.dart';
 import 'package:dualis_mobile/features/journal/presentation/controllers/journal_flow_state.dart';
 import 'package:dualis_mobile/features/journal/presentation/journal_labels.dart';
@@ -84,8 +85,12 @@ void main() {
   final optionKey = '$time.$branch.${options.first}';
   final optionLabel = JournalLabels.option(pt, optionKey);
 
-  Future<void> pump(WidgetTester tester) async {
-    harness = JournalHarness()..premium = true;
+  Future<void> pump(
+    WidgetTester tester, {
+    List<UserCondition> conditions = const [],
+    JournalFlowArgs args = const JournalFlowArgs(),
+  }) async {
+    harness = JournalHarness(conditions: conditions)..premium = true;
     tester.view.physicalSize = const Size(1000, 3200);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -95,7 +100,7 @@ void main() {
       routes: [
         GoRoute(
           path: RoutePaths.journal,
-          builder: (context, state) => const JournalFlowScreen(),
+          builder: (context, state) => JournalFlowScreen(args: args),
         ),
         GoRoute(
           path: RoutePaths.emergency,
@@ -411,6 +416,54 @@ void main() {
       expect(spoken.where((t) => t.contains(pt.jv2PersistenceQuestion)), isEmpty);
       expect(spoken.where((t) => t.contains(pt.jv2IntensityQuestion)), hasLength(1));
       expect(harness.remote.created, isEmpty);
+    });
+  });
+  group('Buttons that save (CR-01, WR-05)', () {
+    const bp = UserCondition(
+      id: 'c1',
+      label: 'Hipertensão',
+      tracking: [JournalKeys.trackingBloodPressure],
+    );
+    const physical = JournalFlowArgs(initialArea: JournalArea.physical);
+
+    /// Physical "Bem" with a tracked condition, readings typed in.
+    Future<void> toConditionsWithReadings(WidgetTester tester) async {
+      await pump(tester, conditions: const [bp], args: physical);
+      await say(tester, 'bem');
+      expect(flow(tester).step, JournalStep.conditions);
+      await tester.enterText(find.byKey(const Key('chronicTrack_c1_0_systolic')), '120');
+      await tester.enterText(find.byKey(const Key('chronicTrack_c1_0_diastolic')), '80');
+      await tester.pumpAndSettle();
+      expect(flow(tester).hasReadings, isTrue);
+    }
+
+    testWidgets('conditions step: "<condition>, abacaxi" never presses "Só registrar medições"',
+        (tester) async {
+      await toConditionsWithReadings(tester);
+
+      await say(tester, '${bp.label}, abacaxi');
+
+      expect(harness.remote.created, isEmpty);
+      expect(find.text('SUMMARY'), findsNothing);
+      expect(flow(tester).step, JournalStep.conditions);
+    });
+
+    testWidgets('conditions step: "<condition>, registrar medições" saves nothing', (tester) async {
+      await toConditionsWithReadings(tester);
+
+      await say(tester, '${bp.label}, registrar medições');
+
+      expect(harness.remote.created, isEmpty);
+      expect(flow(tester).step, JournalStep.conditions);
+    });
+
+    testWidgets('"Só registrar medições" said alone still saves', (tester) async {
+      await toConditionsWithReadings(tester);
+
+      await say(tester, pt.chronicTrackJustLog);
+
+      expect(harness.remote.created, hasLength(1));
+      expect(find.text('SUMMARY'), findsOneWidget);
     });
   });
 }
