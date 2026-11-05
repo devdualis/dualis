@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:ui' show Locale;
+
 import 'package:dualis_mobile/core/voice/voice_input_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,7 +25,7 @@ void main() {
         )).thenAnswer((_) async {});
   });
 
-  Future<bool?> onDeviceUsed(SpeechToTextVoiceInputService service) async {
+  Future<SpeechListenOptions> listenOnce(SpeechToTextVoiceInputService service) async {
     await service.listen(
       languageCode: 'es',
       dictation: false,
@@ -33,8 +36,11 @@ void main() {
           onResult: any(named: 'onResult'),
           listenOptions: captureAny(named: 'listenOptions'),
         )).captured.single as SpeechListenOptions;
-    return options.onDevice;
+    return options;
   }
+
+  Future<bool?> onDeviceUsed(SpeechToTextVoiceInputService service) async =>
+      (await listenOnce(service)).onDevice;
 
   test('Android uses the standard recognizer, not the strict on-device one', () async {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
@@ -48,5 +54,45 @@ void main() {
     addTearDown(() => debugDefaultTargetPlatformOverride = null);
 
     expect(await onDeviceUsed(SpeechToTextVoiceInputService(speech: speech)), isTrue);
+  });
+
+  test('Android starts listening without waiting for the locale list', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    // The plugin can leave this call unanswered on Android 13+.
+    when(() => speech.locales()).thenAnswer((_) => Completer<List<LocaleName>>().future);
+
+    final options = await listenOnce(SpeechToTextVoiceInputService(
+      speech: speech,
+      deviceLocales: () => const [Locale('es', 'CO'), Locale('en', 'US')],
+    ));
+
+    expect(options.localeId, 'es_CO');
+    verifyNever(() => speech.locales());
+  });
+
+  test('Android without a matching phone language uses the default region', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+
+    final options = await listenOnce(SpeechToTextVoiceInputService(
+      speech: speech,
+      deviceLocales: () => const [Locale('en', 'US')],
+    ));
+
+    expect(options.localeId, 'es_ES');
+  });
+
+  test('iOS does not hang when the locale list never arrives', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    when(() => speech.locales()).thenAnswer((_) => Completer<List<LocaleName>>().future);
+
+    final options = await listenOnce(SpeechToTextVoiceInputService(
+      speech: speech,
+      deviceLocales: () => const [Locale('es', 'MX')],
+    )).timeout(const Duration(seconds: 4));
+
+    expect(options.localeId, 'es_MX');
   });
 }

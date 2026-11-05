@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show Locale, PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,6 +41,7 @@ abstract class VoiceInputService {
 /// backend by this class.
 class SpeechToTextVoiceInputService implements VoiceInputService {
   final SpeechToText _speech;
+  final List<Locale> Function() _deviceLocales;
   bool _ready = false;
   bool _onDevice;
   void Function()? _onDone;
@@ -52,8 +54,12 @@ class SpeechToTextVoiceInputService implements VoiceInputService {
   void Function(String, bool)? _lastOnResult;
   bool _gotResult = false;
 
-  SpeechToTextVoiceInputService({SpeechToText? speech, bool? preferOnDevice})
-      : _speech = speech ?? SpeechToText(),
+  SpeechToTextVoiceInputService({
+    SpeechToText? speech,
+    bool? preferOnDevice,
+    List<Locale> Function()? deviceLocales,
+  })  : _speech = speech ?? SpeechToText(),
+        _deviceLocales = deviceLocales ?? (() => PlatformDispatcher.instance.locales),
         _onDevice = preferOnDevice ?? defaultTargetPlatform != TargetPlatform.android;
 
   @override
@@ -75,19 +81,31 @@ class SpeechToTextVoiceInputService implements VoiceInputService {
   Future<String?> _localeFor(String languageCode) async {
     if (_localeLanguage == languageCode) return _localeId;
     const preferred = {'pt': 'pt_BR', 'es': 'es_ES', 'en': 'en_US'};
+    // The phone's own region first when it speaks the app language
+    // ("es_CO" for "es"), then the default region for that language.
+    final candidates = <String>[
+      for (final l in _deviceLocales())
+        if (l.languageCode == languageCode && (l.countryCode ?? '').isNotEmpty)
+          '${l.languageCode}_${l.countryCode}',
+      if (preferred[languageCode] != null) preferred[languageCode]!,
+    ];
     String? chosen;
-    try {
-      final locales = await _speech.locales();
-      final ids = [for (final l in locales) l.localeId.replaceAll('-', '_')];
-      final want = preferred[languageCode];
-      if (want != null && ids.contains(want)) {
-        chosen = want;
-      } else {
-        chosen = ids.where((id) => id.startsWith('${languageCode}_')).firstOrNull;
-      }
-    } catch (_) {}
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      // Not asking Android for its list: on Android 13+ the plugin often
+      // never answers that call (no on-device recognizer, or the check
+      // fails), and waiting for it left voice stuck on "listening" without
+      // ever starting the microphone.
+      chosen = candidates.firstOrNull;
+    } else {
+      try {
+        final locales = await _speech.locales().timeout(const Duration(seconds: 2));
+        final ids = [for (final l in locales) l.localeId.replaceAll('-', '_')];
+        chosen = candidates.where(ids.contains).firstOrNull ??
+            ids.where((id) => id.startsWith('${languageCode}_')).firstOrNull;
+      } catch (_) {}
+    }
     _localeLanguage = languageCode;
-    _localeId = chosen ?? preferred[languageCode];
+    _localeId = chosen ?? candidates.firstOrNull;
     return _localeId;
   }
 
