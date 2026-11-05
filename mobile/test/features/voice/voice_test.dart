@@ -6,6 +6,7 @@ import 'package:dualis_mobile/core/security/biometric_lock_controller.dart';
 import 'package:dualis_mobile/core/theme/app_theme.dart';
 import 'package:dualis_mobile/core/voice/voice_input_service.dart';
 import 'package:dualis_mobile/core/voice/voice_matcher.dart';
+import 'package:dualis_mobile/core/voice/voice_targets.dart';
 import 'package:dualis_mobile/features/auth/domain/auth_state.dart';
 import 'package:dualis_mobile/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:dualis_mobile/features/dashboard/presentation/screens/check_in_summary_screen.dart';
@@ -102,6 +103,81 @@ void main() {
 
     test('splits multi-choice answers', () {
       expect(VoiceMatcher.segments('cansado e ansioso'), ['cansado', 'ansioso']);
+    });
+
+    test('splits a multi-answer phrase on punctuation, then on connectors', () {
+      expect(
+        VoiceMatcher.phraseSegments('cansado e ansioso, começou hoje, intensidade três'),
+        ['cansado', 'ansioso', 'comecou hoje', 'intensidade tres'],
+      );
+      expect(VoiceMatcher.phraseSegments('Cansado; ansioso.\nHoje!'), ['cansado', 'ansioso', 'hoje']);
+    });
+
+    test('without punctuation only connectors split the phrase', () {
+      expect(
+        VoiceMatcher.phraseSegments('cansado e ansioso começou hoje intensidade três'),
+        ['cansado', 'ansioso comecou hoje intensidade tres'],
+      );
+    });
+
+    test('"intensidade" before a number is a filler word', () {
+      expect(VoiceMatcher.score('intensidade três', 'três'), 1.0);
+      expect(VoiceMatcher.score('nível 3', '3'), 1.0);
+    });
+
+    test('filler-only segments carry no answer', () {
+      expect(VoiceMatcher.isFillerOnly('eu estou'), isTrue);
+      expect(VoiceMatcher.isFillerOnly('intensidade'), isTrue);
+      expect(VoiceMatcher.isFillerOnly('hoje'), isFalse);
+    });
+
+    test('bestSpanMatch picks "Começou hoje" inside a phrase and leaves the rest', () {
+      final registry = VoiceTargetRegistry();
+      for (final label in [pt.jv2PersistenceHoje, pt.jv2PersistenceDiasSemanas, pt.jv2PersistenceMesesAnos]) {
+        registry.addTarget()
+          ..labels = [label]
+          ..onSelect = () {}
+          ..role = VoiceTargetRole.choice;
+      }
+      final match = registry.bestSpanMatch('comecou hoje intensidade tres', {VoiceTargetRole.choice})!;
+      expect(match.label, pt.jv2PersistenceHoje);
+      expect(match.before, '');
+      expect(match.after, 'intensidade tres');
+      // Words in the middle: both sides are left, in phrase order.
+      final middle = registry.bestSpanMatch('dormi mal comecou hoje mesmo', {VoiceTargetRole.choice})!;
+      expect(middle.label, pt.jv2PersistenceHoje);
+      expect(middle.before, 'dormi mal');
+      expect(middle.after, 'mesmo');
+      // Roles outside the set never answer.
+      expect(registry.bestSpanMatch('comecou hoje', {VoiceTargetRole.option}), isNull);
+    });
+
+    test('bestSpanMatch takes the number with its prefix', () {
+      final registry = VoiceTargetRegistry();
+      for (var level = 1; level <= 5; level++) {
+        registry.addTarget()
+          ..labels = ['$level', ['um', 'dois', 'três', 'quatro', 'cinco'][level - 1]]
+          ..onSelect = () {};
+      }
+      final match = registry.bestSpanMatch('intensidade tres', {VoiceTargetRole.option})!;
+      expect(match.label, 'três');
+      expect(match.before, '');
+      expect(match.after, '');
+    });
+
+    test('the registry revision changes when targets or the step change', () {
+      final registry = VoiceTargetRegistry();
+      final start = registry.revision;
+      final entry = registry.addTarget();
+      expect(registry.revision, greaterThan(start));
+      final added = registry.revision;
+      registry.activeStep = 'b';
+      expect(registry.revision, greaterThan(added));
+      final stepped = registry.revision;
+      registry.activeStep = 'b';
+      expect(registry.revision, stepped);
+      entry.remove();
+      expect(registry.revision, greaterThan(stepped));
     });
   });
 

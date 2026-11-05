@@ -403,6 +403,11 @@ class VoiceController extends Notifier<VoiceState> {
           if (!VoiceMatcher.isFillerOnly(s)) s,
       ];
       if (segments.length > 1) return _multiAnswer(text, segments, previousMisses);
+      // Recognizers rarely return commas: one run of words that names an
+      // answer here and still has words for the next steps.
+      if (segments.length == 1 && _carriesMore(registry, segments.single)) {
+        return _multiAnswer(text, segments, previousMisses);
+      }
     }
     // "Cansado e ansioso": several options in one answer.
     final parts = VoiceMatcher.segments(text);
@@ -436,6 +441,18 @@ class VoiceController extends Notifier<VoiceState> {
   }
 
   bool _leftJournalHandsFree() => state.handsFree && !_onJournal;
+
+  /// Content words a single phrase must keep after this step's answer to
+  /// go on to the next steps ("cansado começou hoje"), so a short extra
+  /// word ("cansada demais") keeps the plain one-answer behavior.
+  static const int minCarryWords = 2;
+
+  bool _carriesMore(VoiceTargetRegistry registry, String segment) {
+    final match = registry.bestSpanMatch(segment, carryRoles);
+    if (match == null) return false;
+    final rest = VoiceMatcher.words('${match.before} ${match.after}');
+    return rest.where((w) => !VoiceMatcher.isFiller(w)).length >= minCarryWords;
+  }
 
   /// Several answers in one phrase. The step on screen takes what it can;
   /// the rest waits for the next step. Nothing is pressed but answers and

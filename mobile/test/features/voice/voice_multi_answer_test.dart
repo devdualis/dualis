@@ -167,4 +167,43 @@ void main() {
     expect(feedback(tester)?.kind, VoiceFeedbackKind.heard);
     expect(harness.remote.created, isEmpty);
   });
+
+  testWidgets('the same phrase without commas reaches the same end state', (tester) async {
+    await pump(tester);
+    await toOptions(tester);
+
+    await say(tester, '$optionLabel começou hoje intensidade três');
+
+    final state = flow(tester);
+    expect(state.step, JournalStep.intensity);
+    final item = state.items.single;
+    expect(item.optionKey, optionKey);
+    expect(item.persistence, JournalKeys.persistenceHoje);
+    expect(item.intensity, 3);
+    expect(harness.remote.created, isEmpty);
+  });
+
+  testWidgets('"<labelA> e <labelB>" still selects both options and stays on the step',
+      (tester) async {
+    await pump(tester);
+    await toOptions(tester);
+    final keys = [for (final o in options.take(2)) '$time.$branch.$o'];
+
+    await say(tester, '${JournalLabels.option(pt, keys[0])} e ${JournalLabels.option(pt, keys[1])}');
+
+    final state = flow(tester);
+    expect(state.step, JournalStep.options);
+    expect(state.selectedOptions, keys.toSet());
+  });
+
+  testWidgets('one answer with a single extra word keeps the one-answer behavior', (tester) async {
+    await pump(tester);
+    await toOptions(tester);
+
+    await say(tester, '$optionLabel demais');
+
+    final state = flow(tester);
+    expect(state.step, JournalStep.options);
+    expect(state.selectedOptions, {optionKey});
+  });
 }
