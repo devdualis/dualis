@@ -1034,10 +1034,10 @@
   "privacyPolicySection8Body": "Se você permitir, o app pode usar IA para sugerir opções do diário a partir do que você escreve em \"escrever o meu\" ou em \"descrever com minhas palavras\". É um recurso opcional e separado dos termos de uso.",
   "privacyPolicySection8Bullet1": "O que é enviado: só o texto que você escreveu. Nenhum identificador seu ou do perfil é enviado. Antes de passar o texto ao provedor de IA, o nosso servidor tenta tirar nomes, e-mails, links e números longos (como CPF e telefone); esse passo não é infalível, então evite escrever dados pessoais.",
   "privacyPolicySection8Bullet2": "Para quê: sugerir opções que já existem no diário. Você confere e liga cada uma; nada é marcado sem você. A IA não avalia a sua saúde.",
-  "privacyPolicySection8Bullet3": "Onde: um provedor de IA em nuvem contratado processa o texto no Brasil, na região de São Paulo. O texto não fica guardado nos servidores do DualisCheckUp, não é registrado em logs e o provedor não pode usá-lo para treinar modelos.",
+  "privacyPolicySection8Bullet3": "Onde: um provedor de IA em nuvem contratado processa o texto no Brasil, na região de São Paulo. O provedor não guarda o texto nem pode usá-lo para treinar modelos, e o nosso servidor não o registra em logs.",
   "privacyPolicySection8Bullet4": "Base legal: consentimento específico (LGPD Art. 11, I), separado dos termos de uso.",
   "privacyPolicySection8Bullet5": "É opcional: sem ele, todo o resto do app funciona. Você pode revogar o consentimento a qualquer momento em Configurações.",
-  "privacyPolicySection8Bullet6": "O texto que você escolher manter como nota é guardado como qualquer outra nota do diário.",
+  "privacyPolicySection8Bullet6": "O que fica guardado: só o que você escolher manter. Se você ficar com as suas próprias palavras em \"escrever o meu\" ou marcar \"Guardar este texto como nota\", esse texto é guardado no seu registro do diário como qualquer outro registro.",
   "privacyPolicyCtaQuestion": "Deseja exportar seus dados ou gerenciar sua conta agora?",
   "privacyPolicyCtaButton": "Ir para a Central de Privacidade",
   "onboardingIntendedUseNote": "O DualisCheckUp é um aplicativo de bem-estar e autoconhecimento. Não é um dispositivo médico e não substitui um profissional de saúde.",
@@ -3479,9 +3479,9 @@
   "@aiConsentWhatIsSent": {
     "description": "AI consent: what is sent"
   },
-  "aiConsentNoTraining": "O texto não fica guardado nos nossos servidores e não é usado para treinar modelos.",
+  "aiConsentNoTraining": "O provedor de IA não guarda o texto nem o usa para treinar modelos, e o nosso servidor não o registra em logs. No seu diário fica só o que você escolher manter: as suas palavras em \"Escrever o meu\" ou o texto que você marcar para guardar como nota.",
   "@aiConsentNoTraining": {
-    "description": "AI consent: not stored, not used for training"
+    "description": "AI consent: the provider keeps nothing and trains on nothing; the server logs nothing; the diary keeps only what the person chooses"
   },
   "aiConsentOnlyOptions": "A IA só aponta opções que já existem no diário. Você confere e escolhe; nada é marcado sem você. A IA não avalia a sua saúde.",
   "@aiConsentOnlyOptions": {

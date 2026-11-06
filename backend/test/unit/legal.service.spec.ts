@@ -158,6 +158,18 @@ describe('LegalService - SaaS Legal Foundations', () => {
     });
 
     it.each([
+      ['pt-BR', /"escrever o meu".*"Guardar este texto como nota".*guardado no seu registro do diário/],
+      ['es', /"escribir el mío".*"Guardar este texto como nota".*se guarda en su registro del diario/],
+      ['en', /"write my own".*"Keep this text as a note".*saved in your diary entry/],
+    ])('section 7 never says the text is not stored, and says what is kept (%s)', (lang, kept) => {
+      const section = service.getPrivacyPolicy(lang).sections[6];
+      const text = [section.content, ...(section.bullets ?? [])].join(' ');
+      expect(text).not.toMatch(/não fica guardado nos servidores|no se guarda en los servidores|not stored on DualisCheckUp/);
+      expect(text).toMatch(kept);
+      expect(findBannedVocabulary(text)).toEqual([]);
+    });
+
+    it.each([
       ['pt-BR', ['1-dados-coletados', '2-finalidade-tratamento', '3-operadores-transferencia-internacional', '4-pagamentos', '5-direitos-titular-lgpd', '6-comunicacoes-e-opt-out']],
       ['es', ['1-data-collected', '2-purposes', '3-processors-international-transfer', '4-payments', '5-retention-and-deletion', '6-communications']],
       ['en', ['1-data-collected', '2-purposes', '3-processors-international-transfer', '4-payments', '5-rights-and-deletion', '6-communications-optout']],

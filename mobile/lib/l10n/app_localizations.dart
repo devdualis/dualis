@@ -2221,7 +2221,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyPolicySection8Bullet3.
   ///
   /// In pt, this message translates to:
-  /// **'Onde: um provedor de IA em nuvem contratado processa o texto no Brasil, na região de São Paulo. O texto não fica guardado nos servidores do DualisCheckUp, não é registrado em logs e o provedor não pode usá-lo para treinar modelos.'**
+  /// **'Onde: um provedor de IA em nuvem contratado processa o texto no Brasil, na região de São Paulo. O provedor não guarda o texto nem pode usá-lo para treinar modelos, e o nosso servidor não o registra em logs.'**
   String get privacyPolicySection8Bullet3;
 
   /// No description provided for @privacyPolicySection8Bullet4.
@@ -2239,7 +2239,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyPolicySection8Bullet6.
   ///
   /// In pt, this message translates to:
-  /// **'O texto que você escolher manter como nota é guardado como qualquer outra nota do diário.'**
+  /// **'O que fica guardado: só o que você escolher manter. Se você ficar com as suas próprias palavras em \"escrever o meu\" ou marcar \"Guardar este texto como nota\", esse texto é guardado no seu registro do diário como qualquer outro registro.'**
   String get privacyPolicySection8Bullet6;
 
   /// No description provided for @privacyPolicyCtaQuestion.
@@ -9988,10 +9988,10 @@ abstract class AppLocalizations {
   /// **'Vai só o texto, sem nenhum identificador seu ou do perfil. Antes de passar o texto à IA, o nosso servidor tenta tirar nomes, e-mails, links e números longos, como CPF e telefone. Isso não é infalível: evite escrever dados pessoais.'**
   String get aiConsentWhatIsSent;
 
-  /// AI consent: not stored, not used for training
+  /// AI consent: the provider keeps nothing and trains on nothing; the server logs nothing; the diary keeps only what the person chooses
   ///
   /// In pt, this message translates to:
-  /// **'O texto não fica guardado nos nossos servidores e não é usado para treinar modelos.'**
+  /// **'O provedor de IA não guarda o texto nem o usa para treinar modelos, e o nosso servidor não o registra em logs. No seu diário fica só o que você escolher manter: as suas palavras em \"Escrever o meu\" ou o texto que você marcar para guardar como nota.'**
   String get aiConsentNoTraining;
 
   /// AI consent: what the AI does

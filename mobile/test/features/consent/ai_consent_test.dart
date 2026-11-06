@@ -171,10 +171,10 @@ void main() {
           findsOneWidget,
         );
         expect(_textContaining('números longos, como CPF'), findsOneWidget);
-        expect(
-          _textContaining('não é usado para treinar modelos'),
-          findsOneWidget,
-        );
+        expect(_textContaining('nem o usa para treinar modelos'), findsOneWidget);
+        // Honest about what stays: the person's own words they choose to keep.
+        expect(_textContaining('No seu diário fica só o que você escolher manter'), findsOneWidget);
+        expect(_textContaining('não fica guardado'), findsNothing);
         expect(_textContaining('nada é marcado sem você'), findsOneWidget);
         expect(_textContaining('É opcional'), findsOneWidget);
         expect(_textContaining('LGPD, art. 11, I'), findsOneWidget);

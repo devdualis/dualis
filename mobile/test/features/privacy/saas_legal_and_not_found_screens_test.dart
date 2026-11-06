@@ -173,6 +173,26 @@ void main() {
       }
     });
 
+    test('AI copy never says the text is not stored; it says what is kept (WR-06)', () {
+      final never = RegExp(
+        r'não fica guardado nos|not stored on|no se guarda en (los|nuestros) servidores|not kept on our servers',
+      );
+      final kept = {
+        'pt': RegExp(r'"escrever o meu".*"Guardar este texto como nota".*guardado no seu registro do diário'),
+        'es': RegExp(r'"escribir el mío".*"Guardar este texto como nota".*se guarda en su registro del diario'),
+        'en': RegExp(r'"Write my own".*"Keep this text as a note".*saved in your journal entry'),
+      };
+      for (final entry in locales.entries) {
+        final l = lookupAppLocalizations(entry.value);
+        final code = entry.value.languageCode;
+        for (final t in [l.privacyPolicySection8Bullet3, l.privacyPolicySection8Bullet6, l.aiConsentNoTraining]) {
+          expect(t, isNot(matches(never)), reason: t);
+        }
+        expect(l.privacyPolicySection8Bullet6, matches(kept[code]!), reason: code);
+        expect(l.aiConsentNoTraining, contains(l.jv2WriteMine), reason: code);
+      }
+    });
+
     test('describe-flow copy resolves in pt, es and en', () {
       final pt = lookupAppLocalizations(const Locale('pt'));
       expect(pt.jv2DescribeTile, 'Descrever com minhas palavras');

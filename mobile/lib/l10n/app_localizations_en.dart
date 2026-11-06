@@ -1239,7 +1239,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyPolicySection8Bullet3 =>
-      'Where: a contracted cloud AI provider processes the text in Brazil, in the São Paulo region. The text is not stored on DualisCheckUp servers, is not logged, and the provider may not use it to train models.';
+      'Where: a contracted cloud AI provider processes the text in Brazil, in the São Paulo region. The provider does not keep the text and may not use it to train models, and our server does not log it.';
 
   @override
   String get privacyPolicySection8Bullet4 =>
@@ -1251,7 +1251,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyPolicySection8Bullet6 =>
-      'Any text you choose to keep as a note is stored like any other journal note.';
+      'What is kept: only what you choose to keep. If you keep your own words with \"Write my own\" or tick \"Keep this text as a note\", that text is saved in your journal entry like any other entry.';
 
   @override
   String get privacyPolicyCtaQuestion =>
@@ -5924,7 +5924,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiConsentNoTraining =>
-      'The text is not kept on our servers and is not used to train models.';
+      'The AI provider does not keep the text or use it to train models, and our server does not log it. Your journal keeps only what you choose: your own words in \"Write my own\", or the text you tick to keep as a note.';
 
   @override
   String get aiConsentOnlyOptions =>

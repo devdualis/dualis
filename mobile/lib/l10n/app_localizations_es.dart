@@ -1251,7 +1251,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get privacyPolicySection8Bullet3 =>
-      'Dónde: un proveedor de IA en la nube contratado trata el texto en Brasil, en la región de São Paulo. El texto no se guarda en los servidores de DualisCheckUp, no se registra en logs y el proveedor no puede usarlo para entrenar modelos.';
+      'Dónde: un proveedor de IA en la nube contratado trata el texto en Brasil, en la región de São Paulo. El proveedor no guarda el texto ni puede usarlo para entrenar modelos, y nuestro servidor no lo registra en logs.';
 
   @override
   String get privacyPolicySection8Bullet4 =>
@@ -1263,7 +1263,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get privacyPolicySection8Bullet6 =>
-      'El texto que decidas guardar como nota se guarda como cualquier otra nota del diario.';
+      'Qué queda guardado: solo lo que usted elija conservar. Si se queda con sus propias palabras en \"escribir el mío\" o marca \"Guardar este texto como nota\", ese texto se guarda en su registro del diario como cualquier otro registro.';
 
   @override
   String get privacyPolicyCtaQuestion =>
@@ -5942,7 +5942,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get aiConsentNoTraining =>
-      'El texto no se guarda en nuestros servidores y no se usa para entrenar modelos.';
+      'El proveedor de IA no guarda el texto ni lo usa para entrenar modelos, y nuestro servidor no lo registra en logs. En tu diario queda solo lo que elijas conservar: tus palabras en \"Escribir el mío\" o el texto que marques para guardar como nota.';
 
   @override
   String get aiConsentOnlyOptions =>
