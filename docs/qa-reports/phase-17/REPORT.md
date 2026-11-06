@@ -2,7 +2,7 @@
 
 Date: 2026-11-05. Tested by: automated QA agent; report reviewed by the orchestrator.
 Device: iPhone 17 Pro simulator, iOS 26.1 (`55A00CEF-138F-41DB-BD39-63BC163A8F22`). Flutter 3.47.6.
-Code tested: `main` at `7aa7ffa`. The screenshots were taken at `72d6bf3`, which already includes the fix for the voice banner. Commits after the QA run: `eb28db1` (wording of the privacy policy, see 5.4), which came after screenshot 3.7.
+Code tested: `main` at `7aa7ffa`. The screenshots were taken at `72d6bf3`, which already includes the fix for the voice banner. Commits after the QA run: `eb28db1` (wording of the privacy policy, see 5.4) and the 13 fixes from the code review (see 5.6).
 
 ## 1. Summary
 
@@ -168,6 +168,43 @@ The AI section said "não vão nome, CPF, e-mail". It now says the server tries 
   - "<option>, pular" could skip the step.
 - Riverpod's automatic retry delayed the offline answer for the consent.
 
+## 5.6 Code review after the QA: 13 fixes
+
+An independent code review of the phase found 2 blockers and 8 warnings. All of them were fixed, one commit each, with tests that fail without the fix. **The screenshots in section 3 are from before these fixes.**
+
+| Finding | Fix | Commit |
+|---|---|---|
+| CR-01 (blocker) | A multi-answer phrase could press "Só registrar medições" and save without the summary. Now no phrase presses any button that saves; said on their own, they still work. | `e023cb5` |
+| CR-02 (blocker) | Loose words such as "muito" or "hoje" could set intensity or duration the person never said. Now a carried word only counts on an exact label, and intensity only takes a number that stands alone. | `c622876` |
+| WR-01 | The text-to-speech safety timer now also silences the engine, so the mic never opens while the app is speaking. | `825c5cd` |
+| WR-02 | "Stop" always wins over a reading that is just starting, and the app silences speech before closing the mic (help, lock, sign-out). | `487c82f` |
+| WR-03 | **Privacy:** condition names and labels the person typed ("Escrever o meu") are never read aloud. | `0ca6e05` |
+| WR-04 | A phrase never unchecks an option that was already checked. | `09da13b` |
+| WR-05 | "Bem" on the physical area is never pressed from a multi-answer phrase (it saved directly). | `fdf49ef` |
+| WR-06 | **Policy and consent:** they said the text is "never stored". They now say the AI provider does not store it and the server does not log it, but the label or note the person chooses to save does stay in their journal (pt/es/en). | `53c333a` |
+| WR-07 | "Guardar este texto como nota" adds to the existing note instead of replacing it. | `d8e39e8` |
+| WR-08 | Two taps on "Permitir" at once no longer return a 500 error. | `928eac7` |
+| IN-01 | If the AI is unavailable or times out, the app shows the failure message instead of "no similar options" (503 `AI_UNAVAILABLE`). | `d1dd196` |
+| IN-05 | An error while answering by voice no longer leaves hands-free mode stuck. | `52fe52a` |
+| IN-06 | On profiles shared by another account, consent is not requested and the AI is not called. | `5e90fe5` |
+
+Tests after the fixes:
+- Mobile: 962/962, run without the owner's untracked billing tests.
+- Backend unit: 567/567.
+- e2e: 129/129, against a temporary local database.
+- RLS: `ai-consents-rls` 8/8, with a new case for two simultaneous grants.
+
+Three RLS failures did not come from these changes:
+- one is the owner's untracked `billing-rls.spec.ts`;
+- two are 0028 cases that need a full superuser, which the local Supabase Postgres does not have.
+
+Not fixed (minor, open):
+- the user's quota is consumed when the shared limit refuses the call;
+- the shared limit counts per instance;
+- the "wait for the next step" check almost never holds;
+- the consent endpoints have no rate limit;
+- the `when` date of 0030.
+
 ## 6. Decisions respected
 
 - **The AI only returns keys of options that already exist** in the area on screen (at most 4). The server filters and the app filters again. Nothing about mood, duration or intensity is set by the AI.
@@ -196,7 +233,7 @@ The AI section said "não vão nome, CPF, e-mail". It now says the server tries 
 1. **Migration 0030 in production, by hand,** with the role that owns the tables: `backend/src/database/migrations/0030_ai_processing_consents.sql`. Do not use `drizzle-kit generate`.
 2. **Deploy order:** the app with the consent dialog must ship **before or together with** the backend. Otherwise "Escrever o meu" responds 403 to everyone until each person gives consent.
 3. **`PRIVACY_VERSION`:** if production pins it in `BACKEND_ENV`, raise it to **`2026.5`**. `DISCLAIMER_VERSION` stays at `2026.1`.
-4. **Gap in migration numbering:** 0030 has idx 30 in `_journal.json`. Your untracked `0029_revenuecat_subscriptions.sql` will need **idx 31** or a rename to 0031.
+4. **Gap in migration numbering:** 0030 has idx 30 in `_journal.json` with `when` = 0028 + 1 ms. Drizzle only applies migrations whose `when` is greater than the last one applied. If 0029 (billing) goes in with an earlier `when`, **it would be skipped silently in production**. Give it idx 31 and a `when` greater than 0030's, or rename it to 0031.
 5. **Google Cloud data processing terms ("no training")** and the international transfer clause (LGPD art. 33): still to be confirmed.
 6. **Audio test** on the iPhone and the Xiaomi: a check-in by voice, plus one phrase with several answers.
 7. **Live evaluation** of 5 to 10 descriptions with Vertex, spaced at least 6.5 s apart.
