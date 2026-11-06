@@ -532,6 +532,10 @@ class VoiceController extends Notifier<VoiceState> {
           entry.onSelect!.call();
           labels.add(match.label);
         }
+      } else if (entry.selected) {
+        // Already marked (a tap, an earlier phrase): kept as it is, never
+        // pressed again, since that would take it off.
+        if (picked.add(entry)) labels.add(match.label);
       } else {
         // The same option named twice is picked once, never toggled off.
         if (picked.add(entry)) {

@@ -57,6 +57,10 @@ class VoiceTargetEntry {
   /// "Escrever o meu" label): it can be said, but it is never read aloud.
   bool personal = false;
 
+  /// Marked on screen right now. A multi-answer phrase keeps it as it is:
+  /// pressing it again would take it off.
+  bool selected = false;
+
   /// Labels that count in a phrase carried over from an earlier step,
   /// and only when one is all its segment says (filler words aside). The
   /// intensity levels keep their numbers here, so "muito cedo" or "dois
@@ -360,6 +364,7 @@ class VoiceTarget extends StatefulWidget {
     this.spokenLabel,
     this.carryLabels,
     this.personal = false,
+    this.selected = false,
     required this.child,
   });
 
@@ -378,6 +383,9 @@ class VoiceTarget extends StatefulWidget {
 
   /// The label is the person's own text: never read aloud.
   final bool personal;
+
+  /// Marked on screen: a multi-answer phrase never presses it again.
+  final bool selected;
   final Widget child;
 
   @override
@@ -429,7 +437,8 @@ class _VoiceTargetState extends State<VoiceTarget> {
       ..saves = widget.saves
       ..carryLabels = widget.carryLabels
       ..spokenLabel = widget.spokenLabel
-      ..personal = widget.personal;
+      ..personal = widget.personal
+      ..selected = widget.selected;
     if (changed) entry._registry._revision++;
   }
 

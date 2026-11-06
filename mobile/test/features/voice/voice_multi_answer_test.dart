@@ -499,6 +499,37 @@ void main() {
     });
   });
 
+  group('An option already marked stays marked (WR-04)', () {
+    testWidgets('tapped "<option>", then "<option>, começou hoje": still on, flow goes on',
+        (tester) async {
+      await pump(tester);
+      await toOptions(tester);
+      await tester.tap(find.byKey(Key('jv2_option_$optionKey')));
+      await tester.pumpAndSettle();
+      expect(flow(tester).selectedOptions, {optionKey});
+
+      await say(tester, '$optionLabel, começou hoje');
+
+      final state = flow(tester);
+      expect(state.step, JournalStep.intensity);
+      expect(state.items.single.optionKey, optionKey);
+      expect(state.items.single.persistence, JournalKeys.persistenceHoje);
+    });
+
+    testWidgets('"<a> e <b>, começou hoje" with <a> marked keeps both', (tester) async {
+      await pump(tester);
+      await toOptions(tester);
+      final keys = [for (final o in options.take(2)) '$time.$branch.$o'];
+      await tester.tap(find.byKey(Key('jv2_option_${keys[0]}')));
+      await tester.pumpAndSettle();
+
+      await say(tester,
+          '${JournalLabels.option(pt, keys[0])} e ${JournalLabels.option(pt, keys[1])}, começou hoje');
+
+      expect(flow(tester).items.map((i) => i.optionKey), keys);
+    });
+  });
+
   group('What the person wrote is never read aloud (WR-03)', () {
     const diabetes = UserCondition(id: 'c9', label: 'Diabetes tipo dois');
     const physical = JournalFlowArgs(initialArea: JournalArea.physical);

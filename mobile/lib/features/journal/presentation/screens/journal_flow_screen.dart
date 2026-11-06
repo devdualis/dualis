@@ -1846,6 +1846,7 @@ class _ChoiceCard extends StatelessWidget {
         onSelect: enabled && voice ? onTap : null,
         role: multi ? VoiceTargetRole.option : VoiceTargetRole.choice,
         saves: saves,
+        selected: selected,
         child: _content(context),
       );
 
@@ -2068,6 +2069,7 @@ class _ChoiceTile extends StatelessWidget {
         onSelect: enabled ? onTap : null,
         role: voiceRole ?? (multi ? VoiceTargetRole.option : VoiceTargetRole.choice),
         personal: personal,
+        selected: selected,
         child: _content(context),
       );
 
@@ -2343,6 +2345,7 @@ class _ConditionTile extends StatelessWidget {
         onSelect: onTap,
         role: VoiceTargetRole.other,
         personal: true,
+        selected: selected,
         child: _content(context),
       );
 
@@ -2452,7 +2455,12 @@ class _OptionCell extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => VoiceTarget(labels: [label], onSelect: onTap, child: _content(context));
+  Widget build(BuildContext context) => VoiceTarget(
+        labels: [label],
+        onSelect: onTap,
+        selected: selected,
+        child: _content(context),
+      );
 
   Widget _content(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
