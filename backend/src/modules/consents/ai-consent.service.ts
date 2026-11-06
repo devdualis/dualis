@@ -79,6 +79,9 @@ export class AiConsentService {
       if (active) {
         await tx.update(userAiConsents).set({ revokedAt: sql`now()` }).where(eq(userAiConsents.id, active.id));
       }
+      // Two grants at once (a double tap, a retry) both see no active row. The partial
+      // unique index lets only one insert land; the other one returns the row that did,
+      // instead of failing with a unique violation (500).
       const [created] = await tx
         .insert(userAiConsents)
         .values({
@@ -88,8 +91,12 @@ export class AiConsentService {
           ipAddressHash: this.encryptionService.hashIp(clientIp || '127.0.0.1'),
           userAgent: userAgent ? userAgent.slice(0, USER_AGENT_MAX) : null,
         })
+        .onConflictDoNothing({
+          target: [userAiConsents.userId, userAiConsents.purpose],
+          where: sql`revoked_at IS NULL`,
+        })
         .returning();
-      return created;
+      return created ?? (await this.findActive(tx, userId));
     });
     return toStatus(row);
   }

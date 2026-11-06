@@ -23,7 +23,8 @@ function fakeTx(active: any[] = []) {
     insert: () => ({
       values: (values: any) => {
         inserted.push(values);
-        return { returning: async () => [{ id: 'row-1', grantedAt: new Date('2026-11-05T12:00:00Z'), revokedAt: null, ...values }] };
+        const returning = async () => [{ id: 'row-1', grantedAt: new Date('2026-11-05T12:00:00Z'), revokedAt: null, ...values }];
+        return { returning, onConflictDoNothing: () => ({ returning }) };
       },
     }),
   };
@@ -89,6 +90,43 @@ describe('AiConsentService', () => {
     expect(inserted).toHaveLength(0);
     expect(tx.update).not.toHaveBeenCalled();
     expect(result.grantedAt).toBe('2026-11-01T00:00:00.000Z');
+  });
+
+  it('a concurrent grant that lost the insert returns the active row, never a unique violation', async () => {
+    const winner = {
+      id: 'row-winner',
+      userId: USER,
+      purpose: AI_CONSENT_PURPOSE,
+      consentVersion: AI_PROCESSING_CONSENT_VERSION,
+      grantedAt: new Date('2026-11-05T12:00:00Z'),
+      revokedAt: null,
+    };
+    // First read: no active row yet. The insert then meets the other request's row
+    // (ON CONFLICT DO NOTHING returns nothing), and the second read finds it.
+    const reads = [[], [winner]];
+    const conflict = vi.fn();
+    const tx = {
+      select: () => ({ from: () => ({ where: () => ({ limit: async () => reads.shift() ?? [] }) }) }),
+      update: vi.fn(),
+      insert: () => ({
+        values: () => ({
+          onConflictDoNothing: (config: any) => {
+            conflict(config);
+            return { returning: async () => [] };
+          },
+        }),
+      }),
+    };
+    const database = { withRls: vi.fn(async (_u: string, callback: (t: any) => Promise<any>) => callback(tx)) };
+    const encryption = { hashIp: vi.fn(() => 'h'.repeat(64)) };
+    const service = new AiConsentService(database as any, encryption as any);
+
+    const result = await service.grant(USER, AI_PROCESSING_CONSENT_VERSION, RAW_IP);
+
+    expect(result).toMatchObject({ granted: true, version: AI_PROCESSING_CONSENT_VERSION, grantedAt: '2026-11-05T12:00:00.000Z' });
+    expect(conflict).toHaveBeenCalledTimes(1);
+    expect(conflict.mock.calls[0][0].target).toHaveLength(2);
+    expect(conflict.mock.calls[0][0].where).toBeDefined();
   });
 
   it('an active row of an older version does not count and is closed on the next grant', async () => {

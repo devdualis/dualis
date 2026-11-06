@@ -223,6 +223,38 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)('AI-processing consents: real ru
     expect(codeOf(missing)).toBe(AI_CONSENT_REQUIRED);
   });
 
+  it('(f2) a grant that races another one returns the row that won, never a unique violation', async () => {
+    // The other request's insert is in flight (not committed): this grant sees no active
+    // row, then its insert waits on the partial unique index until the other one commits.
+    const other = await appPool.connect();
+    try {
+      await other.query('BEGIN');
+      await other.query("SELECT set_config('app.current_user_id', $1, true)", [userB]);
+      const won = await other.query(
+        `INSERT INTO user_ai_consents (user_id, purpose, consent_version, ip_address_hash)
+         VALUES ($1, $2, $3, repeat('0', 64)) RETURNING granted_at`,
+        [userB, AI_CONSENT_PURPOSE, AI_PROCESSING_CONSENT_VERSION],
+      );
+      const pending = controller.grant(req(userB), { version: AI_PROCESSING_CONSENT_VERSION });
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      await other.query('COMMIT');
+
+      const result = await pending;
+      expect(result).toMatchObject({ granted: true, version: AI_PROCESSING_CONSENT_VERSION });
+      expect(result.grantedAt).toBe(new Date(won.rows[0].granted_at).toISOString());
+    } finally {
+      other.release();
+    }
+    expect((await rowsOf(userB)).filter((r) => r.revoked_at === null)).toHaveLength(1);
+
+    // Many at once (double tap, retries): all succeed, one active row.
+    const results = await Promise.all(
+      Array.from({ length: 4 }, () => controller.grant(req(userB), { version: AI_PROCESSING_CONSENT_VERSION })),
+    );
+    for (const r of results) expect(r).toMatchObject({ granted: true });
+    expect((await rowsOf(userB)).filter((r) => r.revoked_at === null)).toHaveLength(1);
+  });
+
   it('(g) deleting user A removes their consent rows (cascade)', async () => {
     await controller.grant(req(userA), { version: AI_PROCESSING_CONSENT_VERSION });
     expect((await rowsOf(userA)).length).toBeGreaterThan(0);
