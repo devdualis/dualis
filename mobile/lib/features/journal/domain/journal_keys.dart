@@ -426,6 +426,9 @@ class JournalKeys {
   static const int conditionLabelMaxLength = 40;
   static const int triggerNoteMaxLength = 60;
 
+  /// The entry note (the note field and text kept from "Descrever").
+  static const int noteMaxLength = 1000;
+
   /// Truncates by grapheme clusters so an emoji is never split.
   static String limitChars(String value, int max) {
     final chars = value.characters;

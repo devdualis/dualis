@@ -213,6 +213,57 @@ void main() {
       expect(entry.note, text);
     });
 
+    testWidgets('kept twice: the second text is added after the first, never in its place',
+        (tester) async {
+      final h = JournalHarness()..premium = true;
+      h.remote.suggestedEntryKeys = const ['passado.tristeza.saudade'];
+      await pumpJournalFlow(tester, h);
+      await describe(tester, typed: 'Primeiro texto', keepNote: true);
+      await tapKey(tester, 'jv2_describe_option_passado.tristeza.saudade');
+      await tapKey(tester, 'jv2_describe_use');
+      await tapKey(tester, 'jv2_back');
+      expect(flowState(tester).step, JournalStep.time);
+
+      await tapKey(tester, 'jv2_describe');
+      await tester.enterText(find.byKey(const Key('jv2_describe_field')), 'Segundo texto');
+      await tester.pumpAndSettle();
+      await tapKey(tester, 'jv2_describe_keep_note');
+      await tapKey(tester, 'jv2_describe_suggest');
+      await tapKey(tester, 'jv2_describe_option_passado.tristeza.saudade');
+      await tapKey(tester, 'jv2_describe_use');
+
+      final entry =
+          containerOf(tester).read(journalFlowControllerProvider.notifier).buildEntry();
+      expect(entry.note, 'Primeiro texto\n\nSegundo texto');
+    });
+
+    testWidgets('kept after a long note: the note stays within its length limit',
+        (tester) async {
+      final h = JournalHarness()..premium = true;
+      h.remote.suggestedEntryKeys = const ['passado.tristeza.saudade'];
+      await pumpJournalFlow(tester, h);
+      final long = 'a' * (JournalKeys.noteMaxLength - 5);
+      await describe(tester, typed: long, keepNote: true);
+      await tapKey(tester, 'jv2_describe_option_passado.tristeza.saudade');
+      await tapKey(tester, 'jv2_describe_use');
+      await tapKey(tester, 'jv2_back');
+
+      await tapKey(tester, 'jv2_describe');
+      await tester.enterText(find.byKey(const Key('jv2_describe_field')), 'Segundo texto');
+      await tester.pumpAndSettle();
+      await tapKey(tester, 'jv2_describe_keep_note');
+      await tapKey(tester, 'jv2_describe_suggest');
+      await tapKey(tester, 'jv2_describe_option_passado.tristeza.saudade');
+      await tapKey(tester, 'jv2_describe_use');
+
+      final note = containerOf(tester)
+          .read(journalFlowControllerProvider.notifier)
+          .buildEntry()
+          .note!;
+      expect(note.length, JournalKeys.noteMaxLength);
+      expect(note, startsWith(long));
+    });
+
     testWidgets('unchecked (the default): the note stays empty', (tester) async {
       final h = JournalHarness()..premium = true;
       h.remote.suggestedEntryKeys = const ['passado.tristeza.saudade'];

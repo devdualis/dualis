@@ -550,7 +550,10 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     final result = await showDescribeSheet(context, area: area, isMale: isMale);
     if (!mounted || result == null) return;
     if (result.keepAsNote && result.text.isNotEmpty) {
-      final note = JournalKeys.limitChars(result.text, describeTextMaxLength);
+      // Added after what the note already says, never in its place.
+      final current = _noteController.text.trim();
+      final merged = current.isEmpty ? result.text : '$current\n\n${result.text}';
+      final note = JournalKeys.limitChars(merged, JournalKeys.noteMaxLength);
       _noteController.text = note;
       _controller.setNote(note);
     }
@@ -1474,7 +1477,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             controller: _noteController,
             minLines: 4,
             maxLines: 8,
-            maxLength: 1000,
+            maxLength: JournalKeys.noteMaxLength,
             decoration: InputDecoration(
               hintText: l10n.jv2NoteHint,
               border: const OutlineInputBorder(),
