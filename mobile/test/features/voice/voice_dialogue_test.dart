@@ -132,6 +132,51 @@ class _ManyOptions extends StatelessWidget {
       );
 }
 
+/// Two steps: "Cansado" and "Continuar", then "Bomba", whose answer throws.
+class _ThrowingSteps extends ConsumerStatefulWidget {
+  const _ThrowingSteps();
+
+  @override
+  ConsumerState<_ThrowingSteps> createState() => _ThrowingStepsState();
+}
+
+class _ThrowingStepsState extends ConsumerState<_ThrowingSteps> {
+  int step = 1;
+
+  @override
+  Widget build(BuildContext context) {
+    final token = 'step$step';
+    ref.read(voiceTargetRegistryProvider).activeStep = token;
+    return Scaffold(
+      body: VoiceStep(
+        key: ValueKey(token),
+        token: token,
+        child: Column(
+          children: step == 1
+              ? [
+                  const VoicePrompt(text: 'Primeira', child: Text('Primeira')),
+                  VoiceTarget(labels: const ['Cansado'], onSelect: () {}, child: const Text('Cansado')),
+                  VoiceTarget(
+                    labels: const ['Continuar'],
+                    onSelect: () => setState(() => step = 2),
+                    role: VoiceTargetRole.advance,
+                    child: const Text('Continuar'),
+                  ),
+                ]
+              : [
+                  const VoicePrompt(text: 'Segunda', child: Text('Segunda')),
+                  VoiceTarget(
+                    labels: const ['Bomba'],
+                    onSelect: () => throw StateError('answer failed'),
+                    child: const Text('Bomba'),
+                  ),
+                ],
+        ),
+      ),
+    );
+  }
+}
+
 void main() {
   final pt = AppLocalizationsPt();
   late JournalHarness harness;
@@ -323,6 +368,17 @@ void main() {
           .split(', ');
       expect(labels, hasLength(maxReadOptions));
     });
+  });
+
+  testWidgets('an answer that throws during a carried phrase: hands-free listens again',
+      (tester) async {
+    await pump(tester, phrases: ['cansado, bomba'], journal: const _ThrowingSteps());
+    await tester.tap(find.byKey(const Key('voice_mic_button')));
+    await run(tester, steps: 40);
+
+    expect(find.text('Segunda'), findsOneWidget);
+    // The phrase ended as not understood and the mic opened again.
+    expect(voice.listenCalls, greaterThanOrEqualTo(2));
   });
 
   group('Speech stops at once', () {

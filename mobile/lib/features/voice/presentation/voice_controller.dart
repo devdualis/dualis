@@ -600,9 +600,20 @@ class VoiceController extends Notifier<VoiceState> {
       ..ensureVisualUpdate();
   }
 
-  /// Next frame of a multi-answer phrase: press "Continuar" if the last
-  /// pass asked for it, or try what is left on the step now on screen.
+  /// Next frame of a multi-answer phrase. An answer that throws ends the
+  /// phrase as not understood, so hands-free never waits on it forever.
   void _replay(int token) {
+    try {
+      _replayStep(token);
+    } catch (error) {
+      debugPrint('Voice: multi-answer replay failed: $error');
+      if (token == _carryToken && _carryDone != null) _notUnderstoodCarry();
+    }
+  }
+
+  /// Presses "Continuar" if the last pass asked for it, or tries what is
+  /// left on the step now on screen.
+  void _replayStep(int token) {
     if (token != _carryToken || _carryDone == null) return;
     if (_carrySession != _session ||
         !_onJournal ||
