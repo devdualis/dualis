@@ -64,8 +64,13 @@ class LoggedVoiceInput implements VoiceInputService {
   @override
   Future<void> stop() async {}
 
+  /// When set, `cancel` is written into the log too.
+  bool logCancel = false;
+
   @override
-  Future<void> cancel() async {}
+  Future<void> cancel() async {
+    if (logCancel) log.add('cancel');
+  }
 }
 
 class SignedIn extends AuthController {
@@ -375,6 +380,17 @@ void main() {
       await startSpeaking(tester);
       (containerOf(tester).read(authControllerProvider.notifier) as SignedIn).signOutNow();
       await run(tester, steps: 10);
+      expectStoppedWithoutListening(tester);
+    });
+
+    testWidgets('the lock stops the speech before it closes the mic', (tester) async {
+      await startSpeaking(tester);
+      voice.logCancel = true;
+      (containerOf(tester).read(biometricLockControllerProvider.notifier) as TestLock).engage();
+      await run(tester, steps: 10);
+      final log = output().log;
+      expect(log, containsAll(['stop', 'cancel']));
+      expect(log.indexOf('stop'), lessThan(log.indexOf('cancel')));
       expectStoppedWithoutListening(tester);
     });
 

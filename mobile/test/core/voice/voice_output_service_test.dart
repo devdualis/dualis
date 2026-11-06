@@ -1,3 +1,4 @@
+import 'dart:async';
 
 import 'package:dualis_mobile/core/voice/voice_output_service.dart';
 import 'package:flutter/foundation.dart';
@@ -37,10 +38,28 @@ class FakeTtsEngine implements TtsEngine {
   Future<void> awaitSpeakCompletion(bool value) => _call('awaitSpeakCompletion:$value', null);
 
   @override
-  Future<bool> speak(String text) => _call('speak', accept);
+  Future<bool> speak(String text) async {
+    final hold = holdSpeak;
+    holdSpeak = null;
+    final result = _call('speak', accept);
+    if (hold != null) await hold.future;
+    return result;
+  }
+
+  /// When set, the next engine stop waits for it (a slow platform call).
+  Completer<void>? holdStop;
+
+  /// When set, the next engine speak waits for it.
+  Completer<void>? holdSpeak;
 
   @override
-  Future<void> stop() => _call('stop', null);
+  Future<void> stop() async {
+    final hold = holdStop;
+    holdStop = null;
+    final result = _call('stop', null);
+    if (hold != null) await hold.future;
+    return result;
+  }
 
   @override
   Future<bool> isLanguageAvailable(String languageTag) =>
@@ -172,6 +191,40 @@ void main() {
     await future.timeout(const Duration(seconds: 2));
     await settle();
     expect(engine.calls.lastIndexOf('stop'), greaterThan(speak));
+  });
+
+  test('stop() while speak waits for the engine stop: nothing is read', () async {
+    await service.prepare('pt');
+    engine.calls.clear();
+    final release = engine.holdStop = Completer<void>();
+    var done = false;
+    final future = service.speak('Como você está?')..then((_) => done = true);
+    await settle();
+    expect(engine.calls, ['stop']);
+
+    await service.stop();
+    release.complete();
+    await future.timeout(const Duration(seconds: 1));
+
+    expect(done, isTrue);
+    expect(engine.calls, isNot(contains('speak')));
+  });
+
+  test('stop() while the engine takes the text: it is stopped right after', () async {
+    await service.prepare('pt');
+    engine.calls.clear();
+    final release = engine.holdSpeak = Completer<void>();
+    final future = service.speak('Como você está?');
+    await settle();
+    expect(engine.calls, ['stop', 'speak']);
+
+    await service.stop();
+    release.complete();
+    await future.timeout(const Duration(seconds: 1));
+    await settle();
+
+    expect(engine.calls.last, 'stop');
+    expect(engine.calls.lastIndexOf('stop'), greaterThan(engine.calls.indexOf('speak')));
   });
 
   test('a late cancel of the stopped speech does not end the new one', () async {

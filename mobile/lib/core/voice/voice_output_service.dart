@@ -157,6 +157,11 @@ class FlutterTtsVoiceOutputService implements VoiceOutputService {
   Completer<void>? _pending;
   Timer? _timer;
 
+  /// Bumped by every [speak] and [stop]. A speak that finds it changed
+  /// after one of its awaits was overtaken (by a stop, or a newer speak)
+  /// and never reaches the engine, so stop always wins.
+  int _generation = 0;
+
   /// Cancel events of a speech stopped just before a new one must not end
   /// the new one: a cancel counts only once the new speech has started.
   bool _started = false;
@@ -229,10 +234,13 @@ class FlutterTtsVoiceOutputService implements VoiceOutputService {
   @override
   Future<void> speak(String text) async {
     if (text.trim().isEmpty) return;
+    final generation = ++_generation;
     await _ensureInit();
-    if (_unavailable) return;
+    if (_unavailable || generation != _generation) return;
     _finish();
     await _guard(_engine.stop);
+    // Stopped (help, lock, mic) while the engine was stopping: say nothing.
+    if (generation != _generation) return;
     final done = Completer<void>();
     _pending = done;
     _started = false;
@@ -244,12 +252,21 @@ class FlutterTtsVoiceOutputService implements VoiceOutputService {
       unawaited(_guard(_engine.stop));
     });
     final accepted = await _guard(() => _engine.speak(text)) ?? false;
+    if (generation != _generation) {
+      // A stop came while the engine was taking the text: silence it. A
+      // newer speech already on the engine (pending) is left alone; one
+      // not sent yet is sent after this stop.
+      _finish(done);
+      if (accepted && _pending == null) unawaited(_guard(_engine.stop));
+      return done.future;
+    }
     if (!accepted || _unavailable) _finish(done);
     return done.future;
   }
 
   @override
   Future<void> stop() async {
+    _generation++;
     _finish();
     await _guard(_engine.stop);
   }

@@ -232,12 +232,15 @@ class VoiceController extends Notifier<VoiceState> {
   }
 
   Future<void> stop() async {
+    // Silence first: help, the lock or sign-out are never talked over
+    // while the mic closes.
+    final output = _outputUsed ? _stopOutput() : null;
     _clearCarry();
     await _stopSession();
     _dictationSink = null;
     _lastReadKey = null;
     state = state.copyWith(handsFree: false, dictating: false, speaking: false);
-    if (_outputUsed) await _stopOutput();
+    if (output != null) await output;
   }
 
   Future<void> _stopOutput() async {
