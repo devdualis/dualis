@@ -236,7 +236,13 @@ class FlutterTtsVoiceOutputService implements VoiceOutputService {
     final done = Completer<void>();
     _pending = done;
     _started = false;
-    _timer = Timer(timeoutBase + perCharacter * text.length, () => _finish(done));
+    // Safety timeout: end the speech itself, not only the wait, so the mic
+    // never opens while the engine is still talking.
+    _timer = Timer(timeoutBase + perCharacter * text.length, () {
+      if (!identical(_pending, done)) return;
+      _finish(done);
+      unawaited(_guard(_engine.stop));
+    });
     final accepted = await _guard(() => _engine.speak(text)) ?? false;
     if (!accepted || _unavailable) _finish(done);
     return done.future;

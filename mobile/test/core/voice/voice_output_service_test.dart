@@ -160,6 +160,20 @@ void main() {
     expect(done(), isTrue);
   });
 
+  test('the safety timeout also stops the engine (the mic never opens over speech)', () async {
+    service = FlutterTtsVoiceOutputService(
+      engine,
+      perCharacter: Duration.zero,
+      timeoutBase: const Duration(milliseconds: 40),
+    );
+    final (future, _) = await begin('Como você está?');
+    engine.start();
+    final speak = engine.calls.lastIndexOf('speak');
+    await future.timeout(const Duration(seconds: 2));
+    await settle();
+    expect(engine.calls.lastIndexOf('stop'), greaterThan(speak));
+  });
+
   test('a late cancel of the stopped speech does not end the new one', () async {
     final (first, firstDone) = await begin('Primeira pergunta');
     engine.start();
