@@ -686,6 +686,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             multi: true,
             semanticsHint: l10n.jv2Remove,
             voiceRole: VoiceTargetRole.other,
+            personal: true,
             onTap: () => _controller.removeCustomLabel(label),
           ),
         const SizedBox(height: 8),
@@ -1038,6 +1039,8 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
               ? l10n.jv2ConditionCardQuestion(items.first.conditionLabel ?? '')
               : l10n.jv2IntensityQuestion)
           : l10n.jv2IntensityCompactQuestion,
+      // The condition name is the person's own text: never read aloud.
+      spokenQuestion: single ? l10n.jv2IntensityQuestion : null,
       bottom: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1506,6 +1509,9 @@ class _StepLayout extends StatelessWidget {
   final String? axisLabel;
   final Color? axisColor;
   final String? question;
+
+  /// Read aloud instead of [question] (one that holds the person's text).
+  final String? spokenQuestion;
   final String? hint;
   final List<Widget> children;
   final Widget? bottom;
@@ -1520,6 +1526,7 @@ class _StepLayout extends StatelessWidget {
     this.axisLabel,
     this.axisColor,
     this.question,
+    this.spokenQuestion,
     this.hint,
     required this.children,
     this.bottom,
@@ -1605,7 +1612,7 @@ class _StepLayout extends StatelessWidget {
                 const SizedBox(height: 6),
                 // Read aloud in the hands-free check-in (Premium).
                 VoicePrompt(
-                  text: question!,
+                  text: spokenQuestion ?? question!,
                   child: Text(
                     question!,
                     style: GoogleFonts.plusJakartaSans(
@@ -2045,17 +2052,22 @@ class _ChoiceTile extends StatelessWidget {
     this.accent = false,
     this.semanticsHint,
     this.voiceRole,
+    this.personal = false,
     required this.onTap,
   });
 
   /// Role for voice; by default an option (multi) or a choice.
   final VoiceTargetRole? voiceRole;
 
+  /// [label] is the person's own text: never read aloud.
+  final bool personal;
+
   @override
   Widget build(BuildContext context) => VoiceTarget(
         labels: [label],
         onSelect: enabled ? onTap : null,
         role: voiceRole ?? (multi ? VoiceTargetRole.option : VoiceTargetRole.choice),
+        personal: personal,
         child: _content(context),
       );
 
@@ -2323,8 +2335,16 @@ class _ConditionTile extends StatelessWidget {
     this.child,
   });
 
+  /// The condition name is the person's own text: it can be said, but it
+  /// is never read aloud and never picked by a multi-answer phrase.
   @override
-  Widget build(BuildContext context) => VoiceTarget(labels: [label], onSelect: onTap, child: _content(context));
+  Widget build(BuildContext context) => VoiceTarget(
+        labels: [label],
+        onSelect: onTap,
+        role: VoiceTargetRole.other,
+        personal: true,
+        child: _content(context),
+      );
 
   Widget _content(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;

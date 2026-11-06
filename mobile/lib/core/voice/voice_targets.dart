@@ -53,6 +53,10 @@ class VoiceTargetEntry {
   /// Read aloud instead of `labels.first` when set.
   String? spokenLabel;
 
+  /// Its label is something the person wrote (a condition name, an
+  /// "Escrever o meu" label): it can be said, but it is never read aloud.
+  bool personal = false;
+
   /// Labels that count in a phrase carried over from an earlier step,
   /// and only when one is all its segment says (filler words aside). The
   /// intensity levels keep their numbers here, so "muito cedo" or "dois
@@ -190,6 +194,7 @@ class VoiceTargetRegistry {
     final entries = [
       for (final t in activeTargets)
         if ((t.role == VoiceTargetRole.option || t.role == VoiceTargetRole.choice) &&
+            !t.personal &&
             _readLabel(t).isNotEmpty)
           t,
     ]..sort((a, b) => a.order.compareTo(b.order));
@@ -354,6 +359,7 @@ class VoiceTarget extends StatefulWidget {
     this.saves = false,
     this.spokenLabel,
     this.carryLabels,
+    this.personal = false,
     required this.child,
   });
 
@@ -369,6 +375,9 @@ class VoiceTarget extends StatefulWidget {
 
   /// The only labels that count in a carried multi-answer phrase.
   final List<String>? carryLabels;
+
+  /// The label is the person's own text: never read aloud.
+  final bool personal;
   final Widget child;
 
   @override
@@ -419,7 +428,8 @@ class _VoiceTargetState extends State<VoiceTarget> {
       ..role = widget.role
       ..saves = widget.saves
       ..carryLabels = widget.carryLabels
-      ..spokenLabel = widget.spokenLabel;
+      ..spokenLabel = widget.spokenLabel
+      ..personal = widget.personal;
     if (changed) entry._registry._revision++;
   }
 

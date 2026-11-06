@@ -5,6 +5,7 @@ import 'package:dualis_mobile/core/router/route_paths.dart';
 import 'package:dualis_mobile/core/security/biometric_lock_controller.dart';
 import 'package:dualis_mobile/core/theme/app_theme.dart';
 import 'package:dualis_mobile/core/voice/voice_input_service.dart';
+import 'package:dualis_mobile/core/voice/voice_targets.dart';
 import 'package:dualis_mobile/features/auth/domain/auth_state.dart';
 import 'package:dualis_mobile/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:dualis_mobile/features/journal/domain/journal_keys.dart';
@@ -495,6 +496,45 @@ void main() {
       await say(tester, 'hoje');
 
       expect(flow(tester).items.single.persistence, JournalKeys.persistenceHoje);
+    });
+  });
+
+  group('What the person wrote is never read aloud (WR-03)', () {
+    const diabetes = UserCondition(id: 'c9', label: 'Diabetes tipo dois');
+    const physical = JournalFlowArgs(initialArea: JournalArea.physical);
+
+    VoiceTargetRegistry registry(WidgetTester tester) =>
+        containerOf(tester).read(voiceTargetRegistryProvider);
+
+    testWidgets('condition names: not in the read-out, still said by voice', (tester) async {
+      await pump(tester, conditions: const [diabetes], args: physical);
+      await say(tester, 'não tão bem');
+      expect(flow(tester).step, JournalStep.body);
+      expect(find.text(diabetes.label), findsOneWidget);
+
+      expect(registry(tester).readableOptions, isNot(contains(diabetes.label)));
+
+      await say(tester, diabetes.label);
+      expect(flow(tester).selectedConditionIds, {diabetes.id});
+
+      // Its 1-5 card asks about the condition by name on screen only.
+      await say(tester, 'continuar');
+      expect(flow(tester).step, JournalStep.intensity);
+      expect(find.text(pt.jv2ConditionCardQuestion(diabetes.label)), findsOneWidget);
+      final prompt = registry(tester).activePrompt!.text;
+      expect(prompt, isNot(contains(diabetes.label)));
+      expect(prompt, pt.jv2IntensityQuestion);
+    });
+
+    testWidgets('"Escrever o meu" labels are not in the read-out', (tester) async {
+      await pump(tester);
+      await toOptions(tester);
+      containerOf(tester).read(journalFlowControllerProvider.notifier).addCustomLabel('minha dor X');
+      await tester.pumpAndSettle();
+      expect(find.text('minha dor X'), findsOneWidget);
+
+      expect(registry(tester).readableOptions, isNot(contains('minha dor X')));
+      expect(registry(tester).readableOptions, contains(optionLabel));
     });
   });
 
