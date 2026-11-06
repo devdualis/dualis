@@ -364,6 +364,7 @@ Plans:
   6. Free people keep plain conditions; the tracking switch and readings open the Premium promo. Decision (2026-11-01): the gate lives in the app only (same as "Meus cuidados"); server-side entitlement checks arrive with Phase 15 billing.
   7. Guardrails (ESTRATEGIA §18.4, ANEXO Phase 14): no reference ranges, no normal/high labels or colours, no alerts, no trend wording. Readings are encrypted at rest, never sent to AI, isolated by RLS per profile, included in LGPD export and deletion. Privacy policy adds "medições que você registrar". Validation bounds only catch typos.
   8. New migration is written for manual production apply. Copy in pt, es, en.
+
 **Plans:** 4 plans
 
 Plans:
@@ -371,6 +372,31 @@ Plans:
 - [x] 16-02: Mobile Domain, Drift Schema v7 & Offline Serialization (Wave 2)
 - [x] 16-03: Mobile UI: Conditions List, "Bem" Flow & Reading Input Cards (Wave 3)
 - [x] 16-04: Per-Condition History, Raw Chart, Summary PDF & Live E2E Sign-Off (Wave 4)
+
+### Phase 17: Conversational voice check-in, multi-answer phrases, AI option suggestions and AI consent
+
+**Goal:** Make the daily check-in faster and more natural without the app ever assessing, classifying or interpreting symptoms.
+1. Voice dialogue: in the check-in, the app reads each step's question and options aloud with on-device text-to-speech, then listens. It works offline and never interprets what was said.
+2. Multi-answer phrases: one spoken phrase can answer several steps in a row (for example "cansado e ansioso, começou hoje, intensidade três"). Only the deterministic matcher is used; segments a step does not use carry over to the next step.
+3. Free description: the person describes freely how they feel. The backend sends the de-identified text to Gemini on Vertex AI (southamerica-east1) and gets back ONLY existing option keys of the journal tree: no diagnosis, condition, severity, intensity or urgency. The person reviews and confirms every suggestion before anything is selected. The app does not react to the content of the text (strategy §18.2, decision kept on 2026-11-05); help stays universal through the help button, ≤1 tap on every screen.
+4. AI-processing consent: a specific LGPD Art. 11, I consent for sending journal text to the AI provider (Google Vertex AI, Brazil region), recorded on the server, versioned and revocable. Both suggestion endpoints require it (the existing `POST /v1/journal/suggest-option` and the new one). The app asks before the first use and lets the person revoke it in settings. The privacy policy is updated in pt, es and en.
+5. The phase ends with a QA report with screenshots.
+
+**Requirements**: VOICE-02 (voice dialogue), VOICE-03 (multi-answer), JOURNAL-AI-01 (free description suggestions), LGPD-AI-01 (AI-processing consent)
+**Depends on:** Phase 16
+**Plans:** 10/10 plans executed
+
+Plans:
+- [x] 17-01-PLAN.md — Backend: AI-processing consent table (migration 0030, RLS), consent API and 403 gate on suggest-option (Wave 1)
+- [x] 17-02-PLAN.md — Mobile: hands-free check-in reads question + options with on-device TTS, then listens; stop rules (Wave 1)
+- [x] 17-03-PLAN.md — Backend: POST /v1/journal/suggest-entry returning only existing option keys; timeout and shared limits (Wave 2)
+- [x] 17-04-PLAN.md — Backend: AI consents in the LGPD export, privacy policy AI section pt/es/en (2026.5), requirements IDs (Wave 2)
+- [x] 17-05-PLAN.md — Mobile: speaking banner, more-options hint, "Ler as perguntas em voz alta" setting (Wave 2)
+- [x] 17-06-PLAN.md — Mobile: multi-answer phrases with the deterministic matcher and a carry-over queue (Wave 2)
+- [x] 17-07-PLAN.md — Mobile: AI consent dialog, settings tile and reusable consent gate (Wave 3)
+- [x] 17-08-PLAN.md — Mobile: "Escrever o meu" asks consent first; in-app privacy policy AI section (Wave 4)
+- [x] 17-09-PLAN.md — Mobile: "Descrever com minhas palavras" with a review list (all OFF) and calm fallbacks (Wave 5)
+- [x] 17-10-PLAN.md — QA: simulator run with screenshots, clean-worktree gates, Spanish report (Wave 6)
 
 ---
 

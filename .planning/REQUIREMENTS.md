@@ -130,6 +130,10 @@ A comercialização da versão 2.0 será dividida em dois tiers comerciais princ
 - [ ] **PREM-03 / RF-012 & UC-02 (SRS ID 11)**: **Transcrição de Exames Laboratoriais (OCR)** — Upload de PDF/foto de laudos com transcrição conferida pelo usuário de biomarcadores e intervalos de referência impressos pelo laboratório, sem alertas de alteração, cores diagnósticas ou comentários clínicos de IA.
 - [ ] **PREM-13 / AUTH-03**: **Opções Avançadas de Log In Biométrico** — Configurações expandidas de autenticação biométrica nativa (FaceID / TouchID / Biometrics): opções de ativação/desativação, tempo de timeout customizável e reautenticação biométrica para acessar registros e exportação de dados.
 - [ ] **PREM-14 / VOICE-01**: **Registro por Voz pós-login (Exclusivo Tier Advanced)** — Interface assistida por voz (Speech-to-Text) após o login para registro ágil de anotações no diário de bem-estar.
+- [x] **VOICE-02**: **Diálogo por voz no check-in** — O app lê no aparelho a pergunta e até ~6 opções da tela e depois escuta; funciona offline; nunca ouve enquanto fala; a fala para ao abrir a ajuda, no bloqueio, ao sair da conta, no toque no microfone e ao sair do check-in; ajuste "Ler as perguntas em voz alta" em Configurações.
+- [x] **VOICE-03**: **Frases com várias respostas** — Uma frase responde passos seguidos só com o reconhecimento determinístico; o que sobra passa ao próximo passo; nunca pula uma resposta obrigatória e nunca aperta Salvar ou Pular; a intensidade só é preenchida quando dita.
+- [x] **JOURNAL-AI-01**: **Descrever com minhas palavras (Premium)** — Texto desidentificado enviado à IA na região de São Paulo; volta só chaves de opções já existentes da área; lista de revisão com tudo desligado; a pessoa confirma cada opção; sem diagnóstico, condição, gravidade, urgência ou intensidade; o app não reage ao conteúdo do texto e a ajuda continua universal.
+- [x] **LGPD-AI-01**: **Consentimento específico para IA** — Consentimento LGPD Art. 11, I registrado no servidor, versionado e revogável, que cobre "Escrever o meu" e "Descrever com minhas palavras"; sem ele as rotas de sugestão respondem 403 `AI_CONSENT_REQUIRED`; os registros entram na exportação de dados e saem com a exclusão da conta; política de privacidade em pt/es/en.
 - [ ] **PREM-04 / RF-013 (SRS ID 12)**: **Gestão de Tiers de Assinatura Recorrente** — Monetização e gestão de acesso via checkout seguro com suporte aos tiers Free, Premium, Advanced e Pacote Família. Recursos de ajuda urgente permanecem sempre 100% gratuitos.
 
 ---
@@ -183,6 +187,10 @@ Which phases cover which requirements.
 | DASH-03 | Phase 9 | Screen 7: Psico-Emocional Trend Graph (RF-008) | Pending |
 | DASH-04 | Phase 9 | Screen 7: Pattern Cards & Retrospective List | Pending |
 | SEC-03 | Phase 10 | Privacy Center & Account Deletion (LGPD Art. 18) | Pending |
+| VOICE-02 | Phase 17 | Voice dialogue in the check-in (on-device TTS + listen) | Complete |
+| VOICE-03 | Phase 17 | Multi-answer phrases (deterministic recognizer) | Complete |
+| JOURNAL-AI-01 | Phase 17 | Describe in my own words (AI suggestions of existing options) | Complete |
+| LGPD-AI-01 | Phase 17 | AI-processing consent, export and privacy policy (LGPD Art. 11, I) | Complete |
 
 **Coverage:**
 - v1 requirements: 30 total
@@ -191,4 +199,4 @@ Which phases cover which requirements.
 
 ---
 *Requirements defined: 2026-09-13*  
-*Last updated: 2026-10-16 after Wellness Repositioning consolidation*
+*Last updated: 2026-11-05 (Phase 17 requirements)*

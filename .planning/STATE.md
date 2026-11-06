@@ -1,19 +1,19 @@
 ---
 gsd_state_version: "1.0"
 milestone: v2.0
-current_phase: 16
-current_phase_name: premium-chronic-condition-tracking-self-reported-measurement
-status: completed
-stopped_at: Phase 16 executed and verified (Live Flutter E2E signed off, points 1-3 addressed)
-last_updated: "2026-11-02T14:22:09.857Z"
-last_activity: 2026-11-02
-last_activity_desc: Completed Phase 16 chronic condition tracking & self-reported measurements
-state_head: 61dc76636fb68d15e62206e6d9f29329db2d1f07
+current_phase: 17
+current_phase_name: Conversational voice check-in, multi-answer phrases, AI option suggestions and AI consent
+status: verifying
+stopped_at: Completed 17-09-PLAN.md
+last_updated: "2026-11-05T23:41:03.143Z"
+last_activity: 2026-11-05
+last_activity_desc: Phase 17 execution started
+state_head: a517a21330b3f5897ca67a8ce8fb2439141e0f14
 progress:
-  total_phases: 15
+  total_phases: 17
   completed_phases: 11
-  total_plans: 35
-  completed_plans: 24
+  total_plans: 38
+  completed_plans: 33
 milestone_name: v2.0-premium-advanced
 ---
 
@@ -24,14 +24,14 @@ milestone_name: v2.0-premium-advanced
 See: .planning/PROJECT.md (updated 2026-09-14)
 
 **Core value:** Unified, safe, and clinically consistent daily health triage bridging somatic/physical symptoms and psycho-emotional states with immediate emergency escalation and 14-day anti-tampering historical verification.
-**Current focus:** Milestone v1.0 Complete
+**Current focus:** Phase 17 — Conversational voice check-in, multi-answer phrases, AI option suggestions and AI consent
 
 ## Current Position
 
-Phase: 11 (multi-profile-legal-guardianship-consensual-sharing) — PLANNING
-Plan: 0 of 3
-Status: Phase 11 planned. Sign-off requires live Flutter e2e (Plan 11-03), not widget tests alone.
-Last activity: 2026-11-02 - Completed quick task 261102-fmk: Hydration settings save feedback, localized water texts, notifications-off notice
+Phase: 17 (Conversational voice check-in, multi-answer phrases, AI option suggestions and AI consent) — EXECUTING
+Plan: 10 of 10
+Status: Phase complete — ready for verification
+Last activity: 2026-11-05 — Phase 17 execution started
 
 Progress: [██████████] 100%
 
@@ -64,6 +64,19 @@ Progress: [██████████] 100%
 - Trend: Stable
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 17 P01 | 25min | 2 tasks | 15 files |
+| Phase 17 P02 | 25min | 3 tasks | 18 files |
+| Phase 17 P03 | 8min | 3 tasks | 9 files |
+| Phase 17 P04 | 20min | 3 tasks | 7 files |
+| Phase 17 P05 | 8 min | 3 tasks | 16 files |
+| Phase 17 P06 | 7min | 3 tasks | 5 files |
+| Phase 17 P07 | 25min | 2 tasks | 14 files |
+| Phase 17 P08 | 30min | 2 tasks | 14 files |
+| Phase 17 P09 | 7min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -81,10 +94,36 @@ Recent decisions affecting current work:
 - [Init]: Screen 3 Unified Trigger includes 3 distinct choices: Good/Normal (instant exit), So-so (standard triage), and Bad/Sick (high-sensitivity triage), plus AdMob container.
 - [Init]: PostgreSQL environment strategy: Supabase free tier for development sandbox; Google Cloud SQL (São Paulo southamerica-east1) for production. Drizzle ORM provides standard connection string compatibility (DATABASE_URL) across both.
 - [Phase 11]: Widget tests do not close a v2 UI phase. Sign-off is a live Flutter session: `integration_test` plus a Dart driver pass (`dtd`, `widget_inspector`, `flutter_driver_command`, `get_runtime_errors`) on a simulator with the premium flag on.
+- [Phase 17]: AI_PROCESSING_CONSENT_VERSION '2026.1' is a code literal, separate from legal document versions and env overrides
+- [Phase 17]: AI consent gate runs in the suggestOption handler after assertCategory so 400 validation still precedes 403
+- [Phase 17]: Migration 0030 grants dualis_app SELECT/INSERT/UPDATE only; consent rows leave via users ON DELETE CASCADE
+- [Phase 17]: AI suggestions allowed only on OWNER profiles (own or managed dependent); holder consent covers both
+- [Phase 17]: 17-02: TTS read-out is question + at most 6 option labels; a step is read once per hands-free run
+- [Phase 17]: 17-02: a TTS cancel counts only after the new speech started; mic opens 300 ms after speech ends
+- [Phase 17]: 17-02: read-aloud preference in secure storage (dualis_voice_read_aloud, default on), read with a 300 ms bound
+- [Phase 17]: 17-03: suggest-entry gates in order 400 body, 403 category, 403 AI_PROFILE_NOT_ALLOWED, 403 AI_CONSENT_REQUIRED, 429 AI_BUSY, then the model
+- [Phase 17]: 17-03: per-person (3/min, 20/day) and shared (8/min per instance, both suggestion routes) limiters apply only when a userId is passed; suggest-option stays quiet when the shared limit is hit
+- [Phase 17]: 17-03: suggest-entry server budget 6000 ms via GeminiService timeoutMs (one AbortSignal for all attempts, no retry after abort)
+- [Phase 17]: 17-04: LGPD export carries aiConsents (oldest first, revokedAt null while active), formatVersion 1.6
+- [Phase 17]: 17-04: Privacy policy section 7 on AI journal suggestions (pt/es/en), category-only naming kept; LEGAL_DOCUMENTS_VERSION 2026.5 — prod PRIVACY_VERSION env pin must be raised at deploy
+- [Phase 17]: 17-05: speaking text takes precedence in the voice banner; banner stays IgnorePointer in its slot
+- [Phase 17]: 17-05: more-options hint only past 6 non-blank options ('Ou diga outra opção da tela.')
+- [Phase 17]: 17-05: read-aloud choice is a device preference kept by clearSession (keyVoiceReadAloud)
+- [Phase 17]: 17-06: multi-answer voice phrases run only on /journal; Continuar pressed post-frame only after the step took an answer and never when leftover words name Salvar/Pular/Voltar
+- [Phase 17]: 17-06: a comma-less single phrase carries to the next steps only with >=2 content words left (minCarryWords)
+- [Phase 17]: AI consent tile shown to every signed-in person, not Premium-only
+- [Phase 17]: Riverpod auto-retry off for the AI consent status so offline answers at once
+- [Phase 17]: Only an explicit 'Agora não' is remembered per consent version; the flag is cleared on sign-out
+- [Phase 17]: 17-08: Escrever o meu checks the connection, then ensureAiConsent(unlessDeclined) before suggest-option; decline/offline/403 keep the typed label
+- [Phase 17]: 17-08: After 403 AI_CONSENT_REQUIRED the journal screen awaits aiConsentController.refresh() (not invalidate, nothing watches it there)
+- [Phase 17]: 17-08: In-app privacy policy section 8 mirrors API section 7 (6 bullets); wording says our server de-identifies
+- [Phase 17]: 17-09: suggested keys are re-checked on the device by one shared filter (describeUsableKeys) used by both the review list and applySuggestedOptions; physical side comes from the body map and branchesFor
+- [Phase 17]: 17-09: 'Seguir sem sugestões' adds no options but still keeps the text as note when the person checked 'Guardar este texto como nota'; Cancel keeps nothing
 
 ### Roadmap Evolution
 
 - Phase 16 added: Premium chronic-condition tracking and self-reported measurements (readings live inside the physical check-in, tied to conditions the person marks as needing records; Premium only).
+- Phase 17 added (2026-11-05): conversational voice check-in, multi-answer phrases, AI option suggestions from a free description, and a server-recorded LGPD Art. 11 consent for AI processing. Requested by the user after voice was fixed on Android.
 
 ### Pending Todos
 
@@ -98,6 +137,7 @@ None yet.
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
+| 261105-nvd | Corregir export subscriptions: pnpm build y tsc --noEmit pasan | 2026-11-05 | uncommitted | [261105-nvd-fix-revenuecat-subscriptions-schema-expo](./quick/261105-nvd-fix-revenuecat-subscriptions-schema-expo/) |
 | 261030-evl | Valores ao longo do tempo: lista por exame com último valor, data e linha neutra; "Ver mais" e busca (>15 itens) no lugar dos chips | 2026-10-30 | 2d57809 | [261030-evl-exam-values-list](./quick/261030-evl-exam-values-list/) |
 | 261030-ktb | Exames repetidos: o mesmo arquivo não é guardado nem lido duas vezes por perfil (HMAC com chave do servidor, migração 0022, backfill); mesma leitura em outro arquivo pergunta "Descartar este / Manter os dois" | 2026-10-30 | (this commit) | [261030-ktb-documentos-de-exames-repetidos](./quick/261030-ktb-documentos-de-exames-repetidos/) |
 | 261030-nrm | Nomes de itens de exame num só formato: sem pontuação solta ("Segmentados :" = "Segmentados:"), primeira letra maiúscula, siglas mantidas (HDL, VCM, T4) | 2026-10-30 | (this commit) | [261030-nrm-normalize-exam-item-names](./quick/261030-nrm-normalize-exam-item-names/) |
@@ -164,6 +204,6 @@ Items acknowledged and deferred at milestone close:
 
 ## Session Continuity
 
-Last session: 2026-09-13
-Stopped at: Roadmap created with 10 phases and 28 requirements mapped
+Last session: 2026-11-05T23:05:40.086Z
+Stopped at: Completed 17-09-PLAN.md
 Resume file: None
