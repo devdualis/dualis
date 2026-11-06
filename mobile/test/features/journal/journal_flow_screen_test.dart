@@ -628,6 +628,27 @@ void main() {
       await tapKey(tester, 'jv2_custom_add');
     }
 
+    testWidgets('a profile shared by another account: no consent dialog, nothing sent',
+        (tester) async {
+      final h = JournalHarness();
+      h.consent.granted = false;
+      h.remote.suggestedOptionKey = 'futuro.mente.antecipar';
+      await pumpJournalFlow(
+        tester,
+        h,
+        extraOverrides: [activeProfileControllerProvider.overrideWith(_SharedByOther.new)],
+      );
+      await startNotSoGood(tester);
+      await pickFeeling(tester, 'futuro', 'mente');
+
+      await writeMine(tester, 'penso demais no amanhã');
+
+      expect(find.byKey(const Key('ai_consent_dialog')), findsNothing);
+      expect(find.byKey(const Key('jv2_custom_chip_penso demais no amanhã')), findsOneWidget);
+      expect(h.remote.suggestRequests, isEmpty);
+      expect(h.consent.calls, isEmpty);
+    });
+
     testWidgets('without consent the dialog comes first; "Agora não" keeps the label and sends nothing',
         (tester) async {
       final h = JournalHarness();
@@ -1289,5 +1310,31 @@ class _MaleActiveProfileNotifier extends ActiveProfileController {
             gender: 'masculino',
           ),
         ],
+      );
+}
+
+/// Ana is signed in with Carlos's profile, shared by Carlos, active.
+class _SharedByOther extends ActiveProfileController {
+  @override
+  ActiveProfileState build() => ActiveProfileState(
+        profiles: [
+          const Profile(
+            id: 'p1',
+            name: 'Ana',
+            profileType: ProfileType.primary,
+            ownership: ProfileOwnership.own,
+            accessLevel: ProfileAccessLevel.owner,
+          ),
+          Profile.fromJson(const {
+            'id': 'shared-1',
+            'name': 'Carlos',
+            'profileType': 'primary',
+            'ownership': 'shared',
+            'accessLevel': 'CO_MANAGE',
+            'readableCategories': ['journal'],
+            'writableCategories': ['journal'],
+          }),
+        ],
+        activeProfileId: 'shared-1',
       );
 }

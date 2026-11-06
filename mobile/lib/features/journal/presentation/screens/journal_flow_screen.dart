@@ -779,10 +779,12 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     try {
       // Offline the label is kept as typed: no consent dialog, no request.
       // Without the AI consent (declined now or before on this device)
-      // nothing is sent either.
+      // nothing is sent either, and a profile shared by another account
+      // never gets AI suggestions (nor the consent dialog).
       final online = await repository.isOnline();
       if (!mounted) return;
       final allowed = online &&
+          aiProfileAllowed(ref.read(activeProfileControllerProvider).activeProfile) &&
           await ensureAiConsent(context, ref, ask: AiConsentAsk.unlessDeclined);
       if (!mounted) return;
       if (allowed) {

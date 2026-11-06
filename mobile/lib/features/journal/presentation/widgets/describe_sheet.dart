@@ -368,7 +368,12 @@ class _DescribeSheetState extends ConsumerState<DescribeSheet> {
 /// them as well).
 bool describeAvailable(WidgetRef ref) {
   if (!ref.watch(premiumProfilesEnabledProvider)) return false;
-  final profile = ref.watch(activeProfileControllerProvider).activeProfile;
-  if (profile == null) return true;
-  return !profile.isShared && profile.accessLevel == ProfileAccessLevel.owner;
+  return aiProfileAllowed(ref.watch(activeProfileControllerProvider).activeProfile);
 }
+
+/// AI suggestions are only for the holder's own profile or a dependent
+/// they manage. A profile shared by another account gets none: no consent
+/// dialog and no request (the server refuses it too).
+bool aiProfileAllowed(Profile? profile) =>
+    profile == null ||
+    (!profile.isShared && profile.accessLevel == ProfileAccessLevel.owner);
