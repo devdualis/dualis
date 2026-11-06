@@ -49,7 +49,8 @@ enum AiSuggestFailure {
   /// The request was sent but the answer took too long.
   timeout,
 
-  /// Any other error.
+  /// Any other error, including 503 `AI_UNAVAILABLE` (the suggestion
+  /// could not be made: model off, timeout or error on the server).
   unavailable,
 }
 

@@ -9,7 +9,7 @@ import { JournalService } from '../../src/modules/journal/journal.service';
 import { buildJournalSummary, dayMarkers } from '../../src/modules/journal/journal-summary';
 import { houseAdsFor } from '../../src/modules/journal/house-ads';
 import { BANNED_VOCABULARY, findBannedVocabulary } from '../../scripts/banned-vocabulary';
-import { JournalSuggestService, catalogKeys } from '../../src/modules/journal/journal-suggest.service';
+import { JournalSuggestService, aiUnavailableError, catalogKeys } from '../../src/modules/journal/journal-suggest.service';
 import { aiConsentRequiredError, aiProfileNotAllowedError } from '../../src/modules/consents/ai-consent.service';
 import { assertCategory } from '../../src/modules/profiles/profile-context';
 
@@ -248,8 +248,8 @@ describe('Journal v2 contract: free-description suggestion', () => {
     } catch (err) {
       category = err;
     }
-    const errors = [aiConsentRequiredError(), aiProfileNotAllowedError(), busy, category];
-    expect(errors.map((e) => (e as HttpException).getStatus())).toEqual([403, 403, 429, 403]);
+    const errors = [aiConsentRequiredError(), aiProfileNotAllowedError(), busy, category, aiUnavailableError()];
+    expect(errors.map((e) => (e as HttpException).getStatus())).toEqual([403, 403, 429, 403, 503]);
     for (const err of errors) expectCleanResponse((err as HttpException).getResponse());
   });
 });

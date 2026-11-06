@@ -11,6 +11,18 @@ import {
   JournalSuggestService,
 } from '../../src/modules/journal/journal-suggest.service';
 
+/** The stable code of a 503 the call threw, or null when it resolved. */
+async function unavailableCode(call: Promise<unknown>): Promise<string | null> {
+  try {
+    await call;
+    return null;
+  } catch (err) {
+    expect(err).toBeInstanceOf(HttpException);
+    expect((err as HttpException).getStatus()).toBe(503);
+    return ((err as HttpException).getResponse() as any).code;
+  }
+}
+
 describe('JournalSuggestService', () => {
   it('catalog keys are only everyday diary chips, never .custom', () => {
     const emotional = catalogKeys('emotional');
@@ -200,21 +212,29 @@ describe('JournalSuggestService.suggestEntry (free description)', () => {
   });
 
   it('without Gemini or with nothing left after de-identification, the model is not called', async () => {
-    expect(await new JournalSuggestService(undefined).suggestEntry('sem ânimo', 'emotional')).toEqual({ optionKeys: [] });
+    expect(await new JournalSuggestService(undefined).suggestEntry('   ', 'emotional')).toEqual({ optionKeys: [] });
     const { service, generateJson } = withModel({ optionKeys: ['futuro.medo.desanimo'] });
     expect(await service.suggestEntry('   ', 'emotional')).toEqual({ optionKeys: [] });
     expect(generateJson).not.toHaveBeenCalled();
     const off = vi.fn();
     const unavailable = new JournalSuggestService({ isAvailable: false, generateJson: off } as any);
-    expect(await unavailable.suggestEntry('sem ânimo', 'emotional')).toEqual({ optionKeys: [] });
+    expect(await unavailableCode(unavailable.suggestEntry('sem ânimo', 'emotional'))).toBe('AI_UNAVAILABLE');
+    expect(await unavailableCode(new JournalSuggestService(undefined).suggestEntry('sem ânimo', 'emotional'))).toBe(
+      'AI_UNAVAILABLE',
+    );
     expect(off).not.toHaveBeenCalled();
   });
 
-  it('a model error gives an empty list and never logs the text', async () => {
+  it('a model error is 503 AI_UNAVAILABLE (not "nothing fits"), with no model output, and never logs the text', async () => {
     const generateJson = vi.fn().mockRejectedValue(new Error('boom'));
     const service = new JournalSuggestService({ isAvailable: true, generateJson } as any);
     const warn = vi.spyOn((service as any).logger, 'warn').mockImplementation(() => undefined);
-    expect(await service.suggestEntry('texto muito pessoal sobre mim', 'emotional')).toEqual({ optionKeys: [] });
+    const error = await service.suggestEntry('texto muito pessoal sobre mim', 'emotional').catch((e) => e);
+    expect(error).toBeInstanceOf(HttpException);
+    expect(error.getStatus()).toBe(503);
+    expect(Object.keys(error.getResponse()).sort()).toEqual(['code', 'error', 'message', 'statusCode']);
+    expect(error.getResponse().code).toBe('AI_UNAVAILABLE');
+    expect(JSON.stringify(error.getResponse())).not.toContain('boom');
     expect(warn).toHaveBeenCalledWith('Journal entry suggestion failed: boom');
     expect(JSON.stringify(warn.mock.calls)).not.toContain('pessoal');
   });
@@ -267,10 +287,10 @@ describe('suggestion time budget and limits', () => {
     expect(GLOBAL_AI_LIMITS).toEqual({ perMinute: 8, perDay: 2000 });
   });
 
-  it('suggestEntry asks the model for an answer within 6 s; an abort gives an empty list', async () => {
+  it('suggestEntry asks the model for an answer within 6 s; an abort is 503 AI_UNAVAILABLE', async () => {
     const { service, gemini } = setup();
     gemini.generateJson.mockRejectedValueOnce(Object.assign(new Error('This operation was aborted'), { name: 'AbortError' }));
-    expect(await service.suggestEntry('sem ânimo', 'emotional', 'u1')).toEqual({ optionKeys: [] });
+    expect(await unavailableCode(service.suggestEntry('sem ânimo', 'emotional', 'u1'))).toBe('AI_UNAVAILABLE');
     expect(gemini.generateJson.mock.calls[0][0].timeoutMs).toBe(6000);
   });
 
@@ -317,7 +337,7 @@ describe('suggestion time budget and limits', () => {
     const { service, gemini } = setup();
     for (let i = 0; i < 10; i++) expect(await service.suggestEntry('   ', 'emotional', 'u1')).toEqual({ optionKeys: [] });
     gemini.isAvailable = false;
-    for (let i = 0; i < 10; i++) expect(await service.suggestEntry('sem ânimo', 'emotional', 'u1')).toEqual({ optionKeys: [] });
+    for (let i = 0; i < 10; i++) expect(await unavailableCode(service.suggestEntry('sem ânimo', 'emotional', 'u1'))).toBe('AI_UNAVAILABLE');
     gemini.isAvailable = true;
     for (let i = 0; i < 3; i++) expect(await busyCode(service.suggestEntry('sem ânimo', 'emotional', 'u1'))).toBeNull();
     expect(gemini.generateJson).toHaveBeenCalledTimes(3);

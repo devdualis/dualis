@@ -415,6 +415,16 @@ void main() {
       await expectFallback(tester, pt.jv2DescribeFailed, step: JournalStep.body);
     });
 
+    testWidgets('AI not available (503 AI_UNAVAILABLE): the failure message, not "no options"',
+        (tester) async {
+      final h = JournalHarness()..premium = true;
+      h.remote.suggestEntryError = suggestEntryFailure(status: 503, code: 'AI_UNAVAILABLE');
+      await pumpJournalFlow(tester, h);
+      await describe(tester);
+      expect(find.text(pt.jv2DescribeEmpty), findsNothing);
+      await expectFallback(tester, pt.jv2DescribeFailed);
+    });
+
     testWidgets('busy (429 AI_BUSY)', (tester) async {
       final h = JournalHarness()..premium = true;
       h.remote.suggestEntryError =

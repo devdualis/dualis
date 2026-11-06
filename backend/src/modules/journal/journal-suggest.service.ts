@@ -31,7 +31,25 @@ export const GLOBAL_AI_LIMITS: SuggestLimits = { perMinute: 8, perDay: 2000 };
 /** Server budget for one free-description call, under the app's 8 s timeout. */
 export const SUGGEST_ENTRY_TIMEOUT_MS = 6000;
 export const AI_BUSY = 'AI_BUSY';
+export const AI_UNAVAILABLE = 'AI_UNAVAILABLE';
 const SHARED_KEY = 'all';
+
+/**
+ * The suggestion could not be made (model off, timeout, model error). A 503 with a stable
+ * code, so the app says so calmly instead of "no similar options"; nothing of the model's
+ * answer is in it.
+ */
+export function aiUnavailableError(): HttpException {
+  return new HttpException(
+    {
+      statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+      error: 'Service Unavailable',
+      code: AI_UNAVAILABLE,
+      message: 'As sugestões não estão disponíveis agora. Siga pelas opções da tela.',
+    },
+    HttpStatus.SERVICE_UNAVAILABLE,
+  );
+}
 
 function aiBusyError(): HttpException {
   return new HttpException(
@@ -352,7 +370,9 @@ export class JournalSuggestService {
   /**
    * Maps a free description onto up to four existing options of the area (no branch, no
    * side: the app derives the side). Returns option keys and nothing else, whatever the
-   * text says. The text is not stored, cached or logged.
+   * text says. The text is not stored, cached or logged. An empty list means nothing fit;
+   * when no suggestion could be made (model off, timeout, error) it throws 503
+   * AI_UNAVAILABLE instead.
    */
   async suggestEntry(
     text: string,
@@ -361,7 +381,8 @@ export class JournalSuggestService {
   ): Promise<{ optionKeys: string[] }> {
     const allowed = catalogKeys(area);
     const clean = deidentify(text ?? '');
-    if (!clean || allowed.length === 0 || !this.gemini?.isAvailable) return { optionKeys: [] };
+    if (!clean || allowed.length === 0) return { optionKeys: [] };
+    if (!this.gemini?.isAvailable) throw aiUnavailableError();
     // Counted only when the model is about to be called. The route always passes the user;
     // scripts and evals call without one. Outside the try: the 429 must reach the app.
     if (userId && (!this.entryLimiter.tryConsume(userId) || !this.sharedLimiter.tryConsume(SHARED_KEY))) {
@@ -387,7 +408,7 @@ export class JournalSuggestService {
     } catch (err) {
       // Never log the text: only that the call failed and why.
       this.logger.warn(`Journal entry suggestion failed: ${(err as Error).message?.slice(0, 200)}`);
-      return { optionKeys: [] };
+      throw aiUnavailableError();
     }
   }
 }

@@ -451,11 +451,13 @@ describe('Journal v2 E2E (/v1/journal/entries, conditions, summary, /v1/house-ad
       expect(aiConsent.assertAllowed).toHaveBeenCalledWith(mockUserId, expect.objectContaining({ accessLevel: 'OWNER' }));
     });
 
-    it('a model failure still answers 200 with an empty list', async () => {
+    it('a model failure answers 503 AI_UNAVAILABLE, not an empty list, with nothing of the model in it', async () => {
       gemini.generateJson.mockRejectedValue(new Error('deadline exceeded'));
       const res = await suggestEntry({ text: 'ando sem ânimo com tudo', area: 'emotional' });
-      expect(res.statusCode).toBe(200);
-      expect(res.json()).toEqual({ optionKeys: [] });
+      expect(res.statusCode).toBe(503);
+      expect(res.json()).toMatchObject({ statusCode: 503, code: 'AI_UNAVAILABLE' });
+      expect(res.body).not.toContain('deadline');
+      expect(res.body).not.toContain('optionKeys');
     });
   });
 });
