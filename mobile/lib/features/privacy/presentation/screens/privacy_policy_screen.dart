@@ -20,7 +20,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
         scrolledUnderElevation: 1,
         title: Text(
           l10n.privacyPolicyAppBarTitle,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
             fontSize: 18,
             color: AppColors.textPrimaryLight,
@@ -63,7 +63,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     Text(
                       l10n.privacyPolicyHeaderTitle,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimaryLight,
@@ -72,7 +72,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       l10n.privacyPolicyHeaderSubtitle,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         color: AppColors.clinicalTealDark,
                         fontWeight: FontWeight.w600,
@@ -81,7 +81,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                     const Divider(height: 24),
                     Text(
                       l10n.privacyPolicyIntro,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 13,
                         color: AppColors.textSecondaryLight,
                         height: 1.5,
@@ -101,7 +101,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                           Expanded(
                             child: Text(
                               l10n.privacyPolicyDpoLine,
-                              style: GoogleFonts.plusJakartaSans(
+                              style: GoogleFonts.inter(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimaryLight,
@@ -250,7 +250,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                     Text(
                       l10n.privacyPolicyCtaQuestion,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimaryLight,
@@ -323,7 +323,7 @@ class _PrivacySectionCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimaryLight,
@@ -335,7 +335,7 @@ class _PrivacySectionCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             content,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 13,
               color: AppColors.textSecondaryLight,
               height: 1.5,
@@ -360,7 +360,7 @@ class _PrivacySectionCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         bullet,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           color: AppColors.textSecondaryLight,
                           height: 1.4,

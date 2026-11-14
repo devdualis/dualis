@@ -61,7 +61,7 @@ class DualisTextField extends StatelessWidget {
         autovalidateMode: autovalidateMode,
         focusNode: focusNode,
         inputFormatters: inputFormatters,
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: 16,
           fontWeight: FontWeight.w400,
         ),

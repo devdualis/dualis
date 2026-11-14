@@ -20,7 +20,7 @@ class BiologicalSexSelector extends StatelessWidget {
       children: [
         Text(
           'Sexo Biológico',
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: AppColors.textPrimaryLight,
@@ -141,7 +141,7 @@ class _GenderOption extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       label,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                         color: selected ? Colors.white : AppColors.textSecondaryLight,

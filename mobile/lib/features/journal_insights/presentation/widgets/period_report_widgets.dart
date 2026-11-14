@@ -13,12 +13,12 @@ import 'chart_tokens.dart';
 const Color _barColor = ChartTokens.body;
 const Color _trackColor = Color(0xFFEFF3F7);
 
-TextStyle get _textStyle => GoogleFonts.plusJakartaSans(
+TextStyle get _textStyle => GoogleFonts.inter(
       fontSize: 13,
       color: AppColors.textPrimaryLight,
     );
 
-TextStyle get _smallStyle => GoogleFonts.plusJakartaSans(
+TextStyle get _smallStyle => GoogleFonts.inter(
       fontSize: 11,
       color: AppColors.textSecondaryLight,
     );

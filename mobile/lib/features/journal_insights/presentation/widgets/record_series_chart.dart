@@ -61,7 +61,7 @@ class RecordSeriesChart extends StatelessWidget {
         barSeries.add(s);
       }
     }
-    final axisStyle = GoogleFonts.plusJakartaSans(
+    final axisStyle = GoogleFonts.inter(
       fontSize: 10,
       color: AppColors.textSecondaryLight,
     );
@@ -144,7 +144,7 @@ class RecordSeriesChart extends StatelessWidget {
                   LineTooltipItem(
                     describeRecord(l10n, locale,
                         barPoints[spot.barIndex][spot.spotIndex]),
-                    GoogleFonts.plusJakartaSans(
+                    GoogleFonts.inter(
                       fontSize: 11.5,
                       height: 1.35,
                       color: AppColors.textPrimaryLight,
@@ -361,7 +361,7 @@ class _SeriesAnswersCardState extends State<SeriesAnswersCard> {
                       color: s.key == current.key ? s.color : AppColors.outlineLight,
                       width: 1.4,
                     ),
-                    labelStyle: GoogleFonts.plusJakartaSans(
+                    labelStyle: GoogleFonts.inter(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimaryLight,
@@ -421,7 +421,7 @@ class _ShapeLegend extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           label,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 12,
             color: AppColors.textPrimaryLight,
           ),
@@ -468,7 +468,7 @@ class _ShapePainter extends CustomPainter {
       old.index != index || old.color != color;
 }
 
-final TextStyle chartCaptionStyle = GoogleFonts.plusJakartaSans(
+final TextStyle chartCaptionStyle = GoogleFonts.inter(
   fontSize: 12,
   color: AppColors.textSecondaryLight,
 );

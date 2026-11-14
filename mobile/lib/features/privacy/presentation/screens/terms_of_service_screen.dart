@@ -20,7 +20,7 @@ class TermsOfServiceScreen extends StatelessWidget {
         scrolledUnderElevation: 1,
         title: Text(
           l10n.termsAppBarTitle,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
             fontSize: 18,
             color: AppColors.textPrimaryLight,
@@ -63,7 +63,7 @@ class TermsOfServiceScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     Text(
                       l10n.termsHeaderTitle,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimaryLight,
@@ -72,7 +72,7 @@ class TermsOfServiceScreen extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       l10n.termsVersionLine,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         color: AppColors.textSecondaryLight,
                         fontWeight: FontWeight.w500,
@@ -81,7 +81,7 @@ class TermsOfServiceScreen extends StatelessWidget {
                     const Divider(height: 24),
                     Text(
                       l10n.termsIntro,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 13,
                         color: AppColors.textSecondaryLight,
                         height: 1.5,
@@ -205,7 +205,7 @@ class _LegalSectionCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimaryLight,
@@ -217,7 +217,7 @@ class _LegalSectionCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             content,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 13,
               color: AppColors.textSecondaryLight,
               height: 1.5,
@@ -242,7 +242,7 @@ class _LegalSectionCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         bullet,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           color: AppColors.textSecondaryLight,
                           height: 1.4,

@@ -55,7 +55,7 @@ class _ConditionReadingsScreenState
         appBar: AppBar(
           title: Text(
             l10n.chronicHistoryTitle,
-            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
+            style: GoogleFonts.inter(fontWeight: FontWeight.w700),
           ),
         ),
         body: SafeArea(
@@ -82,7 +82,7 @@ class _ConditionReadingsScreenState
       appBar: AppBar(
         title: Text(
           l10n.chronicHistoryTitle,
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
+          style: GoogleFonts.inter(fontWeight: FontWeight.w700),
         ),
       ),
       body: SafeArea(
@@ -100,7 +100,7 @@ class _ConditionReadingsScreenState
               Text(
                 name,
                 key: const Key('chronic_history_name'),
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimaryLight,
@@ -110,7 +110,7 @@ class _ConditionReadingsScreenState
                 const SizedBox(height: 2),
                 Text(
                   l10n.chronicHistoryProfile(profile),
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 13,
                     color: AppColors.textSecondaryLight,
                   ),
@@ -146,7 +146,7 @@ class _ConditionReadingsScreenState
                   Text(
                     l10n.chronicHistoryError,
                     key: const Key('chronic_history_error'),
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       color: AppColors.textSecondaryLight,
                     ),
                   ),
@@ -206,7 +206,7 @@ class _ConditionReadingsScreenState
               Expanded(
                 child: Text(
                   l10n.chronicHistoryOffline,
-                  style: GoogleFonts.plusJakartaSans(fontSize: 13),
+                  style: GoogleFonts.inter(fontSize: 13),
                 ),
               ),
             ],
@@ -218,7 +218,7 @@ class _ConditionReadingsScreenState
           child: Text(
             l10n.chronicHistoryEmpty(_days),
             key: const Key('chronic_history_empty'),
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               color: AppColors.textSecondaryLight,
             ),
           ),
@@ -241,7 +241,7 @@ class _ConditionReadingsScreenState
           padding: const EdgeInsets.only(bottom: 16),
           child: Text(
             l10n.chronicHistoryChartHint,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 12,
               color: AppColors.textSecondaryLight,
             ),
@@ -284,7 +284,7 @@ class _Section extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -292,7 +292,7 @@ class _Section extends StatelessWidget {
               ),
               Text(
                 trailing,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   color: AppColors.textSecondaryLight,
                 ),
@@ -338,7 +338,7 @@ class _DayBlock extends StatelessWidget {
         children: [
           Text(
             title,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w700,
               color: AppColors.textSecondaryLight,
@@ -361,7 +361,7 @@ class _DayBlock extends StatelessWidget {
                     width: 52,
                     child: Text(
                       DateFormat('HH:mm', locale).format(r.measuredAt.toLocal()),
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -372,14 +372,14 @@ class _DayBlock extends StatelessWidget {
                       children: [
                         Text(
                           readingKindLabel(l10n, r.kind),
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontSize: 12,
                             color: AppColors.textSecondaryLight,
                           ),
                         ),
                         Text(
                           readingValueText(l10n, locale, r),
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimaryLight,

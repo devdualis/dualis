@@ -42,7 +42,7 @@ class HabitsWaterSummaryCard extends ConsumerWidget {
               child: Text(
                 '$emoji $label',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: AppColors.clinicalTealDark,
@@ -74,7 +74,7 @@ class HabitsWaterSummaryCard extends ConsumerWidget {
         children: [
           Text(
             l10n.habitsWaterSummaryTitle,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimaryLight,
@@ -98,7 +98,7 @@ class HabitsWaterSummaryCard extends ConsumerWidget {
                     Center(
                       child: Text(
                         '${water.progressPercent}%',
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
                           color: AppColors.textPrimaryLight,
@@ -112,7 +112,7 @@ class HabitsWaterSummaryCard extends ConsumerWidget {
               Expanded(
                 child: Text(
                   '${water.todayTotalMl} / ${water.dailyTargetMl} ml',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: AppColors.textPrimaryLight,
@@ -144,7 +144,7 @@ class HabitsWaterSummaryCard extends ConsumerWidget {
               icon: const Icon(Icons.chevron_right_rounded, size: 18),
               label: Text(
                 l10n.habitsWaterSummaryOpen,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),

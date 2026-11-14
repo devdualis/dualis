@@ -207,7 +207,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 Text(
                   l10n.registerTitle,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimaryLight,
@@ -216,7 +216,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: 8),
                 Text(
                   l10n.registerSubtitle,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     color: AppColors.textSecondaryLight,
                     height: 1.4,
@@ -336,14 +336,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     child: Text.rich(
                       TextSpan(
                         text: l10n.registerHaveAccountPrompt,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 14,
                           color: AppColors.textSecondaryLight,
                         ),
                         children: [
                           TextSpan(
                             text: l10n.screen1SecondaryCta,
-                            style: GoogleFonts.plusJakartaSans(
+                            style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: AppColors.softIndigo,

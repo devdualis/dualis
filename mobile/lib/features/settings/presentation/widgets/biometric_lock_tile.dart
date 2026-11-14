@@ -75,14 +75,14 @@ class _BiometricLockTileState extends ConsumerState<BiometricLockTile> {
           ),
           title: Text(
             l10n.bioLockSettingsTitle,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),
           ),
           subtitle: Text(
             l10n.bioLockSettingsSubtitle,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 12,
               color: AppColors.textSecondaryLight,
             ),

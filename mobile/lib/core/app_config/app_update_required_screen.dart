@@ -26,7 +26,7 @@ class AppUpdateRequiredScreen extends StatelessWidget {
               Text(
                 l10n.appUpdateTitle,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
                 ),
@@ -35,7 +35,7 @@ class AppUpdateRequiredScreen extends StatelessWidget {
               Text(
                 l10n.appUpdateMessage(minSupportedVersion ?? ''),
                 textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 15,
                   height: 1.45,
                   color: Colors.black87,

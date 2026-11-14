@@ -103,7 +103,7 @@ class _ConditionReadingsCardState extends State<ConditionReadingsCard> {
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
               child: Text(
                 l10n.chronicTrackPickKind,
-                style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w700),
+                style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700),
               ),
             ),
             for (final k in widget.tracking)
@@ -152,7 +152,7 @@ class _ConditionReadingsCardState extends State<ConditionReadingsCard> {
             onPressed: () => _pickKindAndAdd(l10n),
             child: Text(
               _rows.isEmpty ? l10n.chronicTrackAdd : l10n.chronicTrackAddAnother,
-              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
+              style: GoogleFonts.inter(fontWeight: FontWeight.w700),
             ),
           ),
         ),
@@ -220,7 +220,7 @@ class _ConditionReadingsCardState extends State<ConditionReadingsCard> {
           const SizedBox(height: 10),
           Text(
             l10n.chronicTrackMoment,
-            style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600),
+            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 6),
           Wrap(
@@ -268,7 +268,7 @@ class _ConditionReadingsCardState extends State<ConditionReadingsCard> {
               Expanded(
                 child: Text(
                   readingKindLabel(l10n, row.kind),
-                  style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700),
+                  style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700),
                 ),
               ),
               IconButton(
@@ -291,7 +291,7 @@ class _ConditionReadingsCardState extends State<ConditionReadingsCard> {
                     Expanded(
                       child: Text(
                         l10n.chronicTrackTime,
-                        style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600),
+                        style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
                       ),
                     ),
                     ActionChip(
@@ -484,7 +484,7 @@ class _NumberField extends StatelessWidget {
         border: const OutlineInputBorder(),
         errorText: error,
         errorMaxLines: 2,
-        errorStyle: GoogleFonts.plusJakartaSans(
+        errorStyle: GoogleFonts.inter(
           fontSize: 12,
           fontWeight: FontWeight.w600,
           color: AppColors.dualisNavy,

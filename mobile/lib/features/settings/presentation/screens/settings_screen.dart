@@ -191,7 +191,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             const SizedBox(height: 18),
             Text(
               l10n.changeAvatar,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimaryLight,
@@ -200,7 +200,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             const SizedBox(height: 6),
             Text(
               l10n.settingsChangePhotoSubtitle,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 color: AppColors.textSecondaryLight,
               ),
@@ -257,7 +257,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(
                   l10n.cancel,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     color: AppColors.textSecondaryLight,
                     fontWeight: FontWeight.w600,
                   ),
@@ -410,18 +410,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(
           l10n.logoutButton,
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold),
         ),
         content: Text(
           l10n.settingsLogoutConfirmBody,
-          style: GoogleFonts.plusJakartaSans(fontSize: 14),
+          style: GoogleFonts.inter(fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
               l10n.cancel,
-              style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondaryLight),
+              style: GoogleFonts.inter(color: AppColors.textSecondaryLight),
             ),
           ),
           ElevatedButton(
@@ -432,7 +432,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
               l10n.settingsLogoutConfirmAction,
-              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+              style: GoogleFonts.inter(fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -462,7 +462,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         scrolledUnderElevation: 1,
         title: Text(
           l10n.settingsTitle,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
             fontSize: 20,
             color: AppColors.textPrimaryLight,
@@ -507,7 +507,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           const SizedBox(width: 8),
                           Text(
                             l10n.profileSection,
-                            style: GoogleFonts.plusJakartaSans(
+                            style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textPrimaryLight,
@@ -579,7 +579,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   const SizedBox(width: 6),
                                   Text(
                                     l10n.settingsPhotoAdjustHint,
-                                    style: GoogleFonts.plusJakartaSans(
+                                    style: GoogleFonts.inter(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.clinicalTealDark,
@@ -598,7 +598,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           icon: const Icon(Icons.palette_outlined, size: 16),
                           label: Text(
                             l10n.changeAvatar,
-                            style: GoogleFonts.plusJakartaSans(
+                            style: GoogleFonts.inter(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
@@ -611,7 +611,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(height: 16),
                       Text(
                         l10n.nameLabel,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textSecondaryLight,
@@ -621,7 +621,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       TextFormField(
                         key: const Key('settings_name_input'),
                         controller: _nameController,
-                        style: GoogleFonts.plusJakartaSans(fontSize: 14),
+                        style: GoogleFonts.inter(fontSize: 14),
                         decoration: InputDecoration(
                           hintText: l10n.settingsNameHint,
                           prefixIcon: const Icon(Icons.badge_outlined, color: AppColors.clinicalTeal),
@@ -653,7 +653,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         children: [
                           Text(
                             l10n.dateOfBirthLabel,
-                            style: GoogleFonts.plusJakartaSans(
+                            style: GoogleFonts.inter(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: AppColors.textSecondaryLight,
@@ -669,7 +669,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               ),
                               child: Text(
                                 l10n.yearsOld(age),
-                                style: GoogleFonts.plusJakartaSans(
+                                style: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.clinicalTealDark,
@@ -698,7 +698,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   _selectedDateOfBirth != null
                                       ? DateFormat('dd/MM/yyyy').format(_selectedDateOfBirth!)
                                       : l10n.selectDateOfBirthHint,
-                                  style: GoogleFonts.plusJakartaSans(
+                                  style: GoogleFonts.inter(
                                     fontSize: 14,
                                     color: _selectedDateOfBirth != null
                                         ? AppColors.textPrimaryLight
@@ -733,7 +733,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 )
                               : Text(
                                   l10n.saveProfile,
-                                  style: GoogleFonts.plusJakartaSans(
+                                  style: GoogleFonts.inter(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
                                   ),
@@ -771,7 +771,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           const SizedBox(width: 8),
                           Text(
                             l10n.securitySection,
-                            style: GoogleFonts.plusJakartaSans(
+                            style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textPrimaryLight,
@@ -782,7 +782,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(height: 16),
                       Text(
                         l10n.currentPassword,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textSecondaryLight,
@@ -793,7 +793,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         key: const Key('settings_current_password_input'),
                         controller: _currentPasswordController,
                         obscureText: _obscureCurrentPassword,
-                        style: GoogleFonts.plusJakartaSans(fontSize: 14),
+                        style: GoogleFonts.inter(fontSize: 14),
                         decoration: InputDecoration(
                           hintText: l10n.currentPasswordHint,
                           prefixIcon: const Icon(Icons.key_outlined, color: AppColors.softIndigo),
@@ -833,7 +833,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(height: 14),
                       Text(
                         l10n.newPassword,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textSecondaryLight,
@@ -844,7 +844,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         key: const Key('settings_new_password_input'),
                         controller: _newPasswordController,
                         obscureText: _obscureNewPassword,
-                        style: GoogleFonts.plusJakartaSans(fontSize: 14),
+                        style: GoogleFonts.inter(fontSize: 14),
                         decoration: InputDecoration(
                           hintText: l10n.newPasswordHint,
                           prefixIcon: const Icon(Icons.lock_reset_rounded, color: AppColors.softIndigo),
@@ -889,7 +889,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(height: 14),
                       Text(
                         l10n.confirmNewPassword,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textSecondaryLight,
@@ -900,7 +900,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         key: const Key('settings_confirm_password_input'),
                         controller: _confirmPasswordController,
                         obscureText: _obscureConfirmPassword,
-                        style: GoogleFonts.plusJakartaSans(fontSize: 14),
+                        style: GoogleFonts.inter(fontSize: 14),
                         decoration: InputDecoration(
                           hintText: l10n.confirmPasswordHint,
                           prefixIcon: const Icon(Icons.check_circle_outline_rounded, color: AppColors.softIndigo),
@@ -940,7 +940,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(height: 8),
                       Text(
                         l10n.passwordComplexityHint,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           color: AppColors.textSecondaryLight,
                         ),
@@ -967,7 +967,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 )
                               : Text(
                                   l10n.changePassword,
-                                  style: GoogleFonts.plusJakartaSans(
+                                  style: GoogleFonts.inter(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
                                   ),
@@ -1042,14 +1042,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         leading: const Icon(Icons.analytics_outlined, color: AppColors.softIndigo),
                         title: Text(
                           l10n.settingsDataHistoryTile,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
                         ),
                         subtitle: Text(
                           l10n.settingsDataHistorySubtitle,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontSize: 12,
                             color: AppColors.textSecondaryLight,
                           ),
@@ -1063,14 +1063,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         leading: const Icon(Icons.water_drop_outlined, color: AppColors.clinicalTeal),
                         title: Text(
                           l10n.settingsRemindersTile,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
                         ),
                         subtitle: Text(
                           l10n.settingsRemindersSubtitle,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontSize: 12,
                             color: AppColors.textSecondaryLight,
                           ),
@@ -1110,14 +1110,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         leading: const Icon(Icons.shield_outlined, color: AppColors.clinicalTeal),
                         title: Text(
                           l10n.settingsPrivacyCenterTile,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
                         ),
                         subtitle: Text(
                           l10n.settingsPrivacyCenterSubtitle,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontSize: 12,
                             color: AppColors.textSecondaryLight,
                           ),
@@ -1131,14 +1131,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         leading: const Icon(Icons.description_outlined, color: AppColors.softIndigo),
                         title: Text(
                           l10n.settingsTermsTile,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
                         ),
                         subtitle: Text(
                           l10n.settingsTermsSubtitle,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontSize: 12,
                             color: AppColors.textSecondaryLight,
                           ),
@@ -1152,14 +1152,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         leading: const Icon(Icons.policy_outlined, color: AppColors.clinicalTeal),
                         title: Text(
                           l10n.settingsPrivacyPolicyTile,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
                         ),
                         subtitle: Text(
                           l10n.settingsPrivacyPolicySubtitle,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontSize: 12,
                             color: AppColors.textSecondaryLight,
                           ),
@@ -1195,14 +1195,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         activeThumbColor: AppColors.clinicalTeal,
                         title: Text(
                           l10n.settingsEducationalTipsTile,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
                         ),
                         subtitle: Text(
                           l10n.settingsEducationalTipsSubtitle,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontSize: 12,
                             color: AppColors.textSecondaryLight,
                           ),
@@ -1245,7 +1245,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                     title: Text(
                       isPremium ? l10n.settingsPlanPremium : l10n.settingsPlanFree,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -1257,7 +1257,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             onPressed: () => context.push(RoutePaths.premiumPromo),
                             child: Text(
                               l10n.settingsPlanSeePremium,
-                              style: GoogleFonts.plusJakartaSans(
+                              style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.softIndigo,
@@ -1282,7 +1282,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     leading: const Icon(Icons.logout_rounded, color: AppColors.emergencyCrimson),
                     title: Text(
                       l10n.logoutButton,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                         color: AppColors.emergencyCrimson,
@@ -1299,7 +1299,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   children: [
                     Text(
                       'DualisCheckUp • v1.0.0 (Build 2026.1)',
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textSecondaryLight,
@@ -1309,7 +1309,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Text(
                       l10n.settingsOperatorInfo,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 11,
                         color: AppColors.textSecondaryLight.withValues(alpha: 0.8),
                         height: 1.4,
@@ -1346,7 +1346,7 @@ class _SectionLabel extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           label,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w700,
             color: color,
@@ -1378,7 +1378,7 @@ class _LanguageTile extends ConsumerWidget {
       leading: Text(flag, style: const TextStyle(fontSize: 22)),
       title: Text(
         label,
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
           fontSize: 14,
           color: isSelected ? AppColors.softIndigo : AppColors.textPrimaryLight,
@@ -1436,7 +1436,7 @@ class _PhotoOptionTile extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimaryLight,
@@ -1444,7 +1444,7 @@ class _PhotoOptionTile extends StatelessWidget {
                   ),
                   Text(
                     subtitle,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 12,
                       color: AppColors.textSecondaryLight,
                     ),

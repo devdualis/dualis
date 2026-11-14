@@ -139,7 +139,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                   },
                   child: Text(
                     l10n.screen1PrimaryCta,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -158,7 +158,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                   },
                   child: Text(
                     l10n.screen1SecondaryCta,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -171,7 +171,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                 l10n.onboardingIntendedUseNote,
                 key: const Key('onboarding_intended_use_note'),
                 textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 11,
                   height: 1.4,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,

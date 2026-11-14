@@ -210,7 +210,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
             focusNode: _focusNodes[index],
             keyboardType: TextInputType.number,
             textAlign: TextAlign.center,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimaryLight,
@@ -311,7 +311,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
               Text(
                 'Verifique seu e-mail',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimaryLight,
@@ -321,7 +321,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
               Text(
                 'Enviamos um código de segurança de 6 dígitos para o e-mail:',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 14,
                   color: AppColors.textSecondaryLight,
                   height: 1.4,
@@ -337,7 +337,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                 ),
                 child: Text(
                   masked,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: AppColors.clinicalTeal,
@@ -364,7 +364,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                     const SizedBox(width: 6),
                     Text(
                       'Reenviar código em ${_secondsRemaining.toString().padLeft(2, '0')}s',
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         color: AppColors.textSecondaryLight,
                       ),
@@ -379,7 +379,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                   onPressed: _isResending ? null : _handleResend,
                   child: Text(
                     _isResending ? 'Enviando novo código...' : 'Não recebeu o código? Reenviar',
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: AppColors.clinicalTeal,

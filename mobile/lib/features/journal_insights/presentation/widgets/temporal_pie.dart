@@ -56,7 +56,7 @@ class TemporalPieChart extends StatelessWidget {
                           radius: 82,
                           title: '${_percent(pie.counts[t]!, total)}%',
                           titlePositionPercentageOffset: 0.62,
-                          titleStyle: GoogleFonts.plusJakartaSans(
+                          titleStyle: GoogleFonts.inter(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
@@ -98,12 +98,12 @@ class _SliceRow extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final count = pie.counts[time]!;
     final top = pie.top[time];
-    final strong = GoogleFonts.plusJakartaSans(
+    final strong = GoogleFonts.inter(
       fontSize: 13.5,
       fontWeight: FontWeight.w700,
       color: AppColors.textPrimaryLight,
     );
-    final body = GoogleFonts.plusJakartaSans(
+    final body = GoogleFonts.inter(
       fontSize: 12.5,
       height: 1.4,
       color: AppColors.textPrimaryLight,

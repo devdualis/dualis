@@ -212,7 +212,7 @@ class _DescribeSheetState extends ConsumerState<DescribeSheet> {
         padding: const EdgeInsets.only(bottom: 8),
         child: Text(
           text,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 20,
             fontWeight: FontWeight.w800,
           ),
@@ -223,7 +223,7 @@ class _DescribeSheetState extends ConsumerState<DescribeSheet> {
         padding: const EdgeInsets.only(bottom: 12),
         child: Text(
           text,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 14,
             color: AppColors.textSecondaryLight,
           ),
@@ -354,7 +354,7 @@ class _DescribeSheetState extends ConsumerState<DescribeSheet> {
           child: Text(
             _message ?? l10n.jv2DescribeFailed,
             key: const Key('jv2_describe_message'),
-            style: GoogleFonts.plusJakartaSans(fontSize: 15),
+            style: GoogleFonts.inter(fontSize: 15),
           ),
         ),
         const SizedBox(height: 12),

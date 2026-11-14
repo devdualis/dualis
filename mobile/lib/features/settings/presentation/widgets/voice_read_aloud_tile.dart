@@ -50,14 +50,14 @@ class _VoiceReadAloudTileState extends ConsumerState<VoiceReadAloudTile> {
           ),
           title: Text(
             l10n.voiceReadAloudTitle,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),
           ),
           subtitle: Text(
             l10n.voiceReadAloudSubtitle,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 12,
               color: AppColors.textSecondaryLight,
             ),

@@ -231,7 +231,7 @@ class _VoiceStatusBannerState extends ConsumerState<VoiceStatusBanner> {
                           text,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,

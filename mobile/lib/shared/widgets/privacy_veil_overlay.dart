@@ -322,7 +322,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
                     Text(
                       l10n.bioLockTitle,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimaryLight,
@@ -332,7 +332,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
                     Text(
                       l10n.bioLockBody,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         color: AppColors.textSecondaryLight,
                         height: 1.4,
@@ -381,7 +381,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
           icon: const Icon(Icons.fingerprint, size: 22),
           label: Text(
             l10n.privacyVeilUnlock,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
@@ -400,7 +400,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
                 }),
         child: Text(
           l10n.bioLockPasswordButton,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 14,
             color: AppColors.clinicalTeal,
             fontWeight: FontWeight.w600,
@@ -412,7 +412,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
         onPressed: _busy ? null : _confirmSignOut,
         child: Text(
           l10n.logoutButton,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 14,
             color: AppColors.textSecondaryLight,
             fontWeight: FontWeight.w600,
@@ -458,7 +458,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
         Text(
           email,
           key: const Key('bioLockPasswordEmail'),
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimaryLight,
@@ -495,7 +495,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
           _error!,
           key: const Key('bioLockPasswordError'),
           textAlign: TextAlign.center,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 13,
             color: AppColors.emergencyCrimson,
           ),
@@ -527,7 +527,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
                   )
                   : Text(
                     l10n.bioLockPasswordSubmit,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -547,7 +547,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
                 }),
         child: Text(
           l10n.bioLockPasswordBack,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 14,
             color: AppColors.clinicalTeal,
             fontWeight: FontWeight.w600,

@@ -148,7 +148,7 @@ class IntensityScaleFull extends StatelessWidget {
           child: value == null
               ? Text(
                   l10n.jv23IntensityPickHint,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 14.5,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textSecondaryLight,
@@ -251,7 +251,7 @@ class _LevelText extends StatelessWidget {
         ),
         TextSpan(text: ' — ${intensityText(l10n, level, physical: physical)}'),
       ]),
-      style: GoogleFonts.plusJakartaSans(
+      style: GoogleFonts.inter(
         fontSize: fontSize,
         fontWeight: FontWeight.w600,
         color: AppColors.dualisNavy,
@@ -283,7 +283,7 @@ class _LevelDot extends StatelessWidget {
       ),
       child: Text(
         '$level',
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontWeight: FontWeight.w700,
           color: selected && level >= 4 ? Colors.white : AppColors.dualisNavy,
         ),
@@ -305,7 +305,7 @@ class JournalEmergencyLine extends StatelessWidget {
       child: Text(
         AppLocalizations.of(context).jv2EmergencyLine,
         textAlign: TextAlign.center,
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: 12,
           color: AppColors.textSecondaryLight,
         ),

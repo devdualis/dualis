@@ -150,7 +150,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                   children: [
                     Text(
                       AppLocalizations.of(context).waterTimeTitle,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimaryLight,
@@ -158,7 +158,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                     ),
                     Text(
                       AppLocalizations.of(context).waterHowMuchNow,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 13,
                         color: AppColors.textSecondaryLight,
                       ),
@@ -193,7 +193,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                   children: [
                     Text(
                       AppLocalizations.of(context).waterDailyGoal(target),
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textSecondaryLight,
@@ -203,7 +203,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                       state.isLoading
                           ? AppLocalizations.of(context).waterLoading
                           : '$total ml ($percent%)',
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                         color: state.isGoalReached
@@ -245,7 +245,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                       const SizedBox(width: 4),
                       Text(
                         AppLocalizations.of(context).waterGoalReached,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: AppColors.clinicalTealDark,
@@ -262,7 +262,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
 
           Text(
             AppLocalizations.of(context).waterSelectPortion,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimaryLight,
@@ -282,7 +282,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                   selected: isSelected,
                   materialTapTargetSize: MaterialTapTargetSize.padded,
                   label: Text('$ml ml'),
-                  labelStyle: GoogleFonts.plusJakartaSans(
+                  labelStyle: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                     color: isSelected ? Colors.white : AppColors.textPrimaryLight,
@@ -309,7 +309,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                 selected: _isCustom,
                 materialTapTargetSize: MaterialTapTargetSize.padded,
                 label: Text(AppLocalizations.of(context).waterOtherValue),
-                labelStyle: GoogleFonts.plusJakartaSans(
+                labelStyle: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: _isCustom ? FontWeight.bold : FontWeight.w500,
                   color: _isCustom ? Colors.white : AppColors.textPrimaryLight,
@@ -367,7 +367,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
               AppLocalizations.of(context).commonSaveFailed,
               key: const Key('water_intake_save_failed'),
               textAlign: TextAlign.center,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppColors.emergencyCrimson,

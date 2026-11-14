@@ -178,7 +178,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     const SizedBox(width: 4),
                     Text(
                       AppLocalizations.of(context).loginPremiumLabel,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 11,
                         height: 1.1,
                         fontWeight: FontWeight.w600,
@@ -208,7 +208,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } else if (_currentTabIndex == 1) {
       appBarTitle = Text(
         l10n.xv2DashTitle,
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: 18,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimaryLight,
@@ -245,7 +245,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } else if (_currentTabIndex == 3 && careLocked) {
       appBarTitle = Text(
         'Dualis Premium',
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: 18,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimaryLight,
@@ -255,7 +255,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } else if (_currentTabIndex == 3) {
       appBarTitle = Text(
         l10n.careHubTitle,
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: 18,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimaryLight,
@@ -270,7 +270,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ref.watch(premiumProfilesEnabledProvider)
             ? l10n.habitsChartTitle
             : l10n.navHydration,
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: 18,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimaryLight,
@@ -454,7 +454,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           cardDisplayName,
                                           ref.read(homeClockProvider)(),
                                         ),
-                                  style: GoogleFonts.plusJakartaSans(
+                                  style: GoogleFonts.inter(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
@@ -465,7 +465,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 const SizedBox(height: 2),
                                 Text(
                                   cardDisplaySubtitle,
-                                  style: GoogleFonts.plusJakartaSans(
+                                  style: GoogleFonts.inter(
                                     fontSize: 13,
                                     color: Colors.white.withValues(alpha: 0.85),
                                   ),
@@ -496,7 +496,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           Expanded(
                             child: Text(
                               AppLocalizations.of(context).homeDataProtectedBadge,
-                              style: GoogleFonts.plusJakartaSans(
+                              style: GoogleFonts.inter(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,

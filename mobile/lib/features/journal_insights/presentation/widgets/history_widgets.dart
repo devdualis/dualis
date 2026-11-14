@@ -68,7 +68,7 @@ class HistorySegmented<T> extends StatelessWidget {
                       label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: compact ? 13 : (options.length > 4 ? 12 : 14),
                         fontWeight: value == selected
                             ? FontWeight.w700
@@ -120,7 +120,7 @@ class HistoryPeriodChips extends StatelessWidget {
                   ? AppColors.textPrimaryLight
                   : AppColors.outlineLight,
             ),
-            labelStyle: GoogleFonts.plusJakartaSans(
+            labelStyle: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w700,
               color: days == selected
@@ -182,7 +182,7 @@ class LineToggleChip extends StatelessWidget {
             child: Text(
               label,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
                 color: shown

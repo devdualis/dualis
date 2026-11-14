@@ -26,12 +26,12 @@ List<MapEntry<String, int>> _ranked(Map<String, int> counts, List<String> order)
   return entries;
 }
 
-TextStyle get _lineStyle => GoogleFonts.plusJakartaSans(
+TextStyle get _lineStyle => GoogleFonts.inter(
       fontSize: 13,
       color: AppColors.textPrimaryLight,
     );
 
-TextStyle get _labelStyle => GoogleFonts.plusJakartaSans(
+TextStyle get _labelStyle => GoogleFonts.inter(
       fontSize: 13,
       fontWeight: FontWeight.w700,
       color: AppColors.textPrimaryLight,

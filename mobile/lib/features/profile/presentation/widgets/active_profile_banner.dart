@@ -114,7 +114,7 @@ class ActiveProfileBanner extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     l10n.activeProfileBannerDataOf(profile.name),
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimaryLight,
@@ -123,7 +123,7 @@ class ActiveProfileBanner extends ConsumerWidget {
                 ),
                 Text(
                   l10n.activeProfileBannerSwitchToMine,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: AppColors.clinicalTealDark,
@@ -168,7 +168,7 @@ class ActiveProfileReadOnlyNote extends ConsumerWidget {
           const SizedBox(width: 6),
           Text(
             l10n.activeProfileReadOnlyNote,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 12.5,
               fontWeight: FontWeight.w600,
               color: const Color(0xFFD97706),

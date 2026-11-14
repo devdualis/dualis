@@ -126,7 +126,7 @@ class _VerticalRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final style = GoogleFonts.plusJakartaSans(
+    final style = GoogleFonts.inter(
       fontSize: 8.5,
       fontWeight: FontWeight.w700,
       color: AppColors.textSecondaryLight,
@@ -205,7 +205,7 @@ class _GoodMomentRow extends StatelessWidget {
               if (count > 1)
                 Text(
                   '$count',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 8.5,
                     fontWeight: FontWeight.w700,
                     color: ChartTokens.good,
@@ -227,7 +227,7 @@ class _WaterRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = GoogleFonts.plusJakartaSans(
+    final style = GoogleFonts.inter(
       fontSize: 8.5,
       fontWeight: FontWeight.w700,
       color: ml == null ? AppColors.textSecondaryLight : ChartTokens.water,
@@ -259,7 +259,7 @@ class _Legend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final style = GoogleFonts.plusJakartaSans(
+    final style = GoogleFonts.inter(
       fontSize: 12,
       color: AppColors.textPrimaryLight,
     );
@@ -434,12 +434,12 @@ class CalendarDayView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toLanguageTag();
-    final title = GoogleFonts.plusJakartaSans(
+    final title = GoogleFonts.inter(
       fontSize: 15,
       fontWeight: FontWeight.w700,
       color: AppColors.textPrimaryLight,
     );
-    final body = GoogleFonts.plusJakartaSans(
+    final body = GoogleFonts.inter(
       fontSize: 13,
       height: 1.4,
       color: AppColors.textPrimaryLight,
@@ -464,7 +464,7 @@ class CalendarDayView extends ConsumerWidget {
       children: [
         Text(
           l10n.gxDayDetailTitle(DateFormat.yMMMMd(locale).format(day.day)),
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 19,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimaryLight,

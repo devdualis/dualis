@@ -108,7 +108,7 @@ class _MyConditionsScreenState extends ConsumerState<MyConditionsScreen> {
                 children: [
                   Text(
                     l10n.chronicTrackEdit,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                     ),
@@ -207,7 +207,7 @@ class _MyConditionsScreenState extends ConsumerState<MyConditionsScreen> {
           children: [
             Text(
               premium ? l10n.chronicTrackConditionsSubtitle : l10n.jv2ConditionsSubtitle,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 14,
                 color: AppColors.textSecondaryLight,
                 height: 1.4,
@@ -247,7 +247,7 @@ class _MyConditionsScreenState extends ConsumerState<MyConditionsScreen> {
             if (atLimit)
               Text(
                 l10n.jv2ConditionsLimit(JournalKeys.maxActiveConditions),
-                style: GoogleFonts.plusJakartaSans(fontSize: 12),
+                style: GoogleFonts.inter(fontSize: 12),
               )
             else
               _TrackingFields(
@@ -266,7 +266,7 @@ class _MyConditionsScreenState extends ConsumerState<MyConditionsScreen> {
             else if (list.isEmpty)
               Text(
                 l10n.jv2ConditionsEmpty,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   color: AppColors.textSecondaryLight,
                 ),
               )
@@ -297,7 +297,7 @@ class _MyConditionsScreenState extends ConsumerState<MyConditionsScreen> {
                         ),
                         title: Text(
                           c.label,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
                           ),
@@ -387,7 +387,7 @@ class _TrackingFields extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final title = Text(
       l10n.chronicTrackToggle,
-      style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w600),
+      style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
     );
     if (!premium) {
       return ListTile(
@@ -407,7 +407,7 @@ class _TrackingFields extends StatelessWidget {
             ),
             child: Text(
               l10n.chronicTrackPremiumBadge,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 color: _gold,

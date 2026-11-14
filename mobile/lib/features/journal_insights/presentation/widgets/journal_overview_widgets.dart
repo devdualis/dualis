@@ -30,7 +30,7 @@ class InsightsCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 15,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimaryLight,
@@ -40,7 +40,7 @@ class InsightsCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               subtitle!,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 12,
                 color: AppColors.textSecondaryLight,
               ),

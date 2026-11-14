@@ -114,7 +114,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: Text(
                         l10n.loginPremiumLabel,
                         key: const Key('loginPremiumLabel'),
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1.2,
@@ -175,7 +175,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     onPressed: () => context.push(RoutePaths.forgotPassword),
                     child: Text(
                       l10n.forgotPasswordTitle,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: AppColors.softIndigo,
@@ -198,14 +198,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: Text.rich(
                       TextSpan(
                         text: l10n.loginNoAccountPrompt,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 14,
                           color: AppColors.textSecondaryLight,
                         ),
                         children: [
                           TextSpan(
                             text: l10n.screen1PrimaryCta,
-                            style: GoogleFonts.plusJakartaSans(
+                            style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: AppColors.softIndigo,
@@ -223,7 +223,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   l10n.onboardingIntendedUseNote,
                   key: const Key('login_intended_use_note'),
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 11,
                     height: 1.4,
                     color: AppColors.textSecondaryLight,

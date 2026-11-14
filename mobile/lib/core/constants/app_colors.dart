@@ -41,17 +41,55 @@ class AppColors {
   static const Color surfaceLight = Color(0xFFFFFFFF);
   static const Color surfaceDark = Color(0xFF1E293B);
   static const Color backgroundLight = Color(0xFFF8FAFC);
+
+  /// Redesign canvas: light blue-tinted background that gives the glass
+  /// surfaces something to sit on ("Profundidade" style).
+  static const Color backgroundDepth = Color(0xFFF0F7FB);
   static const Color backgroundDark = Color(0xFF0F172A);
 
   // Text & Typography Neutrals
   static const Color textPrimaryLight = Color(0xFF0F172A);
-  static const Color textSecondaryLight = Color(0xFF64748B);
+  static const Color textSecondaryLight = Color(0xFF5B6B80);
   static const Color textPrimaryDark = Color(0xFFF8FAFC);
   static const Color textSecondaryDark = Color(0xFF94A3B8);
 
   // Borders & Dividers
   static const Color outlineLight = Color(0xFFE2E8F0);
   static const Color outlineDark = Color(0xFF334155);
+
+  // Redesign tokens (brand palette only; two gradients at most)
+  /// Inactive tab glyph in the floating bar.
+  static const Color tabInactive = Color(0xFF8291A5);
+
+  /// Translucent white used by glass cards and the floating bar.
+  static const Color glassFill = Color(0xB8FFFFFF); // ~72%
+  static const Color glassFillStrong = Color(0xC2FFFFFF); // ~76%
+  static const Color glassEdge = Color(0xF2FFFFFF); // inner top highlight
+
+  /// Navy gradient: hero cards and primary surfaces.
+  static const LinearGradient gradientNavy = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF124A7E), dualisNavy, softIndigoDark],
+    stops: [0.0, 0.45, 1.0],
+  );
+
+  /// Blue to cyan gradient: accents and highlights.
+  static const LinearGradient gradientBlueCyan = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [dualisSymbolCyan, dualisSymbolBlue],
+  );
+
+  /// Soft navy drop shadow shared by glass cards and the tab bar.
+  static List<BoxShadow> glassShadow({double blur = 24, double alpha = 0.22}) => [
+        BoxShadow(
+          color: dualisNavy.withValues(alpha: alpha),
+          blurRadius: blur,
+          offset: const Offset(0, 10),
+          spreadRadius: -10,
+        ),
+      ];
 
   // Clinical Intensity & Heat Scale Palette (Single Source of Truth)
   /// Tier 0: Sem dor / Ausência de sintomas

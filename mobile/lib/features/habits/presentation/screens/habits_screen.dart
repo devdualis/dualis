@@ -164,7 +164,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
       appBar: AppBar(
         title: Text(
           _isYesterday ? l10n.habitsTitleYesterday : l10n.habitsTitleToday,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimaryLight,
@@ -256,7 +256,7 @@ class _TabButton extends StatelessWidget {
           child: Center(
             child: Text(
               label,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: selected ? Colors.white : AppColors.textSecondaryLight,
@@ -352,7 +352,7 @@ class _SleepCard extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           l10n.habitsSleepHoursQuestion,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimaryLight,
@@ -479,7 +479,7 @@ class _MovementCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             l10n.habitsMovementMinutesQuestion,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimaryLight,
@@ -635,7 +635,7 @@ class _CycleSettingTile extends StatelessWidget {
         onChanged: onChanged,
         title: Text(
           title,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimaryLight,
@@ -690,7 +690,7 @@ class _QuestionCard extends StatelessWidget {
                 child: Text(
                   title,
                   key: titleKey,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimaryLight,
@@ -710,7 +710,7 @@ class _QuestionCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Text(
                       savedLabel,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF2E7D32),
@@ -770,7 +770,7 @@ class _EmojiOptionButton extends StatelessWidget {
               Text(
                 label,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: selected ? FontWeight.bold : FontWeight.w600,
                   color:
@@ -823,7 +823,7 @@ class _YesNoButton extends StatelessWidget {
           child: Center(
             child: Text(
               label,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 15,
                 fontWeight: selected ? FontWeight.bold : FontWeight.w600,
                 color:
@@ -862,7 +862,7 @@ class _ChipOption extends StatelessWidget {
       side: BorderSide(
         color: selected ? AppColors.clinicalTeal : AppColors.outlineLight,
       ),
-      labelStyle: GoogleFonts.plusJakartaSans(
+      labelStyle: GoogleFonts.inter(
         fontSize: 13,
         fontWeight: selected ? FontWeight.bold : FontWeight.w500,
         color:

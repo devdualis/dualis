@@ -89,7 +89,7 @@ class ProfileSelectionSheet extends ConsumerWidget {
                   children: [
                     Text(
                       l10n.profileSwitcherSheetTitle,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimaryLight,
@@ -226,7 +226,7 @@ class ProfileSelectionSheet extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Text(
         title.toUpperCase(),
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: 12,
           fontWeight: FontWeight.bold,
           color: AppColors.clinicalTealDark,
@@ -241,7 +241,7 @@ class ProfileSelectionSheet extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Text(
         message,
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: 13,
           color: AppColors.textSecondaryLight,
           fontStyle: FontStyle.italic,
@@ -291,7 +291,7 @@ class ProfileSelectionSheet extends ConsumerWidget {
         ),
       title: Text(
         profile.name,
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: 15,
           fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
           color: AppColors.textPrimaryLight,
@@ -299,7 +299,7 @@ class ProfileSelectionSheet extends ConsumerWidget {
       ),
       subtitle: Text(
         _subtitleFor(profile, l10n),
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: 12,
           color: AppColors.textSecondaryLight,
         ),
@@ -410,7 +410,7 @@ class ProfileSelectionSheet extends ConsumerWidget {
               Expanded(
                 child: Text(
                   text,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 13,
                     color: AppColors.textPrimaryLight,
                   ),

@@ -17,10 +17,10 @@ abstract final class CareColors {
 }
 
 TextStyle careTitle([double size = 15]) =>
-    GoogleFonts.plusJakartaSans(fontSize: size, fontWeight: FontWeight.w700, color: AppColors.textPrimaryLight);
+    GoogleFonts.inter(fontSize: size, fontWeight: FontWeight.w700, color: AppColors.textPrimaryLight);
 
 TextStyle careBody([double size = 13]) =>
-    GoogleFonts.plusJakartaSans(fontSize: size, color: AppColors.textSecondaryLight, height: 1.35);
+    GoogleFonts.inter(fontSize: size, color: AppColors.textSecondaryLight, height: 1.35);
 
 String careDate(BuildContext context, DateTime date) =>
     DateFormat.yMd(Localizations.localeOf(context).toLanguageTag()).format(date.toLocal());
@@ -134,7 +134,7 @@ class CarePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-      child: Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700, color: fg)),
+      child: Text(label, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, color: fg)),
     );
   }
 }
@@ -285,7 +285,7 @@ class CareDateField extends StatelessWidget {
       },
       child: InputDecorator(
         decoration: InputDecoration(labelText: label, filled: true, fillColor: AppColors.surfaceLight),
-        child: Text(value == null ? '—' : careDate(context, value!), style: GoogleFonts.plusJakartaSans(fontSize: 15)),
+        child: Text(value == null ? '—' : careDate(context, value!), style: GoogleFonts.inter(fontSize: 15)),
       ),
     );
   }

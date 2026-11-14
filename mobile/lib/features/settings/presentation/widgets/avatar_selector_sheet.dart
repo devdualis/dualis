@@ -112,7 +112,7 @@ class UserAvatar extends StatelessWidget {
       backgroundColor: AppColors.clinicalTealLight,
       child: Text(
         fallbackInitial.isNotEmpty ? fallbackInitial[0].toUpperCase() : 'U',
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: radius * 0.9,
           fontWeight: FontWeight.bold,
           color: AppColors.clinicalTealDark,
@@ -232,7 +232,7 @@ class _AvatarSelectorSheetState extends State<AvatarSelectorSheet> {
           const SizedBox(height: 18),
           Text(
             l10n.selectAvatar,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimaryLight,
@@ -241,7 +241,7 @@ class _AvatarSelectorSheetState extends State<AvatarSelectorSheet> {
           const SizedBox(height: 6),
           Text(
             l10n.avatarSelectorSubtitle,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 13,
               color: AppColors.textSecondaryLight,
             ),
@@ -321,7 +321,7 @@ class _AvatarSelectorSheetState extends State<AvatarSelectorSheet> {
                     const SizedBox(height: 6),
                     Text(
                       preset.label(l10n),
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 11,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                         color: isSelected ? AppColors.softIndigo : AppColors.textSecondaryLight,
@@ -353,7 +353,7 @@ class _AvatarSelectorSheetState extends State<AvatarSelectorSheet> {
               },
               child: Text(
                 l10n.avatarConfirm,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
                 ),

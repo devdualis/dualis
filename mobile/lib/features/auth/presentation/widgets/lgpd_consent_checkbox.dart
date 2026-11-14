@@ -51,7 +51,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     l10n.lgpdConsentSheetTitle,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimaryLight,
@@ -60,7 +60,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     l10n.lgpdConsentSheetBody,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 14,
                       height: 1.5,
                       color: AppColors.textSecondaryLight,
@@ -69,7 +69,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     l10n.lgpdConsentSheetBasesTitle,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimaryLight,
@@ -78,7 +78,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     l10n.lgpdConsentSheetBases,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 13,
                       height: 1.5,
                       color: AppColors.textSecondaryLight,
@@ -133,7 +133,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
       title: Text.rich(
         TextSpan(
           text: l10n.lgpdConsentPrefix,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 13,
             color: AppColors.textPrimaryLight,
             height: 1.4,
@@ -141,7 +141,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
           children: [
             TextSpan(
               text: l10n.lgpdConsentTermsLink,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 color: AppColors.softIndigo,
                 fontWeight: FontWeight.w600,
@@ -153,7 +153,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
             TextSpan(text: l10n.lgpdConsentAnd),
             TextSpan(
               text: l10n.lgpdConsentPrivacyLink,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 color: AppColors.softIndigo,
                 fontWeight: FontWeight.w600,
@@ -165,7 +165,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
             TextSpan(text: l10n.lgpdConsentSuffix),
             TextSpan(
               text: l10n.lgpdConsentLearnMore,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 12,
                 color: AppColors.clinicalTealDark,
                 fontWeight: FontWeight.w600,

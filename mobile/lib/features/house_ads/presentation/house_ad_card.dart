@@ -72,7 +72,7 @@ class HouseAdView extends StatelessWidget {
                 child: Text(
                   l10n.xv2AdLabel,
                   key: const Key('house_ad_label'),
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textSecondaryLight,
@@ -82,7 +82,7 @@ class HouseAdView extends StatelessWidget {
               const Spacer(),
               Text(
                 ad.brand,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textSecondaryLight,
@@ -102,7 +102,7 @@ class HouseAdView extends StatelessWidget {
                   children: [
                     Text(
                       ad.title,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimaryLight,
@@ -111,7 +111,7 @@ class HouseAdView extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       ad.body,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 13,
                         height: 1.35,
                         color: AppColors.textSecondaryLight,
@@ -390,7 +390,7 @@ class _BrandAdCard extends StatelessWidget {
                                 child: Text(
                                   l10n.xv2AdLabel,
                                   key: const Key('house_ad_label'),
-                                  style: GoogleFonts.plusJakartaSans(
+                                  style: GoogleFonts.inter(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,
                                     color: style.labelText,
@@ -407,7 +407,7 @@ class _BrandAdCard extends StatelessWidget {
                               children: [
                                 Text(
                                   ad.title,
-                                  style: GoogleFonts.plusJakartaSans(
+                                  style: GoogleFonts.inter(
                                     fontSize: 20,
                                     height: 1.2,
                                     fontWeight: FontWeight.w800,
@@ -417,7 +417,7 @@ class _BrandAdCard extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 Text(
                                   ad.body,
-                                  style: GoogleFonts.plusJakartaSans(
+                                  style: GoogleFonts.inter(
                                     fontSize: 13.5,
                                     height: 1.45,
                                     color: style.body,
@@ -442,7 +442,7 @@ class _BrandAdCard extends StatelessWidget {
                                         ),
                                         child: Text(
                                           tag,
-                                          style: GoogleFonts.plusJakartaSans(
+                                          style: GoogleFonts.inter(
                                             fontSize: 11.5,
                                             fontWeight: FontWeight.w700,
                                             color: style.chipText,
@@ -472,7 +472,7 @@ class _BrandAdCard extends StatelessWidget {
                                 ),
                                 child: Text(
                                   '${style.cta} →',
-                                  style: GoogleFonts.plusJakartaSans(
+                                  style: GoogleFonts.inter(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w800,
                                     color: style.buttonText,
@@ -481,7 +481,7 @@ class _BrandAdCard extends StatelessWidget {
                               ),
                               Text(
                                 style.footnote,
-                                style: GoogleFonts.plusJakartaSans(
+                                style: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   color: style.footnoteColor,

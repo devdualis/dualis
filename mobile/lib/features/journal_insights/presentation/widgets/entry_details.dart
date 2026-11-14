@@ -62,13 +62,13 @@ class JournalEntryDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final strong = GoogleFonts.plusJakartaSans(
+    final strong = GoogleFonts.inter(
       fontSize: 14,
       fontWeight: FontWeight.w600,
       height: 1.35,
       color: AppColors.textPrimaryLight,
     );
-    final soft = GoogleFonts.plusJakartaSans(
+    final soft = GoogleFonts.inter(
       fontSize: 13,
       height: 1.35,
       color: AppColors.textSecondaryLight,

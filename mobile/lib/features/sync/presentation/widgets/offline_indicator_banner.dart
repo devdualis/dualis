@@ -136,7 +136,7 @@ class OfflineIndicatorBanner extends ConsumerWidget {
             Expanded(
               child: Text(
                 message,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   color: Colors.white,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,

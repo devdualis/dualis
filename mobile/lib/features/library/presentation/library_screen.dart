@@ -24,7 +24,7 @@ class LibraryScreen extends StatelessWidget {
         foregroundColor: AppColors.textPrimaryLight,
         title: Text(
           l10n.xv2LibTitle,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -38,7 +38,7 @@ class LibraryScreen extends StatelessWidget {
         children: [
           Text(
             l10n.xv2LibIntro,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 13,
               height: 1.4,
               color: AppColors.textSecondaryLight,
@@ -50,7 +50,7 @@ class LibraryScreen extends StatelessWidget {
               Text(
                 entry.key.label(l10n),
                 key: Key('library_category_${entry.key.name}'),
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimaryLight,
@@ -106,7 +106,7 @@ class LibraryArticleTile extends StatelessWidget {
             children: [
               Text(
                 article.title(l10n),
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimaryLight,
@@ -115,7 +115,7 @@ class LibraryArticleTile extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 article.summary(l10n),
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 13,
                   height: 1.35,
                   color: AppColors.textSecondaryLight,
@@ -127,7 +127,7 @@ class LibraryArticleTile extends StatelessWidget {
                   Expanded(
                     child: Text(
                       l10n.xv2LibSource(article.source),
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: AppColors.clinicalTealDark,
@@ -136,7 +136,7 @@ class LibraryArticleTile extends StatelessWidget {
                   ),
                   Text(
                     l10n.xv2LibReadTime(article.readTimeMinutes),
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 12,
                       color: AppColors.textSecondaryLight,
                     ),

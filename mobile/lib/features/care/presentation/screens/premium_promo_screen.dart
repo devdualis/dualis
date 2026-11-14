@@ -18,7 +18,7 @@ class PremiumPromoPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           l10n.chronicTrackPromoScreenTitle,
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
+          style: GoogleFonts.inter(fontWeight: FontWeight.w700),
         ),
       ),
       body: const SafeArea(child: PremiumPromoScreen()),
@@ -145,7 +145,7 @@ class PremiumPromoScreen extends StatelessWidget {
                                   const SizedBox(height: 10),
                                   Text(
                                     title,
-                                    style: GoogleFonts.plusJakartaSans(
+                                    style: GoogleFonts.inter(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.textPrimaryLight,
@@ -155,7 +155,7 @@ class PremiumPromoScreen extends StatelessWidget {
                                     desc,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.plusJakartaSans(
+                                    style: GoogleFonts.inter(
                                       fontSize: 12,
                                       color: AppColors.textSecondaryLight,
                                     ),
@@ -189,7 +189,7 @@ class PremiumPromoScreen extends StatelessWidget {
                   ),
                   child: Text(
                     l10n.premiumPromoCta,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 15.5,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
@@ -200,7 +200,7 @@ class PremiumPromoScreen extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 l10n.premiumPromoNote,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   color: AppColors.textSecondaryLight,
                 ),
@@ -269,7 +269,7 @@ class _Hero extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         l10n.premiumPromoBadge.toUpperCase(),
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 11.5,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.4,
@@ -282,7 +282,7 @@ class _Hero extends StatelessWidget {
                 const SizedBox(height: 12),
                 Text(
                   l10n.premiumPromoTitle,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 24,
                     height: 1.2,
                     fontWeight: FontWeight.w800,
@@ -292,7 +292,7 @@ class _Hero extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   l10n.premiumPromoSubtitle,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     height: 1.4,
                     color: const Color(0xFFE0F4FB),

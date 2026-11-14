@@ -209,7 +209,7 @@ class ReadingsChart extends StatelessWidget {
     final minY = (roughMin / interval).floorToDouble() * interval;
     final maxY = (roughMax / interval).ceilToDouble() * interval;
     final step = days <= 7 ? 1 : (days <= 30 ? 7 : 15);
-    final axisStyle = GoogleFonts.plusJakartaSans(
+    final axisStyle = GoogleFonts.inter(
       fontSize: 10,
       color: AppColors.textSecondaryLight,
     );
@@ -307,7 +307,7 @@ class ReadingsChart extends StatelessWidget {
                           LineTooltipItem(
                             readingTooltipText(l10n, locale,
                                 barReadings[spot.barIndex][spot.spotIndex]),
-                            GoogleFonts.plusJakartaSans(
+                            GoogleFonts.inter(
                               fontSize: 11.5,
                               height: 1.35,
                               color: AppColors.textPrimaryLight,
@@ -341,7 +341,7 @@ class ReadingsChart extends StatelessWidget {
                     const SizedBox(width: 6),
                     Text(
                       line.label,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         color: AppColors.textPrimaryLight,
                       ),

@@ -154,7 +154,7 @@ class _CheckInSummaryScreenState extends ConsumerState<CheckInSummaryScreen> {
             centerTitle: true,
             title: Text(
               l10n.xv2SummaryTitle,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: Colors.black87,
@@ -211,7 +211,7 @@ class _CheckInSummaryScreenState extends ConsumerState<CheckInSummaryScreen> {
                         Text(
                           l10n.xv2SummaryThanks,
                           key: const Key('check_in_summary_thanks'),
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontSize: 15,
                             height: 1.4,
                             color: AppColors.textPrimaryLight,
@@ -252,7 +252,7 @@ class _CheckInSummaryScreenState extends ConsumerState<CheckInSummaryScreen> {
                         _countdown != null
                             ? l10n.checkInSummaryBackHomeCountdown(_secondsLeft)
                             : l10n.checkInSummaryBackHome,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -290,7 +290,7 @@ class _SummaryCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w700,
               color: AppColors.textSecondaryLight,
@@ -326,7 +326,7 @@ class _SummaryItemTile extends StatelessWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 15,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimaryLight,
@@ -336,7 +336,7 @@ class _SummaryItemTile extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               l10n.xv2ReportedIntensity(intensity!),
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 color: AppColors.textSecondaryLight,
               ),

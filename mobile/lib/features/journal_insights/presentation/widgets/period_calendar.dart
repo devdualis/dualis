@@ -34,7 +34,7 @@ class PeriodCalendar extends StatelessWidget {
     final locale = Localizations.localeOf(context).toLanguageTag();
     final weeks = calendarWeeks(start, days);
     final end = DateTime(start.year, start.month, start.day + days - 1);
-    final small = GoogleFonts.plusJakartaSans(
+    final small = GoogleFonts.inter(
       fontSize: 10,
       fontWeight: FontWeight.w600,
       color: AppColors.textSecondaryLight,
@@ -146,7 +146,7 @@ class _DayCell extends StatelessWidget {
             children: [
               Text(
                 '${day.day}'.padLeft(2, '0'),
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 9.5,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textSecondaryLight,

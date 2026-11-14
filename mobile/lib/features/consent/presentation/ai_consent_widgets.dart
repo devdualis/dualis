@@ -126,7 +126,7 @@ Future<bool?> showAiConsentDialog(BuildContext context) {
           key: const Key('ai_consent_dialog'),
           title: Text(
             l10n.aiConsentTitle,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontWeight: FontWeight.w700,
               fontSize: 18,
             ),
@@ -141,7 +141,7 @@ Future<bool?> showAiConsentDialog(BuildContext context) {
                     padding: const EdgeInsets.only(bottom: 10),
                     child: Text(
                       p,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         height: 1.4,
                       ),
@@ -226,14 +226,14 @@ class _AiConsentTileState extends ConsumerState<AiConsentTile> {
           ),
           title: Text(
             l10n.aiConsentTileTitle,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),
           ),
           subtitle: Text(
             subtitle,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 12,
               color: AppColors.textSecondaryLight,
             ),

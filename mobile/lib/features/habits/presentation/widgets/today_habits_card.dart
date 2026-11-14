@@ -97,7 +97,7 @@ class TodayHabitsCard extends ConsumerWidget {
                     children: [
                       Text(
                         l10n.habitsHomeEyebrow,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.clinicalTeal,
@@ -105,7 +105,7 @@ class TodayHabitsCard extends ConsumerWidget {
                       ),
                       Text(
                         l10n.habitsTitleToday,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           color: isDark
@@ -338,7 +338,7 @@ class _PremiumTeaserTile extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   l10n.habitsPremiumTeaserTitle,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
@@ -347,7 +347,7 @@ class _PremiumTeaserTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   l10n.habitsPremiumTeaserBody,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 12,
                     color: const Color(0xFFE0F4FB),
                     height: 1.3,
@@ -365,7 +365,7 @@ class _PremiumTeaserTile extends StatelessWidget {
                   ),
                   child: Text(
                     l10n.habitsPremiumTeaserCta,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: AppColors.dualisNavy,
@@ -457,7 +457,7 @@ class _HabitTile extends StatelessWidget {
                 child: Text(
                   title,
                   maxLines: 1,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimaryLight,
@@ -467,7 +467,7 @@ class _HabitTile extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 value,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   height: 1.3,
                   color: const Color(0xFF334155),
@@ -477,7 +477,7 @@ class _HabitTile extends StatelessWidget {
                 Text(
                   valueCaption!,
                   maxLines: 1,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 11,
                     color: AppColors.textSecondaryLight,
                   ),
@@ -528,7 +528,7 @@ class _TilePill extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: (filled ? Colors.white : color)

@@ -62,7 +62,7 @@ class HistoricalDashboardScreen extends ConsumerWidget {
               Text(
                 l10n.errorLoadHistory,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 14,
                   color: AppColors.textPrimaryLight,
                 ),
@@ -180,7 +180,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
           child: Text(
             l10n.xv2DashWindow(_days),
             key: const Key('dashboard_window_label'),
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 13,
               color: AppColors.textSecondaryLight,
             ),
@@ -253,7 +253,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
                 physical
                     ? l10n.historyOnlyPhysicalShared
                     : l10n.historyOnlyEmotionalShared,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textSecondaryLight,
@@ -550,7 +550,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
     ];
   }
 
-  TextStyle get _subtitleStyle => GoogleFonts.plusJakartaSans(
+  TextStyle get _subtitleStyle => GoogleFonts.inter(
         fontSize: 13,
         fontWeight: FontWeight.w700,
         color: AppColors.textPrimaryLight,
@@ -558,7 +558,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
 
   Widget _emptyText(String text) => Text(
         text,
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: 13,
           color: AppColors.textSecondaryLight,
         ),
@@ -607,7 +607,7 @@ class _EntriesList extends ConsumerWidget {
     if (entries.isEmpty) {
       return Text(
         l10n.xv2DashNoEntries,
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: 13,
           color: AppColors.textSecondaryLight,
         ),
@@ -642,7 +642,7 @@ class _EntriesList extends ConsumerWidget {
                     children: [
                       Text(
                         dateFormat.format(entry.recordedAt),
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textSecondaryLight,
@@ -653,7 +653,7 @@ class _EntriesList extends ConsumerWidget {
                         Text(
                           l10n.jv2PendingSync,
                           key: Key('journal_entry_pending_${entry.id}'),
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textSecondaryLight,

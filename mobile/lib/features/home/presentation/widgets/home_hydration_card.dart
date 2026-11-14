@@ -60,7 +60,7 @@ class HomeHydrationCard extends ConsumerWidget {
                         children: [
                           Text(
                             AppLocalizations.of(context).waterCardTitle,
-                            style: GoogleFonts.plusJakartaSans(
+                            style: GoogleFonts.inter(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textPrimaryLight,
@@ -78,7 +78,7 @@ class HomeHydrationCard extends ConsumerWidget {
                       ),
                       Text(
                         AppLocalizations.of(context).waterCardProgress(total, target, percent),
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           color: AppColors.textSecondaryLight,
                         ),
@@ -98,7 +98,7 @@ class HomeHydrationCard extends ConsumerWidget {
                     children: [
                       Text(
                         AppLocalizations.of(context).waterCardChart,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: AppColors.softIndigo,
@@ -136,7 +136,7 @@ class HomeHydrationCard extends ConsumerWidget {
                     icon: const Icon(Icons.add, size: 16, color: AppColors.clinicalTealDark),
                     label: Text(
                       AppLocalizations.of(context).waterCardGlass,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: AppColors.clinicalTealDark,
@@ -174,7 +174,7 @@ class HomeHydrationCard extends ConsumerWidget {
                     icon: const Icon(Icons.edit_note, size: 16, color: Colors.white),
                     label: Text(
                       AppLocalizations.of(context).waterCardOtherAmount,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,

@@ -179,7 +179,7 @@ class _LegendDot extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           label,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 12,
             color: AppColors.textPrimaryLight,
           ),
@@ -234,7 +234,7 @@ class _SleepDayBar extends StatelessWidget {
           if (hoursChip.isNotEmpty)
             Text(
               hoursChip,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 8.5,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textSecondaryLight,
@@ -257,7 +257,7 @@ class _SleepDayBar extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             '${date.day}'.padLeft(2, '0'),
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 9.5,
               fontWeight: FontWeight.w600,
               color: AppColors.textSecondaryLight,
@@ -325,7 +325,7 @@ class HabitsMovementChart extends StatelessWidget {
                     if (habit?.movementMinutes != null)
                       Text(
                         _shortMinutes(habit!.movementMinutes!),
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 8.5,
                           fontWeight: FontWeight.w600,
                           color: AppColors.clinicalTealDark,
@@ -368,7 +368,7 @@ class HabitsMovementChart extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       '${date.day}'.padLeft(2, '0'),
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 9.5,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textSecondaryLight,
@@ -462,7 +462,7 @@ class HabitsPeriodChart extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       '${date.day}'.padLeft(2, '0'),
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 9.5,
                         fontWeight: FontWeight.w600,
                         color:

@@ -159,7 +159,7 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
         foregroundColor: Colors.white,
         title: Text(
           l10n.xv2CropTitle,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -202,7 +202,7 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
                 Text(
                   l10n.xv2CropHint,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     color: Colors.white70,
                   ),

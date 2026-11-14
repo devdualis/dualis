@@ -133,7 +133,7 @@ class _HydrationDashboardScreenState
       appBar: AppBar(
         title: Text(
           l10n.xv2WaterTitle,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimaryLight,
@@ -228,7 +228,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: GoogleFonts.plusJakartaSans(
+      style: GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.bold,
         color: AppColors.textPrimaryLight,
@@ -295,7 +295,7 @@ class _TodayCard extends ConsumerWidget {
                       '${state.todayTotalMl} / ${state.dailyTargetMl} ml',
                       key: const Key('hydration_today_total'),
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimaryLight,
@@ -303,7 +303,7 @@ class _TodayCard extends ConsumerWidget {
                     ),
                     Text(
                       '${state.progressPercent}%',
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         color: AppColors.textSecondaryLight,
                       ),
@@ -471,7 +471,7 @@ class _QuickButton extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: AppColors.clinicalTealDark,
@@ -497,7 +497,7 @@ class _TodayLogs extends ConsumerWidget {
         child: Center(
           child: Text(
             l10n.xv2WaterNoLogsToday,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 13,
               color: AppColors.textSecondaryLight,
             ),
@@ -521,7 +521,7 @@ class _TodayLogs extends ConsumerWidget {
             ),
             title: Text(
               '${log.amountMl} ml',
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimaryLight,
@@ -531,7 +531,7 @@ class _TodayLogs extends ConsumerWidget {
               log.source == 'reminder_alarm'
                   ? l10n.xv2WaterLoggedViaReminder(time)
                   : l10n.xv2WaterLoggedAt(time),
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 12,
                 color: AppColors.textSecondaryLight,
               ),
@@ -571,12 +571,12 @@ class _ReminderSettings extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final notifier = ref.read(hydrationControllerProvider.notifier);
     final settings = state.settings;
-    final titleStyle = GoogleFonts.plusJakartaSans(
+    final titleStyle = GoogleFonts.inter(
       fontWeight: FontWeight.w600,
       fontSize: 14,
       color: AppColors.textPrimaryLight,
     );
-    final subtitleStyle = GoogleFonts.plusJakartaSans(
+    final subtitleStyle = GoogleFonts.inter(
       fontSize: 12,
       color: AppColors.textSecondaryLight,
     );

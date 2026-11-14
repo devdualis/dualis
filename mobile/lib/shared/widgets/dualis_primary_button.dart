@@ -52,7 +52,7 @@ class DualisPrimaryButton extends StatelessWidget {
                   ],
                   Text(
                     text,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,

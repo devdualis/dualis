@@ -106,7 +106,7 @@ class _ClaimProfileSheetState extends ConsumerState<ClaimProfileSheet> {
               children: [
                 Text(
                   l10n.profileClaimTitle,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimaryLight,
@@ -115,7 +115,7 @@ class _ClaimProfileSheetState extends ConsumerState<ClaimProfileSheet> {
                 const SizedBox(height: 8),
                 Text(
                   l10n.profileClaimBody,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     color: AppColors.textSecondaryLight,
                   ),
@@ -149,7 +149,7 @@ class _ClaimProfileSheetState extends ConsumerState<ClaimProfileSheet> {
                   Text(
                     _errorText(l10n, error),
                     key: const ValueKey('claim-code-error'),
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 13,
                       color: AppColors.emergencyCrimson,
                     ),

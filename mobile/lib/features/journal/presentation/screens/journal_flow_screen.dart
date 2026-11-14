@@ -151,7 +151,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           ),
           title: Text(
             l10n.jv2FlowTitle,
-            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
+            style: GoogleFonts.inter(fontWeight: FontWeight.w700),
           ),
         ),
         body: SafeArea(
@@ -424,7 +424,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
                   },
             child: Text(
               l10n.chronicTrackSaveWithout,
-              style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w600),
+              style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -440,7 +440,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           ),
           child: Text(
             l10n.chronicTrackBemBanner,
-            style: GoogleFonts.plusJakartaSans(fontSize: 14, height: 1.4),
+            style: GoogleFonts.inter(fontSize: 14, height: 1.4),
           ),
         ),
         ..._conditionTiles(l10n, state, conditions, trackedOnly: true),
@@ -654,7 +654,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
               onPressed: canConfirm ? onMore : null,
               child: Text(
                 '+ $moreLabel',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -928,7 +928,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             children: [
               Text(
                 l10n.jv23BodyMarked,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textSecondaryLight,
@@ -1137,7 +1137,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
                     child: Text(
                       JournalLabels.persistence(l10n, p),
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w700,
                         color: item.persistence == p
@@ -1198,7 +1198,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
               padding: const EdgeInsets.only(bottom: 4),
               child: Text(
                 l10n.jv2PersistenceOptional,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   color: AppColors.textSecondaryLight,
                 ),
@@ -1242,7 +1242,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             isCondition
                 ? l10n.jv2ConditionCardQuestion(item.conditionLabel ?? '')
                 : journalItemTitle(l10n, item),
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
@@ -1570,7 +1570,7 @@ class _StepLayout extends StatelessWidget {
                   const SizedBox(width: 10),
                   Text(
                     l10n.jv23StepOf(progress!.$1, progress!.$2),
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,
                       color: secondary,
@@ -1587,7 +1587,7 @@ class _StepLayout extends StatelessWidget {
               if (eyebrow != null)
                 Text(
                   eyebrow!,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: AppColors.dualisSymbolBlue,
@@ -1598,7 +1598,7 @@ class _StepLayout extends StatelessWidget {
                 _TypingText(
                   lead!,
                   key: const Key('jv2_phrase'),
-                  style: GoogleFonts.plusJakartaSans(fontSize: 15, color: secondary),
+                  style: GoogleFonts.inter(fontSize: 15, color: secondary),
                 ),
               ],
               if (axisLabel != null) ...[
@@ -1606,7 +1606,7 @@ class _StepLayout extends StatelessWidget {
                 Text(
                   axisLabel!,
                   key: const Key('jv2_axis_label'),
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: axisColor ?? AppColors.dualisSymbolBlue,
@@ -1620,7 +1620,7 @@ class _StepLayout extends StatelessWidget {
                   text: spokenQuestion ?? question!,
                   child: Text(
                     question!,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                       height: 1.25,
@@ -1632,7 +1632,7 @@ class _StepLayout extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   hint!,
-                  style: GoogleFonts.plusJakartaSans(fontSize: 13, color: secondary),
+                  style: GoogleFonts.inter(fontSize: 13, color: secondary),
                 ),
               ],
               const SizedBox(height: 16),
@@ -1734,7 +1734,7 @@ class _SectionLabel extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8, top: 4),
       child: Text(
         text,
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: strong ? 16 : 14,
           fontWeight: strong ? FontWeight.w700 : FontWeight.w600,
         ),
@@ -1757,7 +1757,7 @@ class _CapsLabel extends StatelessWidget {
         header: true,
         child: Text(
           text,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w700,
             color: AppColors.textSecondaryLight,
@@ -1866,7 +1866,7 @@ class _ChoiceCard extends StatelessWidget {
     final text = Text(
       label,
       textAlign: wide ? TextAlign.start : TextAlign.center,
-      style: GoogleFonts.plusJakartaSans(
+      style: GoogleFonts.inter(
         fontSize: large ? 19 : 13.5,
         fontWeight: FontWeight.w700,
         height: 1.22,
@@ -1992,7 +1992,7 @@ class _TopicTabs extends StatelessWidget {
                           child: Text(
                             t.label,
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.plusJakartaSans(
+                            style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                               color: t.selected
@@ -2011,7 +2011,7 @@ class _TopicTabs extends StatelessWidget {
                             ),
                             child: Text(
                               '${t.count}',
-                              style: GoogleFonts.plusJakartaSans(
+                              style: GoogleFonts.inter(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 color: Colors.white,
@@ -2121,7 +2121,7 @@ class _ChoiceTile extends StatelessWidget {
                       children: [
                         Text(
                           label,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontSize: 15,
                             fontWeight: accent ? FontWeight.w700 : FontWeight.w600,
                             color: !enabled
@@ -2251,7 +2251,7 @@ class _TopicCardState extends State<_TopicCard> {
                           children: [
                             Text(
                               widget.title,
-                              style: GoogleFonts.plusJakartaSans(
+                              style: GoogleFonts.inter(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -2261,7 +2261,7 @@ class _TopicCardState extends State<_TopicCard> {
                               widget.subtitle,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.plusJakartaSans(
+                              style: GoogleFonts.inter(
                                 fontSize: 13,
                                 color: isDark
                                     ? AppColors.textSecondaryDark
@@ -2284,7 +2284,7 @@ class _TopicCardState extends State<_TopicCard> {
                               ),
                               child: Text(
                                 '${widget.count}',
-                                style: GoogleFonts.plusJakartaSans(
+                                style: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w800,
                                   color: Colors.white,
@@ -2392,7 +2392,7 @@ class _ConditionTile extends StatelessWidget {
                           children: [
                             Text(
                               label,
-                              style: GoogleFonts.plusJakartaSans(
+                              style: GoogleFonts.inter(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -2400,7 +2400,7 @@ class _ConditionTile extends StatelessWidget {
                             if (subtitle != null)
                               Text(
                                 subtitle!,
-                                style: GoogleFonts.plusJakartaSans(
+                                style: GoogleFonts.inter(
                                   fontSize: 13,
                                   color: isDark
                                       ? AppColors.textSecondaryDark
@@ -2499,7 +2499,7 @@ class _OptionCell extends StatelessWidget {
                 Expanded(
                   child: Text(
                     label,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -2561,7 +2561,7 @@ class _MarkedPill extends StatelessWidget {
                 Flexible(
                   child: Text(
                     label,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: AppColors.dualisNavy,
@@ -2662,7 +2662,7 @@ class _ContinueButton extends StatelessWidget {
             )
           : Text(
               label,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),

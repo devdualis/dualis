@@ -45,7 +45,7 @@ class CarouselCard extends StatelessWidget {
               Text(
                 item.getTitle(l10n),
                 textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
                   height: 1.3,
@@ -56,7 +56,7 @@ class CarouselCard extends StatelessWidget {
               Text(
                 item.getBody(l10n),
                 textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 15,
                   fontWeight: FontWeight.w400,
                   height: 1.4,

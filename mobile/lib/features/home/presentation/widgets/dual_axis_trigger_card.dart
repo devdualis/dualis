@@ -94,7 +94,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                     children: [
                       Text(
                         'Check-in Diário em 2 Etapas',
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.clinicalTeal,
@@ -102,7 +102,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                       ),
                       Text(
                         'Como você está hoje?',
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                           color: isDark
@@ -278,7 +278,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                   child: Text(
                     title,
                     semanticsLabel: '$title, ${tier.localizedLabel(context)}',
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: isDark
@@ -315,7 +315,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         summary,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: isDark
@@ -343,7 +343,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 ),
                 child: Text(
                   '“${narrative.trim()}”',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 12,
                     fontStyle: FontStyle.italic,
                     color: isDark
@@ -407,7 +407,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                   children: [
                     Text(
                       title,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: isDark
@@ -418,7 +418,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         color: isDark
                             ? AppColors.textSecondaryDark
@@ -448,7 +448,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                 icon: Icon(icon, size: 18),
                 label: Text(
                   'Iniciar $title',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -500,7 +500,7 @@ class _AreaNotShared extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: isDark
@@ -511,7 +511,7 @@ class _AreaNotShared extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   AppLocalizations.of(context).profileCategoryNotSharedTitle,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 12,
                     color: secondary,
                   ),
@@ -551,7 +551,7 @@ class _ConditionsTodaySummary extends StatelessWidget {
         children: [
           Text(
             l10n.jv2ConditionsTitle,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w700,
               color: isDark
@@ -562,7 +562,7 @@ class _ConditionsTodaySummary extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             summary,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 14,
               color: isDark
                   ? AppColors.textPrimaryDark

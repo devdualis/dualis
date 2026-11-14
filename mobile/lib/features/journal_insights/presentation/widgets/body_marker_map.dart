@@ -128,7 +128,7 @@ class _RegionRow extends StatelessWidget {
                   children: [
                     Text(
                       '${seriesLabel(l10n, summary.region)} · ${l10n.gxRegionDays(summary.days)}',
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w700,
                         color: color,
@@ -137,7 +137,7 @@ class _RegionRow extends StatelessWidget {
                     if (top != null)
                       Text(
                         '${top.answers.map((a) => '“$a”').join(' · ')} · ${l10n.gxMarks(top.count)}',
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           color: AppColors.textSecondaryLight,
                         ),
@@ -175,7 +175,7 @@ class _Marker extends StatelessWidget {
       ),
       child: Text(
         '$days',
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: size * 0.42,
           fontWeight: FontWeight.w800,
           color: Colors.white,
@@ -343,7 +343,7 @@ class RegionMarksView extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toLanguageTag();
     final color = ChartTokens.region(summary.region);
-    final text = GoogleFonts.plusJakartaSans(
+    final text = GoogleFonts.inter(
       fontSize: 14,
       height: 1.4,
       color: AppColors.textPrimaryLight,
@@ -356,7 +356,7 @@ class RegionMarksView extends StatelessWidget {
       children: [
         Text(
           seriesLabel(l10n, summary.region),
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 20,
             fontWeight: FontWeight.w700,
             color: color,
@@ -390,7 +390,7 @@ class RegionMarksView extends StatelessWidget {
               children: [
                 Text(
                   DateFormat('dd/MM · HH:mm', locale).format(m.at),
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
                     color: color,

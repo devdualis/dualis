@@ -67,7 +67,7 @@ class NotFoundScreen extends ConsumerWidget {
                     ),
                     child: Text(
                       l10n.notFoundErrorCode,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: AppColors.softIndigo,
@@ -79,7 +79,7 @@ class NotFoundScreen extends ConsumerWidget {
                   Text(
                     l10n.notFoundTitle,
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimaryLight,
@@ -89,7 +89,7 @@ class NotFoundScreen extends ConsumerWidget {
                   Text(
                     l10n.notFoundBody,
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 14,
                       color: AppColors.textSecondaryLight,
                       height: 1.5,
@@ -139,7 +139,7 @@ class NotFoundScreen extends ConsumerWidget {
                     icon: const Icon(Icons.arrow_back_rounded, size: 16),
                     label: Text(
                       l10n.notFoundGoBack,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontWeight: FontWeight.w600,
                         color: AppColors.softIndigo,
                       ),

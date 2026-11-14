@@ -276,7 +276,7 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
                   Expanded(
                     child: Text(
                       l10n.addDependentTitle,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimaryLight,
@@ -336,7 +336,7 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
                       const SizedBox(height: 16),
                       Text(
                         l10n.addDependentRelationshipLabel,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: AppColors.textPrimaryLight,
@@ -440,7 +440,7 @@ class _RelationshipHint extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         text,
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: 13,
           height: 1.4,
           color: AppColors.textSecondaryLight,
@@ -490,7 +490,7 @@ class _RelationshipOptionTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                     color: AppColors.textPrimaryLight,
@@ -544,7 +544,7 @@ class _LgpdGuardianConsentBlock extends StatelessWidget {
               padding: const EdgeInsets.only(top: 12),
               child: Text(
                 consentText,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 13,
                   height: 1.45,
                   fontWeight: FontWeight.w500,

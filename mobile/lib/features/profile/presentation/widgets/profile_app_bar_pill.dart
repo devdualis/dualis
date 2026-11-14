@@ -100,7 +100,7 @@ class ProfileAppBarPill extends ConsumerWidget {
                     constraints: const BoxConstraints(maxWidth: 120),
                     child: Text(
                       profile.name,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimaryLight,

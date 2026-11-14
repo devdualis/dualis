@@ -76,7 +76,7 @@ class WaterDayRing extends StatelessWidget {
               ? Text(
                   l10n.gxNoWaterRecord,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 12.5,
                     color: AppColors.textSecondaryLight,
                   ),
@@ -88,7 +88,7 @@ class WaterDayRing extends StatelessWidget {
                       child: Text(
                         formatMl(totalMl, locale),
                         key: const Key('water_day_ring_total'),
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
                           color: AppColors.textPrimaryLight,
@@ -99,7 +99,7 @@ class WaterDayRing extends StatelessWidget {
                       Text(
                         '$percent%',
                         key: const Key('water_day_ring_percent'),
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textSecondaryLight,
@@ -148,7 +148,7 @@ class WaterStepChart extends StatelessWidget {
       for (final s in steps) FlSpot(s.hour, s.cumulativeMl.toDouble()),
       FlSpot(end, last.toDouble()),
     ];
-    final axis = GoogleFonts.plusJakartaSans(
+    final axis = GoogleFonts.inter(
       fontSize: 10,
       color: AppColors.textSecondaryLight,
     );
@@ -223,7 +223,7 @@ class WaterStepChart extends StatelessWidget {
                             steps[spot.spotIndex - 1].addedMl,
                             steps[spot.spotIndex - 1].cumulativeMl,
                           ),
-                          GoogleFonts.plusJakartaSans(
+                          GoogleFonts.inter(
                             fontSize: 11.5,
                             color: AppColors.textPrimaryLight,
                           ),
@@ -302,7 +302,7 @@ class WaterPeriodBars extends StatelessWidget {
     );
     final maxY = math.max(500.0, (top * 1.15 / 500).ceil() * 500.0);
     final step = days <= 7 ? 1 : 5;
-    final axis = GoogleFonts.plusJakartaSans(
+    final axis = GoogleFonts.inter(
       fontSize: 10,
       color: AppColors.textSecondaryLight,
     );
@@ -381,7 +381,7 @@ class WaterPeriodBars extends StatelessWidget {
                     return BarTooltipItem(
                       '${DateFormat('dd/MM', locale).format(day)}\n'
                       '${ml == null ? l10n.gxNoRecord : formatMl(ml, locale)}',
-                      GoogleFonts.plusJakartaSans(
+                      GoogleFonts.inter(
                         fontSize: 11.5,
                         color: AppColors.textPrimaryLight,
                       ),
@@ -459,7 +459,7 @@ class _StatGrid extends StatelessWidget {
                 children: [
                   Text(
                     value,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimaryLight,
@@ -515,7 +515,7 @@ class WaterCalendar extends StatelessWidget {
             child: Text(
               l10n.gxNoRecord,
               textAlign: TextAlign.center,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 8.5,
                 color: AppColors.textSecondaryLight,
               ),
@@ -529,7 +529,7 @@ class WaterCalendar extends StatelessWidget {
             FittedBox(
               child: Text(
                 formatLiters(ml, locale),
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimaryLight,
@@ -551,7 +551,7 @@ class WaterCalendar extends StatelessWidget {
               FittedBox(
                 child: Text(
                   '$percent%',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 8.5,
                     color: AppColors.textSecondaryLight,
                   ),
