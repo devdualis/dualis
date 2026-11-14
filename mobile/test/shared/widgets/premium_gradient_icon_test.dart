@@ -184,7 +184,7 @@ void main() {
         find.descendant(of: destination, matching: find.byIcon(Icons.emergency_outlined)),
       );
       expect(icon.color, Colors.white);
-      expect(icon.size, 18);
+      expect(icon.size, 26);
       final circle = tester.widget<Container>(find.descendant(
         of: destination,
         matching: find.byWidgetPredicate(

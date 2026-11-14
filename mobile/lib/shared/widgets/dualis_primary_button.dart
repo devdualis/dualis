@@ -28,9 +28,7 @@ class DualisPrimaryButton extends StatelessWidget {
           disabledBackgroundColor: AppColors.softIndigo.withAlpha(120),
           foregroundColor: Colors.white,
           disabledForegroundColor: Colors.white70,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          shape: const StadiumBorder(),
           elevation: 0,
         ),
         child: isLoading

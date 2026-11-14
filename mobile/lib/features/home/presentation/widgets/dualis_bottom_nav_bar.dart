@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -44,84 +46,195 @@ class DualisBottomNavBar extends StatelessWidget {
     final emergencyLabel = l10n?.urgentHelpButton ?? 'Ajuda urgente';
     final careLabel = l10n?.careHubTitle ?? 'Meus cuidados';
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: NavigationBar(
-        selectedIndex: currentIndex.clamp(0, emergencyIndex - 1),
-        onDestinationSelected: (index) {
-          if (index == emergencyIndex) {
-            onEmergencyTap();
-            return;
-          }
-          onTap(index);
-        },
-        backgroundColor: AppColors.surfaceLight,
-        indicatorColor: AppColors.clinicalTeal.withValues(alpha: 0.18),
-        elevation: 0,
-        height: 60,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
-        destinations: [
-          NavigationDestination(
-            key: const Key('nav_destination_home'),
-            icon: const Icon(Icons.home_outlined, color: AppColors.textSecondaryLight),
-            selectedIcon: _selected(const Icon(Icons.home_rounded, color: AppColors.clinicalTealDark)),
-            label: '',
-            tooltip: homeLabel,
-          ),
-          NavigationDestination(
-            key: const Key('nav_destination_history'),
-            icon: const Icon(Icons.insights_outlined, color: AppColors.textSecondaryLight),
-            selectedIcon: _selected(const Icon(Icons.insights_rounded, color: AppColors.clinicalTealDark)),
-            label: '',
-            tooltip: historyLabel,
-          ),
-          if (habitsTab)
-            NavigationDestination(
-              key: const Key('nav_destination_habits'),
-              icon: const Icon(Icons.wb_twilight_outlined, color: AppColors.textSecondaryLight),
-              selectedIcon: _selected(const Icon(Icons.wb_twilight_rounded, color: AppColors.clinicalTealDark)),
-              label: '',
-              tooltip: habitsLabel,
-            )
-          else
-            NavigationDestination(
-              key: const Key('nav_destination_hydration'),
-              icon: const Icon(Icons.water_drop_outlined, color: AppColors.textSecondaryLight),
-              selectedIcon: _selected(const Icon(Icons.water_drop_rounded, color: AppColors.clinicalTealDark)),
-              label: '',
-              tooltip: hydrationLabel,
+    final reduceTransparency =
+        MediaQuery.maybeOf(context)?.highContrast ?? false;
+
+    // Floating glass tab bar on the left, separate red help button on the
+    // right (prototype `.tabs` + `.sos`). The help entry keeps its key,
+    // tooltip and `onEmergencyTap`; it is not a bar destination any more.
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 6, 14, 14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(_barHeight / 2),
+                  boxShadow: AppColors.glassShadow(blur: 30, alpha: 0.45),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(_barHeight / 2),
+                  child: BackdropFilter(
+                    filter:
+                        reduceTransparency
+                            ? ImageFilter.blur()
+                            : ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                    child: Container(
+                      height: _barHeight,
+                      decoration: BoxDecoration(
+                        color:
+                            reduceTransparency
+                                ? AppColors.surfaceLight
+                                : AppColors.glassFillStrong,
+                        borderRadius: BorderRadius.circular(_barHeight / 2),
+                        border: Border.all(color: AppColors.glassEdge),
+                      ),
+                      child: NavigationBarTheme(
+                        data: NavigationBarThemeData(
+                          backgroundColor: Colors.transparent,
+                          surfaceTintColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          indicatorColor: AppColors.dualisNavy.withValues(
+                            alpha: 0.08,
+                          ),
+                          indicatorShape: const StadiumBorder(),
+                        ),
+                        child: NavigationBar(
+                          selectedIndex: currentIndex.clamp(
+                            0,
+                            emergencyIndex - 1,
+                          ),
+                          onDestinationSelected: (index) {
+                            if (index == emergencyIndex) {
+                              onEmergencyTap();
+                              return;
+                            }
+                            onTap(index);
+                          },
+                          backgroundColor: Colors.transparent,
+                          elevation: 0,
+                          height: _barHeight,
+                          labelBehavior:
+                              NavigationDestinationLabelBehavior.alwaysHide,
+                          destinations: [
+                            NavigationDestination(
+                              key: const Key('nav_destination_home'),
+                              icon: const Icon(
+                                Icons.home_outlined,
+                                color: AppColors.textSecondaryLight,
+                              ),
+                              selectedIcon: _selected(
+                                const Icon(
+                                  Icons.home_rounded,
+                                  color: AppColors.dualisNavy,
+                                ),
+                              ),
+                              label: '',
+                              tooltip: homeLabel,
+                            ),
+                            NavigationDestination(
+                              key: const Key('nav_destination_history'),
+                              icon: const Icon(
+                                Icons.insights_outlined,
+                                color: AppColors.textSecondaryLight,
+                              ),
+                              selectedIcon: _selected(
+                                const Icon(
+                                  Icons.insights_rounded,
+                                  color: AppColors.dualisNavy,
+                                ),
+                              ),
+                              label: '',
+                              tooltip: historyLabel,
+                            ),
+                            if (habitsTab)
+                              NavigationDestination(
+                                key: const Key('nav_destination_habits'),
+                                icon: const Icon(
+                                  Icons.wb_twilight_outlined,
+                                  color: AppColors.textSecondaryLight,
+                                ),
+                                selectedIcon: _selected(
+                                  const Icon(
+                                    Icons.wb_twilight_rounded,
+                                    color: AppColors.dualisNavy,
+                                  ),
+                                ),
+                                label: '',
+                                tooltip: habitsLabel,
+                              )
+                            else
+                              NavigationDestination(
+                                key: const Key('nav_destination_hydration'),
+                                icon: const Icon(
+                                  Icons.water_drop_outlined,
+                                  color: AppColors.textSecondaryLight,
+                                ),
+                                selectedIcon: _selected(
+                                  const Icon(
+                                    Icons.water_drop_rounded,
+                                    color: AppColors.dualisNavy,
+                                  ),
+                                ),
+                                label: '',
+                                tooltip: hydrationLabel,
+                              ),
+                            if (showCare)
+                              NavigationDestination(
+                                key: const Key('nav_destination_care'),
+                                icon: _careGlyph(
+                                  const Icon(
+                                    Icons.favorite_border_rounded,
+                                    color: AppColors.textSecondaryLight,
+                                  ),
+                                ),
+                                selectedIcon: _careGlyph(
+                                  _selected(
+                                    const Icon(
+                                      Icons.favorite_rounded,
+                                      color: AppColors.dualisNavy,
+                                    ),
+                                  ),
+                                ),
+                                label: '',
+                                tooltip:
+                                    careLocked
+                                        ? (l10n?.navCareLockedTooltip ??
+                                            careLabel)
+                                        : careLabel,
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
-          if (showCare)
-            NavigationDestination(
-              key: const Key('nav_destination_care'),
-              icon: _careGlyph(const Icon(Icons.favorite_border_rounded, color: AppColors.textSecondaryLight)),
-              selectedIcon: _careGlyph(_selected(const Icon(Icons.favorite_rounded, color: AppColors.clinicalTealDark))),
-              label: '',
-              tooltip: careLocked ? (l10n?.navCareLockedTooltip ?? careLabel) : careLabel,
+            const SizedBox(width: 10),
+            Tooltip(
+              message: emergencyLabel,
+              child: Semantics(
+                button: true,
+                label: emergencyLabel,
+                excludeSemantics: true,
+                child: Material(
+                  key: const Key('nav_destination_emergency'),
+                  color: Colors.transparent,
+                  shape: const CircleBorder(),
+                  child: InkWell(
+                    onTap: onEmergencyTap,
+                    customBorder: const CircleBorder(),
+                    child: _emergencyGlyph(Icons.emergency_outlined),
+                  ),
+                ),
+              ),
             ),
-          NavigationDestination(
-            key: const Key('nav_destination_emergency'),
-            icon: _emergencyGlyph(Icons.emergency_outlined),
-            selectedIcon: _emergencyGlyph(Icons.emergency),
-            label: '',
-            tooltip: emergencyLabel,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
+  static const double _barHeight = 62;
+
   Widget _selected(Icon icon) {
-    return premiumIcons ? PremiumGradientIcon(icon: icon, showActiveDot: true) : icon;
+    return premiumIcons
+        ? PremiumGradientIcon(icon: icon, showActiveDot: true)
+        : icon;
   }
 
   Widget _careGlyph(Widget icon) {
@@ -132,7 +245,11 @@ class DualisBottomNavBar extends StatelessWidget {
       backgroundColor: AppColors.dualisSymbolBlue,
       label: const Text(
         'PRO',
-        style: TextStyle(fontSize: 8, fontWeight: FontWeight.w800, color: Colors.white),
+        style: TextStyle(
+          fontSize: 8,
+          fontWeight: FontWeight.w800,
+          color: Colors.white,
+        ),
       ),
       child: icon,
     );
@@ -140,14 +257,22 @@ class DualisBottomNavBar extends StatelessWidget {
 
   Widget _emergencyGlyph(IconData icon) {
     return Container(
-      width: 32,
-      height: 32,
+      width: _barHeight,
+      height: _barHeight,
       alignment: Alignment.center,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.emergencyCrimson,
         shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.emergencyCrimson.withValues(alpha: 0.6),
+            blurRadius: 26,
+            offset: const Offset(0, 12),
+            spreadRadius: -10,
+          ),
+        ],
       ),
-      child: Icon(icon, size: 18, color: Colors.white),
+      child: Icon(icon, size: 26, color: Colors.white),
     );
   }
 }

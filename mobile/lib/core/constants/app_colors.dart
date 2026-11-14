@@ -58,9 +58,6 @@ class AppColors {
   static const Color outlineDark = Color(0xFF334155);
 
   // Redesign tokens (brand palette only; two gradients at most)
-  /// Inactive tab glyph in the floating bar.
-  static const Color tabInactive = Color(0xFF8291A5);
-
   /// Translucent white used by glass cards and the floating bar.
   static const Color glassFill = Color(0xB8FFFFFF); // ~72%
   static const Color glassFillStrong = Color(0xC2FFFFFF); // ~76%
