@@ -189,6 +189,17 @@ void main() {
     });
   }
 
+  testWidgets('on home, switching tabs keeps the bottom help button and no top phone', (tester) async {
+    await pump(tester, RoutePaths.home);
+    for (final key in ['nav_destination_history', 'nav_destination_home']) {
+      await tester.tap(find.byKey(Key(key)));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byKey(const Key('urgent_help_button')), findsNothing, reason: key);
+      expect(find.byKey(const Key('nav_destination_emergency')).hitTestable(), findsOneWidget, reason: key);
+    }
+  });
+
   testWidgets('on home, a sheet covering the bottom bar brings the button back', (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 1.0;

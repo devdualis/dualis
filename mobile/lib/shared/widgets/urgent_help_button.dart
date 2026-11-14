@@ -46,8 +46,9 @@ class UrgentHelpButton extends StatelessWidget {
 }
 
 /// Tracks popup routes (bottom sheets, dialogs, menus) open on a router's
-/// navigator. On /home the bottom bar's emergency entry stands in for the
-/// floating help button, but a modal sheet covers that bar; while a popup is
+/// navigator. On /home (all its tabs) the separate red help button next to
+/// the floating tab bar stands in for the top phone button, so the phone is
+/// hidden there, but a modal sheet covers that bar; while a popup is
 /// open [UrgentHelpOverlay] shows the floating button again so help stays one
 /// tap away (claim sheet, profile sheet, family-sharing dialogs).
 class PopupRouteTracker extends NavigatorObserver with ChangeNotifier {
@@ -145,8 +146,9 @@ class _UrgentHelpOverlayState extends State<UrgentHelpOverlay> {
     return router.state.matchedLocation == RoutePaths.emergency;
   }
 
-  /// On /home the bottom bar's emergency entry is the one-tap help, unless a
-  /// popup (sheet or dialog) covers it.
+  /// On /home the red help button beside the tab bar (key
+  /// `nav_destination_emergency`) is the one-tap help, so the top phone must
+  /// not show; it comes back while a popup (sheet or dialog) covers the bar.
   bool _homeNavCoversHelp() {
     final router = widget.router;
     if (router.routerDelegate.currentConfiguration.isEmpty) return false;
