@@ -26,7 +26,7 @@ class AllergiesScreen extends ConsumerWidget {
     };
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundDepth,
       appBar: careAppBar(context, l10n.careAllergiesTitle),
       floatingActionButton: canEdit
           ? FloatingActionButton.extended(

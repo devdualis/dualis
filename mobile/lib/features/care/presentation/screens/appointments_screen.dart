@@ -31,7 +31,7 @@ class AppointmentsScreen extends ConsumerWidget {
     final async = ref.watch(careRecordsProvider(CareKind.appointment));
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundDepth,
       appBar: careAppBar(context, l10n.careAppointmentsTitle),
       floatingActionButton: canEdit
           ? FloatingActionButton.extended(
@@ -89,13 +89,18 @@ class _AppointmentCard extends StatelessWidget {
               Container(
                 width: 54,
                 height: 54,
-                decoration: BoxDecoration(color: highlight ? CareColors.greenBg : CareColors.slateBg, borderRadius: BorderRadius.circular(13)),
+                decoration: BoxDecoration(
+                  gradient: highlight ? AppColors.gradientNavy : null,
+                  color: highlight ? null : AppColors.iconTileTint,
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('${at.day}', style: careTitle(18).copyWith(color: highlight ? CareColors.green : CareColors.slate)),
+                    Text('${at.day}', style: careTitle(18).copyWith(color: highlight ? Colors.white : CareColors.slate)),
                     Text(DateFormat.MMM(locale).format(at).toUpperCase(),
-                        style: careBody(11).copyWith(fontWeight: FontWeight.w700, color: highlight ? CareColors.green : CareColors.slate)),
+                        style: careBody(11).copyWith(
+                            fontWeight: FontWeight.w700, color: highlight ? AppColors.dualisSymbolCyan : CareColors.slate)),
                   ],
                 ),
               ),
@@ -249,13 +254,14 @@ class _AppointmentFormState extends ConsumerState<_AppointmentForm> {
           Expanded(
             child: InkWell(
               key: const Key('appt_time'),
+              borderRadius: BorderRadius.circular(16),
               onTap: () async {
                 final picked = await showTimePicker(context: context, initialTime: _time ?? const TimeOfDay(hour: 9, minute: 0));
                 if (picked != null) setState(() => _time = picked);
               },
               child: InputDecorator(
                 decoration: InputDecoration(labelText: l10n.careAppointmentTime, filled: true, fillColor: AppColors.surfaceLight),
-                child: Text(_time == null ? '—' : _time!.format(context)),
+                child: Text(_time == null ? '—' : _time!.format(context), style: careBody(15).copyWith(color: AppColors.textPrimaryLight)),
               ),
             ),
           ),
@@ -277,7 +283,7 @@ class _AppointmentFormState extends ConsumerState<_AppointmentForm> {
             child: Material(
               elevation: 6,
               color: AppColors.surfaceLight,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
               clipBehavior: Clip.antiAlias,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 240),

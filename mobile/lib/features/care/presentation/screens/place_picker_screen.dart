@@ -170,7 +170,7 @@ class _PlacePickerScreenState extends State<PlacePickerScreen> {
             top: 12,
             child: Material(
               elevation: 4,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(18),
               color: AppColors.surfaceLight,
               child: TextField(
                 key: const Key('place_search'),

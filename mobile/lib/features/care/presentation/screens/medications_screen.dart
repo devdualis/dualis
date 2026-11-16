@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../journal_insights/presentation/widgets/history_widgets.dart';
 import '../../../profile/domain/models/share_category.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../domain/care_models.dart';
@@ -30,7 +32,7 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
     final async = ref.watch(medicationsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundDepth,
       appBar: careAppBar(context, l10n.careMedicationsTitle),
       floatingActionButton: canEdit
           ? FloatingActionButton.extended(
@@ -48,14 +50,11 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
         data: (meds) => ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
           children: [
-            SegmentedButton<int>(
-              segments: [
-                ButtonSegment(value: 0, label: Text(l10n.careMedTabToday)),
-                ButtonSegment(value: 1, label: Text(l10n.careMedTabAll)),
-              ],
-              selected: {_tab},
-              showSelectedIcon: false,
-              onSelectionChanged: (s) => setState(() => _tab = s.first),
+            HistorySegmented<int>(
+              keyPrefix: 'care_med_tab',
+              options: [(0, l10n.careMedTabToday), (1, l10n.careMedTabAll)],
+              selected: _tab,
+              onChanged: (v) => setState(() => _tab = v),
             ),
             const SizedBox(height: 8),
             if (meds.isEmpty)
@@ -93,7 +92,7 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
         ..add(const SizedBox(height: 10))
         ..add(CareRow(
           color: CareColors.amberBg,
-          borderColor: const Color(0xFFFFE0A3),
+          borderColor: AppColors.intensityMildBorder.withValues(alpha: 0.4),
           leading: const CareIconTile(Icons.inventory_2_outlined, background: Colors.white, foreground: CareColors.amber),
           title: l10n.careMedStockTitle(m.title),
           subtitle: l10n.careMedStockBody(m.stockCount!, m.stockWarnAt!),
@@ -107,7 +106,8 @@ class _MedicationsScreenState extends ConsumerState<MedicationsScreen> {
           const SizedBox(height: 10),
           CareRow(
             leading: CareIconTile(Icons.medication_outlined,
-                background: m.active ? AppColors.softIndigoLight : CareColors.slateBg, foreground: m.active ? AppColors.dualisNavy : CareColors.slate),
+                background: m.active ? AppColors.iconTileTint : AppColors.dualisNavy.withValues(alpha: 0.06),
+                foreground: m.active ? AppColors.dualisNavy : AppColors.textSecondaryLight),
             title: m.title,
             subtitle: [
               if (m.amountPerIntake != null) m.amountPerIntake!,
@@ -133,6 +133,13 @@ class _SlotCard extends ConsumerStatefulWidget {
 
 class _SlotCardState extends ConsumerState<_SlotCard> {
   bool _busy = false;
+
+  static final _slotOutlined = OutlinedButton.styleFrom(
+    minimumSize: const Size(0, 44),
+    padding: const EdgeInsets.symmetric(horizontal: 8),
+    side: BorderSide(color: AppColors.dualisNavy.withValues(alpha: 0.25), width: 1.2),
+    textStyle: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+  );
 
   Future<void> _act(IntakeAction action) async {
     setState(() => _busy = true);
@@ -167,8 +174,11 @@ class _SlotCardState extends ConsumerState<_SlotCard> {
                 height: 26,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: action == 'taken' ? AppColors.clinicalTeal : Colors.transparent,
-                  border: Border.all(color: action == 'taken' ? AppColors.clinicalTeal : const Color(0xFFCBD5E1), width: 2),
+                  color: action == 'taken' ? AppColors.dualisSymbolCyan : Colors.transparent,
+                  border: Border.all(
+                    color: action == 'taken' ? AppColors.dualisSymbolCyan : AppColors.dualisNavy.withValues(alpha: 0.28),
+                    width: 2,
+                  ),
                 ),
                 child: action == 'taken' ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
               ),
@@ -198,16 +208,29 @@ class _SlotCardState extends ConsumerState<_SlotCard> {
             Row(
               children: [
                 Expanded(
-                  child: FilledButton.tonal(
+                  child: FilledButton(
                     key: Key('slot_taken_${widget.med.id}_${widget.at.hour}${widget.at.minute}'),
+                    style: FilledButton.styleFrom(minimumSize: const Size(0, 44), padding: const EdgeInsets.symmetric(horizontal: 8)),
                     onPressed: _busy ? null : () => _act(IntakeAction.taken),
-                    child: Text(l10n.careMedTaken),
+                    child: Text(l10n.careMedTaken, maxLines: 1, overflow: TextOverflow.ellipsis),
                   ),
                 ),
                 const SizedBox(width: 8),
-                Expanded(child: OutlinedButton(onPressed: _busy ? null : () => _act(IntakeAction.snoozed), child: Text(l10n.careMedSnooze))),
+                Expanded(
+                  child: OutlinedButton(
+                    style: _slotOutlined,
+                    onPressed: _busy ? null : () => _act(IntakeAction.snoozed),
+                    child: Text(l10n.careMedSnooze, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ),
+                ),
                 const SizedBox(width: 8),
-                Expanded(child: OutlinedButton(onPressed: _busy ? null : () => _act(IntakeAction.skipped), child: Text(l10n.careMedSkip))),
+                Expanded(
+                  child: OutlinedButton(
+                    style: _slotOutlined,
+                    onPressed: _busy ? null : () => _act(IntakeAction.skipped),
+                    child: Text(l10n.careMedSkip, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ),
+                ),
               ],
             ),
           ],

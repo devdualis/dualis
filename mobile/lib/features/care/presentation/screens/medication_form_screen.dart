@@ -112,7 +112,7 @@ class _MedicationFormScreenState extends ConsumerState<MedicationFormScreen> {
     final l10n = AppLocalizations.of(context);
     final weekdayLabels = [l10n.careMon, l10n.careTue, l10n.careWed, l10n.careThu, l10n.careFri, l10n.careSat, l10n.careSun];
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundDepth,
       appBar: careAppBar(context, _med == null ? l10n.careMedicationNew : l10n.careMedicationEdit, actions: [
         if (_med != null) IconButton(onPressed: _delete, icon: const Icon(Icons.delete_outline)),
       ]),
@@ -188,7 +188,7 @@ class _MedicationFormScreenState extends ConsumerState<MedicationFormScreen> {
               leading: const CareIconTile(Icons.description_outlined, background: CareColors.slateBg, foreground: CareColors.slate),
               title: l10n.careMedBula,
               subtitle: l10n.careMedBulaHint,
-              trailing: const Icon(Icons.open_in_new, color: Color(0xFF94A3B8)),
+              trailing: const Icon(Icons.open_in_new, color: AppColors.textSecondaryLight),
               onTap: () {
                 if (_name.text.trim().isEmpty) return careSnack(context, l10n.careMedBulaNeedsName);
                 launchUrl(anvisaBulaUri(_name.text), mode: LaunchMode.externalApplication);

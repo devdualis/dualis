@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../journal_insights/presentation/widgets/history_widgets.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../../profile/domain/models/share_category.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
@@ -36,7 +37,7 @@ class _VaccinesScreenState extends ConsumerState<VaccinesScreen> {
     final canEdit = activeProfileCanWrite(ref, ShareCategory.care);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundDepth,
       appBar: careAppBar(context, l10n.careVaccinesTitle),
       floatingActionButton: canEdit
           ? FloatingActionButton.extended(
@@ -54,14 +55,11 @@ class _VaccinesScreenState extends ConsumerState<VaccinesScreen> {
         data: (doses) => ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
           children: [
-            SegmentedButton<int>(
-              segments: [
-                ButtonSegment(value: 0, label: Text(l10n.careVaccineTabCalendar)),
-                ButtonSegment(value: 1, label: Text(l10n.careVaccineTabMine)),
-              ],
-              selected: {_tab},
-              showSelectedIcon: false,
-              onSelectionChanged: (s) => setState(() => _tab = s.first),
+            HistorySegmented<int>(
+              keyPrefix: 'care_vaccine_tab',
+              options: [(0, l10n.careVaccineTabCalendar), (1, l10n.careVaccineTabMine)],
+              selected: _tab,
+              onChanged: (v) => setState(() => _tab = v),
             ),
             const SizedBox(height: 12),
             if (_tab == 0) ..._calendar(context, l10n, stage, doses, canEdit) else ..._mine(context, l10n, doses, canEdit),
@@ -135,8 +133,8 @@ class _VaccinesScreenState extends ConsumerState<VaccinesScreen> {
                     child: LinearProgressIndicator(
                       value: (count / v.doses!).clamp(0, 1).toDouble(),
                       minHeight: 6,
-                      backgroundColor: const Color(0xFFEEF2F6),
-                      color: AppColors.clinicalTeal,
+                      backgroundColor: AppColors.dualisNavy.withValues(alpha: 0.08),
+                      color: AppColors.dualisSymbolCyan,
                     ),
                   ),
                 ],
