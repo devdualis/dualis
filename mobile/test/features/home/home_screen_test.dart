@@ -154,15 +154,11 @@ void main() {
 
       // Verify greetings and user email
       expect(find.text('Olá, Ricardo! Bom dia'), findsOneWidget);
-      expect(find.text('rinconrj@gmail.com'), findsOneWidget);
-
-      // Verify LGPD badge
-      expect(find.text('Seus registros estão protegidos'), findsOneWidget);
       // Free build: no Premium tier mark.
       expect(find.byKey(const Key('home_premium_label')), findsNothing);
 
       expect(find.byKey(const Key('home_settings_button')), findsOneWidget);
-      expect(find.byKey(const Key('home_profile_card')), findsOneWidget);
+      expect(find.byKey(const Key('home_profile_card')), findsNothing);
       expect(find.byKey(const Key('home_hydration_nav_button')), findsNothing);
       expect(find.byKey(const Key('nav_destination_hydration')), findsOneWidget);
 

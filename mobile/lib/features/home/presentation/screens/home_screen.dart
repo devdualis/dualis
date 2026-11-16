@@ -14,7 +14,6 @@ import '../../domain/trigger_checkin_state.dart';
 import '../controllers/trigger_checkin_controller.dart';
 import '../widgets/dual_axis_trigger_card.dart';
 import '../../../sync/presentation/controllers/sync_outbox_worker.dart';
-import '../../../settings/presentation/widgets/avatar_selector_sheet.dart';
 import '../../../voice/presentation/voice_widgets.dart';
 import '../widgets/dualis_bottom_nav_bar.dart';
 import '../../../care/presentation/screens/care_hub_screen.dart';
@@ -425,16 +424,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _HomeHero(
-                    picture: useDelegatedAvatar ? null : user?.picture,
-                    avatarInitial: cardAvatarInitial,
-                    name: cardDisplayName,
-                    subtitle: cardDisplaySubtitle,
-                    badge: AppLocalizations.of(context).homeDataProtectedBadge,
-                    onTap: () => context.push(RoutePaths.settings),
-                  ),
-                  const SizedBox(height: 16),
-
                   DualAxisTriggerCard(
                     greeting: useDelegatedAvatar
                         ? AppLocalizations.of(context)
@@ -454,125 +443,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Compact light profile card (redesign): avatar, name, email, small "data
-/// protected" pill and chevron on one row. Taps open Settings.
-class _HomeHero extends StatelessWidget {
-  final String? picture;
-  final String avatarInitial;
-  final String name;
-  final String subtitle;
-  final String badge;
-  final VoidCallback onTap;
-
-  const _HomeHero({
-    required this.picture,
-    required this.avatarInitial,
-    required this.name,
-    required this.subtitle,
-    required this.badge,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      key: const Key('home_profile_card'),
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: AppColors.glassFill,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: AppColors.glassEdge),
-          boxShadow: AppColors.glassShadow(blur: 18, alpha: 0.14),
-        ),
-        child: Row(
-          children: [
-            UserAvatar(
-              picture: picture,
-              fallbackInitial: avatarInitial,
-              radius: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      height: 1.15,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimaryLight,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (subtitle.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: AppColors.textSecondaryLight,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                decoration: BoxDecoration(
-                  color: AppColors.iconTileTint,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.shield_outlined,
-                      size: 14,
-                      color: AppColors.dualisNavy,
-                    ),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        badge,
-                        style: GoogleFonts.inter(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.dualisNavy,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: 6),
-            const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 13,
-              color: AppColors.textSecondaryLight,
-            ),
-          ],
-        ),
       ),
     );
   }

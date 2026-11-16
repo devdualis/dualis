@@ -354,7 +354,6 @@ void main() {
       // =========================================================================
       // 4. HOME SCREEN & BOTTOM NAVIGATION
       // =========================================================================
-      expect(find.byKey(const Key('home_profile_card')), findsOneWidget);
       expect(find.text('Como você está hoje?'), findsOneWidget);
 
       // Verify Stage Action Cards
