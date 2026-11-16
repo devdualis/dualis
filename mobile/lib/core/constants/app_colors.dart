@@ -63,6 +63,9 @@ class AppColors {
   static const Color glassFillStrong = Color(0xC2FFFFFF); // ~76%
   static const Color glassEdge = Color(0xF2FFFFFF); // inner top highlight
 
+  /// Cyan-tinted square behind duotone (navy) structural icons.
+  static const Color iconTileTint = Color(0xFFE6F2FA);
+
   /// Navy gradient: hero cards and primary surfaces.
   static const LinearGradient gradientNavy = LinearGradient(
     begin: Alignment.topLeft,

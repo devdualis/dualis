@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/config/feature_flags.dart';
+import '../../../../core/constants/app_assets.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
@@ -206,6 +207,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           icon: Icons.menu_book_outlined,
           color: AppColors.clinicalTealDark,
           tooltip: l10n.xv2LibTitle,
+          glass: true,
           onTap: () => context.push(RoutePaths.library),
         ),
         const SizedBox(width: 8),
@@ -307,6 +309,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         icon: Icons.settings_outlined,
         color: AppColors.clinicalTealDark,
         tooltip: 'Configurações',
+        glass: _currentTabIndex == 0,
         onTap: () => context.push(RoutePaths.settings),
       ),
       const SizedBox(width: 8),
@@ -415,134 +418,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Builder(
               builder: (context) => SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(
-                20,
                 16,
-                20,
+                16,
+                16,
                 16 + MediaQuery.paddingOf(context).bottom,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  GestureDetector(
-                    key: const Key('home_profile_card'),
+                  _HomeHero(
+                    picture: useDelegatedAvatar ? null : user?.picture,
+                    avatarInitial: cardAvatarInitial,
+                    title: useDelegatedAvatar
+                        ? AppLocalizations.of(context)
+                            .activeProfileCardTitle(cardDisplayName)
+                        : homeGreetingText(
+                            AppLocalizations.of(context),
+                            cardDisplayName,
+                            ref.read(homeClockProvider)(),
+                          ),
+                    subtitle: cardDisplaySubtitle,
+                    badge: AppLocalizations.of(context).homeDataProtectedBadge,
                     onTap: () => context.push(RoutePaths.settings),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            AppColors.clinicalTeal,
-                            AppColors.softIndigo,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.softIndigo.withValues(alpha: 0.25),
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              UserAvatar(
-                                picture:
-                                    useDelegatedAvatar ? null : user?.picture,
-                                fallbackInitial: cardAvatarInitial,
-                                radius: 26,
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      useDelegatedAvatar
-                                          ? AppLocalizations.of(
-                                            context,
-                                          ).activeProfileCardTitle(
-                                            cardDisplayName,
-                                          )
-                                          : homeGreetingText(
-                                            AppLocalizations.of(context),
-                                            cardDisplayName,
-                                            ref.read(homeClockProvider)(),
-                                          ),
-                                      style: GoogleFonts.inter(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      cardDisplaySubtitle,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 13,
-                                        color: Colors.white.withValues(
-                                          alpha: 0.85,
-                                        ),
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                size: 14,
-                                color: Colors.white70,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 18),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.shield_outlined,
-                                  size: 18,
-                                  color: Colors.white,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    ).homeDataProtectedBadge,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
                   const DualAxisTriggerCard(),
                   const SizedBox(height: 16),
@@ -559,11 +458,165 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
+/// Navy hero card (redesign): greeting, account line and the "data protected"
+/// badge over the Dualis symbol watermark. Taps open Settings.
+class _HomeHero extends StatelessWidget {
+  final String? picture;
+  final String avatarInitial;
+  final String title;
+  final String subtitle;
+  final String badge;
+  final VoidCallback onTap;
+
+  const _HomeHero({
+    required this.picture,
+    required this.avatarInitial,
+    required this.title,
+    required this.subtitle,
+    required this.badge,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      key: const Key('home_profile_card'),
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          gradient: AppColors.gradientNavy,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.softIndigoDark.withValues(alpha: 0.7),
+              blurRadius: 40,
+              offset: const Offset(0, 24),
+              spreadRadius: -22,
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -46,
+              top: -6,
+              width: 190,
+              child: ExcludeSemantics(
+                child: Opacity(
+                  opacity: 0.32,
+                  child: Image.asset(
+                    AppAssets.logoSymbol,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 22, 18, 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      UserAvatar(
+                        picture: picture,
+                        fallbackInitial: avatarInitial,
+                        radius: 26,
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: GoogleFonts.inter(
+                                fontSize: 22,
+                                height: 1.1,
+                                letterSpacing: -0.4,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              subtitle,
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.dualisSymbolCyan,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14,
+                        color: Colors.white70,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.16),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.shield_outlined,
+                          size: 18,
+                          color: AppColors.dualisSymbolCyan,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            badge,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _AppBarIconButton extends StatelessWidget {
   final IconData icon;
   final Color color;
   final String tooltip;
   final VoidCallback onTap;
+
+  /// Redesign look (round white glass, navy glyph). Only the Home tab uses it
+  /// for now; other tabs keep the outlined pill until their own step.
+  final bool glass;
 
   const _AppBarIconButton({
     super.key,
@@ -571,10 +624,32 @@ class _AppBarIconButton extends StatelessWidget {
     required this.color,
     required this.tooltip,
     required this.onTap,
+    this.glass = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (glass) {
+      return Tooltip(
+        message: tooltip,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Container(
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.iconTileTint,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white),
+              boxShadow: AppColors.glassShadow(blur: 16, alpha: 0.18),
+            ),
+            child: Icon(icon, size: 22, color: AppColors.dualisNavy),
+          ),
+        ),
+      );
+    }
     return Tooltip(
       message: tooltip,
       child: InkWell(

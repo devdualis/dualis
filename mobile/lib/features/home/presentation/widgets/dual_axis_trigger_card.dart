@@ -9,12 +9,17 @@ import '../../../../core/router/route_paths.dart';
 import '../../../profile/domain/models/share_category.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
 import '../../../../shared/widgets/premium_gradient_icon.dart';
 import '../../../journal/presentation/controllers/journal_flow_state.dart';
 import '../../../journal/presentation/screens/journal_flow_screen.dart';
 import '../../domain/axis_intensity_resolver.dart';
 import '../../domain/trigger_checkin_state.dart';
 import '../controllers/trigger_checkin_controller.dart';
+
+/// Inner surfaces of the glass card: lighter white and a faint navy edge.
+const Color _innerFill = Color(0xB3FFFFFF);
+const Color _innerEdge = Color(0x140E3E6C);
 
 class DualAxisTriggerCard extends ConsumerWidget {
   const DualAxisTriggerCard({super.key});
@@ -59,31 +64,21 @@ class DualAxisTriggerCard extends ConsumerWidget {
     final physicalViewOnly =
         viewOnly || !activeProfileCanWrite(ref, ShareCategory.physicalJournal);
 
+    // Glass card from the app theme (radius 24, translucent fill).
     return Card(
-      elevation: 0,
-      color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
-        ),
-      ),
+      margin: EdgeInsets.zero,
+      color: isDark ? AppColors.surfaceDark : null,
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.clinicalTeal.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
+                const DuotoneIconTile(
+                  child: Icon(
                     Icons.health_and_safety_outlined,
-                    color: AppColors.clinicalTeal,
+                    color: AppColors.dualisNavy,
                     size: 24,
                   ),
                 ),
@@ -95,15 +90,17 @@ class DualAxisTriggerCard extends ConsumerWidget {
                       Text(
                         'Check-in Diário em 2 Etapas',
                         style: GoogleFonts.inter(
-                          fontSize: 13,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w600,
+                          letterSpacing: 0.2,
                           color: AppColors.clinicalTeal,
                         ),
                       ),
                       Text(
                         'Como você está hoje?',
                         style: GoogleFonts.inter(
-                          fontSize: 18,
+                          fontSize: 19,
+                          letterSpacing: -0.3,
                           fontWeight: FontWeight.w700,
                           color: isDark
                               ? AppColors.textPrimaryDark
@@ -117,7 +114,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
 
-            const Divider(height: 1),
+            Divider(height: 1, color: AppColors.dualisNavy.withValues(alpha: 0.08)),
             const SizedBox(height: 16),
 
             if (viewOnly) const ActiveProfileReadOnlyNote(),
@@ -251,7 +248,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isDark ? AppColors.surfaceDark : tier.cardBgColor,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isDark
                 ? tier.color.withValues(alpha: 0.5)
@@ -363,7 +360,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                   icon: const Icon(Icons.refresh_rounded, size: 16),
                   label: const Text('Atualizar'),
                   style: TextButton.styleFrom(
-                    foregroundColor: accentColor,
+                    foregroundColor: AppColors.dualisNavy,
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     visualDensity: VisualDensity.compact,
                   ),
@@ -379,10 +376,10 @@ class DualAxisTriggerCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(16),
+        color: isDark ? AppColors.surfaceDark : _innerFill,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
+          color: isDark ? AppColors.outlineDark : _innerEdge,
         ),
       ),
       child: Column(
@@ -390,12 +387,8 @@ class DualAxisTriggerCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
+              DuotoneIconTile(
+                size: 42,
                 child: premium
                     ? PremiumGradientIcon(icon: Icon(icon, color: accentColor, size: 22))
                     : Icon(icon, color: accentColor, size: 22),
@@ -437,12 +430,10 @@ class DualAxisTriggerCard extends ConsumerWidget {
               child: FilledButton.icon(
                 key: Key(buttonKey),
                 style: FilledButton.styleFrom(
-                  backgroundColor: accentColor,
+                  backgroundColor: AppColors.dualisNavy,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  shape: const StadiumBorder(),
                 ),
                 onPressed: onStart,
                 icon: Icon(icon, size: 18),
@@ -485,9 +476,10 @@ class _AreaNotShared extends StatelessWidget {
       key: ValueKey('home-area-not-shared-$areaKey'),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        color: isDark ? null : _innerFill,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
+          color: isDark ? AppColors.outlineDark : _innerEdge,
         ),
       ),
       child: Row(
@@ -541,9 +533,10 @@ class _ConditionsTodaySummary extends StatelessWidget {
       key: const Key('conditions_today_summary'),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        color: isDark ? null : _innerFill,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
+          color: isDark ? AppColors.outlineDark : _innerEdge,
         ),
       ),
       child: Column(
