@@ -5,6 +5,7 @@ import 'package:intl/intl.dart' show DateFormat;
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../journal/domain/journal_keys.dart';
+import '../../../journal/presentation/widgets/body_geometry.dart';
 import '../../domain/chart_data.dart';
 import '../../domain/history_series.dart' show historySensationLabel;
 import '../../../journal/presentation/journal_labels.dart';
@@ -197,23 +198,22 @@ class _MarkedSilhouette extends StatelessWidget {
     required this.onTap,
   });
 
-  /// Marker anchor of each region, relative to the silhouette box.
-  static Offset anchor(String region, String side) => switch (region) {
-        'cabeca' => const Offset(0.5, 0.075),
-        'peito' => const Offset(0.5, 0.26),
-        'barriga' => const Offset(0.5, 0.40),
-        'pelve' => const Offset(0.5, 0.53),
-        'costas' => const Offset(0.5, 0.33),
-        _ => const Offset(0.6, 0.76),
-      };
+  /// Marker anchor of each region as a fraction of the silhouette box: the
+  /// centre of the region's shape in the check-in body map. Arms and legs are
+  /// one region; its marker sits on the viewer's right leg.
+  static Offset anchor(String region, String side) {
+    final Path path = region == 'membros'
+        ? BodyGeometry.legR
+        : BodyGeometry.pathsOf(region).first;
+    final c = path.getBounds().center;
+    return Offset(c.dx / BodyGeometry.width, c.dy / BodyGeometry.height);
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return LayoutBuilder(builder: (context, constraints) {
-      final h = constraints.maxHeight;
-      final w = h * 0.5;
-      final left = (constraints.maxWidth - w) / 2;
+      final box = _fit(Size(constraints.maxWidth, constraints.maxHeight));
       return Stack(
         clipBehavior: Clip.none,
         children: [
@@ -223,8 +223,8 @@ class _MarkedSilhouette extends StatelessWidget {
           for (final r in regions)
             Positioned(
               // 48 × 48 touch target around a 26 px marker.
-              left: left + anchor(r.region, side).dx * w - 24,
-              top: anchor(r.region, side).dy * h - 24,
+              left: box.left + anchor(r.region, side).dx * box.width - 24,
+              top: box.top + anchor(r.region, side).dy * box.height - 24,
               child: Semantics(
                 button: true,
                 label:
@@ -253,43 +253,60 @@ class _MarkedSilhouette extends StatelessWidget {
   }
 }
 
+/// The 200 x 346 body space scaled into [size], centred, aspect kept.
+Rect _fit(Size size) {
+  final scale = (size.width / BodyGeometry.width) <
+          (size.height / BodyGeometry.height)
+      ? size.width / BodyGeometry.width
+      : size.height / BodyGeometry.height;
+  final w = BodyGeometry.width * scale;
+  final h = BodyGeometry.height * scale;
+  return Rect.fromLTWH((size.width - w) / 2, (size.height - h) / 2, w, h);
+}
+
+/// The check-in body silhouette (front or back) in its unselected look.
 class _SilhouettePainter extends CustomPainter {
   final String side;
   _SilhouettePainter({required this.side});
 
+  static const Color _baseTop = Color(0xFFFFFFFF);
+  static const Color _baseBottom = Color(0xFFDCEAF4);
+  static const Color _outline = Color(0xFFB7CBDB);
+
   @override
   void paint(Canvas canvas, Size size) {
-    final h = size.height;
-    final w = h * 0.5;
-    final left = (size.width - w) / 2;
-    Rect r(double x, double y, double rw, double rh) =>
-        Rect.fromLTWH(left + x * w, y * h, rw * w, rh * h);
-    final fill = Paint()..color = ChartTokens.silhouette;
-    final stroke = Paint()
-      ..color = ChartTokens.silhouetteOutline
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
-    final radius = Radius.circular(w * 0.1);
-    final body = Path()
-      ..addOval(r(0.36, 0.0, 0.28, 0.14))
-      ..addRRect(RRect.fromRectAndRadius(r(0.44, 0.12, 0.12, 0.07), radius))
-      // Torso and hips.
-      ..addRRect(RRect.fromRectAndRadius(r(0.25, 0.17, 0.5, 0.41), radius))
-      // Arms.
-      ..addRRect(RRect.fromRectAndRadius(r(0.09, 0.18, 0.14, 0.38), radius))
-      ..addRRect(RRect.fromRectAndRadius(r(0.77, 0.18, 0.14, 0.38), radius))
-      // Legs.
-      ..addRRect(RRect.fromRectAndRadius(r(0.28, 0.56, 0.2, 0.44), radius))
-      ..addRRect(RRect.fromRectAndRadius(r(0.52, 0.56, 0.2, 0.44), radius));
-    canvas.drawPath(body, fill);
-    canvas.drawPath(body, stroke);
-    if (side == JournalKeys.sideBack) {
-      canvas.drawLine(
-        Offset(left + w * 0.5, h * 0.2),
-        Offset(left + w * 0.5, h * 0.52),
+    final box = _fit(size);
+    canvas.translate(box.left, box.top);
+    canvas.scale(box.width / BodyGeometry.width);
+    final regions = side == JournalKeys.sideBack
+        ? const ['cabeca', 'costas', 'membros']
+        : const ['cabeca', 'peito', 'barriga', 'pelve', 'membros'];
+    final paths = [
+      for (final region in regions) ...BodyGeometry.pathsOf(region),
+    ];
+    final shadow = Paint()
+      ..color = AppColors.dualisNavy.withValues(alpha: 0.18)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.2);
+    for (final p in paths) {
+      canvas.drawPath(p.shift(const Offset(0, 3)), shadow);
+    }
+    for (final p in paths) {
+      canvas.drawPath(
+        p,
         Paint()
-          ..color = ChartTokens.silhouetteOutline
-          ..strokeWidth = 1.5,
+          ..shader = const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [_baseTop, _baseBottom],
+          ).createShader(p.getBounds()),
+      );
+      canvas.drawPath(
+        p,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeJoin = StrokeJoin.round
+          ..strokeWidth = 1.2
+          ..color = _outline,
       );
     }
   }
