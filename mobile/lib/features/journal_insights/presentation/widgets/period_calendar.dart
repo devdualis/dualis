@@ -85,8 +85,8 @@ class PeriodCalendar extends StatelessWidget {
                             )
                           : Container(
                               decoration: BoxDecoration(
-                                color: AppColors.outlineLight.withValues(alpha: 0.45),
-                                borderRadius: BorderRadius.circular(8),
+                                color: AppColors.dualisNavy.withValues(alpha: 0.05),
+                                borderRadius: BorderRadius.circular(10),
                               ),
                               alignment: Alignment.center,
                               padding: const EdgeInsets.all(2),
@@ -127,13 +127,19 @@ class _DayCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Selected day: brand blue ring. Today: navy ring and navy day number.
+    final isToday = DateUtils.isSameDay(day, DateTime.now());
     return Material(
       color: AppColors.surfaceLight,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         side: BorderSide(
-          color: selected ? AppColors.clinicalTeal : AppColors.outlineLight,
-          width: selected ? 2 : 1,
+          color: selected
+              ? AppColors.dualisSymbolBlue
+              : isToday
+                  ? AppColors.dualisNavy
+                  : AppColors.dualisNavy.withValues(alpha: 0.1),
+          width: selected ? 2 : (isToday ? 1.5 : 1),
         ),
       ),
       clipBehavior: Clip.antiAlias,
@@ -149,7 +155,9 @@ class _DayCell extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 9.5,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textSecondaryLight,
+                  color: isToday
+                      ? AppColors.dualisNavy
+                      : AppColors.textSecondaryLight,
                 ),
               ),
               Expanded(child: child),

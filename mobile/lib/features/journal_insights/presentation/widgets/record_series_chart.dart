@@ -80,10 +80,9 @@ class RecordSeriesChart extends StatelessWidget {
             drawVerticalLine: true,
             verticalInterval: 1,
             getDrawingHorizontalLine: (_) =>
-                const FlLine(color: AppColors.outlineLight, strokeWidth: 1),
+                FlLine(color: ChartTokens.grid, strokeWidth: 1),
             getDrawingVerticalLine: (_) => FlLine(
-                color: AppColors.outlineLight.withValues(alpha: 0.5),
-                strokeWidth: 0.5),
+                color: ChartTokens.grid, strokeWidth: 0.5),
           ),
           borderData: FlBorderData(show: false),
           titlesData: FlTitlesData(
@@ -134,7 +133,8 @@ class RecordSeriesChart extends StatelessWidget {
             ],
             touchTooltipData: LineTouchTooltipData(
               getTooltipColor: (_) => AppColors.surfaceLight,
-              tooltipBorder: const BorderSide(color: AppColors.outlineLight),
+              tooltipBorder:
+                  BorderSide(color: AppColors.dualisNavy.withValues(alpha: 0.18)),
               tooltipBorderRadius: BorderRadius.circular(10),
               fitInsideHorizontally: true,
               fitInsideVertically: true,

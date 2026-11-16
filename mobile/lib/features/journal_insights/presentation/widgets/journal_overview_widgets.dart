@@ -51,7 +51,9 @@ class InsightsCard extends StatelessWidget {
         color: AppColors.glassFill,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.glassEdge),
-        boxShadow: AppColors.glassShadow(blur: 24, alpha: 0.2),
+        // Soft shadow: the fill is translucent, so a strong one would show
+        // through as a second panel inside the card.
+        boxShadow: AppColors.glassShadow(blur: 24, alpha: 0.07),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -60,6 +62,7 @@ class InsightsCard extends StatelessWidget {
             titleBlock
           else
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DuotoneIconTile(
                   size: 32,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../journal/presentation/journal_labels.dart';
 
@@ -8,15 +9,16 @@ import '../../../journal/presentation/journal_labels.dart';
 class ChartTokens {
   ChartTokens._();
 
-  static const Color passado = Color(0xFF8055AD);
-  static const Color presente = Color(0xFF178779);
-  static const Color futuro = Color(0xFFDE8A28);
+  /// The three times take the brand navy, cyan and green.
+  static const Color passado = AppColors.dualisNavy;
+  static const Color presente = AppColors.dualisSymbolCyan;
+  static const Color futuro = AppColors.dualisSymbolGreen;
 
   /// Good moments of a "Bem" entry (v2.2).
   static const Color good = Color(0xFF2E9E5B);
 
   /// Emotional record without an axis (never inferred).
-  static const Color neutral = Color(0xFF94A3B8);
+  static const Color neutral = AppColors.textSecondaryDark;
 
   static const Map<String, Color> regions = {
     'cabeca': Color(0xFF537FB8),
@@ -25,7 +27,9 @@ class ChartTokens {
     'pelve': Color(0xFFB0705A),
     'costas': Color(0xFF268E82),
     'membros': Color(0xFF7F8F54),
-    // Whole-body areas are not in the handoff; muted, distinct hues.
+    // Nine regions need nine distinct hues, more than the brand palette has;
+    // these stay muted so they sit quietly next to the brand colours.
+    // Whole-body areas are not in the handoff either.
     'pele': Color(0xFFC0657E),
     'musculos': Color(0xFF7A6A58),
     'hormonios': Color(0xFF4A5D8F),
@@ -33,12 +37,12 @@ class ChartTokens {
 
   /// C1 figure and drop.
   static const Color body = Color(0xFF536E89);
-  static const Color water = Color(0xFF278DC1);
-  static const Color waterTrack = Color(0xFFE3ECF4);
+  static const Color water = AppColors.dualisSymbolBlue;
+  static const Color waterTrack = AppColors.iconTileTint;
 
-  /// Neutral silhouette of the body map (F1).
-  static const Color silhouette = Color(0xFFDCE4EC);
-  static const Color silhouetteOutline = Color(0xFFB8C6D4);
+  /// Grid lines and axis labels: navy hairlines and the muted text colour.
+  static Color get grid => AppColors.dualisNavy.withValues(alpha: 0.08);
+  static const Color axisLabel = AppColors.textSecondaryLight;
 
   static Color time(String key) => switch (key) {
         'passado' => passado,

@@ -166,9 +166,9 @@ class WaterStepChart extends StatelessWidget {
             verticalInterval: 4,
             horizontalInterval: _tick(maxY),
             getDrawingHorizontalLine: (_) =>
-                const FlLine(color: AppColors.outlineLight, strokeWidth: 1),
+                FlLine(color: ChartTokens.grid, strokeWidth: 1),
             getDrawingVerticalLine: (_) =>
-                const FlLine(color: AppColors.outlineLight, strokeWidth: 0.5),
+                FlLine(color: ChartTokens.grid, strokeWidth: 0.5),
           ),
           borderData: FlBorderData(show: false),
           titlesData: FlTitlesData(
@@ -210,7 +210,8 @@ class WaterStepChart extends StatelessWidget {
           lineTouchData: LineTouchData(
             touchTooltipData: LineTouchTooltipData(
               getTooltipColor: (_) => AppColors.surfaceLight,
-              tooltipBorder: const BorderSide(color: AppColors.outlineLight),
+              tooltipBorder:
+                  BorderSide(color: AppColors.dualisNavy.withValues(alpha: 0.18)),
               fitInsideHorizontally: true,
               fitInsideVertically: true,
               getTooltipItems: (spots) => [
@@ -325,7 +326,7 @@ class WaterPeriodBars extends StatelessWidget {
                 drawVerticalLine: false,
                 horizontalInterval: _tick(maxY),
                 getDrawingHorizontalLine: (_) =>
-                    const FlLine(color: AppColors.outlineLight, strokeWidth: 1),
+                    FlLine(color: ChartTokens.grid, strokeWidth: 1),
               ),
               borderData: FlBorderData(show: false),
               extraLinesData: ExtraLinesData(horizontalLines: [
@@ -372,7 +373,8 @@ class WaterPeriodBars extends StatelessWidget {
                 },
                 touchTooltipData: BarTouchTooltipData(
                   getTooltipColor: (_) => AppColors.surfaceLight,
-                  tooltipBorder: const BorderSide(color: AppColors.outlineLight),
+                  tooltipBorder:
+                  BorderSide(color: AppColors.dualisNavy.withValues(alpha: 0.18)),
                   fitInsideHorizontally: true,
                   fitInsideVertically: true,
                   getTooltipItem: (group, _, __, ___) {
@@ -406,7 +408,7 @@ class WaterPeriodBars extends StatelessWidget {
                         : BarChartRodData(
                             toY: maxY * 0.012,
                             width: days <= 7 ? 12 : 5,
-                            color: AppColors.outlineLight,
+                            color: ChartTokens.waterTrack,
                             borderRadius: BorderRadius.zero,
                           ),
                   ]),

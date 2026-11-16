@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../habits/domain/models/habit_day.dart';
 import '../../domain/chart_data.dart' show inPeriod;
+import 'chart_tokens.dart';
 import 'journal_overview_widgets.dart';
 
 /// Charts for daily habits (docs/bienestar/CONTRATO-JOURNAL-V2.md section 6).
@@ -15,7 +16,7 @@ import 'journal_overview_widgets.dart';
 /// No goals computed by the app, no advice, no relations between habits and feelings.
 
 // Calm palette for sleep answers: no traffic-light red/amber, which would read as risk.
-const Color _sleepRegularColor = Color(0xFF7CC4C9);
+const Color _sleepRegularColor = AppColors.dualisSymbolCyan;
 const Color _sleepBadColor = Color(0xFF64748B);
 
 class HabitsChartsSection extends StatelessWidget {
@@ -150,7 +151,7 @@ class _SleepLegend extends StatelessWidget {
       runSpacing: 6,
       children: [
         _LegendDot(
-          color: AppColors.clinicalTeal,
+          color: AppColors.dualisSymbolBlue,
           label: l10n.habitsSleepQualityBem,
         ),
         _LegendDot(
@@ -210,7 +211,7 @@ class _SleepDayBar extends StatelessWidget {
 
     switch (habit?.sleepQuality) {
       case HabitSleepQuality.bem:
-        barColor = AppColors.clinicalTeal;
+        barColor = AppColors.dualisSymbolBlue;
         heightFactor = 0.85;
         break;
       case HabitSleepQuality.regular:
@@ -222,7 +223,7 @@ class _SleepDayBar extends StatelessWidget {
         heightFactor = 0.35;
         break;
       default:
-        barColor = AppColors.outlineLight.withValues(alpha: 0.4);
+        barColor = ChartTokens.grid;
         heightFactor = 0.15;
     }
 
@@ -331,7 +332,7 @@ class HabitsMovementChart extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 8.5,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.clinicalTealDark,
+                          color: AppColors.dualisNavy,
                         ),
                       ),
                     const SizedBox(height: 4),
@@ -343,7 +344,7 @@ class HabitsMovementChart extends StatelessWidget {
                                   width: 22,
                                   height: 22,
                                   decoration: const BoxDecoration(
-                                    color: AppColors.clinicalTeal,
+                                    color: AppColors.dualisSymbolBlue,
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(
@@ -358,11 +359,11 @@ class HabitsMovementChart extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     color:
                                         moved == false
-                                            ? AppColors.outlineLight
+                                            ? ChartTokens.grid
                                             : Colors.transparent,
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: AppColors.outlineLight,
+                                      color: ChartTokens.grid,
                                     ),
                                   ),
                                 ),
@@ -454,9 +455,7 @@ class HabitsPeriodChart extends StatelessWidget {
                                   width: 8,
                                   height: 8,
                                   decoration: BoxDecoration(
-                                    color: AppColors.outlineLight.withValues(
-                                      alpha: 0.5,
-                                    ),
+                                    color: ChartTokens.grid,
                                     shape: BoxShape.circle,
                                   ),
                                 ),

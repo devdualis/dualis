@@ -11,7 +11,7 @@ import 'chart_tokens.dart';
 
 /// One colour for every bar: the length is a count, never a grade.
 const Color _barColor = ChartTokens.body;
-const Color _trackColor = Color(0xFFEFF3F7);
+const Color _trackColor = AppColors.iconTileTint;
 
 TextStyle get _textStyle => GoogleFonts.inter(
       fontSize: 13,
