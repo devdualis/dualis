@@ -10,10 +10,14 @@ import '../../domain/journal_insights_models.dart';
 
 /// Title of one item in the person's words: "🔥 Barriga · Incômodo · Gases
 /// ou barriga estufada", "🛑 O que já passou · Culpa ou arrependimento".
-String entryItemTitle(AppLocalizations l10n, JournalItemView item) {
+String entryItemTitle(
+  AppLocalizations l10n,
+  JournalItemView item, {
+  bool withEmoji = true,
+}) {
   final key = item.optionKey;
   final parts = key?.split('.') ?? const <String>[];
-  final emoji = key == null
+  final emoji = key == null || !withEmoji
       ? null
       : journalEmojis[key] ??
           (parts.length >= 2 ? journalEmojis['${parts[0]}.${parts[1]}'] : null) ??

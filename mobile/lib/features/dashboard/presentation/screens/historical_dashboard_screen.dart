@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../widgets/journal_entries_card.dart';
 import '../../../habits/presentation/controllers/habits_controller.dart';
 import '../../../home/domain/home_greeting.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
@@ -15,7 +16,6 @@ import '../../../journal_insights/domain/journal_insights_models.dart';
 import '../../../journal_insights/domain/period_report.dart';
 import '../../../journal_insights/presentation/controllers/journal_insights_controller.dart';
 import '../../../journal_insights/presentation/widgets/body_marker_map.dart';
-import '../../../journal_insights/presentation/widgets/entry_details.dart';
 import '../../../journal_insights/presentation/widgets/combined_calendar.dart';
 import '../../../journal_insights/presentation/widgets/habits_charts.dart';
 import '../../../journal_insights/presentation/widgets/history_widgets.dart';
@@ -223,7 +223,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
           InsightsCard(
             icon: Icons.list_alt_rounded,
             title: l10n.xv2DashEntriesTitle,
-            child: _EntriesList(entries: entries),
+            child: JournalEntriesCard(entries: entries),
           ),
       ],
     );
@@ -593,142 +593,4 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
           color: AppColors.textSecondaryLight,
         ),
       );
-}
-
-class _EntriesList extends ConsumerWidget {
-  final List<JournalEntryView> entries;
-
-  const _EntriesList({required this.entries});
-
-  Future<void> _confirmDelete(
-    BuildContext context,
-    WidgetRef ref,
-    JournalEntryView entry,
-  ) async {
-    final l10n = AppLocalizations.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.xv2DashDeleteTitle),
-        content: Text(l10n.xv2DashDeleteBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            key: const Key('dashboard_delete_confirm'),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.dualisNavy,
-              foregroundColor: Colors.white,
-              shape: const StadiumBorder(),
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.xv2DashDeleteConfirm),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true) {
-      await ref
-          .read(journalInsightsControllerProvider.notifier)
-          .deleteEntry(entry.id);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    if (entries.isEmpty) {
-      return Text(
-        l10n.xv2DashNoEntries,
-        style: GoogleFonts.inter(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: AppColors.textSecondaryLight,
-        ),
-      );
-    }
-    // Delete also needs write access to the entry's journal branch
-    // (physical entries: physical journal; everything else: emotional).
-    final viewOnly = activeProfileIsViewOnly(ref);
-    final canDeletePhysical =
-        !viewOnly && activeProfileCanWrite(ref, ShareCategory.physicalJournal);
-    final canDeleteEmotional =
-        !viewOnly && activeProfileCanWrite(ref, ShareCategory.emotionalJournal);
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    final dateFormat = DateFormat.yMd(locale).add_Hm();
-    return Column(
-      children: [
-        for (final entry in entries)
-          Container(
-            key: Key('journal_entry_${entry.id}'),
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
-            decoration: BoxDecoration(
-              color: AppColors.dualisNavy.withValues(alpha: 0.04),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.dualisNavy.withValues(alpha: 0.06),
-              ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        dateFormat.format(entry.recordedAt),
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textSecondaryLight,
-                        ),
-                      ),
-                      if (entry.pendingSync) ...[
-                        const SizedBox(height: 2),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.iconTileTint,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            l10n.jv2PendingSync,
-                            key: Key('journal_entry_pending_${entry.id}'),
-                            style: GoogleFonts.inter(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.dualisNavy,
-                            ),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 4),
-                      JournalEntryDetails(entry: entry),
-                    ],
-                  ),
-                ),
-                if ((entry.area == JournalKeys.areaPhysical
-                        ? canDeletePhysical
-                        : canDeleteEmotional) &&
-                    !entry.legacy &&
-                    !entry.pendingSync)
-                  IconButton(
-                    key: Key('journal_entry_delete_${entry.id}'),
-                    tooltip: l10n.xv2DashDeleteTitle,
-                    icon: const Icon(Icons.delete_outline,
-                        size: 20, color: AppColors.textSecondaryLight),
-                    onPressed: () => _confirmDelete(context, ref, entry),
-                  ),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-
 }

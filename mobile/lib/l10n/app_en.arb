@@ -792,6 +792,7 @@
   "xv2DashCooccurrence": "On the {total} days you marked '{a}', you also marked '{b}' on {both}.",
   "xv2DashEntriesTitle": "Your entries",
   "xv2DashNoEntries": "You have no entries in this period yet.",
+  "xv2DashSeeAll": "See all ({count})",
   "xv2DashMoodLine": "How you were: {mood}",
   "xv2DashDeleteTitle": "Delete entry",
   "xv2DashDeleteBody": "This entry will be removed from your history.",

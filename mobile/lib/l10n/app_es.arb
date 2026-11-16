@@ -792,6 +792,7 @@
   "xv2DashCooccurrence": "En los {total} días en que marcaste '{a}', también marcaste '{b}' en {both}.",
   "xv2DashEntriesTitle": "Tus registros",
   "xv2DashNoEntries": "Aún no tienes registros en este periodo.",
+  "xv2DashSeeAll": "Ver todos ({count})",
   "xv2DashMoodLine": "Cómo estabas: {mood}",
   "xv2DashDeleteTitle": "Eliminar registro",
   "xv2DashDeleteBody": "Este registro se borrará de tu historial.",

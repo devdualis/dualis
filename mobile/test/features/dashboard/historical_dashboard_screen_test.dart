@@ -182,6 +182,18 @@ Future<FakeJournalDataSource> pumpDashboard(
   return dataSource;
 }
 
+/// Opens one entry of the compact "Registros" card in its detail sheet.
+Future<void> openEntry(WidgetTester tester, String id) async {
+  await tester.tap(find.byKey(Key('journal_entry_$id')));
+  await tester.pumpAndSettle();
+}
+
+/// Dismisses the open bottom sheet by tapping its barrier.
+Future<void> closeSheet(WidgetTester tester) async {
+  await tester.tapAt(const Offset(10, 10));
+  await tester.pumpAndSettle();
+}
+
 int visibleLineCount(WidgetTester tester) {
   final chart = tester.widget<LineChart>(find.byType(LineChart).first);
   return chart.data.lineBarsData.length;
@@ -483,6 +495,7 @@ void main() {
           mind,
         ]),
       ]);
+      await openEntry(tester, 'e1');
       // Region instead of the map side, in the person's words.
       expect(find.text('💨 Barriga · Incômodo · Gases ou barriga estufada'), findsOneWidget);
       expect(find.text('Há quanto tempo: Meses ou anos · Intensidade 3/5'), findsOneWidget);
@@ -523,9 +536,13 @@ void main() {
           ),
         ]),
       ]);
-      expect(find.textContaining('Cabeça e pescoço · Dor · Tontura'), findsOneWidget);
-      expect(find.textContaining('Incômodo · Dificuldade ou fluxo fraco ao fazer xixi'), findsOneWidget);
-      expect(find.textContaining('Barriga · Intestino preso'), findsOneWidget);
+      await openEntry(tester, 'e1');
+      final sheet = find.byKey(const Key('journal_entry_sheet_e1'));
+      Finder inSheet(String text) =>
+          find.descendant(of: sheet, matching: find.textContaining(text));
+      expect(inSheet('Cabeça e pescoço · Dor · Tontura'), findsOneWidget);
+      expect(inSheet('Incômodo · Dificuldade ou fluxo fraco ao fazer xixi'), findsOneWidget);
+      expect(inSheet('Barriga · Intestino preso'), findsOneWidget);
       expect(find.textContaining('cabeca.'), findsNothing);
       expect(find.textContaining('pelve.'), findsNothing);
     });
@@ -554,10 +571,12 @@ void main() {
         ],
       );
       await pumpDashboard(tester, [full]);
+      await openEntry(tester, 'e1');
       expect(find.text('O que pode ter contribuído: Alimentação, Outro (Feijoada)'), findsOneWidget);
       expect(find.byKey(const Key('entry_coping_e1')), findsOneWidget);
       expect(find.byKey(const Key('entry_helpers_e1')), findsOneWidget);
       expect(find.text('Sua nota: Passou à noite'), findsOneWidget);
+      await closeSheet(tester);
 
       await tester.tap(find.byKey(const Key('history_tab_HistoryTab.body')));
       await tester.pumpAndSettle();
@@ -582,7 +601,9 @@ void main() {
           JournalItemView(kind: 'physical', legacyLabel: 'Dor nas costas', intensity: 2),
         ], legacy: true),
       ]);
-      expect(find.text('Dor nas costas'), findsOneWidget);
+      await openEntry(tester, 'legacy-1');
+      // Once in the one-line row, once in the open detail.
+      expect(find.text('Dor nas costas'), findsNWidgets(2));
       expect(find.text('Intensidade 2/5'), findsOneWidget);
       expect(find.byKey(const Key('journal_entry_delete_legacy-1')), findsNothing);
     });
@@ -598,18 +619,69 @@ void main() {
           ),
         ]),
       ]);
+      // The one-line row has no emoji, the detail keeps the person's words.
+      expect(find.text('O momento atual · Saudade da praia'), findsOneWidget);
+      await openEntry(tester, 'e1');
       expect(find.text('📍 O momento atual · Saudade da praia'), findsOneWidget);
       expect(find.text('Intensidade 2/5'), findsOneWidget);
     });
 
     testWidgets('deleting an entry asks first and calls the API', (tester) async {
       final ds = await pumpDashboard(tester, [entry('e1', 0, [head])]);
+      expect(find.byKey(const Key('journal_entry_delete_e1')), findsNothing);
+      await openEntry(tester, 'e1');
       await tester.tap(find.byKey(const Key('journal_entry_delete_e1')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('dashboard_delete_confirm')));
       await tester.pumpAndSettle();
       expect(ds.deleted, ['e1']);
       expect(find.byKey(const Key('journal_entry_e1')), findsNothing);
+      expect(find.byKey(const Key('journal_entry_sheet_e1')), findsNothing);
+    });
+
+    testWidgets(
+        'compact card: 3 rows and "Ver todos (5)"; the sheet lists 5; a row opens delete',
+        (tester) async {
+      final ds = await pumpDashboard(tester, [
+        for (var i = 0; i < 5; i++) entry('e$i', i, [i.isEven ? head : mind]),
+      ]);
+      // The 3 newest as one-line rows, no content or delete in the card.
+      for (final id in ['e0', 'e1', 'e2']) {
+        expect(find.byKey(Key('journal_entry_$id')), findsOneWidget);
+      }
+      expect(find.byKey(const Key('journal_entry_e3')), findsNothing);
+      expect(find.byKey(const Key('journal_entry_e4')), findsNothing);
+      expect(find.byKey(const Key('entry_details_e0')), findsNothing);
+      expect(find.byKey(const Key('journal_entry_delete_e0')), findsNothing);
+      expect(find.text('Ver todos (5)'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('journal_entries_see_all')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('journal_entries_all_sheet')), findsOneWidget);
+      for (var i = 0; i < 5; i++) {
+        expect(find.byKey(Key('journal_entry_all_e$i')), findsOneWidget);
+      }
+
+      // A row of the sheet opens that entry, with delete.
+      await tester.tap(find.byKey(const Key('journal_entry_all_e4')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('journal_entry_sheet_e4')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('journal_entry_delete_e4')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('dashboard_delete_confirm')));
+      await tester.pumpAndSettle();
+      expect(ds.deleted, ['e4']);
+      // Both sheets closed after the delete.
+      expect(find.byKey(const Key('journal_entries_all_sheet')), findsNothing);
+      expect(find.text('Ver todos (4)'), findsOneWidget);
+    });
+
+    testWidgets('compact card: up to 3 entries show no "Ver todos"',
+        (tester) async {
+      await pumpDashboard(tester, [
+        for (var i = 0; i < 3; i++) entry('e$i', i, [head]),
+      ]);
+      expect(find.byKey(const Key('journal_entries_see_all')), findsNothing);
     });
 
     testWidgets('shows pending offline entries marked as aguardando sincronizar',
@@ -636,6 +708,7 @@ void main() {
         findsOneWidget,
       );
       // Pending entries cannot be deleted via remote API button
+      await openEntry(tester, 'offline-entry-1');
       expect(
         find.byKey(const Key('journal_entry_delete_offline-entry-1')),
         findsNothing,
@@ -646,6 +719,22 @@ void main() {
   group('HistoricalDashboardScreen on a shared profile (categories)', () {
     final physicalEntry = entry('ph-1', 0, [head], area: 'physical');
     final emotionalEntry = entry('em-1', 1, [mind], area: 'emotional');
+
+    /// Opens each entry in turn: delete is offered only where allowed.
+    Future<void> expectDeletable(
+      WidgetTester tester, {
+      required bool ph,
+      required bool em,
+    }) async {
+      await openEntry(tester, 'ph-1');
+      expect(find.byKey(const Key('journal_entry_delete_ph-1')),
+          ph ? findsOneWidget : findsNothing);
+      await closeSheet(tester);
+      await openEntry(tester, 'em-1');
+      expect(find.byKey(const Key('journal_entry_delete_em-1')),
+          em ? findsOneWidget : findsNothing);
+      await closeSheet(tester);
+    }
 
     testWidgets('physical-only grantee sees the partial-share hint',
         (tester) async {
@@ -696,8 +785,7 @@ void main() {
       );
       expect(find.byKey(const ValueKey('history-partial-share-hint')),
           findsNothing);
-      expect(find.byKey(const Key('journal_entry_delete_ph-1')), findsOneWidget);
-      expect(find.byKey(const Key('journal_entry_delete_em-1')), findsOneWidget);
+      await expectDeletable(tester, ph: true, em: true);
     });
 
     testWidgets('owner on the own profile: no hint, delete as before',
@@ -712,8 +800,7 @@ void main() {
       );
       expect(find.byKey(const ValueKey('history-partial-share-hint')),
           findsNothing);
-      expect(find.byKey(const Key('journal_entry_delete_ph-1')), findsOneWidget);
-      expect(find.byKey(const Key('journal_entry_delete_em-1')), findsOneWidget);
+      await expectDeletable(tester, ph: true, em: true);
     });
 
     testWidgets('physical-only co-manager cannot delete an emotional entry',
@@ -723,8 +810,7 @@ void main() {
         [physicalEntry, emotionalEntry],
         profiles: activeShared(sharedWith([ShareCategory.physicalJournal])),
       );
-      expect(find.byKey(const Key('journal_entry_delete_ph-1')), findsOneWidget);
-      expect(find.byKey(const Key('journal_entry_delete_em-1')), findsNothing);
+      await expectDeletable(tester, ph: true, em: false);
     });
 
     testWidgets('view-only grantee with both journals cannot delete',
@@ -737,8 +823,7 @@ void main() {
           access: ProfileAccessLevel.viewOnly,
         )),
       );
-      expect(find.byKey(const Key('journal_entry_delete_ph-1')), findsNothing);
-      expect(find.byKey(const Key('journal_entry_delete_em-1')), findsNothing);
+      await expectDeletable(tester, ph: false, em: false);
     });
   });
 }

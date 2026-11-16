@@ -1665,6 +1665,14 @@
   },
   "xv2DashEntriesTitle": "Seus registros",
   "xv2DashNoEntries": "Você ainda não tem registros neste período.",
+  "xv2DashSeeAll": "Ver todos ({count})",
+  "@xv2DashSeeAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "xv2DashMoodLine": "Como você estava: {mood}",
   "@xv2DashMoodLine": {
     "placeholders": {

@@ -4816,6 +4816,12 @@ abstract class AppLocalizations {
   /// **'Você ainda não tem registros neste período.'**
   String get xv2DashNoEntries;
 
+  /// No description provided for @xv2DashSeeAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver todos ({count})'**
+  String xv2DashSeeAll(int count);
+
   /// No description provided for @xv2DashMoodLine.
   ///
   /// In pt, this message translates to:

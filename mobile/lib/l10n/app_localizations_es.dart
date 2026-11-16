@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -2713,6 +2714,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get xv2DashNoEntries => 'Aún no tienes registros en este periodo.';
+
+  @override
+  String xv2DashSeeAll(int count) {
+    return 'Ver todos ($count)';
+  }
 
   @override
   String xv2DashMoodLine(String mood) {
