@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../../shared/widgets/glass_card.dart';
 
 /// Glass card with a title (and an optional duotone icon tile), shared by the
 /// dashboard sections.
@@ -83,45 +84,4 @@ class InsightsCard extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Glass-card drop shadow painted only outside the rounded card, so it never
-/// shows through a translucent fill. Matches [AppColors.glassShadow].
-class OuterGlassShadowPainter extends CustomPainter {
-  final double radius;
-  final double blur;
-  final double alpha;
-
-  const OuterGlassShadowPainter({
-    required this.radius,
-    this.blur = 24,
-    this.alpha = 0.2,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final card = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      Radius.circular(radius),
-    );
-    final outside = Path.combine(
-      PathOperation.difference,
-      Path()..addRect((Offset.zero & size).inflate(blur * 3)),
-      Path()..addRRect(card),
-    );
-    canvas
-      ..save()
-      ..clipPath(outside)
-      ..drawRRect(
-        card.shift(const Offset(0, 10)).deflate(10),
-        Paint()
-          ..color = AppColors.dualisNavy.withValues(alpha: alpha)
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, blur / 2),
-      )
-      ..restore();
-  }
-
-  @override
-  bool shouldRepaint(OuterGlassShadowPainter old) =>
-      old.radius != radius || old.blur != blur || old.alpha != alpha;
 }

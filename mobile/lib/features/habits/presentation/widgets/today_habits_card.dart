@@ -11,6 +11,7 @@ import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../hydration/presentation/screens/hydration_dashboard_screen.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../../shared/widgets/fluent_emoji.dart';
 import '../../../../shared/widgets/premium_gradient_icon.dart';
 import '../controllers/habits_controller.dart';
 import '../../domain/models/habit_day.dart';
@@ -135,6 +136,12 @@ class _SleepTile extends ConsumerWidget {
     final viewOnly = activeProfileIsViewOnly(ref);
     final done = today.sleepQuality != null;
     final hours = today.sleepHours;
+    final sleepEmoji = done && FluentEmoji.assetForSleep(today.sleepQuality!) != null
+        ? FluentEmoji.image(
+            FluentEmoji.assetForSleep(today.sleepQuality!)!,
+            size: 22,
+          )
+        : null;
 
     return _HabitTile(
       key: const Key('home_habit_tile_sleep'),
@@ -147,10 +154,16 @@ class _SleepTile extends ConsumerWidget {
       onTap: () => context.push(RoutePaths.habits),
       value: done
           ? [
-              sleepQualityLabel(today.sleepQuality!, l10n),
+              // The Fluent emoji (valueLeading) replaces the text emoji.
+              if (sleepEmoji == null)
+                sleepQualityLabel(today.sleepQuality!, l10n)
+              else
+                sleepQualityLabel(today.sleepQuality!, l10n)
+                    .replaceFirst(RegExp(r'^\S+\s'), ''),
               if (hours != null) _compactSleepHours(hours),
             ].join('\n')
           : l10n.habitsTileSleepPending,
+      valueLeading: sleepEmoji,
       action: _TilePill(
         key: const Key('home_habit_sleep_action'),
         label: done ? l10n.habitsTileEdit : l10n.habitsTileAnswer,
@@ -368,6 +381,9 @@ class _HabitTile extends StatelessWidget {
   final String title;
   final String value;
   final String? valueCaption;
+
+  /// Optional Fluent emoji shown before [value] (sleep quality).
+  final Widget? valueLeading;
   final bool done;
   final String doneLabel;
   final Widget? extra;
@@ -389,8 +405,19 @@ class _HabitTile extends StatelessWidget {
     required this.onTap,
     this.extra,
     this.valueCaption,
+    this.valueLeading,
     this.premiumIcon = false,
   });
+
+  Widget _valueText() => Text(
+        value,
+        style: GoogleFonts.inter(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          height: 1.3,
+          color: AppColors.dualisNavy,
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -437,15 +464,17 @@ class _HabitTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
-                value,
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  height: 1.3,
-                  color: AppColors.dualisNavy,
-                ),
-              ),
+              if (valueLeading != null)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    valueLeading!,
+                    const SizedBox(width: 6),
+                    Expanded(child: _valueText()),
+                  ],
+                )
+              else
+                _valueText(),
               if (valueCaption != null)
                 Text(
                   valueCaption!,

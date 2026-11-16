@@ -201,7 +201,9 @@ void main() {
       expect(find.byKey(const Key('habits_minutes_ate_15')), findsOneWidget);
       expect(find.byKey(const Key('habits_minutes_15_30')), findsOneWidget);
 
-      // Tap 15 a 30 min
+      // Tap 15 a 30 min (scroll it into the 800x600 test viewport first)
+      await tester.ensureVisible(find.byKey(const Key('habits_minutes_15_30')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('habits_minutes_15_30')));
       await tester.pumpAndSettle();
 
@@ -237,7 +239,9 @@ void main() {
       final switchFinder = find.byKey(const Key('habits_cycle_switch'));
       expect(switchFinder, findsOneWidget);
 
-      // Toggle switch ON
+      // Toggle switch ON (scroll it into the 800x600 test viewport first)
+      await tester.ensureVisible(switchFinder);
+      await tester.pumpAndSettle();
       await tester.tap(switchFinder);
       await tester.pumpAndSettle();
 

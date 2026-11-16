@@ -4,8 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../../shared/widgets/fluent_emoji.dart';
+import '../../../../shared/widgets/glass_card.dart';
 import '../../../../shared/widgets/load_error_view.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../journal_insights/presentation/widgets/history_widgets.dart';
 import '../../../profile/domain/models/share_category.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
@@ -38,13 +42,19 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
     final state = ref.watch(habitsControllerProvider);
     final controller = ref.read(habitsControllerProvider.notifier);
     final canRead = activeProfileCanRead(ref, ShareCategory.habits);
-    final viewOnly = activeProfileIsViewOnly(ref) ||
+    final viewOnly =
+        activeProfileIsViewOnly(ref) ||
         !activeProfileCanWrite(ref, ShareCategory.habits);
-    final activeProfile = ref.watch(activeProfileControllerProvider).activeProfile;
+    final activeProfile =
+        ref.watch(activeProfileControllerProvider).activeProfile;
     final user = ref.watch(authControllerProvider).user;
-    final isMale = (activeProfile?.gender ?? user?.gender.value)?.toLowerCase() == 'masculino';
-    ref.listen<Object?>(habitsControllerProvider.select((s) => s.saveError),
-        (_, error) {
+    final isMale =
+        (activeProfile?.gender ?? user?.gender.value)?.toLowerCase() ==
+        'masculino';
+    ref.listen<Object?>(habitsControllerProvider.select((s) => s.saveError), (
+      _,
+      error,
+    ) {
       if (error != null) showSaveFailedSnackBar(context);
     });
 
@@ -54,110 +64,111 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
             : controller.todayDayString;
     final activeHabit = _isYesterday ? state.yesterdayHabit : state.todayHabit;
 
-    final body = !canRead
-        ? Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const ActiveProfileBanner(),
-              Expanded(
-                child: NotSharedPlaceholder(
-                  profileName: activeProfile?.name ?? '',
+    final body =
+        !canRead
+            ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const ActiveProfileBanner(),
+                Expanded(
+                  child: NotSharedPlaceholder(
+                    profileName: activeProfile?.name ?? '',
+                  ),
+                ),
+              ],
+            )
+            : state.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : state.loadError != null
+            ? LoadErrorView(
+              error: state.loadError!,
+              onRetry: () => controller.loadData(),
+            )
+            : RefreshIndicator(
+              onRefresh: () => controller.loadData(),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  16,
+                  20,
+                  16 + MediaQuery.paddingOf(context).bottom,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const ActiveProfileBanner(),
+                    if (viewOnly) const ActiveProfileReadOnlyNote(),
+                    const SizedBox(height: 8),
+                    // Day switcher: Hoje / Ontem
+                    _DaySwitcher(
+                      isYesterday: _isYesterday,
+                      todayLabel: l10n.habitsTabToday,
+                      yesterdayLabel: l10n.habitsTabYesterday,
+                      onChanged: (yesterday) {
+                        setState(() => _isYesterday = yesterday);
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Card 1: Sleep Quality & Hours
+                    _SleepCard(
+                      dayString: activeDayString,
+                      habit: activeHabit,
+                      controller: controller,
+                      l10n: l10n,
+                      viewOnly: viewOnly,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Card 2: Movement & Minutes
+                    _MovementCard(
+                      dayString: activeDayString,
+                      habit: activeHabit,
+                      controller: controller,
+                      l10n: l10n,
+                      viewOnly: viewOnly,
+                    ),
+                    const SizedBox(height: 16),
+
+                    if (!isMale) ...[
+                      // Setting: Track Menstrual Cycle switch
+                      _CycleSettingTile(
+                        enabled: state.trackMenstrualCycle,
+                        title: l10n.habitsTrackMenstrualCycleSetting,
+                        onChanged:
+                            viewOnly
+                                ? null
+                                : (val) =>
+                                    controller.setTrackMenstrualCycle(val),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Card 3: Menstrual Cycle (Period)
+                      // Shown only when setting is on OR period = true in last 60 days
+                      if (state.showPeriodCard) ...[
+                        _PeriodCard(
+                          dayString: activeDayString,
+                          habit: activeHabit,
+                          controller: controller,
+                          l10n: l10n,
+                          viewOnly: viewOnly,
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ],
+
+                    // Premium tab: water lives here too (today only).
+                    if (widget.isEmbedded && !_isYesterday) ...[
+                      const HabitsWaterSummaryCard(),
+                      const SizedBox(height: 16),
+                    ],
+
+                    const SizedBox(height: 32),
+                  ],
                 ),
               ),
-            ],
-          )
-        : state.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : state.loadError != null
-              ? LoadErrorView(
-                error: state.loadError!,
-                onRetry: () => controller.loadData(),
-              )
-              : RefreshIndicator(
-                onRefresh: () => controller.loadData(),
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.fromLTRB(
-                    20,
-                    16,
-                    20,
-                    16 + MediaQuery.paddingOf(context).bottom,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const ActiveProfileBanner(),
-                      if (viewOnly) const ActiveProfileReadOnlyNote(),
-                      const SizedBox(height: 8),
-                      // Day switcher: Hoje / Ontem
-                      _DaySwitcher(
-                        isYesterday: _isYesterday,
-                        todayLabel: l10n.habitsTabToday,
-                        yesterdayLabel: l10n.habitsTabYesterday,
-                        onChanged: (yesterday) {
-                          setState(() => _isYesterday = yesterday);
-                        },
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Card 1: Sleep Quality & Hours
-                      _SleepCard(
-                        dayString: activeDayString,
-                        habit: activeHabit,
-                        controller: controller,
-                        l10n: l10n,
-                        viewOnly: viewOnly,
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Card 2: Movement & Minutes
-                      _MovementCard(
-                        dayString: activeDayString,
-                        habit: activeHabit,
-                        controller: controller,
-                        l10n: l10n,
-                        viewOnly: viewOnly,
-                      ),
-                      const SizedBox(height: 16),
-
-                      if (!isMale) ...[
-                        // Setting: Track Menstrual Cycle switch
-                        _CycleSettingTile(
-                          enabled: state.trackMenstrualCycle,
-                          title: l10n.habitsTrackMenstrualCycleSetting,
-                          onChanged:
-                              viewOnly
-                                  ? null
-                                  : (val) =>
-                                      controller.setTrackMenstrualCycle(val),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Card 3: Menstrual Cycle (Period)
-                        // Shown only when setting is on OR period = true in last 60 days
-                        if (state.showPeriodCard) ...[
-                          _PeriodCard(
-                            dayString: activeDayString,
-                            habit: activeHabit,
-                            controller: controller,
-                            l10n: l10n,
-                            viewOnly: viewOnly,
-                          ),
-                          const SizedBox(height: 24),
-                        ],
-                      ],
-
-                      // Premium tab: water lives here too (today only).
-                      if (widget.isEmbedded && !_isYesterday) ...[
-                        const HabitsWaterSummaryCard(),
-                        const SizedBox(height: 16),
-                      ],
-
-                      const SizedBox(height: 32),
-                    ],
-                  ),
-                ),
-              );
+            );
 
     if (widget.isEmbedded) return body;
 
@@ -201,72 +212,13 @@ class _DaySwitcher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.outlineLight),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _TabButton(
-              key: const Key('habits_tab_today'),
-              label: todayLabel,
-              selected: !isYesterday,
-              onTap: () => onChanged(false),
-            ),
-          ),
-          const SizedBox(width: 4),
-          Expanded(
-            child: _TabButton(
-              key: const Key('habits_tab_yesterday'),
-              label: yesterdayLabel,
-              selected: isYesterday,
-              onTap: () => onChanged(true),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TabButton extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _TabButton({
-    super.key,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: selected ? AppColors.clinicalTeal : Colors.transparent,
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Center(
-            child: Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: selected ? Colors.white : AppColors.textSecondaryLight,
-              ),
-            ),
-          ),
-        ),
-      ),
+    // Same segmented control as the History tabs. Keys: habits_tab_today and
+    // habits_tab_yesterday.
+    return HistorySegmented<String>(
+      keyPrefix: 'habits_tab',
+      options: [('today', todayLabel), ('yesterday', yesterdayLabel)],
+      selected: isYesterday ? 'yesterday' : 'today',
+      onChanged: (value) => onChanged(value == 'yesterday'),
     );
   }
 }
@@ -289,10 +241,12 @@ class _SleepCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _QuestionCard(
-      title: dayString == controller.yesterdayDayString
-          ? l10n.habitsSleepQualityQuestionYesterday
-          : l10n.habitsSleepQualityQuestion,
+      title:
+          dayString == controller.yesterdayDayString
+              ? l10n.habitsSleepQualityQuestionYesterday
+              : l10n.habitsSleepQualityQuestion,
       titleKey: const Key('habits_sleep_question'),
+      icon: Icons.bedtime_rounded,
       saved: habit.sleepQuality != null,
       savedLabel: l10n.habitsSaved,
       children: [
@@ -304,6 +258,7 @@ class _SleepCard extends StatelessWidget {
               Expanded(
                 child: _EmojiOptionButton(
                   key: const Key('habits_sleep_bem'),
+                  sleepKey: HabitSleepQuality.bem,
                   emoji: '😴',
                   label: l10n.habitsSleepQualityBem.replaceFirst('😴 ', ''),
                   selected: habit.sleepQuality == HabitSleepQuality.bem,
@@ -320,6 +275,7 @@ class _SleepCard extends StatelessWidget {
               Expanded(
                 child: _EmojiOptionButton(
                   key: const Key('habits_sleep_regular'),
+                  sleepKey: HabitSleepQuality.regular,
                   emoji: '😐',
                   label: l10n.habitsSleepQualityRegular.replaceFirst('😐 ', ''),
                   selected: habit.sleepQuality == HabitSleepQuality.regular,
@@ -336,6 +292,7 @@ class _SleepCard extends StatelessWidget {
               Expanded(
                 child: _EmojiOptionButton(
                   key: const Key('habits_sleep_mal'),
+                  sleepKey: HabitSleepQuality.mal,
                   emoji: '😫',
                   label: l10n.habitsSleepQualityMal.replaceFirst('😫 ', ''),
                   selected: habit.sleepQuality == HabitSleepQuality.mal,
@@ -357,7 +314,7 @@ class _SleepCard extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimaryLight,
+            color: AppColors.textSecondaryLight,
           ),
         ),
         const SizedBox(height: 8),
@@ -438,10 +395,12 @@ class _MovementCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _QuestionCard(
-      title: dayString == controller.yesterdayDayString
-          ? l10n.habitsMovedQuestionYesterday
-          : l10n.habitsMovedQuestion,
+      title:
+          dayString == controller.yesterdayDayString
+              ? l10n.habitsMovedQuestionYesterday
+              : l10n.habitsMovedQuestion,
       titleKey: const Key('habits_moved_question'),
+      icon: Icons.directions_walk_rounded,
       saved: habit.moved != null,
       savedLabel: l10n.habitsSaved,
       children: [
@@ -484,7 +443,7 @@ class _MovementCard extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimaryLight,
+              color: AppColors.textSecondaryLight,
             ),
           ),
           const SizedBox(height: 8),
@@ -569,10 +528,12 @@ class _PeriodCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return _QuestionCard(
       key: const Key('habits_period_card'),
-      title: dayString == controller.yesterdayDayString
-          ? l10n.habitsPeriodQuestionYesterday
-          : l10n.habitsPeriodQuestion,
+      title:
+          dayString == controller.yesterdayDayString
+              ? l10n.habitsPeriodQuestionYesterday
+              : l10n.habitsPeriodQuestion,
       titleKey: const Key('habits_period_question'),
+      icon: Icons.event_repeat_rounded,
       saved: habit.period != null,
       savedLabel: l10n.habitsSaved,
       children: [
@@ -625,34 +586,45 @@ class _CycleSettingTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surfaceLight,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: AppColors.outlineLight),
-      ),
-      child: SwitchListTile(
-        key: const Key('habits_cycle_switch'),
-        value: enabled,
-        onChanged: onChanged,
-        title: Text(
-          title,
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimaryLight,
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      child: Material(
+        type: MaterialType.transparency,
+        child: SwitchListTile(
+          key: const Key('habits_cycle_switch'),
+          value: enabled,
+          onChanged: onChanged,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+          secondary: const DuotoneIconTile(
+            size: 32,
+            radius: 10,
+            child: Icon(
+              Icons.event_repeat_rounded,
+              size: 18,
+              color: AppColors.dualisNavy,
+            ),
           ),
+          title: Text(
+            title,
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimaryLight,
+            ),
+          ),
+          activeTrackColor: AppColors.dualisNavy,
+          activeThumbColor: Colors.white,
         ),
-        activeTrackColor: AppColors.clinicalTeal.withValues(alpha: 0.5),
-        activeThumbColor: AppColors.clinicalTeal,
       ),
     );
   }
 }
 
+/// One question on a glass card: duotone icon tile, title and the "saved" tag.
 class _QuestionCard extends StatelessWidget {
   final String title;
   final Key? titleKey;
+  final IconData? icon;
   final List<Widget> children;
   final bool saved;
   final String savedLabel;
@@ -661,6 +633,7 @@ class _QuestionCard extends StatelessWidget {
     super.key,
     required this.title,
     this.titleKey,
+    this.icon,
     required this.children,
     this.saved = false,
     this.savedLabel = '',
@@ -668,33 +641,29 @@ class _QuestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.outlineLight),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
+    return GlassCard(
+      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              if (icon != null) ...[
+                DuotoneIconTile(
+                  size: 32,
+                  radius: 10,
+                  child: Icon(icon, size: 18, color: AppColors.dualisNavy),
+                ),
+                const SizedBox(width: 10),
+              ],
               Expanded(
                 child: Text(
                   title,
                   key: titleKey,
                   style: GoogleFonts.inter(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.textPrimaryLight,
                   ),
                 ),
@@ -731,7 +700,56 @@ class _QuestionCard extends StatelessWidget {
   }
 }
 
+/// Option surface shared by the sleep, yes/no and chip answers (the check-in
+/// wizard option card): soft navy tint, cyan fill and navy border when picked.
+class _OptionSurface extends StatelessWidget {
+  final bool selected;
+  final VoidCallback? onTap;
+  final EdgeInsetsGeometry padding;
+  final Widget child;
+
+  const _OptionSurface({
+    required this.selected,
+    required this.onTap,
+    required this.child,
+    this.padding = const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const radius = 16.0;
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        constraints: const BoxConstraints(minHeight: 48),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(radius),
+          color:
+              selected
+                  ? AppColors.dualisSymbolCyan.withValues(alpha: 0.14)
+                  : AppColors.dualisNavy.withValues(alpha: 0.04),
+          border: Border.all(
+            color: selected ? AppColors.dualisNavy : Colors.transparent,
+            width: 1.5,
+          ),
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(radius),
+            onTap: onTap,
+            child: Padding(padding: padding, child: child),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _EmojiOptionButton extends StatelessWidget {
+  final String sleepKey;
   final String emoji;
   final String label;
   final bool selected;
@@ -739,6 +757,7 @@ class _EmojiOptionButton extends StatelessWidget {
 
   const _EmojiOptionButton({
     super.key,
+    required this.sleepKey,
     required this.emoji,
     required this.label,
     required this.selected,
@@ -747,45 +766,34 @@ class _EmojiOptionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color:
-          selected
-              ? AppColors.clinicalTeal.withValues(alpha: 0.12)
-              : AppColors.backgroundLight,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: selected ? AppColors.clinicalTeal : AppColors.outlineLight,
-          width: selected ? 2 : 1,
-        ),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(emoji, style: const TextStyle(fontSize: 28)),
-              const SizedBox(height: 6),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: selected ? FontWeight.bold : FontWeight.w600,
-                  color:
-                      selected
-                          ? AppColors.clinicalTealDark
-                          : AppColors.textPrimaryLight,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+    return _OptionSurface(
+      selected: selected,
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Fluent emoji; the text emoji stays as the fallback.
+          FluentEmoji.forSleep(
+            sleepKey,
+            size: 40,
+            fallback: ExcludeSemantics(
+              child: Text(emoji, style: const TextStyle(fontSize: 28)),
+            ),
           ),
-        ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 12.5,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+              color: AppColors.dualisNavy,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
@@ -805,37 +813,33 @@ class _YesNoButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color:
-          selected
-              ? AppColors.clinicalTeal.withValues(alpha: 0.12)
-              : AppColors.backgroundLight,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: selected ? AppColors.clinicalTeal : AppColors.outlineLight,
-          width: selected ? 2 : 1,
-        ),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          child: Center(
+    return _OptionSurface(
+      selected: selected,
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Flexible(
             child: Text(
               label,
+              textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 15,
-                fontWeight: selected ? FontWeight.bold : FontWeight.w600,
-                color:
-                    selected
-                        ? AppColors.clinicalTealDark
-                        : AppColors.textPrimaryLight,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                color: AppColors.dualisNavy,
               ),
             ),
           ),
-        ),
+          if (selected) ...[
+            const SizedBox(width: 6),
+            const Icon(
+              Icons.check_circle_rounded,
+              size: 18,
+              color: AppColors.dualisNavy,
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -859,16 +863,19 @@ class _ChipOption extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: onSelected,
-      selectedColor: AppColors.clinicalTeal.withValues(alpha: 0.15),
-      backgroundColor: AppColors.backgroundLight,
+      showCheckmark: false,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      selectedColor: AppColors.dualisSymbolCyan.withValues(alpha: 0.14),
+      backgroundColor: AppColors.dualisNavy.withValues(alpha: 0.04),
       side: BorderSide(
-        color: selected ? AppColors.clinicalTeal : AppColors.outlineLight,
+        color: selected ? AppColors.dualisNavy : Colors.transparent,
+        width: 1.5,
       ),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
       labelStyle: GoogleFonts.inter(
-        fontSize: 13,
-        fontWeight: selected ? FontWeight.bold : FontWeight.w500,
-        color:
-            selected ? AppColors.clinicalTealDark : AppColors.textPrimaryLight,
+        fontSize: 13.5,
+        fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+        color: AppColors.dualisNavy,
       ),
     );
   }

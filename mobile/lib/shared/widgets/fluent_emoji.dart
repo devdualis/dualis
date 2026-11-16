@@ -48,6 +48,14 @@ class FluentEmoji {
     return name == null ? null : '$_dir/${name}_3d.png';
   }
 
+  /// The sleep-quality emoji for [key] (`bem`, `regular`, `mal`), or [fallback]
+  /// (the text emoji the caller already had) when it is not mapped.
+  static Widget forSleep(String key, {required double size, required Widget fallback}) {
+    final path = assetForSleep(key);
+    if (path == null) return fallback;
+    return image(path, size: size);
+  }
+
   /// The emoji image for [key], or [fallback] when it is not mapped.
   static Widget forJournalKey(String key, {required double size, required Widget fallback}) {
     final path = assetForJournalKey(key);
