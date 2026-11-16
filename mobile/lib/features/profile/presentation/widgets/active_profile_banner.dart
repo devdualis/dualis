@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
 import '../../domain/models/profile.dart';
 import '../../domain/models/share_category.dart';
 import '../controllers/active_profile_controller.dart';
@@ -90,25 +91,29 @@ class ActiveProfileBanner extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: Material(
         key: const ValueKey('active-profile-banner'),
-        color: AppColors.softIndigo.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.glassFill,
+        borderRadius: BorderRadius.circular(20),
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20),
           onTap: () => switchActiveProfileToPrimary(ref),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: AppColors.softIndigo.withValues(alpha: 0.35),
+                color: AppColors.softIndigo.withValues(alpha: 0.14),
               ),
             ),
             child: Row(
               children: [
-                const Icon(
-                  Icons.switch_account_outlined,
-                  size: 20,
-                  color: AppColors.softIndigo,
+                const DuotoneIconTile(
+                  size: 32,
+                  radius: 10,
+                  child: Icon(
+                    Icons.switch_account_outlined,
+                    size: 20,
+                    color: AppColors.softIndigo,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(

@@ -10,17 +10,17 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../hydration/presentation/screens/hydration_dashboard_screen.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
 import '../../../../shared/widgets/premium_gradient_icon.dart';
 import '../controllers/habits_controller.dart';
 import '../../domain/models/habit_day.dart';
 
-const Color _sleepBg = Color(0xFFEEF0FF);
-const Color _sleepBorder = Color(0xFFC7CBF5);
-const Color _sleepAccent = Color(0xFF4F46E5);
-const Color _moveBg = Color(0xFFE8F5E9);
-const Color _moveBorder = Color(0xFFA5D6A7);
-const Color _moveAccent = Color(0xFF2E7D32);
-const Color _waterBorder = Color(0xFF9ED3EE);
+// Redesign: brand palette only. Tiles are neutral glass; the accent colours
+// only the icon, the done marker and the buttons.
+const Color _tileFill = Color(0xBFFFFFFF);
+const Color _tileEdge = Color(0x140E3E6C);
+const Color _sleepAccent = AppColors.dualisNavy;
+const Color _moveAccent = AppColors.dualisNavy;
 
 /// Home "Hábitos de hoje": same shell as the check-in card, with one tile per
 /// habit. Sleep and movement are Premium; the Free build shows water and a
@@ -52,41 +52,30 @@ class TodayHabitsCard extends ConsumerWidget {
       ],
     ];
 
+    // Glass card from the app theme (radius 24, translucent fill).
     return Card(
       key: const Key('home_habits_card'),
-      elevation: 0,
       margin: EdgeInsets.zero,
-      color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
-        ),
-      ),
+      color: isDark ? AppColors.surfaceDark : null,
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.clinicalTeal.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                DuotoneIconTile(
                   child: premium
                       ? const PremiumGradientIcon(
                           icon: Icon(
                             Icons.wb_twilight_rounded,
-                            color: AppColors.clinicalTeal,
+                            color: AppColors.dualisNavy,
                             size: 24,
                           ),
                         )
                       : const Icon(
                           Icons.wb_twilight_rounded,
-                          color: AppColors.clinicalTeal,
+                          color: AppColors.dualisNavy,
                           size: 24,
                         ),
                 ),
@@ -98,15 +87,17 @@ class TodayHabitsCard extends ConsumerWidget {
                       Text(
                         l10n.habitsHomeEyebrow,
                         style: GoogleFonts.inter(
-                          fontSize: 13,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w600,
+                          letterSpacing: 0.2,
                           color: AppColors.clinicalTeal,
                         ),
                       ),
                       Text(
                         l10n.habitsTitleToday,
                         style: GoogleFonts.inter(
-                          fontSize: 18,
+                          fontSize: 19,
+                          letterSpacing: -0.3,
                           fontWeight: FontWeight.w700,
                           color: isDark
                               ? AppColors.textPrimaryDark
@@ -119,7 +110,7 @@ class TodayHabitsCard extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-            const Divider(height: 1),
+            Divider(height: 1, color: AppColors.dualisNavy.withValues(alpha: 0.08)),
             const SizedBox(height: 16),
             IntrinsicHeight(
               child: Row(
@@ -148,8 +139,6 @@ class _SleepTile extends ConsumerWidget {
     return _HabitTile(
       key: const Key('home_habit_tile_sleep'),
       premiumIcon: ref.watch(premiumProfilesEnabledProvider),
-      background: _sleepBg,
-      border: _sleepBorder,
       accent: _sleepAccent,
       icon: Icons.bedtime_rounded,
       title: l10n.habitsTileSleep,
@@ -203,8 +192,6 @@ class _MovementTile extends ConsumerWidget {
     return _HabitTile(
       key: const Key('home_habit_tile_movement'),
       premiumIcon: ref.watch(premiumProfilesEnabledProvider),
-      background: _moveBg,
-      border: _moveBorder,
       accent: _moveAccent,
       icon: Icons.directions_walk_rounded,
       title: l10n.habitsTileMovement,
@@ -256,8 +243,6 @@ class _WaterTile extends ConsumerWidget {
     return _HabitTile(
       key: const Key('home_habit_tile_water'),
       premiumIcon: ref.watch(premiumProfilesEnabledProvider),
-      background: AppColors.clinicalTealLight,
-      border: _waterBorder,
       accent: AppColors.clinicalTeal,
       icon: Icons.water_drop_rounded,
       title: l10n.navHydration,
@@ -271,14 +256,14 @@ class _WaterTile extends ConsumerWidget {
         child: LinearProgressIndicator(
           value: water.progressRatio.clamp(0.0, 1.0),
           minHeight: 6,
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.dualisNavy.withValues(alpha: 0.08),
           color: AppColors.clinicalTeal,
         ),
       ),
       action: _TilePill(
         key: const Key('home_habit_water_add'),
         label: '+200 ml',
-        color: AppColors.clinicalTeal,
+        color: AppColors.dualisNavy,
         filled: true,
         onTap: viewOnly ? null : () => logWaterWithUndo(context, ref, 200),
       ),
@@ -295,16 +280,10 @@ class _PremiumTeaserTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return Material(
       key: const Key('home_habits_premium_teaser'),
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(20),
       clipBehavior: Clip.antiAlias,
       child: Ink(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppColors.dualisNavy, AppColors.dualisSymbolBlue],
-          ),
-        ),
+        decoration: const BoxDecoration(gradient: AppColors.gradientNavy),
         child: InkWell(
           onTap: () => context.push(RoutePaths.premiumPromo),
           child: Padding(
@@ -381,11 +360,9 @@ class _PremiumTeaserTile extends StatelessWidget {
   }
 }
 
-/// One habit, styled like the check-in axis cards: tinted background,
-/// colored border, icon in a circle.
+/// One habit as a neutral glass tile: duotone icon square, title, value and
+/// one action pill.
 class _HabitTile extends StatelessWidget {
-  final Color background;
-  final Color border;
   final Color accent;
   final IconData icon;
   final String title;
@@ -402,8 +379,6 @@ class _HabitTile extends StatelessWidget {
 
   const _HabitTile({
     super.key,
-    required this.background,
-    required this.border,
     required this.accent,
     required this.icon,
     required this.title,
@@ -420,10 +395,10 @@ class _HabitTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: background,
+      color: _tileFill,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: border, width: 1.2),
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: _tileEdge),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -435,12 +410,9 @@ class _HabitTile extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: accent.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
+                  DuotoneIconTile(
+                    size: 32,
+                    radius: 10,
                     child: premiumIcon
                         ? PremiumGradientIcon(icon: Icon(icon, color: accent, size: 18))
                         : Icon(icon, color: accent, size: 18),
@@ -468,9 +440,10 @@ class _HabitTile extends StatelessWidget {
               Text(
                 value,
                 style: GoogleFonts.inter(
-                  fontSize: 12,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
                   height: 1.3,
-                  color: const Color(0xFF334155),
+                  color: AppColors.dualisNavy,
                 ),
               ),
               if (valueCaption != null)
@@ -515,11 +488,11 @@ class _TilePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = onTap != null;
     return Material(
-      color: filled ? color : Colors.white,
-      borderRadius: BorderRadius.circular(10),
+      color: filled ? color : color.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(17),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(17),
         child: Container(
           constraints: const BoxConstraints(minHeight: 34),
           alignment: Alignment.center,
