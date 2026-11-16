@@ -407,7 +407,6 @@ Future<void> showCalendarDaySheet(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    backgroundColor: AppColors.surfaceLight,
     builder: (_) => DraggableScrollableSheet(
       expand: false,
       initialChildSize: 0.7,
@@ -448,8 +447,8 @@ class CalendarDayView extends ConsumerWidget {
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.backgroundLight,
-            borderRadius: BorderRadius.circular(12),
+            color: AppColors.dualisNavy.withValues(alpha: 0.04),
+            borderRadius: BorderRadius.circular(14),
             border: Border(left: BorderSide(color: color, width: 4)),
           ),
           child: Text(describeRecord(l10n, locale, p), style: body),

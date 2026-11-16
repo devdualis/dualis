@@ -54,8 +54,15 @@ class HistoricalDashboardScreen extends ConsumerWidget {
     final content = insightsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (_, __) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
+        child: Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppColors.glassFill,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.glassEdge),
+            boxShadow: AppColors.glassShadow(blur: 24, alpha: 0.2),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -64,12 +71,18 @@ class HistoricalDashboardScreen extends ConsumerWidget {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 14,
+                  fontWeight: FontWeight.w500,
                   color: AppColors.textPrimaryLight,
                 ),
               ),
               const SizedBox(height: 16),
-              FilledButton.tonal(
+              FilledButton(
                 key: const Key('dashboard_retry_button'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.dualisNavy,
+                  foregroundColor: Colors.white,
+                  shape: const StadiumBorder(),
+                ),
                 onPressed: () => ref
                     .read(journalInsightsControllerProvider.notifier)
                     .refresh(),
@@ -182,6 +195,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
             key: const Key('dashboard_window_label'),
             style: GoogleFonts.inter(
               fontSize: 13,
+              fontWeight: FontWeight.w500,
               color: AppColors.textSecondaryLight,
             ),
           ),
@@ -207,6 +221,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
             _tab != HistoryTab.habits &&
             _tabReadable(HistoryTab.together))
           InsightsCard(
+            icon: Icons.list_alt_rounded,
             title: l10n.xv2DashEntriesTitle,
             child: _EntriesList(entries: entries),
           ),
@@ -292,23 +307,27 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
     return [
       if (entries.isNotEmpty)
         InsightsCard(
+          icon: Icons.date_range_rounded,
           key: const Key('period_summary_card'),
           title: l10n.histPeriodSummaryTitle,
           child: PeriodSummary(entries: entries, days: _days),
         ),
       if (!feelings.isEmpty)
         InsightsCard(
+          icon: Icons.mood_rounded,
           key: const Key('feelings_card'),
           title: l10n.histFeelingsTitle,
           subtitle: l10n.histFeelingsSubtitle,
           child: EverydayFeelingsSummary(counts: feelings),
         ),
       InsightsCard(
+        icon: Icons.pie_chart_outline_rounded,
         title: l10n.gxPieTitle,
         subtitle: l10n.gxPieSubtitle,
         child: TemporalPieChart(pie: TemporalPie.compute(points, entries)),
       ),
       InsightsCard(
+        icon: Icons.show_chart_rounded,
         title: l10n.gxLinesTitleEmotional,
         subtitle: l10n.gxLinesSubtitle,
         child: hasIntensity
@@ -323,6 +342,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
       ),
       if (series.isNotEmpty)
         InsightsCard(
+          icon: Icons.chat_bubble_outline_rounded,
           title: l10n.gxAnswersTitleEmotional,
           subtitle: l10n.gxAnswersSubtitle,
           child: SeriesAnswersCard(
@@ -336,6 +356,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
         ),
       if (summary.positiveByTime.isNotEmpty)
         InsightsCard(
+          icon: Icons.wb_sunny_outlined,
           key: const Key('good_moments_card'),
           title: l10n.jv22GoodMomentsTitle,
           subtitle: l10n.jv22GoodMomentsSubtitle,
@@ -343,6 +364,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
         ),
       if (summary.byHelper.isNotEmpty || summary.byCoping.isNotEmpty)
         InsightsCard(
+          icon: Icons.favorite_border_rounded,
           key: const Key('helped_card'),
           title: l10n.jv22HelpedTitle,
           child: HelpedSummary(summary: summary),
@@ -361,6 +383,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
     final hasIntensity = points.any((p) => p.intensity != null);
     return [
       InsightsCard(
+        icon: Icons.accessibility_new_rounded,
         title: l10n.gxBodyMapTitle,
         child: BodyMarkerMap(
           regions: regionSummaries(points),
@@ -377,6 +400,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
         ),
       ),
       InsightsCard(
+        icon: Icons.show_chart_rounded,
         title: l10n.gxLinesTitlePhysical,
         subtitle: l10n.gxLinesSubtitle,
         child: hasIntensity
@@ -391,6 +415,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
       ),
       if (series.isNotEmpty)
         InsightsCard(
+          icon: Icons.chat_bubble_outline_rounded,
           key: _bodyAnswersKey,
           title: l10n.gxAnswersTitlePhysical,
           subtitle: l10n.gxAnswersSubtitle,
@@ -436,6 +461,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
     void pick(DateTime day) => setState(() => _waterDay = day);
     return [
       InsightsCard(
+        icon: Icons.water_drop_outlined,
         title: l10n.gxWaterDayTitle(DateFormat('dd/MM', locale).format(selected)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -462,6 +488,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
         ),
       ),
       InsightsCard(
+        icon: Icons.bar_chart_rounded,
         title: l10n.gxWaterBarsTitle,
         child: WaterPeriodBars(
           totals: totals,
@@ -474,6 +501,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
         ),
       ),
       InsightsCard(
+        icon: Icons.calendar_month_rounded,
         title: l10n.gxWaterCalendarTitle,
         subtitle: l10n.gxWaterCalendarHint,
         child: WaterCalendar(
@@ -524,6 +552,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
     return [
       if (BodyMindCoincidenceList.labelled(l10n, coincidences).isNotEmpty)
         InsightsCard(
+          icon: Icons.join_inner_rounded,
           key: const Key('coincidence_card'),
           title: l10n.histCoincidenceTitle,
           child: BodyMindCoincidenceList(
@@ -532,6 +561,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
           ),
         ),
       InsightsCard(
+        icon: Icons.calendar_month_rounded,
         title: l10n.gxCalendarTitle,
         subtitle: l10n.gxCalendarSubtitle,
         child: CombinedCalendar(
@@ -588,6 +618,11 @@ class _EntriesList extends ConsumerWidget {
           ),
           FilledButton(
             key: const Key('dashboard_delete_confirm'),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.dualisNavy,
+              foregroundColor: Colors.white,
+              shape: const StadiumBorder(),
+            ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(l10n.xv2DashDeleteConfirm),
           ),
@@ -609,6 +644,7 @@ class _EntriesList extends ConsumerWidget {
         l10n.xv2DashNoEntries,
         style: GoogleFonts.inter(
           fontSize: 13,
+          fontWeight: FontWeight.w500,
           color: AppColors.textSecondaryLight,
         ),
       );
@@ -630,8 +666,11 @@ class _EntriesList extends ConsumerWidget {
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
             decoration: BoxDecoration(
-              color: AppColors.backgroundLight,
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.dualisNavy.withValues(alpha: 0.04),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.dualisNavy.withValues(alpha: 0.06),
+              ),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -650,13 +689,21 @@ class _EntriesList extends ConsumerWidget {
                       ),
                       if (entry.pendingSync) ...[
                         const SizedBox(height: 2),
-                        Text(
-                          l10n.jv2PendingSync,
-                          key: Key('journal_entry_pending_${entry.id}'),
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondaryLight,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.iconTileTint,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            l10n.jv2PendingSync,
+                            key: Key('journal_entry_pending_${entry.id}'),
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.dualisNavy,
+                            ),
                           ),
                         ),
                       ],

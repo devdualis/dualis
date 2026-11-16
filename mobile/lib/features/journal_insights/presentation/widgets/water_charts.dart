@@ -451,8 +451,8 @@ class _StatGrid extends StatelessWidget {
               width: width,
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.backgroundLight,
-                borderRadius: BorderRadius.circular(12),
+                color: AppColors.dualisNavy.withValues(alpha: 0.04),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

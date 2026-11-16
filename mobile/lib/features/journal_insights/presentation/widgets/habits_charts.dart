@@ -49,6 +49,7 @@ class HabitsChartsSection extends StatelessWidget {
       children: [
         // 1. Sleep Quality & Hours Chart
         InsightsCard(
+          icon: Icons.bedtime_outlined,
           title: l10n.habitsChartSleepQualityTitle,
           subtitle: l10n.habitsChartSleepBadCount(badSleepCount, days),
           child: HabitsSleepChart(habits: inWindow, start: start, days: days),
@@ -56,6 +57,7 @@ class HabitsChartsSection extends StatelessWidget {
 
         // 2. Movement Chart
         InsightsCard(
+          icon: Icons.directions_walk_rounded,
           title: l10n.habitsChartMovementTitle,
           subtitle: l10n.habitsChartMovementCount(movedCount),
           child: HabitsMovementChart(
@@ -68,6 +70,7 @@ class HabitsChartsSection extends StatelessWidget {
         // 3. Period Chart (if enabled or recorded in period)
         if (showPeriod || periodCount > 0)
           InsightsCard(
+            icon: Icons.water_drop_outlined,
             title: l10n.habitsChartPeriodTitle,
             subtitle: l10n.habitsChartPeriodCount(periodCount),
             child: HabitsPeriodChart(

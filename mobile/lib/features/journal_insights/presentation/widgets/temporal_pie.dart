@@ -113,8 +113,8 @@ class _SliceRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
       decoration: BoxDecoration(
-        color: AppColors.backgroundLight,
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.dualisNavy.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(14),
         border: Border(left: BorderSide(color: ChartTokens.time(time), width: 4)),
       ),
       child: Column(

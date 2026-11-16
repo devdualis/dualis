@@ -24,10 +24,10 @@ class HistorySegmented<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: AppColors.outlineLight.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(compact ? 12 : 14),
+        color: AppColors.dualisNavy.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
@@ -53,13 +53,14 @@ class HistorySegmented<T> extends StatelessWidget {
                       color: value == selected
                           ? AppColors.surfaceLight
                           : Colors.transparent,
-                      borderRadius: BorderRadius.circular(compact ? 9 : 10),
+                      borderRadius: BorderRadius.circular(11),
                       boxShadow: value == selected
                           ? [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.08),
-                                blurRadius: 4,
-                                offset: const Offset(0, 1),
+                                color:
+                                    AppColors.dualisNavy.withValues(alpha: 0.14),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
                               ),
                             ]
                           : null,
@@ -74,7 +75,7 @@ class HistorySegmented<T> extends StatelessWidget {
                             ? FontWeight.w700
                             : FontWeight.w600,
                         color: value == selected
-                            ? AppColors.textPrimaryLight
+                            ? AppColors.dualisNavy
                             : AppColors.textSecondaryLight,
                       ),
                     ),
@@ -113,19 +114,17 @@ class HistoryPeriodChips extends StatelessWidget {
             label: Text(l10n.histPeriodDays(days)),
             selected: days == selected,
             showCheckmark: false,
-            selectedColor: AppColors.textPrimaryLight,
+            selectedColor: AppColors.dualisNavy,
             backgroundColor: AppColors.surfaceLight,
             side: BorderSide(
               color: days == selected
-                  ? AppColors.textPrimaryLight
-                  : AppColors.outlineLight,
+                  ? AppColors.dualisNavy
+                  : AppColors.dualisNavy.withValues(alpha: 0.14),
             ),
             labelStyle: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: days == selected
-                  ? Colors.white
-                  : AppColors.textPrimaryLight,
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              color: days == selected ? Colors.white : AppColors.dualisNavy,
             ),
             onSelected: (_) => onChanged(days),
           ),
@@ -154,7 +153,8 @@ class LineToggleChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final borderColor = shown ? color : AppColors.outlineLight;
+    final borderColor =
+        shown ? color : AppColors.dualisNavy.withValues(alpha: 0.14);
     final chip = Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: dashed

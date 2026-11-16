@@ -326,7 +326,6 @@ Future<void> showRegionMarksSheet(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    backgroundColor: AppColors.surfaceLight,
     builder: (sheetContext) => DraggableScrollableSheet(
       expand: false,
       initialChildSize: 0.7,
@@ -400,7 +399,7 @@ class RegionMarksView extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.outlineLight),
+              border: Border.all(color: AppColors.dualisNavy.withValues(alpha: 0.12)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
