@@ -10,12 +10,14 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/controllers/auth_controller.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/locale_provider.dart';
+import 'shared/widgets/fluent_emoji.dart';
 import 'shared/widgets/privacy_veil_overlay.dart';
 import 'shared/widgets/urgent_help_button.dart';
 import 'features/sync/presentation/widgets/offline_indicator_banner.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  FluentEmoji.registerLicense();
   runApp(
     const ProviderScope(
       child: DualisApp(),

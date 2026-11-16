@@ -79,9 +79,14 @@ void main() {
     expect(find.byKey(const Key('jv2_mood_nao_tao_bem')), findsOneWidget);
     expect(find.byKey(const Key('jv2_mood_normal')), findsNothing);
     expect(find.text(pt.jv2MoodNormal), findsNothing);
-    // Emoji faces (client spec 2.4), no Material icons.
-    expect(find.text('😊'), findsOneWidget);
-    expect(find.text('😕'), findsOneWidget);
+    // Fluent Emoji faces (redesign), no Material icons.
+    bool isAsset(Widget w, String name) =>
+        w is Image && w.image is AssetImage && (w.image as AssetImage).assetName.endsWith(name);
+    expect(
+      find.byWidgetPredicate((w) => isAsset(w, 'smiling_face_with_smiling_eyes_3d.png')),
+      findsOneWidget,
+    );
+    expect(find.byWidgetPredicate((w) => isAsset(w, 'pensive_face_3d.png')), findsOneWidget);
     expect(find.byIcon(Icons.sentiment_satisfied_rounded), findsNothing);
     expect(find.byIcon(Icons.sentiment_dissatisfied_rounded), findsNothing);
     // Opened without an area: emotional axis.

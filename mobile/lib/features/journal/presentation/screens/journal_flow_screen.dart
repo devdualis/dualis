@@ -8,6 +8,8 @@ import '../../../../core/router/route_paths.dart';
 import '../../../../core/voice/voice_matcher.dart';
 import '../../../../core/voice/voice_targets.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../../shared/widgets/fluent_emoji.dart';
 import '../../../auth/domain/user_profile.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../consent/presentation/ai_consent_controller.dart';
@@ -138,20 +140,36 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          leading: VoiceTarget(
-            labels: [l10n.jv2Back, ...VoiceMatcher.aliases(l10n.voiceAliasBack)],
-            onSelect: _back,
-            role: VoiceTargetRole.back,
-            child: IconButton(
-              key: const Key('jv2_back'),
-              tooltip: l10n.jv2Back,
-              icon: const Icon(Icons.arrow_back_rounded),
-              onPressed: _back,
+          leadingWidth: 60,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: VoiceTarget(
+              labels: [l10n.jv2Back, ...VoiceMatcher.aliases(l10n.voiceAliasBack)],
+              onSelect: _back,
+              role: VoiceTargetRole.back,
+              child: Center(
+                child: IconButton(
+                  key: const Key('jv2_back'),
+                  tooltip: l10n.jv2Back,
+                  icon: const Icon(Icons.arrow_back_rounded, size: 20),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.glassFillStrong,
+                    foregroundColor: AppColors.dualisNavy,
+                    fixedSize: const Size(40, 40),
+                    side: BorderSide(color: AppColors.dualisNavy.withValues(alpha: 0.08)),
+                  ),
+                  onPressed: _back,
+                ),
+              ),
             ),
           ),
           title: Text(
             l10n.jv2FlowTitle,
-            style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.2,
+              color: AppColors.dualisNavy,
+            ),
           ),
         ),
         body: SafeArea(
@@ -353,6 +371,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             _ChoiceTile(
               key: Key('jv2_branch_$time.$branch'),
               emoji: journalEmojis['$time.$branch'],
+              emojiKey: '$time.$branch',
               label: JournalLabels.branch(l10n, '$time.$branch'),
               dense: true,
               enabled: enabled,
@@ -581,6 +600,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           _ChoiceTile(
             key: Key('jv2_branch_$time.$branch'),
             emoji: journalEmojis['$time.$branch'],
+            emojiKey: '$time.$branch',
             label: JournalLabels.branch(l10n, '$time.$branch'),
             onTap: () => _controller.chooseTimeBranch(time, branch),
           ),
@@ -1386,7 +1406,11 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         Expanded(
           child: OutlinedButton(
             key: skipKey,
-            style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(54),
+              side: BorderSide.none,
+              backgroundColor: AppColors.dualisNavy.withValues(alpha: 0.08),
+            ),
             onPressed: onSkip,
             child: Text(l10n.jv2Skip),
           ),
@@ -1558,12 +1582,27 @@ class _StepLayout extends StatelessWidget {
                 children: [
                   Expanded(
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: progress!.$1 / progress!.$2,
-                        minHeight: 5,
-                        color: AppColors.dualisSymbolBlue,
-                        backgroundColor: AppColors.outlineLight,
+                      borderRadius: BorderRadius.circular(3),
+                      child: SizedBox(
+                        height: 6,
+                        child: Stack(
+                          children: [
+                            ColoredBox(
+                              color: AppColors.dualisNavy.withValues(alpha: 0.1),
+                              child: const SizedBox.expand(),
+                            ),
+                            FractionallySizedBox(
+                              widthFactor: (progress!.$1 / progress!.$2).clamp(0.0, 1.0),
+                              child: const DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: AppColors.gradientBlueCyan,
+                                  borderRadius: BorderRadius.all(Radius.circular(3)),
+                                ),
+                                child: SizedBox.expand(),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -1571,8 +1610,8 @@ class _StepLayout extends StatelessWidget {
                   Text(
                     l10n.jv23StepOf(progress!.$1, progress!.$2),
                     style: GoogleFonts.inter(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                       color: secondary,
                     ),
                   ),
@@ -1582,14 +1621,15 @@ class _StepLayout extends StatelessWidget {
           ),
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
             children: [
               if (eyebrow != null)
                 Text(
                   eyebrow!,
                   style: GoogleFonts.inter(
-                    fontSize: 13,
+                    fontSize: 12.5,
                     fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
                     color: AppColors.dualisSymbolBlue,
                   ),
                 ),
@@ -1607,8 +1647,9 @@ class _StepLayout extends StatelessWidget {
                   axisLabel!,
                   key: const Key('jv2_axis_label'),
                   style: GoogleFonts.inter(
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: FontWeight.w700,
+                    letterSpacing: 0.4,
                     color: axisColor ?? AppColors.dualisSymbolBlue,
                   ),
                 ),
@@ -1621,9 +1662,11 @@ class _StepLayout extends StatelessWidget {
                   child: Text(
                     question!,
                     style: GoogleFonts.inter(
-                      fontSize: 22,
+                      fontSize: 26,
                       fontWeight: FontWeight.w700,
-                      height: 1.25,
+                      height: 1.14,
+                      letterSpacing: -0.5,
+                      color: AppColors.dualisNavy,
                     ),
                   ),
                 ),
@@ -1641,9 +1684,19 @@ class _StepLayout extends StatelessWidget {
           ),
         ),
         if (bottom != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-            child: bottom,
+          DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0x00F0F7FB), AppColors.backgroundDepth],
+                stops: [0.0, 0.3],
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
+              child: bottom,
+            ),
           ),
       ],
     );
@@ -1758,8 +1811,9 @@ class _CapsLabel extends StatelessWidget {
         child: Text(
           text,
           style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.1,
             color: AppColors.textSecondaryLight,
           ),
         ),
@@ -1856,7 +1910,6 @@ class _ChoiceCard extends StatelessWidget {
       );
 
   Widget _content(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final icon = leading ??
         (emoji == null
             ? null
@@ -1868,71 +1921,87 @@ class _ChoiceCard extends StatelessWidget {
       textAlign: wide ? TextAlign.start : TextAlign.center,
       style: GoogleFonts.inter(
         fontSize: large ? 19 : 13.5,
-        fontWeight: FontWeight.w700,
+        fontWeight: large ? FontWeight.w700 : FontWeight.w600,
         height: 1.22,
-        color: enabled ? null : AppColors.textSecondaryLight,
+        color: enabled ? AppColors.dualisNavy : AppColors.textSecondaryLight,
       ),
     );
     return Semantics(
       button: true,
       selected: selected,
-      child: Material(
-        color: selected
-            ? AppColors.dualisSymbolBlue.withValues(alpha: 0.12)
-            : (isDark ? AppColors.surfaceDark : AppColors.surfaceLight),
-        borderRadius: BorderRadius.circular(18),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: enabled ? onTap : null,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
-            constraints: BoxConstraints(minHeight: large ? 170 : (wide ? 56 : 96)),
-            padding: EdgeInsets.symmetric(horizontal: wide ? 12 : 8, vertical: 10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: selected
-                    ? AppColors.dualisSymbolBlue
-                    : (isDark ? AppColors.outlineDark : AppColors.outlineLight),
-                width: selected ? 2 : 1,
-              ),
-            ),
-            child: Stack(
-              children: [
-                if (wide)
-                  Row(
-                    children: [
-                      if (icon != null) ...[icon, const SizedBox(width: 10)],
-                      Expanded(child: text),
-                    ],
-                  )
-                else
-                  Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        constraints: BoxConstraints(minHeight: large ? 170 : (wide ? 56 : 96)),
+        decoration: _optionDecoration(selected: selected, radius: 22),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(22),
+            onTap: enabled ? onTap : null,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: wide ? 12 : 8, vertical: 10),
+              child: Stack(
+                children: [
+                  if (wide)
+                    Row(
                       children: [
-                        if (icon != null) ...[icon, SizedBox(height: large ? 12 : 6)],
-                        text,
+                        if (icon != null) ...[icon, const SizedBox(width: 10)],
+                        Expanded(child: text),
                       ],
+                    )
+                  else
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (icon != null) ...[icon, SizedBox(height: large ? 12 : 6)],
+                          text,
+                        ],
+                      ),
                     ),
-                  ),
-                if (selected && showCheck)
-                  const Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Icon(
-                      Icons.check_circle_rounded,
-                      size: 20,
-                      color: AppColors.dualisSymbolBlue,
+                  if (selected && showCheck)
+                    const Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Icon(
+                        Icons.check_circle_rounded,
+                        size: 20,
+                        color: AppColors.dualisNavy,
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
   }
+}
+
+/// Glass option surface shared by the choice cards and rows: white and
+/// rounded with a soft shadow; selected is a navy border over a cyan tint.
+BoxDecoration _optionDecoration({required bool selected, required double radius}) {
+  return BoxDecoration(
+    borderRadius: BorderRadius.circular(radius),
+    color: selected
+        ? AppColors.dualisSymbolCyan.withValues(alpha: 0.14)
+        : Colors.white.withValues(alpha: 0.86),
+    border: Border.all(
+      color: selected ? AppColors.dualisNavy : AppColors.dualisNavy.withValues(alpha: 0.08),
+      width: selected ? 2 : 1,
+    ),
+    boxShadow: selected
+        ? null
+        : [
+            BoxShadow(
+              color: AppColors.dualisNavy.withValues(alpha: 0.14),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+              spreadRadius: -12,
+            ),
+          ],
+  );
 }
 
 /// Tabs over the trigger cards, with how many are marked in each tab.
@@ -1952,8 +2021,10 @@ class _TopicTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.outlineLight, width: 2)),
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: AppColors.dualisNavy.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
@@ -1973,17 +2044,25 @@ class _TopicTabs extends StatelessWidget {
                 excludeSemantics: true,
                 child: InkWell(
                   key: t.key,
+                  borderRadius: BorderRadius.circular(13),
                   onTap: t.onTap,
-                  child: Container(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
                     constraints: const BoxConstraints(minHeight: 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: t.selected ? AppColors.dualisSymbolBlue : Colors.transparent,
-                          width: 3,
-                        ),
-                      ),
+                      color: t.selected ? Colors.white : Colors.transparent,
+                      borderRadius: BorderRadius.circular(13),
+                      boxShadow: t.selected
+                          ? [
+                              BoxShadow(
+                                color: AppColors.dualisNavy.withValues(alpha: 0.14),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ]
+                          : null,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -1993,8 +2072,8 @@ class _TopicTabs extends StatelessWidget {
                             t.label,
                             textAlign: TextAlign.center,
                             style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
                               color: t.selected
                                   ? AppColors.dualisNavy
                                   : AppColors.textSecondaryLight,
@@ -2034,6 +2113,10 @@ class _TopicTabs extends StatelessWidget {
 /// Row for answers with longer text (v2.3). Short answers use [_ChoiceCard].
 class _ChoiceTile extends StatelessWidget {
   final String? emoji;
+
+  /// Journal key of the option: when it has a Fluent emoji, that is drawn
+  /// instead of [emoji].
+  final String? emojiKey;
   final String label;
   final bool selected;
   final bool multi;
@@ -2050,6 +2133,7 @@ class _ChoiceTile extends StatelessWidget {
   const _ChoiceTile({
     super.key,
     this.emoji,
+    this.emojiKey,
     required this.label,
     this.selected = false,
     this.multi = false,
@@ -2079,69 +2163,64 @@ class _ChoiceTile extends StatelessWidget {
       );
 
   Widget _content(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fluent = emojiKey == null ? null : FluentEmoji.assetForJournalKey(emojiKey!);
     return Padding(
       padding: EdgeInsets.only(bottom: dense ? 8 : 10),
       child: Semantics(
         button: true,
         selected: multi ? selected : null,
         hint: semanticsHint,
-        child: Material(
-          color: selected
-              ? AppColors.dualisSymbolBlue.withValues(alpha: 0.12)
-              : (isDark ? AppColors.surfaceDark : AppColors.surfaceLight),
-          borderRadius: BorderRadius.circular(18),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(18),
-            onTap: enabled ? onTap : null,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: dense ? 11 : 14,
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: selected
-                      ? AppColors.dualisSymbolBlue
-                      : (isDark ? AppColors.outlineDark : AppColors.outlineLight),
-                  width: selected ? 2 : 1,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          decoration: _optionDecoration(selected: selected, radius: 20),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: enabled ? onTap : null,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: dense ? 10 : 13,
                 ),
-              ),
-              child: Row(
-                children: [
-                  if (emoji != null) ...[
-                    Text(emoji!, style: TextStyle(fontSize: dense ? 22 : 26)),
-                    const SizedBox(width: 14),
-                  ],
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          label,
-                          style: GoogleFonts.inter(
-                            fontSize: 15,
-                            fontWeight: accent ? FontWeight.w700 : FontWeight.w600,
-                            color: !enabled
-                                ? AppColors.textSecondaryLight
-                                : (accent ? AppColors.dualisSymbolBlue : null),
-                          ),
+                child: Row(
+                  children: [
+                    if (fluent != null) ...[
+                      FluentEmoji.image(fluent, size: dense ? 34 : 38),
+                      const SizedBox(width: 12),
+                    ] else if (emoji != null) ...[
+                      DuotoneIconTile(
+                        size: dense ? 36 : 40,
+                        radius: 11,
+                        child: ExcludeSemantics(
+                          child: Text(emoji!, style: TextStyle(fontSize: dense ? 19 : 22)),
                         ),
-                      ],
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    Expanded(
+                      child: Text(
+                        label,
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: accent ? FontWeight.w700 : FontWeight.w600,
+                          color: !enabled
+                              ? AppColors.textSecondaryLight
+                              : (accent ? AppColors.dualisSymbolBlue : AppColors.dualisNavy),
+                        ),
+                      ),
                     ),
-                  ),
-                  if (multi)
-                    Icon(
-                      selected
-                          ? Icons.check_circle_rounded
-                          : Icons.radio_button_unchecked_rounded,
-                      color: selected
-                          ? AppColors.dualisSymbolBlue
-                          : AppColors.outlineLight,
-                    ),
-                ],
+                    if (multi)
+                      Icon(
+                        selected
+                            ? Icons.check_circle_rounded
+                            : Icons.radio_button_unchecked_rounded,
+                        color: selected
+                            ? AppColors.dualisNavy
+                            : AppColors.dualisNavy.withValues(alpha: 0.22),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -2184,7 +2263,6 @@ class _TopicCardState extends State<_TopicCard> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final outline = isDark ? AppColors.outlineDark : AppColors.outlineLight;
     final rows = <Widget>[];
     for (var i = 0; i < widget.children.length; i += 2) {
       rows.add(Padding(
@@ -2209,11 +2287,9 @@ class _TopicCardState extends State<_TopicCard> {
       padding: const EdgeInsets.only(bottom: 10),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-          borderRadius: BorderRadius.circular(18),
+        decoration: _optionDecoration(selected: false, radius: 20).copyWith(
           border: Border.all(
-            color: _open ? AppColors.dualisSymbolBlue : outline,
+            color: _open ? AppColors.dualisNavy : AppColors.dualisNavy.withValues(alpha: 0.08),
             width: _open ? 1.5 : 1,
           ),
         ),
@@ -2230,16 +2306,9 @@ class _TopicCardState extends State<_TopicCard> {
                   padding: const EdgeInsets.all(12),
                   child: Row(
                     children: [
-                      Container(
-                        width: 44,
-                        height: 44,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: _open
-                              ? AppColors.dualisSymbolBlue.withValues(alpha: 0.12)
-                              : (isDark ? AppColors.backgroundDark : AppColors.backgroundLight),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
+                      DuotoneIconTile(
+                        size: 44,
+                        radius: 14,
                         child: ExcludeSemantics(
                           child: Text(widget.emoji, style: const TextStyle(fontSize: 22)),
                         ),
@@ -2254,6 +2323,7 @@ class _TopicCardState extends State<_TopicCard> {
                               style: GoogleFonts.inter(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
+                                color: AppColors.dualisNavy,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -2279,7 +2349,7 @@ class _TopicCardState extends State<_TopicCard> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AppColors.dualisSymbolBlue,
+                                color: AppColors.dualisNavy,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(
@@ -2586,23 +2656,20 @@ class _MoodIcon extends StatelessWidget {
 
   const _MoodIcon(this.mood);
 
-  static const Color _amber = Color(0xFFE0A100);
-
   @override
   Widget build(BuildContext context) {
-    final bem = mood == JournalKeys.moodBem;
-    final color = bem ? AppColors.dualisSymbolGreen : _amber;
-    return Container(
+    return SizedBox(
       key: Key('jv2_mood_icon_$mood'),
-      width: 52,
-      height: 52,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        shape: BoxShape.circle,
-      ),
-      alignment: Alignment.center,
-      child: ExcludeSemantics(
-        child: Text(journalEmojis[mood] ?? '', style: const TextStyle(fontSize: 30)),
+      width: 80,
+      height: 80,
+      child: Center(
+        child: FluentEmoji.forJournalKey(
+          mood,
+          size: 76,
+          fallback: ExcludeSemantics(
+            child: Text(journalEmojis[mood] ?? '', style: const TextStyle(fontSize: 52)),
+          ),
+        ),
       ),
     );
   }
@@ -2649,9 +2716,14 @@ class _ContinueButton extends StatelessWidget {
     return FilledButton(
       key: key == null ? const Key('jv2_continue') : null,
       style: FilledButton.styleFrom(
-        backgroundColor: AppColors.dualisSymbolBlue,
-        minimumSize: const Size.fromHeight(52),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        backgroundColor: AppColors.dualisNavy,
+        minimumSize: const Size.fromHeight(54),
+        shape: const StadiumBorder(),
+      ).copyWith(
+        shadowColor: WidgetStatePropertyAll(AppColors.softIndigoDark.withValues(alpha: 0.7)),
+        elevation: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.disabled) ? 0 : 6,
+        ),
       ),
       onPressed: onPressed,
       child: busy
@@ -2663,7 +2735,7 @@ class _ContinueButton extends StatelessWidget {
           : Text(
               label,
               style: GoogleFonts.inter(
-                fontSize: 16,
+                fontSize: 16.5,
                 fontWeight: FontWeight.w600,
               ),
             ),

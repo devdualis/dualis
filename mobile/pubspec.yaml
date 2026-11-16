@@ -87,6 +87,7 @@ flutter:
     - lib/assets/
     - lib/assets/brand/
     - lib/assets/icon/
+    - assets/emoji/
 
 flutter_launcher_icons:
   android: true
