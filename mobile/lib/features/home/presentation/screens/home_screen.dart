@@ -56,22 +56,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         .read(hydrationNotificationServiceProvider)
         .onNotificationOpened
         .listen((payload) {
-      if (payload == 'open_water_modal' && mounted) {
-        final settings = ref.read(hydrationControllerProvider).settings;
-        if (settings.trackingEnabled) {
-          WaterIntakeModal.show(context, source: 'reminder_alarm');
-        }
-      }
-    });
+          if (payload == 'open_water_modal' && mounted) {
+            final settings = ref.read(hydrationControllerProvider).settings;
+            if (settings.trackingEnabled) {
+              WaterIntakeModal.show(context, source: 'reminder_alarm');
+            }
+          }
+        });
 
     _checkinNotificationSub = ref
         .read(dailyCheckinNotificationServiceProvider)
         .onNotificationOpened
         .listen((payload) {
-      if (payload == 'open_checkin' && mounted) {
-        setState(() => _currentTabIndex = 0);
-      }
-    });
+          if (payload == 'open_checkin' && mounted) {
+            setState(() => _currentTabIndex = 0);
+          }
+        });
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final authState = ref.read(authControllerProvider);
@@ -118,18 +118,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final authState = ref.watch(authControllerProvider);
     final user = authState.user;
     final l10n = AppLocalizations.of(context);
-    final userName = (user?.name != null && user!.name.isNotEmpty) ? user.name : '';
-    final userEmail = (user?.email != null && user!.email.isNotEmpty)
-        ? user.email
-        : l10n.homeSessionActive;
+    final userName =
+        (user?.name != null && user!.name.isNotEmpty) ? user.name : '';
+    final userEmail =
+        (user?.email != null && user!.email.isNotEmpty)
+            ? user.email
+            : l10n.homeSessionActive;
     final activeProfileState = ref.watch(activeProfileControllerProvider);
-    final delegatedProfile = showsDelegatedActiveProfile(ref)
-        ? activeProfileState.activeProfile
-        : null;
+    final delegatedProfile =
+        showsDelegatedActiveProfile(ref)
+            ? activeProfileState.activeProfile
+            : null;
     final cardDisplayName = delegatedProfile?.name ?? userName;
-    final cardDisplaySubtitle = delegatedProfile != null
-        ? profileContextSubtitle(delegatedProfile, l10n)
-        : userEmail;
+    final cardDisplaySubtitle =
+        delegatedProfile != null
+            ? profileContextSubtitle(delegatedProfile, l10n)
+            : userEmail;
     final cardAvatarInitial = cardDisplayName;
     final viewOnlyActive = activeProfileIsViewOnly(ref);
     ref.watch(syncOutboxWorkerProvider);
@@ -155,42 +159,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           }
         },
       );
-      appBarTitle = ref.watch(premiumProfilesEnabledProvider)
-          // Premium builds: tier mark right under the app logo, the usual
-          // place apps show their plan. Same text as the login label.
-          ? Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                logo,
-                Row(
-                  key: const Key('home_premium_label'),
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 5,
-                      height: 5,
-                      decoration: const BoxDecoration(
-                        color: PremiumAccents.champagne,
-                        shape: BoxShape.circle,
+      appBarTitle =
+          ref.watch(premiumProfilesEnabledProvider)
+              // Premium builds: tier mark right under the app logo, the usual
+              // place apps show their plan. Same text as the login label.
+              ? Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  logo,
+                  Row(
+                    key: const Key('home_premium_label'),
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 5,
+                        height: 5,
+                        decoration: const BoxDecoration(
+                          color: PremiumAccents.champagne,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      AppLocalizations.of(context).loginPremiumLabel,
-                      style: GoogleFonts.inter(
-                        fontSize: 11,
-                        height: 1.1,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 1.2,
-                        color: AppColors.clinicalTeal,
+                      const SizedBox(width: 4),
+                      Text(
+                        AppLocalizations.of(context).loginPremiumLabel,
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          height: 1.1,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.2,
+                          color: AppColors.clinicalTeal,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            )
-          : logo;
+                    ],
+                  ),
+                ],
+              )
+              : logo;
       appBarActions = [
         if (ref.watch(premiumProfilesEnabledProvider)) ...[
           const ProfileAppBarPill(),
@@ -261,10 +266,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           color: AppColors.textPrimaryLight,
         ),
       );
-      appBarActions = [
-        const ProfileAppBarPill(),
-        const SizedBox(width: 8),
-      ];
+      appBarActions = [const ProfileAppBarPill(), const SizedBox(width: 8)];
     } else {
       appBarTitle = Text(
         ref.watch(premiumProfilesEnabledProvider)
@@ -278,18 +280,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
       // Premium "Hábitos" tab: the profile pill takes the library's place so
       // the title still fits.
-      appBarActions = ref.watch(premiumProfilesEnabledProvider)
-          ? const [ProfileAppBarPill(), SizedBox(width: 8)]
-          : [
-              _AppBarIconButton(
-                key: const Key('home_library_button'),
-                icon: Icons.menu_book_outlined,
-                color: AppColors.clinicalTealDark,
-                tooltip: l10n.xv2LibTitle,
-                onTap: () => context.push(RoutePaths.library),
-              ),
-              const SizedBox(width: 8),
-            ];
+      appBarActions =
+          ref.watch(premiumProfilesEnabledProvider)
+              ? const [ProfileAppBarPill(), SizedBox(width: 8)]
+              : [
+                _AppBarIconButton(
+                  key: const Key('home_library_button'),
+                  icon: Icons.menu_book_outlined,
+                  color: AppColors.clinicalTealDark,
+                  tooltip: l10n.xv2LibTitle,
+                  onTap: () => context.push(RoutePaths.library),
+                ),
+                const SizedBox(width: 8),
+              ];
     }
 
     appBarActions = [
@@ -311,6 +314,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
+      // The floating tab bar sits over the tab content, with no band behind
+      // it. Bottom inset stays in MediaQuery so scroll views pad past the bar.
+      extendBody: true,
       appBar: AppBar(
         backgroundColor: AppColors.surfaceLight,
         elevation: 0,
@@ -321,6 +327,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         actions: appBarActions,
       ),
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             Expanded(
@@ -399,128 +406,150 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return LandscapeBackground(
       spec: landscapeForDay(ref.read(homeClockProvider)()),
       child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const ActiveProfileBanner(),
-        Expanded(
-          child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-              GestureDetector(
-                key: const Key('home_profile_card'),
-                onTap: () => context.push(RoutePaths.settings),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.clinicalTeal, AppColors.softIndigo],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.softIndigo.withValues(alpha: 0.25),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          UserAvatar(
-                            picture: useDelegatedAvatar ? null : user?.picture,
-                            fallbackInitial: cardAvatarInitial,
-                            radius: 26,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const ActiveProfileBanner(),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                16,
+                20,
+                16 + MediaQuery.paddingOf(context).bottom,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    key: const Key('home_profile_card'),
+                    onTap: () => context.push(RoutePaths.settings),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            AppColors.clinicalTeal,
+                            AppColors.softIndigo,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.softIndigo.withValues(alpha: 0.25),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
                           ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  useDelegatedAvatar
-                                      ? AppLocalizations.of(context)
-                                          .activeProfileCardTitle(
-                                              cardDisplayName)
-                                      : homeGreetingText(
-                                          AppLocalizations.of(context),
-                                          cardDisplayName,
-                                          ref.read(homeClockProvider)(),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              UserAvatar(
+                                picture:
+                                    useDelegatedAvatar ? null : user?.picture,
+                                fallbackInitial: cardAvatarInitial,
+                                radius: 26,
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      useDelegatedAvatar
+                                          ? AppLocalizations.of(
+                                            context,
+                                          ).activeProfileCardTitle(
+                                            cardDisplayName,
+                                          )
+                                          : homeGreetingText(
+                                            AppLocalizations.of(context),
+                                            cardDisplayName,
+                                            ref.read(homeClockProvider)(),
+                                          ),
+                                      style: GoogleFonts.inter(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      cardDisplaySubtitle,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 13,
+                                        color: Colors.white.withValues(
+                                          alpha: 0.85,
                                         ),
-                                  style: GoogleFonts.inter(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  cardDisplaySubtitle,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 13,
-                                    color: Colors.white.withValues(alpha: 0.85),
+                              ),
+                              const Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                size: 14,
+                                color: Colors.white70,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 18),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.shield_outlined,
+                                  size: 18,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).homeDataProtectedBadge,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
                           ),
-                          const Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            size: 14,
-                            color: Colors.white70,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 18),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.shield_outlined, size: 18, color: Colors.white),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              AppLocalizations.of(context).homeDataProtectedBadge,
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-              ),
-              const SizedBox(height: 20),
+                  ),
+                  const SizedBox(height: 20),
 
-              const DualAxisTriggerCard(),
-              const SizedBox(height: 16),
-              const TodayHabitsCard(),
-              const SizedBox(height: 16),
-            ],
+                  const DualAxisTriggerCard(),
+                  const SizedBox(height: 16),
+                  const TodayHabitsCard(),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
           ),
-        ),
-        ),
-      ],
+        ],
       ),
     );
   }
