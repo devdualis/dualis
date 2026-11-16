@@ -30,7 +30,7 @@ class _ExamItemScreenState extends ConsumerState<ExamItemScreen> {
     final l10n = AppLocalizations.of(context);
     final async = ref.watch(careDocumentsProvider);
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundDepth,
       appBar: careAppBar(context, item),
       body: CareAsync<List<CareDocument>>(
         value: async,

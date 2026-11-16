@@ -97,8 +97,8 @@ class _ExamValuesListState extends State<ExamValuesList> {
               isDense: true,
               filled: true,
               fillColor: AppColors.surfaceLight,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.outlineLight)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppColors.outlineLight)),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.outlineLight)),
+              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.outlineLight)),
             ),
           ),
           const SizedBox(height: 10),
@@ -118,12 +118,15 @@ class _ExamValuesListState extends State<ExamValuesList> {
     final single = items.length == 1 && items.first.name.toLowerCase() == group.toLowerCase();
     return CareCard(
       padding: EdgeInsets.zero,
-      child: Column(
+      // Clip so the tinted header and the dividers follow the card corners.
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(21),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (!single)
             Container(
-              color: AppColors.brandBgLightBlue,
+              color: AppColors.iconTileTint,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               child: Row(children: [
                 Expanded(child: Text(group, style: careTitle(13))),
@@ -140,11 +143,12 @@ class _ExamValuesListState extends State<ExamValuesList> {
                 alignment: Alignment.center,
                 child: Text(
                   showAll ? l10n.careExamValuesShowLess : l10n.careExamValuesShowMore(items.length - _rowsPerGroup),
-                  style: careTitle(12).copyWith(color: AppColors.clinicalTeal),
+                  style: careTitle(12).copyWith(color: AppColors.clinicalTealDark),
                 ),
               ),
             ),
         ],
+      ),
       ),
     );
   }

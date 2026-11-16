@@ -180,7 +180,7 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
-        decoration: BoxDecoration(color: CareColors.slateBg, borderRadius: BorderRadius.circular(18)),
+        decoration: BoxDecoration(color: CareColors.slateBg, borderRadius: BorderRadius.circular(22)),
         child: const Icon(Icons.delete_outline, color: CareColors.slate),
       ),
       confirmDismiss: (_) => confirmCareDelete(context),
@@ -232,8 +232,8 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
               d,
               canEdit,
               CareRow(
-                color: AppColors.softIndigoLight,
-                borderColor: const Color(0xFFC9DDF0),
+                color: AppColors.iconTileTint,
+                borderColor: AppColors.dualisSymbolBlue.withValues(alpha: 0.25),
                 leading: const CareIconTile(Icons.sync, background: Colors.white, foreground: AppColors.dualisNavy),
                 title: l10n.careExamReading,
                 subtitle: l10n.careExamReadingHint,
@@ -289,16 +289,41 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
             rxOnly,
             fab,
             TabBarView(children: [values, documents]),
-            tabs: TabBar(
-              labelColor: AppColors.dualisNavy,
-              unselectedLabelColor: CareColors.slate,
-              indicatorColor: AppColors.dualisNavy,
-              labelStyle: careTitle(14),
-              unselectedLabelStyle: careBody(14),
-              tabs: [
-                Tab(key: const Key('exams_tab_values'), text: l10n.careExamTabValues),
-                Tab(key: const Key('exams_tab_documents'), text: l10n.careExamSectionLabs),
-              ],
+            // Same pill look as the History segmented control, but a real TabBar
+            // so it drives the TabBarView.
+            tabs: PreferredSize(
+              preferredSize: const Size.fromHeight(56),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                child: Container(
+                  height: 46,
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: AppColors.dualisNavy.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: TabBar(
+                    dividerColor: Colors.transparent,
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    splashBorderRadius: BorderRadius.circular(11),
+                    indicator: BoxDecoration(
+                      color: AppColors.surfaceLight,
+                      borderRadius: BorderRadius.circular(11),
+                      boxShadow: [
+                        BoxShadow(color: AppColors.dualisNavy.withValues(alpha: 0.14), blurRadius: 8, offset: const Offset(0, 3)),
+                      ],
+                    ),
+                    labelColor: AppColors.dualisNavy,
+                    unselectedLabelColor: AppColors.textSecondaryLight,
+                    labelStyle: careTitle(14),
+                    unselectedLabelStyle: careBody(14).copyWith(fontWeight: FontWeight.w600),
+                    tabs: [
+                      Tab(key: const Key('exams_tab_values'), text: l10n.careExamTabValues),
+                      Tab(key: const Key('exams_tab_documents'), text: l10n.careExamSectionLabs),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         );
@@ -309,7 +334,7 @@ class _ExamsScreenState extends ConsumerState<ExamsScreen> {
   void _retry() => ref.invalidate(careDocumentsProvider);
 
   Widget _scaffold(AppLocalizations l10n, bool rxOnly, Widget? fab, Widget body, {PreferredSizeWidget? tabs}) => Scaffold(
-        backgroundColor: AppColors.backgroundLight,
+        backgroundColor: AppColors.backgroundDepth,
         appBar: careAppBar(context, rxOnly ? l10n.careExamSectionPrescriptions : l10n.careExamsTitle, bottom: tabs),
         floatingActionButton: fab,
         body: body,
@@ -346,8 +371,6 @@ class _DocRow extends StatelessWidget {
     return CareRow(
       leading: CareIconTile(
         d.isPdf ? Icons.picture_as_pdf_outlined : d.kind == DocumentKind.prescription ? Icons.receipt_long_outlined : Icons.science_outlined,
-        background: CareColors.slateBg,
-        foreground: CareColors.slate,
       ),
       title: title,
       subtitle: [d.labName, careDate(context, careDay(d.collectedOn) ?? d.createdAt)].whereType<String>().join(' · '),

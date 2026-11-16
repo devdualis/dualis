@@ -91,7 +91,7 @@ class _PrescriptionReviewScreenState extends ConsumerState<PrescriptionReviewScr
     // (delete, re-read, field edits, reminders) need care write access.
     final canEdit = activeProfileCanWrite(ref, ShareCategory.care);
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundDepth,
       appBar: careAppBar(context, l10n.careRxTitle, actions: [
         if (canEdit) IconButton(
           key: const Key('rx_delete'),
@@ -155,6 +155,7 @@ class _PrescriptionReviewScreenState extends ConsumerState<PrescriptionReviewScr
                           if (canEdit) Checkbox(
                             key: Key('rx_${i}_$field'),
                             shape: const CircleBorder(),
+                            activeColor: AppColors.dualisNavy,
                             value: _checked[i]?.contains(field) ?? false,
                             onChanged: (v) => setState(() => v == true ? (_checked[i] ??= {}).add(field) : _checked[i]?.remove(field)),
                           ),

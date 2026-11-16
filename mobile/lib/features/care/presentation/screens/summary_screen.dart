@@ -20,6 +20,7 @@ import '../../../profile/presentation/controllers/active_profile_controller.dart
 import '../../data/care_api.dart';
 import '../../domain/care_models.dart';
 import '../../domain/pni_calendar.dart';
+import '../../../journal_insights/presentation/widgets/history_widgets.dart';
 import '../widgets/care_widgets.dart';
 
 enum SummarySection { journal, conditions, readings, medications, allergies, vaccines, exams, notes }
@@ -256,7 +257,7 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
       SummarySection.notes: l10n.careSectionNotes,
     };
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundDepth,
       appBar: careAppBar(context, l10n.careSummaryTitle),
       body: Builder(
         builder: (context) {
@@ -264,16 +265,12 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
             children: [
-              SegmentedButton<int>(
-                segments: [
-                  ButtonSegment(value: 7, label: Text(l10n.careDays(7))),
-                  ButtonSegment(value: 30, label: Text(l10n.careDays(30))),
-                  ButtonSegment(value: 90, label: Text(l10n.careDays(90))),
-                ],
-                selected: {_days},
-                showSelectedIcon: false,
-                onSelectionChanged: (s) {
-                  _days = s.first;
+              HistorySegmented<int>(
+                keyPrefix: 'care_summary_days',
+                options: [(7, l10n.careDays(7)), (30, l10n.careDays(30)), (90, l10n.careDays(90))],
+                selected: _days,
+                onChanged: (v) {
+                  _days = v;
                   _reload();
                 },
               ),

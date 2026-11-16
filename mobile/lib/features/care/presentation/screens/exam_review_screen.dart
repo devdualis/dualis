@@ -13,6 +13,7 @@ import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../domain/care_models.dart';
 import '../care_providers.dart';
 import '../care_routes.dart';
+import '../../../../shared/widgets/glass_card.dart';
 import '../widgets/care_widgets.dart';
 
 /// Shows the original document inside the app: the photo, or the PDF pages as
@@ -578,15 +579,12 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
   }
 
   Widget _group(int i, _Group group, bool canEdit) {
-    return Container(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: GlassCard(
       key: _groupKeys[i],
-      margin: const EdgeInsets.only(bottom: 14),
+      radius: 22,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -604,6 +602,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
           ],
         ],
       ),
+      ),
     );
   }
 
@@ -613,7 +612,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
     final canEdit = activeProfileCanWrite(ref, ShareCategory.care);
     final async = ref.watch(careDocumentProvider(widget.documentId));
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundDepth,
       appBar: careAppBar(context, l10n.careExamReviewTitle, actions: [
         if (canEdit) IconButton(tooltip: l10n.careDelete, onPressed: _delete, icon: const Icon(Icons.delete_outline)),
       ]),
@@ -648,7 +647,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                   onTap: () => _chooseGroup(groups),
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(16, 10, 12, 10),
-                    decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0)))),
+                    decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.outlineLight))),
                     child: Row(children: [
                       Expanded(
                         child: ValueListenableBuilder<int>(
@@ -676,7 +675,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                       if (confirm && doc.status == DocumentStatus.review)
                         Container(
                           padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(color: AppColors.brandBgLightBlue, borderRadius: BorderRadius.circular(18)),
+                          decoration: BoxDecoration(color: AppColors.iconTileTint, borderRadius: BorderRadius.circular(22)),
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             Text(l10n.careExamCompareTitle, style: careTitle()),
                             const SizedBox(height: 6),
