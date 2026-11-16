@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../../shared/widgets/glass_card.dart';
 import '../../../house_ads/domain/house_ad.dart';
 
 /// The promo as its own screen (`/premium-promo`), opened from features a
@@ -44,62 +46,14 @@ class PremiumPromoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final features = [
-      (
-        Icons.wb_twilight_rounded,
-        const Color(0xFFEEF0FF),
-        const Color(0xFF4F46E5),
-        l10n.premiumPromoHabits,
-        l10n.premiumPromoHabitsDesc,
-      ),
-      (
-        Icons.vaccines_outlined,
-        AppColors.clinicalTealLight,
-        AppColors.clinicalTealDark,
-        l10n.premiumPromoVaccines,
-        l10n.premiumPromoVaccinesDesc,
-      ),
-      (
-        Icons.block_rounded,
-        const Color(0xFFFFF8E1),
-        const Color(0xFFB26A00),
-        l10n.premiumPromoAllergies,
-        l10n.premiumPromoAllergiesDesc,
-      ),
-      (
-        Icons.medication_outlined,
-        AppColors.softIndigoLight,
-        AppColors.dualisNavy,
-        l10n.premiumPromoMedication,
-        l10n.premiumPromoMedicationDesc,
-      ),
-      (
-        Icons.calendar_month_outlined,
-        const Color(0xFFE8F5E9),
-        const Color(0xFF2E7D32),
-        l10n.premiumPromoAppointments,
-        l10n.premiumPromoAppointmentsDesc,
-      ),
-      (
-        Icons.folder_outlined,
-        const Color(0xFFF1F5F9),
-        const Color(0xFF334155),
-        l10n.premiumPromoExams,
-        l10n.premiumPromoExamsDesc,
-      ),
-      (
-        Icons.picture_as_pdf_outlined,
-        AppColors.clinicalTealLight,
-        AppColors.clinicalTealDark,
-        l10n.premiumPromoPdf,
-        l10n.premiumPromoPdfDesc,
-      ),
-      (
-        Icons.monitor_heart_outlined,
-        AppColors.softIndigoLight,
-        AppColors.dualisNavy,
-        l10n.chronicTrackPromoTitle,
-        l10n.chronicTrackPromoDesc,
-      ),
+      (Icons.wb_twilight_rounded, l10n.premiumPromoHabits, l10n.premiumPromoHabitsDesc),
+      (Icons.vaccines_outlined, l10n.premiumPromoVaccines, l10n.premiumPromoVaccinesDesc),
+      (Icons.block_rounded, l10n.premiumPromoAllergies, l10n.premiumPromoAllergiesDesc),
+      (Icons.medication_outlined, l10n.premiumPromoMedication, l10n.premiumPromoMedicationDesc),
+      (Icons.calendar_month_outlined, l10n.premiumPromoAppointments, l10n.premiumPromoAppointmentsDesc),
+      (Icons.folder_outlined, l10n.premiumPromoExams, l10n.premiumPromoExamsDesc),
+      (Icons.picture_as_pdf_outlined, l10n.premiumPromoPdf, l10n.premiumPromoPdfDesc),
+      (Icons.monitor_heart_outlined, l10n.chronicTrackPromoTitle, l10n.chronicTrackPromoDesc),
     ];
 
     return Column(
@@ -112,66 +66,59 @@ class PremiumPromoScreen extends StatelessWidget {
               _Hero(l10n: l10n),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                // Two columns that grow with the text size instead of a fixed grid.
-                child: LayoutBuilder(
-                  builder:
-                      (context, box) => Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: [
-                          for (final (icon, bg, fg, title, desc) in features)
-                            Container(
-                              width: (box.maxWidth - 10) / 2,
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceLight,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: AppColors.outlineLight,
+                child: GlassCard(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  child: Column(
+                    children: [
+                      for (var i = 0; i < features.length; i++) ...[
+                        if (i > 0) const Divider(height: 1, color: AppColors.outlineLight),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              DuotoneIconTile(
+                                size: 38,
+                                child: Icon(features[i].$1, size: 20, color: AppColors.dualisNavy),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      features[i].$2,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 14.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textPrimaryLight,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      features[i].$3,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12.5,
+                                        height: 1.35,
+                                        color: AppColors.textSecondaryLight,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: 34,
-                                    height: 34,
-                                    decoration: BoxDecoration(
-                                      color: bg,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Icon(icon, size: 19, color: fg),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    title,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.textPrimaryLight,
-                                    ),
-                                  ),
-                                  Text(
-                                    desc,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      color: AppColors.textSecondaryLight,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
         ),
         Container(
-          color: AppColors.backgroundLight,
+          color: AppColors.backgroundDepth,
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
           child: Column(
             children: [
@@ -183,9 +130,7 @@ class PremiumPromoScreen extends StatelessWidget {
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.dualisNavy,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+                    shape: const StadiumBorder(),
                   ),
                   child: Text(
                     l10n.premiumPromoCta,
@@ -200,6 +145,7 @@ class PremiumPromoScreen extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 l10n.premiumPromoNote,
+                textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   color: AppColors.textSecondaryLight,
@@ -230,18 +176,7 @@ class _Hero extends StatelessWidget {
     return Container(
       height: 360,
       clipBehavior: Clip.antiAlias,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.dualisNavy,
-            AppColors.dualisSymbolBlue,
-            AppColors.dualisSymbolCyan,
-          ],
-          stops: [0, 0.75, 1],
-        ),
-      ),
+      decoration: const BoxDecoration(gradient: AppColors.gradientNavy),
       child: Stack(
         children: [
           Padding(
@@ -249,13 +184,23 @@ class _Hero extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                DuotoneIconTile(
+                  size: 40,
+                  background: Colors.white.withValues(alpha: 0.12),
+                  child: const Icon(
+                    Icons.star_rounded,
+                    size: 22,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 11,
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.18),
+                    color: Colors.white.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Row(
@@ -295,7 +240,7 @@ class _Hero extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     height: 1.4,
-                    color: const Color(0xFFE0F4FB),
+                    color: AppColors.clinicalTealLight,
                   ),
                 ),
               ],

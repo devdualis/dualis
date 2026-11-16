@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
 import '../../../journal/presentation/controllers/journal_flow_controller.dart' show userConditionsProvider;
 import '../../../profile/domain/models/share_category.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
@@ -73,112 +74,98 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
         children: [
           if (!canReadCare) NotSharedPlaceholder(profileName: profileName),
           if (canReadCare) ...[
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
-                gradient: const LinearGradient(colors: [AppColors.dualisNavy, AppColors.dualisSymbolBlue]),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(l10n.careHubToday, style: careBody().copyWith(color: Colors.white70)),
-                        const SizedBox(height: 2),
-                        Text(
-                          todaySlots.isEmpty ? l10n.careHubNoRemindersToday : l10n.careHubRemindersToday(todaySlots.length),
-                          style: careTitle(19).copyWith(color: Colors.white),
-                        ),
-                        if (next != null) ...[
-                          const SizedBox(height: 4),
-                          Text(l10n.careHubNext(next.$1.title, careTime(next.$2)), style: careBody().copyWith(color: Colors.white70)),
-                        ],
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.task_alt_rounded, color: Colors.white, size: 40),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            CareRow(
-              key: const Key('care_hub_vaccines'),
-              leading: const CareIconTile(Icons.vaccines_outlined),
-              title: l10n.careVaccinesTitle,
-              subtitle: doses == null ? null : l10n.careHubVaccinesSubtitle(doses.length),
-              onTap: () => context.push(CarePaths.vaccines),
-            ),
-            const SizedBox(height: 10),
-            CareRow(
-              key: const Key('care_hub_allergies'),
-              leading: const CareIconTile(Icons.no_food_outlined, background: CareColors.amberBg, foreground: CareColors.amber),
-              title: l10n.careAllergiesTitle,
-              subtitle: allergies == null
+            _TodayCard(
+              title: todaySlots.isEmpty ? l10n.careHubNoRemindersToday : l10n.careHubRemindersToday(todaySlots.length),
+              eyebrow: l10n.careHubToday,
+              nextLine: next == null ? null : l10n.careHubNext(next.$1.title, careTime(next.$2)),
+              appointmentLine: upcoming.isEmpty
                   ? null
-                  : allergies.isEmpty
-                      ? l10n.careHubNone
-                      : allergies.map((a) => a.str('name')).whereType<String>().take(3).join(', '),
-              onTap: () => context.push(CarePaths.allergies),
-            ),
-            const SizedBox(height: 10),
-          ],
-          if (canReadConditions) ...[
-            CareRow(
-              key: const Key('care_hub_conditions'),
-              leading: const CareIconTile(Icons.healing_outlined, background: CareColors.slateBg, foreground: AppColors.clinicalTeal),
-              title: l10n.careConditionsTitle,
-              subtitle: conditions == null
-                  ? null
-                  : conditions.isEmpty
-                      ? l10n.careHubNone
-                      : conditions.map((c) => c.label).take(3).join(', '),
-              onTap: () => context.push(RoutePaths.myConditions),
-            ),
-            const SizedBox(height: 10),
-          ],
-          if (canReadCare) ...[
-            CareRow(
-              key: const Key('care_hub_medications'),
-              leading: const CareIconTile(Icons.medication_outlined, background: AppColors.softIndigoLight, foreground: AppColors.dualisNavy),
-              title: l10n.careMedicationsTitle,
-              subtitle: [
-                l10n.careHubMedsActive(meds.where((m) => m.active).length),
-                if (lowStock > 0) l10n.careHubLowStock(lowStock),
-              ].join(' · '),
-              onTap: () => context.push(CarePaths.medications),
-            ),
-            const SizedBox(height: 10),
-            CareRow(
-              key: const Key('care_hub_prescriptions'),
-              leading: const CareIconTile(Icons.receipt_long_outlined, background: AppColors.softIndigoLight, foreground: AppColors.dualisNavy),
-              title: l10n.careExamSectionPrescriptions,
-              subtitle: prescriptions == null ? null : l10n.careHubPrescriptions(prescriptions),
-              onTap: () => context.push(CarePaths.prescriptions),
-            ),
-            const SizedBox(height: 10),
-            CareRow(
-              key: const Key('care_hub_appointments'),
-              leading: const CareIconTile(Icons.event_outlined, background: CareColors.greenBg, foreground: CareColors.green),
-              title: l10n.careAppointmentsTitle,
-              subtitle: upcoming.isEmpty
-                  ? l10n.careHubNoUpcoming
                   : l10n.careHubNextAppointment(
                       careDate(context, upcoming.first.occursAt!),
                       upcoming.first.str('professional') ?? upcoming.first.str('specialty') ?? '',
                     ),
-              onTap: () => context.push(CarePaths.appointments),
+              times: [for (final (_, slot) in todaySlots) careTime(slot)],
             ),
-            const SizedBox(height: 10),
-            CareRow(
-              key: const Key('care_hub_exams'),
-              leading: const CareIconTile(Icons.science_outlined, background: CareColors.slateBg, foreground: CareColors.slate),
-              title: l10n.careExamsTitle,
-              subtitle: docs == null ? null : l10n.careHubDocuments(docs),
-              onTap: () => context.push(CarePaths.exams),
-            ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 14),
+          ],
+          _TileGrid(
+            tiles: [
+              if (canReadCare)
+                _CareTile(
+                  key: const Key('care_hub_vaccines'),
+                  icon: Icons.vaccines_outlined,
+                  title: l10n.careVaccinesTitle,
+                  subtitle: doses == null ? null : l10n.careHubVaccinesSubtitle(doses.length),
+                  onTap: () => context.push(CarePaths.vaccines),
+                ),
+              if (canReadCare)
+                _CareTile(
+                  key: const Key('care_hub_allergies'),
+                  icon: Icons.no_food_outlined,
+                  title: l10n.careAllergiesTitle,
+                  subtitle: allergies == null
+                      ? null
+                      : allergies.isEmpty
+                          ? l10n.careHubNone
+                          : allergies.map((a) => a.str('name')).whereType<String>().take(3).join(', '),
+                  onTap: () => context.push(CarePaths.allergies),
+                ),
+              if (canReadConditions)
+                _CareTile(
+                  key: const Key('care_hub_conditions'),
+                  icon: Icons.healing_outlined,
+                  title: l10n.careConditionsTitle,
+                  subtitle: conditions == null
+                      ? null
+                      : conditions.isEmpty
+                          ? l10n.careHubNone
+                          : conditions.map((c) => c.label).take(3).join(', '),
+                  onTap: () => context.push(RoutePaths.myConditions),
+                ),
+              if (canReadCare)
+                _CareTile(
+                  key: const Key('care_hub_medications'),
+                  icon: Icons.medication_outlined,
+                  title: l10n.careMedicationsTitle,
+                  subtitle: [
+                    l10n.careHubMedsActive(meds.where((m) => m.active).length),
+                    if (lowStock > 0) l10n.careHubLowStock(lowStock),
+                  ].join(' · '),
+                  onTap: () => context.push(CarePaths.medications),
+                ),
+              if (canReadCare)
+                _CareTile(
+                  key: const Key('care_hub_prescriptions'),
+                  icon: Icons.receipt_long_outlined,
+                  title: l10n.careExamSectionPrescriptions,
+                  subtitle: prescriptions == null ? null : l10n.careHubPrescriptions(prescriptions),
+                  onTap: () => context.push(CarePaths.prescriptions),
+                ),
+              if (canReadCare)
+                _CareTile(
+                  key: const Key('care_hub_appointments'),
+                  icon: Icons.event_outlined,
+                  title: l10n.careAppointmentsTitle,
+                  subtitle: upcoming.isEmpty
+                      ? l10n.careHubNoUpcoming
+                      : l10n.careHubNextAppointment(
+                          careDate(context, upcoming.first.occursAt!),
+                          upcoming.first.str('professional') ?? upcoming.first.str('specialty') ?? '',
+                        ),
+                  onTap: () => context.push(CarePaths.appointments),
+                ),
+              if (canReadCare)
+                _CareTile(
+                  key: const Key('care_hub_exams'),
+                  icon: Icons.science_outlined,
+                  title: l10n.careExamsTitle,
+                  subtitle: docs == null ? null : l10n.careHubDocuments(docs),
+                  onTap: () => context.push(CarePaths.exams),
+                ),
+            ],
+          ),
+          if (canReadCare) ...[
+            const SizedBox(height: 12),
             CareRow(
               key: const Key('care_hub_summary'),
               leading: const CareIconTile(Icons.picture_as_pdf_outlined),
@@ -188,6 +175,158 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Navy hero of the hub ("today" in the prototype): reminders, the next
+/// medication and appointment, and the day's dose times.
+class _TodayCard extends StatelessWidget {
+  const _TodayCard({required this.eyebrow, required this.title, this.nextLine, this.appointmentLine, required this.times});
+
+  final String eyebrow;
+  final String title;
+  final String? nextLine;
+  final String? appointmentLine;
+  final List<String> times;
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = careBody().copyWith(color: Colors.white.withValues(alpha: 0.78));
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: AppColors.gradientNavy,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.softIndigoDark.withValues(alpha: 0.7),
+            blurRadius: 30,
+            offset: const Offset(0, 18),
+            spreadRadius: -20,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              DuotoneIconTile(
+                background: Colors.white.withValues(alpha: 0.12),
+                child: const Icon(Icons.task_alt_rounded, color: Colors.white, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(eyebrow, style: muted),
+                    const SizedBox(height: 2),
+                    Text(title, style: careTitle(18).copyWith(color: Colors.white)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (nextLine != null) ...[const SizedBox(height: 10), Text(nextLine!, style: muted)],
+          if (appointmentLine != null) ...[
+            SizedBox(height: nextLine == null ? 10 : 2),
+            Text(appointmentLine!, style: muted),
+          ],
+          if (times.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final t in times.take(6))
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.schedule_rounded, size: 15, color: AppColors.dualisSymbolCyan),
+                        const SizedBox(width: 6),
+                        Text(t, style: careTitle(13.5).copyWith(color: Colors.white)),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Two-column grid of equal-height tiles (a lone last tile keeps half width).
+class _TileGrid extends StatelessWidget {
+  const _TileGrid({required this.tiles});
+
+  final List<Widget> tiles;
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <Widget>[];
+    for (var i = 0; i < tiles.length; i += 2) {
+      if (i > 0) rows.add(const SizedBox(height: 12));
+      rows.add(
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: tiles[i]),
+              const SizedBox(width: 12),
+              Expanded(child: i + 1 < tiles.length ? tiles[i + 1] : const SizedBox.shrink()),
+            ],
+          ),
+        ),
+      );
+    }
+    return Column(children: rows);
+  }
+}
+
+class _CareTile extends StatelessWidget {
+  const _CareTile({super.key, required this.icon, required this.title, this.subtitle, required this.onTap});
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return CareCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(16),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 92),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            CareIconTile(icon),
+            const SizedBox(height: 14),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: careTitle(15.5)),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(subtitle!, maxLines: 2, overflow: TextOverflow.ellipsis, style: careBody(12.5)),
+                ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

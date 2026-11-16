@@ -5,19 +5,23 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../../shared/widgets/glass_card.dart';
 
-/// Shared look of the "Meus cuidados" screens (docs/design/premium-v2).
+/// Semantic tones of the "Meus cuidados" screens, built from brand tokens:
+/// amber is a warning, green is ok, slate is neutral (navy on the cyan tint).
 abstract final class CareColors {
-  static const amberBg = Color(0xFFFFF8E1);
-  static const amber = Color(0xFFB26A00);
-  static const greenBg = Color(0xFFE8F5E9);
+  static const amberBg = AppColors.intensityMildBg;
+  static const amber = AppColors.intensityMildText;
+  // 16% of dualisSymbolGreen; the text shade is a dark green for contrast on it.
+  static const greenBg = Color(0x2966BE71);
   static const green = Color(0xFF2E7D32);
-  static const slateBg = Color(0xFFF1F5F9);
-  static const slate = Color(0xFF334155);
+  static const slateBg = AppColors.iconTileTint;
+  static const slate = AppColors.dualisNavy;
 }
 
 TextStyle careTitle([double size = 15]) =>
-    GoogleFonts.inter(fontSize: size, fontWeight: FontWeight.w700, color: AppColors.textPrimaryLight);
+    GoogleFonts.inter(fontSize: size, fontWeight: FontWeight.w700, letterSpacing: -0.1, color: AppColors.textPrimaryLight);
 
 TextStyle careBody([double size = 13]) =>
     GoogleFonts.inter(fontSize: size, color: AppColors.textSecondaryLight, height: 1.35);
@@ -45,33 +49,38 @@ class CareCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final inset = padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 14);
+    if (color != null || borderColor != null || dashed) {
+      // Tinted card (warning banner, dashed "add" card): flat fill, no glass.
+      return Material(
+        color: color ?? AppColors.brandBgLightBlue,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: borderColor ?? (dashed ? AppColors.clinicalTeal.withValues(alpha: 0.4) : Colors.transparent)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(onTap: onTap, child: Padding(padding: inset, child: child)),
+      );
+    }
+    final glass = GlassCard(radius: 22, padding: inset, child: child);
+    if (onTap == null) return glass;
     return Material(
-      color: color ?? AppColors.surfaceLight,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: borderColor ?? (dashed ? AppColors.clinicalTeal.withValues(alpha: 0.4) : AppColors.outlineLight)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(padding: padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 14), child: child),
-      ),
+      type: MaterialType.transparency,
+      child: InkWell(borderRadius: BorderRadius.circular(22), onTap: onTap, child: glass),
     );
   }
 }
 
 class CareIconTile extends StatelessWidget {
-  const CareIconTile(this.icon, {super.key, this.background = AppColors.clinicalTealLight, this.foreground = AppColors.clinicalTealDark});
+  const CareIconTile(this.icon, {super.key, this.background = AppColors.iconTileTint, this.foreground = AppColors.dualisNavy});
 
   final IconData icon;
   final Color background;
   final Color foreground;
 
   @override
-  Widget build(BuildContext context) => Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(13)),
+  Widget build(BuildContext context) => DuotoneIconTile(
+        background: background,
         child: Icon(icon, color: foreground, size: 22),
       );
 }
@@ -108,7 +117,7 @@ class CareRow extends StatelessWidget {
           ),
           if (trailing != null) ...[const SizedBox(width: 8), trailing!]
           else if (onTap != null)
-            const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
         ],
       ),
     );
@@ -127,7 +136,7 @@ class CarePill extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg) = switch (tone) {
       PillTone.done => (CareColors.greenBg, CareColors.green),
-      PillTone.neutral => (CareColors.slateBg, const Color(0xFF475569)),
+      PillTone.neutral => (AppColors.dualisNavy.withValues(alpha: 0.08), AppColors.textSecondaryLight),
       PillTone.blue => (AppColors.clinicalTealLight, AppColors.clinicalTealDark),
       PillTone.amber => (CareColors.amberBg, CareColors.amber),
     };
@@ -149,13 +158,13 @@ class CareNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(color: CareColors.slateBg, borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(color: AppColors.dualisNavy.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(14)),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(icon, size: 18, color: AppColors.textSecondaryLight),
             const SizedBox(width: 8),
-            Expanded(child: Text(text, style: careBody(12).copyWith(color: const Color(0xFF475569)))),
+            Expanded(child: Text(text, style: careBody(12))),
           ],
         ),
       );
@@ -167,7 +176,7 @@ class CareSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      Padding(padding: const EdgeInsets.only(top: 8, bottom: 2), child: Text(title, style: careTitle()));
+      Padding(padding: const EdgeInsets.only(top: 10, bottom: 2), child: Text(title, style: careTitle(16)));
 }
 
 class CareEmpty extends StatelessWidget {
@@ -180,7 +189,7 @@ class CareEmpty extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 28),
         child: Column(
           children: [
-            Icon(icon, size: 40, color: const Color(0xFF94A3B8)),
+            Icon(icon, size: 40, color: AppColors.textSecondaryLight.withValues(alpha: 0.6)),
             const SizedBox(height: 8),
             Text(text, textAlign: TextAlign.center, style: careBody(14)),
           ],
@@ -272,7 +281,7 @@ class CareDateField extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       key: fieldKey,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       onTap: () async {
         final now = DateTime.now();
         final picked = await showDatePicker(
@@ -285,7 +294,7 @@ class CareDateField extends StatelessWidget {
       },
       child: InputDecorator(
         decoration: InputDecoration(labelText: label, filled: true, fillColor: AppColors.surfaceLight),
-        child: Text(value == null ? '—' : careDate(context, value!), style: GoogleFonts.inter(fontSize: 15)),
+        child: Text(value == null ? '—' : careDate(context, value!), style: GoogleFonts.inter(fontSize: 15, color: AppColors.textPrimaryLight)),
       ),
     );
   }
@@ -297,8 +306,7 @@ Future<T?> showCareSheet<T>(BuildContext context, Widget Function(BuildContext) 
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    backgroundColor: AppColors.surfaceLight,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
+    // Background and corners come from the glass bottom-sheet theme.
     builder: (ctx) => Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
       child: SafeArea(child: SingleChildScrollView(padding: const EdgeInsets.fromLTRB(18, 0, 18, 18), child: builder(ctx))),
@@ -329,10 +337,10 @@ void careSnack(BuildContext context, String text) =>
 PreferredSizeWidget careAppBar(BuildContext context, String title, {List<Widget> actions = const [], PreferredSizeWidget? bottom}) {
   return AppBar(
     bottom: bottom,
-    backgroundColor: AppColors.surfaceLight,
+    backgroundColor: AppColors.backgroundDepth,
     elevation: 0,
-    scrolledUnderElevation: 1,
-    title: Text(title, style: careTitle(19)),
+    scrolledUnderElevation: 0,
+    title: Text(title, style: careTitle(19).copyWith(color: AppColors.dualisNavy)),
     // Space for the global urgent-help button (UrgentHelpOverlay).
     actions: [...actions, const SizedBox(width: 56)],
   );
