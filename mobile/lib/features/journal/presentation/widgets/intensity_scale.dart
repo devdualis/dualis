@@ -112,27 +112,31 @@ class IntensityScaleFull extends StatelessWidget {
             onSelect: voice ? () => onChanged(level) : null,
             child: const SizedBox.shrink(),
           ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            for (var level = 1; level <= 5; level++)
-              Semantics(
-                selected: value == level,
-                button: true,
-                label: '${l10n.jv2IntensityLevel(level)}, ${intensityName(l10n, level)}: '
-                    '${intensityText(l10n, level, physical: physical)}',
-                excludeSemantics: true,
-                child: InkWell(
-                  key: Key('${keyPrefix}_$level'),
-                  customBorder: const CircleBorder(),
-                  onTap: () => onChanged(level),
-                  child: Padding(
-                    padding: const EdgeInsets.all(2),
-                    child: _LevelDot(level: level, selected: value == level, size: 54),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(2, 8, 2, 0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              for (var level = 1; level <= 5; level++) ...[
+                if (level > 1) const SizedBox(width: 8),
+                Expanded(
+                  child: Semantics(
+                    selected: value == level,
+                    button: true,
+                    label: '${l10n.jv2IntensityLevel(level)}, ${intensityName(l10n, level)}: '
+                        '${intensityText(l10n, level, physical: physical)}',
+                    excludeSemantics: true,
+                    child: InkWell(
+                      key: Key('${keyPrefix}_$level'),
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () => onChanged(level),
+                      child: _LevelBar(level: level, value: value, unit: 12, base: 10),
+                    ),
                   ),
                 ),
-              ),
-          ],
+              ],
+            ],
+          ),
         ),
         const SizedBox(height: 12),
         AnimatedContainer(
@@ -141,21 +145,21 @@ class IntensityScaleFull extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
             color: value == null
-                ? AppColors.backgroundLight
-                : AppColors.dualisSymbolBlue.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(14),
+                ? AppColors.dualisNavy.withValues(alpha: 0.05)
+                : AppColors.iconTileTint,
+            borderRadius: BorderRadius.circular(16),
           ),
           child: value == null
               ? Text(
                   l10n.jv23IntensityPickHint,
                   style: GoogleFonts.inter(
-                    fontSize: 14.5,
+                    fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textSecondaryLight,
                     height: 1.3,
                   ),
                 )
-              : _LevelText(level: value!, physical: physical, fontSize: 14.5),
+              : _LevelText(level: value!, physical: physical, fontSize: 14),
         ),
       ],
     );
@@ -196,23 +200,24 @@ class IntensityScaleCompact extends StatelessWidget {
             child: const SizedBox.shrink(),
           ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            for (var level = 1; level <= 5; level++)
-              Semantics(
-                selected: value == level,
-                button: true,
-                label: '${l10n.jv2IntensityLevel(level)}, ${intensityName(l10n, level)}',
-                child: InkWell(
-                  key: Key('${keyPrefix}_$level'),
-                  customBorder: const CircleBorder(),
-                  onTap: () => onChanged(level),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: _LevelDot(level: level, selected: value == level, size: 38),
+            for (var level = 1; level <= 5; level++) ...[
+              if (level > 1) const SizedBox(width: 6),
+              Expanded(
+                child: Semantics(
+                  selected: value == level,
+                  button: true,
+                  label: '${l10n.jv2IntensityLevel(level)}, ${intensityName(l10n, level)}',
+                  child: InkWell(
+                    key: Key('${keyPrefix}_$level'),
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: () => onChanged(level),
+                    child: _LevelBar(level: level, value: value, unit: 7, base: 8),
                   ),
                 ),
               ),
+            ],
           ],
         ),
         if (value != null) ...[
@@ -221,7 +226,7 @@ class IntensityScaleCompact extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.dualisSymbolBlue.withValues(alpha: 0.10),
+              color: AppColors.iconTileTint,
               borderRadius: BorderRadius.circular(12),
             ),
             child: _LevelText(level: value!, physical: physical, fontSize: 13),
@@ -261,33 +266,50 @@ class _LevelText extends StatelessWidget {
   }
 }
 
-class _LevelDot extends StatelessWidget {
+/// One bar of the 1-5 scale: taller with each level, blue-cyan up to the
+/// chosen level and a soft navy tint above it, the number underneath.
+class _LevelBar extends StatelessWidget {
   final int level;
-  final bool selected;
-  final double size;
+  final int? value;
 
-  const _LevelDot({required this.level, this.selected = true, this.size = 32});
+  /// Height of the first bar and the growth per level.
+  final double base;
+  final double unit;
+
+  const _LevelBar({
+    required this.level,
+    required this.value,
+    required this.base,
+    required this.unit,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final shade = intensityShade(level);
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: selected ? shade : Colors.transparent,
-        border: Border.all(color: shade, width: 2),
-      ),
-      child: Text(
-        '$level',
-        style: GoogleFonts.inter(
-          fontWeight: FontWeight.w700,
-          color: selected && level >= 4 ? Colors.white : AppColors.dualisNavy,
+    final on = value != null && level <= value!;
+    final current = value == level;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          height: base + level * unit,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            gradient: on ? AppColors.gradientBlueCyan : null,
+            color: on ? null : AppColors.dualisNavy.withValues(alpha: 0.1),
+          ),
         ),
-      ),
+        const SizedBox(height: 6),
+        Text(
+          '$level',
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: current ? FontWeight.w800 : FontWeight.w600,
+            color: current ? AppColors.dualisNavy : AppColors.textSecondaryLight,
+          ),
+        ),
+        const SizedBox(height: 4),
+      ],
     );
   }
 }

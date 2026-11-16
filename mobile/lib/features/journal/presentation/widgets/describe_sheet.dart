@@ -230,6 +230,14 @@ class _DescribeSheetState extends ConsumerState<DescribeSheet> {
         ),
       );
 
+  OutlineInputBorder _fieldBorder({bool focused = false}) => OutlineInputBorder(
+        borderRadius: BorderRadius.circular(22),
+        borderSide: BorderSide(
+          color: focused ? AppColors.dualisNavy : AppColors.dualisNavy.withValues(alpha: 0.12),
+          width: focused ? 2 : 1,
+        ),
+      );
+
   Widget _manualButton(AppLocalizations l10n) => TextButton(
         key: const Key('jv2_describe_manual'),
         onPressed: _close,
@@ -247,7 +255,9 @@ class _DescribeSheetState extends ConsumerState<DescribeSheet> {
           maxLines: 6,
           maxLength: describeTextMaxLength,
           decoration: InputDecoration(
-            border: const OutlineInputBorder(),
+            border: _fieldBorder(),
+            enabledBorder: _fieldBorder(),
+            focusedBorder: _fieldBorder(focused: true),
             suffixIcon: voiceAvailable(ref)
                 ? VoiceDictationButton(controller: _text, fieldKey: 'describe')
                 : null,
@@ -348,8 +358,8 @@ class _DescribeSheetState extends ConsumerState<DescribeSheet> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.dualisSymbolBlue.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(16),
+            color: AppColors.iconTileTint,
+            borderRadius: BorderRadius.circular(18),
           ),
           child: Text(
             _message ?? l10n.jv2DescribeFailed,

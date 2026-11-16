@@ -257,8 +257,8 @@ class _ConditionReadingsCardState extends State<ConditionReadingsCard> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.fromLTRB(12, 4, 4, 12),
       decoration: BoxDecoration(
-        color: AppColors.backgroundLight,
-        borderRadius: BorderRadius.circular(14),
+        color: AppColors.dualisNavy.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -268,7 +268,11 @@ class _ConditionReadingsCardState extends State<ConditionReadingsCard> {
               Expanded(
                 child: Text(
                   readingKindLabel(l10n, row.kind),
-                  style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700),
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.dualisNavy,
+                  ),
                 ),
               ),
               IconButton(
@@ -298,7 +302,7 @@ class _ConditionReadingsCardState extends State<ConditionReadingsCard> {
                       key: Key('${prefix}_time'),
                       avatar: const Icon(Icons.schedule_rounded, size: 18),
                       label: Text(TimeOfDay.fromDateTime(row.measuredAt).format(context)),
-                      backgroundColor: AppColors.dualisSymbolBlue.withValues(alpha: 0.12),
+                      backgroundColor: AppColors.iconTileTint,
                       side: BorderSide.none,
                       shape: const StadiumBorder(),
                       onPressed: () => _pickTime(row),

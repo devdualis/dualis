@@ -913,6 +913,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
               ),
             ],
             selected: {state.bodySide},
+            showSelectedIcon: false,
             onSelectionChanged: (s) => _controller.setBodySide(s.first),
           ),
         ),
@@ -926,14 +927,17 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             child: const SizedBox.shrink(),
           ),
         const SizedBox(height: 12),
-        Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 340),
-            child: BodyRegionMap(
-              side: state.bodySide,
-              selected: selected,
-              onToggle: _controller.toggleRegion,
-              labelOf: (region) => JournalLabels.root(l10n, region),
+        _GlassCard(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 340),
+              child: BodyRegionMap(
+                side: state.bodySide,
+                selected: selected,
+                onToggle: _controller.toggleRegion,
+                labelOf: (region) => JournalLabels.root(l10n, region),
+              ),
             ),
           ),
         ),
@@ -1176,7 +1180,8 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
 
   Widget _singleItemIntensity(AppLocalizations l10n, JournalItem item) {
     final isCondition = item.kind == JournalKeys.kindCondition;
-    return Column(
+    return _GlassCard(
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (!isCondition) _SectionLabel(journalItemTitle(l10n, item)),
@@ -1193,6 +1198,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           onChanged: (v) => _controller.setIntensity(item.draftId, v),
         ),
       ],
+      ),
     );
   }
 
@@ -1247,14 +1253,11 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     required Widget child,
   }) {
     final isCondition = item.kind == JournalKeys.kindCondition;
-    return Container(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: _GlassCard(
       key: Key('jv2_item_row_$index'),
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.outlineLight),
-      ),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -1265,11 +1268,13 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w700,
+              color: AppColors.dualisNavy,
             ),
           ),
           const SizedBox(height: 8),
           child,
         ],
+      ),
       ),
     );
   }
@@ -1506,7 +1511,9 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             maxLength: JournalKeys.noteMaxLength,
             decoration: InputDecoration(
               hintText: l10n.jv2NoteHint,
-              border: const OutlineInputBorder(),
+              border: _noteBorder(),
+              enabledBorder: _noteBorder(),
+              focusedBorder: _noteBorder(focused: true),
               suffixIcon: voiceAvailable(ref)
                   ? VoiceDictationButton(
                       controller: _noteController,
@@ -1521,6 +1528,14 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       ],
     );
   }
+
+  OutlineInputBorder _noteBorder({bool focused = false}) => OutlineInputBorder(
+        borderRadius: BorderRadius.circular(22),
+        borderSide: BorderSide(
+          color: focused ? AppColors.dualisNavy : AppColors.dualisNavy.withValues(alpha: 0.12),
+          width: focused ? 2 : 1,
+        ),
+      );
 
   String? _phrase(AppLocalizations l10n, JournalFlowState state) {
     final id = state.phraseId;
@@ -1979,6 +1994,29 @@ class _ChoiceCard extends StatelessWidget {
   }
 }
 
+/// Translucent white card with a soft navy shadow: the body map and the
+/// intensity cards sit on one.
+class _GlassCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  const _GlassCard({super.key, required this.child, this.padding = const EdgeInsets.all(16)});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: AppColors.glassFill,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.glassEdge),
+        boxShadow: AppColors.glassShadow(blur: 24, alpha: 0.2),
+      ),
+      child: child,
+    );
+  }
+}
+
 /// Glass option surface shared by the choice cards and rows: white and
 /// rounded with a soft shadow; selected is a navy border over a cyan tint.
 BoxDecoration _optionDecoration({required bool selected, required double radius}) {
@@ -2426,17 +2464,14 @@ class _ConditionTile extends StatelessWidget {
 
   Widget _content(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final outline = isDark ? AppColors.outlineDark : AppColors.outlineLight;
     final highlighted = selected || open;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
-          borderRadius: BorderRadius.circular(16),
+        decoration: _optionDecoration(selected: selected, radius: 18).copyWith(
           border: Border.all(
-            color: highlighted ? AppColors.dualisSymbolBlue : outline,
+            color: highlighted ? AppColors.dualisNavy : AppColors.dualisNavy.withValues(alpha: 0.08),
             width: highlighted ? 1.5 : 1,
           ),
         ),
@@ -2465,6 +2500,7 @@ class _ConditionTile extends StatelessWidget {
                               style: GoogleFonts.inter(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
+                                color: AppColors.dualisNavy,
                               ),
                             ),
                             if (subtitle != null)
@@ -2495,7 +2531,9 @@ class _ConditionTile extends StatelessWidget {
                               ? Icons.check_circle_rounded
                               : Icons.radio_button_unchecked_rounded,
                           size: 22,
-                          color: selected ? AppColors.dualisSymbolBlue : outline,
+                          color: selected
+                              ? AppColors.dualisNavy
+                              : AppColors.dualisNavy.withValues(alpha: 0.22),
                         ),
                     ],
                   ),
@@ -2538,50 +2576,53 @@ class _OptionCell extends StatelessWidget {
       );
 
   Widget _content(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Semantics(
       button: true,
       selected: selected,
-      child: Material(
-        color: selected
-            ? AppColors.dualisSymbolBlue.withValues(alpha: 0.12)
-            : (isDark ? AppColors.backgroundDark : AppColors.backgroundLight),
-        borderRadius: BorderRadius.circular(14),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: onTap,
-          child: Container(
-            constraints: const BoxConstraints(minHeight: 56),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: selected ? AppColors.dualisSymbolBlue : Colors.transparent,
-                width: 1.5,
-              ),
-            ),
-            child: Row(
-              children: [
-                if (emoji != null) ...[
-                  ExcludeSemantics(child: Text(emoji!, style: const TextStyle(fontSize: 22))),
-                  const SizedBox(width: 8),
-                ],
-                Expanded(
-                  child: Text(
-                    label,
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        constraints: const BoxConstraints(minHeight: 56),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: selected
+              ? AppColors.dualisSymbolCyan.withValues(alpha: 0.14)
+              : AppColors.dualisNavy.withValues(alpha: 0.04),
+          border: Border.all(
+            color: selected ? AppColors.dualisNavy : Colors.transparent,
+            width: 1.5,
+          ),
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              child: Row(
+                children: [
+                  if (emoji != null) ...[
+                    ExcludeSemantics(child: Text(emoji!, style: const TextStyle(fontSize: 22))),
+                    const SizedBox(width: 8),
+                  ],
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.dualisNavy,
+                      ),
                     ),
                   ),
-                ),
-                if (selected)
-                  const Icon(
-                    Icons.check_circle_rounded,
-                    size: 18,
-                    color: AppColors.dualisSymbolBlue,
-                  ),
-              ],
+                  if (selected)
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      size: 18,
+                      color: AppColors.dualisNavy,
+                    ),
+                ],
+              ),
             ),
           ),
         ),
@@ -2617,10 +2658,12 @@ class _MarkedPill extends StatelessWidget {
       label: removeLabel,
       excludeSemantics: true,
       child: Material(
-        color: AppColors.dualisSymbolBlue.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(16),
+        color: AppColors.dualisSymbolCyan.withValues(alpha: 0.16),
+        shape: StadiumBorder(
+          side: BorderSide(color: AppColors.dualisNavy.withValues(alpha: 0.25)),
+        ),
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          customBorder: const StadiumBorder(),
           onTap: onRemove,
           child: Container(
             constraints: const BoxConstraints(minHeight: 36),
@@ -2649,8 +2692,8 @@ class _MarkedPill extends StatelessWidget {
   }
 }
 
-/// Mood emoji (😊 Bem, 😕 Não tão bem) on a green or amber circle. Same
-/// size and shape for both; nothing else on screen depends on the choice.
+/// Mood emoji (Fluent 3D: Bem, Não tão bem). Same size for both; nothing
+/// else on screen depends on the choice.
 class _MoodIcon extends StatelessWidget {
   final String mood;
 
