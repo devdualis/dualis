@@ -18,7 +18,11 @@ import '../../domain/trigger_checkin_state.dart';
 import '../controllers/trigger_checkin_controller.dart';
 
 class DualAxisTriggerCard extends ConsumerWidget {
-  const DualAxisTriggerCard({super.key});
+  const DualAxisTriggerCard({super.key, this.greeting});
+
+  /// Greeting shown as the first title line ("Olá, Ana! Bom dia", or the
+  /// dependent's profile text). Omitted: the title is just the question.
+  final String? greeting;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -192,6 +196,14 @@ class DualAxisTriggerCard extends ConsumerWidget {
         ),
     ];
 
+    final titleStyle = GoogleFonts.inter(
+      fontSize: 24,
+      height: 1.15,
+      letterSpacing: -0.4,
+      fontWeight: FontWeight.w700,
+      color: Colors.white,
+    );
+
     return Container(
       width: double.infinity,
       clipBehavior: Clip.antiAlias,
@@ -239,15 +251,14 @@ class DualAxisTriggerCard extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 6),
-                Text(
-                  'Como você está hoje?',
-                  style: GoogleFonts.inter(
-                    fontSize: 24,
-                    height: 1.15,
-                    letterSpacing: -0.4,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
+                Column(
+                  key: const Key('home_checkin_title'),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (greeting != null && greeting!.isNotEmpty)
+                      Text(greeting!, style: titleStyle),
+                    Text('Como você está hoje?', style: titleStyle),
+                  ],
                 ),
                 const SizedBox(height: 18),
                 IntrinsicHeight(
@@ -348,7 +359,7 @@ class _AxisTileState extends State<_AxisTile> {
                 ),
                 child: widget.icon,
               ),
-              const SizedBox(height: 22),
+              const SizedBox(height: 14),
               Text(
                 widget.title,
                 style: GoogleFonts.inter(

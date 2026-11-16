@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/config/feature_flags.dart';
-import '../../../../core/constants/app_assets.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
@@ -429,7 +428,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   _HomeHero(
                     picture: useDelegatedAvatar ? null : user?.picture,
                     avatarInitial: cardAvatarInitial,
-                    title: useDelegatedAvatar
+                    name: cardDisplayName,
+                    subtitle: cardDisplaySubtitle,
+                    badge: AppLocalizations.of(context).homeDataProtectedBadge,
+                    onTap: () => context.push(RoutePaths.settings),
+                  ),
+                  const SizedBox(height: 16),
+
+                  DualAxisTriggerCard(
+                    greeting: useDelegatedAvatar
                         ? AppLocalizations.of(context)
                             .activeProfileCardTitle(cardDisplayName)
                         : homeGreetingText(
@@ -437,13 +444,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             cardDisplayName,
                             ref.read(homeClockProvider)(),
                           ),
-                    subtitle: cardDisplaySubtitle,
-                    badge: AppLocalizations.of(context).homeDataProtectedBadge,
-                    onTap: () => context.push(RoutePaths.settings),
                   ),
-                  const SizedBox(height: 16),
-
-                  const DualAxisTriggerCard(),
                   const SizedBox(height: 16),
                   const TodayHabitsCard(),
                   const SizedBox(height: 16),
@@ -458,12 +459,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-/// Navy hero card (redesign): greeting, account line and the "data protected"
-/// badge over the Dualis symbol watermark. Taps open Settings.
+/// Compact light profile card (redesign): avatar, name, email, small "data
+/// protected" pill and chevron on one row. Taps open Settings.
 class _HomeHero extends StatelessWidget {
   final String? picture;
   final String avatarInitial;
-  final String title;
+  final String name;
   final String subtitle;
   final String badge;
   final VoidCallback onTap;
@@ -471,7 +472,7 @@ class _HomeHero extends StatelessWidget {
   const _HomeHero({
     required this.picture,
     required this.avatarInitial,
-    required this.title,
+    required this.name,
     required this.subtitle,
     required this.badge,
     required this.onTap,
@@ -481,125 +482,94 @@ class _HomeHero extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       key: const Key('home_profile_card'),
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        clipBehavior: Clip.antiAlias,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          gradient: AppColors.gradientNavy,
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.softIndigoDark.withValues(alpha: 0.7),
-              blurRadius: 40,
-              offset: const Offset(0, 24),
-              spreadRadius: -22,
-            ),
-          ],
+          color: AppColors.glassFill,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.glassEdge),
+          boxShadow: AppColors.glassShadow(blur: 18, alpha: 0.14),
         ),
-        child: Stack(
+        child: Row(
           children: [
-            Positioned(
-              right: -46,
-              top: -6,
-              width: 190,
-              child: ExcludeSemantics(
-                child: Opacity(
-                  opacity: 0.32,
-                  child: Image.asset(
-                    AppAssets.logoSymbol,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                  ),
-                ),
-              ),
+            UserAvatar(
+              picture: picture,
+              fallbackInitial: avatarInitial,
+              radius: 20,
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 22, 18, 18),
+            const SizedBox(width: 12),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      UserAvatar(
-                        picture: picture,
-                        fallbackInitial: avatarInitial,
-                        radius: 26,
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              title,
-                              style: GoogleFonts.inter(
-                                fontSize: 22,
-                                height: 1.1,
-                                letterSpacing: -0.4,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              subtitle,
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.dualisSymbolCyan,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        size: 14,
-                        color: Colors.white70,
-                      ),
-                    ],
+                  Text(
+                    name,
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      height: 1.15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimaryLight,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 18),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.16),
+                  if (subtitle.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: AppColors.textSecondaryLight,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.shield_outlined,
-                          size: 18,
-                          color: AppColors.dualisSymbolCyan,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            badge,
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  ],
                 ],
               ),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                decoration: BoxDecoration(
+                  color: AppColors.iconTileTint,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.shield_outlined,
+                      size: 14,
+                      color: AppColors.dualisNavy,
+                    ),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        badge,
+                        style: GoogleFonts.inter(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.dualisNavy,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 6),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 13,
+              color: AppColors.textSecondaryLight,
             ),
           ],
         ),
