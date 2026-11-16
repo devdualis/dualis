@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../../shared/widgets/glass_card.dart';
 import '../../../../shared/widgets/load_error_view.dart';
 import '../../../home/domain/home_greeting.dart';
 import '../../../house_ads/data/house_ads_repository.dart';
@@ -45,8 +47,9 @@ class _HydrationDashboardScreenState
   Future<void> _onWaterLogged() async {
     if (_showAd || ref.read(premiumProfilesEnabledProvider)) return;
     final now = ref.read(homeClockProvider)();
-    final allowed =
-        await ref.read(houseAdsRepositoryProvider).takeWaterAdSlot(now);
+    final allowed = await ref
+        .read(houseAdsRepositoryProvider)
+        .takeWaterAdSlot(now);
     if (allowed && mounted) setState(() => _showAd = true);
   }
 
@@ -57,7 +60,8 @@ class _HydrationDashboardScreenState
     final notifier = ref.read(hydrationControllerProvider.notifier);
     // Water is part of the habits category.
     final canRead = activeProfileCanRead(ref, ShareCategory.habits);
-    final viewOnly = activeProfileIsViewOnly(ref) ||
+    final viewOnly =
+        activeProfileIsViewOnly(ref) ||
         !activeProfileCanWrite(ref, ShareCategory.habits);
 
     ref.listen<HydrationState>(hydrationControllerProvider, (prev, next) {
@@ -68,63 +72,73 @@ class _HydrationDashboardScreenState
       }
     });
 
-    final content = !canRead
-        ? Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const ActiveProfileBanner(),
-              Expanded(
-                child: NotSharedPlaceholder(
-                  profileName: ref
-                          .watch(activeProfileControllerProvider)
-                          .activeProfile
-                          ?.name ??
-                      '',
+    final content =
+        !canRead
+            ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const ActiveProfileBanner(),
+                Expanded(
+                  child: NotSharedPlaceholder(
+                    profileName:
+                        ref
+                            .watch(activeProfileControllerProvider)
+                            .activeProfile
+                            ?.name ??
+                        '',
+                  ),
+                ),
+              ],
+            )
+            : state.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : state.loadError != null
+            ? LoadErrorView(
+              error: state.loadError!,
+              onRetry: () => notifier.loadData(),
+            )
+            : RefreshIndicator(
+              onRefresh: () => notifier.loadData(),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  16,
+                  20,
+                  16 + MediaQuery.paddingOf(context).bottom,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const ActiveProfileBanner(),
+                    if (viewOnly) const ActiveProfileReadOnlyNote(),
+                    const SizedBox(height: 8),
+                    _TodayCard(state: state, viewOnly: viewOnly),
+                    if (_showAd) ...[
+                      const SizedBox(height: 16),
+                      const HouseAdCard(),
+                    ],
+                    const SizedBox(height: 24),
+                    _SectionTitle(l10n.xv2WaterTodayLogs),
+                    const SizedBox(height: 12),
+                    _TodayLogs(state: state, viewOnly: viewOnly),
+                    const SizedBox(height: 24),
+                    _SectionTitle(l10n.gxWaterStepTitle),
+                    const SizedBox(height: 12),
+                    _Panel(child: _TodaySteps(state: state)),
+                    const SizedBox(height: 24),
+                    _SectionTitle(l10n.xv2WaterHistoryTitle),
+                    const SizedBox(height: 12),
+                    _Panel(child: _PeriodBars(state: state)),
+                    const SizedBox(height: 28),
+                    _SectionTitle(l10n.xv2WaterRemindersTitle),
+                    const SizedBox(height: 12),
+                    _ReminderSettings(state: state, viewOnly: viewOnly),
+                    const SizedBox(height: 36),
+                  ],
                 ),
               ),
-            ],
-          )
-        : state.isLoading
-        ? const Center(child: CircularProgressIndicator())
-        : state.loadError != null
-        ? LoadErrorView(error: state.loadError!, onRetry: () => notifier.loadData())
-        : RefreshIndicator(
-            onRefresh: () => notifier.loadData(),
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + MediaQuery.paddingOf(context).bottom),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const ActiveProfileBanner(),
-                  if (viewOnly) const ActiveProfileReadOnlyNote(),
-                  const SizedBox(height: 8),
-                  _TodayCard(state: state, viewOnly: viewOnly),
-                  if (_showAd) ...[
-                    const SizedBox(height: 16),
-                    const HouseAdCard(),
-                  ],
-                  const SizedBox(height: 24),
-                  _SectionTitle(l10n.xv2WaterTodayLogs),
-                  const SizedBox(height: 12),
-                  _TodayLogs(state: state, viewOnly: viewOnly),
-                  const SizedBox(height: 24),
-                  _SectionTitle(l10n.gxWaterStepTitle),
-                  const SizedBox(height: 12),
-                  _Panel(child: _TodaySteps(state: state)),
-                  const SizedBox(height: 24),
-                  _SectionTitle(l10n.xv2WaterHistoryTitle),
-                  const SizedBox(height: 12),
-                  _Panel(child: _PeriodBars(state: state)),
-                  const SizedBox(height: 28),
-                  _SectionTitle(l10n.xv2WaterRemindersTitle),
-                  const SizedBox(height: 12),
-                  _ReminderSettings(state: state, viewOnly: viewOnly),
-                  const SizedBox(height: 36),
-                ],
-              ),
-            ),
-          );
+            );
 
     if (widget.isEmbedded) return content;
 
@@ -156,7 +170,11 @@ class _HydrationDashboardScreenState
 }
 
 /// Logs a quick amount, then confirms it with "Desfazer" (handoff H1).
-Future<void> logWaterWithUndo(BuildContext context, WidgetRef ref, int ml) async {
+Future<void> logWaterWithUndo(
+  BuildContext context,
+  WidgetRef ref,
+  int ml,
+) async {
   final notifier = ref.read(hydrationControllerProvider.notifier);
   final messenger = ScaffoldMessenger.of(context);
   final l10n = AppLocalizations.of(context);
@@ -170,15 +188,17 @@ Future<void> logWaterWithUndo(BuildContext context, WidgetRef ref, int ml) async
   final added = logs.last;
   messenger
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(
-      key: const Key('hydration_logged_snack'),
-      content: Text(l10n.gxWaterLoggedSnack(ml)),
-      action: SnackBarAction(
-        key: const Key('hydration_logged_undo'),
-        label: l10n.gxUndo,
-        onPressed: () => notifier.deleteLog(added),
+    ..showSnackBar(
+      SnackBar(
+        key: const Key('hydration_logged_snack'),
+        content: Text(l10n.gxWaterLoggedSnack(ml)),
+        action: SnackBarAction(
+          key: const Key('hydration_logged_undo'),
+          label: l10n.gxUndo,
+          onPressed: () => notifier.deleteLog(added),
+        ),
       ),
-    ));
+    );
 }
 
 /// H2 for today.
@@ -230,7 +250,7 @@ class _SectionTitle extends StatelessWidget {
       text,
       style: GoogleFonts.inter(
         fontSize: 16,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w700,
         color: AppColors.textPrimaryLight,
       ),
     );
@@ -242,17 +262,7 @@ class _Panel extends StatelessWidget {
   const _Panel({required this.child});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.outlineLight),
-      ),
-      child: child,
-    );
-  }
+  Widget build(BuildContext context) => GlassCard(child: child);
 }
 
 class _TodayCard extends ConsumerWidget {
@@ -267,8 +277,9 @@ class _TodayCard extends ConsumerWidget {
       builder: (_) => _GoalDialog(initialMl: state.dailyTargetMl),
     );
     if (value != null) {
-      final ok =
-          await ref.read(hydrationControllerProvider.notifier).setDailyTarget(value);
+      final ok = await ref
+          .read(hydrationControllerProvider.notifier)
+          .setDailyTarget(value);
       if (!ok && context.mounted) showSaveFailedSnackBar(context);
     }
   }
@@ -278,7 +289,30 @@ class _TodayCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final streak = state.streakDays(ref.read(homeClockProvider)());
 
-    return _Panel(
+    // Navy hero card, same family as the Home check-in card.
+    const onNavy = Colors.white;
+    final chipLabel = GoogleFonts.inter(
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+      color: onNavy,
+    );
+    final chipFill = Colors.white.withValues(alpha: 0.14);
+    const chipSide = BorderSide(color: Color(0x33FFFFFF));
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: AppColors.gradientNavy,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.softIndigoDark.withValues(alpha: 0.7),
+            blurRadius: 40,
+            offset: const Offset(0, 24),
+            spreadRadius: -22,
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -297,15 +331,15 @@ class _TodayCard extends ConsumerWidget {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimaryLight,
+                        fontWeight: FontWeight.w800,
+                        color: onNavy,
                       ),
                     ),
                     Text(
                       '${state.progressPercent}%',
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: AppColors.textSecondaryLight,
+                        color: onNavy.withValues(alpha: 0.75),
                       ),
                     ),
                   ],
@@ -313,7 +347,7 @@ class _TodayCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Wrap(
             alignment: WrapAlignment.center,
             spacing: 8,
@@ -321,15 +355,30 @@ class _TodayCard extends ConsumerWidget {
             children: [
               Chip(
                 key: const Key('hydration_streak'),
-                avatar: const Icon(Icons.local_fire_department_outlined,
-                    size: 18, color: AppColors.clinicalTealDark),
+                avatar: const Icon(
+                  Icons.local_fire_department_outlined,
+                  size: 18,
+                  color: onNavy,
+                ),
                 label: Text(l10n.xv2WaterStreak(streak)),
+                labelStyle: chipLabel,
+                backgroundColor: chipFill,
+                side: chipSide,
+                shape: const StadiumBorder(),
               ),
               ActionChip(
                 key: const Key('hydration_goal_edit'),
-                avatar: const Icon(Icons.flag_outlined,
-                    size: 18, color: AppColors.clinicalTealDark),
+                avatar: const Icon(
+                  Icons.flag_outlined,
+                  size: 18,
+                  color: onNavy,
+                ),
                 label: Text(l10n.xv2WaterGoalChip(state.dailyTargetMl)),
+                labelStyle: chipLabel,
+                backgroundColor: chipFill,
+                disabledColor: chipFill,
+                side: chipSide,
+                shape: const StadiumBorder(),
                 onPressed: viewOnly ? null : () => _editGoal(context, ref),
               ),
             ],
@@ -341,7 +390,7 @@ class _TodayCard extends ConsumerWidget {
                 Expanded(
                   child: _QuickButton(
                     key: const Key('hydration_quick_add_200'),
-                    emoji: '🥛',
+                    icon: Icons.water_drop_outlined,
                     label: '200 ml',
                     onTap: () => logWaterWithUndo(context, ref, 200),
                   ),
@@ -350,7 +399,7 @@ class _TodayCard extends ConsumerWidget {
                 Expanded(
                   child: _QuickButton(
                     key: const Key('hydration_quick_add_500'),
-                    emoji: '🍶',
+                    icon: Icons.local_drink_rounded,
                     label: '500 ml',
                     onTap: () => logWaterWithUndo(context, ref, 500),
                   ),
@@ -359,10 +408,11 @@ class _TodayCard extends ConsumerWidget {
                 Expanded(
                   child: _QuickButton(
                     key: const Key('dashboard_add_water_button'),
-                    emoji: '✏️',
+                    icon: Icons.edit_rounded,
                     label: l10n.xv2WaterOther,
-                    onTap: () =>
-                        WaterIntakeModal.show(context, source: 'dashboard'),
+                    onTap:
+                        () =>
+                            WaterIntakeModal.show(context, source: 'dashboard'),
                   ),
                 ),
               ],
@@ -384,8 +434,9 @@ class _GoalDialog extends StatefulWidget {
 }
 
 class _GoalDialogState extends State<_GoalDialog> {
-  late final TextEditingController _controller =
-      TextEditingController(text: widget.initialMl.toString());
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initialMl.toString(),
+  );
 
   @override
   void dispose() {
@@ -443,14 +494,15 @@ class _GoalDialogState extends State<_GoalDialog> {
   }
 }
 
+/// Quick-add button on the navy hero: translucent white fill, white label.
 class _QuickButton extends StatelessWidget {
-  final String emoji;
+  final IconData icon;
   final String label;
   final VoidCallback onTap;
 
   const _QuickButton({
     super.key,
-    required this.emoji,
+    required this.icon,
     required this.label,
     required this.onTap,
   });
@@ -460,21 +512,23 @@ class _QuickButton extends StatelessWidget {
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(0, 64),
-        side: const BorderSide(color: AppColors.clinicalTeal),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.white.withValues(alpha: 0.12),
+        side: const BorderSide(color: Color(0x40FFFFFF)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       ),
       onPressed: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 20)),
+          Icon(icon, size: 20, color: Colors.white),
           const SizedBox(height: 2),
           Text(
             label,
             style: GoogleFonts.inter(
               fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: AppColors.clinicalTealDark,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
           ),
         ],
@@ -506,56 +560,88 @@ class _TodayLogs extends ConsumerWidget {
       );
     }
     return Column(
-      children: state.todayLogs.reversed.map((log) {
-        final time = DateFormat('HH:mm').format(log.timestamp);
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          elevation: 0.5,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          color: AppColors.surfaceLight,
-          child: ListTile(
-            leading: const Icon(
-              Icons.local_drink_rounded,
-              color: AppColors.clinicalTealDark,
-            ),
-            title: Text(
-              '${log.amountMl} ml',
-              style: GoogleFonts.inter(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimaryLight,
-              ),
-            ),
-            subtitle: Text(
-              log.source == 'reminder_alarm'
-                  ? l10n.xv2WaterLoggedViaReminder(time)
-                  : l10n.xv2WaterLoggedAt(time),
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: AppColors.textSecondaryLight,
-              ),
-            ),
-            trailing: viewOnly
-                ? null
-                : IconButton(
-                    key: Key(
-                        'delete_water_log_${log.id ?? log.remoteId ?? log.timestamp.millisecondsSinceEpoch}'),
-                    constraints:
-                        const BoxConstraints(minWidth: 48, minHeight: 48),
-                    tooltip: l10n.xv2WaterDeleteLog,
-                    icon: const Icon(Icons.delete_outline,
-                        size: 20, color: Colors.grey),
-                    onPressed: () async {
-                      final ok = await ref
-                          .read(hydrationControllerProvider.notifier)
-                          .deleteLog(log);
-                      if (!ok && context.mounted) showSaveFailedSnackBar(context);
-                    },
+      children:
+          state.todayLogs.reversed.map((log) {
+            final time = DateFormat('HH:mm').format(log.timestamp);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Material(
+                color: AppColors.dualisNavy.withValues(alpha: 0.04),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: AppColors.dualisNavy.withValues(alpha: 0.06),
                   ),
-          ),
-        );
-      }).toList(),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 6, 4, 6),
+                  child: Row(
+                    children: [
+                      const DuotoneIconTile(
+                        size: 36,
+                        radius: 10,
+                        child: Icon(
+                          Icons.local_drink_rounded,
+                          size: 20,
+                          color: AppColors.dualisNavy,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${log.amountMl} ml',
+                              style: GoogleFonts.inter(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimaryLight,
+                              ),
+                            ),
+                            Text(
+                              log.source == 'reminder_alarm'
+                                  ? l10n.xv2WaterLoggedViaReminder(time)
+                                  : l10n.xv2WaterLoggedAt(time),
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: AppColors.textSecondaryLight,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (!viewOnly)
+                        IconButton(
+                          key: Key(
+                            'delete_water_log_${log.id ?? log.remoteId ?? log.timestamp.millisecondsSinceEpoch}',
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 48,
+                            minHeight: 48,
+                          ),
+                          tooltip: l10n.xv2WaterDeleteLog,
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            size: 20,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                          onPressed: () async {
+                            final ok = await ref
+                                .read(hydrationControllerProvider.notifier)
+                                .deleteLog(log);
+                            if (!ok && context.mounted) {
+                              showSaveFailedSnackBar(context);
+                            }
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
     );
   }
 }
@@ -581,15 +667,10 @@ class _ReminderSettings extends ConsumerWidget {
       color: AppColors.textSecondaryLight,
     );
 
-    return Material(
-      color: AppColors.surfaceLight,
-      borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.outlineLight),
-        ),
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      child: Material(
+        type: MaterialType.transparency,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -601,13 +682,26 @@ class _ReminderSettings extends ConsumerWidget {
                 style: subtitleStyle,
               ),
               value: settings.reminderEnabled,
-              activeThumbColor: AppColors.clinicalTeal,
-              onChanged: viewOnly
-                  ? null
-                  : (on) async {
-                      final ok = await notifier.toggleReminders(on);
-                      if (!ok && context.mounted) showSaveFailedSnackBar(context);
-                    },
+              secondary: const DuotoneIconTile(
+                size: 32,
+                radius: 10,
+                child: Icon(
+                  Icons.notifications_active_outlined,
+                  size: 18,
+                  color: AppColors.dualisNavy,
+                ),
+              ),
+              activeTrackColor: AppColors.dualisNavy,
+              activeThumbColor: Colors.white,
+              onChanged:
+                  viewOnly
+                      ? null
+                      : (on) async {
+                        final ok = await notifier.toggleReminders(on);
+                        if (!ok && context.mounted) {
+                          showSaveFailedSnackBar(context);
+                        }
+                      },
             ),
             if (settings.reminderEnabled)
               const Padding(

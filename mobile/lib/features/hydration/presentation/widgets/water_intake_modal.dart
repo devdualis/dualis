@@ -4,21 +4,20 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../journal_insights/presentation/widgets/chart_tokens.dart';
 import '../controllers/hydration_controller.dart';
 
 class WaterIntakeModal extends ConsumerStatefulWidget {
   final String source;
 
-  const WaterIntakeModal({
-    super.key,
-    this.source = 'manual',
-  });
+  const WaterIntakeModal({super.key, this.source = 'manual'});
 
   static Future<void> show(BuildContext context, {String source = 'manual'}) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      showDragHandle: true,
       builder: (ctx) => WaterIntakeModal(source: source),
     );
   }
@@ -83,8 +82,10 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).waterLoggedSuccess(amountToSave)),
-            backgroundColor: AppColors.clinicalTealDark,
+            content: Text(
+              AppLocalizations.of(context).waterLoggedSuccess(amountToSave),
+            ),
+            backgroundColor: AppColors.softIndigoDark,
             duration: const Duration(seconds: 3),
           ),
         );
@@ -100,47 +101,28 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
     final percent = state.progressPercent;
     final viewInsets = MediaQuery.of(context).viewInsets.bottom;
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceLight,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
+    // The glass sheet (fill, radius, shadow) comes from the bottom sheet theme.
+    return Padding(
       padding: EdgeInsets.only(
         left: 24,
         right: 24,
-        top: 20,
+        top: 4,
         bottom: 24 + viewInsets,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Drag handle
-          Center(
-            child: Container(
-              width: 44,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
           // Header
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.clinicalTeal.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
+              const DuotoneIconTile(
+                size: 44,
+                radius: 14,
+                child: Icon(
                   Icons.water_drop_rounded,
-                  color: AppColors.clinicalTealDark,
-                  size: 28,
+                  color: AppColors.dualisNavy,
+                  size: 26,
                 ),
               ),
               const SizedBox(width: 14),
@@ -152,7 +134,7 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                       AppLocalizations.of(context).waterTimeTitle,
                       style: GoogleFonts.inter(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.textPrimaryLight,
                       ),
                     ),
@@ -170,7 +152,10 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                 key: const Key('water_intake_modal_close_button'),
                 constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                 tooltip: AppLocalizations.of(context).waterClose,
-                icon: const Icon(Icons.close, color: AppColors.textSecondaryLight),
+                icon: const Icon(
+                  Icons.close,
+                  color: AppColors.textSecondaryLight,
+                ),
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ],
@@ -182,9 +167,11 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.backgroundLight,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.shade200),
+              color: AppColors.dualisNavy.withValues(alpha: 0.04),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: AppColors.dualisNavy.withValues(alpha: 0.06),
+              ),
             ),
             child: Column(
               children: [
@@ -206,9 +193,10 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                       style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
-                        color: state.isGoalReached
-                            ? AppColors.clinicalTealDark
-                            : AppColors.softIndigo,
+                        color:
+                            state.isGoalReached
+                                ? AppColors.dualisNavy
+                                : AppColors.dualisNavy,
                       ),
                     ),
                   ],
@@ -216,39 +204,43 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                 const SizedBox(height: 8),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  child: state.isLoading
-                      ? LinearProgressIndicator(
-                          minHeight: 8,
-                          backgroundColor: Colors.grey.shade200,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.clinicalTeal,
+                  child:
+                      state.isLoading
+                          ? LinearProgressIndicator(
+                            minHeight: 8,
+                            backgroundColor: ChartTokens.waterTrack,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              ChartTokens.water,
+                            ),
+                          )
+                          : LinearProgressIndicator(
+                            value: state.progressRatio.clamp(0.0, 1.0),
+                            minHeight: 8,
+                            backgroundColor: ChartTokens.waterTrack,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              state.isGoalReached
+                                  ? AppColors.dualisNavy
+                                  : ChartTokens.water,
+                            ),
                           ),
-                        )
-                      : LinearProgressIndicator(
-                          value: state.progressRatio.clamp(0.0, 1.0),
-                          minHeight: 8,
-                          backgroundColor: Colors.grey.shade200,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            state.isGoalReached
-                                ? AppColors.clinicalTealDark
-                                : AppColors.clinicalTeal,
-                          ),
-                        ),
                 ),
                 if (state.isGoalReached) ...[
                   const SizedBox(height: 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.verified_rounded,
-                          size: 14, color: AppColors.clinicalTealDark),
+                      const Icon(
+                        Icons.verified_rounded,
+                        size: 14,
+                        color: AppColors.dualisNavy,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         AppLocalizations.of(context).waterGoalReached,
                         style: GoogleFonts.inter(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.clinicalTealDark,
+                          color: AppColors.dualisNavy,
                         ),
                       ),
                     ],
@@ -282,17 +274,23 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                   selected: isSelected,
                   materialTapTargetSize: MaterialTapTargetSize.padded,
                   label: Text('$ml ml'),
-                  labelStyle: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    color: isSelected ? Colors.white : AppColors.textPrimaryLight,
+                  showCheckmark: false,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  selectedColor: AppColors.clinicalTealDark,
-                  backgroundColor: Colors.grey.shade100,
+                  labelStyle: GoogleFonts.inter(
+                    fontSize: 13.5,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                    color: AppColors.dualisNavy,
+                  ),
+                  selectedColor: AppColors.dualisSymbolCyan.withValues(
+                    alpha: 0.14,
+                  ),
+                  backgroundColor: AppColors.dualisNavy.withValues(alpha: 0.04),
                   side: BorderSide(
-                    color: isSelected
-                        ? AppColors.clinicalTealDark
-                        : Colors.grey.shade300,
+                    color:
+                        isSelected ? AppColors.dualisNavy : Colors.transparent,
+                    width: 1.5,
                   ),
                   onSelected: (val) {
                     if (val) {
@@ -309,17 +307,22 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                 selected: _isCustom,
                 materialTapTargetSize: MaterialTapTargetSize.padded,
                 label: Text(AppLocalizations.of(context).waterOtherValue),
-                labelStyle: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: _isCustom ? FontWeight.bold : FontWeight.w500,
-                  color: _isCustom ? Colors.white : AppColors.textPrimaryLight,
+                showCheckmark: false,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                selectedColor: AppColors.clinicalTealDark,
-                backgroundColor: Colors.grey.shade100,
+                labelStyle: GoogleFonts.inter(
+                  fontSize: 13.5,
+                  fontWeight: _isCustom ? FontWeight.w700 : FontWeight.w600,
+                  color: AppColors.dualisNavy,
+                ),
+                selectedColor: AppColors.dualisSymbolCyan.withValues(
+                  alpha: 0.14,
+                ),
+                backgroundColor: AppColors.dualisNavy.withValues(alpha: 0.04),
                 side: BorderSide(
-                  color: _isCustom
-                      ? AppColors.clinicalTealDark
-                      : Colors.grey.shade300,
+                  color: _isCustom ? AppColors.dualisNavy : Colors.transparent,
+                  width: 1.5,
                 ),
                 onSelected: (val) {
                   setState(() {
@@ -347,13 +350,13 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(
-                    color: AppColors.clinicalTealDark,
+                    color: AppColors.dualisNavy,
                     width: 2,
                   ),
                 ),
                 prefixIcon: const Icon(
                   Icons.local_drink_outlined,
-                  color: AppColors.clinicalTealDark,
+                  color: AppColors.dualisNavy,
                 ),
               ),
             ),
