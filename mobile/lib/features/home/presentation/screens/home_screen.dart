@@ -410,7 +410,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           const ActiveProfileBanner(),
           Expanded(
-            child: SingleChildScrollView(
+            // Builder: this context sits below the Scaffold, so its bottom
+            // padding includes the floating tab bar.
+            child: Builder(
+              builder: (context) => SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(
                 20,
                 16,
@@ -547,6 +550,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   const SizedBox(height: 16),
                 ],
               ),
+            ),
             ),
           ),
         ],

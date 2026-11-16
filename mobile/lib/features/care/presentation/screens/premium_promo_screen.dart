@@ -107,7 +107,7 @@ class PremiumPromoScreen extends StatelessWidget {
       children: [
         Expanded(
           child: ListView(
-            padding: EdgeInsets.zero,
+            padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
             children: [
               _Hero(l10n: l10n),
               Padding(
