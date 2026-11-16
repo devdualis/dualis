@@ -373,19 +373,29 @@ void main() {
       await tester.pumpAndSettle();
 
       final emotionalCard = tester.widget<Container>(
-        find.byKey(const Key('psicoemocional_completed_card')),
+        find
+            .descendant(
+              of: find.byKey(const Key('psicoemocional_completed_card')),
+              matching: find.byType(Container),
+            )
+            .first,
       );
       expect(
         (emotionalCard.decoration as BoxDecoration).color,
-        AppColors.intensityModerateBg,
+        AppColors.intensityModerate.withValues(alpha: 0.2),
       );
 
       final physicalCard = tester.widget<Container>(
-        find.byKey(const Key('fisica_completed_card')),
+        find
+            .descendant(
+              of: find.byKey(const Key('fisica_completed_card')),
+              matching: find.byType(Container),
+            )
+            .first,
       );
       expect(
         (physicalCard.decoration as BoxDecoration).color,
-        AppColors.intensityMildBg,
+        AppColors.intensityMild.withValues(alpha: 0.2),
       );
     });
   });

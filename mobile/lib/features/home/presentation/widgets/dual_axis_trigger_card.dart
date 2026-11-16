@@ -4,22 +4,18 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/config/feature_flags.dart';
+import '../../../../core/constants/app_assets.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../profile/domain/models/share_category.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../shared/widgets/duotone_icon_tile.dart';
 import '../../../../shared/widgets/premium_gradient_icon.dart';
 import '../../../journal/presentation/controllers/journal_flow_state.dart';
 import '../../../journal/presentation/screens/journal_flow_screen.dart';
 import '../../domain/axis_intensity_resolver.dart';
 import '../../domain/trigger_checkin_state.dart';
 import '../controllers/trigger_checkin_controller.dart';
-
-/// Inner surfaces of the glass card: lighter white and a faint navy edge.
-const Color _innerFill = Color(0xB3FFFFFF);
-const Color _innerEdge = Color(0x140E3E6C);
 
 class DualAxisTriggerCard extends ConsumerWidget {
   const DualAxisTriggerCard({super.key});
@@ -28,8 +24,6 @@ class DualAxisTriggerCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(triggerCheckInProvider);
     final notifier = ref.read(triggerCheckInProvider.notifier);
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final premium = ref.watch(premiumProfilesEnabledProvider);
 
     final isEmotionalCompleted = state.isEmotionalCompleted;
@@ -45,12 +39,6 @@ class DualAxisTriggerCard extends ConsumerWidget {
       state: state,
     );
 
-    final emotionalStatus = state.emotionalStatus;
-    final physicalStatus = state.physicalStatus;
-
-    final emotionalSummary = state.emotionalSummary;
-    final physicalSummary = state.physicalSummary;
-
     final viewOnly = activeProfileIsViewOnly(ref);
     // On a shared profile each area follows its journal category: unreadable
     // shows the not-shared text, readable but not writable hides the starts.
@@ -64,456 +52,428 @@ class DualAxisTriggerCard extends ConsumerWidget {
     final physicalViewOnly =
         viewOnly || !activeProfileCanWrite(ref, ShareCategory.physicalJournal);
 
-    // Glass card from the app theme (radius 24, translucent fill).
-    return Card(
-      margin: EdgeInsets.zero,
-      color: isDark ? AppColors.surfaceDark : null,
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                const DuotoneIconTile(
-                  child: Icon(
-                    Icons.health_and_safety_outlined,
-                    color: AppColors.dualisNavy,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Check-in Diário em 2 Etapas',
-                        style: GoogleFonts.inter(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.2,
-                          color: AppColors.clinicalTeal,
-                        ),
-                      ),
-                      Text(
-                        'Como você está hoje?',
-                        style: GoogleFonts.inter(
-                          fontSize: 19,
-                          letterSpacing: -0.3,
-                          fontWeight: FontWeight.w700,
-                          color: isDark
-                              ? AppColors.textPrimaryDark
-                              : AppColors.textPrimaryLight,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
 
-            Divider(height: 1, color: AppColors.dualisNavy.withValues(alpha: 0.08)),
-            const SizedBox(height: 16),
-
-            if (viewOnly) const ActiveProfileReadOnlyNote(),
-
-            // Etapa 1: Psicoemocional
-            if (!canReadEmotional)
-              _AreaNotShared(
-                areaKey: 'emotional',
-                title: 'Psicoemocional',
-                icon: Icons.psychology_rounded,
-                isDark: isDark,
-              )
-            else
-            _buildStageCard(
-              context: context,
-              title: 'Psicoemocional',
-              subtitle: 'Humor, ansiedade, estresse e clareza mental',
-              icon: Icons.psychology_rounded,
-              accentColor: AppColors.dualisSymbolGreen,
-              isCompleted: isEmotionalCompleted,
-              status: emotionalStatus,
-              intensity: emotionalIntensity,
-              summary: emotionalSummary,
-              // Only text the user typed in that stage's triage; never the
-              // AI's mapped lay term.
-              narrative: state.emotionalNarrative,
-              buttonKey: 'start_psicoemocional_triage_button',
-              completedCardKey: 'psicoemocional_completed_card',
-              retakeKey: 'retake_psicoemocional_button',
-              onStart: () {
-                context.push(
-                  RoutePaths.journal,
-                  extra: const JournalFlowArgs(initialArea: JournalArea.emotional),
-                );
-              },
-              onRetake: () {
-                notifier.prepareForUpdate();
-                context.push(
-                  RoutePaths.journal,
-                  extra: const JournalFlowArgs(initialArea: JournalArea.emotional),
-                );
-              },
-              isDark: isDark,
-              viewOnly: emotionalViewOnly,
-              premium: premium,
-            ),
-
-            const SizedBox(height: 16),
-
-            // Etapa 2: Físico
-            if (!canReadPhysical)
-              _AreaNotShared(
-                areaKey: 'physical',
-                title: 'Físico',
-                icon: Icons.accessibility_new_rounded,
-                isDark: isDark,
-              )
-            else
-            _buildStageCard(
-              context: context,
-              title: 'Físico',
-              subtitle: 'Dores corporais, desconforto somático ou fadiga',
-              icon: Icons.accessibility_new_rounded,
-              accentColor: AppColors.dualisSymbolBlue,
-              isCompleted: isPhysicalCompleted,
-              status: physicalStatus,
-              intensity: physicalIntensity,
-              summary: physicalSummary,
-              narrative: state.physicalNarrative,
-              buttonKey: 'start_fisica_triage_button',
-              completedCardKey: 'fisica_completed_card',
-              retakeKey: 'retake_fisica_button',
-              onStart: () {
-                context.push(
-                  RoutePaths.journal,
-                  extra: const JournalFlowArgs(initialArea: JournalArea.physical),
-                );
-              },
-              onRetake: () {
-                notifier.prepareForUpdate();
-                context.push(
-                  RoutePaths.journal,
-                  extra: const JournalFlowArgs(initialArea: JournalArea.physical),
-                );
-              },
-              isDark: isDark,
-              viewOnly: physicalViewOnly,
-              premium: premium,
-            ),
-            if (state.conditionsSummary != null &&
-                state.conditionsSummary!.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              _ConditionsTodaySummary(
-                summary: state.conditionsSummary!,
-                isDark: isDark,
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStageCard({
-    required BuildContext context,
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required Color accentColor,
-    required bool isCompleted,
-    required TriggerStatus? status,
-    int? intensity,
-    required String? summary,
-    required String? narrative,
-    required String buttonKey,
-    required String completedCardKey,
-    required String retakeKey,
-    required VoidCallback onStart,
-    required VoidCallback onRetake,
-    required bool isDark,
-    required bool viewOnly,
-    required bool premium,
-  }) {
-    if (isCompleted) {
-      final tier = intensity != null
-          ? ClinicalIntensityTier.fromScore(intensity)
-          : (status?.tier ?? ClinicalIntensityTier.none);
-
-      return Container(
-        key: Key(completedCardKey),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : tier.cardBgColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isDark
-                ? tier.color.withValues(alpha: 0.5)
-                : tier.borderColor,
+    Widget tileFor({
+      required String areaKey,
+      required bool canRead,
+      required String title,
+      required String subtitle,
+      required IconData icon,
+      required Color accentColor,
+      required bool isCompleted,
+      required TriggerStatus? status,
+      required int? intensity,
+      required String buttonKey,
+      required String completedCardKey,
+      required bool tileViewOnly,
+      required JournalArea area,
+    }) {
+      final tint = Color.lerp(accentColor, Colors.white, 0.65)!;
+      final iconWidget = premium
+          ? PremiumGradientIcon(icon: Icon(icon, color: tint, size: 22))
+          : Icon(icon, color: tint, size: 22);
+      if (!canRead) {
+        return _AxisTile(
+          key: ValueKey('home-area-not-shared-$areaKey'),
+          title: title,
+          semanticsLabel: title,
+          icon: Icon(icon, color: tint, size: 22),
+          badge: const Icon(
+            Icons.lock_outline_rounded,
+            size: 18,
+            color: Colors.white70,
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: premium
-                      ? PremiumGradientIcon(icon: Icon(icon, color: accentColor, size: 20))
-                      : Icon(icon, color: accentColor, size: 20),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    title,
-                    semanticsLabel: '$title, ${tier.localizedLabel(context)}',
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: isDark
-                          ? AppColors.textPrimaryDark
-                          : AppColors.textPrimaryLight,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            if (summary != null && summary.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColors.surfaceDark
-                      : Colors.white.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: tier.color.withValues(alpha: 0.25),
-                  ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.check_circle_outline_rounded,
-                      size: 16,
-                      color: accentColor,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        summary,
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: isDark
-                              ? AppColors.textPrimaryDark
-                              : AppColors.textPrimaryLight,
-                          height: 1.3,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-            if (narrative != null &&
-                narrative.trim().isNotEmpty &&
-                int.tryParse(narrative.trim()) == null) ...[
-              const SizedBox(height: 10),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.surfaceDark : Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.outlineLight),
-                ),
-                child: Text(
-                  '“${narrative.trim()}”',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontStyle: FontStyle.italic,
-                    color: isDark
-                        ? AppColors.textSecondaryDark
-                        : AppColors.textSecondaryLight,
-                  ),
-                ),
-              ),
-            ],
-            if (!viewOnly) ...[
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  key: Key(retakeKey),
-                  onPressed: onRetake,
-                  icon: const Icon(Icons.refresh_rounded, size: 16),
-                  label: const Text('Atualizar'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.dualisNavy,
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
+          note: AppLocalizations.of(context).profileCategoryNotSharedTitle,
+          reduceMotion: reduceMotion,
+        );
+      }
+      if (isCompleted) {
+        final tier = intensity != null
+            ? ClinicalIntensityTier.fromScore(intensity)
+            : (status?.tier ?? ClinicalIntensityTier.none);
+        return _AxisTile(
+          key: Key(completedCardKey),
+          title: title,
+          semanticsLabel: '$title, ${tier.localizedLabel(context)}',
+          icon: iconWidget,
+          badge: const Icon(
+            Icons.check_circle_rounded,
+            size: 20,
+            color: AppColors.dualisSymbolGreen,
+          ),
+          fill: tier.color.withValues(alpha: 0.2),
+          edge: tier.color.withValues(alpha: 0.6),
+          reduceMotion: reduceMotion,
+        );
+      }
+      return _AxisTile(
+        key: tileViewOnly ? null : Key(buttonKey),
+        title: title,
+        semanticsLabel: tileViewOnly ? title : 'Iniciar $title',
+        semanticsHint: subtitle,
+        icon: iconWidget,
+        onTap: tileViewOnly
+            ? null
+            : () {
+                context.push(
+                  RoutePaths.journal,
+                  extra: JournalFlowArgs(initialArea: area),
+                );
+              },
+        reduceMotion: reduceMotion,
       );
     }
 
-    // Botão de etapa intacto/sem tocar
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : _innerFill,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark ? AppColors.outlineDark : _innerEdge,
+    final emotionalTile = tileFor(
+      areaKey: 'emotional',
+      canRead: canReadEmotional,
+      title: 'Psicoemocional',
+      subtitle: 'Humor, ansiedade, estresse e clareza mental',
+      icon: Icons.psychology_rounded,
+      accentColor: AppColors.dualisSymbolGreen,
+      isCompleted: isEmotionalCompleted,
+      status: state.emotionalStatus,
+      intensity: emotionalIntensity,
+      buttonKey: 'start_psicoemocional_triage_button',
+      completedCardKey: 'psicoemocional_completed_card',
+      tileViewOnly: emotionalViewOnly,
+      area: JournalArea.emotional,
+    );
+    final physicalTile = tileFor(
+      areaKey: 'physical',
+      canRead: canReadPhysical,
+      title: 'Físico',
+      subtitle: 'Dores corporais, desconforto somático ou fadiga',
+      icon: Icons.accessibility_new_rounded,
+      accentColor: AppColors.dualisSymbolBlue,
+      isCompleted: isPhysicalCompleted,
+      status: state.physicalStatus,
+      intensity: physicalIntensity,
+      buttonKey: 'start_fisica_triage_button',
+      completedCardKey: 'fisica_completed_card',
+      tileViewOnly: physicalViewOnly,
+      area: JournalArea.physical,
+    );
+
+    final details = <Widget>[
+      if (canReadEmotional && isEmotionalCompleted)
+        _CompletedDetails(
+          icon: Icons.psychology_rounded,
+          summary: state.emotionalSummary,
+          // Only text the user typed in that stage's triage; never the
+          // AI's mapped lay term.
+          narrative: state.emotionalNarrative,
+          retakeKey: 'retake_psicoemocional_button',
+          showRetake: !emotionalViewOnly,
+          onRetake: () {
+            notifier.prepareForUpdate();
+            context.push(
+              RoutePaths.journal,
+              extra: const JournalFlowArgs(initialArea: JournalArea.emotional),
+            );
+          },
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              DuotoneIconTile(
-                size: 42,
-                child: premium
-                    ? PremiumGradientIcon(icon: Icon(icon, color: accentColor, size: 22))
-                    : Icon(icon, color: accentColor, size: 22),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: isDark
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textPrimaryLight,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: isDark
-                            ? AppColors.textSecondaryDark
-                            : AppColors.textSecondaryLight,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+      if (canReadPhysical && isPhysicalCompleted)
+        _CompletedDetails(
+          icon: Icons.accessibility_new_rounded,
+          summary: state.physicalSummary,
+          narrative: state.physicalNarrative,
+          retakeKey: 'retake_fisica_button',
+          showRetake: !physicalViewOnly,
+          onRetake: () {
+            notifier.prepareForUpdate();
+            context.push(
+              RoutePaths.journal,
+              extra: const JournalFlowArgs(initialArea: JournalArea.physical),
+            );
+          },
+        ),
+    ];
+
+    return Container(
+      width: double.infinity,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        gradient: AppColors.gradientNavy,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.softIndigoDark.withValues(alpha: 0.7),
+            blurRadius: 40,
+            offset: const Offset(0, 24),
+            spreadRadius: -22,
           ),
-          if (!viewOnly) ...[
-            const SizedBox(height: 14),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                key: Key(buttonKey),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.dualisNavy,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: const StadiumBorder(),
-                ),
-                onPressed: onStart,
-                icon: Icon(icon, size: 18),
-                label: Text(
-                  'Iniciar $title',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -46,
+            top: -6,
+            width: 170,
+            child: ExcludeSemantics(
+              child: Opacity(
+                opacity: 0.28,
+                child: Image.asset(
+                  AppAssets.logoSymbol,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
                 ),
               ),
             ),
-          ],
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 22, 18, 18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Check-in Diário em 2 Etapas'.toUpperCase(),
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    color: AppColors.dualisSymbolCyan,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Como você está hoje?',
+                  style: GoogleFonts.inter(
+                    fontSize: 24,
+                    height: 1.15,
+                    letterSpacing: -0.4,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(child: emotionalTile),
+                      const SizedBox(width: 12),
+                      Expanded(child: physicalTile),
+                    ],
+                  ),
+                ),
+                if (viewOnly) const ActiveProfileReadOnlyNote(),
+                for (final d in details) ...[
+                  const SizedBox(height: 14),
+                  d,
+                ],
+                if (state.conditionsSummary != null &&
+                    state.conditionsSummary!.isNotEmpty) ...[
+                  const SizedBox(height: 14),
+                  _ConditionsTodaySummary(summary: state.conditionsSummary!),
+                ],
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-/// Compact stand-in for a check-in area the shared profile did not grant, so
-/// an empty area never reads as "nothing recorded today".
-class _AreaNotShared extends StatelessWidget {
-  const _AreaNotShared({
-    required this.areaKey,
+/// One axis tile on the navy card: translucent rounded square holding the axis
+/// icon, the label below, an optional corner badge (check or lock). The whole
+/// tile is the tap target when [onTap] is set, with scale feedback on
+/// pointer-down (instant when animations are disabled).
+class _AxisTile extends StatefulWidget {
+  const _AxisTile({
+    super.key,
     required this.title,
+    required this.semanticsLabel,
     required this.icon,
-    required this.isDark,
+    required this.reduceMotion,
+    this.semanticsHint,
+    this.badge,
+    this.note,
+    this.onTap,
+    this.fill,
+    this.edge,
   });
 
-  final String areaKey;
   final String title;
-  final IconData icon;
-  final bool isDark;
+  final String semanticsLabel;
+  final String? semanticsHint;
+  final Widget icon;
+  final Widget? badge;
+  final String? note;
+  final VoidCallback? onTap;
+  final Color? fill;
+  final Color? edge;
+  final bool reduceMotion;
+
+  @override
+  State<_AxisTile> createState() => _AxisTileState();
+}
+
+class _AxisTileState extends State<_AxisTile> {
+  bool _pressed = false;
+
+  void _setPressed(bool v) {
+    if (widget.onTap == null || _pressed == v) return;
+    setState(() => _pressed = v);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final secondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
-    return Container(
-      key: ValueKey('home-area-not-shared-$areaKey'),
-      padding: const EdgeInsets.all(16),
+    final tile = Container(
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDark ? null : _innerFill,
-        borderRadius: BorderRadius.circular(20),
+        color: widget.fill ??
+            Colors.white.withValues(alpha: _pressed ? 0.18 : 0.10),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isDark ? AppColors.outlineDark : _innerEdge,
+          color: widget.edge ?? Colors.white.withValues(alpha: 0.16),
         ),
       ),
-      child: Row(
+      child: Stack(
         children: [
-          Icon(icon, size: 22, color: secondary),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
-                  ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                child: widget.icon,
+              ),
+              const SizedBox(height: 22),
+              Text(
+                widget.title,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              if (widget.note != null) ...[
                 const SizedBox(height: 2),
                 Text(
-                  AppLocalizations.of(context).profileCategoryNotSharedTitle,
+                  widget.note!,
                   style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: secondary,
+                    fontSize: 11.5,
+                    color: Colors.white.withValues(alpha: 0.7),
                   ),
                 ),
               ],
-            ),
+            ],
           ),
-          Icon(Icons.lock_outline_rounded, size: 18, color: secondary),
+          if (widget.badge != null)
+            Positioned(top: 0, right: 0, child: widget.badge!),
         ],
       ),
+    );
+
+    return Semantics(
+      container: true,
+      button: widget.onTap != null,
+      label: widget.semanticsLabel,
+      hint: widget.semanticsHint,
+      excludeSemantics: widget.semanticsHint != null,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => _setPressed(true),
+        onTapUp: (_) => _setPressed(false),
+        onTapCancel: () => _setPressed(false),
+        onTap: widget.onTap,
+        child: AnimatedScale(
+          scale: _pressed ? 0.97 : 1,
+          duration: widget.reduceMotion
+              ? Duration.zero
+              : const Duration(milliseconds: 110),
+          curve: Curves.easeOut,
+          child: tile,
+        ),
+      ),
+    );
+  }
+}
+
+/// Summary, narrative and "Atualizar" action for a finished axis, as compact
+/// translucent text under the tiles.
+class _CompletedDetails extends StatelessWidget {
+  const _CompletedDetails({
+    required this.icon,
+    required this.summary,
+    required this.narrative,
+    required this.retakeKey,
+    required this.showRetake,
+    required this.onRetake,
+  });
+
+  final IconData icon;
+  final String? summary;
+  final String? narrative;
+  final String retakeKey;
+  final bool showRetake;
+  final VoidCallback onRetake;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasSummary = summary != null && summary!.isNotEmpty;
+    final hasNarrative = narrative != null &&
+        narrative!.trim().isNotEmpty &&
+        int.tryParse(narrative!.trim()) == null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (hasSummary)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, size: 16, color: Colors.white70),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  summary!,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        if (hasNarrative) ...[
+          const SizedBox(height: 6),
+          Text(
+            '“${narrative!.trim()}”',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+              color: Colors.white.withValues(alpha: 0.72),
+            ),
+          ),
+        ],
+        if (showRetake)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              key: Key(retakeKey),
+              onPressed: onRetake,
+              icon: const Icon(Icons.refresh_rounded, size: 16),
+              label: const Text('Atualizar'),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.dualisSymbolCyan,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -522,9 +482,8 @@ class _AreaNotShared extends StatelessWidget {
 /// block: conditions never fill the emotional or physical axis.
 class _ConditionsTodaySummary extends StatelessWidget {
   final String summary;
-  final bool isDark;
 
-  const _ConditionsTodaySummary({required this.summary, required this.isDark});
+  const _ConditionsTodaySummary({required this.summary});
 
   @override
   Widget build(BuildContext context) {
@@ -533,11 +492,9 @@ class _ConditionsTodaySummary extends StatelessWidget {
       key: const Key('conditions_today_summary'),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDark ? null : _innerFill,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark ? AppColors.outlineDark : _innerEdge,
-        ),
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -547,20 +504,13 @@ class _ConditionsTodaySummary extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: isDark
-                  ? AppColors.textSecondaryDark
-                  : AppColors.textSecondaryLight,
+              color: Colors.white.withValues(alpha: 0.72),
             ),
           ),
           const SizedBox(height: 4),
           Text(
             summary,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: isDark
-                  ? AppColors.textPrimaryDark
-                  : AppColors.textPrimaryLight,
-            ),
+            style: GoogleFonts.inter(fontSize: 14, color: Colors.white),
           ),
         ],
       ),

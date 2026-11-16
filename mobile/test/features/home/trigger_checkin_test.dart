@@ -74,7 +74,7 @@ void main() {
       await tester.pumpWidget(createTriggerCheckInTestApp());
       await tester.pumpAndSettle();
 
-      expect(find.text('Check-in Diário em 2 Etapas'), findsOneWidget);
+      expect(find.text('CHECK-IN DIÁRIO EM 2 ETAPAS'), findsOneWidget);
       expect(find.text('Psicoemocional'), findsOneWidget);
       expect(find.text('Físico'), findsOneWidget);
 

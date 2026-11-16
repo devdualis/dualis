@@ -72,18 +72,15 @@ void _tallView(WidgetTester tester) {
 const _emotionalButton = Key('start_psicoemocional_triage_button');
 const _physicalButton = Key('start_fisica_triage_button');
 
-/// The badge icon is the match that is not inside the start button.
-Finder _badge(IconData icon, Key buttonKey) {
-  final all = find.byIcon(icon);
-  final inButton = find.descendant(of: find.byKey(buttonKey), matching: all);
-  return find.byWidgetPredicate((widget) {
-    if (widget is! Icon || widget.icon != icon) return false;
-    return !inButton.evaluate().any((e) => identical(e.widget, widget));
-  });
-}
+/// The axis icon sits inside the tile that carries the start key.
+Finder _badge(IconData icon, Key tileKey) =>
+    find.descendant(of: find.byKey(tileKey), matching: find.byIcon(icon));
+
+/// Light tint of the axis colour used on the navy card.
+Color _tint(Color accent) => Color.lerp(accent, Colors.white, 0.65)!;
 
 void main() {
-  testWidgets('Premium: the two badge icons get the gradient, buttons stay plain',
+  testWidgets('Premium: the two badge icons get the gradient, tiles are the start targets',
       (tester) async {
     _tallView(tester);
     await tester.pumpWidget(_harness(premium: true));
@@ -105,11 +102,7 @@ void main() {
       expect(find.ancestor(of: badge, matching: find.byType(ShaderMask)), findsOneWidget);
       final glyph = tester.widget<Icon>(badge);
       expect(glyph.size, 22);
-      expect(glyph.color, color);
-
-      final buttonIcon = find.descendant(of: find.byKey(button), matching: find.byIcon(icon));
-      expect(buttonIcon, findsOneWidget);
-      expect(find.ancestor(of: buttonIcon, matching: find.byType(ShaderMask)), findsNothing);
+      expect(glyph.color, _tint(color));
     }
   });
 
