@@ -208,10 +208,9 @@ class _VoiceStatusBannerState extends ConsumerState<VoiceStatusBanner> {
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
                     color: AppColors.dualisNavy.withValues(alpha: 0.94),
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: const [
-                      BoxShadow(color: Color(0x33000000), blurRadius: 12, offset: Offset(0, 4)),
-                    ],
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+                    boxShadow: AppColors.glassShadow(alpha: 0.35),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -223,7 +222,7 @@ class _VoiceStatusBannerState extends ConsumerState<VoiceStatusBanner> {
                                 ? Icons.graphic_eq_rounded
                                 : Icons.record_voice_over_rounded,
                         size: 18,
-                        color: Colors.white,
+                        color: AppColors.dualisSymbolCyan,
                       ),
                       const SizedBox(width: 8),
                       Flexible(

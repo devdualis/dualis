@@ -122,7 +122,7 @@ class ActiveProfileBanner extends ConsumerWidget {
                     style: GoogleFonts.inter(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimaryLight,
+                      color: AppColors.dualisNavy,
                     ),
                   ),
                 ),

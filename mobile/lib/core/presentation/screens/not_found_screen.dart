@@ -8,6 +8,7 @@ import '../../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/dualis_logo.dart';
 import '../../../shared/widgets/dualis_primary_button.dart';
+import '../../../shared/widgets/duotone_icon_tile.dart';
 
 class NotFoundScreen extends ConsumerWidget {
   final String? uri;
@@ -23,7 +24,7 @@ class NotFoundScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundDepth,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -39,30 +40,20 @@ class NotFoundScreen extends ConsumerWidget {
                     width: 160,
                   ),
                   const SizedBox(height: 36),
-                  Container(
-                    width: 88,
-                    height: 88,
-                    decoration: BoxDecoration(
-                      color: AppColors.clinicalTeal.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.clinicalTeal.withValues(alpha: 0.3),
-                        width: 2,
-                      ),
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.travel_explore_rounded,
-                        size: 44,
-                        color: AppColors.clinicalTeal,
-                      ),
+                  const DuotoneIconTile(
+                    size: 88,
+                    radius: 28,
+                    child: Icon(
+                      Icons.travel_explore_rounded,
+                      size: 44,
+                      color: AppColors.dualisNavy,
                     ),
                   ),
                   const SizedBox(height: 24),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.outlineLight.withValues(alpha: 0.4),
+                      color: AppColors.dualisNavy.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -81,8 +72,8 @@ class NotFoundScreen extends ConsumerWidget {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
                       fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimaryLight,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.dualisNavy,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -100,16 +91,15 @@ class NotFoundScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.grey.shade300),
+                        color: AppColors.glassFill,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.glassEdge),
                       ),
                       child: Text(
                         uri!,
-                        style: const TextStyle(
-                          fontFamily: 'monospace',
+                        style: GoogleFonts.inter(
                           fontSize: 12,
-                          color: Colors.black87,
+                          color: AppColors.textSecondaryLight,
                         ),
                       ),
                     ),

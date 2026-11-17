@@ -99,7 +99,7 @@ class OfflineIndicatorBanner extends ConsumerWidget {
         ? const Color(0xFFB45309)
         : isOffline
             ? const Color(0xFFD97706)
-            : AppColors.clinicalTeal;
+            : AppColors.dualisNavy;
 
     final message = rejectedCount > 0
         ? l10n.jv2OutboxRejectedNotice
@@ -115,6 +115,10 @@ class OfflineIndicatorBanner extends ConsumerWidget {
       button: !isOffline && pendingCount > 0,
       child: Material(
         color: backgroundColor,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+        ),
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: !isOffline && pendingCount > 0
               ? () => unawaited(
@@ -127,10 +131,18 @@ class OfflineIndicatorBanner extends ConsumerWidget {
         padding: EdgeInsets.fromLTRB(16, 9 + topInset, 16, 9),
         child: Row(
           children: [
-            Icon(
-              isOffline ? Icons.cloud_off_rounded : Icons.sync_rounded,
-              color: Colors.white,
-              size: 18,
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: Icon(
+                isOffline ? Icons.cloud_off_rounded : Icons.sync_rounded,
+                color: Colors.white,
+                size: 16,
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/config/feature_flags.dart';
+import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/router/route_paths.dart';
 import '../../core/security/biometric_lock_controller.dart';
@@ -302,9 +303,29 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      body: SafeArea(
+      backgroundColor: AppColors.dualisNavy,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(gradient: AppColors.gradientNavy),
         child: Stack(
+          children: [
+            // Brand watermark, same treatment as the Home check-in card.
+            Positioned(
+              right: -70,
+              bottom: -30,
+              width: 320,
+              child: ExcludeSemantics(
+                child: Opacity(
+                  opacity: 0.16,
+                  child: Image.asset(
+                    AppAssets.logoSymbol,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+            ),
+            SafeArea(
+              child: Stack(
           children: [
             Center(
               child: SingleChildScrollView(
@@ -324,8 +345,8 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimaryLight,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -334,13 +355,13 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        color: AppColors.textSecondaryLight,
+                        color: Colors.white.withValues(alpha: 0.78),
                         height: 1.4,
                       ),
                     ),
                     const SizedBox(height: 32),
                     if (!lock.locked)
-                      const CircularProgressIndicator()
+                      const CircularProgressIndicator(color: Colors.white)
                     else if (_passwordMode)
                       ..._buildPasswordForm(l10n)
                     else
@@ -359,6 +380,9 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
             ),
           ],
         ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -371,11 +395,10 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
         child: FilledButton.icon(
           key: const Key('privacyVeilUnlockButton'),
           style: FilledButton.styleFrom(
-            backgroundColor: AppColors.softIndigo,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            backgroundColor: Colors.white,
+            foregroundColor: AppColors.dualisNavy,
+            disabledBackgroundColor: Colors.white.withValues(alpha: 0.5),
+            shape: const StadiumBorder(),
           ),
           onPressed: _busy ? null : _tryBiometrics,
           icon: const Icon(Icons.fingerprint, size: 22),
@@ -402,7 +425,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
           l10n.bioLockPasswordButton,
           style: GoogleFonts.inter(
             fontSize: 14,
-            color: AppColors.clinicalTeal,
+            color: AppColors.dualisSymbolCyan,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -414,7 +437,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
           l10n.logoutButton,
           style: GoogleFonts.inter(
             fontSize: 14,
-            color: AppColors.textSecondaryLight,
+            color: Colors.white.withValues(alpha: 0.7),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -461,7 +484,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimaryLight,
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 12),
@@ -482,7 +505,10 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
           labelText: l10n.bioLockPasswordLabel,
           filled: true,
           fillColor: AppColors.surfaceLight,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
           suffixIcon: IconButton(
             icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
             onPressed: () => setState(() => _obscure = !_obscure),
@@ -491,13 +517,20 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
       ),
       if (_error != null) ...[
         const SizedBox(height: 8),
-        Text(
-          _error!,
-          key: const Key('bioLockPasswordError'),
-          textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            color: AppColors.emergencyCrimson,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppColors.emergencySurfaceRed,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            _error!,
+            key: const Key('bioLockPasswordError'),
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              color: AppColors.emergencyTextDark,
+            ),
           ),
         ),
       ],
@@ -508,11 +541,10 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
         child: FilledButton(
           key: const Key('bioLockPasswordSubmit'),
           style: FilledButton.styleFrom(
-            backgroundColor: AppColors.softIndigo,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            backgroundColor: Colors.white,
+            foregroundColor: AppColors.dualisNavy,
+            disabledBackgroundColor: Colors.white.withValues(alpha: 0.5),
+            shape: const StadiumBorder(),
           ),
           onPressed: _busy ? null : _submitPassword,
           child:
@@ -522,7 +554,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: AppColors.dualisNavy,
                     ),
                   )
                   : Text(
@@ -549,7 +581,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
           l10n.bioLockPasswordBack,
           style: GoogleFonts.inter(
             fontSize: 14,
-            color: AppColors.clinicalTeal,
+            color: AppColors.dualisSymbolCyan,
             fontWeight: FontWeight.w600,
           ),
         ),

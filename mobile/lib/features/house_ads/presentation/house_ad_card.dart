@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/config/feature_flags.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/glass_card.dart';
 import '../../home/domain/home_greeting.dart';
 import '../data/house_ads_repository.dart';
 import '../domain/house_ad.dart';
@@ -50,14 +51,9 @@ class HouseAdView extends StatelessWidget {
     if (style != null) {
       return _BrandAdCard(ad: ad, style: style, onOpen: hasLink ? _open : null);
     }
-    return Container(
+    return GlassCard(
       key: const Key('house_ad_card'),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.outlineLight),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -66,8 +62,8 @@ class HouseAdView extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.outlineLight,
-                  borderRadius: BorderRadius.circular(6),
+                  color: AppColors.dualisNavy.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   l10n.xv2AdLabel,
@@ -105,7 +101,7 @@ class HouseAdView extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimaryLight,
+                        color: AppColors.dualisNavy,
                       ),
                     ),
                     const SizedBox(height: 4),
