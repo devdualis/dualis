@@ -82,122 +82,56 @@ class DualisBottomNavBar extends StatelessWidget {
                         borderRadius: BorderRadius.circular(_barHeight / 2),
                         border: Border.all(color: AppColors.glassEdge),
                       ),
-                      child: NavigationBarTheme(
-                        data: NavigationBarThemeData(
-                          backgroundColor: Colors.transparent,
-                          surfaceTintColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          indicatorColor: AppColors.dualisNavy.withValues(
-                            alpha: 0.08,
-                          ),
-                          indicatorShape: const StadiumBorder(),
+                      child: _SlidingTabs(
+                        selectedIndex: currentIndex.clamp(
+                          0,
+                          emergencyIndex - 1,
                         ),
-                        child: NavigationBar(
-                          selectedIndex: currentIndex.clamp(
-                            0,
-                            emergencyIndex - 1,
+                        onSelected: onTap,
+                        gradientPill: !premiumIcons,
+                        tabs: [
+                          _TabSpec(
+                            key: const Key('nav_destination_home'),
+                            icon: Icons.home_outlined,
+                            selectedIcon: Icons.home_rounded,
+                            label: homeLabel,
                           ),
-                          onDestinationSelected: (index) {
-                            if (index == emergencyIndex) {
-                              onEmergencyTap();
-                              return;
-                            }
-                            onTap(index);
-                          },
-                          backgroundColor: Colors.transparent,
-                          elevation: 0,
-                          height: _barHeight,
-                          labelBehavior:
-                              NavigationDestinationLabelBehavior.alwaysHide,
-                          destinations: [
-                            NavigationDestination(
-                              key: const Key('nav_destination_home'),
-                              icon: const Icon(
-                                Icons.home_outlined,
-                                color: AppColors.textSecondaryLight,
-                              ),
-                              selectedIcon: _selected(
-                                const Icon(
-                                  Icons.home_rounded,
-                                  color: AppColors.dualisNavy,
-                                ),
-                              ),
-                              label: '',
-                              tooltip: homeLabel,
+                          _TabSpec(
+                            key: const Key('nav_destination_history'),
+                            icon: Icons.insights_outlined,
+                            selectedIcon: Icons.insights_rounded,
+                            label: _short(historyLabel),
+                            tooltip: historyLabel,
+                          ),
+                          if (habitsTab)
+                            _TabSpec(
+                              key: const Key('nav_destination_habits'),
+                              icon: Icons.wb_twilight_outlined,
+                              selectedIcon: Icons.wb_twilight_rounded,
+                              label: habitsLabel,
+                            )
+                          else
+                            _TabSpec(
+                              key: const Key('nav_destination_hydration'),
+                              icon: Icons.water_drop_outlined,
+                              selectedIcon: Icons.water_drop_rounded,
+                              label: hydrationLabel,
                             ),
-                            NavigationDestination(
-                              key: const Key('nav_destination_history'),
-                              icon: const Icon(
-                                Icons.insights_outlined,
-                                color: AppColors.textSecondaryLight,
-                              ),
-                              selectedIcon: _selected(
-                                const Icon(
-                                  Icons.insights_rounded,
-                                  color: AppColors.dualisNavy,
-                                ),
-                              ),
-                              label: '',
-                              tooltip: historyLabel,
+                          if (showCare)
+                            _TabSpec(
+                              key: const Key('nav_destination_care'),
+                              icon: Icons.favorite_border_rounded,
+                              selectedIcon: Icons.favorite_rounded,
+                              label: _short(careLabel),
+                              tooltip:
+                                  careLocked
+                                      ? (l10n?.navCareLockedTooltip ??
+                                          careLabel)
+                                      : careLabel,
+                              locked: careLocked,
                             ),
-                            if (habitsTab)
-                              NavigationDestination(
-                                key: const Key('nav_destination_habits'),
-                                icon: const Icon(
-                                  Icons.wb_twilight_outlined,
-                                  color: AppColors.textSecondaryLight,
-                                ),
-                                selectedIcon: _selected(
-                                  const Icon(
-                                    Icons.wb_twilight_rounded,
-                                    color: AppColors.dualisNavy,
-                                  ),
-                                ),
-                                label: '',
-                                tooltip: habitsLabel,
-                              )
-                            else
-                              NavigationDestination(
-                                key: const Key('nav_destination_hydration'),
-                                icon: const Icon(
-                                  Icons.water_drop_outlined,
-                                  color: AppColors.textSecondaryLight,
-                                ),
-                                selectedIcon: _selected(
-                                  const Icon(
-                                    Icons.water_drop_rounded,
-                                    color: AppColors.dualisNavy,
-                                  ),
-                                ),
-                                label: '',
-                                tooltip: hydrationLabel,
-                              ),
-                            if (showCare)
-                              NavigationDestination(
-                                key: const Key('nav_destination_care'),
-                                icon: _careGlyph(
-                                  const Icon(
-                                    Icons.favorite_border_rounded,
-                                    color: AppColors.textSecondaryLight,
-                                  ),
-                                ),
-                                selectedIcon: _careGlyph(
-                                  _selected(
-                                    const Icon(
-                                      Icons.favorite_rounded,
-                                      color: AppColors.dualisNavy,
-                                    ),
-                                  ),
-                                ),
-                                label: '',
-                                tooltip:
-                                    careLocked
-                                        ? (l10n?.navCareLockedTooltip ??
-                                            careLabel)
-                                        : careLabel,
-                              ),
-                          ],
-                        ),
+                        ],
+                        premiumIcons: premiumIcons,
                       ),
                     ),
                   ),
@@ -231,28 +165,20 @@ class DualisBottomNavBar extends StatelessWidget {
 
   static const double _barHeight = 62;
 
-  Widget _selected(Icon icon) {
-    return premiumIcons
-        ? PremiumGradientIcon(icon: icon, showActiveDot: true)
-        : icon;
-  }
-
-  Widget _careGlyph(Widget icon) {
-    if (!careLocked) return icon;
-    return Badge(
-      key: const Key('nav_care_pro_badge'),
-      offset: const Offset(14, -6),
-      backgroundColor: AppColors.dualisSymbolBlue,
-      label: const Text(
-        'PRO',
-        style: TextStyle(
-          fontSize: 8,
-          fontWeight: FontWeight.w800,
-          color: Colors.white,
-        ),
-      ),
-      child: icon,
-    );
+  /// Compact name for the active pill: drops a possessive prefix
+  /// ("Meus cuidados" -> "Cuidados") and any "& Mapa" / "y Mapa" suffix. The
+  /// full name stays in the tooltip and semantics.
+  static String _short(String label) {
+    var t = label.split(RegExp(r'\s+(?:&|y)\s+')).first.trim();
+    final m = RegExp(
+      r'^(?:meus|mis|my)\s+',
+      caseSensitive: false,
+    ).firstMatch(t);
+    if (m != null && t.length > m.end) {
+      t = t.substring(m.end);
+      t = t[0].toUpperCase() + t.substring(1);
+    }
+    return t;
   }
 
   Widget _emergencyGlyph(IconData icon) {
@@ -273,6 +199,218 @@ class DualisBottomNavBar extends StatelessWidget {
         ],
       ),
       child: Icon(icon, size: 26, color: Colors.white),
+    );
+  }
+}
+
+class _TabSpec {
+  final Key key;
+  final IconData icon;
+  final IconData selectedIcon;
+  final String label;
+  final String tooltip;
+
+  /// Shows the "PRO" badge (free build care tab).
+  final bool locked;
+
+  const _TabSpec({
+    required this.key,
+    required this.icon,
+    required this.selectedIcon,
+    required this.label,
+    String? tooltip,
+    this.locked = false,
+  }) : tooltip = tooltip ?? label;
+}
+
+/// Tab row with one pill that slides under the selected tab. Only the
+/// selected tab shows its label; the others are icon-only (name stays in the
+/// tooltip / semantics). Animation is skipped when the OS asks to reduce
+/// motion.
+class _SlidingTabs extends StatelessWidget {
+  final List<_TabSpec> tabs;
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
+
+  /// Free build: teal→navy gradient pill with white content. Premium keeps the
+  /// light tint so its gradient icon and champagne dot stay visible.
+  final bool gradientPill;
+  final bool premiumIcons;
+
+  const _SlidingTabs({
+    required this.tabs,
+    required this.selectedIndex,
+    required this.onSelected,
+    required this.gradientPill,
+    required this.premiumIcons,
+  });
+
+  static const double _selectedWeight = 2.3;
+  static const double _pillInset = 3;
+  static const double _edgePad = 6;
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final duration =
+        reduceMotion ? Duration.zero : const Duration(milliseconds: 380);
+    const curve = Curves.easeOutBack;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final total = constraints.maxWidth - _edgePad * 2;
+        final unit = total / (tabs.length - 1 + _selectedWeight);
+        double left(int i) =>
+            _edgePad +
+            i * unit +
+            (i > selectedIndex ? (_selectedWeight - 1) * unit : 0);
+        double width(int i) =>
+            i == selectedIndex ? _selectedWeight * unit : unit;
+
+        return SizedBox(
+          height: DualisBottomNavBar._barHeight,
+          child: Stack(
+            children: [
+              AnimatedPositioned(
+                key: const Key('nav_active_pill'),
+                duration: duration,
+                curve: curve,
+                left: left(selectedIndex) + _pillInset,
+                width: width(selectedIndex) - _pillInset * 2,
+                top: _pillInset + 2,
+                bottom: _pillInset + 2,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(999),
+                    gradient:
+                        gradientPill
+                            ? const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.clinicalTeal,
+                                AppColors.dualisNavy,
+                              ],
+                            )
+                            : null,
+                    color:
+                        gradientPill
+                            ? null
+                            : AppColors.dualisNavy.withValues(alpha: 0.08),
+                  ),
+                ),
+              ),
+              for (var i = 0; i < tabs.length; i++)
+                AnimatedPositioned(
+                  duration: duration,
+                  curve: curve,
+                  left: left(i),
+                  width: width(i),
+                  top: 0,
+                  bottom: 0,
+                  child: _TabButton(
+                    spec: tabs[i],
+                    selected: i == selectedIndex,
+                    onTap: () => onSelected(i),
+                    onGradient: gradientPill,
+                    premiumIcons: premiumIcons,
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _TabButton extends StatelessWidget {
+  final _TabSpec spec;
+  final bool selected;
+  final VoidCallback onTap;
+  final bool onGradient;
+  final bool premiumIcons;
+
+  const _TabButton({
+    required this.spec,
+    required this.selected,
+    required this.onTap,
+    required this.onGradient,
+    required this.premiumIcons,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color =
+        selected
+            ? (onGradient ? Colors.white : AppColors.dualisNavy)
+            : AppColors.textSecondaryLight;
+    final icon = Icon(
+      selected ? spec.selectedIcon : spec.icon,
+      color: color,
+      size: 24,
+    );
+    Widget glyph =
+        selected && premiumIcons
+            ? PremiumGradientIcon(icon: icon, showActiveDot: true)
+            : icon;
+    if (spec.locked) {
+      glyph = Badge(
+        key: const Key('nav_care_pro_badge'),
+        offset: const Offset(14, -6),
+        backgroundColor: AppColors.dualisSymbolBlue,
+        label: const Text(
+          'PRO',
+          style: TextStyle(
+            fontSize: 8,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+        ),
+        child: glyph,
+      );
+    }
+
+    return Tooltip(
+      message: spec.tooltip,
+      child: Semantics(
+        button: true,
+        selected: selected,
+        label: spec.tooltip,
+        excludeSemantics: true,
+        child: InkWell(
+          key: spec.key,
+          onTap: onTap,
+          customBorder: const StadiumBorder(),
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                glyph,
+                if (selected)
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          spec.label,
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: color,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

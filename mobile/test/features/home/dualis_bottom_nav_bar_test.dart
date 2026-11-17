@@ -28,8 +28,8 @@ void main() {
       expect(find.byKey(const Key('nav_destination_hydration')), findsOneWidget);
       expect(find.byKey(const Key('nav_destination_emergency')), findsOneWidget);
 
-      // Verify text labels are hidden for clean icon-only bottom bar
-      expect(find.text('Início'), findsNothing);
+      // Only the selected tab shows its label; the others stay icon-only.
+      expect(find.text('Início'), findsOneWidget);
       expect(find.text('Meu Dia'), findsNothing);
       expect(find.text('Histórico & Mapa'), findsNothing);
       expect(find.text('Água'), findsNothing);
