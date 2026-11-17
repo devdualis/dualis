@@ -1,9 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/notifications/app_notification_center.dart';
 import '../../../core/notifications/notification_action_queue.dart';
 import '../../auth/presentation/controllers/auth_controller.dart';
+import '../../care/data/care_api.dart';
+import '../../care/domain/care_models.dart';
+import '../../care/presentation/care_providers.dart';
 import '../../hydration/data/hydration_repository.dart';
 import '../../hydration/presentation/controllers/hydration_controller.dart';
 
@@ -19,10 +23,14 @@ class NotificationActionSync {
       required DateTime timestamp,
     }) logWater,
     Future<void> Function()? onWaterLogged,
+    CareApi Function()? careApi,
+    void Function(String medicationId)? onMedicationLogged,
     DateTime Function()? clock,
   })  : _userId = userId,
         _logWater = logWater,
-        _onWaterLogged = onWaterLogged {
+        _onWaterLogged = onWaterLogged,
+        _careApi = careApi,
+        _onMedicationLogged = onMedicationLogged {
     _drain = NotificationActionDrain(queue, handle: handle, clock: clock);
   }
 
@@ -33,6 +41,8 @@ class NotificationActionSync {
     required DateTime timestamp,
   }) _logWater;
   final Future<void> Function()? _onWaterLogged;
+  final CareApi Function()? _careApi;
+  final void Function(String medicationId)? _onMedicationLogged;
   late final NotificationActionDrain _drain;
   bool _loggedWater = false;
 
@@ -56,7 +66,7 @@ class NotificationActionSync {
       case PendingNotificationActionKind.water:
         return _water(action);
       case PendingNotificationActionKind.medicationTaken:
-        return DrainOutcome.drop;
+        return _medication(action);
     }
   }
 
@@ -71,6 +81,44 @@ class NotificationActionSync {
     await _logWater(userId: userId, amountMl: amount, timestamp: action.at.toLocal());
     _loggedWater = true;
     return DrainOutcome.done;
+  }
+
+  /// "Tomei": the backend has no idempotency key, so the slot is checked
+  /// first. A dose already marked (in the app, or by a retry whose answer was
+  /// lost) is never sent twice.
+  Future<DrainOutcome> _medication(PendingNotificationAction action) async {
+    final userId = _userId();
+    if (userId == null || userId.isEmpty) return DrainOutcome.retry;
+    final medicationId = action.medicationId;
+    final scheduledFor = action.scheduledFor;
+    final careApi = _careApi?.call();
+    if (medicationId == null || scheduledFor == null || careApi == null) {
+      return DrainOutcome.drop;
+    }
+    try {
+      final intakes =
+          await careApi.list(CareKind.medicationIntake, parentId: medicationId);
+      final slot = _minuteUtc(scheduledFor);
+      final alreadyTaken = intakes.any((intake) =>
+          intake.str('action') == IntakeAction.taken.name &&
+          intake.occursAt != null &&
+          _minuteUtc(intake.occursAt!) == slot);
+      if (!alreadyTaken) {
+        await careApi.logIntake(medicationId, scheduledFor, IntakeAction.taken);
+      }
+      _onMedicationLogged?.call(medicationId);
+      return DrainOutcome.done;
+    } on DioException catch (e) {
+      const rejected = {400, 403, 404, 422};
+      return rejected.contains(e.response?.statusCode)
+          ? DrainOutcome.drop
+          : DrainOutcome.retry;
+    }
+  }
+
+  static DateTime _minuteUtc(DateTime d) {
+    final u = d.toUtc();
+    return DateTime.utc(u.year, u.month, u.day, u.hour, u.minute);
   }
 }
 
@@ -91,5 +139,10 @@ final notificationActionSyncProvider = Provider<NotificationActionSync>((ref) {
             ),
     onWaterLogged: () =>
         ref.read(hydrationControllerProvider.notifier).loadData(),
+    careApi: () => ref.read(careApiProvider),
+    onMedicationLogged: (medicationId) {
+      ref.invalidate(intakesProvider(medicationId));
+      ref.invalidate(careRecordsProvider(CareKind.medication));
+    },
   );
 });

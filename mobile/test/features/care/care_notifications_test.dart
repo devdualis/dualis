@@ -112,6 +112,36 @@ void main() {
     for (final secret in ['Losartana', '50 mg', 'comprimidos']) {
       expect(text, isNot(contains(secret)));
     }
+    // The payload holds the record id and HH:mm only.
+    final payload = call[#payload] as String;
+    expect(payload, 'care_med|r-medication|08:00');
+    for (final secret in ['Losartana', '50 mg', 'comprimidos']) {
+      expect(payload, isNot(contains(secret)));
+    }
+  });
+
+  test('medication reminder carries Tomei and Adiar 15 min in the background',
+      () async {
+    final h = _Harness();
+    await h.run(medications: [
+      Medication(_record(CareKind.medication, {
+        'name': 'X',
+        'times': ['8:05'],
+        'weekdays': <int>[1, 3],
+      })),
+    ]);
+    expect(h.scheduled, hasLength(2));
+    for (final call in h.scheduled) {
+      expect(call[#payload], 'care_med|r-medication|08:05');
+      final details = call[#notificationDetails] as NotificationDetails;
+      final actions = details.android!.actions!;
+      expect(actions.map((a) => a.id), ['med_taken', 'med_snooze']);
+      expect(actions.map((a) => a.title), ['Tomei', 'Adiar 15 min']);
+      expect(actions.every((a) => !a.showsUserInterface), isTrue);
+      expect(details.iOS!.categoryIdentifier, 'dualis_care_medication');
+      expect(call[#title], 'Hora do seu medicamento');
+      expect(call[#body], 'Toque para ver o lembrete.');
+    }
   });
 
   test('appointment reminder says Tomorrow for 1d and Today for 2h, no names',

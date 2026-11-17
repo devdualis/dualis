@@ -3,7 +3,12 @@
 import 'dart:io';
 import 'dart:ui' show Locale;
 
+import 'package:dio/dio.dart';
 import 'package:dualis_mobile/core/notifications/app_notification_center.dart';
+import 'package:dualis_mobile/core/notifications/daily_checkin_notification_service.dart';
+import 'package:dualis_mobile/features/care/data/care_api.dart';
+import 'package:dualis_mobile/features/care/data/care_notifications.dart';
+import 'package:dualis_mobile/features/care/domain/care_models.dart';
 import 'package:dualis_mobile/core/notifications/hydration_notification_service.dart';
 import 'package:dualis_mobile/core/notifications/notification_action_queue.dart';
 import 'package:dualis_mobile/core/notifications/notification_actions.dart';
@@ -18,6 +23,8 @@ import 'package:timezone/timezone.dart' as tz;
 class _MockPlugin extends Mock implements FlutterLocalNotificationsPlugin {}
 
 class _FakeTZDateTime extends Fake implements tz.TZDateTime {}
+
+class _MockCareApi extends Mock implements CareApi {}
 
 class _RecordingExecutor extends NotificationActionExecutor {
   _RecordingExecutor()
@@ -72,6 +79,9 @@ void main() {
     registerFallbackValue(_FakeTZDateTime());
     registerFallbackValue(AndroidScheduleMode.inexactAllowWhileIdle);
     registerFallbackValue(DateTimeComponents.time);
+    registerFallbackValue(CareKind.medicationIntake);
+    registerFallbackValue(IntakeAction.taken);
+    registerFallbackValue(DateTime(2026));
   });
 
   group('resolveNotificationAction: water', () {
@@ -503,5 +513,218 @@ void main() {
         expect(ids, contains(variant.categoryId));
       }
     });
+  });
+
+  group('check-in buttons', () {
+    test('Fazer check-in opens the app, Mais tarde only dismisses', () {
+      final details = DailyCheckinNotificationService.notificationDetails(_pt);
+      final actions = details.android!.actions!;
+      expect(actions, hasLength(2));
+      expect(actions[0].id, NotificationActionIds.checkinOpen);
+      expect(actions[0].title, 'Fazer check-in');
+      expect(actions[0].showsUserInterface, isTrue);
+      expect(actions[1].id, NotificationActionIds.checkinLater);
+      expect(actions[1].title, 'Mais tarde');
+      expect(actions[1].showsUserInterface, isFalse);
+      expect(actions[1].cancelNotification, isTrue);
+      expect(details.iOS!.categoryIdentifier, NotificationCategoryIds.checkin);
+      expect(details.android!.channelId,
+          DailyCheckinNotificationService.checkinChannelId);
+    });
+
+    test('checkin_open reaches the open_checkin stream; later schedules nothing',
+        () async {
+      final executor = _RecordingExecutor();
+      final center = AppNotificationCenter(
+        plugin: _MockPlugin(),
+        timezoneResolver: () async => 'UTC',
+        actionExecutor: executor,
+      );
+      final received = <String>[];
+      final sub = center
+          .payloads(where: (p) => p == NotificationPayloads.openCheckIn)
+          .listen(received.add);
+      center.handleNotificationResponse(_action(
+          NotificationActionIds.checkinOpen,
+          payload: NotificationPayloads.openCheckIn));
+      center.handleNotificationResponse(_action(
+          NotificationActionIds.checkinLater,
+          payload: NotificationPayloads.openCheckIn));
+      await Future<void>.delayed(Duration.zero);
+      expect(received, [NotificationPayloads.openCheckIn]);
+      expect(executor.executed.single, isA<Dismiss>());
+    });
+  });
+
+  group('medication buttons', () {
+    test('medicationScheduledFor picks the latest slot at or before the tap',
+        () {
+      expect(medicationScheduledFor('08:30', DateTime(2026, 11, 17, 9, 10)),
+          DateTime(2026, 11, 17, 8, 30));
+      expect(medicationScheduledFor('23:50', DateTime(2026, 11, 18, 0, 6)),
+          DateTime(2026, 11, 17, 23, 50));
+      expect(medicationScheduledFor('09:10', DateTime(2026, 11, 17, 9, 10)),
+          DateTime(2026, 11, 17, 9, 10));
+      expect(medicationScheduledFor('99:00', _t), isNull);
+    });
+
+    test('Tomei queues the slot with ids only; malformed payload dismisses',
+        () {
+      final effect = resolveNotificationAction(
+        actionId: NotificationActionIds.medTaken,
+        payload: CarePayloads.medication('med-1', '08:30'),
+        now: _t,
+      );
+      final entry = (effect as EnqueueAction).action;
+      expect(entry.kind, PendingNotificationActionKind.medicationTaken);
+      expect(entry.medicationId, 'med-1');
+      expect(entry.scheduledFor, DateTime(2026, 11, 17, 8, 30));
+      for (final bad in [null, '', 'care_med|med-1', 'care_med|a b|08:30',
+          'care_med|med-1|8h', 'open_checkin']) {
+        expect(
+            resolveNotificationAction(
+                actionId: NotificationActionIds.medTaken,
+                payload: bad,
+                now: _t),
+            isA<Dismiss>(),
+            reason: '$bad');
+      }
+    });
+
+    test('snooze ids stay out of the rescheduled care range', () {
+      expect(careSnoozeId(6000), 6100);
+      expect(careSnoozeId(6029), 6129);
+      expect(careSnoozeId(6105), 6105);
+      expect(careSnoozeId(null), 6130);
+      expect(careSnoozeId(42), 6130);
+      expect(vaccineSnoozeId(6003), 6203);
+      expect(vaccineSnoozeId(6210), 6210);
+      expect(vaccineSnoozeId(7000), 6230);
+    });
+
+    test('Adiar 15 min schedules the same medication reminder once', () async {
+      final scheduled = <Map<Symbol, dynamic>>[];
+      final executor = NotificationActionExecutor(
+        plugin: _schedulingPlugin(scheduled),
+        queue: InMemoryNotificationActionQueue(),
+        l10n: () => _pt,
+      );
+      final payload = CarePayloads.medication('med-1', '08:30');
+      await executor.execute(resolveNotificationAction(
+        actionId: NotificationActionIds.medSnooze,
+        payload: payload,
+        notificationId: 6004,
+        now: _t,
+      ));
+      final call = scheduled.single;
+      expect(call[#id], 6104);
+      expect(call[#title], _pt.careNotifMedTitle);
+      expect(call[#body], _pt.careNotifMedBody);
+      expect(call[#payload], payload);
+      expect(call[#matchDateTimeComponents], isNull);
+      expect((call[#scheduledDate] as tz.TZDateTime).toUtc(),
+          _t.add(const Duration(minutes: 15)).toUtc());
+      final details = call[#notificationDetails] as NotificationDetails;
+      expect(details.android!.channelId, CareNotificationService.channelId);
+      expect(details.android!.actions!.map((a) => a.id),
+          [NotificationActionIds.medTaken, NotificationActionIds.medSnooze]);
+    });
+  });
+
+  group('NotificationActionSync: medication', () {
+    final slot = DateTime(2026, 11, 17, 8, 30);
+    PendingNotificationAction taken() => PendingNotificationAction(
+          id: 'm1',
+          kind: PendingNotificationActionKind.medicationTaken,
+          at: _t,
+          medicationId: 'med-1',
+          scheduledFor: slot,
+        );
+    CareRecord intake(DateTime at, String action) => CareRecord(
+          id: 'i-$action',
+          kind: CareKind.medicationIntake,
+          data: {'action': action},
+          createdAt: at,
+          occursAt: at.toUtc(),
+        );
+
+    late _MockCareApi api;
+    late InMemoryNotificationActionQueue queue;
+    late List<String> invalidated;
+    String? user;
+
+    NotificationActionSync sync() => NotificationActionSync(
+          queue: queue,
+          userId: () => user,
+          clock: () => _t,
+          logWater: ({required userId, required amountMl, required timestamp}) async {},
+          careApi: () => api,
+          onMedicationLogged: invalidated.add,
+        );
+
+    setUp(() async {
+      api = _MockCareApi();
+      queue = InMemoryNotificationActionQueue();
+      invalidated = [];
+      user = 'user-1';
+      await queue.add(taken());
+      when(() => api.logIntake(any(), any(), any())).thenAnswer((_) async =>
+          intake(slot, 'taken'));
+    });
+
+    test('no user keeps it and calls nothing', () async {
+      user = null;
+      expect(await sync().drain(), 0);
+      verifyNever(() => api.list(any(), parentId: any(named: 'parentId')));
+      expect(await queue.list(), hasLength(1));
+    });
+
+    test('an already taken slot is done without a POST', () async {
+      when(() => api.list(CareKind.medicationIntake, parentId: 'med-1'))
+          .thenAnswer((_) async => [intake(slot.add(const Duration(seconds: 20)), 'taken')]);
+      expect(await sync().drain(), 1);
+      verifyNever(() => api.logIntake(any(), any(), any()));
+      expect(await queue.list(), isEmpty);
+      expect(invalidated, ['med-1']);
+    });
+
+    test('otherwise logs the intake once', () async {
+      when(() => api.list(CareKind.medicationIntake, parentId: 'med-1'))
+          .thenAnswer((_) async => [intake(slot, 'skipped'),
+                intake(slot.subtract(const Duration(days: 1)), 'taken')]);
+      expect(await sync().drain(), 1);
+      verify(() => api.logIntake('med-1', slot, IntakeAction.taken)).called(1);
+      expect(await queue.list(), isEmpty);
+    });
+
+    DioException dio(int? status) => DioException(
+          requestOptions: RequestOptions(path: '/x'),
+          type: status == null
+              ? DioExceptionType.connectionError
+              : DioExceptionType.badResponse,
+          response: status == null
+              ? null
+              : Response(requestOptions: RequestOptions(path: '/x'), statusCode: status),
+        );
+
+    for (final status in [400, 403, 404, 422]) {
+      test('a $status drops it', () async {
+        when(() => api.list(any(), parentId: any(named: 'parentId')))
+            .thenAnswer((_) async => []);
+        when(() => api.logIntake(any(), any(), any())).thenThrow(dio(status));
+        expect(await sync().drain(), 0);
+        expect(await queue.list(), isEmpty);
+      });
+    }
+
+    for (final status in [null, 401, 500, 503]) {
+      test('${status ?? 'no response'} keeps it for a retry', () async {
+        when(() => api.list(any(), parentId: any(named: 'parentId')))
+            .thenThrow(dio(status));
+        expect(await sync().drain(), 0);
+        expect(await queue.list(), hasLength(1));
+        verifyNever(() => api.logIntake(any(), any(), any()));
+      });
+    }
   });
 }

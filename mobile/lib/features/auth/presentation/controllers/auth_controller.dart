@@ -10,6 +10,7 @@ import '../../data/auth_remote_data_source.dart';
 import '../../data/auth_repository_impl.dart';
 import '../../domain/auth_state.dart';
 import '../../domain/user_profile.dart';
+import '../../../../core/notifications/app_notification_center.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final apiClient = ref.watch(apiClientProvider);
@@ -471,6 +472,8 @@ class AuthController extends Notifier<AuthState> {
       final owner = await _secureStorage.getLocalDataOwnerId();
       if (owner != null && owner != userId) {
         await ref.read(appDatabaseProvider).wipeAllLocalData();
+        // Queued notification taps belong to the previous account (LGPD).
+        await ref.read(notificationActionQueueProvider).clear();
         await _secureStorage.delete(
           key: SecureStorageService.keyHydrationSettings,
         );

@@ -6,6 +6,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:uuid/uuid.dart';
 
+import '../../features/care/data/care_notifications.dart';
 import '../../l10n/app_localizations.dart';
 import 'app_notification_center.dart';
 import 'hydration_notification_service.dart';
@@ -321,6 +322,9 @@ class NotificationActionExecutor {
         title = HydrationNotificationService.title(variant, l10n);
         body = HydrationNotificationService.body(variant, l10n);
       case SnoozeKind.medication:
+        details = CareNotificationService.medicationDetails(l10n);
+        title = l10n.careNotifMedTitle;
+        body = l10n.careNotifMedBody;
       case SnoozeKind.vaccine:
         debugPrint('Care snooze not available yet');
         return;

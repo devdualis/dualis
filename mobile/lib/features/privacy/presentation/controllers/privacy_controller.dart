@@ -4,6 +4,7 @@ import '../../../../core/database/app_database.dart';
 import '../../../../core/security/secure_storage_service.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../data/privacy_remote_data_source.dart';
+import '../../../../core/notifications/app_notification_center.dart';
 
 class PrivacyState {
   final bool isExporting;
@@ -113,6 +114,8 @@ class PrivacyController extends Notifier<PrivacyState> {
         password: password,
       );
       await _db.wipeAllLocalData();
+      // Queued notification taps go with the rest of the local data.
+      await ref.read(notificationActionQueueProvider).clear();
       try {
         await _secureStorage.deleteHabitsData();
       } catch (_) {}

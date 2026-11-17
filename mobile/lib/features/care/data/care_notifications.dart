@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../../core/notifications/app_notification_center.dart';
+import '../../../core/notifications/notification_actions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/locale_provider.dart';
 import '../domain/care_models.dart';
@@ -36,19 +37,9 @@ class CareNotificationService {
         await _center.plugin.cancel(id: _idBase + i);
       }
       final l10n = _l10n();
-      final details = NotificationDetails(
-        android: AndroidNotificationDetails(
-          channelId,
-          l10n.careNotifChannelName,
-          channelDescription: l10n.careNotifChannelDescription,
-          importance: Importance.high,
-          priority: Priority.high,
-          category: AndroidNotificationCategory.reminder,
-          icon: NotificationStyle.androidSmallIcon,
-          color: NotificationStyle.careColor,
-        ),
-        iOS: const DarwinNotificationDetails(presentAlert: true, presentSound: true),
-      );
+      final medDetails = medicationDetails(l10n);
+      final apptDetails = appointmentDetails(l10n, hasPlace: false);
+      final boosterDetails = vaccineDetails(l10n);
       final now = tz.TZDateTime.now(tz.local);
       final jobs = <_Job>[];
 
@@ -58,17 +49,22 @@ class CareNotificationService {
           final parts = time.split(':');
           final hour = int.parse(parts[0]);
           final minute = int.parse(parts[1]);
+          // Record id and HH:mm only, never the medication name.
+          final payload = CarePayloads.medication(
+            med.id,
+            '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}',
+          );
           if (med.weekdays.isEmpty) {
             var at = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
             if (!at.isAfter(now)) at = at.add(const Duration(days: 1));
-            jobs.add(_Job(l10n.careNotifMedTitle, body, at, DateTimeComponents.time));
+            jobs.add(_Job(l10n.careNotifMedTitle, body, at, DateTimeComponents.time, medDetails, payload));
           } else {
             for (final weekday in med.weekdays) {
               var at = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
               while (at.weekday != weekday || !at.isAfter(now)) {
                 at = at.add(const Duration(days: 1));
               }
-              jobs.add(_Job(l10n.careNotifMedTitle, body, at, DateTimeComponents.dayOfWeekAndTime));
+              jobs.add(_Job(l10n.careNotifMedTitle, body, at, DateTimeComponents.dayOfWeekAndTime, medDetails, payload));
             }
           }
         }
@@ -84,7 +80,7 @@ class CareNotificationService {
         final body = sameDay
             ? l10n.careNotifAppointmentBodyToday(_hhmm(startsAt))
             : l10n.careNotifAppointmentBodyTomorrow(_hhmm(startsAt));
-        jobs.add(_Job(l10n.careNotifAppointmentTitle, body, tz.TZDateTime.from(at, tz.local), null));
+        jobs.add(_Job(l10n.careNotifAppointmentTitle, body, tz.TZDateTime.from(at, tz.local), null, apptDetails, null));
       }
 
       for (final dose in vaccineDoses) {
@@ -92,7 +88,7 @@ class CareNotificationService {
         if (booster == null) continue;
         final at = tz.TZDateTime(tz.local, booster.year, booster.month, booster.day, 9);
         if (!at.isAfter(now)) continue;
-        jobs.add(_Job(l10n.careNotifBoosterTitle, l10n.careNotifBoosterBody, at, null));
+        jobs.add(_Job(l10n.careNotifBoosterTitle, l10n.careNotifBoosterBody, at, null, boosterDetails, null));
       }
 
       final exact = await _center.canScheduleExactAlarms();
@@ -103,7 +99,8 @@ class CareNotificationService {
           title: job.title,
           body: job.body,
           scheduledDate: job.at,
-          notificationDetails: details,
+          notificationDetails: job.details,
+          payload: job.payload,
           androidScheduleMode: exact ? AndroidScheduleMode.exactAllowWhileIdle : AndroidScheduleMode.inexactAllowWhileIdle,
           matchDateTimeComponents: job.repeat,
         );
@@ -113,6 +110,57 @@ class CareNotificationService {
     }
   }
 
+  static AndroidNotificationDetails _android(
+    AppLocalizations l10n, {
+    List<AndroidNotificationAction>? actions,
+  }) =>
+      AndroidNotificationDetails(
+        channelId,
+        l10n.careNotifChannelName,
+        channelDescription: l10n.careNotifChannelDescription,
+        importance: Importance.high,
+        priority: Priority.high,
+        category: AndroidNotificationCategory.reminder,
+        icon: NotificationStyle.androidSmallIcon,
+        color: NotificationStyle.careColor,
+        actions: actions,
+      );
+
+  /// "Tomei" and "Adiar 15 min", both handled without opening the app.
+  static NotificationDetails medicationDetails(AppLocalizations l10n) =>
+      NotificationDetails(
+        android: _android(l10n, actions: <AndroidNotificationAction>[
+          AndroidNotificationAction(
+            NotificationActionIds.medTaken,
+            l10n.notifActionMedTaken,
+          ),
+          AndroidNotificationAction(
+            NotificationActionIds.medSnooze,
+            l10n.notifActionSnooze15,
+          ),
+        ]),
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentSound: true,
+          categoryIdentifier: NotificationCategoryIds.careMedication,
+        ),
+      );
+
+  static NotificationDetails appointmentDetails(
+    AppLocalizations l10n, {
+    required bool hasPlace,
+  }) =>
+      NotificationDetails(
+        android: _android(l10n),
+        iOS: const DarwinNotificationDetails(presentAlert: true, presentSound: true),
+      );
+
+  static NotificationDetails vaccineDetails(AppLocalizations l10n) =>
+      NotificationDetails(
+        android: _android(l10n),
+        iOS: const DarwinNotificationDetails(presentAlert: true, presentSound: true),
+      );
+
   static String _hhmm(DateTime d) => '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
 }
 
@@ -121,7 +169,9 @@ class _Job {
   final String body;
   final tz.TZDateTime at;
   final DateTimeComponents? repeat;
-  const _Job(this.title, this.body, this.at, this.repeat);
+  final NotificationDetails details;
+  final String? payload;
+  const _Job(this.title, this.body, this.at, this.repeat, this.details, this.payload);
 }
 
 final careNotificationServiceProvider = Provider<CareNotificationService>((ref) {

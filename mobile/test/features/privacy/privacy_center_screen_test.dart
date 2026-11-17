@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dualis_mobile/core/database/app_database.dart';
 import 'package:dualis_mobile/core/network/api_client.dart';
+import 'package:dualis_mobile/core/notifications/app_notification_center.dart';
+import 'package:dualis_mobile/core/notifications/notification_action_queue.dart';
 import 'package:dualis_mobile/core/security/secure_storage_service.dart';
 import 'package:dualis_mobile/features/privacy/data/privacy_remote_data_source.dart';
 import 'package:dualis_mobile/features/privacy/presentation/screens/privacy_center_screen.dart';
@@ -133,6 +135,8 @@ void main() {
             appDatabaseProvider.overrideWithValue(db),
             privacyRemoteDataSourceProvider.overrideWithValue(mockRemoteDataSource),
             secureStorageServiceProvider.overrideWithValue(mockSecureStorage),
+            notificationActionQueueProvider
+                .overrideWithValue(InMemoryNotificationActionQueue()),
           ],
         ),
       );
@@ -154,6 +158,8 @@ void main() {
             appDatabaseProvider.overrideWithValue(db),
             privacyRemoteDataSourceProvider.overrideWithValue(mockRemoteDataSource),
             secureStorageServiceProvider.overrideWithValue(mockSecureStorage),
+            notificationActionQueueProvider
+                .overrideWithValue(InMemoryNotificationActionQueue()),
           ],
         ),
       );
@@ -175,6 +181,13 @@ void main() {
 
     testWidgets('tapping delete account shows confirmation dialog with disabled button until password entered',
         (tester) async {
+      final actionQueue = InMemoryNotificationActionQueue();
+      await actionQueue.add(PendingNotificationAction(
+        id: 'queued',
+        kind: PendingNotificationActionKind.water,
+        at: DateTime(2026, 11, 17),
+        amountMl: 250,
+      ));
       await tester.pumpWidget(
         createTestWidget(
           child: const PrivacyCenterScreen(),
@@ -182,6 +195,8 @@ void main() {
             appDatabaseProvider.overrideWithValue(db),
             privacyRemoteDataSourceProvider.overrideWithValue(mockRemoteDataSource),
             secureStorageServiceProvider.overrideWithValue(mockSecureStorage),
+            notificationActionQueueProvider
+                .overrideWithValue(actionQueue),
           ],
         ),
       );
@@ -220,6 +235,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(mockRemoteDataSource.deleteCalled, isTrue);
+      // Queued notification taps are wiped with the local data.
+      expect(await actionQueue.list(), isEmpty);
       expect(mockRemoteDataSource.lastPassword, 'ValidPassword123!');
       // The device keeps no daily habits of a deleted account.
       expect(mockSecureStorage.habitsDeleted, isTrue);

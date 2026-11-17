@@ -9,6 +9,7 @@ import 'package:timezone/timezone.dart' as tz;
 import '../../l10n/app_localizations.dart';
 import '../../l10n/locale_provider.dart';
 import 'app_notification_center.dart';
+import 'notification_actions.dart';
 
 class DailyCheckinNotificationService {
   DailyCheckinNotificationService({
@@ -75,7 +76,12 @@ class DailyCheckinNotificationService {
 
   tz.TZDateTime _now() => _clock?.call() ?? tz.TZDateTime.now(tz.local);
 
-  NotificationDetails _getNotificationDetails(AppLocalizations l10n) {
+  NotificationDetails _getNotificationDetails(AppLocalizations l10n) =>
+      notificationDetails(l10n);
+
+  /// "Fazer check-in" opens the app; "Mais tarde" only dismisses (the 2 h
+  /// repeat is the "later", nothing extra is scheduled).
+  static NotificationDetails notificationDetails(AppLocalizations l10n) {
     return NotificationDetails(
       android: AndroidNotificationDetails(
         checkinChannelId,
@@ -88,11 +94,23 @@ class DailyCheckinNotificationService {
         color: NotificationStyle.checkinColor,
         enableVibration: true,
         playSound: true,
+        actions: <AndroidNotificationAction>[
+          AndroidNotificationAction(
+            NotificationActionIds.checkinOpen,
+            l10n.notifActionCheckinStart,
+            showsUserInterface: true,
+          ),
+          AndroidNotificationAction(
+            NotificationActionIds.checkinLater,
+            l10n.notifActionLater,
+          ),
+        ],
       ),
       iOS: const DarwinNotificationDetails(
         presentAlert: true,
         presentSound: true,
         presentBadge: true,
+        categoryIdentifier: NotificationCategoryIds.checkin,
       ),
     );
   }
