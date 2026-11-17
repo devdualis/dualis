@@ -14,6 +14,9 @@ class AppColors {
   /// Símbolo — verde (#66BE71) - Segmentos verdes do símbolo
   static const Color dualisSymbolGreen = Color(0xFF66BE71);
 
+  /// Care reminders accent (#3E8E4A) - medication, appointment, vaccine notifications
+  static const Color dualisCareGreen = Color(0xFF3E8E4A);
+
   /// Tagline (#2B9ED0) - "continuous check up"
   static const Color dualisTagline = Color(0xFF2B9ED0);
 

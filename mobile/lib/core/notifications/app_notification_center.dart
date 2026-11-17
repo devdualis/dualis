@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui' show Locale, PlatformDispatcher;
+import 'dart:ui' show Color, Locale, PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -11,12 +11,25 @@ import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../l10n/app_localizations.dart';
+import '../constants/app_colors.dart';
 
 /// Payloads carried by local notifications. A tap on a notification is routed
 /// to whichever feature listens for its payload.
 abstract final class NotificationPayloads {
   static const String openWaterModal = 'open_water_modal';
   static const String openCheckIn = 'open_checkin';
+}
+
+/// Visual identity shared by every local notification: one monochrome small
+/// icon and a tint color per channel.
+abstract final class NotificationStyle {
+  /// Drawable name under `android/app/src/main/res/drawable`. Resolved by name
+  /// at runtime, so it must match the file name exactly.
+  static const String androidSmallIcon = 'ic_stat_dualis';
+
+  static const Color checkinColor = AppColors.dualisNavy;
+  static const Color waterColor = AppColors.dualisSymbolBlue;
+  static const Color careColor = AppColors.dualisCareGreen;
 }
 
 /// Resolves the IANA identifier of the device timezone.
@@ -135,7 +148,7 @@ class AppNotificationCenter {
     await _configureLocalTimezone();
 
     const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings(NotificationStyle.androidSmallIcon);
     // Permissions are requested explicitly (requestPermissions) when reminders
     // are scheduled, never as a side effect of initializing at app start.
     const darwinSettings = DarwinInitializationSettings(

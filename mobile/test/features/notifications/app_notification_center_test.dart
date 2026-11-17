@@ -13,6 +13,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
+import 'package:dualis_mobile/core/constants/app_colors.dart';
 import 'package:dualis_mobile/core/notifications/app_notification_center.dart';
 import 'package:dualis_mobile/core/notifications/daily_checkin_notification_service.dart';
 import 'package:dualis_mobile/core/notifications/hydration_notification_service.dart';
@@ -58,6 +59,7 @@ class Harness {
           onDidReceiveNotificationResponse:
               any(named: 'onDidReceiveNotificationResponse'),
         )).thenAnswer((invocation) async {
+      initSettings = invocation.namedArguments[#settings] as InitializationSettings?;
       tapHandler = invocation.namedArguments[#onDidReceiveNotificationResponse]
           as void Function(NotificationResponse)?;
       return true;
@@ -91,6 +93,7 @@ class Harness {
   final List<int> cancelledIds = <int>[];
   final List<Map<Symbol, dynamic>> scheduled = <Map<Symbol, dynamic>>[];
   void Function(NotificationResponse)? tapHandler;
+  InitializationSettings? initSettings;
 
   Map<int, Map<Symbol, dynamic>> get scheduledById => {
         for (final call in scheduled) call[#id] as int: call,
@@ -659,6 +662,41 @@ void main() {
       expect(
         h.scheduled.every((c) => (c[#title] as String).contains('Dualis Daily Check-in')),
         isTrue,
+      );
+    });
+  });
+
+  group('Notification style', () {
+    test('plugin default small icon is ic_stat_dualis', () async {
+      final h = Harness();
+      await h.center.initialize();
+      expect(h.initSettings!.android!.defaultIcon, 'ic_stat_dualis');
+    });
+
+    test('check-in notifications carry the icon and navy color', () async {
+      final h = Harness();
+      await DailyCheckinNotificationService(
+        center: h.center,
+        clock: () => _madrid(2026, 9, 25, 7),
+        localeResolver: () => const Locale('pt', 'BR'),
+      ).scheduleDailyCheckInReminders(isCompletedToday: false);
+      final android =
+          (h.scheduledById[2008]![#notificationDetails] as NotificationDetails)
+              .android!;
+      expect(android.icon, 'ic_stat_dualis');
+      expect(android.color, AppColors.dualisNavy);
+      expect(android.channelId, DailyCheckinNotificationService.checkinChannelId);
+    });
+
+    test('the drawable and its keep rule exist', () {
+      expect(
+        File('android/app/src/main/res/drawable/ic_stat_dualis.xml')
+            .existsSync(),
+        isTrue,
+      );
+      expect(
+        File('android/app/src/main/res/raw/keep.xml').readAsStringSync(),
+        contains('ic_stat_dualis'),
       );
     });
   });

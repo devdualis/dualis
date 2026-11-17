@@ -84,6 +84,8 @@ class DailyCheckinNotificationService {
         importance: Importance.high,
         priority: Priority.high,
         category: AndroidNotificationCategory.reminder,
+        icon: NotificationStyle.androidSmallIcon,
+        color: NotificationStyle.checkinColor,
         enableVibration: true,
         playSound: true,
       ),
