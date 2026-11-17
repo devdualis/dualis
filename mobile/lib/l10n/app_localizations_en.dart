@@ -4005,23 +4005,29 @@ class AppLocalizationsEn extends AppLocalizations {
       'Medication times, appointments and vaccine boosters you set.';
 
   @override
-  String get careNotifMedTitle => 'Time for your reminder';
+  String get careNotifMedTitle => 'Time for your medication';
+
+  @override
+  String get careNotifMedBody => 'Tap to see the reminder.';
 
   @override
   String get careNotifAppointmentTitle => 'Appointment reminder';
 
   @override
-  String careNotifAppointmentBody(String who, String time) {
-    return '$who at $time';
+  String careNotifAppointmentBodyToday(String time) {
+    return 'Today at $time';
+  }
+
+  @override
+  String careNotifAppointmentBodyTomorrow(String time) {
+    return 'Tomorrow at $time';
   }
 
   @override
   String get careNotifBoosterTitle => 'Vaccine reminder';
 
   @override
-  String careNotifBoosterBody(String name) {
-    return 'The date you picked for the booster: $name';
-  }
+  String get careNotifBoosterBody => 'Today is the date you chose.';
 
   @override
   String get careMedicationNew => 'New medication';

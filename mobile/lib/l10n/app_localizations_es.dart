@@ -4015,23 +4015,29 @@ class AppLocalizationsEs extends AppLocalizations {
       'Horarios de medicamentos, consultas y refuerzos de vacunas que usted configuró.';
 
   @override
-  String get careNotifMedTitle => 'Hora de su recordatorio';
+  String get careNotifMedTitle => 'Hora de tu medicamento';
+
+  @override
+  String get careNotifMedBody => 'Toca para ver el recordatorio.';
 
   @override
   String get careNotifAppointmentTitle => 'Recordatorio de consulta';
 
   @override
-  String careNotifAppointmentBody(String who, String time) {
-    return '$who a las $time';
+  String careNotifAppointmentBodyToday(String time) {
+    return 'Hoy a las $time';
+  }
+
+  @override
+  String careNotifAppointmentBodyTomorrow(String time) {
+    return 'Mañana a las $time';
   }
 
   @override
   String get careNotifBoosterTitle => 'Recordatorio de vacuna';
 
   @override
-  String careNotifBoosterBody(String name) {
-    return 'Fecha que usted eligió para el refuerzo: $name';
-  }
+  String get careNotifBoosterBody => 'Hoy es la fecha que elegiste.';
 
   @override
   String get careMedicationNew => 'Nuevo medicamento';

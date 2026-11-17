@@ -2450,28 +2450,27 @@
   "careRxNote": "O Dualis copia o texto da receita. Ele não transforma \"12/12h\" em horários nem cria lembretes sozinho.",
   "careNotifChannelName": "Lembretes de cuidados",
   "careNotifChannelDescription": "Horários de medicamentos, consultas e reforços de vacina que você configurou.",
-  "careNotifMedTitle": "Hora do seu lembrete",
+  "careNotifMedTitle": "Hora do seu medicamento",
+  "careNotifMedBody": "Toque para ver o lembrete.",
   "careNotifAppointmentTitle": "Lembrete de consulta",
-  "careNotifAppointmentBody": "{who} às {time}",
-  "@careNotifAppointmentBody": {
+  "careNotifAppointmentBodyToday": "Hoje às {time}",
+  "@careNotifAppointmentBodyToday": {
     "placeholders": {
-      "who": {
+      "time": {
         "type": "String"
-      },
+      }
+    }
+  },
+  "careNotifAppointmentBodyTomorrow": "Amanhã às {time}",
+  "@careNotifAppointmentBodyTomorrow": {
+    "placeholders": {
       "time": {
         "type": "String"
       }
     }
   },
   "careNotifBoosterTitle": "Lembrete de vacina",
-  "careNotifBoosterBody": "Data que você escolheu para o reforço: {name}",
-  "@careNotifBoosterBody": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
+  "careNotifBoosterBody": "Hoje é a data que você escolheu.",
   "careMedicationNew": "Novo medicamento",
   "gxTabEmotions": "Emoções",
   "gxTabBody": "Corpo",

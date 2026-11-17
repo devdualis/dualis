@@ -4010,23 +4010,29 @@ class AppLocalizationsPt extends AppLocalizations {
       'Horários de medicamentos, consultas e reforços de vacina que você configurou.';
 
   @override
-  String get careNotifMedTitle => 'Hora do seu lembrete';
+  String get careNotifMedTitle => 'Hora do seu medicamento';
+
+  @override
+  String get careNotifMedBody => 'Toque para ver o lembrete.';
 
   @override
   String get careNotifAppointmentTitle => 'Lembrete de consulta';
 
   @override
-  String careNotifAppointmentBody(String who, String time) {
-    return '$who às $time';
+  String careNotifAppointmentBodyToday(String time) {
+    return 'Hoje às $time';
+  }
+
+  @override
+  String careNotifAppointmentBodyTomorrow(String time) {
+    return 'Amanhã às $time';
   }
 
   @override
   String get careNotifBoosterTitle => 'Lembrete de vacina';
 
   @override
-  String careNotifBoosterBody(String name) {
-    return 'Data que você escolheu para o reforço: $name';
-  }
+  String get careNotifBoosterBody => 'Hoje é a data que você escolheu.';
 
   @override
   String get careMedicationNew => 'Novo medicamento';

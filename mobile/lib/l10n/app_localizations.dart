@@ -6871,8 +6871,14 @@ abstract class AppLocalizations {
   /// No description provided for @careNotifMedTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Hora do seu lembrete'**
+  /// **'Hora do seu medicamento'**
   String get careNotifMedTitle;
+
+  /// No description provided for @careNotifMedBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque para ver o lembrete.'**
+  String get careNotifMedBody;
 
   /// No description provided for @careNotifAppointmentTitle.
   ///
@@ -6880,11 +6886,17 @@ abstract class AppLocalizations {
   /// **'Lembrete de consulta'**
   String get careNotifAppointmentTitle;
 
-  /// No description provided for @careNotifAppointmentBody.
+  /// No description provided for @careNotifAppointmentBodyToday.
   ///
   /// In pt, this message translates to:
-  /// **'{who} às {time}'**
-  String careNotifAppointmentBody(String who, String time);
+  /// **'Hoje às {time}'**
+  String careNotifAppointmentBodyToday(String time);
+
+  /// No description provided for @careNotifAppointmentBodyTomorrow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Amanhã às {time}'**
+  String careNotifAppointmentBodyTomorrow(String time);
 
   /// No description provided for @careNotifBoosterTitle.
   ///
@@ -6895,8 +6907,8 @@ abstract class AppLocalizations {
   /// No description provided for @careNotifBoosterBody.
   ///
   /// In pt, this message translates to:
-  /// **'Data que você escolheu para o reforço: {name}'**
-  String careNotifBoosterBody(String name);
+  /// **'Hoje é a data que você escolheu.'**
+  String get careNotifBoosterBody;
 
   /// No description provided for @careMedicationNew.
   ///

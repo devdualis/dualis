@@ -7,11 +7,11 @@ import '../../../core/notifications/app_notification_center.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../l10n/locale_provider.dart';
 import '../domain/care_models.dart';
-import '../domain/pni_calendar.dart';
 
 /// Local reminders for "Meus cuidados": the medication times, appointment
-/// reminders and vaccine boosters the person chose. Texts only repeat what the
-/// person typed; they never advise a dose.
+/// reminders and vaccine boosters the person chose. Notification texts never
+/// show medication, vaccine or specialty names (they stay readable on the lock
+/// screen) and never advise a dose.
 class CareNotificationService {
   CareNotificationService(this._center, this._l10n);
 
@@ -44,6 +44,8 @@ class CareNotificationService {
           importance: Importance.high,
           priority: Priority.high,
           category: AndroidNotificationCategory.reminder,
+          icon: NotificationStyle.androidSmallIcon,
+          color: NotificationStyle.careColor,
         ),
         iOS: const DarwinNotificationDetails(presentAlert: true, presentSound: true),
       );
@@ -51,7 +53,7 @@ class CareNotificationService {
       final jobs = <_Job>[];
 
       for (final med in medications.where((m) => m.active)) {
-        final body = [med.title, if (med.amountPerIntake != null) med.amountPerIntake!].join(' · ');
+        final body = l10n.careNotifMedBody;
         for (final time in med.times) {
           final parts = time.split(':');
           final hour = int.parse(parts[0]);
@@ -78,8 +80,11 @@ class CareNotificationService {
         if (startsAt == null || reminder == null || reminder == 'none') continue;
         final at = startsAt.subtract(reminder == '1d' ? const Duration(days: 1) : const Duration(hours: 2));
         if (!at.isAfter(now)) continue;
-        final who = appt.str('professional') ?? appt.str('specialty') ?? '';
-        jobs.add(_Job(l10n.careNotifAppointmentTitle, l10n.careNotifAppointmentBody(who, _hhmm(startsAt)), tz.TZDateTime.from(at, tz.local), null));
+        final sameDay = at.year == startsAt.year && at.month == startsAt.month && at.day == startsAt.day;
+        final body = sameDay
+            ? l10n.careNotifAppointmentBodyToday(_hhmm(startsAt))
+            : l10n.careNotifAppointmentBodyTomorrow(_hhmm(startsAt));
+        jobs.add(_Job(l10n.careNotifAppointmentTitle, body, tz.TZDateTime.from(at, tz.local), null));
       }
 
       for (final dose in vaccineDoses) {
@@ -87,8 +92,7 @@ class CareNotificationService {
         if (booster == null) continue;
         final at = tz.TZDateTime(tz.local, booster.year, booster.month, booster.day, 9);
         if (!at.isAfter(now)) continue;
-        final name = dose.str('customName') ?? pniVaccineByKey(dose.str('vaccineKey'))?.name ?? '';
-        jobs.add(_Job(l10n.careNotifBoosterTitle, l10n.careNotifBoosterBody(name), at, null));
+        jobs.add(_Job(l10n.careNotifBoosterTitle, l10n.careNotifBoosterBody, at, null));
       }
 
       final exact = await _center.canScheduleExactAlarms();
