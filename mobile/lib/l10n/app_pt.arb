@@ -3620,5 +3620,45 @@
   "navHelpShort": "Ajuda",
   "@navHelpShort": {
     "description": "Short visible label on the red help button of the bottom bar; full name stays in tooltip and semantics"
+  },
+  "notifActionCheckinStart": "Fazer check-in",
+  "@notifActionCheckinStart": {
+    "description": "Check-in reminder button that opens the daily check-in"
+  },
+  "notifActionLater": "Mais tarde",
+  "@notifActionLater": {
+    "description": "Check-in reminder button that only dismisses the notification"
+  },
+  "notifActionWaterDrank": "Bebi 250 ml",
+  "@notifActionWaterDrank": {
+    "description": "Water reminder button that logs 250 ml without opening the app"
+  },
+  "notifActionSnooze30": "Adiar 30 min",
+  "@notifActionSnooze30": {
+    "description": "Water reminder button that shows the reminder again in 30 minutes"
+  },
+  "notifActionMedTaken": "Tomei",
+  "@notifActionMedTaken": {
+    "description": "Medication reminder button that records the dose as taken"
+  },
+  "notifActionSnooze15": "Adiar 15 min",
+  "@notifActionSnooze15": {
+    "description": "Medication reminder button that shows the reminder again in 15 minutes"
+  },
+  "notifActionSeeDetails": "Ver detalhes",
+  "@notifActionSeeDetails": {
+    "description": "Appointment reminder button that opens the appointments list"
+  },
+  "notifActionDirections": "Como chegar",
+  "@notifActionDirections": {
+    "description": "Appointment reminder button that opens maps with the saved place"
+  },
+  "notifActionSeeVaccines": "Ver vacinas",
+  "@notifActionSeeVaccines": {
+    "description": "Vaccine reminder button that opens the vaccines screen"
+  },
+  "notifActionRemindTomorrow": "Lembrar amanhã",
+  "@notifActionRemindTomorrow": {
+    "description": "Vaccine reminder button that shows the reminder again in 24 hours"
   }
 }

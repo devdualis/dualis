@@ -23,6 +23,8 @@ class _Harness {
           settings: any(named: 'settings'),
           onDidReceiveNotificationResponse:
               any(named: 'onDidReceiveNotificationResponse'),
+          onDidReceiveBackgroundNotificationResponse:
+              any(named: 'onDidReceiveBackgroundNotificationResponse'),
         )).thenAnswer((_) async => true);
     when(() => plugin.getNotificationAppLaunchDetails())
         .thenAnswer((_) async => null);

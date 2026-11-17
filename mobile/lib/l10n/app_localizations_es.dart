@@ -6073,4 +6073,34 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get navHelpShort => 'Ayuda';
+
+  @override
+  String get notifActionCheckinStart => 'Hacer check-in';
+
+  @override
+  String get notifActionLater => 'Más tarde';
+
+  @override
+  String get notifActionWaterDrank => 'Bebí 250 ml';
+
+  @override
+  String get notifActionSnooze30 => 'Posponer 30 min';
+
+  @override
+  String get notifActionMedTaken => 'Lo tomé';
+
+  @override
+  String get notifActionSnooze15 => 'Posponer 15 min';
+
+  @override
+  String get notifActionSeeDetails => 'Ver detalles';
+
+  @override
+  String get notifActionDirections => 'Cómo llegar';
+
+  @override
+  String get notifActionSeeVaccines => 'Ver vacunas';
+
+  @override
+  String get notifActionRemindTomorrow => 'Recordar mañana';
 }

@@ -10215,6 +10215,66 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ajuda'**
   String get navHelpShort;
+
+  /// Check-in reminder button that opens the daily check-in
+  ///
+  /// In pt, this message translates to:
+  /// **'Fazer check-in'**
+  String get notifActionCheckinStart;
+
+  /// Check-in reminder button that only dismisses the notification
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais tarde'**
+  String get notifActionLater;
+
+  /// Water reminder button that logs 250 ml without opening the app
+  ///
+  /// In pt, this message translates to:
+  /// **'Bebi 250 ml'**
+  String get notifActionWaterDrank;
+
+  /// Water reminder button that shows the reminder again in 30 minutes
+  ///
+  /// In pt, this message translates to:
+  /// **'Adiar 30 min'**
+  String get notifActionSnooze30;
+
+  /// Medication reminder button that records the dose as taken
+  ///
+  /// In pt, this message translates to:
+  /// **'Tomei'**
+  String get notifActionMedTaken;
+
+  /// Medication reminder button that shows the reminder again in 15 minutes
+  ///
+  /// In pt, this message translates to:
+  /// **'Adiar 15 min'**
+  String get notifActionSnooze15;
+
+  /// Appointment reminder button that opens the appointments list
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver detalhes'**
+  String get notifActionSeeDetails;
+
+  /// Appointment reminder button that opens maps with the saved place
+  ///
+  /// In pt, this message translates to:
+  /// **'Como chegar'**
+  String get notifActionDirections;
+
+  /// Vaccine reminder button that opens the vaccines screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver vacinas'**
+  String get notifActionSeeVaccines;
+
+  /// Vaccine reminder button that shows the reminder again in 24 hours
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrar amanhã'**
+  String get notifActionRemindTomorrow;
 }
 
 class _AppLocalizationsDelegate

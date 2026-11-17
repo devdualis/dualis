@@ -1723,5 +1723,15 @@
   "jv2DescribeProfileNotAllowed": "AI suggestions only work on profiles you manage.",
   "jv2DescribeCancel": "Cancel",
   "homeCheckinEyebrow": "Daily check-in · 2 min",
-  "navHelpShort": "Help"
+  "navHelpShort": "Help",
+  "notifActionCheckinStart": "Do check-in",
+  "notifActionLater": "Later",
+  "notifActionWaterDrank": "I drank 250 ml",
+  "notifActionSnooze30": "Snooze 30 min",
+  "notifActionMedTaken": "Taken",
+  "notifActionSnooze15": "Snooze 15 min",
+  "notifActionSeeDetails": "See details",
+  "notifActionDirections": "Directions",
+  "notifActionSeeVaccines": "See vaccines",
+  "notifActionRemindTomorrow": "Remind me tomorrow"
 }

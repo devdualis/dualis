@@ -37,6 +37,8 @@ class PluginHarness {
           settings: any(named: 'settings'),
           onDidReceiveNotificationResponse:
               any(named: 'onDidReceiveNotificationResponse'),
+          onDidReceiveBackgroundNotificationResponse:
+              any(named: 'onDidReceiveBackgroundNotificationResponse'),
         )).thenAnswer((invocation) async {
       platformTapHandler = invocation
               .namedArguments[#onDidReceiveNotificationResponse]
@@ -305,6 +307,8 @@ void main() {
             settings: any(named: 'settings'),
             onDidReceiveNotificationResponse:
                 any(named: 'onDidReceiveNotificationResponse'),
+            onDidReceiveBackgroundNotificationResponse:
+                any(named: 'onDidReceiveBackgroundNotificationResponse'),
           )).called(1);
     });
 

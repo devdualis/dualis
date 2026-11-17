@@ -58,6 +58,8 @@ class Harness {
           settings: any(named: 'settings'),
           onDidReceiveNotificationResponse:
               any(named: 'onDidReceiveNotificationResponse'),
+          onDidReceiveBackgroundNotificationResponse:
+              any(named: 'onDidReceiveBackgroundNotificationResponse'),
         )).thenAnswer((invocation) async {
       initSettings = invocation.namedArguments[#settings] as InitializationSettings?;
       tapHandler = invocation.namedArguments[#onDidReceiveNotificationResponse]
@@ -220,6 +222,8 @@ void main() {
             settings: any(named: 'settings'),
             onDidReceiveNotificationResponse:
                 any(named: 'onDidReceiveNotificationResponse'),
+            onDidReceiveBackgroundNotificationResponse:
+                any(named: 'onDidReceiveBackgroundNotificationResponse'),
           )).called(1);
       verify(() => h.plugin.getNotificationAppLaunchDetails()).called(1);
     });
@@ -237,6 +241,8 @@ void main() {
             settings: captureAny(named: 'settings'),
             onDidReceiveNotificationResponse:
                 any(named: 'onDidReceiveNotificationResponse'),
+            onDidReceiveBackgroundNotificationResponse:
+                any(named: 'onDidReceiveBackgroundNotificationResponse'),
           )).captured.single as InitializationSettings;
       expect(settings.iOS!.requestAlertPermission, isFalse);
       expect(settings.android, isNotNull);

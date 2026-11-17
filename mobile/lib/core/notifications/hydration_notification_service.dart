@@ -10,8 +10,40 @@ import '../../features/hydration/domain/models/hydration_settings.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/locale_provider.dart';
 import 'app_notification_center.dart';
+import 'notification_actions.dart';
 
 typedef HydrationModalCallback = void Function();
+
+/// The three looks of a water reminder. Each has its own snooze button id and
+/// iOS category, so the snooze rebuilds the same copy without reading
+/// settings.
+enum WaterReminderVariant {
+  chimeTracking(
+    NotificationActionIds.waterSnoozeChimeTracking,
+    NotificationCategoryIds.waterChimeTracking,
+  ),
+  chimeReminder(
+    NotificationActionIds.waterSnoozeChime,
+    NotificationCategoryIds.waterChime,
+  ),
+  alarm(
+    NotificationActionIds.waterSnoozeAlarm,
+    NotificationCategoryIds.waterAlarm,
+  );
+
+  const WaterReminderVariant(this.snoozeActionId, this.categoryId);
+
+  final String snoozeActionId;
+  final String categoryId;
+
+  static WaterReminderVariant fromSettings(
+    ReminderSoundStyle style,
+    bool trackingEnabled,
+  ) {
+    if (style == ReminderSoundStyle.phoneAlarm) return alarm;
+    return trackingEnabled ? chimeTracking : chimeReminder;
+  }
+}
 
 class HydrationNotificationService {
   HydrationNotificationService({
@@ -45,6 +77,9 @@ class HydrationNotificationService {
   /// In-seconds test reminder id.
   static const int testReminderId = 1999;
 
+  /// One-off reminder scheduled by the "Adiar 30 min" button.
+  static const int snoozeReminderId = 1998;
+
   /// When today's hydration target is reached, reminder slots still ahead today
   /// are scheduled as one-shots on the next [completedLookaheadDays] days
   /// so that no reminders fire for the rest of today, but upcoming days remain
@@ -65,8 +100,15 @@ class HydrationNotificationService {
 
   /// Every notification ID owned by this service. Other features' IDs (e.g.
   /// daily check-in 2000+) are never touched.
-  static List<int> get ownedNotificationIds =>
-      [...scheduledReminderIds, immediateReminderId, testReminderId];
+  /// [snoozeReminderId] is owned (cancelled when reminders are switched off)
+  /// but not in [scheduledReminderIds], so the reschedule on every app start
+  /// keeps a pending snooze.
+  static List<int> get ownedNotificationIds => [
+        ...scheduledReminderIds,
+        immediateReminderId,
+        testReminderId,
+        snoozeReminderId,
+      ];
 
   FlutterLocalNotificationsPlugin get _plugin => _center.plugin;
 
@@ -94,11 +136,23 @@ class HydrationNotificationService {
   AppLocalizations _l10n() =>
       resolveNotificationLocalizations(_localeResolver?.call());
 
-  NotificationDetails _getNotificationDetails(
-    ReminderSoundStyle style,
+  /// Channel, sound and buttons for [variant]. Shared with the snooze built
+  /// by the notification action handler, so a snoozed reminder looks the same.
+  static NotificationDetails notificationDetails(
+    WaterReminderVariant variant,
     AppLocalizations l10n,
   ) {
-    if (style == ReminderSoundStyle.phoneAlarm) {
+    final actions = <AndroidNotificationAction>[
+      AndroidNotificationAction(
+        NotificationActionIds.waterDrank250,
+        l10n.notifActionWaterDrank,
+      ),
+      AndroidNotificationAction(
+        variant.snoozeActionId,
+        l10n.notifActionSnooze30,
+      ),
+    ];
+    if (variant == WaterReminderVariant.alarm) {
       return NotificationDetails(
         android: AndroidNotificationDetails(
           alarmChannelId,
@@ -112,12 +166,14 @@ class HydrationNotificationService {
           color: NotificationStyle.waterColor,
           enableVibration: true,
           playSound: true,
+          actions: actions,
         ),
-        iOS: const DarwinNotificationDetails(
+        iOS: DarwinNotificationDetails(
           presentAlert: true,
           presentSound: true,
           presentBadge: true,
           interruptionLevel: InterruptionLevel.timeSensitive,
+          categoryIdentifier: variant.categoryId,
         ),
       );
     }
@@ -134,30 +190,28 @@ class HydrationNotificationService {
         color: NotificationStyle.waterColor,
         enableVibration: true,
         playSound: true,
+        actions: actions,
       ),
-      iOS: const DarwinNotificationDetails(
+      iOS: DarwinNotificationDetails(
         presentAlert: true,
         presentSound: true,
         presentBadge: true,
+        categoryIdentifier: variant.categoryId,
       ),
     );
   }
 
-  String _title(AppLocalizations l10n, ReminderSoundStyle style) =>
-      style == ReminderSoundStyle.phoneAlarm
+  static String title(WaterReminderVariant variant, AppLocalizations l10n) =>
+      variant == WaterReminderVariant.alarm
           ? l10n.notifWaterAlarmTitle
           : l10n.notifWaterTitle;
 
-  String _body(
-    AppLocalizations l10n,
-    ReminderSoundStyle style,
-    bool trackingEnabled,
-  ) {
-    if (style == ReminderSoundStyle.phoneAlarm) return l10n.notifWaterAlarmBody;
-    return trackingEnabled
-        ? l10n.notifWaterBodyTracking
-        : l10n.notifWaterBodyReminder;
-  }
+  static String body(WaterReminderVariant variant, AppLocalizations l10n) =>
+      switch (variant) {
+        WaterReminderVariant.alarm => l10n.notifWaterAlarmBody,
+        WaterReminderVariant.chimeTracking => l10n.notifWaterBodyTracking,
+        WaterReminderVariant.chimeReminder => l10n.notifWaterBodyReminder,
+      };
 
   tz.TZDateTime _now() => _clock?.call() ?? tz.TZDateTime.now(tz.local);
 
@@ -185,10 +239,13 @@ class HydrationNotificationService {
     await requestPermissions();
 
     final l10n = _l10n();
-    final details = _getNotificationDetails(settings.reminderSoundStyle, l10n);
-    final title = _title(l10n, settings.reminderSoundStyle);
-    final body =
-        _body(l10n, settings.reminderSoundStyle, settings.trackingEnabled);
+    final variant = WaterReminderVariant.fromSettings(
+      settings.reminderSoundStyle,
+      settings.trackingEnabled,
+    );
+    final details = notificationDetails(variant, l10n);
+    final title = HydrationNotificationService.title(variant, l10n);
+    final body = HydrationNotificationService.body(variant, l10n);
     final now = _now();
 
     // Verifica se alarmes exatos são permitidos pelo SO
@@ -302,12 +359,13 @@ class HydrationNotificationService {
   }) async {
     await initialize();
     final l10n = _l10n();
-    final details = _getNotificationDetails(style, l10n);
+    final variant = WaterReminderVariant.fromSettings(style, trackingEnabled);
+    final details = notificationDetails(variant, l10n);
 
     await _plugin.show(
       id: immediateReminderId,
-      title: _title(l10n, style),
-      body: customBody ?? _body(l10n, style, trackingEnabled),
+      title: title(variant, l10n),
+      body: customBody ?? body(variant, l10n),
       notificationDetails: details,
       payload: NotificationPayloads.openWaterModal,
     );
@@ -324,9 +382,10 @@ class HydrationNotificationService {
     await initialize();
     await requestPermissions();
     final l10n = _l10n();
-    final details = _getNotificationDetails(style, l10n);
-    final title = _title(l10n, style);
-    final body = customBody ?? _body(l10n, style, trackingEnabled);
+    final variant = WaterReminderVariant.fromSettings(style, trackingEnabled);
+    final details = notificationDetails(variant, l10n);
+    final title = HydrationNotificationService.title(variant, l10n);
+    final body = customBody ?? HydrationNotificationService.body(variant, l10n);
     final scheduledDate =
         tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds));
 

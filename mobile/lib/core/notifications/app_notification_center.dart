@@ -11,13 +11,31 @@ import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../l10n/app_localizations.dart';
+import '../../l10n/locale_provider.dart';
 import '../constants/app_colors.dart';
+import 'notification_action_queue.dart';
+import 'notification_actions.dart';
 
 /// Payloads carried by local notifications. A tap on a notification is routed
 /// to whichever feature listens for its payload.
 abstract final class NotificationPayloads {
   static const String openWaterModal = 'open_water_modal';
   static const String openCheckIn = 'open_checkin';
+
+  /// Care buttons that open the app ("Ver detalhes", "Ver vacinas",
+  /// "Como chegar"). Directions carry the appointment id only, never the place.
+  static const String openCareAppointments = 'open_care_appointments';
+  static const String openCareVaccines = 'open_care_vaccines';
+  static const String _careDirectionsPrefix = 'open_care_directions|';
+  static String careDirections(String appointmentId) =>
+      '$_careDirectionsPrefix$appointmentId';
+
+  /// The appointment id of a [careDirections] payload, or null.
+  static String? careDirectionsId(String payload) {
+    if (!payload.startsWith(_careDirectionsPrefix)) return null;
+    final id = payload.substring(_careDirectionsPrefix.length);
+    return RegExp(r'^[A-Za-z0-9_-]+$').hasMatch(id) ? id : null;
+  }
 }
 
 /// Visual identity shared by every local notification: one monochrome small
@@ -103,9 +121,13 @@ class AppNotificationCenter {
     required this.plugin,
     LocalTimezoneResolver? timezoneResolver,
     NotificationPermissionPromptStore? permissionPromptStore,
+    Locale Function()? localeResolver,
+    NotificationActionExecutor? actionExecutor,
   })  : _timezoneResolver = timezoneResolver ?? _platformTimezone,
         _permissionPromptStore =
-            permissionPromptStore ?? FileNotificationPermissionPromptStore();
+            permissionPromptStore ?? FileNotificationPermissionPromptStore(),
+        _localeResolver = localeResolver,
+        _actionExecutor = actionExecutor;
 
   static final Expando<AppNotificationCenter> _byPlugin =
       Expando<AppNotificationCenter>('AppNotificationCenter');
@@ -119,6 +141,16 @@ class AppNotificationCenter {
   final FlutterLocalNotificationsPlugin plugin;
   final LocalTimezoneResolver _timezoneResolver;
   final NotificationPermissionPromptStore _permissionPromptStore;
+  final Locale Function()? _localeResolver;
+  NotificationActionExecutor? _actionExecutor;
+
+  /// Applies button effects that arrive on the main isolate.
+  NotificationActionExecutor get actionExecutor =>
+      _actionExecutor ??= NotificationActionExecutor(
+        plugin: plugin,
+        queue: FileNotificationActionQueue(),
+        l10n: () => resolveNotificationLocalizations(_localeResolver?.call()),
+      );
 
   Future<void>? _initialization;
   Future<void>? _firstLaunchPermission;
@@ -151,20 +183,25 @@ class AppNotificationCenter {
         AndroidInitializationSettings(NotificationStyle.androidSmallIcon);
     // Permissions are requested explicitly (requestPermissions) when reminders
     // are scheduled, never as a side effect of initializing at app start.
-    const darwinSettings = DarwinInitializationSettings(
+    final darwinSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
       requestSoundPermission: false,
+      notificationCategories: darwinNotificationCategories(
+        resolveNotificationLocalizations(_localeResolver?.call()),
+      ),
     );
 
     try {
       await plugin.initialize(
-        settings: const InitializationSettings(
+        settings: InitializationSettings(
           android: androidSettings,
           iOS: darwinSettings,
           macOS: darwinSettings,
         ),
         onDidReceiveNotificationResponse: handleNotificationResponse,
+        onDidReceiveBackgroundNotificationResponse:
+            notificationActionBackgroundHandler,
       );
     } catch (e) {
       debugPrint('Notification plugin initialization failed: $e');
@@ -224,9 +261,33 @@ class AppNotificationCenter {
 
   /// Entry point for every tap, live or launch. Public so the plugin callback
   /// and tests share the same path.
+  ///
+  /// A button tap resolves to an effect: buttons that open a screen dispatch
+  /// that screen's payload, the others are applied by [actionExecutor].
   void handleNotificationResponse(NotificationResponse response) {
+    final actionId = response.actionId;
+    if (response.notificationResponseType ==
+            NotificationResponseType.selectedNotificationAction &&
+        actionId != null &&
+        actionId.isNotEmpty) {
+      final effect = resolveNotificationAction(
+        actionId: actionId,
+        payload: response.payload,
+        notificationId: response.id,
+        now: DateTime.now(),
+      );
+      if (effect is OpenInApp) {
+        _dispatch(effect.payload);
+      } else {
+        unawaited(actionExecutor.execute(effect));
+      }
+      return;
+    }
     final payload = response.payload;
     if (payload == null || payload.isEmpty) return;
+    // Care reminders carry ids for their buttons only; a tap on the body just
+    // opens the app, as before.
+    if (payload.startsWith('care_')) return;
     _dispatch(payload);
   }
 
@@ -430,5 +491,27 @@ String formatReminderHour(int hour) => '${hour.toString().padLeft(2, '0')}:00';
 /// instance) keeps an initialization started in one scope — e.g. one widget
 /// test's fake-async zone — from being awaited by another.
 final appNotificationCenterProvider = Provider<AppNotificationCenter>((ref) {
-  return AppNotificationCenter(plugin: FlutterLocalNotificationsPlugin());
+  final plugin = FlutterLocalNotificationsPlugin();
+  final queue = ref.watch(notificationActionQueueProvider);
+  Locale locale() => ref.read(localeProvider);
+  // The background engine has no Riverpod state: keep the app language on
+  // disk so snoozed reminders use it too.
+  ref.listen<Locale>(localeProvider, (_, next) {
+    unawaited(queue.saveLanguageCode(next.languageCode).catchError((_) {}));
+  }, fireImmediately: true);
+  return AppNotificationCenter(
+    plugin: plugin,
+    localeResolver: locale,
+    actionExecutor: NotificationActionExecutor(
+      plugin: plugin,
+      queue: queue,
+      l10n: () => resolveNotificationLocalizations(locale()),
+    ),
+  );
 });
+
+/// Notification button taps waiting for the main isolate (see
+/// [notificationActionBackgroundHandler]).
+final notificationActionQueueProvider = Provider<NotificationActionQueue>(
+  (ref) => FileNotificationActionQueue(),
+);

@@ -1723,5 +1723,15 @@
   "jv2DescribeProfileNotAllowed": "Las sugerencias con IA solo funcionan en los perfiles que administras.",
   "jv2DescribeCancel": "Cancelar",
   "homeCheckinEyebrow": "Check-in diario · 2 min",
-  "navHelpShort": "Ayuda"
+  "navHelpShort": "Ayuda",
+  "notifActionCheckinStart": "Hacer check-in",
+  "notifActionLater": "Más tarde",
+  "notifActionWaterDrank": "Bebí 250 ml",
+  "notifActionSnooze30": "Posponer 30 min",
+  "notifActionMedTaken": "Lo tomé",
+  "notifActionSnooze15": "Posponer 15 min",
+  "notifActionSeeDetails": "Ver detalles",
+  "notifActionDirections": "Cómo llegar",
+  "notifActionSeeVaccines": "Ver vacunas",
+  "notifActionRemindTomorrow": "Recordar mañana"
 }

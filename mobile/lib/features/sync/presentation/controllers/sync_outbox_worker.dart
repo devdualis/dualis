@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/connectivity_service.dart';
 import '../../../journal/data/journal_repository.dart';
+import '../../data/notification_action_sync.dart';
 import '../../data/triage_outbox_repository.dart';
 
 class SyncState {
@@ -47,12 +48,31 @@ class SyncOutboxWorker extends Notifier<SyncState> {
     final observer = _ResumeSyncObserver(() {
       if (ref.read(isOnlineProvider).value ?? true) {
         syncPendingOutbox();
+      } else {
+        // Water taps from a notification need no network.
+        drainNotificationActions();
       }
     });
     WidgetsBinding.instance.addObserver(observer);
     ref.onDispose(() => WidgetsBinding.instance.removeObserver(observer));
 
     return const SyncState();
+  }
+
+  bool _drainingNotificationActions = false;
+
+  /// Applies notification button taps queued while the app was closed.
+  /// Never throws; returns 0 on any error or when a drain is already running.
+  Future<int> drainNotificationActions() async {
+    if (_drainingNotificationActions) return 0;
+    _drainingNotificationActions = true;
+    try {
+      return await ref.read(notificationActionSyncProvider).drain();
+    } catch (_) {
+      return 0;
+    } finally {
+      _drainingNotificationActions = false;
+    }
   }
 
   Future<int> syncPendingOutbox() async {
@@ -77,6 +97,9 @@ class SyncOutboxWorker extends Notifier<SyncState> {
         successfullySynced +=
             await ref.read(journalRepositoryProvider).syncPending();
       } catch (_) {}
+
+      // Water / medication taps from notification buttons.
+      successfullySynced += await drainNotificationActions();
 
       state = state.copyWith(
         isSyncing: false,

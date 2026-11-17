@@ -49,6 +49,10 @@
             android:value="2" />
 
         <!-- Receivers required by flutter_local_notifications for scheduled notifications -->
+        <!-- Notification buttons that run without opening the app. -->
+        <receiver
+            android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
         <receiver
             android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
             android:exported="false" />

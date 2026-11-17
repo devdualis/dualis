@@ -6068,4 +6068,34 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get navHelpShort => 'Ajuda';
+
+  @override
+  String get notifActionCheckinStart => 'Fazer check-in';
+
+  @override
+  String get notifActionLater => 'Mais tarde';
+
+  @override
+  String get notifActionWaterDrank => 'Bebi 250 ml';
+
+  @override
+  String get notifActionSnooze30 => 'Adiar 30 min';
+
+  @override
+  String get notifActionMedTaken => 'Tomei';
+
+  @override
+  String get notifActionSnooze15 => 'Adiar 15 min';
+
+  @override
+  String get notifActionSeeDetails => 'Ver detalhes';
+
+  @override
+  String get notifActionDirections => 'Como chegar';
+
+  @override
+  String get notifActionSeeVaccines => 'Ver vacinas';
+
+  @override
+  String get notifActionRemindTomorrow => 'Lembrar amanhã';
 }
