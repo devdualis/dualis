@@ -185,6 +185,63 @@ void main() {
     expect('${call[#title]} ${call[#body]}', isNot(contains('Secreta')));
   });
 
+  test('appointment with a place gets Ver detalhes and Como chegar, id-only payload',
+      () async {
+    final h = _Harness();
+    final now = DateTime.now();
+    final startsAt = DateTime(now.year, now.month, now.day + 3, 14, 30);
+    await h.run(appointments: [
+      _record(
+        CareKind.appointment,
+        {'reminder': '1d', 'place': 'Clinica Cardio Paulista', 'specialty': 'Cardiologia'},
+        occursAt: startsAt,
+      ),
+    ]);
+    final call = h.scheduled.single;
+    expect(call[#payload], 'care_appt|r-appointment');
+    expect(call[#payload], isNot(contains('Clinica')));
+    expect(call[#payload], isNot(contains('Cardio')));
+    expect(call[#body], 'Amanhã às 14:30');
+    final details = call[#notificationDetails] as NotificationDetails;
+    final actions = details.android!.actions!;
+    expect(actions.map((a) => a.id), ['appt_details', 'appt_directions']);
+    expect(actions.map((a) => a.title), ['Ver detalhes', 'Como chegar']);
+    expect(actions.every((a) => a.showsUserInterface), isTrue);
+    expect(details.iOS!.categoryIdentifier, 'dualis_care_appointment_place');
+  });
+
+  test('appointment without a place gets Ver detalhes only', () async {
+    final h = _Harness();
+    final now = DateTime.now();
+    await h.run(appointments: [
+      _record(CareKind.appointment, {'reminder': '1d'},
+          occursAt: DateTime(now.year, now.month, now.day + 3, 10)),
+    ]);
+    final details = h.scheduled.single[#notificationDetails] as NotificationDetails;
+    expect(details.android!.actions!.map((a) => a.id), ['appt_details']);
+    expect(details.iOS!.categoryIdentifier, 'dualis_care_appointment');
+    expect(h.scheduled.single[#payload], 'care_appt|r-appointment');
+  });
+
+  test('vaccine booster gets Ver vacinas and Lembrar amanhã', () async {
+    final h = _Harness();
+    await h.run(vaccineDoses: [
+      _record(CareKind.vaccineDose, {
+        'customName': 'Vacina Secreta XYZ',
+        'boosterOn': _ymd(DateTime.now().add(const Duration(days: 10))),
+      }),
+    ]);
+    final call = h.scheduled.single;
+    expect(call[#payload], 'care_vaccine');
+    final details = call[#notificationDetails] as NotificationDetails;
+    final actions = details.android!.actions!;
+    expect(actions.map((a) => a.id), ['vaccine_open', 'vaccine_tomorrow']);
+    expect(actions.map((a) => a.title), ['Ver vacinas', 'Lembrar amanhã']);
+    expect(actions[0].showsUserInterface, isTrue);
+    expect(actions[1].showsUserInterface, isFalse);
+    expect(details.iOS!.categoryIdentifier, 'dualis_care_vaccine');
+  });
+
   test('every care notification uses the care channel, icon and green color',
       () async {
     final h = _Harness();

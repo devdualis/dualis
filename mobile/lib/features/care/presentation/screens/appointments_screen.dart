@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -10,15 +9,11 @@ import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../domain/care_models.dart';
 import '../../domain/specialties.dart';
 import '../care_providers.dart';
+import '../open_in_maps.dart';
 import '../widgets/care_widgets.dart';
 import 'place_picker_screen.dart';
 
 /// Opens Google Maps (app if installed, else web) on the picked point, or searching for [place].
-Future<void> _openInMaps(String place, {double? lat, double? lng}) => launchUrl(
-      Uri.https('www.google.com', '/maps/search/', {'api': '1', 'query': lat != null && lng != null ? '$lat,$lng' : place}),
-      mode: LaunchMode.externalApplication,
-    );
-
 /// Appointment agenda: date, professional, place, "perguntas que quero fazer"
 /// and the person's notes afterwards.
 class AppointmentsScreen extends ConsumerWidget {
@@ -117,7 +112,7 @@ class _AppointmentCard extends StatelessWidget {
                     if (a.str('place') != null)
                       InkWell(
                         key: const Key('appt_card_place'),
-                        onTap: () => _openInMaps(a.str('place')!, lat: a.number('placeLat'), lng: a.number('placeLng')),
+                        onTap: () => openPlaceInMaps(a.str('place')!, lat: a.number('placeLat'), lng: a.number('placeLng')),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 2),
                           child: Row(children: [

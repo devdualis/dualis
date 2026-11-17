@@ -39,6 +39,7 @@ class CareNotificationService {
       final l10n = _l10n();
       final medDetails = medicationDetails(l10n);
       final apptDetails = appointmentDetails(l10n, hasPlace: false);
+      final apptPlaceDetails = appointmentDetails(l10n, hasPlace: true);
       final boosterDetails = vaccineDetails(l10n);
       final now = tz.TZDateTime.now(tz.local);
       final jobs = <_Job>[];
@@ -80,7 +81,17 @@ class CareNotificationService {
         final body = sameDay
             ? l10n.careNotifAppointmentBodyToday(_hhmm(startsAt))
             : l10n.careNotifAppointmentBodyTomorrow(_hhmm(startsAt));
-        jobs.add(_Job(l10n.careNotifAppointmentTitle, body, tz.TZDateTime.from(at, tz.local), null, apptDetails, null));
+        // "Como chegar" only when there is a place; the place itself never goes
+        // into the payload (the app reads it from the record).
+        final hasPlace = appt.str('place') != null;
+        jobs.add(_Job(
+          l10n.careNotifAppointmentTitle,
+          body,
+          tz.TZDateTime.from(at, tz.local),
+          null,
+          hasPlace ? apptPlaceDetails : apptDetails,
+          CarePayloads.appointment(appt.id),
+        ));
       }
 
       for (final dose in vaccineDoses) {
@@ -88,7 +99,7 @@ class CareNotificationService {
         if (booster == null) continue;
         final at = tz.TZDateTime(tz.local, booster.year, booster.month, booster.day, 9);
         if (!at.isAfter(now)) continue;
-        jobs.add(_Job(l10n.careNotifBoosterTitle, l10n.careNotifBoosterBody, at, null, boosterDetails, null));
+        jobs.add(_Job(l10n.careNotifBoosterTitle, l10n.careNotifBoosterBody, at, null, boosterDetails, CarePayloads.vaccine));
       }
 
       final exact = await _center.canScheduleExactAlarms();
@@ -146,19 +157,54 @@ class CareNotificationService {
         ),
       );
 
+  /// "Ver detalhes", plus "Como chegar" when the appointment has a place.
+  /// Both open the app.
   static NotificationDetails appointmentDetails(
     AppLocalizations l10n, {
     required bool hasPlace,
   }) =>
       NotificationDetails(
-        android: _android(l10n),
-        iOS: const DarwinNotificationDetails(presentAlert: true, presentSound: true),
+        android: _android(l10n, actions: <AndroidNotificationAction>[
+          AndroidNotificationAction(
+            NotificationActionIds.apptDetails,
+            l10n.notifActionSeeDetails,
+            showsUserInterface: true,
+          ),
+          if (hasPlace)
+            AndroidNotificationAction(
+              NotificationActionIds.apptDirections,
+              l10n.notifActionDirections,
+              showsUserInterface: true,
+            ),
+        ]),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentSound: true,
+          categoryIdentifier: hasPlace
+              ? NotificationCategoryIds.careAppointmentPlace
+              : NotificationCategoryIds.careAppointment,
+        ),
       );
 
+  /// "Ver vacinas" opens the app; "Lembrar amanhã" re-notifies in 24 h.
   static NotificationDetails vaccineDetails(AppLocalizations l10n) =>
       NotificationDetails(
-        android: _android(l10n),
-        iOS: const DarwinNotificationDetails(presentAlert: true, presentSound: true),
+        android: _android(l10n, actions: <AndroidNotificationAction>[
+          AndroidNotificationAction(
+            NotificationActionIds.vaccineOpen,
+            l10n.notifActionSeeVaccines,
+            showsUserInterface: true,
+          ),
+          AndroidNotificationAction(
+            NotificationActionIds.vaccineTomorrow,
+            l10n.notifActionRemindTomorrow,
+          ),
+        ]),
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentSound: true,
+          categoryIdentifier: NotificationCategoryIds.careVaccine,
+        ),
       );
 
   static String _hhmm(DateTime d) => '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';

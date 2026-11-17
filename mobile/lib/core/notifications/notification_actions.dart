@@ -326,8 +326,9 @@ class NotificationActionExecutor {
         title = l10n.careNotifMedTitle;
         body = l10n.careNotifMedBody;
       case SnoozeKind.vaccine:
-        debugPrint('Care snooze not available yet');
-        return;
+        details = CareNotificationService.vaccineDetails(l10n);
+        title = l10n.careNotifBoosterTitle;
+        body = l10n.careNotifBoosterBody;
     }
 
     // A UTC instant needs no timezone database (the background engine has

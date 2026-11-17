@@ -553,6 +553,7 @@ void main() {
       await Future<void>.delayed(Duration.zero);
       expect(received, [NotificationPayloads.openCheckIn]);
       expect(executor.executed.single, isA<Dismiss>());
+      await sub.cancel();
     });
   });
 
@@ -628,6 +629,72 @@ void main() {
       expect(details.android!.channelId, CareNotificationService.channelId);
       expect(details.android!.actions!.map((a) => a.id),
           [NotificationActionIds.medTaken, NotificationActionIds.medSnooze]);
+    });
+  });
+
+  group('appointment and vaccine buttons', () {
+    test('open-in-app buttons resolve to their payloads', () {
+      expect((resolveNotificationAction(
+                  actionId: NotificationActionIds.apptDetails,
+                  payload: 'care_appt|a1',
+                  now: _t) as OpenInApp)
+              .payload,
+          NotificationPayloads.openCareAppointments);
+      expect((resolveNotificationAction(
+                  actionId: NotificationActionIds.apptDirections,
+                  payload: 'care_appt|a1',
+                  now: _t) as OpenInApp)
+              .payload,
+          'open_care_directions|a1');
+      expect((resolveNotificationAction(
+                  actionId: NotificationActionIds.apptDirections,
+                  payload: 'garbage',
+                  now: _t) as OpenInApp)
+              .payload,
+          NotificationPayloads.openCareAppointments);
+      expect((resolveNotificationAction(
+                  actionId: NotificationActionIds.vaccineOpen, now: _t) as OpenInApp)
+              .payload,
+          NotificationPayloads.openCareVaccines);
+    });
+
+    test('Lembrar amanhã schedules the booster again in 24 h', () async {
+      final scheduled = <Map<Symbol, dynamic>>[];
+      final executor = NotificationActionExecutor(
+        plugin: _schedulingPlugin(scheduled),
+        queue: InMemoryNotificationActionQueue(),
+        l10n: () => _pt,
+      );
+      await executor.execute(resolveNotificationAction(
+        actionId: NotificationActionIds.vaccineTomorrow,
+        payload: CarePayloads.vaccine,
+        notificationId: 6007,
+        now: _t,
+      ));
+      final call = scheduled.single;
+      expect(call[#id], 6207);
+      expect(call[#title], _pt.careNotifBoosterTitle);
+      expect(call[#body], _pt.careNotifBoosterBody);
+      expect(call[#payload], 'care_vaccine');
+      expect(call[#matchDateTimeComponents], isNull);
+      expect((call[#scheduledDate] as tz.TZDateTime).toUtc(),
+          _t.add(const Duration(hours: 24)).toUtc());
+      final details = call[#notificationDetails] as NotificationDetails;
+      expect(details.android!.channelId, CareNotificationService.channelId);
+      expect(details.iOS!.categoryIdentifier, NotificationCategoryIds.careVaccine);
+    });
+
+    test('a care body tap opens the app without dispatching', () async {
+      final center = AppNotificationCenter(
+        plugin: _MockPlugin(),
+        timezoneResolver: () async => 'UTC',
+        actionExecutor: _RecordingExecutor(),
+      );
+      center.handleNotificationResponse(NotificationResponse(
+        notificationResponseType: NotificationResponseType.selectedNotification,
+        payload: CarePayloads.appointment('a1'),
+      ));
+      expect(center.pendingPayloads, isEmpty);
     });
   });
 

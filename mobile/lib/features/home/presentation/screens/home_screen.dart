@@ -23,6 +23,8 @@ import '../../../dashboard/presentation/screens/historical_dashboard_screen.dart
 import '../../../journal_insights/presentation/controllers/journal_insights_controller.dart';
 import '../../../../core/notifications/hydration_notification_service.dart';
 import '../../../../core/notifications/daily_checkin_notification_service.dart';
+import '../../../../core/notifications/app_notification_center.dart';
+import '../../../care/presentation/care_notification_router.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../hydration/presentation/hydration_reminder_offer.dart';
 import '../../../hydration/presentation/screens/hydration_dashboard_screen.dart';
@@ -47,6 +49,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _currentTabIndex = 0;
   StreamSubscription<String>? _notificationSub;
   StreamSubscription<String>? _checkinNotificationSub;
+  StreamSubscription<String>? _careNotificationSub;
 
   @override
   void initState() {
@@ -70,6 +73,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           if (payload == 'open_checkin' && mounted) {
             setState(() => _currentTabIndex = 0);
           }
+        });
+    // Care buttons that open the app: appointments, directions, vaccines.
+    final careRouter = CareNotificationRouter(
+      loadAppointment: appointmentLoader(ref),
+      navigate: (path) {
+        if (mounted) context.push(path);
+      },
+    );
+    _careNotificationSub = ref
+        .read(appNotificationCenterProvider)
+        .payloads(where: isCareRoutePayload)
+        .listen((payload) {
+          if (mounted) unawaited(careRouter.handle(payload));
         });
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -98,6 +114,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void dispose() {
     _notificationSub?.cancel();
     _checkinNotificationSub?.cancel();
+    _careNotificationSub?.cancel();
     super.dispose();
   }
 
