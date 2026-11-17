@@ -7,6 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../data/profile_repository.dart';
 import '../controllers/active_profile_controller.dart';
+import 'profile_ui.dart';
 
 /// Opens the claim sheet as a regular modal bottom sheet, like the profile
 /// sheet, so the urgent-help button stays on screen. On success shows
@@ -91,25 +92,27 @@ class _ClaimProfileSheetState extends ConsumerState<ClaimProfileSheet> {
     final l10n = AppLocalizations.of(context);
     final error = _error;
     return Material(
-      color: Colors.white,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      color: profileSheetFill,
+      borderRadius: profileSheetRadius,
       clipBehavior: Clip.antiAlias,
       child: SafeArea(
         top: false,
         child: Padding(
           padding: EdgeInsets.fromLTRB(
-              24, 20, 24, 24 + MediaQuery.of(context).viewInsets.bottom),
+              24, 0, 24, 24 + MediaQuery.of(context).viewInsets.bottom),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const ProfileSheetHandle(),
+                const SizedBox(height: 8),
                 Text(
                   l10n.profileClaimTitle,
                   style: GoogleFonts.inter(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimaryLight,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.dualisNavy,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -130,10 +133,12 @@ class _ClaimProfileSheetState extends ConsumerState<ClaimProfileSheet> {
                   textAlign: TextAlign.center,
                   autocorrect: false,
                   enableSuggestions: false,
-                  style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 3),
+                  style: GoogleFonts.inter(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 3,
+                    color: AppColors.dualisNavy,
+                  ),
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp('[A-Za-z0-9]')),
                     const _UpperCaseFormatter(),
@@ -158,12 +163,29 @@ class _ClaimProfileSheetState extends ConsumerState<ClaimProfileSheet> {
                 const SizedBox(height: 16),
                 FilledButton(
                   key: const ValueKey('claim-code-submit'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.softIndigo,
+                    disabledBackgroundColor:
+                        AppColors.softIndigo.withAlpha(120),
+                    foregroundColor: Colors.white,
+                    disabledForegroundColor: Colors.white70,
+                    minimumSize: const Size.fromHeight(52),
+                    shape: const StadiumBorder(),
+                    elevation: 0,
+                    textStyle: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   onPressed: _ready ? _submit : null,
                   child: _submitting
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2))
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ))
                       : Text(l10n.profileClaimSubmit),
                 ),
               ],

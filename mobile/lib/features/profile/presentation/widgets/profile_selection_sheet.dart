@@ -10,13 +10,17 @@ import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/glass_card.dart';
 import '../../../../shared/widgets/urgent_help_button.dart';
+import '../../../settings/presentation/widgets/settings_row_icon.dart'
+    show SettingsDivider;
 import '../../data/profile_repository.dart';
 import '../../domain/models/profile.dart';
 import '../controllers/active_profile_controller.dart';
 import '../screens/add_dependent_modal.dart';
 import 'claim_profile_sheet.dart';
 import 'family_sharing_dialogs.dart' show familySharingDateFormat;
+import 'profile_ui.dart';
 
 /// Modal bottom sheet for switching active profiles, renaming, deleting,
 /// adding legal dependents, opening family sharing management, claiming a
@@ -54,8 +58,8 @@ class ProfileSelectionSheet extends ConsumerWidget {
     final sharedProfiles = state.sharedProfiles;
 
     return Material(
-      color: Colors.white,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      color: profileSheetFill,
+      borderRadius: profileSheetRadius,
       clipBehavior: Clip.antiAlias,
       child: SafeArea(
         top: false,
@@ -67,49 +71,42 @@ class ProfileSelectionSheet extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(
-                child: Container(
-                  margin: const EdgeInsets.only(top: 12, bottom: 8),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+              const ProfileSheetHandle(),
               Padding(
                 // At full height the header reaches the top of the screen,
                 // where the floating urgent-help button sits: keep the close
                 // button out of that strip.
                 padding: const EdgeInsets.fromLTRB(
-                    20, 4, UrgentHelpButton.reservedEdgeWidth, 8),
+                    20, 4, UrgentHelpButton.reservedEdgeWidth, 4),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       l10n.profileSwitcherSheetTitle,
                       style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimaryLight,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.dualisNavy,
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
+                    ProfileRoundIconButton(
+                      icon: Icons.close,
                       tooltip: l10n.profileSwitcherClose,
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
                 ),
               ),
-              const Divider(height: 1),
               Flexible(
                 child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _buildSectionHeader(l10n.profileSwitcherMyProfile),
+                      ProfileSectionHeader(
+                        l10n.profileSwitcherMyProfile,
+                        padding: const EdgeInsets.fromLTRB(4, 12, 4, 8),
+                      ),
                       ...primaryProfiles.map(
                         (p) => _buildProfileTile(
                           context,
@@ -119,7 +116,10 @@ class ProfileSelectionSheet extends ConsumerWidget {
                           l10n,
                         ),
                       ),
-                      _buildSectionHeader(l10n.profileSwitcherDependents),
+                      ProfileSectionHeader(
+                        l10n.profileSwitcherDependents,
+                        padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
+                      ),
                       if (dependentProfiles.isEmpty)
                         _buildEmptyMessage(l10n.profileSwitcherNoDependents)
                       else
@@ -133,7 +133,10 @@ class ProfileSelectionSheet extends ConsumerWidget {
                           ),
                           ..._buildDependentNotices(context, ref, p, l10n),
                         ],
-                      _buildSectionHeader(l10n.profileSwitcherShared),
+                      ProfileSectionHeader(
+                        l10n.profileSwitcherShared,
+                        padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
+                      ),
                       if (sharedProfiles.isEmpty)
                         _buildEmptyMessage(l10n.profileSwitcherNoShared)
                       else
@@ -151,9 +154,8 @@ class ProfileSelectionSheet extends ConsumerWidget {
                   ),
                 ),
               ),
-              const Divider(height: 1),
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -162,11 +164,14 @@ class ProfileSelectionSheet extends ConsumerWidget {
                       icon: const Icon(Icons.person_add_alt_1_outlined),
                       label: Text(l10n.profileSwitcherAddDependent),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.clinicalTeal,
+                        backgroundColor: AppColors.softIndigo,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                        elevation: 0,
+                        minimumSize: const Size.fromHeight(52),
+                        shape: const StadiumBorder(),
+                        textStyle: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       onPressed: () async {
@@ -177,40 +182,39 @@ class ProfileSelectionSheet extends ConsumerWidget {
                       },
                     ),
                     const SizedBox(height: 10),
-                    OutlinedButton.icon(
-                      key: const ValueKey('profile-manage-sharing'),
-                      icon: const Icon(Icons.people_alt_outlined),
-                      label: Text(l10n.profileSwitcherManageSharing),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.softIndigo,
-                        side: const BorderSide(color: AppColors.softIndigo),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                    GlassCard(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      radius: 22,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ProfileActionRow(
+                            key: const ValueKey('profile-manage-sharing'),
+                            icon: Icons.people_alt_outlined,
+                            label: l10n.profileSwitcherManageSharing,
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              context.push(RoutePaths.familySharing);
+                            },
+                          ),
+                          if (premiumEnabled) ...[
+                            const SettingsDivider(),
+                            ProfileActionRow(
+                              key: const ValueKey('profile-claim-entry'),
+                              icon: Icons.vpn_key_outlined,
+                              label: l10n.profileClaimEntry,
+                              onTap: () async {
+                                final claimed =
+                                    await showClaimProfileSheet(context);
+                                if (claimed && context.mounted) {
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                            ),
+                          ],
+                        ],
                       ),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        context.push(RoutePaths.familySharing);
-                      },
                     ),
-                    if (premiumEnabled) ...[
-                      const SizedBox(height: 4),
-                      TextButton.icon(
-                        key: const ValueKey('profile-claim-entry'),
-                        icon: const Icon(Icons.vpn_key_outlined),
-                        label: Text(l10n.profileClaimEntry),
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.softIndigo,
-                        ),
-                        onPressed: () async {
-                          final claimed = await showClaimProfileSheet(context);
-                          if (claimed && context.mounted) {
-                            Navigator.of(context).pop();
-                          }
-                        },
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -221,24 +225,9 @@ class ProfileSelectionSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Text(
-        title.toUpperCase(),
-        style: GoogleFonts.inter(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: AppColors.clinicalTealDark,
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
-  }
-
   Widget _buildEmptyMessage(String message) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: Text(
         message,
         style: GoogleFonts.inter(
@@ -262,87 +251,121 @@ class ProfileSelectionSheet extends ConsumerWidget {
         : '?';
 
     // Shared first: someone else's primary profile is not "Titular" here.
-    final Color avatarBgColor;
+    final Gradient avatarGradient;
+    final Color badgeColor;
     if (profile.ownership == ProfileOwnership.shared) {
-      avatarBgColor = profile.accessLevel == ProfileAccessLevel.viewOnly
-          ? const Color(0xFFD97706)
-          : AppColors.softIndigo;
+      final viewOnly = profile.accessLevel == ProfileAccessLevel.viewOnly;
+      avatarGradient = viewOnly
+          ? const LinearGradient(colors: [
+              AppColors.textSecondaryLight,
+              AppColors.textSecondaryLight,
+            ])
+          : AppColors.gradientNavy;
+      badgeColor = viewOnly
+          ? AppColors.textSecondaryLight
+          : AppColors.clinicalTealDark;
     } else if (profile.isPrimary) {
-      avatarBgColor = AppColors.clinicalTeal;
+      avatarGradient = AppColors.gradientBlueCyan;
+      badgeColor = AppColors.clinicalTealDark;
     } else {
-      avatarBgColor = AppColors.softIndigo;
+      avatarGradient = AppColors.gradientNavy;
+      badgeColor = AppColors.dualisNavy;
     }
+    final subtitle = _subtitleFor(profile, l10n);
 
-    return Material(
-      color: Colors.transparent,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-        leading: CircleAvatar(
-          radius: 18,
-          backgroundColor: avatarBgColor,
-          child: Text(
-            initial,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: Colors.white.withValues(alpha: isActive ? 0.95 : 0.7),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: isActive
+                ? AppColors.dualisSymbolBlue
+                : AppColors.dualisNavy.withValues(alpha: 0.08),
+            width: isActive ? 1.5 : 1,
           ),
         ),
-      title: Text(
-        profile.name,
-        style: GoogleFonts.inter(
-          fontSize: 15,
-          fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
-          color: AppColors.textPrimaryLight,
-        ),
-      ),
-      subtitle: Text(
-        _subtitleFor(profile, l10n),
-        style: GoogleFonts.inter(
-          fontSize: 12,
-          color: AppColors.textSecondaryLight,
-        ),
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (profile.canEdit)
-            IconButton(
-              key: ValueKey('profile-edit-${profile.id}'),
-              icon: const Icon(Icons.edit_outlined, size: 20),
-              color: AppColors.textSecondaryLight,
-              tooltip: l10n.profileSwitcherRenameTitle,
-              onPressed: () => _showRenameDialog(context, ref, profile, l10n),
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
+          contentPadding: const EdgeInsets.fromLTRB(12, 4, 10, 4),
+          leading: Container(
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              gradient: avatarGradient,
+              shape: BoxShape.circle,
             ),
-          if (profile.canDelete)
-            IconButton(
-              key: ValueKey('profile-delete-${profile.id}'),
-              icon: const Icon(Icons.delete_outline, size: 20),
-              color: AppColors.emergencyCrimson,
-              tooltip: l10n.profileSwitcherDeleteTitle,
-              onPressed: () => _showDeleteDialog(context, ref, profile, l10n),
-            ),
-          if (isActive)
-            const Padding(
-              padding: EdgeInsets.only(left: 6),
-              child: Icon(
-                Icons.check_circle_rounded,
-                color: AppColors.clinicalTeal,
-                size: 22,
+            child: Text(
+              initial,
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
               ),
             ),
-        ],
+          ),
+          title: Text(
+            profile.name,
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+              color: AppColors.textPrimaryLight,
+            ),
+          ),
+          subtitle: subtitle.isEmpty
+              ? null
+              : Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: ProfilePill(subtitle, color: badgeColor),
+                  ),
+                ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (profile.canEdit)
+                ProfileRoundIconButton(
+                  key: ValueKey('profile-edit-${profile.id}'),
+                  icon: Icons.edit_outlined,
+                  tooltip: l10n.profileSwitcherRenameTitle,
+                  onPressed: () =>
+                      _showRenameDialog(context, ref, profile, l10n),
+                ),
+              if (profile.canDelete) ...[
+                const SizedBox(width: 6),
+                ProfileRoundIconButton(
+                  key: ValueKey('profile-delete-${profile.id}'),
+                  icon: Icons.delete_outline,
+                  color: AppColors.emergencyCrimson,
+                  tooltip: l10n.profileSwitcherDeleteTitle,
+                  onPressed: () =>
+                      _showDeleteDialog(context, ref, profile, l10n),
+                ),
+              ],
+              if (isActive)
+                const Padding(
+                  padding: EdgeInsets.only(left: 8),
+                  child: Icon(
+                    Icons.check_circle_rounded,
+                    color: AppColors.dualisSymbolBlue,
+                    size: 24,
+                  ),
+                ),
+            ],
+          ),
+          onTap: () {
+            ref
+                .read(activeProfileControllerProvider.notifier)
+                .selectProfile(profile.id);
+            Navigator.of(context).pop();
+          },
+        ),
       ),
-      onTap: () {
-        ref
-            .read(activeProfileControllerProvider.notifier)
-            .selectProfile(profile.id);
-        Navigator.of(context).pop();
-      },
-    ),
-  );
-}
+    );
+  }
 
   /// Hand-over (dependent turned 18) and legal basis (adult dependent still
   /// on Art. 14) notices, only for dependents this account owns.
@@ -391,35 +414,27 @@ class ProfileSelectionSheet extends ConsumerWidget {
     required String text,
     required Widget action,
   }) {
-    return Container(
+    return Padding(
       key: key,
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-      padding: const EdgeInsets.fromLTRB(12, 10, 4, 4),
-      decoration: BoxDecoration(
-        color: AppColors.softIndigo.withAlpha(20),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, size: 18, color: AppColors.softIndigo),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  text,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    color: AppColors.textPrimaryLight,
-                  ),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: ProfileNoticePanel(
+        icon: icon,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                text,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: AppColors.textPrimaryLight,
                 ),
               ),
-            ],
-          ),
-          Align(alignment: Alignment.centerRight, child: action),
-        ],
+            ),
+            Align(alignment: Alignment.centerRight, child: action),
+          ],
+        ),
       ),
     );
   }
@@ -459,22 +474,19 @@ class ProfileSelectionSheet extends ConsumerWidget {
               familySharingDateFormat.format(handover.expiresAt.toLocal()),
             )),
             const SizedBox(height: 16),
-            SelectableText(
-              handover.code,
-              key: const ValueKey('handover-code-value'),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 3,
-                color: AppColors.softIndigo,
+            ProfileCodeBox(
+              child: SelectableText(
+                handover.code,
+                key: const ValueKey('handover-code-value'),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                style: profileCodeTextStyle(),
               ),
             ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               key: const ValueKey('handover-code-copy'),
-              icon: const Icon(Icons.copy),
+              icon: const Icon(Icons.copy_rounded, size: 18),
               label: Text(l10n.profileHandoverCopy),
               onPressed: () async {
                 final dialogMessenger = ScaffoldMessenger.of(dialogCtx);
@@ -518,11 +530,15 @@ class ProfileSelectionSheet extends ConsumerWidget {
               key: const ValueKey('legal-basis-consent-checkbox'),
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.leading,
+              activeColor: AppColors.dualisNavy,
               value: accepted,
               onChanged: (v) => setDialogState(() => accepted = v ?? false),
               title: Text(
                 l10n.addDependentLgpdArt11Consent,
-                style: const TextStyle(fontSize: 13),
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: AppColors.textPrimaryLight,
+                ),
               ),
             ),
           ),

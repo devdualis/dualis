@@ -23,40 +23,35 @@ class ProfileAppBarPill extends ConsumerWidget {
     final profile = state.activeProfile;
     if (profile == null) return const SizedBox.shrink();
 
-    final Color borderColor;
-    final Color backgroundColor;
+    final Color accentColor;
     final Widget? badgeIcon;
 
     if (profile.ownership == ProfileOwnership.shared) {
       if (profile.accessLevel == ProfileAccessLevel.viewOnly) {
-        borderColor = const Color(0xFFD97706);
-        backgroundColor = const Color(0xFFD97706).withAlpha(25);
+        accentColor = AppColors.textSecondaryLight;
         badgeIcon = const Icon(
           Icons.visibility,
           size: 14,
-          color: Color(0xFFD97706),
+          color: AppColors.textSecondaryLight,
         );
       } else {
-        borderColor = AppColors.softIndigo;
-        backgroundColor = AppColors.softIndigo.withAlpha(25);
+        accentColor = AppColors.dualisNavy;
         badgeIcon = const Icon(
           Icons.people_outline,
           size: 14,
-          color: AppColors.softIndigo,
+          color: AppColors.dualisNavy,
         );
       }
     } else if (profile.ownership == ProfileOwnership.dependent ||
         !profile.isPrimary) {
-      borderColor = AppColors.softIndigo;
-      backgroundColor = AppColors.softIndigo.withAlpha(25);
+      accentColor = AppColors.dualisNavy;
       badgeIcon = const Icon(
         Icons.family_restroom,
         size: 14,
-        color: AppColors.softIndigo,
+        color: AppColors.dualisNavy,
       );
     } else {
-      borderColor = AppColors.clinicalTeal;
-      backgroundColor = AppColors.clinicalTeal.withAlpha(20);
+      accentColor = AppColors.dualisSymbolBlue;
       badgeIcon = null;
     }
 
@@ -73,23 +68,25 @@ class ProfileAppBarPill extends ConsumerWidget {
           borderRadius: BorderRadius.circular(20),
           onTap: () => ProfileSelectionSheet.show(context),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            height: 40,
+            padding: const EdgeInsets.fromLTRB(6, 0, 8, 0),
             decoration: BoxDecoration(
-              color: backgroundColor,
+              color: AppColors.iconTileTint,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: borderColor, width: 1.2),
+              border: Border.all(color: Colors.white),
+              boxShadow: AppColors.glassShadow(blur: 16, alpha: 0.18),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircleAvatar(
-                  radius: 11,
-                  backgroundColor: borderColor,
+                  radius: 14,
+                  backgroundColor: accentColor,
                   child: Text(
                     initial,
-                    style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
                       color: Colors.white,
                     ),
                   ),
@@ -103,7 +100,7 @@ class ProfileAppBarPill extends ConsumerWidget {
                       style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimaryLight,
+                        color: AppColors.dualisNavy,
                       ),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
@@ -117,8 +114,8 @@ class ProfileAppBarPill extends ConsumerWidget {
                 const SizedBox(width: 2),
                 const Icon(
                   Icons.arrow_drop_down,
-                  size: 16,
-                  color: AppColors.textSecondaryLight,
+                  size: 18,
+                  color: AppColors.dualisNavy,
                 ),
               ],
             ),

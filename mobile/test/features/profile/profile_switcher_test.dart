@@ -549,6 +549,9 @@ void main() {
         findsOneWidget,
       );
 
+      await tester.ensureVisible(
+          find.byKey(const ValueKey('handover-generate-dep-18')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('handover-generate-dep-18')));
       await tester.pumpAndSettle();
 
@@ -580,6 +583,9 @@ void main() {
       final fake = await pumpSheet(tester, [primaryProfile, withCode]);
 
       expect(find.text('Código ativo até 04/11/2026 09:15'), findsOneWidget);
+      await tester.ensureVisible(
+          find.byKey(const ValueKey('handover-generate-dep-18')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('handover-generate-dep-18')));
       await tester.pumpAndSettle();
       expect(fake.handoverCodeRequests, ['dep-18']);
