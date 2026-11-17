@@ -139,25 +139,32 @@ class _RefreshGlassButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Center(
+    return Semantics(
+      button: true,
       child: InkResponse(
         onTap: () =>
             ref.read(journalInsightsControllerProvider.notifier).refresh(),
         customBorder: const CircleBorder(),
-        child: Container(
-          width: 40,
-          height: 40,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: AppColors.iconTileTint,
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white),
-            boxShadow: AppColors.glassShadow(blur: 16, alpha: 0.18),
-          ),
-          child: const Icon(
-            Icons.refresh_rounded,
-            size: 22,
-            color: AppColors.dualisNavy,
+        child: SizedBox(
+          width: 48,
+          height: 48,
+          child: Center(
+            child: Container(
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.iconTileTint,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white),
+                boxShadow: AppColors.glassShadow(blur: 16, alpha: 0.18),
+              ),
+              child: const Icon(
+                Icons.refresh_rounded,
+                size: 22,
+                color: AppColors.dualisNavy,
+              ),
+            ),
           ),
         ),
       ),
