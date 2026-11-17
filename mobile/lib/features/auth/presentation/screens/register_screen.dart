@@ -10,6 +10,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
 import '../../../../shared/widgets/dualis_text_field.dart';
+import '../../../../shared/widgets/glass_card.dart';
 import '../../domain/form_validators.dart';
 import '../../domain/user_profile.dart';
 import '../controllers/auth_controller.dart';
@@ -176,7 +177,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundDepth,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -209,8 +210,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   l10n.registerTitle,
                   style: GoogleFonts.inter(
                     fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimaryLight,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.dualisNavy,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -224,89 +225,96 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // 1. Nome Completo
-                DualisTextField(
-                  key: const Key('fullNameField'),
-                  labelText: l10n.fullName,
-                  hintText: l10n.registerNameHint,
-                  controller: _nameController,
-                  validator: FormValidators.validateName,
-                  keyboardType: TextInputType.name,
-                  textInputAction: TextInputAction.next,
-                  prefixIcon: const Icon(Icons.person_outline, color: AppColors.textSecondaryLight),
-                ),
-                const SizedBox(height: 16),
+                GlassCard(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      // 1. Nome Completo
+                      DualisTextField(
+                        key: const Key('fullNameField'),
+                        labelText: l10n.fullName,
+                        hintText: l10n.registerNameHint,
+                        controller: _nameController,
+                        validator: FormValidators.validateName,
+                        keyboardType: TextInputType.name,
+                        textInputAction: TextInputAction.next,
+                        prefixIcon: const Icon(Icons.person_outline, color: AppColors.textSecondaryLight),
+                      ),
+                      const SizedBox(height: 16),
 
-                // 2. Data de Nascimento
-                DualisTextField(
-                  key: const Key('birthDateField'),
-                  labelText: l10n.birthDate,
-                  hintText: l10n.registerDobHint,
-                  helperText: l10n.registerDobHelper,
-                  controller: _dobController,
-                  validator: FormValidators.validateDateOfBirth,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    DateInputFormatter(),
-                  ],
-                  textInputAction: TextInputAction.next,
-                  prefixIcon: const Icon(Icons.calendar_today_outlined, color: AppColors.textSecondaryLight),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.edit_calendar_outlined, color: AppColors.softIndigo),
-                    onPressed: _pickDateOfBirth,
+                      // 2. Data de Nascimento
+                      DualisTextField(
+                        key: const Key('birthDateField'),
+                        labelText: l10n.birthDate,
+                        hintText: l10n.registerDobHint,
+                        helperText: l10n.registerDobHelper,
+                        controller: _dobController,
+                        validator: FormValidators.validateDateOfBirth,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          DateInputFormatter(),
+                        ],
+                        textInputAction: TextInputAction.next,
+                        prefixIcon: const Icon(Icons.calendar_today_outlined, color: AppColors.textSecondaryLight),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.edit_calendar_outlined, color: AppColors.softIndigo),
+                          onPressed: _pickDateOfBirth,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 3. Sexo Biológico
+                      BiologicalSexSelector(
+                        key: const Key('biologicalSexSelector'),
+                        selectedGender: _selectedGender,
+                        onGenderChanged: (gender) {
+                          setState(() {
+                            _selectedGender = gender;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 4. E-mail
+                      DualisTextField(
+                        key: const Key('emailField'),
+                        labelText: l10n.email,
+                        hintText: l10n.authEmailHint,
+                        controller: _emailController,
+                        validator: FormValidators.validateEmail,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textSecondaryLight),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 5. Senha
+                      DualisTextField(
+                        key: const Key('passwordField'),
+                        labelText: l10n.password,
+                        hintText: l10n.registerPasswordHint,
+                        helperText: l10n.registerPasswordHelper,
+                        controller: _passwordController,
+                        validator: FormValidators.validatePassword,
+                        obscureText: _obscurePassword,
+                        textInputAction: TextInputAction.done,
+                        prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondaryLight),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // 3. Sexo Biológico
-                BiologicalSexSelector(
-                  key: const Key('biologicalSexSelector'),
-                  selectedGender: _selectedGender,
-                  onGenderChanged: (gender) {
-                    setState(() {
-                      _selectedGender = gender;
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // 4. E-mail
-                DualisTextField(
-                  key: const Key('emailField'),
-                  labelText: l10n.email,
-                  hintText: l10n.authEmailHint,
-                  controller: _emailController,
-                  validator: FormValidators.validateEmail,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textSecondaryLight),
-                ),
-                const SizedBox(height: 16),
-
-                // 5. Senha
-                DualisTextField(
-                  key: const Key('passwordField'),
-                  labelText: l10n.password,
-                  hintText: l10n.registerPasswordHint,
-                  helperText: l10n.registerPasswordHelper,
-                  controller: _passwordController,
-                  validator: FormValidators.validatePassword,
-                  obscureText: _obscurePassword,
-                  textInputAction: TextInputAction.done,
-                  prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondaryLight),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      color: AppColors.textSecondaryLight,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(height: 20),
 
                 // 7. Consentimento LGPD Art. 11 Checkbox
                 LgpdConsentCheckbox(

@@ -27,71 +27,45 @@ class BiologicalSexSelector extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: AppColors.outlineLight, width: 1.5),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          clipBehavior: Clip.hardEdge,
-          child: IntrinsicHeight(
-            child: Row(
-              children: [
-                _GenderOption(
-                  label: 'Masculino',
-                  icon: Icons.male_rounded,
-                  value: Gender.masculino,
-                  selected: selectedGender == Gender.masculino,
-                  onTap: () => onGenderChanged(Gender.masculino),
-                  isFirst: true,
-                ),
-                _Divider(visible: selectedGender != Gender.masculino && selectedGender != Gender.feminino),
-                _GenderOption(
-                  label: 'Feminino',
-                  icon: Icons.female_rounded,
-                  value: Gender.feminino,
-                  selected: selectedGender == Gender.feminino,
-                  onTap: () => onGenderChanged(Gender.feminino),
-                ),
-                _Divider(visible: selectedGender != Gender.feminino && selectedGender != Gender.outro),
-                _GenderOption(
-                  label: 'Outro',
-                  icon: Icons.person_outline_rounded,
-                  value: Gender.outro,
-                  selected: selectedGender == Gender.outro,
-                  onTap: () => onGenderChanged(Gender.outro),
-                  isLast: true,
-                ),
-              ],
+        Row(
+          children: [
+            _GenderOption(
+              label: 'Masculino',
+              icon: Icons.male_rounded,
+              value: Gender.masculino,
+              selected: selectedGender == Gender.masculino,
+              onTap: () => onGenderChanged(Gender.masculino),
             ),
-          ),
+            const SizedBox(width: 8),
+            _GenderOption(
+              label: 'Feminino',
+              icon: Icons.female_rounded,
+              value: Gender.feminino,
+              selected: selectedGender == Gender.feminino,
+              onTap: () => onGenderChanged(Gender.feminino),
+            ),
+            const SizedBox(width: 8),
+            _GenderOption(
+              label: 'Outro',
+              icon: Icons.person_outline_rounded,
+              value: Gender.outro,
+              selected: selectedGender == Gender.outro,
+              onTap: () => onGenderChanged(Gender.outro),
+            ),
+          ],
         ),
       ],
     );
   }
 }
 
-class _Divider extends StatelessWidget {
-  final bool visible;
-  const _Divider({required this.visible});
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      width: 1,
-      color: visible ? AppColors.outlineLight : Colors.transparent,
-    );
-  }
-}
-
+/// Wizard-style option chip: rounded, navy border and cyan tint when selected.
 class _GenderOption extends StatelessWidget {
   final String label;
   final IconData icon;
   final Gender value;
   final bool selected;
   final VoidCallback onTap;
-  final bool isFirst;
-  final bool isLast;
 
   const _GenderOption({
     required this.label,
@@ -99,17 +73,11 @@ class _GenderOption extends StatelessWidget {
     required this.value,
     required this.selected,
     required this.onTap,
-    this.isFirst = false,
-    this.isLast = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final borderRadius = BorderRadius.horizontal(
-      left: isFirst ? const Radius.circular(11) : Radius.zero,
-      right: isLast ? const Radius.circular(11) : Radius.zero,
-    );
-
+    final radius = BorderRadius.circular(16);
     return Expanded(
       child: Semantics(
         button: true,
@@ -118,33 +86,46 @@ class _GenderOption extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
-          constraints: const BoxConstraints(minHeight: 48),
-          color: selected ? AppColors.softIndigo : Colors.transparent,
+          constraints: const BoxConstraints(minHeight: 56),
+          decoration: BoxDecoration(
+            borderRadius: radius,
+            color: selected
+                ? AppColors.dualisSymbolCyan.withValues(alpha: 0.14)
+                : Colors.white.withValues(alpha: 0.86),
+            border: Border.all(
+              color: selected
+                  ? AppColors.dualisNavy
+                  : AppColors.dualisNavy.withValues(alpha: 0.08),
+              width: selected ? 2 : 1,
+            ),
+          ),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
               onTap: onTap,
-              borderRadius: borderRadius,
-              splashColor: AppColors.softIndigo.withValues(alpha: 0.15),
-              highlightColor: AppColors.softIndigo.withValues(alpha: 0.08),
+              borderRadius: radius,
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       icon,
-                      size: 18,
-                      color: selected ? Colors.white : AppColors.textSecondaryLight,
+                      size: 20,
+                      color: selected
+                          ? AppColors.dualisNavy
+                          : AppColors.textSecondaryLight,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       label,
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                        color: selected ? Colors.white : AppColors.textSecondaryLight,
+                        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                        color: selected
+                            ? AppColors.dualisNavy
+                            : AppColors.textSecondaryLight,
                       ),
                     ),
                   ],

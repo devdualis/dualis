@@ -174,7 +174,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                 style: GoogleFonts.inter(
                   fontSize: 11,
                   height: 1.4,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: AppColors.textSecondaryLight,
                 ),
               ),
               const SizedBox(height: 16),

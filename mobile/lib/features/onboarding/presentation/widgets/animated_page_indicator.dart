@@ -28,7 +28,7 @@ class AnimatedPageIndicator extends StatelessWidget {
             decoration: BoxDecoration(
               color: isActive
                   ? AppColors.softIndigo
-                  : AppColors.outlineLight,
+                  : AppColors.dualisNavy.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(12),
             ),
           );

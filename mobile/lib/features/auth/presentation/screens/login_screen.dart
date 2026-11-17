@@ -10,6 +10,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
 import '../../../../shared/widgets/dualis_text_field.dart';
+import '../../../../shared/widgets/glass_card.dart';
 import '../../domain/form_validators.dart';
 import '../controllers/auth_controller.dart';
 
@@ -76,7 +77,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final isPremium = ref.watch(premiumProfilesEnabledProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundDepth,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -141,31 +142,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                DualisTextField(
-                  key: const Key('loginEmailField'),
-                  labelText: l10n.email,
-                  hintText: l10n.authEmailHint,
-                  controller: _emailController,
-                  validator: FormValidators.validateEmail,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textSecondaryLight),
-                ),
-                const SizedBox(height: 16),
-                DualisTextField(
-                  key: const Key('loginPasswordField'),
-                  labelText: l10n.password,
-                  controller: _passwordController,
-                  validator: (v) => (v == null || v.isEmpty) ? l10n.loginPasswordRequired : null,
-                  obscureText: _obscurePassword,
-                  textInputAction: TextInputAction.done,
-                  prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondaryLight),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      color: AppColors.textSecondaryLight,
-                    ),
-                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                GlassCard(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      DualisTextField(
+                        key: const Key('loginEmailField'),
+                        labelText: l10n.email,
+                        hintText: l10n.authEmailHint,
+                        controller: _emailController,
+                        validator: FormValidators.validateEmail,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textSecondaryLight),
+                      ),
+                      const SizedBox(height: 16),
+                      DualisTextField(
+                        key: const Key('loginPasswordField'),
+                        labelText: l10n.password,
+                        controller: _passwordController,
+                        validator: (v) => (v == null || v.isEmpty) ? l10n.loginPasswordRequired : null,
+                        obscureText: _obscurePassword,
+                        textInputAction: TextInputAction.done,
+                        prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondaryLight),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Align(

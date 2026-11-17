@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../../shared/widgets/glass_card.dart';
 import '../../domain/value_card_item.dart';
 
 class CarouselCard extends StatelessWidget {
@@ -13,13 +16,14 @@ class CarouselCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
 
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: Center(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      child: GlassCard(
+        padding: EdgeInsets.zero,
+        radius: 28,
+        child: Center(
         child: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
           padding: const EdgeInsets.all(16.0),
@@ -28,17 +32,13 @@ class CarouselCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: item.accentColor.withAlpha(28),
-                  shape: BoxShape.circle,
-                ),
+              DuotoneIconTile(
+                size: 72,
+                radius: 22,
                 child: Icon(
                   item.icon,
-                  size: 32,
-                  color: item.accentColor,
+                  size: 36,
+                  color: AppColors.dualisNavy,
                 ),
               ),
               const SizedBox(height: 16),
@@ -49,7 +49,7 @@ class CarouselCard extends StatelessWidget {
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
                   height: 1.3,
-                  color: theme.colorScheme.onSurface,
+                  color: AppColors.dualisNavy,
                 ),
               ),
               const SizedBox(height: 12),
@@ -60,11 +60,12 @@ class CarouselCard extends StatelessWidget {
                   fontSize: 15,
                   fontWeight: FontWeight.w400,
                   height: 1.4,
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: AppColors.textSecondaryLight,
                 ),
               ),
             ],
           ),
+        ),
         ),
       ),
     );

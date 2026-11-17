@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/glass_card.dart';
 
 class LgpdConsentCheckbox extends StatelessWidget {
   final bool value;
@@ -20,10 +21,6 @@ class LgpdConsentCheckbox extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (ctx) {
         final l10n = AppLocalizations.of(ctx);
         return DraggableScrollableSheet(
@@ -43,7 +40,7 @@ class LgpdConsentCheckbox extends StatelessWidget {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: AppColors.dualisNavy.withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -53,8 +50,8 @@ class LgpdConsentCheckbox extends StatelessWidget {
                     l10n.lgpdConsentSheetTitle,
                     style: GoogleFonts.inter(
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimaryLight,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.dualisNavy,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -123,57 +120,71 @@ class LgpdConsentCheckbox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return CheckboxListTile(
-      key: const Key('lgpdConsentCheckbox'),
-      value: value,
-      onChanged: onChanged,
-      contentPadding: EdgeInsets.zero,
-      controlAffinity: ListTileControlAffinity.leading,
-      activeColor: AppColors.softIndigo,
-      title: Text.rich(
-        TextSpan(
-          text: l10n.lgpdConsentPrefix,
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            color: AppColors.textPrimaryLight,
-            height: 1.4,
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      radius: 20,
+      child: Material(
+        type: MaterialType.transparency,
+        child: CheckboxListTile(
+          key: const Key('lgpdConsentCheckbox'),
+          value: value,
+          onChanged: onChanged,
+          contentPadding: EdgeInsets.zero,
+          controlAffinity: ListTileControlAffinity.leading,
+          activeColor: AppColors.softIndigo,
+          checkboxShape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
           ),
-          children: [
+          title: Text.rich(
             TextSpan(
-              text: l10n.lgpdConsentTermsLink,
+              text: l10n.lgpdConsentPrefix,
               style: GoogleFonts.inter(
                 fontSize: 13,
-                color: AppColors.softIndigo,
-                fontWeight: FontWeight.w600,
-                decoration: TextDecoration.underline,
+                color: AppColors.textPrimaryLight,
+                height: 1.4,
               ),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () => context.push(RoutePaths.termsOfService),
+              children: [
+                TextSpan(
+                  text: l10n.lgpdConsentTermsLink,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: AppColors.softIndigo,
+                    fontWeight: FontWeight.w600,
+                    decoration: TextDecoration.underline,
+                  ),
+                  recognizer:
+                      TapGestureRecognizer()
+                        ..onTap = () => context.push(RoutePaths.termsOfService),
+                ),
+                TextSpan(text: l10n.lgpdConsentAnd),
+                TextSpan(
+                  text: l10n.lgpdConsentPrivacyLink,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: AppColors.softIndigo,
+                    fontWeight: FontWeight.w600,
+                    decoration: TextDecoration.underline,
+                  ),
+                  recognizer:
+                      TapGestureRecognizer()
+                        ..onTap = () => context.push(RoutePaths.privacyPolicy),
+                ),
+                TextSpan(text: l10n.lgpdConsentSuffix),
+                TextSpan(
+                  text: l10n.lgpdConsentLearnMore,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: AppColors.dualisSymbolBlue,
+                    fontWeight: FontWeight.w600,
+                    decoration: TextDecoration.underline,
+                  ),
+                  recognizer:
+                      TapGestureRecognizer()
+                        ..onTap = () => _showDisclaimerBottomSheet(context),
+                ),
+              ],
             ),
-            TextSpan(text: l10n.lgpdConsentAnd),
-            TextSpan(
-              text: l10n.lgpdConsentPrivacyLink,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                color: AppColors.softIndigo,
-                fontWeight: FontWeight.w600,
-                decoration: TextDecoration.underline,
-              ),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () => context.push(RoutePaths.privacyPolicy),
-            ),
-            TextSpan(text: l10n.lgpdConsentSuffix),
-            TextSpan(
-              text: l10n.lgpdConsentLearnMore,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: AppColors.clinicalTealDark,
-                fontWeight: FontWeight.w600,
-              ),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () => _showDisclaimerBottomSheet(context),
-            ),
-          ],
+          ),
         ),
       ),
     );
