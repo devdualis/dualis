@@ -1364,11 +1364,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsNameHint => 'Seu nome completo';
 
   @override
-  String get settingsRemindersTile => 'Lembretes e Hidratação';
+  String get settingsRemindersTile => 'Lembretes';
 
   @override
-  String get settingsRemindersSubtitle =>
-      'Escolha quando lembrar de beber água';
+  String get settingsRemindersSubtitle => 'Quando o DualisCheckUp avisa você';
 
   @override
   String get settingsTermsTile => 'Termos de Uso';
@@ -6098,4 +6097,45 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get notifActionRemindTomorrow => 'Lembrar amanhã';
+
+  @override
+  String get remindersTitle => 'Lembretes';
+
+  @override
+  String get remindersLead => 'Veja quando o DualisCheckUp avisa você.';
+
+  @override
+  String get remindersCheckInTitle => 'Check-in diário';
+
+  @override
+  String remindersCheckInSummary(String from, String to) {
+    return 'A cada 2 horas, das $from às $to, até você fazer o check-in do dia';
+  }
+
+  @override
+  String get remindersWaterTitle => 'Água';
+
+  @override
+  String remindersWaterSummaryOn(String from, String to) {
+    return 'Ligado, das $from às $to';
+  }
+
+  @override
+  String get remindersStatusOn => 'Ligado';
+
+  @override
+  String get remindersStatusOff => 'Desligado';
+
+  @override
+  String get remindersCareTitle => 'Cuidados';
+
+  @override
+  String get remindersCareSummary => 'Medicamentos, consultas e vacinas';
+
+  @override
+  String get remindersWaterLinkTitle => 'Ajustar em Lembretes';
+
+  @override
+  String get remindersPrivacyNote =>
+      'Os avisos usam textos gerais. Nomes de medicamentos, vacinas e consultas só aparecem dentro do app.';
 }

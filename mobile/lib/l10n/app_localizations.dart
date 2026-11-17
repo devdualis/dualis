@@ -2437,13 +2437,13 @@ abstract class AppLocalizations {
   /// No description provided for @settingsRemindersTile.
   ///
   /// In pt, this message translates to:
-  /// **'Lembretes e Hidratação'**
+  /// **'Lembretes'**
   String get settingsRemindersTile;
 
   /// No description provided for @settingsRemindersSubtitle.
   ///
   /// In pt, this message translates to:
-  /// **'Escolha quando lembrar de beber água'**
+  /// **'Quando o DualisCheckUp avisa você'**
   String get settingsRemindersSubtitle;
 
   /// No description provided for @settingsTermsTile.
@@ -10275,6 +10275,78 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Lembrar amanhã'**
   String get notifActionRemindTomorrow;
+
+  /// Title of the Lembretes screen in Settings
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembretes'**
+  String get remindersTitle;
+
+  /// Lead text at the top of the Lembretes screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Veja quando o DualisCheckUp avisa você.'**
+  String get remindersLead;
+
+  /// Check-in row title on the Lembretes screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Check-in diário'**
+  String get remindersCheckInTitle;
+
+  /// Read-only check-in schedule summary; from/to are HH:00 times
+  ///
+  /// In pt, this message translates to:
+  /// **'A cada 2 horas, das {from} às {to}, até você fazer o check-in do dia'**
+  String remindersCheckInSummary(String from, String to);
+
+  /// Water row title on the Lembretes screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Água'**
+  String get remindersWaterTitle;
+
+  /// Water reminder summary when on; from/to are HH:00 times
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligado, das {from} às {to}'**
+  String remindersWaterSummaryOn(String from, String to);
+
+  /// Reminder status when on
+  ///
+  /// In pt, this message translates to:
+  /// **'Ligado'**
+  String get remindersStatusOn;
+
+  /// Reminder status when off
+  ///
+  /// In pt, this message translates to:
+  /// **'Desligado'**
+  String get remindersStatusOff;
+
+  /// Care row title on the Lembretes screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Cuidados'**
+  String get remindersCareTitle;
+
+  /// Care row summary listing the reminder categories
+  ///
+  /// In pt, this message translates to:
+  /// **'Medicamentos, consultas e vacinas'**
+  String get remindersCareSummary;
+
+  /// Hydration dashboard row that opens the Lembretes screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Ajustar em Lembretes'**
+  String get remindersWaterLinkTitle;
+
+  /// Privacy line on the Lembretes screen and permission sheet
+  ///
+  /// In pt, this message translates to:
+  /// **'Os avisos usam textos gerais. Nomes de medicamentos, vacinas e consultas só aparecem dentro do app.'**
+  String get remindersPrivacyNote;
 }
 
 class _AppLocalizationsDelegate

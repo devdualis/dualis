@@ -265,6 +265,12 @@ Widget createSettingsRouterTestApp({
           body: Center(child: Text('Home Screen')),
         ),
       ),
+      GoRoute(
+        path: RoutePaths.reminders,
+        builder: (context, state) => const Scaffold(
+          body: Center(child: Text('Reminders Screen')),
+        ),
+      ),
     ],
   );
 
@@ -450,7 +456,7 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(createSettingsTestApp(repository: fakeRepo, user: testUser));
+      await tester.pumpWidget(createSettingsRouterTestApp(repository: fakeRepo, user: testUser));
       await tester.pumpAndSettle();
 
       // Section "Seus registros e hábitos"
@@ -461,10 +467,13 @@ void main() {
       expect(find.text('Histórico e Tendências'), findsOneWidget);
       expect(find.text('Veja tudo o que você registrou, dia a dia'), findsOneWidget);
 
-      final hydrationTile = find.byKey(const Key('settings_hydration_tile'));
-      await tester.ensureVisible(hydrationTile);
-      expect(find.text('Lembretes e Hidratação'), findsOneWidget);
-      expect(find.text('Escolha quando lembrar de beber água'), findsOneWidget);
+      final remindersTile = find.byKey(const Key('settings_reminders_tile'));
+      await tester.ensureVisible(remindersTile);
+      expect(
+        find.descendant(of: remindersTile, matching: find.text('Lembretes')),
+        findsOneWidget,
+      );
+      expect(find.text('Quando o DualisCheckUp avisa você'), findsOneWidget);
 
       // Section "Privacidade e Dados"
       final privacySection = find.text('Privacidade e Dados');
@@ -475,6 +484,12 @@ void main() {
       await tester.ensureVisible(privacyTile);
       expect(find.text('Central de Privacidade e LGPD'), findsOneWidget);
       expect(find.text('Veja, baixe ou apague seus dados'), findsOneWidget);
+
+      // The Lembretes tile opens the Lembretes screen.
+      await tester.ensureVisible(remindersTile);
+      await tester.tap(remindersTile);
+      await tester.pumpAndSettle();
+      expect(find.text('Reminders Screen'), findsOneWidget);
     });
 
     testWidgets('7. Shows one-time photo adjust hint for custom photo when not yet adjusted', (tester) async {

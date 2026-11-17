@@ -563,20 +563,20 @@ void main() {
       expect(find.text('💧 +500 ml registrados com sucesso!'), findsNothing);
     });
 
-    testWidgets('reminder switch that fails to save says so and keeps its value', (tester) async {
+    testWidgets('dashboard links to Lembretes and has no reminder switch', (tester) async {
       await tester.pumpWidget(dashboard(_FailingHydrationController(
         const HydrationState(settings: HydrationSettings(dailyTargetMl: 2000)),
       )));
       await tester.pumpAndSettle();
 
-      final toggle = find.byKey(const Key('settings_water_reminder_switch'));
-      await tester.ensureVisible(toggle);
-      await tester.tap(toggle);
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('save_failed_snack')), findsOneWidget);
-      // Reminders start on; turning them off failed, so they stay on.
-      expect(tester.widget<SwitchListTile>(toggle).value, isTrue);
+      final link = find.byKey(const Key('hydration_reminders_link'));
+      await tester.ensureVisible(link);
+      expect(link, findsOneWidget);
+      expect(find.text('Ajustar em Lembretes'), findsOneWidget);
+      expect(find.text('Ligado'), findsOneWidget);
+      // The switch moved to the Lembretes screen (reminders_screen_test).
+      expect(find.byType(SwitchListTile), findsNothing);
+      expect(find.byKey(const Key('settings_water_reminder_switch')), findsNothing);
     });
 
     testWidgets('home card speaks the app language', (tester) async {

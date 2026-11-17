@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/router/route_paths.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/duotone_icon_tile.dart';
 import '../../../../shared/widgets/glass_card.dart';
@@ -133,7 +135,7 @@ class _HydrationDashboardScreenState
                     const SizedBox(height: 28),
                     _SectionTitle(l10n.xv2WaterRemindersTitle),
                     const SizedBox(height: 12),
-                    _ReminderSettings(state: state, viewOnly: viewOnly),
+                    _ReminderSettings(state: state),
                     const SizedBox(height: 36),
                   ],
                 ),
@@ -646,16 +648,14 @@ class _TodayLogs extends ConsumerWidget {
   }
 }
 
-class _ReminderSettings extends ConsumerWidget {
+class _ReminderSettings extends StatelessWidget {
   final HydrationState state;
-  final bool viewOnly;
 
-  const _ReminderSettings({required this.state, required this.viewOnly});
+  const _ReminderSettings({required this.state});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final notifier = ref.read(hydrationControllerProvider.notifier);
     final settings = state.settings;
     final titleStyle = GoogleFonts.inter(
       fontWeight: FontWeight.w600,
@@ -667,6 +667,7 @@ class _ReminderSettings extends ConsumerWidget {
       color: AppColors.textSecondaryLight,
     );
 
+    // The water switch lives on the Lembretes screen; this row links there.
     return GlassCard(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Material(
@@ -674,15 +675,9 @@ class _ReminderSettings extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SwitchListTile(
-              key: const Key('settings_water_reminder_switch'),
-              title: Text(l10n.registerWaterReminderTitle, style: titleStyle),
-              subtitle: Text(
-                l10n.registerWaterReminderSubtitle,
-                style: subtitleStyle,
-              ),
-              value: settings.reminderEnabled,
-              secondary: const DuotoneIconTile(
+            ListTile(
+              key: const Key('hydration_reminders_link'),
+              leading: const DuotoneIconTile(
                 size: 32,
                 radius: 10,
                 child: Icon(
@@ -691,17 +686,18 @@ class _ReminderSettings extends ConsumerWidget {
                   color: AppColors.dualisNavy,
                 ),
               ),
-              activeTrackColor: AppColors.dualisNavy,
-              activeThumbColor: Colors.white,
-              onChanged:
-                  viewOnly
-                      ? null
-                      : (on) async {
-                        final ok = await notifier.toggleReminders(on);
-                        if (!ok && context.mounted) {
-                          showSaveFailedSnackBar(context);
-                        }
-                      },
+              title: Text(l10n.remindersWaterLinkTitle, style: titleStyle),
+              subtitle: Text(
+                settings.reminderEnabled
+                    ? l10n.remindersStatusOn
+                    : l10n.remindersStatusOff,
+                style: subtitleStyle,
+              ),
+              trailing: const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.textSecondaryLight,
+              ),
+              onTap: () => context.push(RoutePaths.reminders),
             ),
             if (settings.reminderEnabled)
               const Padding(

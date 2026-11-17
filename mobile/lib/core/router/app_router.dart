@@ -21,6 +21,7 @@ import '../../features/privacy/presentation/screens/privacy_center_screen.dart';
 import '../../features/privacy/presentation/screens/terms_of_service_screen.dart';
 import '../../features/privacy/presentation/screens/privacy_policy_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/settings/presentation/screens/reminders_screen.dart';
 import '../../features/hydration/presentation/screens/hydration_dashboard_screen.dart';
 import '../../features/habits/presentation/screens/habits_screen.dart';
 import '../../features/profile/presentation/screens/family_sharing_screen.dart';
@@ -198,6 +199,11 @@ GoRouter createRouter({
         path: RoutePaths.settings,
         name: 'settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.reminders,
+        name: 'reminders',
+        builder: (context, state) => const RemindersScreen(),
       ),
       GoRoute(
         path: RoutePaths.hydration,

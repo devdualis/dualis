@@ -951,8 +951,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       const SettingsDivider(),
                       ListTile(
-                        key: const Key('settings_hydration_tile'),
-                        leading: const SettingsRowIcon(Icons.water_drop_outlined),
+                        key: const Key('settings_reminders_tile'),
+                        leading: const SettingsRowIcon(Icons.notifications_none_rounded),
                         title: Text(
                           l10n.settingsRemindersTile,
                           style: GoogleFonts.inter(
@@ -968,7 +968,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                         ),
                         trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
-                        onTap: () => context.push(RoutePaths.hydration),
+                        onTap: () => context.push(RoutePaths.reminders),
                       ),
                     ],
                   )),

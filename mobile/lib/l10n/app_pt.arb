@@ -1063,8 +1063,8 @@
   "settingsLogoutConfirmBody": "Deseja realmente encerrar sua sessão? Seus dados permanecem seguros e criptografados.",
   "settingsLogoutConfirmAction": "Sair",
   "settingsNameHint": "Seu nome completo",
-  "settingsRemindersTile": "Lembretes e Hidratação",
-  "settingsRemindersSubtitle": "Escolha quando lembrar de beber água",
+  "settingsRemindersTile": "Lembretes",
+  "settingsRemindersSubtitle": "Quando o DualisCheckUp avisa você",
   "settingsTermsTile": "Termos de Uso",
   "settingsTermsSubtitle": "Condições de uso, planos, cancelamento e reembolso",
   "settingsPrivacyPolicyTile": "Política de Privacidade (LGPD)",
@@ -3660,5 +3660,69 @@
   "notifActionRemindTomorrow": "Lembrar amanhã",
   "@notifActionRemindTomorrow": {
     "description": "Vaccine reminder button that shows the reminder again in 24 hours"
+  },
+  "remindersTitle": "Lembretes",
+  "@remindersTitle": {
+    "description": "Title of the Lembretes screen in Settings"
+  },
+  "remindersLead": "Veja quando o DualisCheckUp avisa você.",
+  "@remindersLead": {
+    "description": "Lead text at the top of the Lembretes screen"
+  },
+  "remindersCheckInTitle": "Check-in diário",
+  "@remindersCheckInTitle": {
+    "description": "Check-in row title on the Lembretes screen"
+  },
+  "remindersCheckInSummary": "A cada 2 horas, das {from} às {to}, até você fazer o check-in do dia",
+  "@remindersCheckInSummary": {
+    "description": "Read-only check-in schedule summary; from/to are HH:00 times",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "remindersWaterTitle": "Água",
+  "@remindersWaterTitle": {
+    "description": "Water row title on the Lembretes screen"
+  },
+  "remindersWaterSummaryOn": "Ligado, das {from} às {to}",
+  "@remindersWaterSummaryOn": {
+    "description": "Water reminder summary when on; from/to are HH:00 times",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "remindersStatusOn": "Ligado",
+  "@remindersStatusOn": {
+    "description": "Reminder status when on"
+  },
+  "remindersStatusOff": "Desligado",
+  "@remindersStatusOff": {
+    "description": "Reminder status when off"
+  },
+  "remindersCareTitle": "Cuidados",
+  "@remindersCareTitle": {
+    "description": "Care row title on the Lembretes screen"
+  },
+  "remindersCareSummary": "Medicamentos, consultas e vacinas",
+  "@remindersCareSummary": {
+    "description": "Care row summary listing the reminder categories"
+  },
+  "remindersWaterLinkTitle": "Ajustar em Lembretes",
+  "@remindersWaterLinkTitle": {
+    "description": "Hydration dashboard row that opens the Lembretes screen"
+  },
+  "remindersPrivacyNote": "Os avisos usam textos gerais. Nomes de medicamentos, vacinas e consultas só aparecem dentro do app.",
+  "@remindersPrivacyNote": {
+    "description": "Privacy line on the Lembretes screen and permission sheet"
   }
 }

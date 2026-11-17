@@ -16,6 +16,7 @@ class AppColors {
 
   /// Care reminders accent (#3E8E4A) - medication, appointment, vaccine notifications
   static const Color dualisCareGreen = Color(0xFF3E8E4A);
+  static const Color dualisCareGreenLight = Color(0xFFE7F4E9);
 
   /// Tagline (#2B9ED0) - "continuous check up"
   static const Color dualisTagline = Color(0xFF2B9ED0);

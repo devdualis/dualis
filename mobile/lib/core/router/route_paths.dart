@@ -16,6 +16,7 @@ class RoutePaths {
   static const String history = '/history';
   static const String privacyCenter = '/privacy-center';
   static const String settings = '/settings';
+  static const String reminders = '/reminders';
   static const String hydration = '/hydration';
   static const String habits = '/habits';
   static const String familySharing = '/family-sharing';
