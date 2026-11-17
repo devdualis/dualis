@@ -41,12 +41,14 @@ class ProfilePill extends StatelessWidget {
   final String label;
   final Color color;
   final IconData? icon;
+  final int maxLines;
 
   const ProfilePill(
     this.label, {
     super.key,
     this.color = AppColors.dualisNavy,
     this.icon,
+    this.maxLines = 1,
   });
 
   @override
@@ -67,7 +69,7 @@ class ProfilePill extends StatelessWidget {
           Flexible(
             child: Text(
               label,
-              maxLines: 1,
+              maxLines: maxLines,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.inter(
                 fontSize: 11.5,

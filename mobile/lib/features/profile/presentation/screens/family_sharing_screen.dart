@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../data/profile_repository.dart';
 import '../../domain/models/shared_access_grant.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../../shared/widgets/glass_card.dart';
 import '../controllers/active_profile_controller.dart';
 import '../widgets/family_sharing_dialogs.dart';
+import '../widgets/profile_ui.dart';
 
 /// Family sharing management (PREM-07): who sees my data vs. data shared
 /// with me, invite generation, invite acceptance and instant revocation.
@@ -40,8 +44,12 @@ class _UnavailableState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.family_restroom,
-                size: 64, color: AppColors.softIndigo),
+            const DuotoneIconTile(
+              size: 88,
+              radius: 28,
+              child: Icon(Icons.family_restroom,
+                  size: 44, color: AppColors.dualisNavy),
+            ),
             const SizedBox(height: 16),
             Text(l10n.familySharingUnavailableTitle,
                 textAlign: TextAlign.center,
@@ -97,7 +105,8 @@ class _FamilySharingBodyState extends ConsumerState<_FamilySharingBody>
     final accepted = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      showDragHandle: true,
+      backgroundColor: Colors.transparent,
+      useSafeArea: true,
       builder: (_) => const FamilySharingAcceptSheet(),
     );
     if (accepted == true && mounted) {
@@ -111,7 +120,14 @@ class _FamilySharingBodyState extends ConsumerState<_FamilySharingBody>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.familySharingRevokeConfirmTitle),
+        title: Text(
+          l10n.familySharingRevokeConfirmTitle,
+          style: GoogleFonts.inter(
+            fontSize: 19,
+            fontWeight: FontWeight.w700,
+            color: AppColors.dualisNavy,
+          ),
+        ),
         content: Text(l10n.familySharingRevokeConfirmBody),
         actions: [
           TextButton(
@@ -121,7 +137,13 @@ class _FamilySharingBodyState extends ConsumerState<_FamilySharingBody>
           FilledButton(
             key: const ValueKey('family-share-revoke-confirm'),
             style: FilledButton.styleFrom(
-                backgroundColor: AppColors.emergencyCrimson),
+              backgroundColor: AppColors.emergencyCrimson,
+              minimumSize: const Size(96, 46),
+              textStyle: GoogleFonts.inter(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(l10n.familySharingRevokeButton),
           ),
@@ -177,31 +199,53 @@ class _FamilySharingBodyState extends ConsumerState<_FamilySharingBody>
     final l10n = AppLocalizations.of(context);
     final state = ref.watch(activeProfileControllerProvider);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.familySharingTitle),
-        bottom: TabBar(
-          controller: _tabs,
-          tabs: [
-            // Two-line labels: the pt-BR copy does not fit one line on
-            // narrow phones.
-            Tab(
-              key: const ValueKey('family-share-tab-outgoing'),
-              height: 56,
-              child: Text(l10n.familySharingTabOutgoing,
-                  textAlign: TextAlign.center, maxLines: 2),
-            ),
-            Tab(
-              key: const ValueKey('family-share-tab-incoming'),
-              height: 56,
-              child: Text(l10n.familySharingTabIncoming,
-                  textAlign: TextAlign.center, maxLines: 2),
-            ),
-          ],
-        ),
-      ),
+      appBar: AppBar(title: Text(l10n.familySharingTitle)),
       body: Column(
         children: [
           if (state.isLoading) const LinearProgressIndicator(minHeight: 2),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: AppColors.dualisNavy.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: TabBar(
+                controller: _tabs,
+                dividerColor: Colors.transparent,
+                indicatorSize: TabBarIndicatorSize.tab,
+                splashBorderRadius: BorderRadius.circular(999),
+                indicator: BoxDecoration(
+                  color: AppColors.surfaceLight,
+                  borderRadius: BorderRadius.circular(999),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.dualisNavy.withValues(alpha: 0.14),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                tabs: [
+                  // Two-line labels: the pt-BR copy does not fit one line on
+                  // narrow phones.
+                  Tab(
+                    key: const ValueKey('family-share-tab-outgoing'),
+                    height: 52,
+                    child: Text(l10n.familySharingTabOutgoing,
+                        textAlign: TextAlign.center, maxLines: 2),
+                  ),
+                  Tab(
+                    key: const ValueKey('family-share-tab-incoming'),
+                    height: 52,
+                    child: Text(l10n.familySharingTabIncoming,
+                        textAlign: TextAlign.center, maxLines: 2),
+                  ),
+                ],
+              ),
+            ),
+          ),
           Expanded(
             child: TabBarView(
               controller: _tabs,
@@ -275,11 +319,29 @@ class _GrantList extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         if (visible.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 32),
-            child: Text(emptyText,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium),
+          GlassCard(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const DuotoneIconTile(
+                  size: 56,
+                  radius: 18,
+                  child: Icon(Icons.family_restroom,
+                      size: 30, color: AppColors.dualisNavy),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  emptyText,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    height: 1.45,
+                    color: AppColors.textSecondaryLight,
+                  ),
+                ),
+              ],
+            ),
           ),
         for (final g in visible)
           _GrantTile(
@@ -333,93 +395,115 @@ class _GrantTile extends StatelessWidget {
       subtitle = l10n.familySharingPendingUntil(grant.inviteCode ?? '',
           familySharingDateFormat.format(grant.expiresAt.toLocal()));
     }
+    final Color statusColor = grant.isActive
+        ? AppColors.clinicalTealDark
+        : _isExpired
+            ? AppColors.emergencyCrimson
+            : AppColors.dualisNavy;
     // Owners see who accepted, so a share with the wrong person can be revoked.
     final grantee = grant.isActive && grant.direction == GrantDirection.outgoing
         ? grant.granteeLabel
         : null;
 
-    return Card(
+    return Padding(
       key: ValueKey('family-share-grant-${grant.id}'),
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.only(bottom: 14),
+      child: GlassCard(
+        padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  backgroundColor: AppColors.softIndigoLight,
-                  foregroundColor: AppColors.softIndigo,
-                  child: Text(name.isEmpty ? '?' : name[0].toUpperCase()),
+                Container(
+                  width: 40,
+                  height: 40,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    gradient: AppColors.gradientNavy,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    name.isEmpty ? '?' : name[0].toUpperCase(),
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(name,
-                          style: Theme.of(context).textTheme.titleSmall),
-                      const SizedBox(height: 2),
                       Text(
-                        subtitle,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: _isExpired
-                              ? AppColors.emergencyCrimson
-                              : Theme.of(context).hintColor,
+                        name,
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimaryLight,
                         ),
                       ),
+                      const SizedBox(height: 4),
+                      ProfilePill(subtitle, color: statusColor, maxLines: 3),
                     ],
                   ),
                 ),
-                Chip(
-                  visualDensity: VisualDensity.compact,
-                  avatar: Icon(
-                      viewOnly ? Icons.visibility_outlined : Icons.edit_note,
-                      size: 16),
-                  label: Text(viewOnly
+                const SizedBox(width: 8),
+                ProfilePill(
+                  viewOnly
                       ? l10n.familySharingScopeViewOnly
-                      : l10n.familySharingScopeCoManage),
+                      : l10n.familySharingScopeCoManage,
+                  color: viewOnly
+                      ? AppColors.textSecondaryLight
+                      : AppColors.clinicalTealDark,
+                  icon:
+                      viewOnly ? Icons.visibility_outlined : Icons.edit_note,
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(
               relationshipLabel(l10n, grant.relationship),
               key: ValueKey('grant-relationship-${grant.id}'),
-              style: Theme.of(context).textTheme.bodySmall,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: AppColors.textSecondaryLight,
+              ),
             ),
             if (grant.categories.isNotEmpty) ...[
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Wrap(
                 spacing: 6,
-                runSpacing: 4,
+                runSpacing: 6,
                 children: [
                   for (final c in grant.categories)
-                    Chip(
+                    ProfilePill(
+                      shareCategoryLabel(l10n, c),
                       key: ValueKey('grant-category-${grant.id}-${c.apiValue}'),
-                      visualDensity: VisualDensity.compact,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      labelStyle: Theme.of(context).textTheme.labelSmall,
-                      label: Text(shareCategoryLabel(l10n, c)),
+                      color: AppColors.dualisNavy,
                     ),
                 ],
               ),
             ],
             if (grantee != null) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               Text(
                 l10n.familySharingSharedWith(grantee),
                 key: ValueKey('family-share-grantee-${grant.id}'),
-                style: Theme.of(context).textTheme.bodySmall,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: AppColors.textSecondaryLight,
+                ),
               ),
             ],
             // The PATCH accepts PENDING and ACCEPTED grants only.
             if (onEditCategories != null &&
                 (grant.isActive ||
                     (grant.status == GrantStatus.pending && !_isExpired))) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton.icon(
@@ -431,14 +515,20 @@ class _GrantTile extends StatelessWidget {
               ),
             ],
             if (grant.isActive) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Align(
                 alignment: Alignment.centerRight,
                 child: FilledButton.icon(
                   key: revokeKey,
                   style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.emergencyCrimson,
-                      foregroundColor: Colors.white),
+                    backgroundColor: AppColors.emergencyCrimson,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(0, 44),
+                    textStyle: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   onPressed: onRevoke,
                   icon: const Icon(Icons.block, size: 18),
                   label: Text(l10n.familySharingRevokeButton),
@@ -447,13 +537,23 @@ class _GrantTile extends StatelessWidget {
             ],
             // A pending invite can be cancelled before anyone uses the code.
             if (grant.status == GrantStatus.pending && !_isExpired) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Align(
                 alignment: Alignment.centerRight,
                 child: OutlinedButton.icon(
                   key: ValueKey('family-share-cancel-${grant.id}'),
                   style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.emergencyCrimson),
+                    foregroundColor: AppColors.emergencyCrimson,
+                    side: const BorderSide(
+                      color: AppColors.emergencyCrimson,
+                      width: 1.5,
+                    ),
+                    minimumSize: const Size(0, 44),
+                    textStyle: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   onPressed: onRevoke,
                   icon: const Icon(Icons.close, size: 18),
                   label: Text(l10n.familySharingCancelInvite),

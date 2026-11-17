@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../data/profile_repository.dart';
 import '../../domain/models/shared_access_grant.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
 import '../controllers/active_profile_controller.dart';
+import 'profile_ui.dart';
 
 final familySharingDateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
@@ -36,16 +39,50 @@ String shareCategoryLabel(AppLocalizations l10n, ShareCategory c) =>
       ShareCategory.care => l10n.familySharingCategoryCare,
     };
 
+final TextStyle _dialogTitleStyle = GoogleFonts.inter(
+  fontSize: 19,
+  fontWeight: FontWeight.w700,
+  color: AppColors.dualisNavy,
+);
+
+/// Compact navy button for dialog action rows (the theme default is full width).
+final ButtonStyle _dialogFilledStyle = FilledButton.styleFrom(
+  minimumSize: const Size(96, 46),
+  textStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
+);
+
 /// Guardian confirmation required to share a dependent's data (gap 9).
 Widget _dependentConfirmTile(
         AppLocalizations l10n, bool value, ValueChanged<bool> onChanged) =>
-    CheckboxListTile(
-      key: const ValueKey('family-share-dependent-confirm'),
-      contentPadding: EdgeInsets.zero,
-      controlAffinity: ListTileControlAffinity.leading,
-      value: value,
-      title: Text(l10n.familySharingDependentConfirm),
-      onChanged: (v) => onChanged(v == true),
+    Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.dualisSymbolBlue.withValues(alpha: 0.08),
+          border: Border.all(
+            color: AppColors.dualisSymbolBlue.withValues(alpha: 0.18),
+          ),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: CheckboxListTile(
+            key: const ValueKey('family-share-dependent-confirm'),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+            controlAffinity: ListTileControlAffinity.leading,
+            activeColor: AppColors.dualisNavy,
+            value: value,
+            title: Text(
+              l10n.familySharingDependentConfirm,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: AppColors.textPrimaryLight,
+              ),
+            ),
+            onChanged: (v) => onChanged(v == true),
+          ),
+        ),
+      ),
     );
 
 /// One checkbox per category (D2), keyed `family-share-category-<apiValue>`.
@@ -66,24 +103,57 @@ class FamilySharingCategoryChecklist extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(l10n.familySharingCategoriesLabel,
-            style: Theme.of(context).textTheme.labelLarge),
+        Text(
+          l10n.familySharingCategoriesLabel,
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: AppColors.dualisNavy,
+          ),
+        ),
+        const SizedBox(height: 8),
         for (final c in ShareCategory.values) ...[
-          CheckboxListTile(
-            key: ValueKey('family-share-category-${c.apiValue}'),
-            contentPadding: EdgeInsets.zero,
-            dense: true,
-            controlAffinity: ListTileControlAffinity.leading,
-            value: selected.contains(c),
-            title: Text(shareCategoryLabel(l10n, c)),
-            onChanged: (checked) => onChanged(checked == true
-                ? {...selected, c}
-                : selected.where((x) => x != c).toSet()),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 160),
+              decoration: profileOptionDecoration(
+                selected: selected.contains(c),
+                radius: 16,
+              ),
+              child: Material(
+                type: MaterialType.transparency,
+                child: CheckboxListTile(
+                  key: ValueKey('family-share-category-${c.apiValue}'),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                  dense: true,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  activeColor: AppColors.dualisNavy,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  value: selected.contains(c),
+                  title: Text(
+                    shareCategoryLabel(l10n, c),
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: selected.contains(c)
+                          ? FontWeight.w700
+                          : FontWeight.w600,
+                      color: AppColors.dualisNavy,
+                    ),
+                  ),
+                  onChanged: (checked) => onChanged(checked == true
+                      ? {...selected, c}
+                      : selected.where((x) => x != c).toSet()),
+                ),
+              ),
+            ),
           ),
           // Opt-in only, explained (D2).
           if (c == ShareCategory.emotionalJournal)
             Padding(
-              padding: const EdgeInsets.only(left: 48, bottom: 4),
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
               child: Text(
                 l10n.familySharingEmotionalExplanation,
                 key: const ValueKey('family-share-emotional-explanation'),
@@ -92,8 +162,13 @@ class FamilySharingCategoryChecklist extends StatelessWidget {
             ),
         ],
         if (selected.isEmpty)
-          Text(l10n.familySharingCategoriesRequired,
-              style: const TextStyle(color: AppColors.emergencyCrimson)),
+          Text(
+            l10n.familySharingCategoriesRequired,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              color: AppColors.emergencyCrimson,
+            ),
+          ),
         const SizedBox(height: 8),
         Text(
           l10n.familySharingSafetyNeverShared,
@@ -186,7 +261,7 @@ class _FamilySharingInviteDialogState
     final l10n = AppLocalizations.of(context);
     final invite = _invite;
     return AlertDialog(
-      title: Text(l10n.familySharingInviteTitle),
+      title: Text(l10n.familySharingInviteTitle, style: _dialogTitleStyle),
       content: SingleChildScrollView(
         child: invite == null ? _buildForm(l10n) : _buildCode(l10n, invite),
       ),
@@ -198,6 +273,7 @@ class _FamilySharingInviteDialogState
               ),
               FilledButton(
                 key: const ValueKey('family-share-invite-generate'),
+                style: _dialogFilledStyle,
                 onPressed: _canGenerate ? _generate : null,
                 child: Text(l10n.familySharingInviteGenerate),
               ),
@@ -205,6 +281,7 @@ class _FamilySharingInviteDialogState
           : [
               FilledButton(
                 key: const ValueKey('family-share-invite-done'),
+                style: _dialogFilledStyle,
                 onPressed: () => Navigator.of(context).pop(invite),
                 child: Text(l10n.familySharingDone),
               ),
@@ -235,9 +312,15 @@ class _FamilySharingInviteDialogState
           }),
         ),
         const SizedBox(height: 16),
-        Text(l10n.familySharingInviteScopeLabel,
-            style: Theme.of(context).textTheme.labelLarge),
-        const SizedBox(height: 4),
+        Text(
+          l10n.familySharingInviteScopeLabel,
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: AppColors.dualisNavy,
+          ),
+        ),
+        const SizedBox(height: 8),
         _scopeOption(ProfileShareLevel.viewOnly,
             l10n.familySharingScopeViewOnlyOption, Icons.visibility_outlined),
         _scopeOption(ProfileShareLevel.coManage,
@@ -270,8 +353,13 @@ class _FamilySharingInviteDialogState
         if (_failed)
           Padding(
             padding: const EdgeInsets.only(top: 8),
-            child: Text(l10n.familySharingInviteError,
-                style: const TextStyle(color: AppColors.emergencyCrimson)),
+            child: Text(
+              l10n.familySharingInviteError,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: AppColors.emergencyCrimson,
+              ),
+            ),
           ),
       ],
     );
@@ -279,17 +367,45 @@ class _FamilySharingInviteDialogState
 
   Widget _scopeOption(ProfileShareLevel level, String label, IconData icon) {
     final selected = _level == level;
-    return ListTile(
-      key: ValueKey('family-share-scope-${level.name}'),
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon),
-      title: Text(label),
-      trailing: Icon(
-        selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-        color: selected ? AppColors.clinicalTeal : null,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        decoration: profileOptionDecoration(selected: selected, radius: 16),
+        child: Material(
+          type: MaterialType.transparency,
+          child: ListTile(
+            key: ValueKey('family-share-scope-${level.name}'),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            leading: DuotoneIconTile(
+              size: 36,
+              radius: 12,
+              child: Icon(icon, size: 20, color: AppColors.dualisNavy),
+            ),
+            title: Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                color: AppColors.dualisNavy,
+              ),
+            ),
+            trailing: Icon(
+              selected
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+              color: selected
+                  ? AppColors.dualisNavy
+                  : AppColors.textSecondaryLight,
+            ),
+            selected: selected,
+            onTap: () => setState(() => _level = level),
+          ),
+        ),
       ),
-      selected: selected,
-      onTap: () => setState(() => _level = level),
     );
   }
 
@@ -301,16 +417,13 @@ class _FamilySharingInviteDialogState
         Text(l10n.familySharingInviteCodeHint, textAlign: TextAlign.center),
         const SizedBox(height: 16),
         // One line: 10 characters fit a 320 dp phone at this size.
-        SelectableText(
-          code,
-          key: const ValueKey('family-share-invite-code'),
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 3,
-            color: AppColors.softIndigo,
+        ProfileCodeBox(
+          child: SelectableText(
+            code,
+            key: const ValueKey('family-share-invite-code'),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            style: profileCodeTextStyle(),
           ),
         ),
         const SizedBox(height: 8),
@@ -322,7 +435,7 @@ class _FamilySharingInviteDialogState
         const SizedBox(height: 12),
         OutlinedButton.icon(
           key: const ValueKey('family-share-invite-copy'),
-          icon: const Icon(Icons.copy),
+          icon: const Icon(Icons.copy_rounded, size: 18),
           label: Text(l10n.familySharingCopyCode),
           onPressed: () async {
             final messenger = ScaffoldMessenger.of(context);
@@ -372,15 +485,21 @@ class _FamilySharingEditCategoriesDialogState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return AlertDialog(
-      title: Text(l10n.familySharingEditCategories),
+      title: Text(l10n.familySharingEditCategories, style: _dialogTitleStyle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(widget.grant.targetProfileName,
-                style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 8),
+            Text(
+              widget.grant.targetProfileName,
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimaryLight,
+              ),
+            ),
+            const SizedBox(height: 12),
             FamilySharingCategoryChecklist(
               selected: _categories,
               onChanged: (next) => setState(() => _categories = next),
@@ -398,6 +517,7 @@ class _FamilySharingEditCategoriesDialogState
         ),
         FilledButton(
           key: const ValueKey('family-share-edit-save'),
+          style: _dialogFilledStyle,
           onPressed: _canSave
               ? () => Navigator.of(context).pop<FamilySharingCategoryEdit>((
                     categories: [
@@ -468,15 +588,27 @@ class _FamilySharingAcceptSheetState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final ready = _controller.text.length == _codeLength && !_submitting;
-    return Padding(
+    return Material(
+      color: profileSheetFill,
+      borderRadius: profileSheetRadius,
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
       padding: EdgeInsets.fromLTRB(
-          24, 24, 24, 24 + MediaQuery.of(context).viewInsets.bottom),
+          24, 0, 24, 24 + MediaQuery.of(context).viewInsets.bottom),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l10n.familySharingAcceptTitle,
-              style: Theme.of(context).textTheme.titleMedium),
+          const ProfileSheetHandle(),
+          const SizedBox(height: 8),
+          Text(
+            l10n.familySharingAcceptTitle,
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: AppColors.dualisNavy,
+            ),
+          ),
           const SizedBox(height: 16),
           TextField(
             key: const ValueKey('invite-code-field'),
@@ -485,8 +617,12 @@ class _FamilySharingAcceptSheetState
             maxLength: _codeLength,
             textCapitalization: TextCapitalization.characters,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-                fontSize: 24, fontWeight: FontWeight.w600, letterSpacing: 4),
+            style: GoogleFonts.inter(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 4,
+              color: AppColors.dualisNavy,
+            ),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp('[A-Za-z0-9]')),
               const _UpperCaseFormatter(),
@@ -513,10 +649,14 @@ class _FamilySharingAcceptSheetState
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2))
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ))
                 : Text(l10n.familySharingAcceptSubmit),
           ),
         ],
+      ),
       ),
     );
   }
