@@ -6,6 +6,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../core/utils/error_message_resolver.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../../shared/widgets/glass_card.dart';
 import '../controllers/privacy_controller.dart';
 
 class PrivacyCenterScreen extends ConsumerStatefulWidget {
@@ -136,7 +138,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                             ScaffoldMessenger.of(this.context).showSnackBar(
                               SnackBar(
                                 content: Text(l10n.deleteSuccessMessage),
-                                backgroundColor: AppColors.clinicalTeal,
+                                backgroundColor: AppColors.dualisNavy,
                               ),
                             );
                             try {
@@ -173,10 +175,15 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
     });
 
     return Scaffold(
+      backgroundColor: AppColors.backgroundDepth,
       appBar: AppBar(
         title: Text(
           l10n.privacyCenterTitle,
-          style: const TextStyle(fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
+            color: AppColors.dualisNavy,
+          ),
         ),
         elevation: 0,
       ),
@@ -185,33 +192,16 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
+            GlassCard(
+ padding: const EdgeInsets.all(20),
+ child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: AppColors.clinicalTeal.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.download_rounded,
-                            color: AppColors.clinicalTeal,
-                            size: 24,
-                          ),
-                        ),
+                        DuotoneIconTile(
+ child: const Icon(Icons.download_rounded, color: AppColors.dualisNavy, size: 22),
+ ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
@@ -237,14 +227,14 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                     FilledButton.icon(
                       key: const Key('export_data_button'),
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.clinicalTeal,
+                        backgroundColor: AppColors.dualisNavy,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
                           vertical: 14,
                           horizontal: 20,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(24),
                         ),
                       ),
                       icon: privacyState.isExporting
@@ -268,7 +258,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(l10n.exportSuccessMessage),
-                                    backgroundColor: AppColors.clinicalTeal,
+                                    backgroundColor: AppColors.dualisNavy,
                                   ),
                                 );
                                 _showExportPreviewDialog(context, data);
@@ -277,13 +267,12 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                     ),
                   ],
                 ),
-              ),
-            ),
+ ),
             const SizedBox(height: 24),
             Container(
               decoration: BoxDecoration(
                 color: AppColors.emergencySurfaceRed,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(24),
                 border: Border.all(
                   color: AppColors.emergencyCrimson.withValues(alpha: 0.3),
                   width: 1.5,
@@ -295,18 +284,10 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                 children: [
                   Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: AppColors.emergencyCrimson.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.delete_forever_rounded,
-                          color: AppColors.emergencyCrimson,
-                          size: 24,
-                        ),
-                      ),
+                      DuotoneIconTile(
+ background: AppColors.emergencyCrimson.withValues(alpha: 0.1),
+ child: const Icon(Icons.delete_forever_rounded, color: AppColors.emergencyCrimson, size: 22),
+ ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -343,7 +324,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                         horizontal: 20,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(24),
                       ),
                     ),
                     icon: privacyState.isDeleting
@@ -365,33 +346,16 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
+            GlassCard(
+ padding: const EdgeInsets.all(20),
+ child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: AppColors.softIndigo.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.gavel_rounded,
-                            color: AppColors.softIndigo,
-                            size: 24,
-                          ),
-                        ),
+                        DuotoneIconTile(
+ child: const Icon(Icons.gavel_rounded, color: AppColors.dualisNavy, size: 22),
+ ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
@@ -420,11 +384,11 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                           child: OutlinedButton.icon(
                             key: const Key('privacy_center_terms_button'),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.softIndigo,
-                              side: const BorderSide(color: AppColors.softIndigo),
+                              foregroundColor: AppColors.dualisNavy,
+                              side: const BorderSide(color: AppColors.dualisNavy),
                               minimumSize: const Size(48, 48),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(24),
                               ),
                             ),
                             icon: const Icon(Icons.description_outlined, size: 18),
@@ -437,11 +401,11 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                           child: FilledButton.icon(
                             key: const Key('privacy_center_policy_button'),
                             style: FilledButton.styleFrom(
-                              backgroundColor: AppColors.softIndigo,
+                              backgroundColor: AppColors.dualisNavy,
                               foregroundColor: Colors.white,
                               minimumSize: const Size(48, 48),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(24),
                               ),
                             ),
                             icon: const Icon(Icons.policy_outlined, size: 18),
@@ -453,36 +417,18 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                     ),
                   ],
                 ),
-              ),
-            ),
+ ),
             const SizedBox(height: 24),
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
+            GlassCard(
+ padding: const EdgeInsets.all(20),
+ child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: AppColors.clinicalTealDark.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.shield_rounded,
-                            color: AppColors.clinicalTealDark,
-                            size: 24,
-                          ),
-                        ),
+                        DuotoneIconTile(
+ child: const Icon(Icons.shield_rounded, color: AppColors.dualisNavy, size: 22),
+ ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
@@ -510,8 +456,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                     ),
                   ],
                 ),
-              ),
-            ),
+ ),
             const SizedBox(height: 24),
           ],
         ),

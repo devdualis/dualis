@@ -7,6 +7,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/ai_consent_repository.dart';
 import 'ai_consent_controller.dart';
+import '../../settings/presentation/widgets/settings_row_icon.dart';
 
 /// How [ensureAiConsent] asks when consent is missing.
 enum AiConsentAsk {
@@ -219,11 +220,9 @@ class _AiConsentTileState extends ConsumerState<AiConsentTile> {
         SwitchListTile(
           key: const Key('settings_ai_consent_switch'),
           value: granted,
-          activeThumbColor: AppColors.clinicalTeal,
-          secondary: const Icon(
-            Icons.auto_awesome_outlined,
-            color: AppColors.clinicalTeal,
-          ),
+          activeThumbColor: Colors.white,
+          activeTrackColor: AppColors.dualisNavy,
+          secondary: const SettingsRowIcon(Icons.auto_awesome_outlined),
           title: Text(
             l10n.aiConsentTileTitle,
             style: GoogleFonts.inter(
@@ -240,7 +239,7 @@ class _AiConsentTileState extends ConsumerState<AiConsentTile> {
           ),
           onChanged: _busy ? null : _onChanged,
         ),
-        const Divider(height: 1, color: AppColors.outlineLight),
+        const SettingsDivider(),
       ],
     );
   }

@@ -209,12 +209,9 @@ class _AvatarSelectorSheetState extends State<AvatarSelectorSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Container(
+    // Background and corners come from the glass bottom-sheet theme.
+    return Padding(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceLight,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,13 +274,13 @@ class _AvatarSelectorSheetState extends State<AvatarSelectorSheet> {
                         shape: BoxShape.circle,
                         color: preset.backgroundColor,
                         border: Border.all(
-                          color: isSelected ? AppColors.softIndigo : Colors.transparent,
+                          color: isSelected ? AppColors.dualisNavy : Colors.transparent,
                           width: 3,
                         ),
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                  color: AppColors.softIndigo.withValues(alpha: 0.35),
+                                  color: AppColors.dualisNavy.withValues(alpha: 0.35),
                                   blurRadius: 8,
                                   offset: const Offset(0, 3),
                                 )
@@ -310,7 +307,7 @@ class _AvatarSelectorSheetState extends State<AvatarSelectorSheet> {
                                 ),
                                 child: const Icon(
                                   Icons.check_circle_rounded,
-                                  color: AppColors.softIndigo,
+                                  color: AppColors.dualisNavy,
                                   size: 16,
                                 ),
                               ),
@@ -324,7 +321,7 @@ class _AvatarSelectorSheetState extends State<AvatarSelectorSheet> {
                       style: GoogleFonts.inter(
                         fontSize: 11,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isSelected ? AppColors.softIndigo : AppColors.textSecondaryLight,
+                        color: isSelected ? AppColors.dualisNavy : AppColors.textSecondaryLight,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -341,10 +338,11 @@ class _AvatarSelectorSheetState extends State<AvatarSelectorSheet> {
             height: 48,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.clinicalTeal,
+                backgroundColor: AppColors.dualisNavy,
                 foregroundColor: Colors.white,
+                elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(24),
                 ),
               ),
               onPressed: () {

@@ -162,6 +162,8 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
+            color: Colors.white,
           ),
         ),
         leading: IconButton(
@@ -261,6 +263,7 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
                             foregroundColor: Colors.white,
                             side: const BorderSide(color: Colors.white54),
                             minimumSize: const Size.fromHeight(52),
+                            shape: const StadiumBorder(),
                           ),
                           onPressed: () {
                             _transform.value =
@@ -277,9 +280,10 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
                         child: FilledButton(
                           key: const Key('photo_crop_confirm'),
                           style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.clinicalTeal,
+                            backgroundColor: AppColors.dualisSymbolBlue,
                             foregroundColor: Colors.white,
                             minimumSize: const Size.fromHeight(52),
+                            shape: const StadiumBorder(),
                           ),
                           onPressed: _saving ? null : _confirm,
                           child: Text(l10n.xv2CropConfirm),

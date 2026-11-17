@@ -15,7 +15,9 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../l10n/locale_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../consent/presentation/ai_consent_widgets.dart';
+import '../../../../shared/widgets/glass_card.dart';
 import '../widgets/avatar_selector_sheet.dart';
+import '../widgets/settings_row_icon.dart';
 import '../widgets/biometric_lock_tile.dart';
 import '../widgets/voice_read_aloud_tile.dart';
 import 'photo_crop_screen.dart';
@@ -165,15 +167,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _showPhotoPickerSheet() {
     final l10n = AppLocalizations.of(context);
+    // Background and corners come from the glass bottom-sheet theme.
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
+      builder: (ctx) => Padding(
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-        decoration: const BoxDecoration(
-          color: AppColors.surfaceLight,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -211,7 +209,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               icon: Icons.camera_alt_rounded,
               label: l10n.settingsPhotoCamera,
               subtitle: l10n.settingsPhotoCameraSubtitle,
-              color: AppColors.clinicalTeal,
+              color: AppColors.dualisNavy,
               onTap: () => _pickImage(ImageSource.camera),
             ),
             const SizedBox(height: 12),
@@ -220,7 +218,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               icon: Icons.photo_library_rounded,
               label: l10n.settingsPhotoGallery,
               subtitle: l10n.settingsPhotoGallerySubtitle,
-              color: AppColors.softIndigo,
+              color: AppColors.dualisNavy,
               onTap: () => _pickImage(ImageSource.gallery),
             ),
             const SizedBox(height: 12),
@@ -229,12 +227,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               icon: Icons.palette_outlined,
               label: l10n.settingsPhotoPresets,
               subtitle: l10n.settingsPhotoPresetsSubtitle,
-              color: AppColors.clinicalTealDark,
+              color: AppColors.dualisNavy,
               onTap: () {
                 Navigator.of(context).pop();
                 showModalBottomSheet(
                   context: context,
-                  backgroundColor: Colors.transparent,
                   isScrollControlled: true,
                   builder: (ctx) => AvatarSelectorSheet(
                     currentPicture: _selectedPicture,
@@ -282,7 +279,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: AppColors.clinicalTeal,
+              primary: AppColors.dualisNavy,
               onPrimary: Colors.white,
               onSurface: AppColors.textPrimaryLight,
             ),
@@ -332,7 +329,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.profileUpdatedSuccess),
-          backgroundColor: AppColors.clinicalTeal,
+          backgroundColor: AppColors.dualisNavy,
         ),
       );
     } else {
@@ -388,7 +385,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.passwordChangedSuccess),
-          backgroundColor: AppColors.clinicalTeal,
+          backgroundColor: AppColors.dualisNavy,
         ),
       );
     } else {
@@ -455,21 +452,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final isPremium = ref.watch(premiumProfilesEnabledProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundDepth,
       appBar: AppBar(
-        backgroundColor: AppColors.surfaceLight,
+        backgroundColor: AppColors.backgroundDepth,
         elevation: 0,
-        scrolledUnderElevation: 1,
+        scrolledUnderElevation: 0,
         title: Text(
           l10n.settingsTitle,
           style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-            color: AppColors.textPrimaryLight,
+            fontWeight: FontWeight.w700,
+            fontSize: 19,
+            letterSpacing: -0.2,
+            color: AppColors.dualisNavy,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimaryLight),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.dualisNavy),
           onPressed: () => Navigator.of(context).canPop()
               ? Navigator.of(context).pop()
               : context.go(RoutePaths.home),
@@ -481,30 +479,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceLight,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.outlineLight),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Form(
+              SizedBox(width: double.infinity, child: GlassCard(padding: const EdgeInsets.all(20), child: Form(
                   key: _profileFormKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.person_outline_rounded, color: AppColors.clinicalTeal),
-                          const SizedBox(width: 8),
+                          const SettingsRowIcon(Icons.person_outline_rounded),
+                          const SizedBox(width: 12),
                           Text(
                             l10n.profileSection,
                             style: GoogleFonts.inter(
@@ -537,7 +520,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   padding: const EdgeInsets.all(6),
                                   decoration: const BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: AppColors.clinicalTeal,
+                                    gradient: AppColors.gradientNavy,
                                   ),
                                   child: const Icon(
                                     Icons.edit_rounded,
@@ -562,10 +545,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.clinicalTeal.withValues(alpha: 0.12),
+                                color: AppColors.iconTileTint,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: AppColors.clinicalTeal.withValues(alpha: 0.3),
+                                  color: AppColors.dualisNavy.withValues(alpha: 0.12),
                                 ),
                               ),
                               child: Row(
@@ -574,7 +557,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   const Icon(
                                     Icons.crop_rounded,
                                     size: 14,
-                                    color: AppColors.clinicalTeal,
+                                    color: AppColors.dualisNavy,
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
@@ -582,7 +565,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     style: GoogleFonts.inter(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
-                                      color: AppColors.clinicalTealDark,
+                                      color: AppColors.dualisNavy,
                                     ),
                                   ),
                                 ],
@@ -604,7 +587,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ),
                           ),
                           style: TextButton.styleFrom(
-                            foregroundColor: AppColors.clinicalTeal,
+                            foregroundColor: AppColors.dualisNavy,
                           ),
                         ),
                       ),
@@ -624,21 +607,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         style: GoogleFonts.inter(fontSize: 14),
                         decoration: InputDecoration(
                           hintText: l10n.settingsNameHint,
-                          prefixIcon: const Icon(Icons.badge_outlined, color: AppColors.clinicalTeal),
-                          filled: true,
-                          fillColor: AppColors.backgroundLight,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.outlineLight),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.outlineLight),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.clinicalTeal, width: 2),
-                          ),
+                          prefixIcon: const Icon(Icons.badge_outlined, color: AppColors.dualisNavy),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().length < 2) {
@@ -664,7 +633,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               key: const Key('settings_age_badge'),
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: AppColors.clinicalTealLight,
+                                color: AppColors.iconTileTint,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
@@ -672,7 +641,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 style: GoogleFonts.inter(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.clinicalTealDark,
+                                  color: AppColors.dualisNavy,
                                 ),
                               ),
                             ),
@@ -685,13 +654,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                           decoration: BoxDecoration(
-                            color: AppColors.backgroundLight,
-                            borderRadius: BorderRadius.circular(12),
+                            color: AppColors.surfaceLight,
+                            borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: AppColors.outlineLight),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.cake_outlined, color: AppColors.clinicalTeal),
+                              const Icon(Icons.cake_outlined, color: AppColors.dualisNavy),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
@@ -718,10 +687,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         child: ElevatedButton(
                           key: const Key('settings_save_profile_button'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.clinicalTeal,
+                            backgroundColor: AppColors.dualisNavy,
                             foregroundColor: Colors.white,
+                            elevation: 0,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(24),
                             ),
                           ),
                           onPressed: _isSavingProfile ? null : _handleSaveProfile,
@@ -742,33 +712,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     ],
                   ),
-                ),
-              ),
+                ))),
               const SizedBox(height: 20),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceLight,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.outlineLight),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Form(
+              SizedBox(width: double.infinity, child: GlassCard(padding: const EdgeInsets.all(20), child: Form(
                   key: _passwordFormKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.lock_outline_rounded, color: AppColors.softIndigo),
-                          const SizedBox(width: 8),
+                          const SettingsRowIcon(Icons.lock_outline_rounded),
+                          const SizedBox(width: 12),
                           Text(
                             l10n.securitySection,
                             style: GoogleFonts.inter(
@@ -796,7 +750,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         style: GoogleFonts.inter(fontSize: 14),
                         decoration: InputDecoration(
                           hintText: l10n.currentPasswordHint,
-                          prefixIcon: const Icon(Icons.key_outlined, color: AppColors.softIndigo),
+                          prefixIcon: const Icon(Icons.key_outlined, color: AppColors.dualisNavy),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscureCurrentPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
@@ -807,20 +761,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 _obscureCurrentPassword = !_obscureCurrentPassword;
                               });
                             },
-                          ),
-                          filled: true,
-                          fillColor: AppColors.backgroundLight,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.outlineLight),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.outlineLight),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.softIndigo, width: 2),
                           ),
                         ),
                         validator: (value) {
@@ -847,7 +787,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         style: GoogleFonts.inter(fontSize: 14),
                         decoration: InputDecoration(
                           hintText: l10n.newPasswordHint,
-                          prefixIcon: const Icon(Icons.lock_reset_rounded, color: AppColors.softIndigo),
+                          prefixIcon: const Icon(Icons.lock_reset_rounded, color: AppColors.dualisNavy),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscureNewPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
@@ -858,20 +798,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 _obscureNewPassword = !_obscureNewPassword;
                               });
                             },
-                          ),
-                          filled: true,
-                          fillColor: AppColors.backgroundLight,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.outlineLight),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.outlineLight),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.softIndigo, width: 2),
                           ),
                         ),
                         validator: (value) {
@@ -903,7 +829,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         style: GoogleFonts.inter(fontSize: 14),
                         decoration: InputDecoration(
                           hintText: l10n.confirmPasswordHint,
-                          prefixIcon: const Icon(Icons.check_circle_outline_rounded, color: AppColors.softIndigo),
+                          prefixIcon: const Icon(Icons.check_circle_outline_rounded, color: AppColors.dualisNavy),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
@@ -914,20 +840,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 _obscureConfirmPassword = !_obscureConfirmPassword;
                               });
                             },
-                          ),
-                          filled: true,
-                          fillColor: AppColors.backgroundLight,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.outlineLight),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.outlineLight),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.softIndigo, width: 2),
                           ),
                         ),
                         validator: (value) {
@@ -952,10 +864,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         child: ElevatedButton(
                           key: const Key('settings_change_password_button'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.softIndigo,
+                            backgroundColor: AppColors.dualisNavy,
                             foregroundColor: Colors.white,
+                            elevation: 0,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(24),
                             ),
                           ),
                           onPressed: _isChangingPassword ? null : _handleChangePassword,
@@ -976,70 +889,49 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     ],
                   ),
-                ),
-              ),
+                ))),
               const SizedBox(height: 20),
               _SectionLabel(
                 icon: Icons.language_rounded,
                 label: l10n.settingsLanguageSection,
-                color: AppColors.softIndigo,
+                color: AppColors.dualisNavy,
               ),
               const SizedBox(height: 10),
-              Material(
-                color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(16),
-                clipBehavior: Clip.antiAlias,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.outlineLight),
-                  ),
-                  child: Column(
+              _SettingsGroup(child: Column(
                     children: [
                       _LanguageTile(
                         flag: '🇧🇷',
                         label: l10n.settingsLanguagePortuguese,
                         locale: const Locale('pt', 'BR'),
                       ),
-                      const Divider(height: 1, color: AppColors.outlineLight),
+                      const SettingsDivider(),
                       _LanguageTile(
                         flag: '🇪🇸',
                         label: l10n.settingsLanguageSpanish,
                         locale: const Locale('es'),
                       ),
-                      const Divider(height: 1, color: AppColors.outlineLight),
+                      const SettingsDivider(),
                       _LanguageTile(
                         flag: '🇺🇸',
                         label: l10n.settingsLanguageEnglish,
                         locale: const Locale('en'),
                       ),
                     ],
-                  ),
-                ),
-              ),
+                  )),
               const SizedBox(height: 12),
               const NotificationsBlockedNotice(),
               const SizedBox(height: 8),
               _SectionLabel(
                 icon: Icons.bookmark_border_rounded,
                 label: l10n.settingsRecordsAndHabitsSection,
-                color: AppColors.softIndigo,
+                color: AppColors.dualisNavy,
               ),
               const SizedBox(height: 10),
-              Material(
-                color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(16),
-                clipBehavior: Clip.antiAlias,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.outlineLight),
-                  ),
-                  child: Column(
+              _SettingsGroup(child: Column(
                     children: [
                       ListTile(
                         key: const Key('settings_history_tile'),
-                        leading: const Icon(Icons.analytics_outlined, color: AppColors.softIndigo),
+                        leading: const SettingsRowIcon(Icons.analytics_outlined),
                         title: Text(
                           l10n.settingsDataHistoryTile,
                           style: GoogleFonts.inter(
@@ -1057,10 +949,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
                         onTap: () => context.push(RoutePaths.history),
                       ),
-                      const Divider(height: 1, color: AppColors.outlineLight),
+                      const SettingsDivider(),
                       ListTile(
                         key: const Key('settings_hydration_tile'),
-                        leading: const Icon(Icons.water_drop_outlined, color: AppColors.clinicalTeal),
+                        leading: const SettingsRowIcon(Icons.water_drop_outlined),
                         title: Text(
                           l10n.settingsRemindersTile,
                           style: GoogleFonts.inter(
@@ -1079,26 +971,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         onTap: () => context.push(RoutePaths.hydration),
                       ),
                     ],
-                  ),
-                ),
-              ),
+                  )),
               const SizedBox(height: 20),
               _SectionLabel(
                 icon: Icons.shield_outlined,
                 label: l10n.settingsPrivacySection,
-                color: AppColors.clinicalTeal,
+                color: AppColors.dualisNavy,
               ),
               const SizedBox(height: 10),
-              Material(
-                color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(16),
-                clipBehavior: Clip.antiAlias,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.outlineLight),
-                  ),
-                  child: Column(
+              _SettingsGroup(child: Column(
                     children: [
                       // Premium only; render nothing on Free builds.
                       const BiometricLockTile(),
@@ -1107,7 +988,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const AiConsentTile(),
                       ListTile(
                         key: const Key('settings_privacy_tile'),
-                        leading: const Icon(Icons.shield_outlined, color: AppColors.clinicalTeal),
+                        leading: const SettingsRowIcon(Icons.shield_outlined),
                         title: Text(
                           l10n.settingsPrivacyCenterTile,
                           style: GoogleFonts.inter(
@@ -1125,10 +1006,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
                         onTap: () => context.push(RoutePaths.privacyCenter),
                       ),
-                      const Divider(height: 1, color: AppColors.outlineLight),
+                      const SettingsDivider(),
                       ListTile(
                         key: const Key('settings_terms_tile'),
-                        leading: const Icon(Icons.description_outlined, color: AppColors.softIndigo),
+                        leading: const SettingsRowIcon(Icons.description_outlined),
                         title: Text(
                           l10n.settingsTermsTile,
                           style: GoogleFonts.inter(
@@ -1146,10 +1027,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
                         onTap: () => context.push(RoutePaths.termsOfService),
                       ),
-                      const Divider(height: 1, color: AppColors.outlineLight),
+                      const SettingsDivider(),
                       ListTile(
                         key: const Key('settings_privacy_policy_tile'),
-                        leading: const Icon(Icons.policy_outlined, color: AppColors.clinicalTeal),
+                        leading: const SettingsRowIcon(Icons.policy_outlined),
                         title: Text(
                           l10n.settingsPrivacyPolicyTile,
                           style: GoogleFonts.inter(
@@ -1168,31 +1049,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         onTap: () => context.push(RoutePaths.privacyPolicy),
                       ),
                     ],
-                  ),
-                ),
-              ),
+                  )),
               const SizedBox(height: 20),
               _SectionLabel(
                 icon: Icons.notifications_active_outlined,
                 label: l10n.settingsCommunicationsSection,
-                color: AppColors.clinicalTealDark,
+                color: AppColors.dualisNavy,
               ),
               const SizedBox(height: 10),
-              Material(
-                color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(16),
-                clipBehavior: Clip.antiAlias,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.outlineLight),
-                  ),
-                  child: Column(
+              _SettingsGroup(child: Column(
                     children: [
                       SwitchListTile(
                         key: const Key('settings_marketing_optout_switch'),
                         value: true,
-                        activeThumbColor: AppColors.clinicalTeal,
+                        activeThumbColor: Colors.white,
+                        activeTrackColor: AppColors.dualisNavy,
+                        secondary: const SettingsRowIcon(Icons.lightbulb_outline_rounded),
                         title: Text(
                           l10n.settingsEducationalTipsTile,
                           style: GoogleFonts.inter(
@@ -1215,34 +1087,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     ? l10n.settingsEducationalTipsOn
                                     : l10n.settingsEducationalTipsOff,
                               ),
-                              backgroundColor: AppColors.clinicalTeal,
+                              backgroundColor: AppColors.dualisNavy,
                               duration: const Duration(seconds: 2),
                             ),
                           );
                         },
                       ),
                     ],
-                  ),
-                ),
-              ),
+                  )),
               const SizedBox(height: 20),
               // Plan row: shows the tier quietly. Free gets a link to the
               // Premium page; Premium has no call to action.
-              Material(
-                color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(16),
-                clipBehavior: Clip.antiAlias,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.outlineLight),
-                  ),
-                  child: ListTile(
+              _SettingsGroup(child: ListTile(
                     key: const Key('settings_plan_tile'),
-                    leading: const Icon(
-                      Icons.card_membership_outlined,
-                      color: AppColors.clinicalTeal,
-                    ),
+                    leading: const SettingsRowIcon(Icons.card_membership_outlined),
                     title: Text(
                       isPremium ? l10n.settingsPlanPremium : l10n.settingsPlanFree,
                       style: GoogleFonts.inter(
@@ -1260,26 +1118,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.softIndigo,
+                                color: AppColors.dualisNavy,
                               ),
                             ),
                           ),
-                  ),
-                ),
-              ),
+                  )),
               const SizedBox(height: 20),
-              Material(
-                color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(16),
-                clipBehavior: Clip.antiAlias,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.outlineLight),
-                  ),
-                  child: ListTile(
+              _SettingsGroup(destructive: true, child: ListTile(
                     key: const Key('settings_logout_tile'),
-                    leading: const Icon(Icons.logout_rounded, color: AppColors.emergencyCrimson),
+                    leading: const SettingsRowIcon(Icons.logout_rounded, color: AppColors.emergencyCrimson),
                     title: Text(
                       l10n.logoutButton,
                       style: GoogleFonts.inter(
@@ -1290,9 +1137,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                     trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.emergencyCrimson),
                     onTap: _handleLogout,
-                  ),
-                ),
-              ),
+                  )),
               const SizedBox(height: 24),
               Center(
                 child: Column(
@@ -1340,21 +1185,57 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: color),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: color,
-            letterSpacing: 0.4,
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.1,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Grouped glass card holding a list of rows. [destructive] draws the
+/// outlined red variant used for the logout row.
+class _SettingsGroup extends StatelessWidget {
+  final Widget child;
+  final bool destructive;
+
+  const _SettingsGroup({required this.child, this.destructive = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final inner = Material(
+      type: MaterialType.transparency,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: child,
+      ),
+    );
+    if (destructive) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: AppColors.emergencyCrimson.withValues(alpha: 0.45),
           ),
         ),
-      ],
-    );
+        child: inner,
+      );
+    }
+    return GlassCard(radius: 22, padding: EdgeInsets.zero, child: inner);
   }
 }
 
@@ -1375,17 +1256,19 @@ class _LanguageTile extends ConsumerWidget {
     final isSelected = currentLocale.languageCode == locale.languageCode;
 
     return ListTile(
+      selected: isSelected,
+      selectedTileColor: AppColors.iconTileTint,
       leading: Text(flag, style: const TextStyle(fontSize: 22)),
       title: Text(
         label,
         style: GoogleFonts.inter(
           fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
           fontSize: 14,
-          color: isSelected ? AppColors.softIndigo : AppColors.textPrimaryLight,
+          color: isSelected ? AppColors.dualisNavy : AppColors.textPrimaryLight,
         ),
       ),
       trailing: isSelected
-          ? const Icon(Icons.check_circle_rounded, color: AppColors.softIndigo, size: 20)
+          ? const Icon(Icons.check_circle_rounded, color: AppColors.dualisNavy, size: 20)
           : const Icon(Icons.radio_button_unchecked_rounded, color: AppColors.textSecondaryLight, size: 20),
       onTap: () => ref.read(localeProvider.notifier).setLocale(locale),
     );
@@ -1411,21 +1294,21 @@ class _PhotoOptionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(18),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: color.withValues(alpha: 0.25)),
+          color: AppColors.surfaceLight,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.outlineLight),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
+                color: AppColors.iconTileTint,
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color, size: 22),
             ),

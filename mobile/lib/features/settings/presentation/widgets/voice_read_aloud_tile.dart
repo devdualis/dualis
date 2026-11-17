@@ -6,6 +6,7 @@ import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/voice/voice_output_service.dart';
 import '../../../../l10n/app_localizations.dart';
+import 'settings_row_icon.dart';
 
 /// "Ler as perguntas em voz alta" switch for the voice check-in. Premium
 /// builds only, on by default. Renders nothing on Free builds (including
@@ -43,11 +44,9 @@ class _VoiceReadAloudTileState extends ConsumerState<VoiceReadAloudTile> {
         SwitchListTile(
           key: const Key('settings_voice_read_aloud_switch'),
           value: on,
-          activeThumbColor: AppColors.clinicalTeal,
-          secondary: const Icon(
-            Icons.record_voice_over_outlined,
-            color: AppColors.clinicalTeal,
-          ),
+          activeThumbColor: Colors.white,
+          activeTrackColor: AppColors.dualisNavy,
+          secondary: const SettingsRowIcon(Icons.record_voice_over_outlined),
           title: Text(
             l10n.voiceReadAloudTitle,
             style: GoogleFonts.inter(
@@ -64,7 +63,7 @@ class _VoiceReadAloudTileState extends ConsumerState<VoiceReadAloudTile> {
           ),
           onChanged: (value) => ref.read(voiceReadAloudProvider.notifier).set(value),
         ),
-        const Divider(height: 1, color: AppColors.outlineLight),
+        const SettingsDivider(),
       ],
     );
   }

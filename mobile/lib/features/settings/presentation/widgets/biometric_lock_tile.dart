@@ -5,6 +5,7 @@ import '../../../../core/config/feature_flags.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/security/biometric_lock_controller.dart';
 import '../../../../l10n/app_localizations.dart';
+import 'settings_row_icon.dart';
 
 /// "Desbloquear com biometria" switch. Premium builds only, and only on
 /// devices that can ask for a fingerprint, face or device PIN. Renders
@@ -68,11 +69,9 @@ class _BiometricLockTileState extends ConsumerState<BiometricLockTile> {
         SwitchListTile(
           key: const Key('settings_biometric_lock_switch'),
           value: enabled,
-          activeThumbColor: AppColors.clinicalTeal,
-          secondary: const Icon(
-            Icons.fingerprint,
-            color: AppColors.clinicalTeal,
-          ),
+          activeThumbColor: Colors.white,
+          activeTrackColor: AppColors.dualisNavy,
+          secondary: const SettingsRowIcon(Icons.fingerprint),
           title: Text(
             l10n.bioLockSettingsTitle,
             style: GoogleFonts.inter(
@@ -89,7 +88,7 @@ class _BiometricLockTileState extends ConsumerState<BiometricLockTile> {
           ),
           onChanged: _busy ? null : _onChanged,
         ),
-        const Divider(height: 1, color: AppColors.outlineLight),
+        const SettingsDivider(),
       ],
     );
   }

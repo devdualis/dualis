@@ -5,6 +5,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../../shared/widgets/glass_card.dart';
 
 class TermsOfServiceScreen extends StatelessWidget {
   const TermsOfServiceScreen({super.key});
@@ -13,47 +15,36 @@ class TermsOfServiceScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundDepth,
       appBar: AppBar(
-        backgroundColor: AppColors.surfaceLight,
+        backgroundColor: AppColors.backgroundDepth,
         elevation: 0,
-        scrolledUnderElevation: 1,
+        scrolledUnderElevation: 0,
         title: Text(
           l10n.termsAppBarTitle,
           style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
             fontSize: 18,
-            color: AppColors.textPrimaryLight,
+            letterSpacing: -0.2,
+            color: AppColors.dualisNavy,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimaryLight),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.dualisNavy),
           onPressed: () => context.canPop() ? context.pop() : context.go(RoutePaths.settings),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 680),
+              child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceLight,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.outlineLight),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
+              SizedBox(width: double.infinity, child: GlassCard(padding: const EdgeInsets.all(20), child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const DualisLogo(
@@ -88,15 +79,14 @@ class TermsOfServiceScreen extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
-              ),
+                ))),
               const SizedBox(height: 20),
 
               // Section 1
               _LegalSectionCard(
                 title: l10n.termsSection1Title,
                 icon: Icons.assignment_turned_in_outlined,
-                color: AppColors.clinicalTeal,
+                color: AppColors.dualisNavy,
                 content: l10n.termsSection1Body,
               ),
               const SizedBox(height: 16),
@@ -105,7 +95,7 @@ class TermsOfServiceScreen extends StatelessWidget {
               _LegalSectionCard(
                 title: l10n.termsSection2Title,
                 icon: Icons.spa_outlined,
-                color: AppColors.clinicalTeal,
+                color: AppColors.dualisNavy,
                 content: l10n.termsSection2Body,
                 bullets: [
                   l10n.termsSection2Bullet1,
@@ -119,7 +109,7 @@ class TermsOfServiceScreen extends StatelessWidget {
               _LegalSectionCard(
                 title: l10n.termsSection3Title,
                 icon: Icons.credit_card_outlined,
-                color: AppColors.softIndigo,
+                color: AppColors.dualisNavy,
                 content: l10n.termsSection3Body,
                 bullets: [
                   l10n.termsSection3Bullet1,
@@ -133,7 +123,7 @@ class TermsOfServiceScreen extends StatelessWidget {
               _LegalSectionCard(
                 title: l10n.termsSection4Title,
                 icon: Icons.copyright_outlined,
-                color: AppColors.clinicalTealDark,
+                color: AppColors.dualisNavy,
                 content: l10n.termsSection4Body,
               ),
               const SizedBox(height: 16),
@@ -142,7 +132,7 @@ class TermsOfServiceScreen extends StatelessWidget {
               _LegalSectionCard(
                 title: l10n.termsSection5Title,
                 icon: Icons.shield_outlined,
-                color: AppColors.softIndigo,
+                color: AppColors.dualisNavy,
                 content: l10n.termsSection5Body,
               ),
               const SizedBox(height: 16),
@@ -156,6 +146,8 @@ class TermsOfServiceScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
             ],
+          ),
+            ),
           ),
         ),
       ),
@@ -180,27 +172,12 @@ class _LegalSectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.outlineLight),
-      ),
-      child: Column(
+    return SizedBox(width: double.infinity, child: GlassCard(padding: const EdgeInsets.all(20), child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: color, size: 20),
-              ),
+              DuotoneIconTile(size: 36, radius: 11, child: Icon(icon, color: AppColors.dualisNavy, size: 20)),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -255,7 +232,6 @@ class _LegalSectionCard extends StatelessWidget {
             ),
           ],
         ],
-      ),
-    );
+      )));
   }
 }
