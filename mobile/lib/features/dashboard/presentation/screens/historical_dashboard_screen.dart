@@ -106,28 +106,61 @@ class HistoricalDashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           l10n.xv2DashTitle,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          style: GoogleFonts.inter(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimaryLight,
+          ),
         ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.transparent,
         foregroundColor: AppColors.textPrimaryLight,
         actions: [
           if (ref.watch(premiumProfilesEnabledProvider)) ...[
             const ProfileAppBarPill(),
-            const SizedBox(width: 4),
+            const SizedBox(width: 8),
           ],
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-            onPressed: () =>
-                ref.read(journalInsightsControllerProvider.notifier).refresh(),
-          ),
+          const _RefreshGlassButton(),
           // Space for the global urgent-help button (UrgentHelpOverlay).
           const SizedBox(width: 56),
         ],
       ),
       body: content,
+    );
+  }
+}
+
+/// Round glass refresh button of the standalone app bar (same look as the
+/// Home tab app bar buttons).
+class _RefreshGlassButton extends ConsumerWidget {
+  const _RefreshGlassButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Center(
+      child: InkResponse(
+        onTap: () =>
+            ref.read(journalInsightsControllerProvider.notifier).refresh(),
+        customBorder: const CircleBorder(),
+        child: Container(
+          width: 40,
+          height: 40,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: AppColors.iconTileTint,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white),
+            boxShadow: AppColors.glassShadow(blur: 16, alpha: 0.18),
+          ),
+          child: const Icon(
+            Icons.refresh_rounded,
+            size: 22,
+            color: AppColors.dualisNavy,
+          ),
+        ),
+      ),
     );
   }
 }
