@@ -8983,97 +8983,97 @@ abstract class AppLocalizations {
   /// No description provided for @voiceAliasStop.
   ///
   /// In pt, this message translates to:
-  /// **'parar|pare|chega|parar de ouvir|cancelar|sair da voz'**
+  /// **'parar|pare|chega|parar de ouvir|cancelar|sair da voz|desligar microfone|desligar o microfone|desligar a voz|fechar microfone|pode parar|para de ouvir|encerrar voz'**
   String get voiceAliasStop;
 
   /// No description provided for @voiceAliasHome.
   ///
   /// In pt, this message translates to:
-  /// **'início|inicio|tela inicial|página inicial'**
+  /// **'início|inicio|tela inicial|página inicial|voltar ao início|ir para o início|tela principal'**
   String get voiceAliasHome;
 
   /// No description provided for @voiceAliasJournalEmotional.
   ///
   /// In pt, this message translates to:
-  /// **'como me sinto|registrar como me sinto|registrar humor|humor|diário|check-in|emocional|mente'**
+  /// **'check-in|checkin|check in|chequin|xeque in|check-up|checkup|fazer check-in|fazer o check-in|fazer meu check-in|começar check-in|iniciar check-in|novo check-in|check-in de hoje|check-in diário|check-in emocional|registro diário|registro de hoje|novo registro|fazer registro|fazer um registro|fazer o registro|registrar o dia|registrar meu dia|registrar hoje|registro do dia|verificação|fazer verificação|fazer a verificação|verificação diária|verificação de hoje|atualizar meu estado|atualizar estado|atualizar meu dia|atualizar como estou|estado de hoje|meu estado|como estou|como estou hoje|como foi meu dia|como está meu dia|meu dia|como me sinto|registrar como me sinto|como estou me sentindo|registrar humor|humor|meu humor|registrar emoções|emoções|sentimentos|estado emocional|lado emocional|parte emocional|emocional|mente|cabeça|diário|abrir diário|escrever no diário|anotar meu dia|começar o dia|vamos começar'**
   String get voiceAliasJournalEmotional;
 
   /// No description provided for @voiceAliasJournalPhysical.
   ///
   /// In pt, this message translates to:
-  /// **'corpo|registrar corpo|físico|registrar físico|como está meu corpo'**
+  /// **'corpo|registrar corpo|físico|registrar físico|como está meu corpo|meu corpo|como está o corpo|check-in físico|check-in do corpo|fazer check-in físico|fazer check-in do corpo|registro físico|registro do corpo|verificação física|verificação do corpo|atualizar meu estado físico|estado físico|lado físico|parte física|sinto algo no corpo|algo no corpo|dor|estou com dor|registrar dor|bem-estar físico'**
   String get voiceAliasJournalPhysical;
 
   /// No description provided for @voiceAliasHistory.
   ///
   /// In pt, this message translates to:
-  /// **'histórico|meus registros|ver histórico|evolução'**
+  /// **'histórico|meus registros|ver histórico|evolução|ver meus registros|registros anteriores|meus check-ins|ver meus check-ins|relatório|relatórios|ver evolução'**
   String get voiceAliasHistory;
 
   /// No description provided for @voiceAliasHydration.
   ///
   /// In pt, this message translates to:
-  /// **'água|hidratação|ver água'**
+  /// **'água|hidratação|ver água|quanto bebi|minha água'**
   String get voiceAliasHydration;
 
   /// No description provided for @voiceAliasLogWater.
   ///
   /// In pt, this message translates to:
-  /// **'registrar água|registrar um copo de água|bebi água|bebi um copo de água|tomei água|um copo de água'**
+  /// **'registrar água|registrar um copo de água|bebi água|bebi um copo de água|tomei água|tomei um copo de água|um copo de água|mais um copo|mais água|anotar água|somar água'**
   String get voiceAliasLogWater;
 
   /// No description provided for @voiceAliasHabits.
   ///
   /// In pt, this message translates to:
-  /// **'hábitos|meus hábitos|sono'**
+  /// **'hábitos|meus hábitos|sono|ver hábitos|ver sono|meu sono'**
   String get voiceAliasHabits;
 
   /// No description provided for @voiceAliasSettings.
   ///
   /// In pt, this message translates to:
-  /// **'configurações|ajustes|abrir configurações'**
+  /// **'configurações|ajustes|abrir configurações|abrir ajustes|preferências'**
   String get voiceAliasSettings;
 
   /// No description provided for @voiceAliasLibrary.
   ///
   /// In pt, this message translates to:
-  /// **'biblioteca|conteúdos|artigos'**
+  /// **'biblioteca|conteúdos|artigos|ler artigos|dicas'**
   String get voiceAliasLibrary;
 
   /// No description provided for @voiceAliasBack.
   ///
   /// In pt, this message translates to:
-  /// **'voltar|volta|anterior|tela anterior'**
+  /// **'voltar|volta|anterior|tela anterior|voltar uma|pergunta anterior|desfazer'**
   String get voiceAliasBack;
 
   /// No description provided for @voiceAliasContinue.
   ///
   /// In pt, this message translates to:
-  /// **'continuar|próximo|seguir|avançar|pronto|ok'**
+  /// **'continuar|continua|próximo|próxima|seguir|segue|avançar|avança|pronto|ok|okay|beleza|feito|em frente|pode seguir|pode continuar|vamos lá|confirmar|confirma|seguinte'**
   String get voiceAliasContinue;
 
   /// No description provided for @voiceAliasSave.
   ///
   /// In pt, this message translates to:
-  /// **'salvar|guardar|terminar|finalizar|salvar registro'**
+  /// **'salvar|salva|guardar|terminar|finalizar|salvar registro|concluir|encerrar|acabei|terminei|pode salvar|finalizar check-in|terminar check-in|salvar check-in|enviar'**
   String get voiceAliasSave;
 
   /// No description provided for @voiceAliasSkip.
   ///
   /// In pt, this message translates to:
-  /// **'pular|pula|não quero responder|próxima pergunta'**
+  /// **'pular|pula|não quero responder|próxima pergunta|passar|passa|deixa pra lá|prefiro não responder|prefiro não dizer|sem resposta'**
   String get voiceAliasSkip;
 
   /// No description provided for @voiceAliasYes.
   ///
   /// In pt, this message translates to:
-  /// **'sim|pode|isso|usar'**
+  /// **'sim|pode|isso|usar|claro|com certeza|exato|correto|pode ser'**
   String get voiceAliasYes;
 
   /// No description provided for @voiceAliasNo.
   ///
   /// In pt, this message translates to:
-  /// **'não|manter|deixa assim'**
+  /// **'não|manter|deixa assim|não quero|melhor não|deixa como está'**
   String get voiceAliasNo;
 
   /// No description provided for @voiceNumberWords.

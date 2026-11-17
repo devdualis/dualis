@@ -92,7 +92,12 @@ class VoiceController extends Notifier<VoiceState> {
   int _session = 0;
   int _feedbackId = 0;
   int _misses = 0;
+  int _silences = 0;
   bool _handled = false;
+
+  /// A voice command just opened the check-in: hands-free mode starts once
+  /// the check-in is on screen, so the mic stays on through the whole flow.
+  bool _openedJournal = false;
   ValueChanged<String>? _dictationSink;
 
   /// What was last read aloud in this hands-free run (step, entries), so a
@@ -110,6 +115,13 @@ class VoiceController extends Notifier<VoiceState> {
   /// Silences or phrases not understood in a row before hands-free mode
   /// stops by itself (so a TV or a chat in the room never keeps it going).
   static const int maxMisses = 3;
+
+  /// Silences in a row before hands-free mode stops by itself. Larger than
+  /// [maxMisses]: a pause (driving, thinking) is not a TV talking.
+  static const int maxSilences = 8;
+
+  /// Longest wait for the check-in to show after a voice command opened it.
+  static const Duration journalOpenWait = Duration(seconds: 2);
 
   /// Glass logged by "registrar água".
   static const int glassMl = 250;
@@ -195,6 +207,8 @@ class VoiceController extends Notifier<VoiceState> {
     _watchRoutes();
     _dictationSink = null;
     _misses = 0;
+    _silences = 0;
+    _openedJournal = false;
     _lastReadKey = null;
     state = state.copyWith(handsFree: _onJournal, dictating: false);
     await _listen();
@@ -206,6 +220,8 @@ class VoiceController extends Notifier<VoiceState> {
     if (state.listening) await _stopSession();
     _dictationSink = onText;
     _misses = 0;
+    _silences = 0;
+    _openedJournal = false;
     state = state.copyWith(handsFree: false, dictating: true);
     await _listen();
   }
@@ -239,6 +255,7 @@ class VoiceController extends Notifier<VoiceState> {
     await _stopSession();
     _dictationSink = null;
     _lastReadKey = null;
+    _openedJournal = false;
     state = state.copyWith(handsFree: false, dictating: false, speaking: false);
     if (output != null) await output;
   }
@@ -338,7 +355,23 @@ class VoiceController extends Notifier<VoiceState> {
     final carried = _carryDone;
     if (carried != null) await carried.future;
     if (session != _session) return; // Mic tapped again meanwhile.
-    if (keepGoing && state.handsFree && _onJournal && _misses < maxMisses) {
+    if (keepGoing && _openedJournal) {
+      _openedJournal = false;
+      if (await _waitForJournal(session)) {
+        // "Fazer check-in" said on Home: the whole check-in goes on by
+        // voice from here, its first question read aloud.
+        _misses = 0;
+        _silences = 0;
+        _lastReadKey = null;
+        state = state.copyWith(handsFree: true);
+      }
+      if (session != _session) return;
+    }
+    if (keepGoing &&
+        state.handsFree &&
+        _onJournal &&
+        _misses < maxMisses &&
+        _silences < maxSilences) {
       // Hands-free check-in: listen again while the flow is on screen.
       await Future<void>.delayed(const Duration(milliseconds: 450));
       if (session != _session) return;
@@ -360,12 +393,14 @@ class VoiceController extends Notifier<VoiceState> {
     if (_location == RoutePaths.emergency) return false;
     if (text.isEmpty) {
       // Silence, or the recognizer gave no words: say so, never act.
-      _misses++;
+      // Counted apart from phrases not understood.
+      _silences++;
       _say(VoiceFeedbackKind.notHeard);
       return true;
     }
     final previousMisses = _misses;
     _misses = 0;
+    _silences = 0;
     final l10n = _l10n;
     final helpWords = VoiceMatcher.aliases(l10n.voiceAliasHelp);
 
@@ -445,6 +480,17 @@ class VoiceController extends Notifier<VoiceState> {
   }
 
   bool _leftJournalHandsFree() => state.handsFree && !_onJournal;
+
+  /// True once the check-in is on screen, false if it did not open in
+  /// [journalOpenWait] or voice was stopped meanwhile.
+  Future<bool> _waitForJournal(int session) async {
+    final deadline = DateTime.now().add(journalOpenWait);
+    while (!_onJournal) {
+      if (session != _session || DateTime.now().isAfter(deadline)) return false;
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
+    return session == _session && !_locked;
+  }
 
   /// Content words a single phrase must keep after this step's answer to
   /// go on to the next steps ("cansado começou hoje"), so a short extra
@@ -699,14 +745,15 @@ class VoiceController extends Notifier<VoiceState> {
 
     if (_onJournal) return false;
 
+    Future<void> openJournal(JournalArea area) async {
+      _openedJournal = true;
+      _push(RoutePaths.journal, extra: JournalFlowArgs(initialArea: area));
+    }
+
     final commands = <(double, Future<void> Function())>[
       (score(l10n.voiceAliasLogWater), _logWater),
-      (score(l10n.voiceAliasJournalEmotional),
-          () async => _push(RoutePaths.journal,
-              extra: const JournalFlowArgs(initialArea: JournalArea.emotional))),
-      (score(l10n.voiceAliasJournalPhysical),
-          () async => _push(RoutePaths.journal,
-              extra: const JournalFlowArgs(initialArea: JournalArea.physical))),
+      (score(l10n.voiceAliasJournalEmotional), () => openJournal(JournalArea.emotional)),
+      (score(l10n.voiceAliasJournalPhysical), () => openJournal(JournalArea.physical)),
       (score(l10n.voiceAliasHistory), () async => _push(RoutePaths.history)),
       (score(l10n.voiceAliasHydration), () async => _push(RoutePaths.hydration)),
       (score(l10n.voiceAliasHabits), () async => _push(RoutePaths.habits)),

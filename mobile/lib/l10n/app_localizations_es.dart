@@ -5315,58 +5315,67 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get voiceAliasStop =>
-      'parar|para|detener|dejar de escuchar|cancelar|basta';
+      'parar|para|detener|dejar de escuchar|cancelar|basta|apagar micrófono|apagar el micrófono|apagar la voz|cerrar micrófono|ya no escuches|terminar voz';
 
   @override
-  String get voiceAliasHome => 'inicio|pantalla de inicio|página principal';
+  String get voiceAliasHome =>
+      'inicio|pantalla de inicio|página principal|volver al inicio|ir al inicio|pantalla principal';
 
   @override
   String get voiceAliasJournalEmotional =>
-      'cómo me siento|registrar cómo me siento|registrar ánimo|ánimo|diario|check-in|emocional|mente';
+      'check-in|checkin|check in|chequin|check-up|checkup|hacer check-in|hacer el check-in|hacer mi check-in|empezar check-in|iniciar check-in|nuevo check-in|check-in de hoy|check-in diario|check-in emocional|chequeo|hacer el chequeo|chequeo diario|chequeo de hoy|registro diario|registro de hoy|nuevo registro|hacer registro|hacer un registro|hacer el registro|registrar el día|registrar mi día|registrar hoy|registro del día|verificación|hacer verificación|hacer la verificación|verificación diaria|verificación de hoy|actualizar mi estado|actualizar estado|actualizar mi estado de hoy|actualizar mi día|actualizar cómo estoy|estado de hoy|mi estado|cómo estoy|cómo estoy hoy|cómo fue mi día|cómo va mi día|mi día|cómo me siento|registrar cómo me siento|cómo me estoy sintiendo|registrar ánimo|ánimo|mi ánimo|estado de ánimo|humor|mi humor|registrar emociones|emociones|sentimientos|estado emocional|lado emocional|parte emocional|emocional|mente|cabeza|diario|abrir diario|escribir en el diario|anotar mi día|empezar el día|vamos a empezar|empezar';
 
   @override
   String get voiceAliasJournalPhysical =>
-      'cuerpo|registrar cuerpo|físico|cómo está mi cuerpo';
+      'cuerpo|registrar cuerpo|físico|registrar físico|cómo está mi cuerpo|mi cuerpo|cómo está el cuerpo|check-in físico|check-in del cuerpo|hacer check-in físico|hacer check-in del cuerpo|chequeo físico|chequeo del cuerpo|registro físico|registro del cuerpo|verificación física|verificación del cuerpo|actualizar mi estado físico|estado físico|lado físico|parte física|siento algo en el cuerpo|algo en el cuerpo|dolor|tengo dolor|registrar dolor|bienestar físico';
 
   @override
   String get voiceAliasHistory =>
-      'historial|mis registros|ver historial|evolución';
+      'historial|mis registros|ver historial|evolución|ver mis registros|registros anteriores|mis check-ins|ver mis check-ins|informe|informes|ver evolución';
 
   @override
-  String get voiceAliasHydration => 'agua|hidratación|ver agua';
+  String get voiceAliasHydration =>
+      'agua|hidratación|ver agua|cuánto bebí|mi agua';
 
   @override
   String get voiceAliasLogWater =>
-      'registrar agua|registrar un vaso de agua|bebí agua|bebí un vaso de agua|tomé agua|un vaso de agua';
+      'registrar agua|registrar un vaso de agua|bebí agua|bebí un vaso de agua|tomé agua|tomé un vaso de agua|un vaso de agua|otro vaso|más agua|anotar agua|sumar agua';
 
   @override
-  String get voiceAliasHabits => 'hábitos|mis hábitos|sueño';
+  String get voiceAliasHabits =>
+      'hábitos|mis hábitos|sueño|ver hábitos|ver sueño|mi sueño';
 
   @override
-  String get voiceAliasSettings => 'configuración|ajustes|abrir configuración';
+  String get voiceAliasSettings =>
+      'configuración|ajustes|abrir configuración|abrir ajustes|preferencias';
 
   @override
-  String get voiceAliasLibrary => 'biblioteca|artículos|contenidos';
+  String get voiceAliasLibrary =>
+      'biblioteca|artículos|contenidos|leer artículos|consejos';
 
   @override
-  String get voiceAliasBack => 'volver|atrás|anterior';
+  String get voiceAliasBack =>
+      'volver|atrás|anterior|pantalla anterior|pregunta anterior|regresar|deshacer';
 
   @override
   String get voiceAliasContinue =>
-      'continuar|siguiente|seguir|avanzar|listo|ok';
+      'continuar|continúa|siguiente|seguir|sigue|avanzar|avanza|listo|ok|okay|vale|hecho|adelante|puedes seguir|puedes continuar|vamos|confirmar|confirma|dale';
 
   @override
-  String get voiceAliasSave => 'guardar|terminar|finalizar|guardar registro';
+  String get voiceAliasSave =>
+      'guardar|guarda|terminar|finalizar|guardar registro|concluir|acabé|terminé|ya terminé|puedes guardar|finalizar check-in|terminar check-in|guardar check-in|enviar|eso es todo';
 
   @override
   String get voiceAliasSkip =>
-      'saltar|omitir|no quiero responder|siguiente pregunta';
+      'saltar|salta|omitir|no quiero responder|siguiente pregunta|pasar|pasa|déjalo|prefiero no responder|prefiero no decir|sin respuesta';
 
   @override
-  String get voiceAliasYes => 'sí|si|claro|usar';
+  String get voiceAliasYes =>
+      'sí|si|claro|usar|por supuesto|exacto|correcto|puede ser';
 
   @override
-  String get voiceAliasNo => 'no|mantener|déjalo así';
+  String get voiceAliasNo =>
+      'no|mantener|déjalo así|no quiero|mejor no|déjalo como está';
 
   @override
   String get voiceNumberWords => 'uno,una|dos|tres|cuatro|cinco';

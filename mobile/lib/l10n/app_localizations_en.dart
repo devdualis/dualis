@@ -5299,55 +5299,64 @@ class AppLocalizationsEn extends AppLocalizations {
   String get voiceAliasHelp => 'help|emergency|sos|i need help|192|188';
 
   @override
-  String get voiceAliasStop => 'stop|stop listening|cancel|enough';
+  String get voiceAliasStop =>
+      'stop|stop listening|cancel|enough|turn off the mic|mic off|turn off voice|close the mic|quit voice';
 
   @override
-  String get voiceAliasHome => 'home|home screen|start';
+  String get voiceAliasHome =>
+      'home|home screen|start|go home|main screen|back to home';
 
   @override
   String get voiceAliasJournalEmotional =>
-      'how i feel|log how i feel|log mood|mood|journal|check in|emotional|mind';
+      'check in|check-in|checkin|check up|checkup|do a check in|do my check in|start check in|start my check in|new check in|today\'s check in|todays check in|daily check in|emotional check in|daily log|log today|log my day|new entry|make an entry|add an entry|journal entry|today\'s entry|update my status|update status|update my status for today|update my day|my status today|status today|how am i|how am i today|how was my day|how is my day|my day|how i feel|how am i feeling|log how i feel|log mood|mood|my mood|log emotions|emotions|feelings|emotional|mind|journal|open journal|write in my journal|let\'s start|lets start|get started';
 
   @override
   String get voiceAliasJournalPhysical =>
-      'body|log body|physical|how is my body';
+      'body|log body|physical|how is my body|my body|body check in|physical check in|do a body check in|log my body|update my physical status|physical status|something in my body|pain|i have pain|log pain|physical wellbeing';
 
   @override
-  String get voiceAliasHistory => 'history|my entries|see history|progress';
+  String get voiceAliasHistory =>
+      'history|my entries|see history|progress|see my entries|past entries|my check ins|reports|report';
 
   @override
-  String get voiceAliasHydration => 'water|hydration|see water';
+  String get voiceAliasHydration =>
+      'water|hydration|see water|how much did i drink|my water';
 
   @override
   String get voiceAliasLogWater =>
-      'log water|log a glass of water|i drank water|i drank a glass of water|a glass of water';
+      'log water|log a glass of water|i drank water|i drank a glass of water|a glass of water|another glass|more water|add water|had water|i had a glass of water';
 
   @override
-  String get voiceAliasHabits => 'habits|my habits|sleep';
+  String get voiceAliasHabits => 'habits|my habits|sleep|see habits|my sleep';
 
   @override
-  String get voiceAliasSettings => 'settings|open settings|preferences';
+  String get voiceAliasSettings => 'settings|open settings|preferences|options';
 
   @override
-  String get voiceAliasLibrary => 'library|articles|content';
+  String get voiceAliasLibrary => 'library|articles|content|read articles|tips';
 
   @override
-  String get voiceAliasBack => 'back|go back|previous';
+  String get voiceAliasBack => 'back|go back|previous|previous question|undo';
 
   @override
-  String get voiceAliasContinue => 'continue|next|go on|done|ok';
+  String get voiceAliasContinue =>
+      'continue|next|go on|done|ok|okay|ready|alright|keep going|move on|confirm|go ahead|sounds good';
 
   @override
-  String get voiceAliasSave => 'save|finish|save entry';
+  String get voiceAliasSave =>
+      'save|finish|save entry|finish check in|save check in|i\'m done|im done|that\'s all|thats all|submit|wrap up|complete';
 
   @override
-  String get voiceAliasSkip => 'skip|skip this|next question';
+  String get voiceAliasSkip =>
+      'skip|skip this|next question|pass|i\'d rather not say|rather not answer|no answer';
 
   @override
-  String get voiceAliasYes => 'yes|sure|use it';
+  String get voiceAliasYes =>
+      'yes|sure|use it|yeah|yep|of course|correct|exactly';
 
   @override
-  String get voiceAliasNo => 'no|keep|keep mine';
+  String get voiceAliasNo =>
+      'no|keep|keep mine|nope|leave it|no thanks|don\'t|dont';
 
   @override
   String get voiceNumberWords => 'one|two|three|four|five';

@@ -298,6 +298,9 @@ void main() {
         output().log.take(8).toList(),
         ['prepare:pt', 'speak', 'done', 'listen', 'prepare:pt', 'speak', 'done', 'listen'],
       );
+      // Silences no longer end hands-free mode within the run: stop it.
+      await containerOf(tester).read(voiceControllerProvider.notifier).stop();
+      await tester.pump(const Duration(seconds: 2));
     });
 
     testWidgets('a phrase not understood keeps the step and is not read again',
@@ -379,6 +382,8 @@ void main() {
     expect(find.text('Segunda'), findsOneWidget);
     // The phrase ended as not understood and the mic opened again.
     expect(voice.listenCalls, greaterThanOrEqualTo(2));
+    await containerOf(tester).read(voiceControllerProvider.notifier).stop();
+    await tester.pump(const Duration(seconds: 2));
   });
 
   group('Speech stops at once', () {
