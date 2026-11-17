@@ -282,4 +282,138 @@ void main() {
       expect(find.text('Emergency Screen'), findsOneWidget);
     });
   });
+
+  group('Sheets', () {
+    testWidgets('check-in row opens a read-only sheet that "Pronto" closes',
+        (tester) async {
+      await pump(tester, _Harness());
+
+      await tester.tap(find.byKey(const Key('reminders_checkin_row')));
+      await tester.pumpAndSettle();
+
+      final sheet = find.byKey(const Key('reminders_checkin_sheet'));
+      expect(sheet, findsOneWidget);
+      expect(
+        find.text(
+          'O lembrete aparece de 2 em 2 horas, das 08:00 às 22:00. Ele para quando você faz o check-in do dia e volta no dia seguinte.',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: sheet, matching: find.byType(Switch)),
+        findsNothing,
+      );
+
+      await tester.tap(find.text('Pronto'));
+      await tester.pumpAndSettle();
+      expect(sheet, findsNothing);
+    });
+
+    for (final (key, label) in [
+      ('reminders_care_link_medications', 'Medications Screen'),
+      ('reminders_care_link_appointments', 'Appointments Screen'),
+      ('reminders_care_link_vaccines', 'Vaccines Screen'),
+    ]) {
+      testWidgets('care sheet link $key opens its screen', (tester) async {
+        await pump(tester, _Harness(premium: true));
+
+        await tester.tap(find.byKey(const Key('reminders_care_row')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('reminders_care_sheet')), findsOneWidget);
+        expect(find.text('Cada lembrete é criado e ajustado no próprio item.'),
+            findsOneWidget);
+
+        await tester.tap(find.byKey(Key(key)));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('reminders_care_sheet')), findsNothing);
+        expect(find.text(label), findsOneWidget);
+      });
+    }
+
+    testWidgets('help stays one tap away while a sheet is open',
+        (tester) async {
+      await pump(tester, _Harness(premium: true));
+
+      await tester.tap(find.byKey(const Key('reminders_care_row')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('reminders_care_sheet')), findsOneWidget);
+
+      final help = find.byKey(const Key('urgent_help_button'));
+      expect(help, findsOneWidget);
+      await tester.tap(help);
+      await tester.pumpAndSettle();
+      expect(find.text('Emergency Screen'), findsOneWidget);
+    });
+  });
+
+  group('Permission explanation sheet', () {
+    _Harness waterOff({required bool allowed}) => _Harness(
+          allowed: allowed,
+          state: const HydrationState(
+            settings: HydrationSettings(reminderEnabled: false),
+          ),
+        );
+
+    testWidgets('blocked: shows the sheet; "Permitir avisos" turns water on',
+        (tester) async {
+      final h = await pump(tester, waterOff(allowed: false));
+      final readsBefore = h.allowedReads;
+
+      await tester.tap(find.byKey(_waterSwitch));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('reminders_permission_sheet')),
+          findsOneWidget);
+      expect(find.text('Quer que o DualisCheckUp lembre você?'), findsOneWidget);
+      expect(find.text('Hora de beber água'), findsOneWidget);
+      expect(find.text('Toque para registrar.'), findsOneWidget);
+      expect(find.text('DualisCheckUp · Água · agora'), findsOneWidget);
+      expect(h.controller.toggles, isEmpty);
+
+      await tester.tap(find.byKey(const Key('reminders_permission_allow')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('reminders_permission_sheet')), findsNothing);
+      expect(h.controller.toggles, [true]);
+      expect(tester.widget<SwitchListTile>(find.byKey(_waterSwitch)).value,
+          isTrue);
+      // The permission is read again after the toggle.
+      expect(h.allowedReads, greaterThan(readsBefore));
+    });
+
+    testWidgets('blocked: "Agora não" leaves the switch off', (tester) async {
+      final h = await pump(tester, waterOff(allowed: false));
+
+      await tester.tap(find.byKey(_waterSwitch));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('reminders_permission_not_now')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('reminders_permission_sheet')), findsNothing);
+      expect(h.controller.toggles, isEmpty);
+      expect(tester.widget<SwitchListTile>(find.byKey(_waterSwitch)).value,
+          isFalse);
+    });
+
+    testWidgets('allowed: turning water on needs no sheet', (tester) async {
+      final h = await pump(tester, waterOff(allowed: true));
+
+      await tester.tap(find.byKey(_waterSwitch));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('reminders_permission_sheet')), findsNothing);
+      expect(h.controller.toggles, [true]);
+    });
+
+    testWidgets('turning water off never shows the sheet', (tester) async {
+      final h = await pump(tester, _Harness(allowed: false));
+
+      await tester.tap(find.byKey(_waterSwitch));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('reminders_permission_sheet')), findsNothing);
+      expect(h.controller.toggles, [false]);
+    });
+  });
 }

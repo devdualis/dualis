@@ -1745,5 +1745,13 @@
   "remindersCareTitle": "Care",
   "remindersCareSummary": "Medications, appointments and vaccines",
   "remindersWaterLinkTitle": "Change in Reminders",
-  "remindersPrivacyNote": "Notifications use general text. Names of medications, vaccines and appointments only appear inside the app."
+  "remindersPrivacyNote": "Notifications use general text. Names of medications, vaccines and appointments only appear inside the app.",
+  "remindersCheckInSheetBody": "The reminder shows every 2 hours from {from} to {to}. It stops once you do the day's check-in and comes back the next day.",
+  "remindersCareSheetBody": "Each reminder is set up on its own item.",
+  "remindersSheetDone": "Done",
+  "remindersPermissionTitle": "Want DualisCheckUp to remind you?",
+  "remindersPermissionBody": "To remind you, your phone needs your permission. You can change this any time.",
+  "remindersPermissionPreviewMeta": "DualisCheckUp · Water · now",
+  "remindersPermissionAllow": "Allow notifications",
+  "remindersPermissionNotNow": "Not now"
 }

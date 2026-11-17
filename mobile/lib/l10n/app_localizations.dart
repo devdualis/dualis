@@ -10347,6 +10347,54 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Os avisos usam textos gerais. Nomes de medicamentos, vacinas e consultas só aparecem dentro do app.'**
   String get remindersPrivacyNote;
+
+  /// Check-in sheet explanation on the Lembretes screen; from/to are HH:00 times
+  ///
+  /// In pt, this message translates to:
+  /// **'O lembrete aparece de 2 em 2 horas, das {from} às {to}. Ele para quando você faz o check-in do dia e volta no dia seguinte.'**
+  String remindersCheckInSheetBody(String from, String to);
+
+  /// Care sheet explanation on the Lembretes screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Cada lembrete é criado e ajustado no próprio item.'**
+  String get remindersCareSheetBody;
+
+  /// Button that closes a Lembretes sheet
+  ///
+  /// In pt, this message translates to:
+  /// **'Pronto'**
+  String get remindersSheetDone;
+
+  /// Title of the sheet shown before asking for notification permission
+  ///
+  /// In pt, this message translates to:
+  /// **'Quer que o DualisCheckUp lembre você?'**
+  String get remindersPermissionTitle;
+
+  /// Body of the permission explanation sheet
+  ///
+  /// In pt, this message translates to:
+  /// **'Para avisar, o celular precisa da sua permissão. Você pode mudar isso quando quiser.'**
+  String get remindersPermissionBody;
+
+  /// Header line of the sample notification in the permission sheet
+  ///
+  /// In pt, this message translates to:
+  /// **'DualisCheckUp · Água · agora'**
+  String get remindersPermissionPreviewMeta;
+
+  /// Permission sheet button that continues to turn reminders on
+  ///
+  /// In pt, this message translates to:
+  /// **'Permitir avisos'**
+  String get remindersPermissionAllow;
+
+  /// Permission sheet button that leaves reminders off
+  ///
+  /// In pt, this message translates to:
+  /// **'Agora não'**
+  String get remindersPermissionNotNow;
 }
 
 class _AppLocalizationsDelegate

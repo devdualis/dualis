@@ -6144,4 +6144,33 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get remindersPrivacyNote =>
       'Los avisos usan textos generales. Los nombres de medicamentos, vacunas y consultas solo aparecen dentro de la app.';
+
+  @override
+  String remindersCheckInSheetBody(String from, String to) {
+    return 'El recordatorio aparece cada 2 horas, de $from a $to. Se detiene cuando haces el check-in del día y vuelve al día siguiente.';
+  }
+
+  @override
+  String get remindersCareSheetBody =>
+      'Cada recordatorio se crea y se ajusta en su propio elemento.';
+
+  @override
+  String get remindersSheetDone => 'Listo';
+
+  @override
+  String get remindersPermissionTitle =>
+      '¿Quieres que DualisCheckUp te recuerde?';
+
+  @override
+  String get remindersPermissionBody =>
+      'Para avisarte, el teléfono necesita tu permiso. Puedes cambiarlo cuando quieras.';
+
+  @override
+  String get remindersPermissionPreviewMeta => 'DualisCheckUp · Agua · ahora';
+
+  @override
+  String get remindersPermissionAllow => 'Permitir avisos';
+
+  @override
+  String get remindersPermissionNotNow => 'Ahora no';
 }
