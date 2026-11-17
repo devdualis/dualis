@@ -13,9 +13,9 @@ import '../../domain/journal_keys.dart';
 import '../../domain/journal_models.dart';
 
 /// Neutral line colours: they tell two lines apart and never say anything
-/// about the value (teal for the first line, slate for the second).
-const Color readingsLineTeal = ChartTokens.presente;
-const Color readingsLineSlate = ChartTokens.body;
+/// about the value (brand navy for the first line, brand cyan for the second).
+const Color readingsLinePrimary = ChartTokens.passado;
+const Color readingsLineSecondary = ChartTokens.presente;
 
 /// Name of a reading kind (`blood_pressure`, `glucose`, `weight`).
 String readingKindLabel(AppLocalizations l10n, String kind) => switch (kind) {
@@ -113,7 +113,7 @@ List<List<ConditionReading>> readingRuns(List<ConditionReading> readings) {
 /// time. Every dot is one reading: several readings on one day stay separate
 /// dots, the line breaks on days without a reading, and nothing is averaged,
 /// smoothed or compared. No bands, target lines or value colours. Blood
-/// pressure has two lines (systolic solid teal, diastolic dashed slate).
+/// pressure has two lines (systolic solid navy, diastolic dashed cyan).
 class ReadingsChart extends StatelessWidget {
   /// `blood_pressure` | `glucose` | `weight`.
   final String kind;
@@ -135,18 +135,18 @@ class ReadingsChart extends StatelessWidget {
 
   List<_Line> _lines(AppLocalizations l10n) => switch (kind) {
         JournalKeys.trackingBloodPressure => [
-            _Line(l10n.chronicHistorySystolic, readingsLineTeal,
+            _Line(l10n.chronicHistorySystolic, readingsLinePrimary,
                 (r) => r.systolic?.toDouble()),
-            _Line(l10n.chronicHistoryDiastolic, readingsLineSlate,
+            _Line(l10n.chronicHistoryDiastolic, readingsLineSecondary,
                 (r) => r.diastolic?.toDouble(),
                 dash: const [6, 4]),
           ],
         JournalKeys.trackingGlucose => [
-            _Line(l10n.chronicHistoryKindGlucose, readingsLineTeal,
+            _Line(l10n.chronicHistoryKindGlucose, readingsLinePrimary,
                 (r) => r.mgdl?.toDouble()),
           ],
         _ => [
-            _Line(l10n.chronicHistoryKindWeight, readingsLineTeal, (r) => r.kg),
+            _Line(l10n.chronicHistoryKindWeight, readingsLinePrimary, (r) => r.kg),
           ],
       };
 
@@ -180,7 +180,7 @@ class ReadingsChart extends StatelessWidget {
           ],
           isCurved: false,
           color: line.color,
-          barWidth: 2.2,
+          barWidth: 2.6,
           dashArray: line.dash,
           isStrokeCapRound: true,
           belowBarData: BarAreaData(show: false),
@@ -211,7 +211,7 @@ class ReadingsChart extends StatelessWidget {
     final step = days <= 7 ? 1 : (days <= 30 ? 7 : 15);
     final axisStyle = GoogleFonts.inter(
       fontSize: 10,
-      color: AppColors.textSecondaryLight,
+      color: ChartTokens.axisLabel,
     );
     final axisNumber = NumberFormat.decimalPattern(locale)
       ..maximumFractionDigits = 1;
@@ -236,10 +236,9 @@ class ReadingsChart extends StatelessWidget {
                 drawVerticalLine: true,
                 verticalInterval: 1,
                 getDrawingHorizontalLine: (_) =>
-                    const FlLine(color: AppColors.outlineLight, strokeWidth: 1),
-                getDrawingVerticalLine: (_) => FlLine(
-                    color: AppColors.outlineLight.withValues(alpha: 0.5),
-                    strokeWidth: 0.5),
+                    FlLine(color: ChartTokens.grid, strokeWidth: 1),
+                getDrawingVerticalLine: (_) =>
+                    FlLine(color: ChartTokens.grid.withValues(alpha: 0.05), strokeWidth: 0.5),
               ),
               borderData: FlBorderData(show: false),
               titlesData: FlTitlesData(
@@ -292,8 +291,8 @@ class ReadingsChart extends StatelessWidget {
                 ],
                 touchTooltipData: LineTouchTooltipData(
                   getTooltipColor: (_) => AppColors.surfaceLight,
-                  tooltipBorder: const BorderSide(color: AppColors.outlineLight),
-                  tooltipBorderRadius: BorderRadius.circular(10),
+                  tooltipBorder: BorderSide(color: AppColors.dualisNavy.withValues(alpha: 0.12)),
+                  tooltipBorderRadius: BorderRadius.circular(12),
                   fitInsideHorizontally: true,
                   fitInsideVertically: true,
                   maxContentWidth: 240,

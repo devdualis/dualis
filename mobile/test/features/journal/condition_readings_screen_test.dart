@@ -240,7 +240,7 @@ void main() {
       expect(b.isCurved, isFalse);
       expect(b.belowBarData.show, isFalse);
       expect(b.aboveBarData.show, isFalse);
-      expect({readingsLineTeal, readingsLineSlate}, contains(b.color));
+      expect({readingsLinePrimary, readingsLineSecondary}, contains(b.color));
     }
     expect(data.extraLinesData.horizontalLines, isEmpty);
     expect(data.rangeAnnotations.horizontalRangeAnnotations, isEmpty);

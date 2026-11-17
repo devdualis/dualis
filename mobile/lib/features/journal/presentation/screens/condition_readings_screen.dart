@@ -5,6 +5,9 @@ import 'package:intl/intl.dart' show DateFormat;
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../../shared/widgets/glass_card.dart';
+import '../../../care/presentation/widgets/care_widgets.dart' show careAppBar;
 import '../../../profile/domain/models/share_category.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
@@ -52,12 +55,8 @@ class _ConditionReadingsScreenState
     if (!activeProfileCanRead(ref, ShareCategory.conditions)) {
       // This screen only reads; adding readings happens in the journal.
       return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            l10n.chronicHistoryTitle,
-            style: GoogleFonts.inter(fontWeight: FontWeight.w700),
-          ),
-        ),
+        backgroundColor: AppColors.backgroundDepth,
+        appBar: careAppBar(context, l10n.chronicHistoryTitle),
         body: SafeArea(
           child: NotSharedPlaceholder(
             profileName: ref.watch(activeProfileControllerProvider
@@ -79,12 +78,8 @@ class _ConditionReadingsScreenState
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          l10n.chronicHistoryTitle,
-          style: GoogleFonts.inter(fontWeight: FontWeight.w700),
-        ),
-      ),
+      backgroundColor: AppColors.backgroundDepth,
+      appBar: careAppBar(context, l10n.chronicHistoryTitle),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
@@ -95,7 +90,7 @@ class _ConditionReadingsScreenState
           },
           child: ListView(
             key: const Key('chronic_history_list'),
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
             children: [
               Text(
                 name,
@@ -103,7 +98,8 @@ class _ConditionReadingsScreenState
                 style: GoogleFonts.inter(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimaryLight,
+                  letterSpacing: -0.3,
+                  color: AppColors.dualisNavy,
                 ),
               ),
               if (profile != null && profile.isNotEmpty) ...[
@@ -143,21 +139,42 @@ class _ConditionReadingsScreenState
                   ),
                 ],
                 error: (_, __) => [
-                  Text(
-                    l10n.chronicHistoryError,
-                    key: const Key('chronic_history_error'),
-                    style: GoogleFonts.inter(
-                      color: AppColors.textSecondaryLight,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: OutlinedButton(
-                      key: const Key('chronic_history_retry'),
-                      onPressed: () => ref.invalidate(
-                          conditionReadingsProvider(widget.conditionId)),
-                      child: Text(l10n.chronicHistoryRetry),
+                  GlassCard(
+                    radius: 22,
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Align(
+                          child: DuotoneIconTile(
+                            size: 48,
+                            radius: 14,
+                            child: Icon(
+                              Icons.error_outline_rounded,
+                              size: 24,
+                              color: AppColors.dualisNavy,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          l10n.chronicHistoryError,
+                          key: const Key('chronic_history_error'),
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            height: 1.4,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        FilledButton(
+                          key: const Key('chronic_history_retry'),
+                          onPressed: () => ref.invalidate(
+                              conditionReadingsProvider(widget.conditionId)),
+                          child: Text(l10n.chronicHistoryRetry),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -190,37 +207,59 @@ class _ConditionReadingsScreenState
 
     return [
       if (!history.complete)
-        Container(
+        Padding(
           key: const Key('chronic_history_offline'),
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.brandBgLightBlue,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.cloud_off_outlined,
-                  size: 18, color: AppColors.textSecondaryLight),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  l10n.chronicHistoryOffline,
-                  style: GoogleFonts.inter(fontSize: 13),
+          padding: const EdgeInsets.only(bottom: 12),
+          child: GlassCard(
+            radius: 18,
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                const DuotoneIconTile(
+                  size: 32,
+                  radius: 10,
+                  child: Icon(Icons.cloud_off_outlined,
+                      size: 18, color: AppColors.dualisNavy),
                 ),
-              ),
-            ],
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    l10n.chronicHistoryOffline,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      height: 1.35,
+                      color: AppColors.textPrimaryLight,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       if (shown.isEmpty)
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Text(
-            l10n.chronicHistoryEmpty(_days),
-            key: const Key('chronic_history_empty'),
-            style: GoogleFonts.inter(
-              color: AppColors.textSecondaryLight,
-            ),
+        GlassCard(
+          radius: 22,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+          child: Column(
+            children: [
+              const DuotoneIconTile(
+                size: 48,
+                radius: 14,
+                child: Icon(Icons.show_chart_rounded,
+                    size: 24, color: AppColors.dualisNavy),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                l10n.chronicHistoryEmpty(_days),
+                key: const Key('chronic_history_empty'),
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  height: 1.4,
+                  color: AppColors.textSecondaryLight,
+                ),
+              ),
+            ],
           ),
         )
       else ...[
@@ -238,11 +277,12 @@ class _ConditionReadingsScreenState
             ),
           ),
         Padding(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
           child: Text(
             l10n.chronicHistoryChartHint,
             style: GoogleFonts.inter(
               fontSize: 12,
+              height: 1.4,
               color: AppColors.textSecondaryLight,
             ),
           ),
@@ -268,40 +308,43 @@ class _Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.fromLTRB(12, 12, 16, 12),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.outlineLight),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: GlassCard(
+        radius: 22,
+        padding: const EdgeInsets.fromLTRB(12, 14, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.1,
+                        color: AppColors.textPrimaryLight,
+                      ),
+                    ),
                   ),
-                ),
+                  Text(
+                    trailing,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: AppColors.textSecondaryLight,
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                trailing,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: AppColors.textSecondaryLight,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          child,
-        ],
+            ),
+            const SizedBox(height: 10),
+            child,
+          ],
+        ),
       ),
     );
   }
@@ -336,40 +379,53 @@ class _DayBlock extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            title,
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textSecondaryLight,
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 8),
+            child: Text(
+              title,
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.1,
+                color: AppColors.textPrimaryLight,
+              ),
             ),
           ),
-          const SizedBox(height: 6),
           for (final r in day.readings)
             Container(
-              margin: const EdgeInsets.only(bottom: 6),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.fromLTRB(10, 8, 12, 8),
               decoration: BoxDecoration(
-                color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.outlineLight),
+                color: AppColors.dualisNavy.withValues(alpha: 0.04),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppColors.dualisNavy.withValues(alpha: 0.06),
+                ),
               ),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    width: 52,
-                    child: Text(
-                      DateFormat('HH:mm', locale).format(r.measuredAt.toLocal()),
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.w700,
-                      ),
+                  DuotoneIconTile(
+                    size: 36,
+                    radius: 10,
+                    child: Icon(
+                      _kindIcon(r.kind),
+                      size: 20,
+                      color: AppColors.dualisNavy,
                     ),
                   ),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text(
+                          readingValueText(l10n, locale, r),
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimaryLight,
+                          ),
+                        ),
                         Text(
                           readingKindLabel(l10n, r.kind),
                           style: GoogleFonts.inter(
@@ -377,26 +433,41 @@ class _DayBlock extends StatelessWidget {
                             color: AppColors.textSecondaryLight,
                           ),
                         ),
-                        Text(
-                          readingValueText(l10n, locale, r),
-                          style: GoogleFonts.inter(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimaryLight,
-                          ),
-                        ),
                       ],
                     ),
                   ),
-                  if (r.pendingSync)
-                    Tooltip(
-                      message: l10n.chronicHistoryPending,
-                      child: const Icon(
-                        Icons.cloud_upload_outlined,
-                        size: 18,
-                        color: AppColors.textSecondaryLight,
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        DateFormat('HH:mm', locale).format(r.measuredAt.toLocal()),
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.dualisNavy,
+                        ),
                       ),
-                    ),
+                      if (r.pendingSync)
+                        Tooltip(
+                          message: l10n.chronicHistoryPending,
+                          child: Container(
+                            margin: const EdgeInsets.only(top: 4),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: AppColors.iconTileTint,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Icon(
+                              Icons.cloud_upload_outlined,
+                              size: 14,
+                              color: AppColors.dualisNavy,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -404,4 +475,10 @@ class _DayBlock extends StatelessWidget {
       ),
     );
   }
+
+  static IconData _kindIcon(String kind) => switch (kind) {
+        JournalKeys.trackingBloodPressure => Icons.favorite_border_rounded,
+        JournalKeys.trackingGlucose => Icons.water_drop_outlined,
+        _ => Icons.monitor_weight_outlined,
+      };
 }
