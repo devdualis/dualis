@@ -5221,10 +5221,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get notificationsBlockedBody =>
-      'Los recordatorios no aparecerán hasta que actives las notificaciones de DualisCheckUp en los ajustes del celular.';
+      'Tus recordatorios siguen guardados, pero solo aparecerán cuando permitas las notificaciones de DualisCheckUp en los ajustes del teléfono.';
 
   @override
-  String get notificationsOpenSettings => 'Abrir ajustes';
+  String get notificationsOpenSettings => 'Abrir ajustes del teléfono';
 
   @override
   String get careConditionsTitle => 'Enfermedades y condiciones';

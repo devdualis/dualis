@@ -25,6 +25,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('As notificações estão desligadas neste celular'), findsOneWidget);
+    expect(
+      find.text(
+        'Seus lembretes continuam salvos, mas só vão aparecer quando você permitir as notificações do DualisCheckUp nos ajustes do celular.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Abrir ajustes do celular'), findsOneWidget);
     await tester.tap(find.byKey(const Key('notifications_open_settings')));
     expect(opened, 1);
   });
@@ -53,6 +60,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
     expect(find.text('Notifications are off on this phone'), findsOneWidget);
+    expect(find.text('Open phone settings'), findsOneWidget);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);

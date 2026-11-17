@@ -8839,13 +8839,13 @@ abstract class AppLocalizations {
   /// No description provided for @notificationsBlockedBody.
   ///
   /// In pt, this message translates to:
-  /// **'Os lembretes não vão aparecer até você ligar as notificações do DualisCheckUp nos ajustes do celular.'**
+  /// **'Seus lembretes continuam salvos, mas só vão aparecer quando você permitir as notificações do DualisCheckUp nos ajustes do celular.'**
   String get notificationsBlockedBody;
 
   /// No description provided for @notificationsOpenSettings.
   ///
   /// In pt, this message translates to:
-  /// **'Abrir ajustes'**
+  /// **'Abrir ajustes do celular'**
   String get notificationsOpenSettings;
 
   /// No description provided for @careConditionsTitle.

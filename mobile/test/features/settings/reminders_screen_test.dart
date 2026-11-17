@@ -416,4 +416,36 @@ void main() {
       expect(h.controller.toggles, [false]);
     });
   });
+
+  group('Blocked banner', () {
+    testWidgets('blocked: banner above the list opens the phone settings',
+        (tester) async {
+      final h = await pump(tester, _Harness(allowed: false));
+
+      final banner = find.byKey(const Key('notifications_blocked_notice'));
+      expect(banner, findsOneWidget);
+      expect(find.text('As notificações estão desligadas neste celular'),
+          findsOneWidget);
+      expect(
+        find.text(
+          'Seus lembretes continuam salvos, mas só vão aparecer quando você permitir as notificações do DualisCheckUp nos ajustes do celular.',
+        ),
+        findsOneWidget,
+      );
+      // Above the reminder list.
+      expect(
+        tester.getTopLeft(banner).dy,
+        lessThan(tester.getTopLeft(find.byKey(const Key('reminders_checkin_row'))).dy),
+      );
+
+      await tester.tap(find.byKey(const Key('notifications_open_settings')));
+      await tester.pumpAndSettle();
+      expect(h.openSettingsCalls, 1);
+    });
+
+    testWidgets('allowed: no banner', (tester) async {
+      await pump(tester, _Harness(allowed: true));
+      expect(find.byKey(const Key('notifications_blocked_notice')), findsNothing);
+    });
+  });
 }

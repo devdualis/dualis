@@ -5214,10 +5214,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get notificationsBlockedBody =>
-      'Os lembretes não vão aparecer até você ligar as notificações do DualisCheckUp nos ajustes do celular.';
+      'Seus lembretes continuam salvos, mas só vão aparecer quando você permitir as notificações do DualisCheckUp nos ajustes do celular.';
 
   @override
-  String get notificationsOpenSettings => 'Abrir ajustes';
+  String get notificationsOpenSettings => 'Abrir ajustes do celular';
 
   @override
   String get careConditionsTitle => 'Doenças e condições';

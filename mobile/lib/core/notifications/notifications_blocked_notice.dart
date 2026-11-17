@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../l10n/app_localizations.dart';
@@ -70,41 +71,68 @@ class _NotificationsBlockedNoticeState
     if (allowed) return const SizedBox.shrink();
 
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     return Container(
       key: const Key('notifications_blocked_notice'),
       margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.fromLTRB(14, 12, 8, 4),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.softIndigoLight,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.outlineLight),
+        color: AppColors.noticeAmberSurface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.noticeAmberBorder),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 2),
-            child: Icon(Icons.notifications_off_outlined, color: AppColors.dualisNavy, size: 22),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.notifications_off_outlined,
+              color: AppColors.noticeAmberText,
+              size: 20,
+            ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   l10n.notificationsBlockedTitle,
-                  style: text.titleSmall?.copyWith(color: AppColors.dualisNavy),
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.noticeAmberText,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   l10n.notificationsBlockedBody,
-                  style: text.bodySmall?.copyWith(color: AppColors.textPrimaryLight),
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    height: 1.4,
+                    color: AppColors.noticeAmberText,
+                  ),
                 ),
-                Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: TextButton(
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 36,
+                  child: FilledButton(
                     key: const Key('notifications_open_settings'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.noticeAmberText,
+                      foregroundColor: Colors.white,
+                      shape: const StadiumBorder(),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      textStyle: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     onPressed: () => ref.read(openNotificationSettingsProvider)(),
                     child: Text(l10n.notificationsOpenSettings),
                   ),

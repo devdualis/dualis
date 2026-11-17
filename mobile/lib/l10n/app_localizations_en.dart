@@ -5211,10 +5211,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationsBlockedBody =>
-      'Reminders won\'t appear until you turn on DualisCheckUp notifications in your phone settings.';
+      'Your reminders stay saved, but they only show once you allow DualisCheckUp notifications in your phone settings.';
 
   @override
-  String get notificationsOpenSettings => 'Open settings';
+  String get notificationsOpenSettings => 'Open phone settings';
 
   @override
   String get careConditionsTitle => 'Conditions & diseases';

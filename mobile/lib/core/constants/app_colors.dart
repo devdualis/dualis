@@ -18,6 +18,11 @@ class AppColors {
   static const Color dualisCareGreen = Color(0xFF3E8E4A);
   static const Color dualisCareGreenLight = Color(0xFFE7F4E9);
 
+  // Sketch 002 blocked-notifications banner. Not for help: crimson is reserved.
+  static const Color noticeAmberSurface = Color(0xFFFFF7E6);
+  static const Color noticeAmberBorder = Color(0xFFF5D08A);
+  static const Color noticeAmberText = Color(0xFF5C3D00);
+
   /// Tagline (#2B9ED0) - "continuous check up"
   static const Color dualisTagline = Color(0xFF2B9ED0);
 
