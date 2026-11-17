@@ -28,18 +28,31 @@ List<MapEntry<String, int>> _ranked(Map<String, int> counts, List<String> order)
 
 TextStyle get _lineStyle => GoogleFonts.inter(
       fontSize: 13,
-      color: AppColors.textPrimaryLight,
+      fontWeight: FontWeight.w500,
+      color: AppColors.dualisNavy,
     );
 
 TextStyle get _labelStyle => GoogleFonts.inter(
-      fontSize: 13,
+      fontSize: 12.5,
       fontWeight: FontWeight.w700,
-      color: AppColors.textPrimaryLight,
+      color: AppColors.textSecondaryLight,
     );
 
+/// One count line as a quiet brand-tinted row, so the cards read as a list of
+/// recorded days rather than loose text.
 Widget _line(String text, {Key? key}) => Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Text(text, key: key, style: _lineStyle),
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Container(
+        key: key,
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+        decoration: BoxDecoration(
+          color: AppColors.brandBgLightBlue,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.dualisNavy.withValues(alpha: 0.06)),
+        ),
+        child: Text(text, style: _lineStyle),
+      ),
     );
 
 /// "Momentos bons": days per time and the most marked good moments.

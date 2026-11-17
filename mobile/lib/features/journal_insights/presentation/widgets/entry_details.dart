@@ -6,6 +6,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../journal/domain/journal_keys.dart';
 import '../../../journal/presentation/journal_item_text.dart';
 import '../../../journal/presentation/journal_labels.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
 import '../../domain/journal_insights_models.dart';
 
 /// Title of one item in the person's words: "🔥 Barriga · Incômodo · Gases
@@ -83,9 +84,20 @@ class JournalEntryDetails extends StatelessWidget {
             ? '${JournalLabels.trigger(l10n, t)} (${entry.triggerNote})'
             : JournalLabels.trigger(l10n, t),
     ];
-    Widget line(String text, TextStyle style, [Key? key]) => Padding(
-          padding: const EdgeInsets.only(bottom: 3),
-          child: Text(text, key: key, style: style),
+    // Closing answers (what may have contributed, how it was, what helped,
+    // the note) sit in quiet brand-tinted pills, in the person's words.
+    Widget pill(String text, [Key? key]) => Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Container(
+            key: key,
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.iconTileTint.withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Text(text, style: soft),
+          ),
         );
     return Column(
       key: Key('entry_details_${entry.id}'),
@@ -93,32 +105,112 @@ class JournalEntryDetails extends StatelessWidget {
       children: [
         if (showItems) ...[
           if (entry.items.isEmpty && entry.mood != null)
-            line(l10n.xv2DashMoodLine(JournalLabels.mood(l10n, entry.mood!)), strong),
-          for (final item in entry.items) ...[
-            line(entryItemTitle(l10n, item), strong),
-            if (entryItemAnswers(l10n, item) case final answers?)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Text(answers, style: soft),
-              ),
-          ],
+            _EntryItemTile(
+              title: l10n.xv2DashMoodLine(JournalLabels.mood(l10n, entry.mood!)),
+              titleStyle: strong,
+              answerStyle: soft,
+            ),
+          for (final item in entry.items)
+            _EntryItemTile(
+              title: entryItemTitle(l10n, item),
+              answers: entryItemAnswers(l10n, item),
+              intensity: item.intensity,
+              titleStyle: strong,
+              answerStyle: soft,
+            ),
         ],
         if (triggers.isNotEmpty)
-          line(l10n.jv24EntryTriggers(triggers.join(', ')), soft,
+          pill(l10n.jv24EntryTriggers(triggers.join(', ')),
               Key('entry_triggers_${entry.id}')),
         if (entry.coping != null)
-          line(l10n.jv22EntryCoping(JournalLabels.coping(l10n, entry.coping!)), soft,
+          pill(l10n.jv22EntryCoping(JournalLabels.coping(l10n, entry.coping!)),
               Key('entry_coping_${entry.id}')),
         if (entry.helpers.isNotEmpty)
-          line(
+          pill(
             l10n.jv22EntryHelpers(
                 entry.helpers.map((h) => JournalLabels.helper(l10n, h)).join(', ')),
-            soft,
             Key('entry_helpers_${entry.id}'),
           ),
         if (entry.note?.trim().isNotEmpty ?? false)
-          line(l10n.jv24EntryNote(entry.note!.trim()), soft, Key('entry_note_${entry.id}')),
+          pill(l10n.jv24EntryNote(entry.note!.trim()), Key('entry_note_${entry.id}')),
       ],
+    );
+  }
+}
+
+/// One recorded item as a tile like the check-in summary: duotone check, the
+/// item in the person's words, how long and how much, and the intensity badge.
+class _EntryItemTile extends StatelessWidget {
+  final String title;
+  final String? answers;
+  final int? intensity;
+  final TextStyle titleStyle;
+  final TextStyle answerStyle;
+
+  const _EntryItemTile({
+    required this.title,
+    this.answers,
+    this.intensity,
+    required this.titleStyle,
+    required this.answerStyle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: AppColors.brandBgLightBlue,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.dualisNavy.withValues(alpha: 0.06)),
+      ),
+      child: Row(
+        children: [
+          const DuotoneIconTile(
+            size: 30,
+            radius: 10,
+            background: Colors.white,
+            child: Icon(Icons.check_rounded, size: 17, color: AppColors.dualisNavy),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: titleStyle),
+                if (answers != null) ...[
+                  const SizedBox(height: 2),
+                  Text(answers!, style: answerStyle),
+                ],
+              ],
+            ),
+          ),
+          if (intensity != null) ...[
+            const SizedBox(width: 8),
+            ExcludeSemantics(
+              child: Container(
+                constraints: const BoxConstraints(minWidth: 24),
+                height: 24,
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.dualisNavy,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '$intensity',
+                  style: GoogleFonts.inter(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
