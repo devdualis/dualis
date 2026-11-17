@@ -263,3 +263,33 @@ TextStyle profileCodeTextStyle() => GoogleFonts.inter(
       letterSpacing: 3,
       color: Colors.white,
     );
+
+/// Option surface in the check-in wizard style: white and rounded with a soft
+/// shadow; selected is a navy border over a cyan tint.
+BoxDecoration profileOptionDecoration({
+  required bool selected,
+  double radius = 18,
+}) {
+  return BoxDecoration(
+    borderRadius: BorderRadius.circular(radius),
+    color: selected
+        ? AppColors.dualisSymbolCyan.withValues(alpha: 0.14)
+        : Colors.white.withValues(alpha: 0.86),
+    border: Border.all(
+      color: selected
+          ? AppColors.dualisNavy
+          : AppColors.dualisNavy.withValues(alpha: 0.08),
+      width: selected ? 2 : 1,
+    ),
+    boxShadow: selected
+        ? null
+        : [
+            BoxShadow(
+              color: AppColors.dualisNavy.withValues(alpha: 0.14),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+              spreadRadius: -12,
+            ),
+          ],
+  );
+}

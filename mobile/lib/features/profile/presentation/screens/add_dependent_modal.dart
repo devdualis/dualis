@@ -12,7 +12,9 @@ import '../../../auth/domain/user_profile.dart';
 import '../../../auth/presentation/widgets/biological_sex_selector.dart';
 import '../../data/profile_repository.dart';
 import '../../domain/models/profile.dart';
+import '../../../../shared/widgets/glass_card.dart';
 import '../controllers/active_profile_controller.dart';
+import '../widgets/profile_ui.dart';
 
 const _relationshipParent = 'parent';
 const _relationshipLegalGuardian = 'legal_guardian';
@@ -250,8 +252,8 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
     return Padding(
       padding: EdgeInsets.only(bottom: viewInsets),
       child: Material(
-        color: AppColors.surfaceLight,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        color: profileSheetFill,
+        borderRadius: profileSheetRadius,
         clipBehavior: Clip.antiAlias,
         child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -260,17 +262,9 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.outlineLight,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            const ProfileSheetHandle(),
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 16, 8),
+              padding: const EdgeInsets.fromLTRB(24, 8, 16, 8),
               child: Row(
                 children: [
                   Expanded(
@@ -279,25 +273,32 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
                       style: GoogleFonts.inter(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimaryLight,
+                        color: AppColors.dualisNavy,
                       ),
                     ),
                   ),
-                  IconButton(
-                    onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close),
+                  ProfileRoundIconButton(
+                    onPressed:
+                        _isSubmitting ? null : () => Navigator.of(context).pop(),
+                    icon: Icons.close,
+                    tooltip: MaterialLocalizations.of(context)
+                        .closeButtonTooltip,
                   ),
                 ],
               ),
             ),
             Flexible(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      GlassCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
                       DualisTextField(
                         controller: _nameController,
                         labelText: l10n.addDependentNameLabel,
@@ -333,13 +334,20 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
                           setState(() => _selectedGender = g);
                         },
                       ),
+                          ],
+                        ),
+                      ),
                       const SizedBox(height: 16),
+                      GlassCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
                       Text(
                         l10n.addDependentRelationshipLabel,
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimaryLight,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.dualisNavy,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -372,6 +380,9 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
                           ],
                         ],
                       ),
+                          ],
+                        ),
+                      ),
                       if (_isAdult != null) ...[
                         const SizedBox(height: 20),
                         // Adults: LGPD Art. 11, I via curator or supporter.
@@ -393,7 +404,8 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
                       ],
                       const SizedBox(height: 16),
                       // Optional audit note (D1: self-declaration, no upload).
-                      TextField(
+                      GlassCard(
+                        child: TextField(
                         key: const ValueKey('add-dependent-notes'),
                         controller: _notesController,
                         enabled: !_isSubmitting,
@@ -404,9 +416,7 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
                         decoration: InputDecoration(
                           labelText: l10n.addDependentNotesLabel,
                           alignLabelWithHint: true,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                        ),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -466,38 +476,43 @@ class _RelationshipOptionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: selected ? AppColors.softIndigo : AppColors.outlineLight,
-              width: selected ? 2 : 1.5,
-            ),
-            color: selected ? AppColors.softIndigoLight : Colors.transparent,
-          ),
-          child: Row(
-            children: [
-              Icon(
-                selected ? Icons.radio_button_checked : Icons.radio_button_off,
-                color: selected ? AppColors.softIndigo : AppColors.textSecondaryLight,
-                size: 22,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                    color: AppColors.textPrimaryLight,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        decoration: profileOptionDecoration(selected: selected),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(18),
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+              child: Row(
+                children: [
+                  Icon(
+                    selected
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_off,
+                    color: selected
+                        ? AppColors.dualisNavy
+                        : AppColors.textSecondaryLight,
+                    size: 22,
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight:
+                            selected ? FontWeight.w700 : FontWeight.w600,
+                        color: AppColors.dualisNavy,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -521,11 +536,13 @@ class _LgpdGuardianConsentBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.softIndigoLight,
-        border: Border.all(color: AppColors.softIndigo, width: 1.5),
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.dualisSymbolBlue.withValues(alpha: 0.08),
+        border: Border.all(
+          color: AppColors.dualisSymbolBlue.withValues(alpha: 0.18),
+        ),
+        borderRadius: BorderRadius.circular(22),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -534,9 +551,9 @@ class _LgpdGuardianConsentBlock extends StatelessWidget {
             key: checkboxKey,
             value: value,
             onChanged: onChanged,
-            activeColor: AppColors.softIndigo,
+            activeColor: AppColors.dualisNavy,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(6),
             ),
           ),
           Expanded(
