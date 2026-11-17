@@ -4,24 +4,66 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
 import '../../../journal/presentation/journal_labels.dart';
 import '../../domain/journal_insights_models.dart';
 import '../../domain/period_report.dart';
 import 'chart_tokens.dart';
 
 /// One colour for every bar: the length is a count, never a grade.
-const Color _barColor = ChartTokens.body;
-const Color _trackColor = AppColors.iconTileTint;
+const Color _barColor = AppColors.dualisNavy;
+const Color _trackColor = ChartTokens.waterTrack;
 
 TextStyle get _textStyle => GoogleFonts.inter(
       fontSize: 13,
-      color: AppColors.textPrimaryLight,
+      height: 1.35,
+      fontWeight: FontWeight.w500,
+      color: AppColors.dualisNavy,
     );
 
 TextStyle get _smallStyle => GoogleFonts.inter(
-      fontSize: 11,
-      color: AppColors.textSecondaryLight,
+      fontSize: 11.5,
+      color: ChartTokens.axisLabel,
     );
+
+/// A sentence of the report on a quiet brand row, led by a small duotone icon.
+class _ReportRow extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final Key? textKey;
+
+  const _ReportRow({required this.icon, required this.text, this.textKey});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: AppColors.brandBgLightBlue,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.dualisNavy.withValues(alpha: 0.06)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DuotoneIconTile(
+            size: 30,
+            radius: 10,
+            background: Colors.white,
+            child: Icon(icon, size: 17, color: AppColors.dualisNavy),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 5),
+              child: Text(text, key: textKey, style: _textStyle),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 const List<String> _weekdayKeys = [
   'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun', //
@@ -57,22 +99,22 @@ class PeriodSummary extends StatelessWidget {
           for (final time in notWell.times)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                l10n.histNotWellTimeSummary(
+              child: _ReportRow(
+                icon: Icons.schedule_rounded,
+                text: l10n.histNotWellTimeSummary(
                     days, notWell.count, notWell.total, time),
-                key: Key('period_not_well_$time'),
-                style: _textStyle,
+                textKey: Key('period_not_well_$time'),
               ),
             ),
         if (most.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            child: Text(
-              l10n.histWeekdayMost(_joinList(l10n, [
+            child: _ReportRow(
+              icon: Icons.calendar_today_rounded,
+              text: l10n.histWeekdayMost(_joinList(l10n, [
                 for (final d in most) l10n.histWeekdayOn(_weekdayKeys[d - 1]),
               ])),
-              key: const Key('period_weekday_most'),
-              style: _textStyle,
+              textKey: const Key('period_weekday_most'),
             ),
           ),
         WeekdayBars(counts: weekdays),
@@ -113,13 +155,13 @@ class WeekdayBars extends StatelessWidget {
                   Text('${counts[d] ?? 0}', style: _smallStyle),
                   const SizedBox(height: 4),
                   Container(
-                    width: 18,
+                    width: 20,
                     height: max == 0
                         ? 2
                         : 2 + (maxBarHeight - 2) * (counts[d] ?? 0) / max,
                     decoration: BoxDecoration(
                       color: (counts[d] ?? 0) == 0 ? _trackColor : _barColor,
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -183,12 +225,12 @@ class EverydayFeelingsSummary extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(5),
                   child: LinearProgressIndicator(
                     value: counts.total == 0
                         ? 0
                         : (counts.records[feeling] ?? 0) / counts.total,
-                    minHeight: 6,
+                    minHeight: 8,
                     color: _barColor,
                     backgroundColor: _trackColor,
                   ),
@@ -238,10 +280,10 @@ class BodyMindCoincidenceList extends StatelessWidget {
         for (final (c, emotion, body) in shown)
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              l10n.histCoincidenceLine(c.days, days, emotion, body),
-              key: Key('coincidence_${c.emotional}_${c.region}'),
-              style: _textStyle,
+            child: _ReportRow(
+              icon: Icons.link_rounded,
+              text: l10n.histCoincidenceLine(c.days, days, emotion, body),
+              textKey: Key('coincidence_${c.emotional}_${c.region}'),
             ),
           ),
         if (lines.length > shown.length)

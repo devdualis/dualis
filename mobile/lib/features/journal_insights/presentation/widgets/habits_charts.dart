@@ -15,9 +15,11 @@ import 'journal_overview_widgets.dart';
 /// "Você se mexeu em 12 dias").
 /// No goals computed by the app, no advice, no relations between habits and feelings.
 
-// Calm palette for sleep answers: no traffic-light red/amber, which would read as risk.
-const Color _sleepRegularColor = AppColors.dualisSymbolCyan;
-const Color _sleepBadColor = Color(0xFF64748B);
+// Calm palette for sleep answers, from the chart tokens: no traffic-light
+// red/amber/green, which would read as risk.
+const Color _sleepBemColor = ChartTokens.passado;
+const Color _sleepRegularColor = ChartTokens.presente;
+const Color _sleepBadColor = ChartTokens.body;
 
 class HabitsChartsSection extends StatelessWidget {
   final List<HabitDay> habits;
@@ -147,11 +149,11 @@ class _SleepLegend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: 12,
+      spacing: 8,
       runSpacing: 6,
       children: [
         _LegendDot(
-          color: AppColors.dualisSymbolBlue,
+          color: _sleepBemColor,
           label: l10n.habitsSleepQualityBem,
         ),
         _LegendDot(
@@ -172,23 +174,32 @@ class _LegendDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 12,
-            color: AppColors.textPrimaryLight,
+    // Brand pill: soft navy tint, the series colour as a round dot.
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.dualisNavy.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
-        ),
-      ],
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.dualisNavy,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -211,7 +222,7 @@ class _SleepDayBar extends StatelessWidget {
 
     switch (habit?.sleepQuality) {
       case HabitSleepQuality.bem:
-        barColor = AppColors.dualisSymbolBlue;
+        barColor = _sleepBemColor;
         heightFactor = 0.85;
         break;
       case HabitSleepQuality.regular:
@@ -241,7 +252,7 @@ class _SleepDayBar extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 8.5,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondaryLight,
+                color: ChartTokens.axisLabel,
               ),
             ),
           const SizedBox(height: 4),
@@ -249,11 +260,11 @@ class _SleepDayBar extends StatelessWidget {
             child: Align(
               alignment: Alignment.bottomCenter,
               child: Container(
-                width: 14,
+                width: 16,
                 height: 50 * heightFactor,
                 decoration: BoxDecoration(
                   color: barColor,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
             ),
@@ -264,7 +275,7 @@ class _SleepDayBar extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 9.5,
               fontWeight: FontWeight.w600,
-              color: AppColors.textSecondaryLight,
+              color: ChartTokens.axisLabel,
             ),
           ),
         ],
@@ -344,7 +355,7 @@ class HabitsMovementChart extends StatelessWidget {
                                   width: 22,
                                   height: 22,
                                   decoration: const BoxDecoration(
-                                    color: AppColors.dualisSymbolBlue,
+                                    color: ChartTokens.passado,
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(
@@ -375,7 +386,7 @@ class HabitsMovementChart extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 9.5,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondaryLight,
+                        color: ChartTokens.axisLabel,
                       ),
                     ),
                   ],
@@ -449,7 +460,7 @@ class HabitsPeriodChart extends StatelessWidget {
                                 ? const Icon(
                                   Icons.water_drop,
                                   size: 18,
-                                  color: Color(0xFFEC407A),
+                                  color: ChartTokens.water,
                                 )
                                 : Container(
                                   width: 8,
@@ -469,7 +480,7 @@ class HabitsPeriodChart extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color:
                             hasPeriod
-                                ? const Color(0xFFEC407A)
+                                ? ChartTokens.water
                                 : AppColors.textSecondaryLight,
                       ),
                     ),
