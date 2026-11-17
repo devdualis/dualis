@@ -8,6 +8,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../../shared/widgets/glass_card.dart';
 import '../controllers/auth_controller.dart';
 
 class EmailVerificationScreen extends ConsumerStatefulWidget {
@@ -212,8 +214,8 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimaryLight,
+              fontWeight: FontWeight.w700,
+              color: AppColors.dualisNavy,
             ),
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
@@ -228,7 +230,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
                   color: _digitControllers[index].text.isNotEmpty
-                      ? AppColors.clinicalTeal
+                      ? AppColors.dualisNavy
                       : AppColors.outlineLight,
                   width: 1.5,
                 ),
@@ -236,8 +238,8 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(
-                  color: AppColors.clinicalTeal,
-                  width: 2,
+                  color: AppColors.dualisSymbolCyan,
+                  width: 2.5,
                 ),
               ),
             ),
@@ -263,7 +265,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
     final masked = _maskEmail(_email);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundDepth,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -294,17 +296,13 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                   withProtectionArea: true,
                 ),
               ),
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: AppColors.clinicalTeal.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
+              const DuotoneIconTile(
+                size: 72,
+                radius: 22,
+                child: Icon(
                   Icons.mark_email_read_outlined,
                   size: 38,
-                  color: AppColors.clinicalTeal,
+                  color: AppColors.dualisNavy,
                 ),
               ),
               const SizedBox(height: 20),
@@ -313,8 +311,8 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimaryLight,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.dualisNavy,
                 ),
               ),
               const SizedBox(height: 12),
@@ -331,23 +329,26 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.glassFill,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.outlineLight),
+                  border: Border.all(color: AppColors.glassEdge),
                 ),
                 child: Text(
                   masked,
                   style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.clinicalTeal,
+                    color: AppColors.dualisNavy,
                   ),
                 ),
               ),
               const SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(_codeLength, (i) => _buildDigitInput(i)),
+              GlassCard(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 18),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(_codeLength, (i) => _buildDigitInput(i)),
+                ),
               ),
               const SizedBox(height: 36),
               DualisPrimaryButton(
@@ -382,7 +383,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.clinicalTeal,
+                      color: AppColors.dualisSymbolBlue,
                     ),
                   ),
                 ),

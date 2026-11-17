@@ -9,6 +9,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
 import '../../../../shared/widgets/dualis_text_field.dart';
+import '../../../../shared/widgets/glass_card.dart';
 import '../../domain/form_validators.dart';
 import '../controllers/auth_controller.dart';
 
@@ -68,7 +69,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.backgroundDepth,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -115,15 +116,18 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                DualisTextField(
-                  key: const Key('forgotPasswordEmailField'),
-                  labelText: l10n.email,
-                  hintText: l10n.authEmailHint,
-                  controller: _emailController,
-                  validator: FormValidators.validateEmail,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.done,
-                  prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textSecondaryLight),
+                GlassCard(
+                  padding: const EdgeInsets.all(16),
+                  child: DualisTextField(
+                    key: const Key('forgotPasswordEmailField'),
+                    labelText: l10n.email,
+                    hintText: l10n.authEmailHint,
+                    controller: _emailController,
+                    validator: FormValidators.validateEmail,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.done,
+                    prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textSecondaryLight),
+                  ),
                 ),
                 const SizedBox(height: 28),
                 DualisPrimaryButton(
