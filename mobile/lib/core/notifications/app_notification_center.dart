@@ -421,7 +421,7 @@ AppLocalizations resolveNotificationLocalizations(Locale? locale) {
   return lookupAppLocalizations(const Locale('en'));
 }
 
-/// `HH:00`, used in reminder titles.
+/// `HH:00`, used in log messages (titles no longer carry the time).
 String formatReminderHour(int hour) => '${hour.toString().padLeft(2, '0')}:00';
 
 /// One center per ProviderScope — the app has exactly one, so the plugin is

@@ -581,13 +581,14 @@ void main() {
       final es = await firstCheckin(const Locale('es'));
       final en = await firstCheckin(const Locale('en'));
 
-      expect(pt[#title], '🌿 Check-in Diário Dualis (08:00)');
-      expect(es[#title], '🌿 Check-in diario Dualis (08:00)');
-      expect(en[#title], '🌿 Dualis Daily Check-in (08:00)');
+      expect(pt[#title], 'Hora do check-in');
+      expect(es[#title], 'Hora del check-in');
+      expect(en[#title], 'Time for your check-in');
+      expect(pt[#body], 'Toque para registrar como você está.');
       expect(es[#body], lookupAppLocalizations(const Locale('es')).notifCheckinBody);
       expect(en[#body], isNot(pt[#body]));
       final channel = (en[#notificationDetails] as NotificationDetails).android!;
-      expect(channel.channelName, 'Daily Check-in Reminders');
+      expect(channel.channelName, 'Daily check-in reminders');
     });
 
     test('water reminder texts and channel follow the app language', () async {
@@ -599,8 +600,8 @@ void main() {
         reminderSoundStyle: ReminderSoundStyle.phoneAlarm,
       ));
       final call = h.scheduledById[1008]!;
-      expect(call[#title], '💧 Hora de beber agua (08:00)');
-      expect(call[#body], 'Toca para registrar la cantidad de agua consumida.');
+      expect(call[#title], 'Recordatorio de agua');
+      expect(call[#body], 'Pediste una alarma para esta hora.');
       final android = (call[#notificationDetails] as NotificationDetails).android!;
       expect(android.channelName, 'Recordatorios de agua (alarma sonora)');
       expect(android.fullScreenIntent, isTrue);
@@ -660,7 +661,7 @@ void main() {
 
       expect(h.scheduled, isNotEmpty);
       expect(
-        h.scheduled.every((c) => (c[#title] as String).contains('Dualis Daily Check-in')),
+        h.scheduled.every((c) => c[#title] == 'Time for your check-in'),
         isTrue,
       );
     });
@@ -686,6 +687,60 @@ void main() {
       expect(android.icon, 'ic_stat_dualis');
       expect(android.color, AppColors.dualisNavy);
       expect(android.channelId, DailyCheckinNotificationService.checkinChannelId);
+    });
+
+    test('check-in title is the same for every slot (no time inside)', () async {
+      final h = Harness();
+      await DailyCheckinNotificationService(
+        center: h.center,
+        clock: () => _madrid(2026, 9, 25, 7),
+        localeResolver: () => const Locale('pt', 'BR'),
+      ).scheduleDailyCheckInReminders(isCompletedToday: false);
+      expect(h.scheduledById[2008]![#title], h.scheduledById[2010]![#title]);
+      expect(h.scheduledById[2008]![#title], 'Hora do check-in');
+    });
+
+    test('chime reminders: tracking on/off bodies, icon, blue color, channel',
+        () async {
+      Future<Map<Symbol, dynamic>> chime(bool tracking) async {
+        final h = Harness();
+        await HydrationNotificationService(
+          center: h.center,
+          localeResolver: () => const Locale('pt', 'BR'),
+        ).scheduleHydrationReminders(HydrationSettings(
+          trackingEnabled: tracking,
+        ));
+        return h.scheduledById[1008]!;
+      }
+
+      final on = await chime(true);
+      final off = await chime(false);
+      expect(on[#title], 'Hora de beber água');
+      expect(on[#body], 'Toque para registrar.');
+      expect(off[#body], 'Um bom momento para um copo de água.');
+      final android = (on[#notificationDetails] as NotificationDetails).android!;
+      expect(android.icon, 'ic_stat_dualis');
+      expect(android.color, AppColors.dualisSymbolBlue);
+      expect(android.channelId, HydrationNotificationService.chimeChannelId);
+    });
+
+    test('alarm reminders: own copy, icon, blue color, max importance', () async {
+      final h = Harness();
+      await HydrationNotificationService(
+        center: h.center,
+        localeResolver: () => const Locale('pt', 'BR'),
+      ).scheduleHydrationReminders(const HydrationSettings(
+        reminderSoundStyle: ReminderSoundStyle.phoneAlarm,
+      ));
+      final call = h.scheduledById[1008]!;
+      expect(call[#title], 'Lembrete de água');
+      expect(call[#body], 'Você pediu um alarme para este horário.');
+      final android = (call[#notificationDetails] as NotificationDetails).android!;
+      expect(android.icon, 'ic_stat_dualis');
+      expect(android.color, AppColors.dualisSymbolBlue);
+      expect(android.importance, Importance.max);
+      expect(android.fullScreenIntent, isTrue);
+      expect(android.channelId, HydrationNotificationService.alarmChannelId);
     });
 
     test('the drawable and its keep rule exist', () {

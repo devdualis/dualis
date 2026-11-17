@@ -123,11 +123,11 @@ class DailyCheckinNotificationService {
 
     final l10n = _l10n();
     final details = _getNotificationDetails(l10n);
+    final title = l10n.notifCheckinTitle;
     final body = l10n.notifCheckinBody;
     final now = _now();
 
     for (final hour in reminderHours) {
-      final title = l10n.notifCheckinTitleAt(formatReminderHour(hour));
       try {
         final todaySlot =
             tz.TZDateTime(now.location, now.year, now.month, now.day, hour);
@@ -216,7 +216,7 @@ class DailyCheckinNotificationService {
     await requestPermissions();
     final l10n = _l10n();
     final details = _getNotificationDetails(l10n);
-    final title = 'Dualis: ${l10n.notifCheckinTitleAt("Agora")}';
+    final title = l10n.notifCheckinTitle;
     final body = l10n.notifCheckinBody;
     final scheduledDate = _now().add(Duration(seconds: seconds));
 

@@ -497,46 +497,42 @@ class AppLocalizationsPt extends AppLocalizations {
   String get navHydration => 'Água';
 
   @override
-  String get notifWaterTitle => '💧 Hora de Beber Água';
+  String get notifWaterTitle => 'Hora de beber água';
 
   @override
-  String notifWaterTitleAt(String time) {
-    return '💧 Hora de Beber Água ($time)';
-  }
+  String get notifWaterBodyTracking => 'Toque para registrar.';
 
   @override
-  String get notifWaterBodyTracking =>
-      'Toque para registrar a quantidade de água consumida.';
+  String get notifWaterBodyReminder => 'Um bom momento para um copo de água.';
 
   @override
-  String get notifWaterBodyReminder =>
-      'Mantenha seu corpo hidratado e saudável!';
+  String get notifWaterAlarmTitle => 'Lembrete de água';
 
   @override
-  String get notifWaterChimeChannelName => 'Lembretes de Água (Aviso Suave)';
+  String get notifWaterAlarmBody => 'Você pediu um alarme para este horário.';
+
+  @override
+  String get notifWaterChimeChannelName => 'Lembretes de água (aviso suave)';
 
   @override
   String get notifWaterChimeChannelDescription =>
       'Aviso de chegada estilo mensagem para lembrete de hidratação';
 
   @override
-  String get notifWaterAlarmChannelName => 'Lembretes de Água (Alarme Sonoro)';
+  String get notifWaterAlarmChannelName => 'Lembretes de água (alarme sonoro)';
 
   @override
   String get notifWaterAlarmChannelDescription =>
       'Alarme sonoro para lembrar de beber água a cada 2 horas';
 
   @override
-  String notifCheckinTitleAt(String time) {
-    return '🌿 Check-in Diário Dualis ($time)';
-  }
+  String get notifCheckinTitle => 'Hora do check-in';
 
   @override
-  String get notifCheckinBody =>
-      'Você ainda não fez seu registro de hoje. Toque para fazer seu check-in!';
+  String get notifCheckinBody => 'Toque para registrar como você está.';
 
   @override
-  String get notifCheckinChannelName => 'Lembretes de Check-in Diário';
+  String get notifCheckinChannelName => 'Lembretes de check-in diário';
 
   @override
   String get notifCheckinChannelDescription =>

@@ -970,34 +970,40 @@ abstract class AppLocalizations {
   /// **'Água'**
   String get navHydration;
 
-  /// Water reminder notification title (immediate reminder)
+  /// Water reminder notification title (scheduled and immediate, no time inside)
   ///
   /// In pt, this message translates to:
-  /// **'💧 Hora de Beber Água'**
+  /// **'Hora de beber água'**
   String get notifWaterTitle;
-
-  /// Scheduled water reminder notification title
-  ///
-  /// In pt, this message translates to:
-  /// **'💧 Hora de Beber Água ({time})'**
-  String notifWaterTitleAt(String time);
 
   /// Water reminder body when intake tracking is enabled
   ///
   /// In pt, this message translates to:
-  /// **'Toque para registrar a quantidade de água consumida.'**
+  /// **'Toque para registrar.'**
   String get notifWaterBodyTracking;
 
   /// Water reminder body when intake tracking is disabled
   ///
   /// In pt, this message translates to:
-  /// **'Mantenha seu corpo hidratado e saudável!'**
+  /// **'Um bom momento para um copo de água.'**
   String get notifWaterBodyReminder;
+
+  /// Water reminder notification title when the alarm sound style is chosen
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrete de água'**
+  String get notifWaterAlarmTitle;
+
+  /// Water reminder notification body when the alarm sound style is chosen
+  ///
+  /// In pt, this message translates to:
+  /// **'Você pediu um alarme para este horário.'**
+  String get notifWaterAlarmBody;
 
   /// Android notification channel name, soft water reminders
   ///
   /// In pt, this message translates to:
-  /// **'Lembretes de Água (Aviso Suave)'**
+  /// **'Lembretes de água (aviso suave)'**
   String get notifWaterChimeChannelName;
 
   /// Android notification channel description, soft water reminders
@@ -1009,7 +1015,7 @@ abstract class AppLocalizations {
   /// Android notification channel name, alarm-style water reminders
   ///
   /// In pt, this message translates to:
-  /// **'Lembretes de Água (Alarme Sonoro)'**
+  /// **'Lembretes de água (alarme sonoro)'**
   String get notifWaterAlarmChannelName;
 
   /// Android notification channel description, alarm-style water reminders
@@ -1018,22 +1024,22 @@ abstract class AppLocalizations {
   /// **'Alarme sonoro para lembrar de beber água a cada 2 horas'**
   String get notifWaterAlarmChannelDescription;
 
-  /// Scheduled daily check-in reminder notification title
+  /// Daily check-in reminder notification title (no time inside)
   ///
   /// In pt, this message translates to:
-  /// **'🌿 Check-in Diário Dualis ({time})'**
-  String notifCheckinTitleAt(String time);
+  /// **'Hora do check-in'**
+  String get notifCheckinTitle;
 
   /// Daily check-in reminder notification body
   ///
   /// In pt, this message translates to:
-  /// **'Você ainda não fez seu registro de hoje. Toque para fazer seu check-in!'**
+  /// **'Toque para registrar como você está.'**
   String get notifCheckinBody;
 
   /// Android notification channel name, daily check-in reminders
   ///
   /// In pt, this message translates to:
-  /// **'Lembretes de Check-in Diário'**
+  /// **'Lembretes de check-in diário'**
   String get notifCheckinChannelName;
 
   /// Android notification channel description, daily check-in reminders

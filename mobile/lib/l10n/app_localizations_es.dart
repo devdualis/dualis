@@ -497,20 +497,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get navHydration => 'Agua';
 
   @override
-  String get notifWaterTitle => '💧 Hora de beber agua';
+  String get notifWaterTitle => 'Hora de beber agua';
 
   @override
-  String notifWaterTitleAt(String time) {
-    return '💧 Hora de beber agua ($time)';
-  }
+  String get notifWaterBodyTracking => 'Toca para registrar.';
 
   @override
-  String get notifWaterBodyTracking =>
-      'Toca para registrar la cantidad de agua consumida.';
+  String get notifWaterBodyReminder => 'Un buen momento para un vaso de agua.';
 
   @override
-  String get notifWaterBodyReminder =>
-      '¡Mantén tu cuerpo hidratado y saludable!';
+  String get notifWaterAlarmTitle => 'Recordatorio de agua';
+
+  @override
+  String get notifWaterAlarmBody => 'Pediste una alarma para esta hora.';
 
   @override
   String get notifWaterChimeChannelName =>
@@ -529,13 +528,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Alarma sonora para recordarte beber agua cada 2 horas';
 
   @override
-  String notifCheckinTitleAt(String time) {
-    return '🌿 Check-in diario Dualis ($time)';
-  }
+  String get notifCheckinTitle => 'Hora del check-in';
 
   @override
-  String get notifCheckinBody =>
-      'Aún no hiciste tu registro de hoy. ¡Toca para hacer tu check-in!';
+  String get notifCheckinBody => 'Toca para registrar cómo estás.';
 
   @override
   String get notifCheckinChannelName => 'Recordatorios de check-in diario';

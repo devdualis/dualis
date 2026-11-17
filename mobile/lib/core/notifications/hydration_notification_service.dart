@@ -108,6 +108,8 @@ class HydrationNotificationService {
           priority: Priority.high,
           fullScreenIntent: true,
           category: AndroidNotificationCategory.alarm,
+          icon: NotificationStyle.androidSmallIcon,
+          color: NotificationStyle.waterColor,
           enableVibration: true,
           playSound: true,
         ),
@@ -128,6 +130,8 @@ class HydrationNotificationService {
         importance: Importance.high,
         priority: Priority.high,
         category: AndroidNotificationCategory.reminder,
+        icon: NotificationStyle.androidSmallIcon,
+        color: NotificationStyle.waterColor,
         enableVibration: true,
         playSound: true,
       ),
@@ -139,9 +143,21 @@ class HydrationNotificationService {
     );
   }
 
-  String _body(AppLocalizations l10n, bool trackingEnabled) => trackingEnabled
-      ? l10n.notifWaterBodyTracking
-      : l10n.notifWaterBodyReminder;
+  String _title(AppLocalizations l10n, ReminderSoundStyle style) =>
+      style == ReminderSoundStyle.phoneAlarm
+          ? l10n.notifWaterAlarmTitle
+          : l10n.notifWaterTitle;
+
+  String _body(
+    AppLocalizations l10n,
+    ReminderSoundStyle style,
+    bool trackingEnabled,
+  ) {
+    if (style == ReminderSoundStyle.phoneAlarm) return l10n.notifWaterAlarmBody;
+    return trackingEnabled
+        ? l10n.notifWaterBodyTracking
+        : l10n.notifWaterBodyReminder;
+  }
 
   tz.TZDateTime _now() => _clock?.call() ?? tz.TZDateTime.now(tz.local);
 
@@ -170,7 +186,9 @@ class HydrationNotificationService {
 
     final l10n = _l10n();
     final details = _getNotificationDetails(settings.reminderSoundStyle, l10n);
-    final body = _body(l10n, settings.trackingEnabled);
+    final title = _title(l10n, settings.reminderSoundStyle);
+    final body =
+        _body(l10n, settings.reminderSoundStyle, settings.trackingEnabled);
     final now = _now();
 
     // Verifica se alarmes exatos são permitidos pelo SO
@@ -182,7 +200,6 @@ class HydrationNotificationService {
     for (final hour in settings.scheduledHours) {
       if (hour < 0 || hour > 23) continue;
       final timeFormatted = formatReminderHour(hour);
-      final title = l10n.notifWaterTitleAt(timeFormatted);
 
       try {
         final todaySlot = tz.TZDateTime(
@@ -289,8 +306,8 @@ class HydrationNotificationService {
 
     await _plugin.show(
       id: immediateReminderId,
-      title: l10n.notifWaterTitle,
-      body: customBody ?? _body(l10n, trackingEnabled),
+      title: _title(l10n, style),
+      body: customBody ?? _body(l10n, style, trackingEnabled),
       notificationDetails: details,
       payload: NotificationPayloads.openWaterModal,
     );
@@ -308,6 +325,8 @@ class HydrationNotificationService {
     await requestPermissions();
     final l10n = _l10n();
     final details = _getNotificationDetails(style, l10n);
+    final title = _title(l10n, style);
+    final body = customBody ?? _body(l10n, style, trackingEnabled);
     final scheduledDate =
         tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds));
 
@@ -319,9 +338,8 @@ class HydrationNotificationService {
     try {
       await _plugin.zonedSchedule(
         id: testReminderId,
-        title: l10n.notifWaterTitle,
-        body: customBody ??
-            '💧 Dualis: Alerta de teste em segundo plano! O app está ativo na memória.',
+        title: title,
+        body: body,
         scheduledDate: scheduledDate,
         notificationDetails: details,
         payload: NotificationPayloads.openWaterModal,
@@ -330,9 +348,8 @@ class HydrationNotificationService {
     } catch (_) {
       await _plugin.zonedSchedule(
         id: testReminderId,
-        title: l10n.notifWaterTitle,
-        body: customBody ??
-            '💧 Dualis: Alerta de teste em segundo plano! O app está ativo na memória.',
+        title: title,
+        body: body,
         scheduledDate: scheduledDate,
         notificationDetails: details,
         payload: NotificationPayloads.openWaterModal,

@@ -494,44 +494,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navHydration => 'Water';
 
   @override
-  String get notifWaterTitle => '💧 Time to Drink Water';
+  String get notifWaterTitle => 'Time to drink water';
 
   @override
-  String notifWaterTitleAt(String time) {
-    return '💧 Time to Drink Water ($time)';
-  }
+  String get notifWaterBodyTracking => 'Tap to log it.';
 
   @override
-  String get notifWaterBodyTracking => 'Tap to log how much water you drank.';
+  String get notifWaterBodyReminder => 'A good moment for a glass of water.';
 
   @override
-  String get notifWaterBodyReminder => 'Keep your body hydrated and healthy!';
+  String get notifWaterAlarmTitle => 'Water reminder';
 
   @override
-  String get notifWaterChimeChannelName => 'Water Reminders (Soft Chime)';
+  String get notifWaterAlarmBody => 'You asked for an alarm at this time.';
+
+  @override
+  String get notifWaterChimeChannelName => 'Water reminders (soft chime)';
 
   @override
   String get notifWaterChimeChannelDescription =>
       'Message-style alert reminding you to stay hydrated';
 
   @override
-  String get notifWaterAlarmChannelName => 'Water Reminders (Alarm Sound)';
+  String get notifWaterAlarmChannelName => 'Water reminders (alarm sound)';
 
   @override
   String get notifWaterAlarmChannelDescription =>
       'Alarm sound reminding you to drink water every 2 hours';
 
   @override
-  String notifCheckinTitleAt(String time) {
-    return '🌿 Dualis Daily Check-in ($time)';
-  }
+  String get notifCheckinTitle => 'Time for your check-in';
 
   @override
-  String get notifCheckinBody =>
-      'You haven\'t made today\'s entry yet. Tap to check in!';
+  String get notifCheckinBody => 'Tap to log how you feel.';
 
   @override
-  String get notifCheckinChannelName => 'Daily Check-in Reminders';
+  String get notifCheckinChannelName => 'Daily check-in reminders';
 
   @override
   String get notifCheckinChannelDescription =>

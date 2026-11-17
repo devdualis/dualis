@@ -590,28 +590,27 @@
   "@navHydration": {
     "description": "Bottom navigation Hydration label"
   },
-  "notifWaterTitle": "💧 Hora de Beber Água",
+  "notifWaterTitle": "Hora de beber água",
   "@notifWaterTitle": {
-    "description": "Water reminder notification title (immediate reminder)"
+    "description": "Water reminder notification title (scheduled and immediate, no time inside)"
   },
-  "notifWaterTitleAt": "💧 Hora de Beber Água ({time})",
-  "@notifWaterTitleAt": {
-    "description": "Scheduled water reminder notification title",
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "notifWaterBodyTracking": "Toque para registrar a quantidade de água consumida.",
+  "notifWaterBodyTracking": "Toque para registrar.",
   "@notifWaterBodyTracking": {
     "description": "Water reminder body when intake tracking is enabled"
   },
-  "notifWaterBodyReminder": "Mantenha seu corpo hidratado e saudável!",
+  "notifWaterBodyReminder": "Um bom momento para um copo de água.",
   "@notifWaterBodyReminder": {
     "description": "Water reminder body when intake tracking is disabled"
   },
-  "notifWaterChimeChannelName": "Lembretes de Água (Aviso Suave)",
+  "notifWaterAlarmTitle": "Lembrete de água",
+  "@notifWaterAlarmTitle": {
+    "description": "Water reminder notification title when the alarm sound style is chosen"
+  },
+  "notifWaterAlarmBody": "Você pediu um alarme para este horário.",
+  "@notifWaterAlarmBody": {
+    "description": "Water reminder notification body when the alarm sound style is chosen"
+  },
+  "notifWaterChimeChannelName": "Lembretes de água (aviso suave)",
   "@notifWaterChimeChannelName": {
     "description": "Android notification channel name, soft water reminders"
   },
@@ -619,7 +618,7 @@
   "@notifWaterChimeChannelDescription": {
     "description": "Android notification channel description, soft water reminders"
   },
-  "notifWaterAlarmChannelName": "Lembretes de Água (Alarme Sonoro)",
+  "notifWaterAlarmChannelName": "Lembretes de água (alarme sonoro)",
   "@notifWaterAlarmChannelName": {
     "description": "Android notification channel name, alarm-style water reminders"
   },
@@ -627,20 +626,15 @@
   "@notifWaterAlarmChannelDescription": {
     "description": "Android notification channel description, alarm-style water reminders"
   },
-  "notifCheckinTitleAt": "🌿 Check-in Diário Dualis ({time})",
-  "@notifCheckinTitleAt": {
-    "description": "Scheduled daily check-in reminder notification title",
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
+  "notifCheckinTitle": "Hora do check-in",
+  "@notifCheckinTitle": {
+    "description": "Daily check-in reminder notification title (no time inside)"
   },
-  "notifCheckinBody": "Você ainda não fez seu registro de hoje. Toque para fazer seu check-in!",
+  "notifCheckinBody": "Toque para registrar como você está.",
   "@notifCheckinBody": {
     "description": "Daily check-in reminder notification body"
   },
-  "notifCheckinChannelName": "Lembretes de Check-in Diário",
+  "notifCheckinChannelName": "Lembretes de check-in diário",
   "@notifCheckinChannelName": {
     "description": "Android notification channel name, daily check-in reminders"
   },
