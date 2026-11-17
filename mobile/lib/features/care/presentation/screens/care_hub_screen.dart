@@ -311,7 +311,6 @@ class _CareTile extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: 92),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             CareIconTile(icon),
             const SizedBox(height: 14),
