@@ -162,7 +162,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ref.watch(premiumProfilesEnabledProvider)
               // Premium builds: tier mark right under the app logo, the usual
               // place apps show their plan. Same text as the login label.
-              ? Column(
+              // Scales down instead of overflowing when the profile pill
+              // leaves little room for the title.
+              ? FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -193,6 +198,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ],
                   ),
                 ],
+              ),
               )
               : logo;
       appBarActions = [
