@@ -10185,6 +10185,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Cancelar'**
   String get jv2DescribeCancel;
+
+  /// Eyebrow above the Home check-in card title (shown uppercase)
+  ///
+  /// In pt, this message translates to:
+  /// **'Check-in diário · 2 min'**
+  String get homeCheckinEyebrow;
+
+  /// Short visible label on the red help button of the bottom bar; full name stays in tooltip and semantics
+  ///
+  /// In pt, this message translates to:
+  /// **'Ajuda'**
+  String get navHelpShort;
 }
 
 class _AppLocalizationsDelegate

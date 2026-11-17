@@ -1718,5 +1718,7 @@
   "jv2DescribeFailed": "Could not look for suggestions right now. Continue with the usual screens.",
   "jv2DescribeBusy": "Many suggestions in a row. Try again in a moment or continue with the usual screens.",
   "jv2DescribeProfileNotAllowed": "AI suggestions only work on profiles you manage.",
-  "jv2DescribeCancel": "Cancel"
+  "jv2DescribeCancel": "Cancel",
+  "homeCheckinEyebrow": "Daily check-in · 2 min",
+  "navHelpShort": "Help"
 }

@@ -184,17 +184,17 @@ void main() {
         find.descendant(of: destination, matching: find.byIcon(Icons.emergency_outlined)),
       );
       expect(icon.color, Colors.white);
-      expect(icon.size, 26);
+      expect(icon.size, 22);
       final circle = tester.widget<Container>(find.descendant(
         of: destination,
         matching: find.byWidgetPredicate(
           (widget) =>
               widget is Container &&
-              widget.decoration is BoxDecoration &&
-              (widget.decoration as BoxDecoration).color == AppColors.emergencyCrimson,
+              widget.decoration is ShapeDecoration &&
+              (widget.decoration as ShapeDecoration).color == AppColors.emergencyCrimson,
         ),
       ));
-      expect((circle.decoration as BoxDecoration).shape, BoxShape.circle);
+      expect((circle.decoration as ShapeDecoration).shape, isA<StadiumBorder>());
     });
   });
 }

@@ -1,6 +1,7 @@
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/premium_gradient_icon.dart';
@@ -148,11 +149,14 @@ class DualisBottomNavBar extends StatelessWidget {
                 child: Material(
                   key: const Key('nav_destination_emergency'),
                   color: Colors.transparent,
-                  shape: const CircleBorder(),
+                  shape: const StadiumBorder(),
                   child: InkWell(
                     onTap: onEmergencyTap,
-                    customBorder: const CircleBorder(),
-                    child: _emergencyGlyph(Icons.emergency_outlined),
+                    customBorder: const StadiumBorder(),
+                    child: _emergencyGlyph(
+                      Icons.emergency_outlined,
+                      l10n?.navHelpShort ?? 'Ajuda',
+                    ),
                   ),
                 ),
               ),
@@ -181,15 +185,16 @@ class DualisBottomNavBar extends StatelessWidget {
     return t;
   }
 
-  Widget _emergencyGlyph(IconData icon) {
+  Widget _emergencyGlyph(IconData icon, String label) {
     return Container(
-      width: _barHeight,
       height: _barHeight,
+      constraints: const BoxConstraints(minWidth: _barHeight),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       alignment: Alignment.center,
-      decoration: BoxDecoration(
+      decoration: ShapeDecoration(
         color: AppColors.emergencyCrimson,
-        shape: BoxShape.circle,
-        boxShadow: [
+        shape: const StadiumBorder(),
+        shadows: [
           BoxShadow(
             color: AppColors.emergencyCrimson.withValues(alpha: 0.6),
             blurRadius: 26,
@@ -198,7 +203,22 @@ class DualisBottomNavBar extends StatelessWidget {
           ),
         ],
       ),
-      child: Icon(icon, size: 26, color: Colors.white),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 22, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            maxLines: 1,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

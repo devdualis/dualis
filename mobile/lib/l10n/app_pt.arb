@@ -3619,5 +3619,13 @@
   "jv2DescribeCancel": "Cancelar",
   "@jv2DescribeCancel": {
     "description": "Closes the free description sheet"
+  },
+  "homeCheckinEyebrow": "Check-in diário · 2 min",
+  "@homeCheckinEyebrow": {
+    "description": "Eyebrow above the Home check-in card title (shown uppercase)"
+  },
+  "navHelpShort": "Ajuda",
+  "@navHelpShort": {
+    "description": "Short visible label on the red help button of the bottom bar; full name stays in tooltip and semantics"
   }
 }

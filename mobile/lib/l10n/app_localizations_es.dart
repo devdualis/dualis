@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -6057,4 +6056,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get jv2DescribeCancel => 'Cancelar';
+
+  @override
+  String get homeCheckinEyebrow => 'Check-in diario · 2 min';
+
+  @override
+  String get navHelpShort => 'Ayuda';
 }

@@ -242,7 +242,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Check-in Diário em 2 Etapas'.toUpperCase(),
+                  AppLocalizations.of(context).homeCheckinEyebrow.toUpperCase(),
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,

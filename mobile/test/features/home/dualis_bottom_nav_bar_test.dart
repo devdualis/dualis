@@ -104,12 +104,12 @@ void main() {
         matching: find.byWidgetPredicate(
           (widget) =>
               widget is Container &&
-              widget.decoration is BoxDecoration &&
-              (widget.decoration as BoxDecoration).color ==
+              widget.decoration is ShapeDecoration &&
+              (widget.decoration as ShapeDecoration).color ==
                   AppColors.emergencyCrimson,
         ),
       ));
-      expect((circle.decoration as BoxDecoration).shape, BoxShape.circle);
+      expect((circle.decoration as ShapeDecoration).shape, isA<StadiumBorder>());
 
       await tester.tap(find.byKey(const Key('nav_destination_emergency')));
       await tester.pumpAndSettle();
