@@ -750,11 +750,14 @@ void main() {
     });
 
     test('the drawable and its keep rule exist', () {
-      expect(
-        File('android/app/src/main/res/drawable/ic_stat_dualis.xml')
-            .existsSync(),
-        isTrue,
-      );
+      for (final density in ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi']) {
+        expect(
+          File('android/app/src/main/res/drawable-$density/ic_stat_dualis.png')
+              .existsSync(),
+          isTrue,
+          reason: 'drawable-$density',
+        );
+      }
       expect(
         File('android/app/src/main/res/raw/keep.xml').readAsStringSync(),
         contains('ic_stat_dualis'),
