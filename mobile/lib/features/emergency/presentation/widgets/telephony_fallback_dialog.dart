@@ -60,6 +60,7 @@ class TelephonyFallbackDialog extends StatelessWidget {
             ),
             child: Text(
               phoneNumber,
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 36,
                 fontWeight: FontWeight.w900,

@@ -359,6 +359,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ),
                         ],
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),

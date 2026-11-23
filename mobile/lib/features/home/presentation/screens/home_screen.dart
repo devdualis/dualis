@@ -445,7 +445,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 16 + MediaQuery.paddingOf(context).bottom,
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   DualAxisTriggerCard(
                     greeting: useDelegatedAvatar

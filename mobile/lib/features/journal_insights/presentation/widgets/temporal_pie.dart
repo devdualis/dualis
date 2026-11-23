@@ -31,12 +31,21 @@ class TemporalPieChart extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (total == 0)
-          Text(l10n.xv2DashNoEmotional, style: chartCaptionStyle)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            child: Center(
+              child: Text(
+                l10n.xv2DashNoEmotional,
+                textAlign: TextAlign.center,
+                style: chartCaptionStyle,
+              ),
+            ),
+          )
         else ...[
           Center(
             child: SizedBox(
-              width: 170,
-              height: 170,
+              width: 180,
+              height: 180,
               child: Semantics(
                 label: [
                   for (final t in times)
@@ -45,7 +54,7 @@ class TemporalPieChart extends StatelessWidget {
                 child: PieChart(
                   PieChartData(
                     sectionsSpace: 2,
-                    centerSpaceRadius: 0,
+                    centerSpaceRadius: 26,
                     startDegreeOffset: -90,
                     pieTouchData: PieTouchData(enabled: false),
                     sections: [
@@ -53,9 +62,9 @@ class TemporalPieChart extends StatelessWidget {
                         PieChartSectionData(
                           value: pie.counts[t]!.toDouble(),
                           color: ChartTokens.time(t),
-                          radius: 82,
+                          radius: 64,
                           title: '${_percent(pie.counts[t]!, total)}%',
-                          titlePositionPercentageOffset: 0.62,
+                          titlePositionPercentageOffset: 0.55,
                           titleStyle: GoogleFonts.inter(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
@@ -72,11 +81,14 @@ class TemporalPieChart extends StatelessWidget {
           for (final t in times) _SliceRow(time: t, pie: pie),
         ],
         if (pie.withoutAxis > 0) ...[
-          const SizedBox(height: 4),
-          Text(
-            l10n.gxPieWithoutAxis(pie.withoutAxis),
-            key: const Key('temporal_pie_without_axis'),
-            style: chartCaptionStyle,
+          const SizedBox(height: 6),
+          Center(
+            child: Text(
+              l10n.gxPieWithoutAxis(pie.withoutAxis),
+              key: const Key('temporal_pie_without_axis'),
+              textAlign: TextAlign.center,
+              style: chartCaptionStyle,
+            ),
           ),
         ],
       ],

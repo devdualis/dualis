@@ -143,6 +143,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     onPressed: () => context.go(RoutePaths.login),
                     child: Text(
                       l10n.forgotPasswordBackToLogin,
+                      textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

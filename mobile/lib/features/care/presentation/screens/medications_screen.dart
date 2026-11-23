@@ -172,6 +172,7 @@ class _SlotCardState extends ConsumerState<_SlotCard> {
               Container(
                 width: 26,
                 height: 26,
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: action == 'taken' ? AppColors.dualisSymbolCyan : Colors.transparent,
@@ -210,9 +211,9 @@ class _SlotCardState extends ConsumerState<_SlotCard> {
                 Expanded(
                   child: FilledButton(
                     key: Key('slot_taken_${widget.med.id}_${widget.at.hour}${widget.at.minute}'),
-                    style: FilledButton.styleFrom(minimumSize: const Size(0, 44), padding: const EdgeInsets.symmetric(horizontal: 8)),
+                    style: FilledButton.styleFrom(minimumSize: const Size(0, 44), padding: const EdgeInsets.symmetric(horizontal: 4)),
                     onPressed: _busy ? null : () => _act(IntakeAction.taken),
-                    child: Text(l10n.careMedTaken, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    child: Text(l10n.careMedTaken, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -220,7 +221,7 @@ class _SlotCardState extends ConsumerState<_SlotCard> {
                   child: OutlinedButton(
                     style: _slotOutlined,
                     onPressed: _busy ? null : () => _act(IntakeAction.snoozed),
-                    child: Text(l10n.careMedSnooze, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    child: Text(l10n.careMedSnooze, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -228,7 +229,7 @@ class _SlotCardState extends ConsumerState<_SlotCard> {
                   child: OutlinedButton(
                     style: _slotOutlined,
                     onPressed: _busy ? null : () => _act(IntakeAction.skipped),
-                    child: Text(l10n.careMedSkip, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    child: Text(l10n.careMedSkip, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
                   ),
                 ),
               ],

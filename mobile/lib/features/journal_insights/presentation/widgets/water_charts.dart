@@ -83,11 +83,15 @@ class WaterDayRing extends StatelessWidget {
                 )
               : Column(
                   mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     FittedBox(
+                      fit: BoxFit.scaleDown,
                       child: Text(
                         formatMl(totalMl, locale),
                         key: const Key('water_day_ring_total'),
+                        textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
@@ -95,16 +99,19 @@ class WaterDayRing extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (percent != null)
+                    if (percent != null) ...[
+                      const SizedBox(height: 2),
                       Text(
                         '$percent%',
                         key: const Key('water_day_ring_percent'),
+                        textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondaryLight,
+                          color: AppColors.clinicalTealDark,
                         ),
                       ),
+                    ],
                   ],
                 ),
         ),
@@ -135,8 +142,14 @@ class WaterStepChart extends StatelessWidget {
     final locale = Localizations.localeOf(context).toLanguageTag();
     if (steps.isEmpty) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Text(l10n.gxNoWaterRecord, style: chartCaptionStyle),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        child: Center(
+          child: Text(
+            l10n.gxNoWaterRecord,
+            textAlign: TextAlign.center,
+            style: chartCaptionStyle,
+          ),
+        ),
       );
     }
     final last = steps.last.cumulativeMl;
@@ -418,7 +431,13 @@ class WaterPeriodBars extends StatelessWidget {
         ),
         if (inPeriod(today, start, days)) ...[
           const SizedBox(height: 6),
-          Text(l10n.gxTodayInProgress, style: chartCaptionStyle),
+          Center(
+            child: Text(
+              l10n.gxTodayInProgress,
+              textAlign: TextAlign.center,
+              style: chartCaptionStyle,
+            ),
+          ),
         ],
       ],
     );

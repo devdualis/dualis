@@ -42,9 +42,12 @@ class EmergencyActionButton extends StatelessWidget {
           ),
           label: Text(
             label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               color: AppColors.emergencyCrimson,
-              fontSize: 18,
+              fontSize: 16.5,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -71,9 +74,12 @@ class EmergencyActionButton extends StatelessWidget {
         ),
         label: Text(
           label,
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
         ),

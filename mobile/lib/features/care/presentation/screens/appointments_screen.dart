@@ -92,8 +92,9 @@ class _AppointmentCard extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('${at.day}', style: careTitle(18).copyWith(color: highlight ? Colors.white : CareColors.slate)),
+                    Text('${at.day}', textAlign: TextAlign.center, style: careTitle(18).copyWith(color: highlight ? Colors.white : CareColors.slate)),
                     Text(DateFormat.MMM(locale).format(at).toUpperCase(),
+                        textAlign: TextAlign.center,
                         style: careBody(11).copyWith(
                             fontWeight: FontWeight.w700, color: highlight ? AppColors.dualisSymbolCyan : CareColors.slate)),
                   ],
@@ -118,7 +119,7 @@ class _AppointmentCard extends StatelessWidget {
                           child: Row(children: [
                             const Icon(Icons.place_outlined, size: 16, color: AppColors.dualisNavy),
                             const SizedBox(width: 4),
-                            Expanded(child: Text(a.str('place')!, style: careBody().copyWith(color: AppColors.dualisNavy, decoration: TextDecoration.underline))),
+                            Expanded(child: Text(a.str('place')!, maxLines: 2, overflow: TextOverflow.ellipsis, style: careBody().copyWith(color: AppColors.dualisNavy, decoration: TextDecoration.underline))),
                           ]),
                         ),
                       ),

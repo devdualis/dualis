@@ -31,12 +31,18 @@ class JournalEntriesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     if (entries.isEmpty) {
-      return Text(
-        l10n.xv2DashNoEntries,
-        style: GoogleFonts.inter(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: AppColors.textSecondaryLight,
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        child: Center(
+          child: Text(
+            l10n.xv2DashNoEntries,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textSecondaryLight,
+            ),
+          ),
         ),
       );
     }

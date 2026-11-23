@@ -188,6 +188,7 @@ class _EmergencyScreenState extends ConsumerState<EmergencyScreen> {
                 ),
                 child: Text(
                   crisisResourcesText(loc, lines),
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,

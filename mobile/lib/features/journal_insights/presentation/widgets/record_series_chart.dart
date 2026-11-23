@@ -282,8 +282,14 @@ class _SeriesLinesCardState extends State<SeriesLinesCard> {
               ),
           ],
         ),
-        const SizedBox(height: 6),
-        Text(l10n.gxLegendHint, style: chartCaptionStyle),
+        const SizedBox(height: 8),
+        Center(
+          child: Text(
+            l10n.gxLegendHint,
+            textAlign: TextAlign.center,
+            style: chartCaptionStyle,
+          ),
+        ),
       ],
     );
   }
@@ -375,8 +381,14 @@ class _SeriesAnswersCardState extends State<SeriesAnswersCard> {
         const SizedBox(height: 8),
         if (withIntensity.isEmpty)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Text(l10n.gxNoIntensityPoints, style: chartCaptionStyle),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+            child: Center(
+              child: Text(
+                l10n.gxNoIntensityPoints,
+                textAlign: TextAlign.center,
+                style: chartCaptionStyle,
+              ),
+            ),
           )
         else
           RecordSeriesChart(

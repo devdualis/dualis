@@ -177,6 +177,8 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundDepth,
       appBar: AppBar(
+        backgroundColor: AppColors.backgroundDepth,
+        scrolledUnderElevation: 0,
         title: Text(
           l10n.privacyCenterTitle,
           style: const TextStyle(
@@ -392,7 +394,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                               ),
                             ),
                             icon: const Icon(Icons.description_outlined, size: 18),
-                            label: const Text('Termos de Uso'),
+                            label: const FittedBox(fit: BoxFit.scaleDown, child: Text('Termos de Uso')),
                             onPressed: () => context.push(RoutePaths.termsOfService),
                           ),
                         ),
@@ -409,7 +411,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                               ),
                             ),
                             icon: const Icon(Icons.policy_outlined, size: 18),
-                            label: const Text('Política LGPD'),
+                            label: const FittedBox(fit: BoxFit.scaleDown, child: Text('Política LGPD')),
                             onPressed: () => context.push(RoutePaths.privacyPolicy),
                           ),
                         ),

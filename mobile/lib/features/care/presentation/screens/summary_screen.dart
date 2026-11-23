@@ -311,7 +311,13 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
                             if (b.lines.length > 4) Text(l10n.careSummaryMore(b.lines.length - 4), style: careBody(12)),
                           ],
                           const Divider(height: 24),
-                          Text(l10n.careSummaryFooter, style: careBody(11)),
+                          Center(
+                            child: Text(
+                              l10n.careSummaryFooter,
+                              textAlign: TextAlign.center,
+                              style: careBody(11),
+                            ),
+                          ),
                         ],
                       ),
               ),

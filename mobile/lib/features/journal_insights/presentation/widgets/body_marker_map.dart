@@ -82,7 +82,16 @@ class BodyMarkerMap extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         if (regions.isEmpty)
-          Text(l10n.histNoPhysical, style: chartCaptionStyle)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            child: Center(
+              child: Text(
+                l10n.histNoPhysical,
+                textAlign: TextAlign.center,
+                style: chartCaptionStyle,
+              ),
+            ),
+          )
         else ...[
           for (final r in onMap) _RegionRow(summary: r, onTap: () => open(r)),
           if (wholeBody.isNotEmpty) ...[
@@ -93,8 +102,14 @@ class BodyMarkerMap extends StatelessWidget {
               _RegionRow(summary: r, onTap: () => open(r)),
           ],
         ],
-        const SizedBox(height: 6),
-        Text(l10n.gxBodyMapCaption, style: chartCaptionStyle),
+        const SizedBox(height: 8),
+        Center(
+          child: Text(
+            l10n.gxBodyMapCaption,
+            textAlign: TextAlign.center,
+            style: chartCaptionStyle,
+          ),
+        ),
       ],
     );
   }

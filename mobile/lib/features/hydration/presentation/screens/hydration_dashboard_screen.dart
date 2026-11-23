@@ -339,6 +339,7 @@ class _TodayCard extends ConsumerWidget {
                     ),
                     Text(
                       '${state.progressPercent}%',
+                      textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: onNavy.withValues(alpha: 0.75),
@@ -527,6 +528,9 @@ class _QuickButton extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w700,
@@ -550,12 +554,16 @@ class _TodayLogs extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     if (state.todayLogs.isEmpty) {
       return _Panel(
-        child: Center(
-          child: Text(
-            l10n.xv2WaterNoLogsToday,
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              color: AppColors.textSecondaryLight,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          child: Center(
+            child: Text(
+              l10n.xv2WaterNoLogsToday,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: AppColors.textSecondaryLight,
+              ),
             ),
           ),
         ),

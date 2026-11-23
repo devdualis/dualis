@@ -203,6 +203,7 @@ class LibraryArticleTile extends StatelessWidget {
                 Container(
                   width: 34,
                   height: 34,
+                  alignment: Alignment.center,
                   decoration: const BoxDecoration(
                     color: AppColors.iconTileTint,
                     shape: BoxShape.circle,

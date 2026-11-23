@@ -345,9 +345,12 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
               const SizedBox(height: 32),
               GlassCard(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 18),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(_codeLength, (i) => _buildDigitInput(i)),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(_codeLength, (i) => _buildDigitInput(i)),
+                  ),
                 ),
               ),
               const SizedBox(height: 36),

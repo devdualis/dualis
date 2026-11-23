@@ -102,7 +102,13 @@ class CombinedCalendar extends StatelessWidget {
           },
         ),
         const SizedBox(height: 8),
-        Text(l10n.gxCalendarCaption, style: chartCaptionStyle),
+        Center(
+          child: Text(
+            l10n.gxCalendarCaption,
+            textAlign: TextAlign.center,
+            style: chartCaptionStyle,
+          ),
+        ),
       ],
     );
   }
@@ -532,7 +538,13 @@ class CalendarDayView extends ConsumerWidget {
         ],
         if (!day.isEmpty) ...[
           const SizedBox(height: 12),
-          Text(l10n.gxSameDayNote, style: chartCaptionStyle),
+          Center(
+            child: Text(
+              l10n.gxSameDayNote,
+              textAlign: TextAlign.center,
+              style: chartCaptionStyle,
+            ),
+          ),
         ],
       ],
     );

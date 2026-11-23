@@ -99,11 +99,15 @@ class CareRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveCrossAlign = (subtitle != null && subtitle!.length > 36)
+        ? CrossAxisAlignment.start
+        : CrossAxisAlignment.center;
     return CareCard(
       onTap: onTap,
       color: color,
       borderColor: borderColor,
       child: Row(
+        crossAxisAlignment: effectiveCrossAlign,
         children: [
           if (leading != null) ...[leading!, const SizedBox(width: 12)],
           Expanded(
@@ -117,7 +121,10 @@ class CareRow extends StatelessWidget {
           ),
           if (trailing != null) ...[const SizedBox(width: 8), trailing!]
           else if (onTap != null)
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
+            Padding(
+              padding: EdgeInsets.only(top: effectiveCrossAlign == CrossAxisAlignment.start ? 6 : 0),
+              child: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondaryLight),
+            ),
         ],
       ),
     );
@@ -143,7 +150,11 @@ class CarePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-      child: Text(label, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, color: fg)),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, color: fg),
+      ),
     );
   }
 }
@@ -162,7 +173,10 @@ class CareNote extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 18, color: AppColors.textSecondaryLight),
+            Padding(
+              padding: const EdgeInsets.only(top: 1),
+              child: Icon(icon, size: 18, color: AppColors.textSecondaryLight),
+            ),
             const SizedBox(width: 8),
             Expanded(child: Text(text, style: careBody(12))),
           ],
@@ -185,14 +199,18 @@ class CareEmpty extends StatelessWidget {
   final IconData icon;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 28),
-        child: Column(
-          children: [
-            Icon(icon, size: 40, color: AppColors.textSecondaryLight.withValues(alpha: 0.6)),
-            const SizedBox(height: 8),
-            Text(text, textAlign: TextAlign.center, style: careBody(14)),
-          ],
+  Widget build(BuildContext context) => Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(icon, size: 40, color: AppColors.textSecondaryLight.withValues(alpha: 0.6)),
+              const SizedBox(height: 8),
+              Text(text, textAlign: TextAlign.center, style: careBody(14)),
+            ],
+          ),
         ),
       );
 }

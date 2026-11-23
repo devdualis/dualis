@@ -74,7 +74,7 @@ class _ExamItemScreenState extends ConsumerState<ExamItemScreen> {
                   children: [
                     TableRow(children: [
                       for (final h in [l10n.careExamDate, l10n.careExamValue, l10n.careExamReferencePrinted, l10n.careExamLab])
-                        Padding(padding: const EdgeInsets.symmetric(vertical: 6), child: Text(h, style: careBody(11))),
+                        Padding(padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6), child: Text(h, style: careBody(11))),
                     ]),
                     for (final (date, v, lab, _) in shown)
                       TableRow(children: [
@@ -96,7 +96,7 @@ class _ExamItemScreenState extends ConsumerState<ExamItemScreen> {
   }
 
   Widget _cell(String text, {bool bold = false}) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
         child: Text(text, style: bold ? careTitle(13) : careBody(12)),
       );
 }

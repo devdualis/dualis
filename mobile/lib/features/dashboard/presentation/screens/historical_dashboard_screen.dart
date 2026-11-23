@@ -626,11 +626,18 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
         color: AppColors.textPrimaryLight,
       );
 
-  Widget _emptyText(String text) => Text(
-        text,
-        style: GoogleFonts.inter(
-          fontSize: 13,
-          color: AppColors.textSecondaryLight,
+  Widget _emptyText(String text) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        child: Center(
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textSecondaryLight,
+            ),
+          ),
         ),
       );
 }
