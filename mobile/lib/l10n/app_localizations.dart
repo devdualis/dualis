@@ -2581,7 +2581,7 @@ abstract class AppLocalizations {
   /// No description provided for @authEmailHint.
   ///
   /// In pt, this message translates to:
-  /// **'seu.email@exemplo.com'**
+  /// **'nome@dualischeckup.com'**
   String get authEmailHint;
 
   /// No description provided for @loginPasswordRequired.
