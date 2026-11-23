@@ -11,15 +11,19 @@
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>O Dualis transforma sua fala em texto para você navegar e registrar seu dia por voz. Quando o aparelho permite, isso acontece no próprio aparelho.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Usamos a câmera para sua foto de perfil.</string>
+	<string>O Dualis precisa de acesso à câmera para você capturar sua foto de perfil e anexar exames.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Usamos sua galeria para sua foto de perfil.</string>
+	<string>O Dualis precisa de acesso à sua galeria para você escolher sua foto de perfil e anexar exames.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>O Dualis usa sua localização para encontrar serviços e profissionais de saúde próximos a você.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 		<key>NSAllowsArbitraryLoads</key>
-		<true/>
+		<false/>
 	</dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>

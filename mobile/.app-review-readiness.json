@@ -1,0 +1,17 @@
+{
+  "build": "1.0.0 (1)",
+  "checked_on": "2026-11-23",
+  "enforce": false,
+  "checks": {
+    "demo_account": "pass",
+    "live_backend": "pass",
+    "review_notes": "pass",
+    "screenshots_match_build": "pass",
+    "account_deletion_device_test": "pass",
+    "privacy_labels_match_runtime": "pass",
+    "iap_reachable_by_reviewer": "n/a"
+  },
+  "notes": {
+    "iap_reachable_by_reviewer": "Dualis currently operates as a free-tier wellness platform; in-app purchases are not enabled yet in this build."
+  }
+}

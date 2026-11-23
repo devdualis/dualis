@@ -1448,7 +1448,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Accede a tu diario de bienestar de forma segura.';
 
   @override
-  String get authEmailHint => 'tu.correo@ejemplo.com';
+  String get authEmailHint => 'nombre@dualischeckup.com';
 
   @override
   String get loginPasswordRequired => 'La contraseña es obligatoria.';

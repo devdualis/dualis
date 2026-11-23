@@ -1437,7 +1437,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginSubtitle => 'Access your wellness journal securely.';
 
   @override
-  String get authEmailHint => 'your.email@example.com';
+  String get authEmailHint => 'name@dualischeckup.com';
 
   @override
   String get loginPasswordRequired => 'Password is required.';

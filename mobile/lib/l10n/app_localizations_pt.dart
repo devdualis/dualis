@@ -1443,7 +1443,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get loginSubtitle => 'Acesse seu diário de bem-estar com segurança.';
 
   @override
-  String get authEmailHint => 'seu.email@exemplo.com';
+  String get authEmailHint => 'nome@dualischeckup.com';
 
   @override
   String get loginPasswordRequired => 'Senha é obrigatória.';

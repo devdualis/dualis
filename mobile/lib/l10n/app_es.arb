@@ -413,7 +413,7 @@
   "avatarPresetRadiant": "Radiante",
   "loginTitle": "Entrar en DualisCheckUp",
   "loginSubtitle": "Accede a tu diario de bienestar de forma segura.",
-  "authEmailHint": "tu.correo@ejemplo.com",
+  "authEmailHint": "nombre@dualischeckup.com",
   "loginPasswordRequired": "La contraseña es obligatoria.",
   "loginNoAccountPrompt": "¿Aún no tienes cuenta? ",
   "registerTitle": "Crea tu cuenta",

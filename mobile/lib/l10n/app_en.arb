@@ -413,7 +413,7 @@
   "avatarPresetRadiant": "Radiant",
   "loginTitle": "Sign in to DualisCheckUp",
   "loginSubtitle": "Access your wellness journal securely.",
-  "authEmailHint": "your.email@example.com",
+  "authEmailHint": "name@dualischeckup.com",
   "loginPasswordRequired": "Password is required.",
   "loginNoAccountPrompt": "Don't have an account yet? ",
   "registerTitle": "Create your account",
