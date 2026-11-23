@@ -14,4 +14,5 @@ export * from './journal.schema';
 export * from './care.schema';
 
 export * from './daily-habits.schema';
+export * from './subscriptions.schema';
 export * from './ai-consents.schema';

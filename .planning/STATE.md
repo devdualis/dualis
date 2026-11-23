@@ -5,10 +5,10 @@ current_phase: 17
 current_phase_name: Conversational voice check-in, multi-answer phrases, AI option suggestions and AI consent
 status: verifying
 stopped_at: Completed 17-09-PLAN.md
-last_updated: "2026-11-05T23:41:03.143Z"
-last_activity: 2026-11-05
+last_updated: "2026-11-17T20:33:31.503Z"
+last_activity: 2026-11-17
 last_activity_desc: Phase 17 execution started
-state_head: a517a21330b3f5897ca67a8ce8fb2439141e0f14
+state_head: f0dc76d5b26cafb55788d4dddbd9a4741ce9c103
 progress:
   total_phases: 17
   completed_phases: 11
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-09-14)
 Phase: 17 (Conversational voice check-in, multi-answer phrases, AI option suggestions and AI consent) — EXECUTING
 Plan: 10 of 10
 Status: Phase complete — ready for verification
-Last activity: 2026-11-05 — Phase 17 execution started
+Last activity: 2026-11-17 - Completed quick task 261117-nzg: Notification redesign part 3: Lembretes screen in Settings
 
 Progress: [██████████] 100%
 
@@ -137,6 +137,10 @@ None yet.
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
+| 261117-n27 | Notification restyle 1: monochrome icon, channel colors, calm pt/es/en copy, no health names in notifications | 2026-11-17 | f11fcc1 | [261117-n27-notification-restyle-part-1-icon-channel](./quick/261117-n27-notification-restyle-part-1-icon-channel/) |
+| 261117-los | Voice: hands-free stays on through a check-in opened by voice from Home; silences counted apart (8); large pt/es/en phrase dictionary | 2026-11-17 | cb4e0e3 | [261117-los-voice-hands-free-check-in-and-synonym-di](./quick/261117-los-voice-hands-free-check-in-and-synonym-di/) |
+| 261116-fp9 | Redesign step 2: Home restyle (navy hero with logo watermark, glass check-in and habits cards, duotone icons) | 2026-11-16 | 673316c | [261116-fp9-redesign-step2-home](./quick/261116-fp9-redesign-step2-home/) |
+| 261113-tqx | Redesign step 1: design tokens, glass theme, Inter, floating tab bar with separate help button; top help hidden while bottom help shows | 2026-11-13 | 0ad28d8 | [261113-tqx-redesign-step1-design-system](./quick/261113-tqx-redesign-step1-design-system/) |
 | 261105-nvd | Corregir export subscriptions: pnpm build y tsc --noEmit pasan | 2026-11-05 | uncommitted | [261105-nvd-fix-revenuecat-subscriptions-schema-expo](./quick/261105-nvd-fix-revenuecat-subscriptions-schema-expo/) |
 | 261030-evl | Valores ao longo do tempo: lista por exame com último valor, data e linha neutra; "Ver mais" e busca (>15 itens) no lugar dos chips | 2026-10-30 | 2d57809 | [261030-evl-exam-values-list](./quick/261030-evl-exam-values-list/) |
 | 261030-ktb | Exames repetidos: o mesmo arquivo não é guardado nem lido duas vezes por perfil (HMAC com chave do servidor, migração 0022, backfill); mesma leitura em outro arquivo pergunta "Descartar este / Manter os dois" | 2026-10-30 | (this commit) | [261030-ktb-documentos-de-exames-repetidos](./quick/261030-ktb-documentos-de-exames-repetidos/) |
@@ -192,6 +196,19 @@ None yet.
 | 261101-pms | Check-in: factores en temas (opción B), mapa del cuerpo protagonista, región pelve separada (pt/en/es) | 2026-11-01 | 9253657 | [261101-pms-check-in-opcion-b-factores-mapa-del-cuer](./quick/261101-pms-check-in-opcion-b-factores-mapa-del-cuer/) |
 | 261102-ffw | Show errors/retry in habits and hydration; offline banner on every screen | 2026-11-02 | eab5cf5 | [261102-ffw-fix-ui-state-gaps-habits-hydration-offli](./quick/261102-ffw-fix-ui-state-gaps-habits-hydration-offli/) |
 | 261102-fmk | Hydration settings save feedback, localized water texts, notifications-off notice | 2026-11-02 | 61dc766 | [261102-fmk-ui-state-gaps-settings-l10n-permission](./quick/261102-fmk-ui-state-gaps-settings-l10n-permission/) |
+| 261116-gmz | Redesign step 3: check-in wizard and summary | 2026-11-16 | 7fb92df | [261116-gmz-redesign-step3-checkin-wizard-and-summar](./quick/261116-gmz-redesign-step3-checkin-wizard-and-summar/) |
+| 261116-h8x | History body map uses the new silhouette | 2026-11-16 | 4670c99 | [261116-h8x-history-body-map-new-silhouette](./quick/261116-h8x-history-body-map-new-silhouette/) |
+| 261116-p53 | Redesign step 4: History | 2026-11-16 | 140a0e3 | [261116-p53-redesign-step4-history](./quick/261116-p53-redesign-step4-history/) |
+| 261116-ppg | History: compact entries card with see-all sheet | 2026-11-16 | ba087c8 | [261116-ppg-history-entries-see-all](./quick/261116-ppg-history-entries-see-all/) |
+| 261116-q8z | Redesign step 5: Habits and Hydration | 2026-11-16 | 74c5567 | [261116-q8z-redesign-step5-habits-hydration](./quick/261116-q8z-redesign-step5-habits-hydration/) |
+| 261116-qrq | Redesign step 6: Care | 2026-11-16 | 79445d4 | [261116-qrq-redesign-step6-care](./quick/261116-qrq-redesign-step6-care/) |
+| 261116-tti | Redesign step 7: Care tile fix, Library, Settings and Privacy | 2026-11-16 | 1ae4af2 | [261116-tti-redesign-step7-library-settings](./quick/261116-tti-redesign-step7-library-settings/) |
+| 261116-u27 | Redesign step 8: onboarding, auth, lock screen, banners, 404, house ad | 2026-11-16 | 340455b | [261116-u27-redesign-step8-auth-lock-banners](./quick/261116-u27-redesign-step8-auth-lock-banners/) |
+| 261116-v4c | Redesign step 9: My conditions and readings | 2026-11-16 | 8c08579 | [261116-v4c-redesign-step9-conditions](./quick/261116-v4c-redesign-step9-conditions/) |
+| 261116-w7k | Redesign step 10: profile switcher, add dependent, family sharing | 2026-11-16 | 755d07b | [261116-w7k-redesign-step10-profiles-family](./quick/261116-w7k-redesign-step10-profiles-family/) |
+| 261116-x2m | Redesign step 11: History leftovers | 2026-11-16 | 63594eb | [261116-x2m-redesign-step11-history-leftovers](./quick/261116-x2m-redesign-step11-history-leftovers/) |
+| 261117-ndu | Notification redesign part 2: action buttons on reminders | 2026-11-17 | aa20146 | [261117-ndu-notification-action-buttons-part-2](./quick/261117-ndu-notification-action-buttons-part-2/) |
+| 261117-nzg | Notification redesign part 3: Lembretes screen in Settings | 2026-11-17 | f0dc76d | [261117-nzg-reminders-settings-screen-part-3](./quick/261117-nzg-reminders-settings-screen-part-3/) |
 
 ## Deferred Items
 
