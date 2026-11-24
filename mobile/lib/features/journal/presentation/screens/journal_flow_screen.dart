@@ -1879,12 +1879,10 @@ class _CardGrid extends StatelessWidget {
 /// Card with a big icon for short answers (v2.3). Long answers use
 /// [_ChoiceTile] rows instead.
 class _ChoiceCard extends StatelessWidget {
-  final String? emoji;
-
-  /// Journal key drawn as a fixed-size mark. Wins over [emoji].
+  /// Journal key drawn as a fixed-size mark.
   final String? markKey;
 
-  /// Drawn instead of [emoji] when set.
+  /// Optional custom leading widget.
   final Widget? leading;
   final String label;
   final bool selected;
@@ -1903,7 +1901,6 @@ class _ChoiceCard extends StatelessWidget {
 
   const _ChoiceCard({
     super.key,
-    this.emoji,
     this.markKey,
     this.leading,
     required this.label,
@@ -1935,13 +1932,7 @@ class _ChoiceCard extends StatelessWidget {
       );
 
   Widget _content(BuildContext context) {
-    final icon = JournalMarks.box(markKey, size: large ? 64 : (wide ? 28 : 36)) ??
-        leading ??
-        (emoji == null
-            ? null
-            : ExcludeSemantics(
-                child: Text(emoji!, style: TextStyle(fontSize: large ? 52 : (wide ? 22 : 28))),
-              ));
+    final icon = JournalMarks.box(markKey, size: large ? 64 : (wide ? 28 : 36)) ?? leading;
     final text = Text(
       label,
       textAlign: wide ? TextAlign.start : TextAlign.center,
@@ -2580,7 +2571,6 @@ class _ConditionTile extends StatelessWidget {
 
 /// One option inside a [_TopicCard].
 class _OptionCell extends StatelessWidget {
-  final String? emoji;
   final String? markKey;
   final String label;
   final bool selected;
@@ -2588,7 +2578,6 @@ class _OptionCell extends StatelessWidget {
 
   const _OptionCell({
     super.key,
-    this.emoji,
     this.markKey,
     required this.label,
     required this.selected,
@@ -2631,9 +2620,6 @@ class _OptionCell extends StatelessWidget {
                 children: [
                   if (JournalMarks.box(markKey, size: 24) case final mark?) ...[
                     mark,
-                    const SizedBox(width: 8),
-                  ] else if (emoji != null) ...[
-                    ExcludeSemantics(child: Text(emoji!, style: const TextStyle(fontSize: 22))),
                     const SizedBox(width: 8),
                   ],
                   Expanded(
