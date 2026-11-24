@@ -134,7 +134,7 @@ void main() {
     );
 
     expect(find.byKey(const Key('check_in_summary_details')), findsOneWidget);
-    expect(find.text('💨 Barriga · Incômodo · Gases ou barriga estufada'), findsOneWidget);
+    expect(find.text('Barriga · Incômodo · Gases ou barriga estufada'), findsOneWidget);
     expect(find.text('Há quanto tempo: Meses ou anos · Intensidade 3/5'), findsOneWidget);
     expect(find.text('O que pode ter contribuído: Alimentação'), findsOneWidget);
     expect(find.textContaining('Como foi lidar'), findsOneWidget);
@@ -164,7 +164,7 @@ void main() {
         ),
       ),
     );
-    expect(find.text('🛑 O que já passou · Culpa ou arrependimento'), findsOneWidget);
+    expect(find.text('O que já passou · Culpa ou arrependimento'), findsOneWidget);
     expect(find.byKey(const Key('check_in_summary_body')), findsNothing);
   });
 

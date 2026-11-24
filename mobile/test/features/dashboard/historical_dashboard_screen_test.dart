@@ -497,9 +497,9 @@ void main() {
       ]);
       await openEntry(tester, 'e1');
       // Region instead of the map side, in the person's words.
-      expect(find.text('💨 Barriga · Incômodo · Gases ou barriga estufada'), findsOneWidget);
+      expect(find.text('Barriga · Incômodo · Gases ou barriga estufada'), findsOneWidget);
       expect(find.text('Há quanto tempo: Meses ou anos · Intensidade 3/5'), findsOneWidget);
-      expect(find.text('🧠 O que vem pela frente · Fico antecipando problemas'), findsOneWidget);
+      expect(find.text('O que vem pela frente · Fico antecipando problemas'), findsOneWidget);
       expect(find.text('Há quanto tempo: Alguns dias ou semanas · Intensidade 4/5'), findsOneWidget);
       expect(find.textContaining('Frente'), findsNothing);
     });
