@@ -25,6 +25,7 @@ import '../../domain/journal_models.dart';
 import '../controllers/journal_flow_controller.dart';
 import '../controllers/journal_flow_state.dart';
 import '../journal_item_text.dart';
+import '../journal_marks.dart';
 import '../journal_labels.dart';
 import '../widgets/body_region_map.dart';
 import '../widgets/condition_readings_card.dart';
@@ -539,7 +540,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         for (final time in JournalKeys.times)
           _ChoiceTile(
             key: Key('jv2_time_$time'),
-            emoji: journalEmojis[time],
+            emojiKey: time,
             label: JournalLabels.root(l10n, time),
             onTap: () => _controller.chooseTime(time),
           ),
@@ -554,7 +555,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     final isMale = _isMale;
     return _ChoiceTile(
       key: const Key('jv2_describe'),
-      emoji: '💬',
+      emojiKey: 'descrever',
       label: l10n.jv2DescribeTile,
       accent: true,
       voiceRole: VoiceTargetRole.other,
@@ -591,7 +592,8 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     };
     return _StepLayout(
       progress: _progress(state),
-      eyebrow: '${journalEmojis[time] ?? ''} ${JournalLabels.root(l10n, time)}'.trim(),
+      eyebrow: JournalLabels.root(l10n, time),
+      eyebrowMark: time,
       lead: _phrase(l10n, state),
       question: question,
       hint: l10n.jv23TapOneHint,
@@ -629,7 +631,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         for (final branch in branches.keys)
           _ChoiceTile(
             key: Key('jv2_branch_$region.$branch'),
-            emoji: journalEmojis['$region.$branch'],
+            emojiKey: '$region.$branch',
             label: JournalLabels.branch(l10n, '$region.$branch'),
             onTap: () => _controller.chooseBranch(branch),
           ),
@@ -693,7 +695,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         for (final option in options)
           _ChoiceTile(
             key: Key('jv2_option_$prefix.$option'),
-            emoji: journalEmojis['$prefix.$option'],
+            emojiKey: '$prefix.$option',
             label: JournalLabels.option(l10n, '$prefix.$option'),
             selected: state.selectedOptions.contains('$prefix.$option'),
             multi: true,
@@ -703,7 +705,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         for (final label in state.customLabels)
           _ChoiceTile(
             key: Key('jv2_custom_chip_$label'),
-            emoji: '✏️',
+            emojiKey: 'outro',
             label: label,
             selected: true,
             multi: true,
@@ -762,7 +764,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         else
           _ChoiceTile(
             key: const Key('jv2_write_mine'),
-            emoji: '✏️',
+            emojiKey: 'outro',
             label: l10n.jv2WriteMine,
             accent: true,
             voiceRole: VoiceTargetRole.other,
@@ -961,6 +963,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
               for (final r in onMap)
                 _MarkedPill(
                   key: Key('jv2_marked_${r.region}'),
+                  markKey: r.region,
                   label: r.side == JournalKeys.sideBack && r.region != 'costas'
                       ? '${JournalLabels.root(l10n, r.region)} · ${l10n.jv2BodyBack}'
                       : JournalLabels.root(l10n, r.region),
@@ -973,7 +976,8 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         const SizedBox(height: 20),
         _TopicCard(
           headerKey: const Key('jv2_topic_whole_body'),
-          emoji: '✨',
+          emoji: '',
+          markKey: 'physical',
           title: l10n.jv2WholeBody,
           subtitle: l10n.jv23WholeBodyHint,
           count: wholeCount,
@@ -983,7 +987,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             for (final area in JournalKeys.wholeBodyAreas)
               _OptionCell(
                 key: Key('jv2_region_$area'),
-                emoji: _wholeBodyEmojis[area],
+                markKey: area,
                 label: JournalLabels.root(l10n, area),
                 selected: selected.contains(area),
                 onTap: () => _controller.toggleRegion(area),
@@ -1030,7 +1034,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
               for (final p in JournalKeys.persistences)
                 _ChoiceCard(
                   key: Key('jv2_persistence_0_$p'),
-                  emoji: _persistenceShortEmojis[p],
+                  markKey: p,
                   label: JournalLabels.persistence(l10n, p),
                   selected: items.first.persistence == p,
                   onTap: () => _controller.choosePersistence(items.first.draftId, p),
@@ -1090,12 +1094,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     );
   }
 
-  static const Map<String, String> _persistenceShortEmojis = {
-    JournalKeys.persistenceHoje: '⏱️',
-    JournalKeys.persistenceDiasSemanas: '⏳',
-    JournalKeys.persistenceMesesAnos: '🔄',
-  };
-
   /// "Há quanto tempo?": three cards (one item) or a compact row (several).
   Widget _persistencePicker(
     AppLocalizations l10n,
@@ -1111,7 +1109,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           for (final p in JournalKeys.persistences)
             _ChoiceCard(
               key: Key('jv2_persistence_${index}_$p'),
-              emoji: _persistenceShortEmojis[p],
+              markKey: p,
               label: JournalLabels.persistence(l10n, p),
               selected: item.persistence == p,
               voice: voice,
@@ -1285,12 +1283,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         _ => l10n.jv23TriggerTopicCorpo,
       };
 
-  static const Map<String, String> _wholeBodyEmojis = {
-    'pele': '🖐️',
-    'musculos': '💪',
-    'hormonios': '🌡️',
-  };
-
   /// Triggers in three tabs of icon cards (v2.3). "Não sei" and "Outro"
   /// sit below the tabs.
   Widget _triggersStep(AppLocalizations l10n, JournalFlowState state) {
@@ -1341,7 +1333,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             for (final t in shown)
               _ChoiceCard(
                 key: Key('jv2_trigger_$t'),
-                emoji: journalEmojis[t],
+                markKey: t,
                 label: JournalLabels.trigger(l10n, t),
                 selected: state.triggers.contains(t),
                 multi: true,
@@ -1356,7 +1348,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             for (final t in [JournalKeys.triggerNaoSei, JournalKeys.triggerOutro])
               _ChoiceCard(
                 key: Key('jv2_trigger_$t'),
-                emoji: journalEmojis[t],
+                markKey: t,
                 label: JournalLabels.trigger(l10n, t),
                 selected: state.triggers.contains(t),
                 multi: true,
@@ -1456,7 +1448,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             for (final c in JournalKeys.copings)
               _ChoiceCard(
                 key: Key('jv22_coping_$c'),
-                emoji: journalEmojis[c],
+                markKey: c,
                 label: JournalLabels.coping(l10n, c),
                 selected: state.coping == c,
                 onTap: () => _controller.chooseCoping(c),
@@ -1474,7 +1466,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
             for (final h in helpers)
               _ChoiceCard(
                 key: Key('jv22_helper_$h'),
-                emoji: journalEmojis[h],
+                markKey: h,
                 label: JournalLabels.helper(l10n, h),
                 selected: state.helpers.contains(h),
                 multi: true,
@@ -1547,6 +1539,9 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
 
 class _StepLayout extends StatelessWidget {
   final String? eyebrow;
+
+  /// Mark drawn before [eyebrow]. The body map is never used here.
+  final String? eyebrowMark;
   final String? lead;
 
   /// Short label between the lead and the question (the entry axis).
@@ -1566,6 +1561,7 @@ class _StepLayout extends StatelessWidget {
   const _StepLayout({
     this.progress,
     this.eyebrow,
+    this.eyebrowMark,
     this.lead,
     this.axisLabel,
     this.axisColor,
@@ -1639,14 +1635,24 @@ class _StepLayout extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
             children: [
               if (eyebrow != null)
-                Text(
-                  eyebrow!,
-                  style: GoogleFonts.inter(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.3,
-                    color: AppColors.dualisSymbolBlue,
-                  ),
+                Row(
+                  children: [
+                    if (JournalMarks.box(eyebrowMark, size: 16) case final mark?) ...[
+                      mark,
+                      const SizedBox(width: 6),
+                    ],
+                    Flexible(
+                      child: Text(
+                        eyebrow!,
+                        style: GoogleFonts.inter(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.3,
+                          color: AppColors.dualisSymbolBlue,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               if (lead != null) ...[
                 const SizedBox(height: 4),
@@ -1875,6 +1881,9 @@ class _CardGrid extends StatelessWidget {
 class _ChoiceCard extends StatelessWidget {
   final String? emoji;
 
+  /// Journal key drawn as a fixed-size mark. Wins over [emoji].
+  final String? markKey;
+
   /// Drawn instead of [emoji] when set.
   final Widget? leading;
   final String label;
@@ -1895,6 +1904,7 @@ class _ChoiceCard extends StatelessWidget {
   const _ChoiceCard({
     super.key,
     this.emoji,
+    this.markKey,
     this.leading,
     required this.label,
     this.selected = false,
@@ -1925,7 +1935,8 @@ class _ChoiceCard extends StatelessWidget {
       );
 
   Widget _content(BuildContext context) {
-    final icon = leading ??
+    final icon = JournalMarks.box(markKey, size: large ? 64 : (wide ? 28 : 36)) ??
+        leading ??
         (emoji == null
             ? null
             : ExcludeSemantics(
@@ -2201,7 +2212,10 @@ class _ChoiceTile extends StatelessWidget {
       );
 
   Widget _content(BuildContext context) {
-    final fluent = emojiKey == null ? null : FluentEmoji.assetForJournalKey(emojiKey!);
+    final mark = JournalMarks.box(emojiKey, size: dense ? 22 : 26);
+    final fluent = mark != null || emojiKey == null
+        ? null
+        : FluentEmoji.assetForJournalKey(emojiKey!);
     return Padding(
       padding: EdgeInsets.only(bottom: dense ? 8 : 10),
       child: Semantics(
@@ -2223,7 +2237,14 @@ class _ChoiceTile extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    if (fluent != null) ...[
+                    if (mark != null) ...[
+                      DuotoneIconTile(
+                        size: dense ? 36 : 40,
+                        radius: 11,
+                        child: mark,
+                      ),
+                      const SizedBox(width: 12),
+                    ] else if (fluent != null) ...[
                       FluentEmoji.image(fluent, size: dense ? 34 : 38),
                       const SizedBox(width: 12),
                     ] else if (emoji != null) ...[
@@ -2273,6 +2294,9 @@ class _ChoiceTile extends StatelessWidget {
 class _TopicCard extends StatefulWidget {
   final Key headerKey;
   final String emoji;
+
+  /// Drawn in the header tile instead of [emoji] when it has a mark.
+  final String? markKey;
   final String title;
   final String subtitle;
   final int count;
@@ -2283,6 +2307,7 @@ class _TopicCard extends StatefulWidget {
   const _TopicCard({
     required this.headerKey,
     required this.emoji,
+    this.markKey,
     required this.title,
     required this.subtitle,
     required this.count,
@@ -2347,9 +2372,10 @@ class _TopicCardState extends State<_TopicCard> {
                       DuotoneIconTile(
                         size: 44,
                         radius: 14,
-                        child: ExcludeSemantics(
-                          child: Text(widget.emoji, style: const TextStyle(fontSize: 22)),
-                        ),
+                        child: JournalMarks.box(widget.markKey, size: 26) ??
+                            ExcludeSemantics(
+                              child: Text(widget.emoji, style: const TextStyle(fontSize: 22)),
+                            ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -2555,6 +2581,7 @@ class _ConditionTile extends StatelessWidget {
 /// One option inside a [_TopicCard].
 class _OptionCell extends StatelessWidget {
   final String? emoji;
+  final String? markKey;
   final String label;
   final bool selected;
   final VoidCallback onTap;
@@ -2562,6 +2589,7 @@ class _OptionCell extends StatelessWidget {
   const _OptionCell({
     super.key,
     this.emoji,
+    this.markKey,
     required this.label,
     required this.selected,
     required this.onTap,
@@ -2601,7 +2629,10 @@ class _OptionCell extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               child: Row(
                 children: [
-                  if (emoji != null) ...[
+                  if (JournalMarks.box(markKey, size: 24) case final mark?) ...[
+                    mark,
+                    const SizedBox(width: 8),
+                  ] else if (emoji != null) ...[
                     ExcludeSemantics(child: Text(emoji!, style: const TextStyle(fontSize: 22))),
                     const SizedBox(width: 8),
                   ],
@@ -2634,12 +2665,14 @@ class _OptionCell extends StatelessWidget {
 /// A part marked on the map, with a button to take it off.
 class _MarkedPill extends StatelessWidget {
   final String label;
+  final String? markKey;
   final String removeLabel;
   final VoidCallback onRemove;
 
   const _MarkedPill({
     super.key,
     required this.label,
+    this.markKey,
     required this.removeLabel,
     required this.onRemove,
   });
@@ -2667,10 +2700,15 @@ class _MarkedPill extends StatelessWidget {
           onTap: onRemove,
           child: Container(
             constraints: const BoxConstraints(minHeight: 36),
-            padding: const EdgeInsets.fromLTRB(12, 6, 8, 6),
+            padding: EdgeInsets.fromLTRB(markKey == null ? 12 : 6, 6, 8, 6),
             child: Row(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                if (JournalMarks.box(markKey, size: 20) case final mark?) ...[
+                  mark,
+                  const SizedBox(width: 4),
+                ],
                 Flexible(
                   child: Text(
                     label,
@@ -2706,13 +2744,10 @@ class _MoodIcon extends StatelessWidget {
       width: 80,
       height: 80,
       child: Center(
-        child: FluentEmoji.forJournalKey(
-          mood,
-          size: 76,
-          fallback: ExcludeSemantics(
-            child: Text(journalEmojis[mood] ?? '', style: const TextStyle(fontSize: 52)),
-          ),
-        ),
+        child: JournalMarks.box(mood, size: 64) ??
+            ExcludeSemantics(
+              child: Text(journalEmojis[mood] ?? '', style: const TextStyle(fontSize: 52)),
+            ),
       ),
     );
   }

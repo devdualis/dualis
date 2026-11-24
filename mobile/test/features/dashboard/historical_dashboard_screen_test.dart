@@ -619,10 +619,10 @@ void main() {
           ),
         ]),
       ]);
-      // The one-line row has no emoji, the detail keeps the person's words.
+      // The row and the detail keep the person's words. The mark is an image.
       expect(find.text('O momento atual · Saudade da praia'), findsOneWidget);
       await openEntry(tester, 'e1');
-      expect(find.text('📍 O momento atual · Saudade da praia'), findsOneWidget);
+      expect(find.text('O momento atual · Saudade da praia'), findsNWidgets(2));
       expect(find.text('Intensidade 2/5'), findsOneWidget);
     });
 

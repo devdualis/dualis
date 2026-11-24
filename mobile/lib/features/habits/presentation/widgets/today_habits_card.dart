@@ -11,7 +11,7 @@ import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../hydration/presentation/screens/hydration_dashboard_screen.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../../shared/widgets/duotone_icon_tile.dart';
-import '../../../../shared/widgets/fluent_emoji.dart';
+import '../../../journal/presentation/journal_marks.dart';
 import '../../../../shared/widgets/premium_gradient_icon.dart';
 import '../controllers/habits_controller.dart';
 import '../../domain/models/habit_day.dart';
@@ -136,12 +136,7 @@ class _SleepTile extends ConsumerWidget {
     final viewOnly = activeProfileIsViewOnly(ref);
     final done = today.sleepQuality != null;
     final hours = today.sleepHours;
-    final sleepEmoji = done && FluentEmoji.assetForSleep(today.sleepQuality!) != null
-        ? FluentEmoji.image(
-            FluentEmoji.assetForSleep(today.sleepQuality!)!,
-            size: 22,
-          )
-        : null;
+    final sleepEmoji = done ? JournalMarks.box(today.sleepQuality, size: 22, sleep: true) : null;
 
     return _HabitTile(
       key: const Key('home_habit_tile_sleep'),
@@ -154,12 +149,7 @@ class _SleepTile extends ConsumerWidget {
       onTap: () => context.push(RoutePaths.habits),
       value: done
           ? [
-              // The Fluent emoji (valueLeading) replaces the text emoji.
-              if (sleepEmoji == null)
-                sleepQualityLabel(today.sleepQuality!, l10n)
-              else
-                sleepQualityLabel(today.sleepQuality!, l10n)
-                    .replaceFirst(RegExp(r'^\S+\s'), ''),
+              sleepQualityLabel(today.sleepQuality!, l10n),
               if (hours != null) _compactSleepHours(hours),
             ].join('\n')
           : l10n.habitsTileSleepPending,

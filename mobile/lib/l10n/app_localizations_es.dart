@@ -4655,13 +4655,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get habitsSleepQualityQuestion => '¿Cómo dormiste anoche?';
 
   @override
-  String get habitsSleepQualityBem => '😴 Dormí bien';
+  String get habitsSleepQualityBem => 'Dormí bien';
 
   @override
-  String get habitsSleepQualityRegular => '😐 Más o menos';
+  String get habitsSleepQualityRegular => 'Más o menos';
 
   @override
-  String get habitsSleepQualityMal => '😫 Dormí mal';
+  String get habitsSleepQualityMal => 'Dormí mal';
 
   @override
   String get habitsSleepHoursQuestion => '¿Cuántas horas, más o menos?';

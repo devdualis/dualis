@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../journal/domain/journal_keys.dart';
 import '../../../journal/presentation/journal_item_text.dart';
+import '../../../journal/presentation/journal_marks.dart';
 import '../../../journal/presentation/journal_labels.dart';
 import '../../../../shared/widgets/duotone_icon_tile.dart';
 import '../../domain/journal_insights_models.dart';
@@ -112,7 +113,8 @@ class JournalEntryDetails extends StatelessWidget {
             ),
           for (final item in entry.items)
             _EntryItemTile(
-              title: entryItemTitle(l10n, item),
+              title: entryItemTitle(l10n, item, withEmoji: false),
+              mark: item.optionKey == null ? null : JournalMarks.assetFor(item.optionKey!),
               answers: entryItemAnswers(l10n, item),
               intensity: item.intensity,
               titleStyle: strong,
@@ -142,6 +144,7 @@ class JournalEntryDetails extends StatelessWidget {
 /// item in the person's words, how long and how much, and the intensity badge.
 class _EntryItemTile extends StatelessWidget {
   final String title;
+  final String? mark;
   final String? answers;
   final int? intensity;
   final TextStyle titleStyle;
@@ -149,6 +152,7 @@ class _EntryItemTile extends StatelessWidget {
 
   const _EntryItemTile({
     required this.title,
+    this.mark,
     this.answers,
     this.intensity,
     required this.titleStyle,
@@ -167,11 +171,13 @@ class _EntryItemTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const DuotoneIconTile(
+          DuotoneIconTile(
             size: 30,
             radius: 10,
             background: Colors.white,
-            child: Icon(Icons.check_rounded, size: 17, color: AppColors.dualisNavy),
+            child: mark == null
+                ? const Icon(Icons.check_rounded, size: 17, color: AppColors.dualisNavy)
+                : JournalMarks.image(mark!, size: 20),
           ),
           const SizedBox(width: 10),
           Expanded(

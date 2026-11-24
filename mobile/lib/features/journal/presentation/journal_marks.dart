@@ -1,0 +1,233 @@
+import 'package:flutter/material.dart';
+
+/// Proprietary duotone marks. One file per meaning, keyed like [journalEmojis].
+/// The body silhouette is not a mark and is never drawn from here.
+class JournalMarks {
+  const JournalMarks._();
+
+  static const String dir = 'assets/marks';
+
+  static const Map<String, String> _byKey = {
+    'bem': 'bem',
+    'normal': 'normal',
+    'nao_tao_bem': 'nao_tao_bem',
+    'passado': 'passado',
+    'presente': 'presente',
+    'futuro': 'futuro',
+    'passado.tristeza': 'tristeza',
+    'passado.memoria': 'memoria',
+    'presente.energia': 'energia',
+    'presente.sobrecarga': 'sobrecarga',
+    'presente.solidao': 'solidao',
+    'futuro.mente': 'mente',
+    'futuro.medo': 'medo',
+    'passado.tristeza.culpa': 'culpa',
+    'passado.tristeza.saudade': 'saudade',
+    'passado.memoria.lembranca': 'lembranca',
+    'passado.memoria.magoa': 'magoa',
+    'presente.energia.corpo': 'corpo_pesado',
+    'presente.energia.desligado': 'desligado',
+    'presente.sobrecarga.paciencia': 'paciencia',
+    'presente.sobrecarga.aperto': 'aperto',
+    'futuro.mente.antecipar': 'antecipar',
+    'futuro.mente.cobranca': 'cobranca',
+    'futuro.medo.julgamento': 'julgamento',
+    'futuro.medo.desanimo': 'desanimo',
+    'passado.memoria.vergonha': 'vergonha',
+    'presente.energia.concentracao': 'concentracao',
+    'presente.sobrecarga.muita_coisa': 'muita_coisa',
+    'presente.sobrecarga.inquieto': 'inquieto',
+    'presente.solidao.sozinho': 'sozinho',
+    'presente.solidao.menos': 'menos',
+    'futuro.mente.indecisao': 'indecisao',
+    'futuro.medo.evitar': 'evitar',
+    'passado.gratidao': 'gratidao',
+    'passado.gratidao.alguem': 'alguem',
+    'passado.gratidao.algo': 'algo',
+    'passado.orgulho': 'orgulho',
+    'passado.orgulho.conquista': 'conquista',
+    'passado.orgulho.resolvi': 'resolvi',
+    'presente.calma': 'calma',
+    'presente.calma.paz': 'calma',
+    'presente.calma.descansado': 'descansado',
+    'presente.conexao': 'conexao',
+    'presente.conexao.pessoas': 'pessoas',
+    'presente.conexao.foco': 'foco',
+    'futuro.animo': 'animo',
+    'futuro.animo.planos': 'planos',
+    'futuro.animo.esperanca': 'esperanca',
+    'futuro.confianca': 'confianca',
+    'futuro.confianca.confiante': 'confianca',
+    'futuro.confianca.preparado': 'preparado',
+    'hoje': 'hoje',
+    'dias_semanas': 'passado',
+    'meses_anos': 'meses',
+    'trabalho': 'trabalho',
+    'familia': 'familia',
+    'sono': 'cama',
+    'dinheiro': 'dinheiro',
+    'telas': 'telas',
+    'ciclo': 'ciclo',
+    'alimentacao': 'alimentacao',
+    'esforco': 'esforco',
+    'queda': 'queda',
+    'medicamento': 'medicamento',
+    'clima': 'clima',
+    'nao_sei': 'nao_sei',
+    'outro': 'escrever',
+    'descrever': 'escrever',
+    'consegui': 'consegui',
+    'esperei': 'hoje',
+    'dificil': 'dificil',
+    'mexer_corpo': 'caminhar',
+    'conversar': 'conversar',
+    'pausa': 'pausa',
+    'lazer': 'lazer',
+    'descansar': 'cama',
+    'beber_agua': 'agua',
+    'remedio': 'medicamento',
+    'repouso': 'cama',
+    'compressa': 'compressa',
+    'alimentacao_leve': 'cha',
+    'consulta_medica': 'consulta',
+    'nada_ainda': 'vazio',
+    'cabeca': 'cabeca',
+    'cabeca.pressao': 'pressao',
+    'cabeca.pressao.temporas': 'cabeca',
+    'cabeca.pressao.latejando': 'latejando',
+    'cabeca.sentidos': 'olhos',
+    'cabeca.sentidos.garganta': 'garganta',
+    'cabeca.sentidos.olhos': 'olhos',
+    'cabeca.pressao.tontura': 'tontura',
+    'cabeca.pressao.mandibula': 'mandibula',
+    'cabeca.sentidos.nariz': 'nariz',
+    'cabeca.sentidos.ouvido': 'ouvido',
+    'cabeca.rosto': 'cabeca',
+    'cabeca.rosto.tontura': 'tontura',
+    'cabeca.rosto.nariz': 'nariz',
+    'cabeca.rosto.ouvido': 'ouvido',
+    'cabeca.rosto.mandibula': 'mandibula',
+    'cabeca.nuca': 'nuca',
+    'cabeca.nuca.rigida': 'rigidez',
+    'cabeca.nuca.pontada': 'latejando',
+    'peito': 'pulmoes',
+    'peito.respiracao': 'pulmoes',
+    'peito.respiracao.curta': 'pulmoes',
+    'peito.respiracao.tosse': 'pulmoes',
+    'peito.incomodo': 'coracao',
+    'peito.incomodo.batedeira': 'latejando',
+    'peito.incomodo.costelas': 'costelas',
+    'barriga': 'barriga',
+    'barriga.queimacao': 'queimacao',
+    'barriga.queimacao.subindo': 'queimacao',
+    'barriga.queimacao.enjoo': 'enjoo',
+    'barriga.colica': 'colica',
+    'barriga.colica.gases': 'gases',
+    'barriga.colica.pontadas': 'latejando',
+    'barriga.colica.menstrual': 'ciclo',
+    'barriga.colica.preso': 'preso',
+    'barriga.colica.solto': 'solto',
+    'barriga.intestino': 'barriga',
+    'barriga.intestino.preso': 'preso',
+    'barriga.intestino.solto': 'solto',
+    'pelve': 'pelve',
+    'pelve.xixi_intima': 'pelve',
+    'pelve.xixi_intima.ardencia': 'ardencia',
+    'pelve.xixi_intima.vontade': 'pelve',
+    'pelve.xixi_intima.coceira': 'coceira',
+    'pelve.xixi_intima.inchaco': 'inchaco',
+    'pelve.urina': 'pelve',
+    'pelve.urina.ardencia': 'ardencia',
+    'pelve.urina.vontade': 'pelve',
+    'pelve.urina.dificuldade': 'pelve',
+    'pelve.urina.cor_odor': 'pelve',
+    'pelve.baixo_ventre': 'pelve',
+    'pelve.baixo_ventre.colica': 'colica',
+    'pelve.baixo_ventre.peso': 'peso',
+    'pelve.baixo_ventre.menstrual': 'ciclo',
+    'pelve.intima': 'pelve',
+    'pelve.intima.coceira': 'coceira',
+    'pelve.intima.inchaco': 'inchaco',
+    'costas': 'costas',
+    'costas.rigidez': 'rigidez',
+    'costas.rigidez.ombros': 'ombros',
+    'costas.rigidez.lombar': 'lombar',
+    'costas.fisgada': 'latejando',
+    'costas.fisgada.irradia': 'latejando',
+    'costas.fisgada.ao_mexer': 'caminhar',
+    'membros': 'perna',
+    'membros.cansaco': 'perna',
+    'membros.cansaco.juntas': 'joelho',
+    'membros.cansaco.pesados': 'peso',
+    'membros.formigamento': 'formigamento',
+    'membros.formigamento.dormentes': 'formigamento',
+    'membros.formigamento.choque': 'latejando',
+    'pele': 'pele',
+    'pele.coceira': 'coceira',
+    'pele.coceira.coceira': 'coceira',
+    'pele.coceira.ardencia': 'ardencia',
+    'pele.aparencia': 'pele',
+    'pele.aparencia.vermelhidao': 'pele',
+    'pele.aparencia.manchas': 'pele',
+    'musculos': 'tronco',
+    'musculos.tensao': 'tronco',
+    'musculos.tensao.rigidez': 'rigidez',
+    'musculos.tensao.caibra': 'latejando',
+    'musculos.cansaco': 'fraqueza',
+    'musculos.cansaco.fraqueza': 'fraqueza',
+    'musculos.cansaco.dolorido': 'peso',
+    'hormonios': 'temperatura',
+    'hormonios.temperatura': 'temperatura',
+    'hormonios.temperatura.calorao': 'temperatura',
+    'hormonios.temperatura.frio': 'temperatura',
+    'hormonios.apetite': 'alimentacao',
+    'hormonios.apetite.sede': 'agua',
+    'hormonios.apetite.fome': 'fome',
+    'emotional': 'mente',
+    'physical': 'tronco',
+    'condition': 'nota',
+  };
+
+  /// Sleep quality is not the mood mark: bem is a moon, not the calm arc.
+  static const Map<String, String> _sleep = {
+    'bem': 'sono_bem',
+    'regular': 'sono_regular',
+    'mal': 'sono_mal',
+    'sono': 'cama',
+  };
+
+  static String? assetFor(String key) {
+    final name = _byKey[key];
+    if (name != null) return '$dir/$name.png';
+    final parts = key.split('.');
+    if (parts.length >= 2) {
+      final branch = _byKey['${parts[0]}.${parts[1]}'];
+      if (branch != null) return '$dir/$branch.png';
+    }
+    final root = _byKey[parts.first];
+    return root == null ? null : '$dir/$root.png';
+  }
+
+  static String? sleepAsset(String key) {
+    final name = _sleep[key];
+    return name == null ? null : '$dir/$name.png';
+  }
+
+  static Widget image(String path, {required double size}) => ExcludeSemantics(
+        child: Image.asset(
+          path,
+          width: size,
+          height: size,
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.medium,
+        ),
+      );
+
+  /// A fixed square so the label beside it stays on the same line.
+  static Widget? box(String? key, {required double size, bool sleep = false}) {
+    if (key == null) return null;
+    final path = sleep ? sleepAsset(key) : assetFor(key);
+    if (path == null) return null;
+    return SizedBox(width: size, height: size, child: image(path, size: size));
+  }
+}

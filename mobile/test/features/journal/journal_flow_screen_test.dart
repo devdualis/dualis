@@ -145,14 +145,12 @@ void main() {
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
 
-    // Screen 1: the three times with their emojis and the client question.
+    // Screen 1: the three times with their marks and the client question.
     expect(find.text(pt.jv2TimeQuestion), findsOneWidget);
     for (final time in JournalKeys.times) {
       expect(find.byKey(Key('jv2_time_$time')), findsOneWidget);
     }
-    expect(find.text('⏳'), findsOneWidget);
-    expect(find.text('📍'), findsOneWidget);
-    expect(find.text('🚀'), findsOneWidget);
+    expect(find.byType(Image), findsWidgets);
     expect(find.byKey(const Key('jv2_branch_futuro.mente')), findsNothing);
     await tapKey(tester, 'jv2_time_futuro');
 

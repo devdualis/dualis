@@ -7849,19 +7849,19 @@ abstract class AppLocalizations {
   /// No description provided for @habitsSleepQualityBem.
   ///
   /// In pt, this message translates to:
-  /// **'😴 Dormi bem'**
+  /// **'Dormi bem'**
   String get habitsSleepQualityBem;
 
   /// No description provided for @habitsSleepQualityRegular.
   ///
   /// In pt, this message translates to:
-  /// **'😐 Mais ou menos'**
+  /// **'Mais ou menos'**
   String get habitsSleepQualityRegular;
 
   /// No description provided for @habitsSleepQualityMal.
   ///
   /// In pt, this message translates to:
-  /// **'😫 Dormi mal'**
+  /// **'Dormi mal'**
   String get habitsSleepQualityMal;
 
   /// No description provided for @habitsSleepHoursQuestion.

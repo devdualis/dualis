@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../journal/domain/journal_keys.dart';
-import '../../../journal/presentation/journal_item_text.dart';
+import '../../../journal/presentation/journal_marks.dart';
 import '../../../journal/presentation/journal_labels.dart';
 import '../../domain/journal_insights_models.dart';
 
@@ -40,7 +40,7 @@ TextStyle get _labelStyle => GoogleFonts.inter(
 
 /// One count line as a quiet brand-tinted row, so the cards read as a list of
 /// recorded days rather than loose text.
-Widget _line(String text, {Key? key}) => Padding(
+Widget _line(String text, {Key? key, String? markKey}) => Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Container(
         key: key,
@@ -51,7 +51,16 @@ Widget _line(String text, {Key? key}) => Padding(
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: AppColors.dualisNavy.withValues(alpha: 0.06)),
         ),
-        child: Text(text, style: _lineStyle),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (JournalMarks.box(markKey, size: 18) case final mark?) ...[
+              mark,
+              const SizedBox(width: 8),
+            ],
+            Expanded(child: Text(text, style: _lineStyle)),
+          ],
+        ),
       ),
     );
 
@@ -78,8 +87,9 @@ class GoodMomentsSummary extends StatelessWidget {
       children: [
         for (final e in times)
           _line(
-            '${journalEmojis[e.key] ?? ''} ${JournalLabels.root(l10n, e.key)} · '
+            '${JournalLabels.root(l10n, e.key)} · '
             '${l10n.xv2DashDaysCount(e.value)}',
+            markKey: e.key,
             key: Key('good_moments_time_${e.key}'),
           ),
         if (top.isNotEmpty) ...[
@@ -122,8 +132,9 @@ class HelpedSummary extends StatelessWidget {
           const SizedBox(height: 4),
           for (final e in copings)
             _line(
-              '${journalEmojis[e.key] ?? ''} ${JournalLabels.coping(l10n, e.key)} · '
+              '${JournalLabels.coping(l10n, e.key)} · '
               '${l10n.xv2DashDaysCount(e.value)}',
+              markKey: e.key,
               key: Key('coping_${e.key}'),
             ),
         ],

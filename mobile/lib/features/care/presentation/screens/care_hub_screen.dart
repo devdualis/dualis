@@ -15,6 +15,7 @@ import '../../domain/care_models.dart';
 import '../care_providers.dart';
 import '../care_routes.dart';
 import '../widgets/care_widgets.dart';
+import '../widgets/care_mark.dart';
 
 /// "Meus cuidados" tab (premium): entry to vaccines, allergies, diseases & conditions,
 /// medications, prescriptions, appointments, exams and the PDF summary of the active profile.
@@ -93,7 +94,7 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
               if (canReadCare)
                 _CareTile(
                   key: const Key('care_hub_vaccines'),
-                  icon: Icons.vaccines_outlined,
+                  mark: CareMarkKind.vaccines,
                   title: l10n.careVaccinesTitle,
                   subtitle: doses == null ? null : l10n.careHubVaccinesSubtitle(doses.length),
                   onTap: () => context.push(CarePaths.vaccines),
@@ -101,7 +102,7 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
               if (canReadCare)
                 _CareTile(
                   key: const Key('care_hub_allergies'),
-                  icon: Icons.no_food_outlined,
+                  mark: CareMarkKind.allergies,
                   title: l10n.careAllergiesTitle,
                   subtitle: allergies == null
                       ? null
@@ -113,7 +114,7 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
               if (canReadConditions)
                 _CareTile(
                   key: const Key('care_hub_conditions'),
-                  icon: Icons.healing_outlined,
+                  mark: CareMarkKind.conditions,
                   title: l10n.careConditionsTitle,
                   subtitle: conditions == null
                       ? null
@@ -125,7 +126,7 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
               if (canReadCare)
                 _CareTile(
                   key: const Key('care_hub_medications'),
-                  icon: Icons.medication_outlined,
+                  mark: CareMarkKind.medications,
                   title: l10n.careMedicationsTitle,
                   subtitle: [
                     l10n.careHubMedsActive(meds.where((m) => m.active).length),
@@ -136,7 +137,7 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
               if (canReadCare)
                 _CareTile(
                   key: const Key('care_hub_prescriptions'),
-                  icon: Icons.receipt_long_outlined,
+                  mark: CareMarkKind.prescriptions,
                   title: l10n.careExamSectionPrescriptions,
                   subtitle: prescriptions == null ? null : l10n.careHubPrescriptions(prescriptions),
                   onTap: () => context.push(CarePaths.prescriptions),
@@ -144,7 +145,7 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
               if (canReadCare)
                 _CareTile(
                   key: const Key('care_hub_appointments'),
-                  icon: Icons.event_outlined,
+                  mark: CareMarkKind.appointments,
                   title: l10n.careAppointmentsTitle,
                   subtitle: upcoming.isEmpty
                       ? l10n.careHubNoUpcoming
@@ -157,7 +158,7 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
               if (canReadCare)
                 _CareTile(
                   key: const Key('care_hub_exams'),
-                  icon: Icons.science_outlined,
+                  mark: CareMarkKind.exams,
                   title: l10n.careExamsTitle,
                   subtitle: docs == null ? null : l10n.careHubDocuments(docs),
                   onTap: () => context.push(CarePaths.exams),
@@ -168,7 +169,7 @@ class _CareHubScreenState extends ConsumerState<CareHubScreen> {
             const SizedBox(height: 12),
             CareRow(
               key: const Key('care_hub_summary'),
-              leading: const CareIconTile(Icons.picture_as_pdf_outlined),
+              leading: const DuotoneIconTile(child: CareMark(CareMarkKind.summary)),
               title: l10n.careSummaryTitle,
               subtitle: l10n.careHubSummarySubtitle,
               onTap: () => context.push(CarePaths.summary),
@@ -295,9 +296,9 @@ class _TileGrid extends StatelessWidget {
 }
 
 class _CareTile extends StatelessWidget {
-  const _CareTile({super.key, required this.icon, required this.title, this.subtitle, required this.onTap});
+  const _CareTile({super.key, required this.mark, required this.title, this.subtitle, required this.onTap});
 
-  final IconData icon;
+  final CareMarkKind mark;
   final String title;
   final String? subtitle;
   final VoidCallback onTap;
@@ -312,7 +313,7 @@ class _CareTile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CareIconTile(icon),
+            DuotoneIconTile(child: CareMark(mark)),
             const SizedBox(height: 14),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
