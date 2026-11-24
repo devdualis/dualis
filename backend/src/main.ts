@@ -15,7 +15,7 @@ async function bootstrap() {
     logger: false, // Pino handles structured logging via nestjs-pino
     // Cloud Run's front end appends the caller's address to X-Forwarded-For. Trusting that one
     // hop makes req.ip that address; earlier entries are whatever the client sent.
-    trustProxy: 1,
+    trustProxy: 1 as any,
     bodyLimit: DEFAULT_BODY_LIMIT, // 1MB; uploads raise it per route with @BodyLimit
   });
   applyRouteBodyLimits(fastifyAdapter.getInstance());
