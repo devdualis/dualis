@@ -27,8 +27,9 @@ COPY src/ ./src/
 COPY test/ ./test/
 COPY scripts/ ./scripts/
 
-# Build production bundle (outputs to dist/src/main.js)
-RUN npm run build
+# Compile TypeScript (dist/src/main.js), then bundle it into one file
+# (dist/bundle/main.js) so a cold start reads 1 file instead of ~1650.
+RUN npm run build && npm run bundle
 
 # Remove development dependencies to keep final image small
 RUN npm prune --omit=dev
@@ -43,16 +44,26 @@ ENV NODE_ENV=production
 # Google Cloud Run provides PORT dynamically; default to 8080
 ENV PORT=8080
 
+# Directory for the V8 compile cache, writable by the node user
+RUN mkdir -p /app/.node-compile-cache && chown node:node /app/.node-compile-cache
+
 # Run container as non-root node user for security
 USER node
 
-# Copy production dependencies and compiled artifacts
+# Copy production dependencies and compiled artifacts.
+# node_modules stays for the packages left out of the bundle (argon2).
 COPY --chown=node:node --from=builder /app/package*.json ./
 COPY --chown=node:node --from=builder /app/node_modules ./node_modules
 COPY --chown=node:node --from=builder /app/dist ./dist
+
+# Ship the V8 code cache for the bundle so a cold start skips most of the
+# parsing and compiling. Node reads NODE_COMPILE_CACHE at runtime too.
+ENV NODE_COMPILE_CACHE=/app/.node-compile-cache
+COPY --chown=node:node scripts/warm-compile-cache.cjs ./scripts/warm-compile-cache.cjs
+RUN node scripts/warm-compile-cache.cjs && test -n "$(ls -A $NODE_COMPILE_CACHE)"
 
 # Document default listening port
 EXPOSE 8080
 
 # Start Fastify NestJS application
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "dist/bundle/main.js"]
