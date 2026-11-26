@@ -22,7 +22,7 @@ Commits en `main`:
 - Tanda 10 (`b3c283a`): `pele_coceira` (piel con rasguños cian) para `pele.coceira.coceira`, `coceira_ardencia` (piel con rasguños y llama) para la rama `pele.coceira`, y el desencadenante `sono` ("Noite mal dormida") reusa `sono_mal`. Los rasguños sueltos `coceira` quedan para la pelve y las claves antiguas; `descansar` y `repouso` siguen con `cama`.
 - Tanda 11 (`1c7e13b`): `refluxo` e `irradia` con acentos cian más gruesos (trazo 3.6–3.8, llama y destello más grandes) tras verlos en el simulador; `irradia` queda como figura quieta de frente para no confundirse con `dor_mexer`.
 
-Tests: `flutter test test/features/journal/ test/features/journal_insights/` pasó (201) después de la tanda 11. El test "a screen never shows the same phrase twice in a row" falló una vez y pasó en las siguientes ejecuciones; parece inestable. Todos los archivos que nombra el mapa existen en `assets/marks/`.
+Tests: `flutter test test/features/journal/ test/features/journal_insights/` pasó (201) después de la tanda 11. El test "a screen never shows the same phrase twice in a row" era inestable (en ~0,5 % de las semillas no salían las 7 variantes); ahora usa semilla fija (`1f4513b`). Todos los archivos que nombra el mapa existen en `assets/marks/`.
 
 ## Estado actual
 
@@ -30,7 +30,7 @@ Tests: `flutter test test/features/journal/ test/features/journal_insights/` pas
 - Los PNG viven en `mobile/assets/marks/` (160×160, RGBA) y el mapa clave→archivo está en `mobile/lib/features/journal/presentation/journal_marks.dart`, en `_byKey` y `_sleep`.
 - Tamaños en la app: 64px en tarjetas grandes y entre 16 y 26px en filas e historial. Cada mark debe leerse a 22px.
 - Verificado en el simulador iPhone 17 (build debug contra el backend de producción, `--dart-define=API_BASE_URL=https://dualis-backend-476640769147.southamerica-east1.run.app`): zonas "No corpo todo", pele, músculos, barriga, costas y desencadenantes muestran los marks nuevos. No se guardó ningún registro de prueba.
-- Para revisar en la app: login con la cuenta del usuario (pedirla con una tarjeta privada), "Atualizar" en Físico, "Não tão bem" y elegir zonas. Los botones "Continuar" a veces necesitan un segundo toque justo después de marcar una opción.
+- Para revisar en la app: login con la cuenta del usuario (pedirla con una tarjeta privada), "Atualizar" en Físico, "Não tão bem" y elegir zonas. En el simulador, "Continuar" a veces pareció necesitar un segundo toque; en tests de widget un solo toque 16 ms después de marcar avanza (emocional y físico), así que probablemente es la automatización.
 - Los SVG fuente y los scripts generadores quedaron en el scratchpad de la sesión. No son durables; usa la receta de abajo para regenerarlos.
 
 ## Sistema visual (respetarlo)
@@ -56,7 +56,7 @@ Tests: `flutter test test/features/journal/ test/features/journal_insights/` pas
 La revisión de marks está terminada. Solo quedan ideas si el usuario quiere seguir:
 
 1. No quedan pictogramas compartidos entre significados distintos. Lo que se repite son claves antiguas y su equivalente nueva, o el mismo significado en zonas distintas.
-2. Investigar el test inestable "a screen never shows the same phrase twice in a row" si vuelve a fallar.
+2. Pendiente de aprobación (2026-11-26): reforzar a 22px `cabeca`, `nariz`, `ouvido`, `pulmoes`, `perna`, `joelho`, `tronco`, `algo`, `alguem`, `orgulho`, `confiante`, `fome`, `fluxo_fraco` y `escrever`.
 3. Si algún mark se ve débil a 22px, engrosar el acento cian (trazo 3.6–3.8) como en la tanda 11.
 4. Reglas aprendidas en la tanda 8: en cabezas de frente, cualquier punto o arco se lee como ojos o boca. Para marcar zonas de la cabeza usar `HEAD` de perfil con la zona en cian recortada por `clipPath` del mismo contorno.
 
