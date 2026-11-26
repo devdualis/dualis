@@ -19,8 +19,9 @@ Commits en `main`:
 - Tanda 8 (este commit siguiente a `2df7dfd`): `musculos` (brazo flexionado), `tensao` (hombros subidos con zigzags), `dolorido` (brazo con destello), `membros_pesados` (figura con flechas hacia abajo), `temporas` y `rosto` (cabeza de perfil con la zona en cian: frente y sien, o cara baja), `dor_mexer` (figura caminando con destello en la espalda) y `apetite` (bol con comida y vaso).
 
 - Tanda 9: `refluxo` (torso con llama y flecha a la garganta) para `barriga.queimacao.subindo`, `irradia` (figura con destello en la espalda y flecha por la pierna) para `costas.fisgada.irradia`, `cansaco_muscular` (brazo de `musculos` con gotas de sudor) para la rama `musculos.cansaco`, `fraqueza` redibujado (mismo brazo con flecha hacia abajo), `pele_ardencia` (piel con llama) para `pele.coceira.ardencia` y `hormonios` (persona con flechas de ciclo) para la zona `hormonios`. El brazo se hizo componiendo `musculos.png` sin su relleno cian más el acento en SVG.
+- Tanda 10: `pele_coceira` (piel con rasguños cian) para `pele.coceira.coceira`, `coceira_ardencia` (piel con rasguños y llama) para la rama `pele.coceira`, y el desencadenante `sono` ("Noite mal dormida") reusa `sono_mal`. Los rasguños sueltos `coceira` quedan para la pelve y las claves antiguas; `descansar` y `repouso` siguen con `cama`.
 
-Tests: `flutter test test/features/journal/ test/features/journal_insights/` pasó (201) después de la tanda 9. El test "a screen never shows the same phrase twice in a row" falló una vez y pasó en las siguientes ejecuciones; parece inestable. Todos los archivos que nombra el mapa existen en `assets/marks/`.
+Tests: `flutter test test/features/journal/ test/features/journal_insights/` pasó (201) después de la tanda 10. El test "a screen never shows the same phrase twice in a row" falló una vez y pasó en las siguientes ejecuciones; parece inestable. Todos los archivos que nombra el mapa existen en `assets/marks/`.
 
 ## Estado actual
 
@@ -51,7 +52,7 @@ Tests: `flutter test test/features/journal/ test/features/journal_insights/` pas
 
 La lista anterior está terminada. Todavía hay archivos que comparten varias claves. La mayoría está bien porque es el mismo significado: una clave antigua y su equivalente nueva, o una rama con una sola opción. Estos son los candidatos a revisar con el usuario:
 
-1. Pendientes de bajo valor: la rama `pele.coceira` ("Coceira ou ardência") comparte `coceira` con su opción; `sono` ("Noite mal dormida") comparte `cama` con los auxilios `descansar` y `repouso` (pantallas distintas).
+1. No quedan pictogramas compartidos entre significados distintos. Lo que se repite son claves antiguas y su equivalente nueva, o el mismo significado en zonas distintas.
 2. Reglas aprendidas en la tanda 8: en cabezas de frente, cualquier punto o arco se lee como ojos o boca. Para marcar zonas de la cabeza usar `HEAD` de perfil con la zona en cian recortada por `clipPath` del mismo contorno.
 
 Para sacar la lista completa, agrupa por archivo las líneas `'clave': 'archivo',` de `journal_marks.dart`.
