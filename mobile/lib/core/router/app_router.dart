@@ -220,7 +220,9 @@ GoRouter createRouter({
             ).read(premiumProfilesEnabledProvider)
             ? null
             : RoutePaths.premiumPromo,
-        builder: (context, state) => const HabitsScreen(),
+        builder: (context, state) => HabitsScreen(
+              targetHabit: state.extra as String?,
+            ),
       ),
       GoRoute(
         path: RoutePaths.familySharing,

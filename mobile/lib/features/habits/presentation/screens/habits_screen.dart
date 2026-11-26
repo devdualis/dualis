@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../../shared/widgets/fluent_emoji.dart';
 import '../../../journal/presentation/journal_marks.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../shared/widgets/load_error_view.dart';
@@ -16,25 +17,64 @@ import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../profile/presentation/widgets/not_shared_placeholder.dart';
 import '../controllers/habits_controller.dart';
 import '../widgets/habits_water_summary_card.dart';
+import '../widgets/movement_modal.dart';
+import '../widgets/sleep_modal.dart';
 import '../../domain/models/habit_day.dart';
 
 /// Screen "Hábitos de hoje" (docs/bienestar/CONTRATO-JOURNAL-V2.md section 6).
 /// One question per card, big emoji buttons, few options, same visual style
-/// as journal and hydration screens.
-/// Supports editing yesterday via Hoje/Ontem switch.
+/// as journal and hydration screens. Focuses on today's habits.
 /// Saves each answer at once.
 class HabitsScreen extends ConsumerStatefulWidget {
   /// True inside the Premium "Hábitos" tab: no app bar, water summary on top.
   final bool isEmbedded;
 
-  const HabitsScreen({super.key, this.isEmbedded = false});
+  /// Optional initial habit card to focus ('sleep' or 'movement').
+  final String? targetHabit;
+
+  const HabitsScreen({
+    super.key,
+    this.isEmbedded = false,
+    this.targetHabit,
+  });
 
   @override
   ConsumerState<HabitsScreen> createState() => _HabitsScreenState();
 }
 
 class _HabitsScreenState extends ConsumerState<HabitsScreen> {
-  bool _isYesterday = false;
+  final _sleepCardKey = GlobalKey();
+  final _movementCardKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.targetHabit != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (widget.targetHabit == 'sleep') {
+          SleepModal.show(context);
+        } else if (widget.targetHabit == 'movement') {
+          MovementModal.show(context);
+        } else {
+          _scrollToTarget(widget.targetHabit!);
+        }
+      });
+    }
+  }
+
+  void _scrollToTarget(String target) {
+    final ctx = target == 'movement'
+        ? _movementCardKey.currentContext
+        : _sleepCardKey.currentContext;
+    if (ctx != null) {
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,11 +98,8 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
       if (error != null) showSaveFailedSnackBar(context);
     });
 
-    final activeDayString =
-        _isYesterday
-            ? controller.yesterdayDayString
-            : controller.todayDayString;
-    final activeHabit = _isYesterday ? state.yesterdayHabit : state.todayHabit;
+    final activeDayString = controller.todayDayString;
+    final activeHabit = state.todayHabit;
 
     final body =
         !canRead
@@ -100,34 +137,30 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
                     const ActiveProfileBanner(),
                     if (viewOnly) const ActiveProfileReadOnlyNote(),
                     const SizedBox(height: 8),
-                    // Day switcher: Hoje / Ontem
-                    _DaySwitcher(
-                      isYesterday: _isYesterday,
-                      todayLabel: l10n.habitsTabToday,
-                      yesterdayLabel: l10n.habitsTabYesterday,
-                      onChanged: (yesterday) {
-                        setState(() => _isYesterday = yesterday);
-                      },
-                    ),
-                    const SizedBox(height: 16),
 
                     // Card 1: Sleep Quality & Hours
-                    _SleepCard(
-                      dayString: activeDayString,
-                      habit: activeHabit,
-                      controller: controller,
-                      l10n: l10n,
-                      viewOnly: viewOnly,
+                    KeyedSubtree(
+                      key: _sleepCardKey,
+                      child: _SleepCard(
+                        dayString: activeDayString,
+                        habit: activeHabit,
+                        controller: controller,
+                        l10n: l10n,
+                        viewOnly: viewOnly,
+                      ),
                     ),
                     const SizedBox(height: 16),
 
                     // Card 2: Movement & Minutes
-                    _MovementCard(
-                      dayString: activeDayString,
-                      habit: activeHabit,
-                      controller: controller,
-                      l10n: l10n,
-                      viewOnly: viewOnly,
+                    KeyedSubtree(
+                      key: _movementCardKey,
+                      child: _MovementCard(
+                        dayString: activeDayString,
+                        habit: activeHabit,
+                        controller: controller,
+                        l10n: l10n,
+                        viewOnly: viewOnly,
+                      ),
                     ),
                     const SizedBox(height: 16),
 
@@ -159,7 +192,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
                     ],
 
                     // Premium tab: water lives here too (today only).
-                    if (widget.isEmbedded && !_isYesterday) ...[
+                    if (widget.isEmbedded) ...[
                       const HabitsWaterSummaryCard(),
                       const SizedBox(height: 16),
                     ],
@@ -176,7 +209,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text(
-          _isYesterday ? l10n.habitsTitleYesterday : l10n.habitsTitleToday,
+          l10n.habitsTitleToday,
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -193,32 +226,6 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
         ],
       ),
       body: body,
-    );
-  }
-}
-
-class _DaySwitcher extends StatelessWidget {
-  final bool isYesterday;
-  final String todayLabel;
-  final String yesterdayLabel;
-  final ValueChanged<bool> onChanged;
-
-  const _DaySwitcher({
-    required this.isYesterday,
-    required this.todayLabel,
-    required this.yesterdayLabel,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    // Same segmented control as the History tabs. Keys: habits_tab_today and
-    // habits_tab_yesterday.
-    return HistorySegmented<String>(
-      keyPrefix: 'habits_tab',
-      options: [('today', todayLabel), ('yesterday', yesterdayLabel)],
-      selected: isYesterday ? 'yesterday' : 'today',
-      onChanged: (value) => onChanged(value == 'yesterday'),
     );
   }
 }
@@ -241,10 +248,7 @@ class _SleepCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _QuestionCard(
-      title:
-          dayString == controller.yesterdayDayString
-              ? l10n.habitsSleepQualityQuestionYesterday
-              : l10n.habitsSleepQualityQuestion,
+      title: l10n.habitsSleepQualityQuestion,
       titleKey: const Key('habits_sleep_question'),
       icon: Icons.bedtime_rounded,
       saved: habit.sleepQuality != null,
@@ -395,10 +399,7 @@ class _MovementCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _QuestionCard(
-      title:
-          dayString == controller.yesterdayDayString
-              ? l10n.habitsMovedQuestionYesterday
-              : l10n.habitsMovedQuestion,
+      title: l10n.habitsMovedQuestion,
       titleKey: const Key('habits_moved_question'),
       icon: Icons.directions_walk_rounded,
       saved: habit.moved != null,
@@ -528,10 +529,7 @@ class _PeriodCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return _QuestionCard(
       key: const Key('habits_period_card'),
-      title:
-          dayString == controller.yesterdayDayString
-              ? l10n.habitsPeriodQuestionYesterday
-              : l10n.habitsPeriodQuestion,
+      title: l10n.habitsPeriodQuestion,
       titleKey: const Key('habits_period_question'),
       icon: Icons.event_repeat_rounded,
       saved: habit.period != null,
@@ -776,11 +774,13 @@ class _EmojiOptionButton extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Fluent emoji; the text emoji stays as the fallback.
-          JournalMarks.box(sleepKey, size: 40, sleep: true) ??
-              ExcludeSemantics(
-                child: Text(emoji, style: const TextStyle(fontSize: 28)),
-              ),
+          FluentEmoji.forSleep(
+            sleepKey,
+            size: 42,
+            fallback: ExcludeSemantics(
+              child: Text(emoji, style: const TextStyle(fontSize: 28)),
+            ),
+          ),
           const SizedBox(height: 8),
           Text(
             label,

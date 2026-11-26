@@ -143,7 +143,7 @@ void main() {
           ))).called(1);
     });
 
-    testWidgets('Ontem asks in the past tense and answered cards show Salvo',
+    testWidgets('today questions are displayed and answered cards show Salvo',
         (tester) async {
       when(() => repository.getHabits(days: 60)).thenAnswer((_) async => []);
       when(() => repository.getTrackMenstrualCycleSetting())
@@ -165,12 +165,6 @@ void main() {
       await tester.tap(find.byKey(const Key('habits_sleep_bem')));
       await tester.pumpAndSettle();
       expect(find.text('Salvo'), findsOneWidget);
-
-      await tester.tap(find.byKey(const Key('habits_tab_yesterday')));
-      await tester.pumpAndSettle();
-      expect(find.text('Como você dormiu na noite anterior?'), findsOneWidget);
-      expect(find.text('Mexeu o corpo ontem?'), findsOneWidget);
-      expect(find.text('Salvo'), findsNothing);
     });
 
     testWidgets('movement minutes chips only appear after selecting Sim',

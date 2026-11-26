@@ -11,10 +11,12 @@ import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../hydration/presentation/screens/hydration_dashboard_screen.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../../shared/widgets/duotone_icon_tile.dart';
-import '../../../journal/presentation/journal_marks.dart';
+import '../../../../shared/widgets/fluent_emoji.dart';
 import '../../../../shared/widgets/premium_gradient_icon.dart';
 import '../controllers/habits_controller.dart';
 import '../../domain/models/habit_day.dart';
+import 'movement_modal.dart';
+import 'sleep_modal.dart';
 
 // Redesign: brand palette only. Tiles are neutral glass; the accent colours
 // only the icon, the done marker and the buttons.
@@ -136,7 +138,13 @@ class _SleepTile extends ConsumerWidget {
     final viewOnly = activeProfileIsViewOnly(ref);
     final done = today.sleepQuality != null;
     final hours = today.sleepHours;
-    final sleepEmoji = done ? JournalMarks.box(today.sleepQuality, size: 22, sleep: true) : null;
+    final sleepEmoji = done
+        ? FluentEmoji.forSleep(
+            today.sleepQuality!,
+            size: 22,
+            fallback: const SizedBox.shrink(),
+          )
+        : null;
 
     return _HabitTile(
       key: const Key('home_habit_tile_sleep'),
@@ -146,7 +154,7 @@ class _SleepTile extends ConsumerWidget {
       title: l10n.habitsTileSleep,
       done: done,
       doneLabel: l10n.habitsSaved,
-      onTap: () => context.push(RoutePaths.habits),
+      onTap: () => SleepModal.show(context),
       value: done
           ? [
               sleepQualityLabel(today.sleepQuality!, l10n),
@@ -158,7 +166,9 @@ class _SleepTile extends ConsumerWidget {
         key: const Key('home_habit_sleep_action'),
         label: done ? l10n.habitsTileEdit : l10n.habitsTileAnswer,
         color: _sleepAccent,
-        onTap: viewOnly ? null : () => context.push(RoutePaths.habits),
+        onTap: viewOnly
+            ? null
+            : () => SleepModal.show(context),
       ),
     );
   }
@@ -200,7 +210,7 @@ class _MovementTile extends ConsumerWidget {
       title: l10n.habitsTileMovement,
       done: moved != null,
       doneLabel: l10n.habitsSaved,
-      onTap: () => context.push(RoutePaths.habits),
+      onTap: () => MovementModal.show(context),
       value: value,
       action: moved == null
           ? Row(
@@ -228,7 +238,9 @@ class _MovementTile extends ConsumerWidget {
               key: const Key('home_habit_movement_action'),
               label: l10n.habitsTileEdit,
               color: _moveAccent,
-              onTap: viewOnly ? null : () => context.push(RoutePaths.habits),
+              onTap: viewOnly
+                  ? null
+                  : () => MovementModal.show(context),
             ),
     );
   }

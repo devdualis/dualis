@@ -110,10 +110,9 @@ Future<FakeHydration> pumpHydration(
 }
 
 void main() {
-  testWidgets('shows glass, goal ring, streak and the three quick buttons',
+  testWidgets('shows goal ring, streak and the three quick buttons',
       (tester) async {
     await pumpHydration(tester);
-    expect(find.byKey(const Key('hydration_glass')), findsOneWidget);
     expect(find.byKey(const Key('hydration_goal_ring')), findsOneWidget);
     expect(find.text('Sequência: 0 dias'), findsOneWidget);
     expect(find.text('200 ml'), findsOneWidget);

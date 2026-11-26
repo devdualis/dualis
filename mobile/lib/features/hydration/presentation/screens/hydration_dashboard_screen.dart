@@ -293,16 +293,9 @@ class _TodayCard extends ConsumerWidget {
 
     // Navy hero card, same family as the Home check-in card.
     const onNavy = Colors.white;
-    final chipLabel = GoogleFonts.inter(
-      fontSize: 13,
-      fontWeight: FontWeight.w600,
-      color: onNavy,
-    );
-    final chipFill = Colors.white.withValues(alpha: 0.14);
-    const chipSide = BorderSide(color: Color(0x33FFFFFF));
     return Container(
       clipBehavior: Clip.antiAlias,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: AppColors.gradientNavy,
         borderRadius: BorderRadius.circular(30),
@@ -318,71 +311,53 @@ class _TodayCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              AnimatedWaterGlass(fill: state.progressRatio),
-              HydrationGoalRing(
-                progress: state.progressRatio,
-                center: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${state.todayTotalMl} / ${state.dailyTargetMl} ml',
-                      key: const Key('hydration_today_total'),
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        color: onNavy,
-                      ),
+          Center(
+            child: HydrationGoalRing(
+              size: 152,
+              progress: state.progressRatio,
+              center: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${state.todayTotalMl} / ${state.dailyTargetMl} ml',
+                    key: const Key('hydration_today_total'),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: onNavy,
                     ),
-                    Text(
-                      '${state.progressPercent}%',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: onNavy.withValues(alpha: 0.75),
-                      ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${state.progressPercent}%',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: onNavy.withValues(alpha: 0.85),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           Wrap(
             alignment: WrapAlignment.center,
             spacing: 8,
-            runSpacing: 4,
+            runSpacing: 6,
             children: [
-              Chip(
+              _HeroBadge(
                 key: const Key('hydration_streak'),
-                avatar: const Icon(
-                  Icons.local_fire_department_outlined,
-                  size: 18,
-                  color: onNavy,
-                ),
-                label: Text(l10n.xv2WaterStreak(streak)),
-                labelStyle: chipLabel,
-                backgroundColor: chipFill,
-                side: chipSide,
-                shape: const StadiumBorder(),
+                icon: Icons.local_fire_department_rounded,
+                label: l10n.xv2WaterStreak(streak),
               ),
-              ActionChip(
+              _HeroBadge(
                 key: const Key('hydration_goal_edit'),
-                avatar: const Icon(
-                  Icons.flag_outlined,
-                  size: 18,
-                  color: onNavy,
-                ),
-                label: Text(l10n.xv2WaterGoalChip(state.dailyTargetMl)),
-                labelStyle: chipLabel,
-                backgroundColor: chipFill,
-                disabledColor: chipFill,
-                side: chipSide,
-                shape: const StadiumBorder(),
-                onPressed: viewOnly ? null : () => _editGoal(context, ref),
+                icon: Icons.flag_rounded,
+                label: l10n.xv2WaterGoalChip(state.dailyTargetMl),
+                onTap: viewOnly ? null : () => _editGoal(context, ref),
               ),
             ],
           ),
@@ -422,6 +397,58 @@ class _TodayCard extends ConsumerWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _HeroBadge extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+
+  const _HeroBadge({
+    super.key,
+    required this.icon,
+    required this.label,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onTap != null;
+    final content = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (!enabled) return content;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: content,
       ),
     );
   }

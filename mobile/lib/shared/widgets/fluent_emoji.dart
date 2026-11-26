@@ -30,7 +30,7 @@ class FluentEmoji {
 
   /// Sleep quality (Bem / Regular / Mal) and sleeping, for the habits screens.
   static const Map<String, String> sleepQuality = {
-    'bem': 'smiling_face_with_smiling_eyes',
+    'bem': 'sleeping_face',
     'regular': 'neutral_face',
     'mal': 'tired_face',
     'sono': 'sleeping_face',

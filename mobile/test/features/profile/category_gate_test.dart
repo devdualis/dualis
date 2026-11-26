@@ -142,7 +142,7 @@ void main() {
         extra: hydration(),
       );
       expectNotShared();
-      expect(find.byKey(const Key('hydration_glass')), findsNothing);
+      expect(find.byKey(const Key('hydration_goal_ring')), findsNothing);
       expect(find.byKey(const Key('hydration_quick_add_200')), findsNothing);
     });
 
@@ -159,7 +159,7 @@ void main() {
         extra: hydration(),
       );
       expect(find.byKey(const ValueKey('category-not-shared')), findsNothing);
-      expect(find.byKey(const Key('hydration_glass')), findsOneWidget);
+      expect(find.byKey(const Key('hydration_goal_ring')), findsOneWidget);
       expect(find.byKey(const Key('hydration_quick_add_200')), findsNothing);
       expect(find.byKey(const Key('dashboard_add_water_button')), findsNothing);
     });
