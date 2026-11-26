@@ -16,7 +16,9 @@ Commits en `main`:
   - Temperatura: `calorao` (persona con ondas de calor y sudor) y `frio` (persona tiritando con copo de nieve).
   - Las claves antiguas `pelve.urina*` y `pelve.intima` solo aparecen en el historial, pero también tienen dibujo propio.
 
-Tests: `flutter test test/features/journal/ test/features/journal_insights/` pasó (201) después de `50ac880`. Todos los archivos que nombra el mapa existen en `assets/marks/`.
+- Tanda 8 (este commit siguiente a `2df7dfd`): `musculos` (brazo flexionado), `tensao` (hombros subidos con zigzags), `dolorido` (brazo con destello), `membros_pesados` (figura con flechas hacia abajo), `temporas` y `rosto` (cabeza de perfil con la zona en cian: frente y sien, o cara baja), `dor_mexer` (figura caminando con destello en la espalda) y `apetite` (bol con comida y vaso).
+
+Tests: `flutter test test/features/journal/ test/features/journal_insights/` pasó (201) después de la tanda 8. Todos los archivos que nombra el mapa existen en `assets/marks/`.
 
 ## Estado actual
 
@@ -47,12 +49,8 @@ Tests: `flutter test test/features/journal/ test/features/journal_insights/` pas
 
 La lista anterior está terminada. Todavía hay archivos que comparten varias claves. La mayoría está bien porque es el mismo significado: una clave antigua y su equivalente nueva, o una rama con una sola opción. Estos son los candidatos a revisar con el usuario:
 
-1. `peso` lo usan `membros.cansaco.pesados`, `musculos.cansaco.dolorido` y `pelve.baixo_ventre.peso`. "Dolorido" podría necesitar dibujo propio.
-2. `cabeca` lo usan la zona `cabeca`, `cabeca.pressao.temporas` y `cabeca.rosto`. Faltan dibujos para sienes y rostro.
-3. `tronco` lo usan `musculos`, `musculos.tensao` y `physical`.
-4. `caminhar` lo usan `mexer_corpo` y `costas.fisgada.ao_mexer` ("dolor al moverse").
-5. `alimentacao` lo usan `alimentacao` y `hormonios.apetite`.
-6. `temperatura` lo usan la zona `hormonios` y `hormonios.temperatura`.
+1. La zona `hormonios` ("Hormônios e metabolismo") sigue con el termómetro; no se encontró un pictograma literal. Pedir idea al usuario.
+2. Reglas aprendidas en la tanda 8: en cabezas de frente, cualquier punto o arco se lee como ojos o boca. Para marcar zonas de la cabeza usar `HEAD` de perfil con la zona en cian recortada por `clipPath` del mismo contorno.
 
 Para sacar la lista completa, agrupa por archivo las líneas `'clave': 'archivo',` de `journal_marks.dart`.
 
