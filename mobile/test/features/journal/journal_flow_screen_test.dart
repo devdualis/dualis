@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dualis_mobile/features/journal/domain/journal_keys.dart';
 import 'package:dualis_mobile/features/journal/domain/journal_models.dart';
 import 'package:dualis_mobile/features/journal/presentation/controllers/journal_flow_controller.dart';
@@ -302,7 +304,10 @@ void main() {
   });
 
   test('a screen never shows the same phrase twice in a row', () {
-    final container = ProviderContainer();
+    // Seeded: an unseeded run misses one of the 7 variants about 0.5% of the time.
+    final container = ProviderContainer(
+      overrides: [journalRandomProvider.overrideWithValue(Random(0))],
+    );
     addTearDown(container.dispose);
     final sub = container.listen(journalFlowControllerProvider, (_, _) {});
     addTearDown(sub.close);
