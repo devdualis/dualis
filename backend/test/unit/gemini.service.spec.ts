@@ -17,14 +17,13 @@ describe('GeminiService (Vertex AI)', () => {
     }
   });
 
-  it('uses Vertex AI in São Paulo by default when a project is set', async () => {
+  it('uses Vertex AI in São Paulo by default when a project is set', () => {
     const saved = process.env.VERTEX_LOCATION;
     delete process.env.VERTEX_LOCATION;
     const service = withConfig({ VERTEX_PROJECT: 'dualis-test' });
     if (saved !== undefined) process.env.VERTEX_LOCATION = saved;
     expect(service.isAvailable).toBe(true);
-    expect((service as any).client).toBeNull(); // the SDK loads on first use, not at startup
-    const client = await (service as any).getClient();
+    const client = (service as any).client;
     expect(client.vertexai).toBe(true);
     expect(client.location).toBe('southamerica-east1');
   });

@@ -1,6 +1,6 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 /** Names per `list` call when deleting a person's pictures. */
 const AVATAR_PAGE_SIZE = 100;
@@ -13,13 +13,6 @@ const LEFTOVER_AVATAR_AGE_MS = 10 * 60 * 1000;
 export class StorageService {
   private readonly logger = new Logger(StorageService.name);
   private supabase: SupabaseClient | null = null;
-  /**
-   * Set when credentials exist. The Supabase SDK is loaded on first use, not at startup,
-   * because loading it adds to every Cloud Run cold start and most requests never touch
-   * pictures.
-   */
-  private credentials: { url: string; key: string } | null = null;
-  private clientPromise?: Promise<SupabaseClient | null>;
   private readonly bucketName: string;
   private bucketChecked = false;
 
@@ -41,10 +34,18 @@ export class StorageService {
       'avatars';
 
     if (supabaseUrl && supabaseKey) {
-      this.credentials = { url: supabaseUrl, key: supabaseKey };
-      this.logger.log(
-        `Supabase Storage configured for bucket: "${this.bucketName}" (client loads on first use)`,
-      );
+      try {
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+          auth: { persistSession: false },
+        });
+        this.logger.log(
+          `Supabase Storage initialized for bucket: "${this.bucketName}"`,
+        );
+      } catch (err) {
+        this.logger.warn(
+          `Failed to initialize Supabase client: ${(err as Error).message}`,
+        );
+      }
     } else {
       this.logger.log(
         'No Supabase credentials found. Fallback to direct DB storage for avatars.',
@@ -52,27 +53,10 @@ export class StorageService {
     }
   }
 
-  /** The Supabase client, created on first use; null without credentials or when creation fails. */
-  private async getClient(): Promise<SupabaseClient | null> {
-    if (this.supabase) return this.supabase;
-    if (!this.credentials) return null;
-    const { url, key } = this.credentials;
-    this.clientPromise ??= import('@supabase/supabase-js')
-      .then(({ createClient }) => {
-        this.supabase = createClient(url, key, { auth: { persistSession: false } });
-        return this.supabase;
-      })
-      .catch((err) => {
-        this.logger.warn(`Failed to initialize Supabase client: ${(err as Error).message}`);
-        return null;
-      });
-    return this.clientPromise;
-  }
-
-  private async ensureBucketExists(supabase: SupabaseClient): Promise<void> {
-    if (this.bucketChecked) return;
+  private async ensureBucketExists(): Promise<void> {
+    if (!this.supabase || this.bucketChecked) return;
     try {
-      const { data: buckets, error } = await supabase.storage.listBuckets();
+      const { data: buckets, error } = await this.supabase.storage.listBuckets();
       if (error) {
         this.logger.warn(`Could not list storage buckets: ${error.message}`);
         return;
@@ -80,7 +64,7 @@ export class StorageService {
 
       const exists = buckets?.some((b) => b.name === this.bucketName);
       if (!exists) {
-        const { error: createError } = await supabase.storage.createBucket(
+        const { error: createError } = await this.supabase.storage.createBucket(
           this.bucketName,
           { public: true },
         );
@@ -112,8 +96,7 @@ export class StorageService {
       return picture;
     }
 
-    const supabase = await this.getClient();
-    if (!supabase) {
+    if (!this.supabase) {
       this.logger.debug(
         `Saving avatar directly to database as data URI for user ${userId}`,
       );
@@ -121,7 +104,7 @@ export class StorageService {
     }
 
     try {
-      await this.ensureBucketExists(supabase);
+      await this.ensureBucketExists();
 
       // Extract mime type and base64 data
       const matches = picture.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
@@ -140,7 +123,7 @@ export class StorageService {
         : 'jpg';
       const fileName = `${userId}/${Date.now()}.${ext}`;
 
-      const { data, error } = await supabase.storage
+      const { data, error } = await this.supabase.storage
         .from(this.bucketName)
         .upload(fileName, buffer, {
           contentType,
@@ -154,7 +137,7 @@ export class StorageService {
         return picture;
       }
 
-      const { data: publicData } = supabase.storage
+      const { data: publicData } = this.supabase.storage
         .from(this.bucketName)
         .getPublicUrl(data.path);
 
@@ -174,18 +157,15 @@ export class StorageService {
    * still in progress. Failures are logged and never thrown.
    */
   async removeAvatar(userId: string, url: string | null | undefined): Promise<void> {
-    if (!url) return;
+    if (!this.supabase || !url) return;
 
     const folder = `${this.bucketName}/${userId}/`;
     if (!url.includes(folder)) return;
     const name = url.slice(url.indexOf(folder) + folder.length).split('?')[0];
     if (!name || name.includes('/')) return;
 
-    const supabase = await this.getClient();
-    if (!supabase) return;
-
     try {
-      const { error } = await supabase.storage
+      const { error } = await this.supabase.storage
         .from(this.bucketName)
         .remove([`${userId}/${name}`]);
       if (error) throw error;
@@ -207,14 +187,13 @@ export class StorageService {
     keep: string | null | undefined,
     now = Date.now(),
   ): Promise<void> {
-    const supabase = await this.getClient();
-    if (!supabase) return;
+    if (!this.supabase) return;
 
     const folder = `${this.bucketName}/${userId}/`;
     const keepName = keep?.includes(folder)
       ? keep.slice(keep.indexOf(folder) + folder.length).split('?')[0]
       : null;
-    const bucket = supabase.storage.from(this.bucketName);
+    const bucket = this.supabase.storage.from(this.bucketName);
 
     try {
       const stale: string[] = [];
@@ -251,10 +230,9 @@ export class StorageService {
    * is deleted. Failures are logged and never thrown.
    */
   async removeAvatars(userId: string): Promise<void> {
-    const supabase = await this.getClient();
-    if (!supabase) return;
+    if (!this.supabase) return;
 
-    const bucket = supabase.storage.from(this.bucketName);
+    const bucket = this.supabase.storage.from(this.bucketName);
 
     try {
       // Removing a page of names brings the next ones to the first page.
