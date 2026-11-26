@@ -1,3 +1,4 @@
+import { performance } from 'node:perf_hooks';
 import { NestFactory } from '@nestjs/core';
 import {
   FastifyAdapter,
@@ -11,6 +12,10 @@ import { AppModule } from './app.module';
 import { applyRouteBodyLimits, DEFAULT_BODY_LIMIT } from './common/http/body-limit';
 
 async function bootstrap() {
+  // Cold-start timing. All milliseconds are measured from process start
+  // (performance.timeOrigin). By the time bootstrap() runs, every import has
+  // been required, so `modulesLoadedMs` covers Node boot plus module loading.
+  const modulesLoadedMs = performance.now();
   const fastifyAdapter = new FastifyAdapter({
     logger: false, // Pino handles structured logging via nestjs-pino
     // Cloud Run's front end appends the caller's address to X-Forwarded-For. Trusting that one
@@ -49,8 +54,11 @@ async function bootstrap() {
     { bufferLogs: true },
   );
 
+  const nestCreatedMs = performance.now();
+
   // Bind structured Pino logger
-  app.useLogger(app.get(Logger));
+  const logger = app.get(Logger);
+  app.useLogger(logger);
 
   // Enable graceful shutdown to drain database pool connections cleanly
   app.enableShutdownHooks();
@@ -109,6 +117,20 @@ async function bootstrap() {
 
   const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
   await app.listen(port, '0.0.0.0');
+
+  const listeningMs = performance.now();
+  logger.log(
+    {
+      msg: 'startup timing',
+      processStart: new Date(performance.timeOrigin).toISOString(),
+      nodeBootMs: Math.round(performance.nodeTiming.bootstrapComplete),
+      modulesLoadedMs: Math.round(modulesLoadedMs),
+      nestCreateMs: Math.round(nestCreatedMs - modulesLoadedMs),
+      listenMs: Math.round(listeningMs - nestCreatedMs),
+      totalMs: Math.round(listeningMs),
+    },
+    'Bootstrap',
+  );
 }
 
 bootstrap();
