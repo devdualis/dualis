@@ -56,7 +56,7 @@ Tests: `flutter test test/features/journal/ test/features/journal_insights/` pas
 La revisión de marks está terminada. Solo quedan ideas si el usuario quiere seguir:
 
 1. No quedan pictogramas compartidos entre significados distintos. Lo que se repite son claves antiguas y su equivalente nueva, o el mismo significado en zonas distintas.
-2. Pendiente de aprobación (2026-11-26): reforzar a 22px `cabeca`, `nariz`, `ouvido`, `pulmoes`, `perna`, `joelho`, `tronco`, `algo`, `alguem`, `orgulho`, `confiante`, `fome`, `fluxo_fraco` y `escrever`.
+2. Tanda 12 (2026-11-26, aprobada): reforzados a 22px `cabeca`, `nariz`, `ouvido`, `pulmoes`, `perna`, `joelho`, `tronco`, `algo`, `alguem`, `orgulho`, `confiante`, `fome`, `fluxo_fraco` y `escrever`. Se hizo sobre los PNG existentes (relleno o acento en SVG), sin redibujar. `alguem`, `tronco` y `confiante` siguen finos a 22px.
 3. Si algún mark se ve débil a 22px, engrosar el acento cian (trazo 3.6–3.8) como en la tanda 11.
 4. Reglas aprendidas en la tanda 8: en cabezas de frente, cualquier punto o arco se lee como ojos o boca. Para marcar zonas de la cabeza usar `HEAD` de perfil con la zona en cian recortada por `clipPath` del mismo contorno.
 
