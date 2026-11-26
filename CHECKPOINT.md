@@ -20,8 +20,9 @@ Commits en `main`:
 
 - Tanda 9: `refluxo` (torso con llama y flecha a la garganta) para `barriga.queimacao.subindo`, `irradia` (figura con destello en la espalda y flecha por la pierna) para `costas.fisgada.irradia`, `cansaco_muscular` (brazo de `musculos` con gotas de sudor) para la rama `musculos.cansaco`, `fraqueza` redibujado (mismo brazo con flecha hacia abajo), `pele_ardencia` (piel con llama) para `pele.coceira.ardencia` y `hormonios` (persona con flechas de ciclo) para la zona `hormonios`. El brazo se hizo componiendo `musculos.png` sin su relleno cian más el acento en SVG.
 - Tanda 10: `pele_coceira` (piel con rasguños cian) para `pele.coceira.coceira`, `coceira_ardencia` (piel con rasguños y llama) para la rama `pele.coceira`, y el desencadenante `sono` ("Noite mal dormida") reusa `sono_mal`. Los rasguños sueltos `coceira` quedan para la pelve y las claves antiguas; `descansar` y `repouso` siguen con `cama`.
+- Tanda 11: `refluxo` e `irradia` con acentos cian más gruesos (trazo 3.6–3.8, llama y destello más grandes) tras verlos en el simulador; `irradia` queda como figura quieta de frente para no confundirse con `dor_mexer`.
 
-Tests: `flutter test test/features/journal/ test/features/journal_insights/` pasó (201) después de la tanda 10. El test "a screen never shows the same phrase twice in a row" falló una vez y pasó en las siguientes ejecuciones; parece inestable. Todos los archivos que nombra el mapa existen en `assets/marks/`.
+Tests: `flutter test test/features/journal/ test/features/journal_insights/` pasó (201) después de la tanda 11. El test "a screen never shows the same phrase twice in a row" falló una vez y pasó en las siguientes ejecuciones; parece inestable. Todos los archivos que nombra el mapa existen en `assets/marks/`.
 
 ## Estado actual
 
