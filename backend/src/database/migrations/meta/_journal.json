@@ -218,6 +218,13 @@
       "when": 1790361574104,
       "tag": "0030_ai_processing_consents",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1790361574105,
+      "tag": "0029_revenuecat_subscriptions",
+      "breakpoints": true
     }
   ]
 }
