@@ -598,8 +598,7 @@ class JournalFlowController extends Notifier<JournalFlowState> {
           ? triggerNote
           : null,
       note: quick || note.isEmpty ? null : note,
-      // The phrases are no longer on screen, so none is reported as shown.
-      transitionVariantIds: const [],
+      transitionVariantIds: state.shownPhraseIds,
       items: quick ? [...positive, ...withReadings] : state.items,
       coping: quick ? null : state.coping,
       helpers: quick

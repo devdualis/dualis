@@ -18,6 +18,7 @@ import '../../../consent/presentation/ai_consent_widgets.dart';
 import '../../../profile/presentation/controllers/active_profile_controller.dart';
 import '../../../voice/presentation/voice_widgets.dart';
 import '../../../dashboard/presentation/screens/check_in_summary_screen.dart';
+import '../../../home/domain/home_greeting.dart' as greeting;
 import '../../../home/presentation/controllers/trigger_checkin_controller.dart';
 import '../../data/journal_repository.dart';
 import '../../domain/journal_keys.dart';
@@ -316,9 +317,19 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
   // ---- Steps ------------------------------------------------------------
 
   Widget _moodStep(AppLocalizations l10n, JournalFlowState state) {
+    final name = ref.watch(authControllerProvider).user?.name.trim() ?? '';
+    final firstName = name.isEmpty ? '' : name.split(RegExp(r'\s+')).first;
+    // Same periods as the Home greeting, so both screens agree after midnight.
+    final dayPart = switch (greeting.dayPeriodFor(ref.watch(greeting.homeClockProvider)())) {
+      greeting.DayPeriod.morning => l10n.jv2GoodMorning,
+      greeting.DayPeriod.afternoon => l10n.jv2GoodAfternoon,
+      greeting.DayPeriod.evening => l10n.jv2GoodEvening,
+    };
+    final hello = firstName.isEmpty ? l10n.jv2Hello : l10n.jv2HelloName(firstName);
     final emotional = _area == JournalArea.emotional;
     return _StepLayout(
       progress: _progress(state),
+      lead: '$hello $dayPart',
       axisLabel: JournalLabels.axis(l10n, _area.key),
       axisColor: emotional ? AppColors.dualisSymbolGreen : AppColors.dualisSymbolBlue,
       question: l10n.jv2MoodQuestion,
@@ -511,6 +522,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
   Widget _timeStep(AppLocalizations l10n, JournalFlowState state) {
     return _StepLayout(
       progress: _progress(state),
+      lead: _phrase(l10n, state),
       question: l10n.jv2TimeQuestion,
       children: [
         for (final time in JournalKeys.times)
@@ -570,6 +582,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       progress: _progress(state),
       eyebrow: JournalLabels.root(l10n, time),
       eyebrowMark: time,
+      lead: _phrase(l10n, state),
       question: question,
       children: [
         for (final branch in JournalKeys.emotionalTree[time]!.keys)
@@ -598,6 +611,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     return _StepLayout(
       progress: _progress(state),
       eyebrow: sideLabel == null ? rootLabel : '$rootLabel · $sideLabel',
+      lead: _phrase(l10n, state),
       question: l10n.jv23WhereExactly,
       children: [
         for (final branch in branches.keys)
@@ -628,6 +642,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     return _StepLayout(
       progress: _progress(state),
       eyebrow: JournalLabels.branch(l10n, prefix),
+      lead: _phrase(l10n, state),
       question: l10n.jv2OptionsQuestion,
       bottom: Column(
         mainAxisSize: MainAxisSize.min,
@@ -857,6 +872,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     final wholeCount = JournalKeys.wholeBodyAreas.where(selected.contains).length;
     return _StepLayout(
       progress: _progress(state),
+      lead: _phrase(l10n, state),
       question: l10n.jv2BodyQuestion,
       bottom: _ContinueButton(
         label: l10n.jv2Continue,
@@ -982,6 +998,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     final voiceRow = items.indexWhere((i) => i.persistence == null);
     return _StepLayout(
       progress: _progress(state),
+      lead: _phrase(l10n, state),
       question: single ? l10n.jv2PersistenceQuestion : l10n.jv24PersistenceCompactQuestion,
       bottom: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1031,6 +1048,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     final voiceRow = items.indexWhere((i) => i.intensity == null);
     return _StepLayout(
       progress: _progress(state),
+      lead: _phrase(l10n, state),
       question: single
           ? (items.first.kind == JournalKeys.kindCondition
               ? l10n.jv2ConditionCardQuestion(items.first.conditionLabel ?? '')
@@ -1262,6 +1280,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     final shown = topics.firstWhere((t) => t.$1 == tab).$2;
     return _StepLayout(
       progress: _progress(state),
+      lead: _phrase(l10n, state),
       question: l10n.jv2TriggersQuestion,
       bottom: _skipOrContinue(
         l10n,
@@ -1390,6 +1409,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     final helpers = JournalKeys.helpersFor(isPhysical: isPhysical);
     return _StepLayout(
       progress: _progress(state),
+      lead: _phrase(l10n, state),
       question: l10n.jv23ClosingTitle,
       bottom: _skipOrContinue(
         l10n,
@@ -1489,6 +1509,11 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           width: focused ? 2 : 1,
         ),
       );
+
+  String? _phrase(AppLocalizations l10n, JournalFlowState state) {
+    final id = state.phraseId;
+    return id == null ? null : JournalLabels.phrase(l10n, id);
+  }
 }
 
 // ---- Building blocks ----------------------------------------------------
@@ -1498,8 +1523,9 @@ class _StepLayout extends StatelessWidget {
 
   /// Mark drawn before [eyebrow]. The body map is never used here.
   final String? eyebrowMark;
+  final String? lead;
 
-  /// Short label above the question (the entry axis).
+  /// Short label between the lead and the question (the entry axis).
   final String? axisLabel;
   final Color? axisColor;
   final String? question;
@@ -1516,6 +1542,7 @@ class _StepLayout extends StatelessWidget {
     this.progress,
     this.eyebrow,
     this.eyebrowMark,
+    this.lead,
     this.axisLabel,
     this.axisColor,
     this.question,
@@ -1526,6 +1553,10 @@ class _StepLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final secondary = theme.brightness == Brightness.dark
+        ? AppColors.textSecondaryDark
+        : AppColors.textSecondaryLight;
     final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1593,6 +1624,14 @@ class _StepLayout extends StatelessWidget {
                     ),
                   ],
                 ),
+              if (lead != null) ...[
+                const SizedBox(height: 4),
+                _TypingText(
+                  lead!,
+                  key: const Key('jv2_phrase'),
+                  style: GoogleFonts.inter(fontSize: 15, color: secondary),
+                ),
+              ],
               if (axisLabel != null) ...[
                 const SizedBox(height: 4),
                 Text(
@@ -1644,6 +1683,78 @@ class _StepLayout extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// Transition phrase typed in softly (client spec 2.7). The rest of the text
+/// is laid out but transparent, so nothing below moves while it types. Shown
+/// whole at once when the system asks for no animations.
+class _TypingText extends StatefulWidget {
+  final String text;
+  final TextStyle style;
+
+  const _TypingText(this.text, {super.key, required this.style});
+
+  @override
+  State<_TypingText> createState() => _TypingTextState();
+}
+
+class _TypingTextState extends State<_TypingText> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(vsync: this);
+
+  static Duration _durationFor(String text) =>
+      Duration(milliseconds: (text.characters.length * 22).clamp(300, 1400));
+
+  @override
+  void initState() {
+    super.initState();
+    _controller
+      ..duration = _durationFor(widget.text)
+      ..forward();
+  }
+
+  @override
+  void didUpdateWidget(_TypingText old) {
+    super.didUpdateWidget(old);
+    if (old.text != widget.text) {
+      _controller
+        ..duration = _durationFor(widget.text)
+        ..forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.of(context).disableAnimations) {
+      return Text(widget.text, style: widget.style);
+    }
+    final chars = widget.text.characters;
+    return Semantics(
+      label: widget.text,
+      excludeSemantics: true,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          final shown = (chars.length * _controller.value).ceil();
+          return Text.rich(
+            TextSpan(children: [
+              TextSpan(text: chars.take(shown).toString()),
+              TextSpan(
+                text: chars.skip(shown).toString(),
+                style: const TextStyle(color: Colors.transparent),
+              ),
+            ]),
+            style: widget.style,
+          );
+        },
+      ),
     );
   }
 }
