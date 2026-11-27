@@ -213,6 +213,7 @@ None yet.
 | 261117-nzg | Notification redesign part 3: Lembretes screen in Settings | 2026-11-17 | f0dc76d | [261117-nzg-reminders-settings-screen-part-3](./quick/261117-nzg-reminders-settings-screen-part-3/) |
 | 73 | Seed the flaky phrase variety test (commit 1f4513b) | 2026-11-26 | 1f4513b | — |
 | fast | Check-in: less helper text, bigger buttons | 2026-11-27 | 1ca11a3 | — |
+| fast | Check-in: lead sentences removed, bigger side and duration buttons | 2026-11-27 | df8f4c5 | — |
 
 ## Deferred Items
 
