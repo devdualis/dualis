@@ -47,6 +47,9 @@ class DualisTextField extends StatelessWidget {
     this.errorMaxLines = 4,
   });
 
+  bool get _isRawInput =>
+      obscureText || keyboardType == TextInputType.emailAddress;
+
   @override
   Widget build(BuildContext context) {
     return Semantics(
@@ -57,6 +60,11 @@ class DualisTextField extends StatelessWidget {
         controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
+        // E-mail and secret fields: the keyboard must not rewrite or
+        // capitalize what is typed.
+        autocorrect: !_isRawInput,
+        enableSuggestions: !_isRawInput,
+        textCapitalization: TextCapitalization.none,
         textInputAction: textInputAction,
         enabled: enabled,
         validator: validator,
