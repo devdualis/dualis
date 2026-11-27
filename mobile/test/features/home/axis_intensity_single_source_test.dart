@@ -382,7 +382,7 @@ void main() {
       );
       expect(
         (emotionalCard.decoration as BoxDecoration).color,
-        AppColors.intensityModerate.withValues(alpha: 0.2),
+        AppColors.intensityModerateBg,
       );
 
       final physicalCard = tester.widget<Container>(
@@ -395,7 +395,7 @@ void main() {
       );
       expect(
         (physicalCard.decoration as BoxDecoration).color,
-        AppColors.intensityMild.withValues(alpha: 0.2),
+        AppColors.intensityMildBg,
       );
     });
   });

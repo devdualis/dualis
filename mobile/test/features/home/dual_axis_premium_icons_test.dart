@@ -77,7 +77,7 @@ Finder _badge(IconData icon, Key tileKey) =>
     find.descendant(of: find.byKey(tileKey), matching: find.byIcon(icon));
 
 /// Light tint of the axis colour used on the navy card.
-Color _tint(Color accent) => Color.lerp(accent, Colors.white, 0.65)!;
+Color _tint(Color accent) => accent;
 
 void main() {
   testWidgets('Premium: the two badge icons get the gradient, tiles are the start targets',
@@ -94,14 +94,14 @@ void main() {
     expect(find.byKey(const Key('premium_active_dot')), findsNothing);
 
     for (final (icon, button, color) in [
-      (Icons.psychology_rounded, _emotionalButton, AppColors.dualisSymbolGreen),
+      (Icons.psychology_rounded, _emotionalButton, AppColors.dualisCareGreen),
       (Icons.accessibility_new_rounded, _physicalButton, AppColors.dualisSymbolBlue),
     ]) {
       final badge = _badge(icon, button);
       expect(badge, findsOneWidget);
       expect(find.ancestor(of: badge, matching: find.byType(ShaderMask)), findsOneWidget);
       final glyph = tester.widget<Icon>(badge);
-      expect(glyph.size, 22);
+      expect(glyph.size, 36);
       expect(glyph.color, _tint(color));
     }
   });
