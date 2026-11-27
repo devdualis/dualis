@@ -125,11 +125,19 @@ Future<void> _openModal(WidgetTester tester, FakeActiveProfileController fake) a
   await tester.pumpAndSettle();
 }
 
+/// The sex selector starts empty; tests pick male.
+Future<void> _pickSex(WidgetTester tester) async {
+  await tester.ensureVisible(find.byIcon(Icons.male_rounded));
+  await tester.tap(find.byIcon(Icons.male_rounded));
+  await tester.pumpAndSettle();
+}
+
 Future<void> _fillValidForm(WidgetTester tester) async {
   final fields = find.byType(TextFormField);
   await tester.enterText(fields.at(0), 'Maria Silva');
   await tester.enterText(fields.at(1), '15012015');
   await tester.pump();
+  await _pickSex(tester);
 
   await tester.tap(
     find.text('Filho(a) menor de idade (Poder Familiar)'),
@@ -196,6 +204,7 @@ void main() {
       await _openModal(tester, fake);
       await tester.enterText(find.byType(TextFormField).at(0), 'João Souza');
       await _enterDob(tester, _dobDigitsYearsAgo(40));
+      await _pickSex(tester);
 
       expect(_tile('curator'), findsOneWidget);
       expect(_tile('supported_decision'), findsOneWidget);
@@ -328,6 +337,7 @@ void main() {
       await _openModal(tester, FakeActiveProfileController());
       await tester.enterText(find.byType(TextFormField).at(0), 'Maria Silva');
       await _enterDob(tester, _dobDigitsYearsAgo(40));
+      await _pickSex(tester);
       await tester.tap(_tile('curator'));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('lgpd-art11-consent')));

@@ -55,7 +55,8 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
   final _dobController = TextEditingController();
   final _notesController = TextEditingController();
 
-  Gender _selectedGender = Gender.masculino;
+  /// No default: the person picks.
+  Gender? _selectedGender;
   String? _relationshipType;
   DateTime? _selectedDate;
   bool _lgpdConsent = false;
@@ -146,7 +147,12 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
     final dobOk = _validateDependentDateOfBirth(_resolveDateOfBirth()) == null;
     final relationshipOk = _relationshipType != null &&
         _allowedRelationships.contains(_relationshipType);
-    return nameOk && dobOk && relationshipOk && _lgpdConsent && !_isSubmitting;
+    return nameOk &&
+        dobOk &&
+        relationshipOk &&
+        _selectedGender != null &&
+        _lgpdConsent &&
+        !_isSubmitting;
   }
 
   String? _validateDependentDateOfBirth(DateTime? date) {
@@ -216,7 +222,7 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
       final profile = await ref.read(activeProfileControllerProvider.notifier).createDependent(
             name: _nameController.text.trim(),
             dateOfBirth: dob,
-            gender: _selectedGender.value,
+            gender: _selectedGender!.value,
             relationshipType: _relationshipType!,
             lgpdConsent: true,
             lgpdLegalBasisNotes: notes.isEmpty ? null : notes,

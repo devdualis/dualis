@@ -118,6 +118,26 @@ void main() {
 
       await tester.pumpAndSettle();
 
+      // Sex starts empty: the button waits for a choice too.
+      final checkbox = find.byKey(const Key('lgpdConsentCheckbox'));
+      await tester.ensureVisible(checkbox);
+      await tester.tap(checkbox);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<FilledButton>(find.descendant(
+              of: find.byKey(const Key('submitRegisterButton')),
+              matching: find.byType(FilledButton),
+            ))
+            .onPressed,
+        isNull,
+      );
+      await tester.tap(checkbox);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byIcon(Icons.female_rounded));
+      await tester.tap(find.byIcon(Icons.female_rounded));
+      await tester.pumpAndSettle();
+
       // Toggle LGPD Checkbox ON
       final checkboxFinder = find.byKey(const Key('lgpdConsentCheckbox'));
       await tester.ensureVisible(checkboxFinder);

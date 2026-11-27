@@ -5,12 +5,13 @@ import '../../../../l10n/app_localizations.dart';
 import '../../domain/user_profile.dart';
 
 class BiologicalSexSelector extends StatelessWidget {
-  final Gender selectedGender;
+  /// Null until the person picks one: nothing is chosen for them.
+  final Gender? selectedGender;
   final ValueChanged<Gender> onGenderChanged;
 
   const BiologicalSexSelector({
     super.key,
-    required this.selectedGender,
+    this.selectedGender,
     required this.onGenderChanged,
   });
 

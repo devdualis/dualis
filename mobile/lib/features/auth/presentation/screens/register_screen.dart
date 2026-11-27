@@ -35,7 +35,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  Gender _selectedGender = Gender.masculino;
+  /// No default: the person picks, so no account is saved as male by
+  /// leaving the field untouched.
+  Gender? _selectedGender;
   bool _lgpdConsent = false;
   bool _obscurePassword = true;
   DateTime? _selectedDate;
@@ -69,7 +71,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final isPasswordValid = FormValidators.validatePassword(_passwordController.text, l10n) == null;
     final isDobValid = FormValidators.validateDateOfBirth(_dobController.text, l10n) == null;
 
-    return isNameValid && isEmailValid && isPasswordValid && isDobValid && _lgpdConsent;
+    return isNameValid && isEmailValid && isPasswordValid && isDobValid &&
+        _selectedGender != null &&
+        _lgpdConsent;
   }
 
   Future<void> _pickDateOfBirth() async {
@@ -122,7 +126,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           name: _nameController.text.trim(),
           email: _emailController.text.trim(),
           password: _passwordController.text,
-          gender: _selectedGender.value,
+          gender: _selectedGender!.value,
           dateOfBirth: isoDate,
           lgpdConsent: _lgpdConsent,
         );
