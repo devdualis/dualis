@@ -3624,5 +3624,81 @@
   "privacySecurityBody": "• Criptografia: TLS 1.3 em trânsito e AES-256 em repouso.\n• Autenticação: Senhas protegidas com algoritmo Argon2id.\n• Isolamento Multitenant: Row-Level Security (RLS) no PostgreSQL.\n• Plano de Vazamento: Protocolo de notificação em até 72h à ANPD e aos titulares (LGPD Art. 48).\n• Contato: contato@dualischeckup.com",
   "@privacySecurityBody": {
     "description": "Privacy center: bullet list of the security card"
+  },
+  "formErrorMinAge": "Você deve ter pelo menos 13 anos para criar uma conta.",
+  "@formErrorMinAge": {
+    "description": "Date of birth validator: under the minimum age"
+  },
+  "homeCheckinQuestion": "Como você está hoje?",
+  "@homeCheckinQuestion": {
+    "description": "Home check-in card question"
+  },
+  "homeAxisEmotionalSubtitle": "Humor, ansiedade, estresse e clareza mental",
+  "@homeAxisEmotionalSubtitle": {
+    "description": "Home check-in card: subtitle of the emotional axis"
+  },
+  "homeAxisPhysicalSubtitle": "Dores no corpo, desconfortos físicos ou cansaço",
+  "@homeAxisPhysicalSubtitle": {
+    "description": "Home check-in card: subtitle of the physical axis"
+  },
+  "homeStartAxisLabel": "Iniciar {title}",
+  "@homeStartAxisLabel": {
+    "description": "Screen-reader label of an axis button on the home card",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "homeRefreshAction": "Atualizar",
+  "@homeRefreshAction": {
+    "description": "Refresh button on the home screen"
+  },
+  "emailVerifyTitle": "Verifique seu e-mail",
+  "@emailVerifyTitle": {
+    "description": "Email verification screen title"
+  },
+  "emailVerifySubtitle": "Enviamos um código de segurança de 6 dígitos para o e-mail:",
+  "@emailVerifySubtitle": {
+    "description": "Email verification screen subtitle, followed by the masked address"
+  },
+  "emailVerifyDigitLabel": "Dígito {position} do código de verificação",
+  "@emailVerifyDigitLabel": {
+    "description": "Screen-reader label of one code digit field",
+    "placeholders": {
+      "position": {
+        "type": "int"
+      }
+    }
+  },
+  "emailVerifyConfirmButton": "Confirmar e Ativar Conta",
+  "@emailVerifyConfirmButton": {
+    "description": "Email verification confirm button"
+  },
+  "emailVerifyResendCountdown": "Reenviar código em {seconds}s",
+  "@emailVerifyResendCountdown": {
+    "description": "Countdown before a new code may be requested",
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "emailVerifyResending": "Enviando novo código...",
+  "@emailVerifyResending": {
+    "description": "Shown while a new code is being sent"
+  },
+  "emailVerifyResendPrompt": "Não recebeu o código? Reenviar",
+  "@emailVerifyResendPrompt": {
+    "description": "Button that requests a new code"
+  },
+  "biologicalSexOptionLabel": "Sexo biológico: {option}",
+  "@biologicalSexOptionLabel": {
+    "description": "Screen-reader label of one biological sex option",
+    "placeholders": {
+      "option": {
+        "type": "String"
+      }
+    }
   }
 }

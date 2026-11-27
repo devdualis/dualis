@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/dualis_logo.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
 import '../../../../shared/widgets/duotone_icon_tile.dart';
@@ -130,8 +131,8 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('E-mail verificado com sucesso! Bem-vindo ao DualisCheckUp.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).emailVerificationSuccess),
           backgroundColor: AppColors.clinicalTeal,
           duration: Duration(seconds: 3),
         ),
@@ -170,8 +171,8 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
     if (success) {
       _startResendTimer();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Novo código enviado para seu e-mail.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).newCodeSentSuccess),
           backgroundColor: AppColors.clinicalTeal,
           duration: Duration(seconds: 3),
         ),
@@ -195,7 +196,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
       width: 48,
       height: 56,
       child: Semantics(
-        label: 'Dígito ${index + 1} do código de verificação',
+        label: AppLocalizations.of(context).emailVerifyDigitLabel(index + 1),
         child: KeyboardListener(
           focusNode: FocusNode(),
           onKeyEvent: (event) {
@@ -263,6 +264,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
     final masked = _maskEmail(_email);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundDepth,
@@ -270,7 +272,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          tooltip: 'Voltar',
+          tooltip: l10n.jv2Back,
           icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.textPrimaryLight),
           onPressed: () {
             if (context.canPop()) {
@@ -307,7 +309,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
               ),
               const SizedBox(height: 20),
               Text(
-                'Verifique seu e-mail',
+                l10n.emailVerifyTitle,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 26,
@@ -317,7 +319,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
               ),
               const SizedBox(height: 12),
               Text(
-                'Enviamos um código de segurança de 6 dígitos para o e-mail:',
+                l10n.emailVerifySubtitle,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 14,
@@ -355,7 +357,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
               ),
               const SizedBox(height: 36),
               DualisPrimaryButton(
-                text: 'Confirmar e Ativar Conta',
+                text: l10n.emailVerifyConfirmButton,
                 isLoading: authState.isLoading,
                 onPressed: _isCodeComplete ? _handleVerify : null,
               ),
@@ -367,7 +369,9 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                     const Icon(Icons.timer_outlined, size: 16, color: AppColors.textSecondaryLight),
                     const SizedBox(width: 6),
                     Text(
-                      'Reenviar código em ${_secondsRemaining.toString().padLeft(2, '0')}s',
+                      l10n.emailVerifyResendCountdown(
+                        _secondsRemaining.toString().padLeft(2, '0'),
+                      ),
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         color: AppColors.textSecondaryLight,
@@ -382,7 +386,9 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                   ),
                   onPressed: _isResending ? null : _handleResend,
                   child: Text(
-                    _isResending ? 'Enviando novo código...' : 'Não recebeu o código? Reenviar',
+                    _isResending
+                        ? l10n.emailVerifyResending
+                        : l10n.emailVerifyResendPrompt,
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,

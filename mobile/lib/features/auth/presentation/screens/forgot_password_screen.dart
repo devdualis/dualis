@@ -123,7 +123,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     labelText: l10n.email,
                     hintText: l10n.authEmailHint,
                     controller: _emailController,
-                    validator: FormValidators.validateEmail,
+                    validator: (value) => FormValidators.validateEmail(value, l10n),
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.done,
                     prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textSecondaryLight),

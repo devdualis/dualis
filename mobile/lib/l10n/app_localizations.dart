@@ -10269,6 +10269,90 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'• Criptografia: TLS 1.3 em trânsito e AES-256 em repouso.\n• Autenticação: Senhas protegidas com algoritmo Argon2id.\n• Isolamento Multitenant: Row-Level Security (RLS) no PostgreSQL.\n• Plano de Vazamento: Protocolo de notificação em até 72h à ANPD e aos titulares (LGPD Art. 48).\n• Contato: contato@dualischeckup.com'**
   String get privacySecurityBody;
+
+  /// Date of birth validator: under the minimum age
+  ///
+  /// In pt, this message translates to:
+  /// **'Você deve ter pelo menos 13 anos para criar uma conta.'**
+  String get formErrorMinAge;
+
+  /// Home check-in card question
+  ///
+  /// In pt, this message translates to:
+  /// **'Como você está hoje?'**
+  String get homeCheckinQuestion;
+
+  /// Home check-in card: subtitle of the emotional axis
+  ///
+  /// In pt, this message translates to:
+  /// **'Humor, ansiedade, estresse e clareza mental'**
+  String get homeAxisEmotionalSubtitle;
+
+  /// Home check-in card: subtitle of the physical axis
+  ///
+  /// In pt, this message translates to:
+  /// **'Dores no corpo, desconfortos físicos ou cansaço'**
+  String get homeAxisPhysicalSubtitle;
+
+  /// Screen-reader label of an axis button on the home card
+  ///
+  /// In pt, this message translates to:
+  /// **'Iniciar {title}'**
+  String homeStartAxisLabel(String title);
+
+  /// Refresh button on the home screen
+  ///
+  /// In pt, this message translates to:
+  /// **'Atualizar'**
+  String get homeRefreshAction;
+
+  /// Email verification screen title
+  ///
+  /// In pt, this message translates to:
+  /// **'Verifique seu e-mail'**
+  String get emailVerifyTitle;
+
+  /// Email verification screen subtitle, followed by the masked address
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviamos um código de segurança de 6 dígitos para o e-mail:'**
+  String get emailVerifySubtitle;
+
+  /// Screen-reader label of one code digit field
+  ///
+  /// In pt, this message translates to:
+  /// **'Dígito {position} do código de verificação'**
+  String emailVerifyDigitLabel(int position);
+
+  /// Email verification confirm button
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar e Ativar Conta'**
+  String get emailVerifyConfirmButton;
+
+  /// Countdown before a new code may be requested
+  ///
+  /// In pt, this message translates to:
+  /// **'Reenviar código em {seconds}s'**
+  String emailVerifyResendCountdown(String seconds);
+
+  /// Shown while a new code is being sent
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviando novo código...'**
+  String get emailVerifyResending;
+
+  /// Button that requests a new code
+  ///
+  /// In pt, this message translates to:
+  /// **'Não recebeu o código? Reenviar'**
+  String get emailVerifyResendPrompt;
+
+  /// Screen-reader label of one biological sex option
+  ///
+  /// In pt, this message translates to:
+  /// **'Sexo biológico: {option}'**
+  String biologicalSexOptionLabel(String option);
 }
 
 class _AppLocalizationsDelegate

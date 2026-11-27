@@ -63,10 +63,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   bool get _isFormValid {
-    final isNameValid = FormValidators.validateName(_nameController.text) == null;
-    final isEmailValid = FormValidators.validateEmail(_emailController.text) == null;
-    final isPasswordValid = FormValidators.validatePassword(_passwordController.text) == null;
-    final isDobValid = FormValidators.validateDateOfBirth(_dobController.text) == null;
+    final l10n = AppLocalizations.of(context);
+    final isNameValid = FormValidators.validateName(_nameController.text, l10n) == null;
+    final isEmailValid = FormValidators.validateEmail(_emailController.text, l10n) == null;
+    final isPasswordValid = FormValidators.validatePassword(_passwordController.text, l10n) == null;
+    final isDobValid = FormValidators.validateDateOfBirth(_dobController.text, l10n) == null;
 
     return isNameValid && isEmailValid && isPasswordValid && isDobValid && _lgpdConsent;
   }
@@ -235,7 +236,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         labelText: l10n.fullName,
                         hintText: l10n.registerNameHint,
                         controller: _nameController,
-                        validator: FormValidators.validateName,
+                        validator: (value) => FormValidators.validateName(value, l10n),
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         prefixIcon: const Icon(Icons.person_outline, color: AppColors.textSecondaryLight),
@@ -249,7 +250,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         hintText: l10n.registerDobHint,
                         helperText: l10n.registerDobHelper,
                         controller: _dobController,
-                        validator: FormValidators.validateDateOfBirth,
+                        validator: (value) => FormValidators.validateDateOfBirth(value, l10n),
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           DateInputFormatter(),
@@ -281,7 +282,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         labelText: l10n.email,
                         hintText: l10n.authEmailHint,
                         controller: _emailController,
-                        validator: FormValidators.validateEmail,
+                        validator: (value) => FormValidators.validateEmail(value, l10n),
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textSecondaryLight),
@@ -295,7 +296,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         hintText: l10n.registerPasswordHint,
                         helperText: l10n.registerPasswordHelper,
                         controller: _passwordController,
-                        validator: FormValidators.validatePassword,
+                        validator: (value) => FormValidators.validatePassword(value, l10n),
                         obscureText: _obscurePassword,
                         textInputAction: TextInputAction.done,
                         prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondaryLight),

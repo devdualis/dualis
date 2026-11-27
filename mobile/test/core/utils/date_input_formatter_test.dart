@@ -1,7 +1,8 @@
-import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dualis_mobile/core/utils/date_input_formatter.dart';
 import 'package:dualis_mobile/features/auth/domain/form_validators.dart';
+import 'package:dualis_mobile/l10n/app_localizations.dart';
 
 void main() {
   group('DateInputFormatter Tests', () {
@@ -73,24 +74,26 @@ void main() {
   });
 
   group('FormValidators.validateDateOfBirth with mask and raw digits', () {
+    final l10n = lookupAppLocalizations(const Locale('pt'));
+
     test('validates standard masked format DD/MM/AAAA', () {
-      expect(FormValidators.validateDateOfBirth('14/01/1985'), isNull);
-      expect(FormValidators.validateDateOfBirth('20/05/2000'), isNull);
+      expect(FormValidators.validateDateOfBirth('14/01/1985', l10n), isNull);
+      expect(FormValidators.validateDateOfBirth('20/05/2000', l10n), isNull);
     });
 
     test('validates unmasked 8 raw digits DDMMAAAA gracefully', () {
-      expect(FormValidators.validateDateOfBirth('14011985'), isNull);
+      expect(FormValidators.validateDateOfBirth('14011985', l10n), isNull);
     });
 
     test('rejects impossible dates like 31/02/1985', () {
-      expect(FormValidators.validateDateOfBirth('31/02/1985'), equals('Informe uma data de nascimento válida.'));
-      expect(FormValidators.validateDateOfBirth('31021985'), equals('Informe uma data de nascimento válida.'));
+      expect(FormValidators.validateDateOfBirth('31/02/1985', l10n), equals('Informe uma data de nascimento válida.'));
+      expect(FormValidators.validateDateOfBirth('31021985', l10n), equals('Informe uma data de nascimento válida.'));
     });
 
     test('rejects future dates', () {
       final futureYear = DateTime.now().year + 1;
       expect(
-        FormValidators.validateDateOfBirth('01/01/$futureYear'),
+        FormValidators.validateDateOfBirth('01/01/$futureYear', l10n),
         equals('A data de nascimento não pode estar no futuro.'),
       );
     });
@@ -98,7 +101,7 @@ void main() {
     test('rejects age under 13', () {
       final recentYear = DateTime.now().year - 5;
       expect(
-        FormValidators.validateDateOfBirth('01/01/$recentYear'),
+        FormValidators.validateDateOfBirth('01/01/$recentYear', l10n),
         equals('Você deve ter pelo menos 13 anos para criar uma conta.'),
       );
     });

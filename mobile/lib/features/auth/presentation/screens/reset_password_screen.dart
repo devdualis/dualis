@@ -149,7 +149,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                         hintText: l10n.newPasswordHint,
                         helperText: l10n.passwordComplexityHint,
                         controller: _newPasswordController,
-                        validator: FormValidators.validatePassword,
+                        validator: (value) => FormValidators.validatePassword(value, l10n),
                         obscureText: _obscureNewPassword,
                         textInputAction: TextInputAction.next,
                         prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondaryLight),

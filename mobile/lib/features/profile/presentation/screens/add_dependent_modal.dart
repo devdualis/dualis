@@ -139,7 +139,10 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
   }
 
   bool get _isFormReady {
-    final nameOk = FormValidators.validateName(_nameController.text) == null;
+    final nameOk = FormValidators.validateName(
+          _nameController.text,
+          AppLocalizations.of(context),
+        ) == null;
     final dobOk = _validateDependentDateOfBirth(_resolveDateOfBirth()) == null;
     final relationshipOk = _relationshipType != null &&
         _allowedRelationships.contains(_relationshipType);
@@ -304,7 +307,7 @@ class _AddDependentModalState extends ConsumerState<AddDependentModal> {
                         labelText: l10n.addDependentNameLabel,
                         textInputAction: TextInputAction.next,
                         onChanged: (_) => _onFieldChanged(),
-                        validator: FormValidators.validateName,
+                        validator: (value) => FormValidators.validateName(value, l10n),
                       ),
                       const SizedBox(height: 16),
                       DualisTextField(

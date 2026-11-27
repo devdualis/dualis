@@ -1,3 +1,5 @@
+import '../../../l10n/app_localizations.dart';
+
 class FormValidators {
   static final RegExp _emailRegExp = RegExp(
     r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
@@ -8,53 +10,53 @@ class FormValidators {
   );
 
   /// Validates Full Name: must be at least 3 characters and contain at least two words.
-  static String? validateName(String? value) {
+  static String? validateName(String? value, AppLocalizations l10n) {
     if (value == null || value.trim().isEmpty) {
-      return 'Por favor, informe seu nome completo (nome e sobrenome).';
+      return l10n.formErrorName;
     }
     final trimmed = value.trim();
     if (trimmed.length < 3) {
-      return 'Por favor, informe seu nome completo (nome e sobrenome).';
+      return l10n.formErrorName;
     }
     final words = trimmed.split(RegExp(r'\s+'));
     if (words.length < 2 || words.any((w) => w.isEmpty)) {
-      return 'Por favor, informe seu nome completo (nome e sobrenome).';
+      return l10n.formErrorName;
     }
     return null;
   }
 
   /// Validates Email: standard RFC 5322 format.
-  static String? validateEmail(String? value) {
+  static String? validateEmail(String? value, AppLocalizations l10n) {
     if (value == null || value.trim().isEmpty) {
-      return 'Informe um endereço de e-mail válido.';
+      return l10n.formErrorEmail;
     }
     final trimmed = value.trim();
     if (!_emailRegExp.hasMatch(trimmed)) {
-      return 'Informe um endereço de e-mail válido.';
+      return l10n.formErrorEmail;
     }
     return null;
   }
 
   /// Validates Password: >= 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char.
-  static String? validatePassword(String? value) {
+  static String? validatePassword(String? value, AppLocalizations l10n) {
     if (value == null || value.isEmpty) {
-      return 'A senha deve ter pelo menos 8 caracteres, incluindo letra maiúscula, minúscula, número e símbolo especial.';
+      return l10n.formErrorPassword;
     }
     if (value.length < 8 || !_passwordRegExp.hasMatch(value)) {
-      return 'A senha deve ter pelo menos 8 caracteres, incluindo letra maiúscula, minúscula, número e símbolo especial.';
+      return l10n.formErrorPassword;
     }
     return null;
   }
 
   /// Validates Date of Birth: must be in past, user age between 13 and 120 years.
-  static String? validateDateOfBirth(dynamic date) {
+  static String? validateDateOfBirth(dynamic date, AppLocalizations l10n) {
     DateTime? parsedDate;
     if (date is DateTime) {
       parsedDate = date;
     } else if (date is String) {
       final trimmed = date.trim();
       if (trimmed.isEmpty) {
-        return 'Informe uma data de nascimento válida.';
+        return l10n.addDependentDobInvalid;
       }
       final parts = trimmed.split('/');
       if (parts.length == 3) {
@@ -91,12 +93,12 @@ class FormValidators {
     }
 
     if (parsedDate == null) {
-      return 'Informe uma data de nascimento válida.';
+      return l10n.addDependentDobInvalid;
     }
 
     final now = DateTime.now();
     if (parsedDate.isAfter(now)) {
-      return 'A data de nascimento não pode estar no futuro.';
+      return l10n.addDependentDobFuture;
     }
 
     int age = now.year - parsedDate.year;
@@ -106,10 +108,10 @@ class FormValidators {
     }
 
     if (age < 13) {
-      return 'Você deve ter pelo menos 13 anos para criar uma conta.';
+      return l10n.formErrorMinAge;
     }
     if (age > 120) {
-      return 'Informe uma data de nascimento válida.';
+      return l10n.addDependentDobInvalid;
     }
 
     return null;

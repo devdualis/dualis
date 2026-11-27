@@ -53,10 +53,11 @@ class AppLocalizationsEs extends AppLocalizations {
       'Autentícate con biometría o contraseña para acceder a tus registros.';
 
   @override
-  String get formErrorName => 'Por favor, ingrese su nombre completo.';
+  String get formErrorName =>
+      'Por favor, ingresa tu nombre completo (nombre y apellido).';
 
   @override
-  String get formErrorEmail => 'Ingrese un correo electrónico válido.';
+  String get formErrorEmail => 'Ingresa un correo electrónico válido.';
 
   @override
   String get formErrorPassword =>
@@ -6022,4 +6023,58 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get privacySecurityBody =>
       '• Cifrado: TLS 1.3 en tránsito y AES-256 en reposo.\n• Autenticación: contraseñas protegidas con el algoritmo Argon2id.\n• Aislamiento multiinquilino: Row-Level Security (RLS) en PostgreSQL.\n• Plan ante filtraciones: protocolo de notificación en un máximo de 72h a la ANPD y a los titulares (LGPD art. 48).\n• Contacto: contato@dualischeckup.com';
+
+  @override
+  String get formErrorMinAge =>
+      'Debes tener al menos 13 años para crear una cuenta.';
+
+  @override
+  String get homeCheckinQuestion => '¿Cómo estás hoy?';
+
+  @override
+  String get homeAxisEmotionalSubtitle =>
+      'Ánimo, ansiedad, estrés y claridad mental';
+
+  @override
+  String get homeAxisPhysicalSubtitle =>
+      'Dolores corporales, molestias físicas o cansancio';
+
+  @override
+  String homeStartAxisLabel(String title) {
+    return 'Iniciar $title';
+  }
+
+  @override
+  String get homeRefreshAction => 'Actualizar';
+
+  @override
+  String get emailVerifyTitle => 'Verifica tu correo';
+
+  @override
+  String get emailVerifySubtitle =>
+      'Enviamos un código de seguridad de 6 dígitos al correo:';
+
+  @override
+  String emailVerifyDigitLabel(int position) {
+    return 'Dígito $position del código de verificación';
+  }
+
+  @override
+  String get emailVerifyConfirmButton => 'Confirmar y activar cuenta';
+
+  @override
+  String emailVerifyResendCountdown(String seconds) {
+    return 'Reenviar código en ${seconds}s';
+  }
+
+  @override
+  String get emailVerifyResending => 'Enviando código nuevo...';
+
+  @override
+  String get emailVerifyResendPrompt => '¿No recibiste el código? Reenviar';
+
+  @override
+  String biologicalSexOptionLabel(String option) {
+    return 'Sexo biológico: $option';
+  }
 }

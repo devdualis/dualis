@@ -1732,5 +1732,19 @@
   "privacyLegalBody": "Read the full data governance guidelines and the service agreement.",
   "privacyLegalPolicyButton": "LGPD Policy",
   "privacySecurityTitle": "Security and incident response",
-  "privacySecurityBody": "• Encryption: TLS 1.3 in transit and AES-256 at rest.\n• Authentication: passwords protected with the Argon2id algorithm.\n• Multi-tenant isolation: Row-Level Security (RLS) in PostgreSQL.\n• Breach plan: notification protocol within 72h to the ANPD and data subjects (LGPD Art. 48).\n• Contact: contato@dualischeckup.com"
+  "privacySecurityBody": "• Encryption: TLS 1.3 in transit and AES-256 at rest.\n• Authentication: passwords protected with the Argon2id algorithm.\n• Multi-tenant isolation: Row-Level Security (RLS) in PostgreSQL.\n• Breach plan: notification protocol within 72h to the ANPD and data subjects (LGPD Art. 48).\n• Contact: contato@dualischeckup.com",
+  "formErrorMinAge": "You must be at least 13 years old to create an account.",
+  "homeCheckinQuestion": "How are you today?",
+  "homeAxisEmotionalSubtitle": "Mood, anxiety, stress and mental clarity",
+  "homeAxisPhysicalSubtitle": "Body aches, physical discomfort or fatigue",
+  "homeStartAxisLabel": "Start {title}",
+  "homeRefreshAction": "Refresh",
+  "emailVerifyTitle": "Verify your email",
+  "emailVerifySubtitle": "We sent a 6-digit security code to this email:",
+  "emailVerifyDigitLabel": "Digit {position} of the verification code",
+  "emailVerifyConfirmButton": "Confirm and activate account",
+  "emailVerifyResendCountdown": "Resend code in {seconds}s",
+  "emailVerifyResending": "Sending a new code...",
+  "emailVerifyResendPrompt": "Didn't get the code? Resend",
+  "biologicalSexOptionLabel": "Biological sex: {option}"
 }

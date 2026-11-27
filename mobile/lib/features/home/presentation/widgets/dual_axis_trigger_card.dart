@@ -63,6 +63,8 @@ class DualAxisTriggerCard extends ConsumerWidget {
     final reduceMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
 
+    final l10n = AppLocalizations.of(context);
+
     Widget tileFor({
       required String areaKey,
       required bool canRead,
@@ -131,7 +133,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
       return _AxisTile(
         key: tileViewOnly ? null : Key(buttonKey),
         title: title,
-        semanticsLabel: tileViewOnly ? title : 'Iniciar $title',
+        semanticsLabel: tileViewOnly ? title : l10n.homeStartAxisLabel(title),
         semanticsHint: subtitle,
         accent: accentColor,
         icon: iconWidget,
@@ -151,8 +153,8 @@ class DualAxisTriggerCard extends ConsumerWidget {
     final emotionalTile = tileFor(
       areaKey: 'emotional',
       canRead: canReadEmotional,
-      title: 'Psicoemocional',
-      subtitle: 'Humor, ansiedade, estresse e clareza mental',
+      title: l10n.jv2AxisEmotional,
+      subtitle: l10n.homeAxisEmotionalSubtitle,
       icon: Icons.psychology_rounded,
       accentColor: AppColors.dualisCareGreen,
       isCompleted: isEmotionalCompleted,
@@ -166,8 +168,8 @@ class DualAxisTriggerCard extends ConsumerWidget {
     final physicalTile = tileFor(
       areaKey: 'physical',
       canRead: canReadPhysical,
-      title: 'Físico',
-      subtitle: 'Dores corporais, desconforto somático ou fadiga',
+      title: l10n.jv2AxisPhysical,
+      subtitle: l10n.homeAxisPhysicalSubtitle,
       icon: Icons.accessibility_new_rounded,
       accentColor: AppColors.dualisSymbolBlue,
       isCompleted: isPhysicalCompleted,
@@ -278,7 +280,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
                   children: [
                     if (greeting != null && greeting!.isNotEmpty)
                       Text(greeting!, style: titleStyle),
-                    Text('Como você está hoje?', style: titleStyle),
+                    Text(l10n.homeCheckinQuestion, style: titleStyle),
                   ],
                 ),
                 const SizedBox(height: 18),
@@ -506,7 +508,7 @@ class _ResultChip extends StatelessWidget {
   }
 }
 
-/// Summary, narrative and "Atualizar" action for a finished axis, on a soft
+/// Summary, narrative and update action for a finished axis, on a soft
 /// panel under the tiles.
 class _CompletedDetails extends StatelessWidget {
   const _CompletedDetails({
@@ -583,7 +585,7 @@ class _CompletedDetails extends StatelessWidget {
                 key: Key(retakeKey),
                 onPressed: onRetake,
                 icon: const Icon(Icons.refresh_rounded, size: 16),
-                label: const Text('Atualizar'),
+                label: Text(AppLocalizations.of(context).homeRefreshAction),
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.clinicalTealDark,
                   backgroundColor: AppColors.iconTileTint,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/user_profile.dart';
 
 class BiologicalSexSelector extends StatelessWidget {
@@ -15,11 +16,12 @@ class BiologicalSexSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Sexo Biológico',
+          l10n.biologicalSex,
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -30,7 +32,7 @@ class BiologicalSexSelector extends StatelessWidget {
         Row(
           children: [
             _GenderOption(
-              label: 'Masculino',
+              label: l10n.sexMale,
               icon: Icons.male_rounded,
               value: Gender.masculino,
               selected: selectedGender == Gender.masculino,
@@ -38,7 +40,7 @@ class BiologicalSexSelector extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             _GenderOption(
-              label: 'Feminino',
+              label: l10n.sexFemale,
               icon: Icons.female_rounded,
               value: Gender.feminino,
               selected: selectedGender == Gender.feminino,
@@ -46,7 +48,7 @@ class BiologicalSexSelector extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             _GenderOption(
-              label: 'Outro',
+              label: l10n.sexOther,
               icon: Icons.person_outline_rounded,
               value: Gender.outro,
               selected: selectedGender == Gender.outro,
@@ -82,7 +84,7 @@ class _GenderOption extends StatelessWidget {
       child: Semantics(
         button: true,
         selected: selected,
-        label: 'Sexo biológico: $label',
+        label: AppLocalizations.of(context).biologicalSexOptionLabel(label),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,

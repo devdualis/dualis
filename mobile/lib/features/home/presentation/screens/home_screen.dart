@@ -251,7 +251,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           key: const Key('home_refresh_history_button'),
           icon: Icons.refresh_rounded,
           color: AppColors.clinicalTealDark,
-          tooltip: 'Atualizar',
+          tooltip: l10n.homeRefreshAction,
           onTap: () {
             ref.read(journalInsightsControllerProvider.notifier).refresh();
             // Shared profiles: also pick up categories the owner changed.
@@ -329,7 +329,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         key: const Key('home_settings_button'),
         icon: Icons.settings_outlined,
         color: AppColors.clinicalTealDark,
-        tooltip: 'Configurações',
+        tooltip: l10n.settingsTitle,
         glass: _currentTabIndex == 0,
         onTap: () => context.push(RoutePaths.settings),
       ),

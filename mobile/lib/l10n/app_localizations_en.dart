@@ -6004,4 +6004,58 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get privacySecurityBody =>
       '• Encryption: TLS 1.3 in transit and AES-256 at rest.\n• Authentication: passwords protected with the Argon2id algorithm.\n• Multi-tenant isolation: Row-Level Security (RLS) in PostgreSQL.\n• Breach plan: notification protocol within 72h to the ANPD and data subjects (LGPD Art. 48).\n• Contact: contato@dualischeckup.com';
+
+  @override
+  String get formErrorMinAge =>
+      'You must be at least 13 years old to create an account.';
+
+  @override
+  String get homeCheckinQuestion => 'How are you today?';
+
+  @override
+  String get homeAxisEmotionalSubtitle =>
+      'Mood, anxiety, stress and mental clarity';
+
+  @override
+  String get homeAxisPhysicalSubtitle =>
+      'Body aches, physical discomfort or fatigue';
+
+  @override
+  String homeStartAxisLabel(String title) {
+    return 'Start $title';
+  }
+
+  @override
+  String get homeRefreshAction => 'Refresh';
+
+  @override
+  String get emailVerifyTitle => 'Verify your email';
+
+  @override
+  String get emailVerifySubtitle =>
+      'We sent a 6-digit security code to this email:';
+
+  @override
+  String emailVerifyDigitLabel(int position) {
+    return 'Digit $position of the verification code';
+  }
+
+  @override
+  String get emailVerifyConfirmButton => 'Confirm and activate account';
+
+  @override
+  String emailVerifyResendCountdown(String seconds) {
+    return 'Resend code in ${seconds}s';
+  }
+
+  @override
+  String get emailVerifyResending => 'Sending a new code...';
+
+  @override
+  String get emailVerifyResendPrompt => 'Didn\'t get the code? Resend';
+
+  @override
+  String biologicalSexOptionLabel(String option) {
+    return 'Biological sex: $option';
+  }
 }
