@@ -192,7 +192,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           child: Form(
             key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -237,6 +236,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         hintText: l10n.registerNameHint,
                         controller: _nameController,
                         validator: (value) => FormValidators.validateName(value, l10n),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         keyboardType: TextInputType.name,
                         textInputAction: TextInputAction.next,
                         prefixIcon: const Icon(Icons.person_outline, color: AppColors.textSecondaryLight),
@@ -251,6 +251,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         helperText: l10n.registerDobHelper,
                         controller: _dobController,
                         validator: (value) => FormValidators.validateDateOfBirth(value, l10n),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           DateInputFormatter(),
@@ -283,6 +284,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         hintText: l10n.authEmailHint,
                         controller: _emailController,
                         validator: (value) => FormValidators.validateEmail(value, l10n),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textSecondaryLight),
@@ -297,6 +299,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         helperText: l10n.registerPasswordHelper,
                         controller: _passwordController,
                         validator: (value) => FormValidators.validatePassword(value, l10n),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         obscureText: _obscurePassword,
                         textInputAction: TextInputAction.done,
                         prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondaryLight),

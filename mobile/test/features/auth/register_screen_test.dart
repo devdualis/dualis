@@ -175,5 +175,48 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgets('typing in the name field does not turn other fields red',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createRegisterTestApp());
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key('fullNameField')), 'C');
+      await tester.pumpAndSettle();
+
+      expect(_fieldHasError(tester, 'fullNameField'), isTrue);
+      expect(_fieldHasError(tester, 'birthDateField'), isFalse);
+      expect(_fieldHasError(tester, 'emailField'), isFalse);
+      expect(_fieldHasError(tester, 'passwordField'), isFalse);
+    });
+
+    testWidgets('date of birth set from the calendar picker is still validated',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createRegisterTestApp());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.edit_calendar_outlined));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Confirmar'));
+      await tester.pumpAndSettle();
+
+      // A date picked from the calendar is a valid DOB: no error shown.
+      expect(_fieldHasError(tester, 'birthDateField'), isFalse);
+
+      // Clearing the picked value must surface the field error again.
+      await tester.enterText(find.byKey(const Key('birthDateField')), '');
+      await tester.pumpAndSettle();
+      expect(_fieldHasError(tester, 'birthDateField'), isTrue);
+    });
   });
+}
+
+bool _fieldHasError(WidgetTester tester, String key) {
+  final state = tester.state<FormFieldState<String>>(
+    find.descendant(
+      of: find.byKey(Key(key)),
+      matching: find.byType(TextFormField),
+    ),
+  );
+  return state.hasError;
 }

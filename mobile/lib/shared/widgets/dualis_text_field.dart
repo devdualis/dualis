@@ -21,6 +21,8 @@ class DualisTextField extends StatelessWidget {
   final AutovalidateMode? autovalidateMode;
   final FocusNode? focusNode;
   final List<TextInputFormatter>? inputFormatters;
+  final int? helperMaxLines;
+  final int? errorMaxLines;
 
   const DualisTextField({
     super.key,
@@ -41,6 +43,8 @@ class DualisTextField extends StatelessWidget {
     this.autovalidateMode,
     this.focusNode,
     this.inputFormatters,
+    this.helperMaxLines = 4,
+    this.errorMaxLines = 4,
   });
 
   @override
@@ -69,7 +73,9 @@ class DualisTextField extends StatelessWidget {
           labelText: labelText,
           hintText: hintText,
           helperText: helperText,
+          helperMaxLines: helperMaxLines,
           errorText: errorText,
+          errorMaxLines: errorMaxLines,
           prefixIcon: prefixIcon,
           suffixIcon: suffixIcon,
           filled: true,
