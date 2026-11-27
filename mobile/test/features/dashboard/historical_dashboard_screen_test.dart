@@ -273,7 +273,7 @@ void main() {
       expect(find.byKey(const Key('journal_entry_older')), findsNothing);
     });
 
-    testWidgets('Emoções: period summary, weekdays and "Como você se sentiu"',
+    testWidgets('Emoções: weekdays and "Como você se sentiu"',
         (tester) async {
       // today = Tuesday 27/10/2026.
       await pumpDashboard(tester, [
@@ -304,12 +304,6 @@ void main() {
       ]);
 
       expect(find.byKey(const Key('period_summary_card')), findsOneWidget);
-      expect(
-        find.text('Nos últimos 14 dias, 2 de 3 registros de “não tão bem” '
-            'foram sobre o futuro.'),
-        findsOneWidget,
-      );
-      expect(find.text('Você registrou mais nas terças.'), findsOneWidget);
       expect(find.byKey(const Key('period_weekday_bars')), findsOneWidget);
 
       expect(find.byKey(const Key('feelings_card')), findsOneWidget);
@@ -322,14 +316,13 @@ void main() {
       expect(tester.widget<Text>(count('tranquilo')).data, '1 de 4 registros');
     });
 
-    testWidgets('no records: no period summary, feelings or coincidences',
+    testWidgets('no records: no weekdays or feelings',
         (tester) async {
       await pumpDashboard(tester, const []);
       expect(find.byKey(const Key('period_summary_card')), findsNothing);
       expect(find.byKey(const Key('feelings_card')), findsNothing);
       await tester.tap(find.byKey(const Key('history_tab_HistoryTab.together')));
       await tester.pumpAndSettle();
-      expect(find.byKey(const Key('coincidence_card')), findsNothing);
       expect(find.byKey(const Key('combined_calendar')), findsOneWidget);
     });
 
@@ -365,30 +358,6 @@ void main() {
       await tester.tap(find.byKey(const Key('history_tab_HistoryTab.together')));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      // The written item still pairs by its time; the unknown branch has no
-      // text and is left out.
-      expect(find.byKey(const Key('coincidence_presente.ramo_novo_peito')),
-          findsNothing);
-      expect(find.byKey(const Key('coincidence_futuro_peito')), findsOneWidget);
-    });
-
-    testWidgets('Juntos: same-day emotional choice and body region as days',
-        (tester) async {
-      await pumpDashboard(tester, [
-        entry('e1', 0, [mind, head]),
-        entry('e2', 3, [mind]),
-        entry('e3', 3, [head]),
-        entry('e4', 5, [mind]),
-      ]);
-      await tester.tap(find.byKey(const Key('history_tab_HistoryTab.together')));
-      await tester.pumpAndSettle();
-      expect(find.byKey(const Key('coincidence_card')), findsOneWidget);
-      expect(
-        find.text('Em 2 dos últimos 14 dias você registrou, no mesmo dia, '
-            '“Mente acelerada” e “Cabeça e pescoço”.'),
-        findsOneWidget,
-      );
-      expect(find.byKey(const Key('combined_calendar')), findsOneWidget);
     });
 
     testWidgets('Corpo: markers count days, sheet lists marks and opens F3',

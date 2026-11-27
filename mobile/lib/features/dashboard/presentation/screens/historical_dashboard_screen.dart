@@ -35,13 +35,12 @@ import '../../../profile/presentation/widgets/profile_app_bar_pill.dart';
 /// v2.0): what the person recorded, counted and drawn, never interpreted.
 /// Everything is computed on the device from one filtered base.
 ///
-/// Emoções: period summary and weekdays (D16), "Como você se sentiu" (D17),
+/// Emoções: records per weekday, "Como você se sentiu" (D17),
 /// E1 pie, E2 lines per time, E3 answers per time.
 /// Corpo: F1 body map, F2 lines per region, F3 answers per region.
 /// Água: H1 ring and H2 steps of the picked day, H3 bars, H4 calendar.
 /// Hábitos: sono, movimento, ciclo menstrual (contagens apenas).
-/// Juntos: same-day emotional choice and body region (D15), described as
-/// days only, and C1 combined calendar.
+/// Juntos: C1 combined calendar.
 class HistoricalDashboardScreen extends ConsumerWidget {
   final bool isEmbedded;
   const HistoricalDashboardScreen({super.key, this.isEmbedded = false});
@@ -339,7 +338,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
           icon: Icons.date_range_rounded,
           key: const Key('period_summary_card'),
           title: l10n.histPeriodSummaryTitle,
-          child: PeriodSummary(entries: entries, days: _days),
+          child: WeekdayBars(counts: recordsByWeekday(entries)),
         ),
       if (!feelings.isEmpty)
         InsightsCard(
@@ -569,18 +568,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
         for (final d in _periodDates(ref.watch(habitsControllerProvider)))
           d: true,
     };
-    final coincidences = bodyMindCoincidences(entries);
     return [
-      if (BodyMindCoincidenceList.labelled(l10n, coincidences).isNotEmpty)
-        InsightsCard(
-          icon: Icons.join_inner_rounded,
-          key: const Key('coincidence_card'),
-          title: l10n.histCoincidenceTitle,
-          child: BodyMindCoincidenceList(
-            coincidences: coincidences,
-            days: _days,
-          ),
-        ),
       InsightsCard(
         icon: Icons.calendar_month_rounded,
         title: l10n.gxCalendarTitle,

@@ -40,7 +40,7 @@ void main() {
     );
   });
 
-  testWidgets('O que te ajudou: "Você marcou … em N dias" and coping counts', (tester) async {
+  testWidgets('O que te ajudou: days per helper and coping counts', (tester) async {
     await _pump(
       tester,
       const HelpedSummary(
@@ -50,8 +50,8 @@ void main() {
         ),
       ),
     );
-    expect(find.text('Você marcou “Conversar com alguém” em 4 dias'), findsOneWidget);
-    expect(find.text('Você marcou “Uma pausa para respirar” em 1 dia'), findsOneWidget);
+    expect(find.text('Conversar com alguém · 4 dias'), findsOneWidget);
+    expect(find.text('Uma pausa para respirar · 1 dia'), findsOneWidget);
     final first = tester.getTopLeft(find.byKey(const Key('helped_conversar')));
     final second = tester.getTopLeft(find.byKey(const Key('helped_pausa')));
     expect(first.dy, lessThan(second.dy));

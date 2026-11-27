@@ -1,11 +1,11 @@
 import '../../journal/domain/journal_keys.dart';
 import 'journal_insights_models.dart';
 
-/// Period report of the history screen (client spec D15–D17, contract
+/// Period report of the history screen (client spec D16–D17, contract
 /// docs/bienestar/CONTRATO-JOURNAL-V2.md "Resumo do período").
 ///
 /// Everything here counts what the person recorded about themself in the
-/// selected period: records, days and weekdays. Nothing is scored, ranked
+/// selected period: records and weekdays. Nothing is scored, ranked
 /// as better or worse, interpreted or used to trigger a message.
 
 /// Everyday feelings of "Como você se sentiu". Fixed order, never ranked.
@@ -77,49 +77,6 @@ Set<String> emotionalTimesOf(JournalEntryView entry) => {
           item.time!,
     };
 
-/// "Nos últimos 14 dias, 6 de 10 registros de 'não tão bem' foram sobre o
-/// futuro": the time(s) most present in "não tão bem" records.
-class NotWellTimeSummary {
-  /// "Não tão bem" records in the period.
-  final int total;
-
-  /// Records of the most present time.
-  final int count;
-
-  /// Most present times; more than one when tied, in passado → futuro order.
-  final List<String> times;
-
-  const NotWellTimeSummary({
-    required this.total,
-    required this.count,
-    required this.times,
-  });
-
-  /// Null when no "não tão bem" record has a time.
-  static NotWellTimeSummary? compute(List<JournalEntryView> entries) {
-    final notWell = [
-      for (final e in entries)
-        if (e.mood == JournalKeys.moodNaoTaoBem) e,
-    ];
-    final byTime = {for (final t in JournalKeys.times) t: 0};
-    for (final entry in notWell) {
-      for (final t in emotionalTimesOf(entry)) {
-        byTime[t] = byTime[t]! + 1;
-      }
-    }
-    final max = byTime.values.fold(0, (a, b) => a > b ? a : b);
-    if (max == 0) return null;
-    return NotWellTimeSummary(
-      total: notWell.length,
-      count: max,
-      times: [
-        for (final t in JournalKeys.times)
-          if (byTime[t] == max) t,
-      ],
-    );
-  }
-}
-
 /// Records per weekday (`DateTime.monday` = 1 … `DateTime.sunday` = 7).
 Map<int, int> recordsByWeekday(List<JournalEntryView> entries) {
   final counts = {for (var d = DateTime.monday; d <= DateTime.sunday; d++) d: 0};
@@ -128,76 +85,4 @@ Map<int, int> recordsByWeekday(List<JournalEntryView> entries) {
     counts[day] = counts[day]! + 1;
   }
   return counts;
-}
-
-/// Weekdays with the most records. Empty when there are no records or when
-/// every weekday has the same count (nothing stands out to describe).
-List<int> mostRecordedWeekdays(Map<int, int> counts) {
-  final max = counts.values.fold(0, (a, b) => a > b ? a : b);
-  if (max == 0) return const [];
-  final top = [
-    for (final e in counts.entries)
-      if (e.value == max) e.key,
-  ]..sort();
-  return top.length == counts.length ? const [] : top;
-}
-
-/// Days on which the person recorded an emotional choice and a body region.
-class BodyMindCoincidence {
-  /// Emotional branch (`futuro.mente`) or, for a written item, the time.
-  final String emotional;
-
-  /// Body region or whole-body area (`peito`, `pele`).
-  final String region;
-  final int days;
-
-  const BodyMindCoincidence({
-    required this.emotional,
-    required this.region,
-    required this.days,
-  });
-}
-
-/// Pairs of an emotional choice and a body region recorded on the same day,
-/// counted in days, most days first. Same day only: no order, no cause.
-List<BodyMindCoincidence> bodyMindCoincidences(
-  List<JournalEntryView> entries,
-) {
-  final emotionalDays = <String, Set<DateTime>>{};
-  final regionDays = <String, Set<DateTime>>{};
-  for (final entry in entries) {
-    for (final item in entry.items) {
-      final key = item.optionKey;
-      if (key == null || key.isEmpty) continue;
-      final parts = key.split('.');
-      if (item.kind == JournalKeys.kindPhysical) {
-        regionDays.putIfAbsent(parts.first, () => {}).add(entry.day);
-      } else if (item.kind == JournalKeys.kindEmotional) {
-        final marker = item.isCustom || parts.length < 2
-            ? parts.first
-            : '${parts[0]}.${parts[1]}';
-        emotionalDays.putIfAbsent(marker, () => {}).add(entry.day);
-      }
-    }
-  }
-  final result = <BodyMindCoincidence>[];
-  for (final e in emotionalDays.entries) {
-    for (final r in regionDays.entries) {
-      final days = e.value.intersection(r.value).length;
-      if (days > 0) {
-        result.add(BodyMindCoincidence(
-          emotional: e.key,
-          region: r.key,
-          days: days,
-        ));
-      }
-    }
-  }
-  result.sort((a, b) {
-    final byDays = b.days.compareTo(a.days);
-    if (byDays != 0) return byDays;
-    final byEmotional = a.emotional.compareTo(b.emotional);
-    return byEmotional != 0 ? byEmotional : a.region.compareTo(b.region);
-  });
-  return result;
 }

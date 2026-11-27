@@ -44,7 +44,7 @@ void main() {
     final today = DateTime(2026, 10, 31);
     final start = DateTime(2026, 10, 2); // 30-day window ending today
 
-    testWidgets('renders sleep and movement charts with exact count texts',
+    testWidgets('renders sleep and movement charts without count sentences',
         (tester) async {
       final habits = [
         const HabitDay(
@@ -80,19 +80,11 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Verify sleep chart and count text
+      // Verify sleep chart
       expect(find.byKey(const Key('habits_sleep_chart')), findsOneWidget);
-      expect(
-        find.text('Você dormiu mal em 2 dos últimos 30 dias'),
-        findsOneWidget,
-      );
 
-      // Verify movement chart and count text
+      // Verify movement chart
       expect(find.byKey(const Key('habits_movement_chart')), findsOneWidget);
-      expect(
-        find.text('Você se mexeu em 2 dias'),
-        findsOneWidget,
-      );
 
       // Period chart should NOT be rendered when showPeriod = false and 0 period days
       expect(find.byKey(const Key('habits_period_chart')), findsNothing);
@@ -116,10 +108,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('habits_period_chart')), findsOneWidget);
-      expect(
-        find.text('Dias com menstruação: 1'),
-        findsOneWidget,
-      );
     });
   });
 }

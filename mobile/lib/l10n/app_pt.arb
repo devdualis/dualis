@@ -2477,31 +2477,6 @@
       }
     }
   },
-  "gxPieTop": "Escolha mais registrada: “{answer}” · {count} de {total}",
-  "@gxPieTop": {
-    "placeholders": {
-      "answer": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "gxPieTied": "Escolhas empatadas, {count} de {total} cada:",
-  "@gxPieTied": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "gxLinesTitleEmotional": "Intensidade",
   "gxLinesTitlePhysical": "Intensidade",
   "gxIntensityValue": "Intensidade {value}/5",
@@ -2542,51 +2517,7 @@
   "gxWaterLogged": "Água registrada",
   "gxDayNothing": "Nenhum registro neste dia.",
   "gxSameDayNote": "Estar no mesmo dia não indica relação entre os itens.",
-  "histPeriodSummaryTitle": "Resumo",
-  "histNotWellTimeSummary": "Nos últimos {days} dias, {count} de {total, plural, =1{1 registro} other{{total} registros}} de “não tão bem” {count, plural, =1{foi} other{foram}} sobre {time, select, passado{o passado} presente{o presente} futuro{o futuro} other{outro tempo}}.",
-  "@histNotWellTimeSummary": {
-    "placeholders": {
-      "days": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      },
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "histWeekdayMost": "Você registrou mais {days}.",
-  "@histWeekdayMost": {
-    "placeholders": {
-      "days": {
-        "type": "String"
-      }
-    }
-  },
-  "histWeekdayOn": "{day, select, mon{nas segundas} tue{nas terças} wed{nas quartas} thu{nas quintas} fri{nas sextas} sat{nos sábados} sun{nos domingos} other{}}",
-  "@histWeekdayOn": {
-    "placeholders": {
-      "day": {
-        "type": "String"
-      }
-    }
-  },
-  "histListAnd": "{first} e {last}",
-  "@histListAnd": {
-    "placeholders": {
-      "first": {
-        "type": "String"
-      },
-      "last": {
-        "type": "String"
-      }
-    }
-  },
+  "histPeriodSummaryTitle": "Dias da semana",
   "histWeekdayBar": "{day}: {count, plural, =1{1 registro} other{{count} registros}}",
   "@histWeekdayBar": {
     "placeholders": {
@@ -2610,32 +2541,6 @@
         "type": "int"
       },
       "total": {
-        "type": "int"
-      }
-    }
-  },
-  "histCoincidenceTitle": "No mesmo dia",
-  "histCoincidenceLine": "Em {count} dos últimos {days} dias você registrou, no mesmo dia, “{emotion}” e “{body}”.",
-  "@histCoincidenceLine": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "days": {
-        "type": "int"
-      },
-      "emotion": {
-        "type": "String"
-      },
-      "body": {
-        "type": "String"
-      }
-    }
-  },
-  "histCoincidenceMore": "{count, plural, =1{e mais 1 combinação} other{e mais {count} combinações}}",
-  "@histCoincidenceMore": {
-    "placeholders": {
-      "count": {
         "type": "int"
       }
     }
@@ -2801,17 +2706,6 @@
   "jv22GoodMomentsMost": "Mais marcados",
   "jv22GoodMoment": "Momento bom",
   "jv22HelpedTitle": "O que te ajudou",
-  "jv22HelpedLine": "Você marcou “{label}” em {count, plural, =1{1 dia} other{{count} dias}}",
-  "@jv22HelpedLine": {
-    "placeholders": {
-      "label": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "jv22EntryCoping": "Como foi lidar: {label}",
   "@jv22EntryCoping": {
     "placeholders": {
@@ -2861,33 +2755,6 @@
   "habitsChartSleepHoursTitle": "Horas de sono",
   "habitsChartMovementTitle": "Movimento do corpo",
   "habitsChartPeriodTitle": "Ciclo menstrual",
-  "habitsChartSleepBadCount": "Você dormiu mal em {count} dos últimos {days} dias",
-  "@habitsChartSleepBadCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "days": {
-        "type": "int"
-      }
-    }
-  },
-  "habitsChartMovementCount": "{count, plural, =1{Você se mexeu em 1 dia} other{Você se mexeu em {count} dias}}",
-  "@habitsChartMovementCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "habitsChartPeriodCount": "Dias com menstruação: {count}",
-  "@habitsChartPeriodCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "habitsChartEmpty": "Sem registros no período",
   "habitsPeriodLabel": "Menstruação",
   "habitsHomeEyebrow": "Seu dia",

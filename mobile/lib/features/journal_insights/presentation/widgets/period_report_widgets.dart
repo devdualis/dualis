@@ -4,9 +4,6 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../../shared/widgets/duotone_icon_tile.dart';
-import '../../../journal/presentation/journal_labels.dart';
-import '../../domain/journal_insights_models.dart';
 import '../../domain/period_report.dart';
 import 'chart_tokens.dart';
 
@@ -25,103 +22,6 @@ TextStyle get _smallStyle => GoogleFonts.inter(
       fontSize: 11.5,
       color: ChartTokens.axisLabel,
     );
-
-/// A sentence of the report on a quiet brand row, led by a small duotone icon.
-class _ReportRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final Key? textKey;
-
-  const _ReportRow({required this.icon, required this.text, this.textKey});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: AppColors.brandBgLightBlue,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.dualisNavy.withValues(alpha: 0.06)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          DuotoneIconTile(
-            size: 30,
-            radius: 10,
-            background: Colors.white,
-            child: Icon(icon, size: 17, color: AppColors.dualisNavy),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 5),
-              child: Text(text, key: textKey, style: _textStyle),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-const List<String> _weekdayKeys = [
-  'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun', //
-];
-
-/// "A, B e C" in the current language.
-String _joinList(AppLocalizations l10n, List<String> items) {
-  if (items.length == 1) return items.first;
-  return l10n.histListAnd(
-    items.sublist(0, items.length - 1).join(', '),
-    items.last,
-  );
-}
-
-/// D16: the "não tão bem" sentence and records per weekday for the period.
-class PeriodSummary extends StatelessWidget {
-  /// Entries of the selected period.
-  final List<JournalEntryView> entries;
-  final int days;
-
-  const PeriodSummary({super.key, required this.entries, required this.days});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final notWell = NotWellTimeSummary.compute(entries);
-    final weekdays = recordsByWeekday(entries);
-    final most = mostRecordedWeekdays(weekdays);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (notWell != null)
-          for (final time in notWell.times)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _ReportRow(
-                icon: Icons.schedule_rounded,
-                text: l10n.histNotWellTimeSummary(
-                    days, notWell.count, notWell.total, time),
-                textKey: Key('period_not_well_$time'),
-              ),
-            ),
-        if (most.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: _ReportRow(
-              icon: Icons.calendar_today_rounded,
-              text: l10n.histWeekdayMost(_joinList(l10n, [
-                for (final d in most) l10n.histWeekdayOn(_weekdayKeys[d - 1]),
-              ])),
-              textKey: const Key('period_weekday_most'),
-            ),
-          ),
-        WeekdayBars(counts: weekdays),
-      ],
-    );
-  }
-}
 
 /// Seven bars, Monday first, with the number of records above each one.
 class WeekdayBars extends StatelessWidget {
@@ -238,62 +138,6 @@ class EverydayFeelingsSummary extends StatelessWidget {
               ],
             ),
           ),
-      ],
-    );
-  }
-}
-
-/// D15: emotional choice and body region recorded on the same day.
-class BodyMindCoincidenceList extends StatelessWidget {
-  final List<BodyMindCoincidence> coincidences;
-  final int days;
-
-  /// Lines shown; the rest is summed up in one line.
-  static const int maxLines = 5;
-
-  const BodyMindCoincidenceList({
-    super.key,
-    required this.coincidences,
-    required this.days,
-  });
-
-  /// Pairs whose keys have text in this version of the app.
-  static List<(BodyMindCoincidence, String, String)> labelled(
-    AppLocalizations l10n,
-    List<BodyMindCoincidence> coincidences,
-  ) =>
-      [
-        for (final c in coincidences)
-          if (JournalLabels.marker(l10n, c.emotional) case final emotion?)
-            if (JournalLabels.region(l10n, c.region) case final body?)
-              (c, emotion, body),
-      ];
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final lines = labelled(l10n, coincidences);
-    final shown = lines.take(maxLines).toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final (c, emotion, body) in shown)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: _ReportRow(
-              icon: Icons.link_rounded,
-              text: l10n.histCoincidenceLine(c.days, days, emotion, body),
-              textKey: Key('coincidence_${c.emotional}_${c.region}'),
-            ),
-          ),
-        if (lines.length > shown.length)
-          Text(
-            l10n.histCoincidenceMore(lines.length - shown.length),
-            key: const Key('coincidence_more'),
-            style: _smallStyle,
-          ),
-        const SizedBox(height: 4),
-        Text(l10n.gxSameDayNote, style: _smallStyle),
       ],
     );
   }

@@ -123,7 +123,8 @@ class HelpedSummary extends StatelessWidget {
       children: [
         for (final e in helpers)
           _line(
-            l10n.jv22HelpedLine(JournalLabels.helper(l10n, e.key), e.value),
+            '${JournalLabels.helper(l10n, e.key)} · '
+            '${l10n.xv2DashDaysCount(e.value)}',
             key: Key('helped_${e.key}'),
           ),
         if (copings.isNotEmpty) ...[

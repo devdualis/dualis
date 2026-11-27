@@ -4056,16 +4056,6 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String gxPieTop(String answer, int count, int total) {
-    return 'Escolha mais registrada: “$answer” · $count de $total';
-  }
-
-  @override
-  String gxPieTied(int count, int total) {
-    return 'Escolhas empatadas, $count de $total cada:';
-  }
-
-  @override
   String get gxLinesTitleEmotional => 'Intensidade';
 
   @override
@@ -4143,55 +4133,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Estar no mesmo dia não indica relação entre os itens.';
 
   @override
-  String get histPeriodSummaryTitle => 'Resumo';
-
-  @override
-  String histNotWellTimeSummary(int days, int count, int total, String time) {
-    String _temp0 = intl.Intl.pluralLogic(
-      total,
-      locale: localeName,
-      other: '$total registros',
-      one: '1 registro',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'foram',
-      one: 'foi',
-    );
-    String _temp2 = intl.Intl.selectLogic(time, {
-      'passado': 'o passado',
-      'presente': 'o presente',
-      'futuro': 'o futuro',
-      'other': 'outro tempo',
-    });
-    return 'Nos últimos $days dias, $count de $_temp0 de “não tão bem” $_temp1 sobre $_temp2.';
-  }
-
-  @override
-  String histWeekdayMost(String days) {
-    return 'Você registrou mais $days.';
-  }
-
-  @override
-  String histWeekdayOn(String day) {
-    String _temp0 = intl.Intl.selectLogic(day, {
-      'mon': 'nas segundas',
-      'tue': 'nas terças',
-      'wed': 'nas quartas',
-      'thu': 'nas quintas',
-      'fri': 'nas sextas',
-      'sat': 'nos sábados',
-      'sun': 'nos domingos',
-      'other': '',
-    });
-    return '$_temp0';
-  }
-
-  @override
-  String histListAnd(String first, String last) {
-    return '$first e $last';
-  }
+  String get histPeriodSummaryTitle => 'Dias da semana';
 
   @override
   String histWeekdayBar(String day, int count) {
@@ -4228,25 +4170,6 @@ class AppLocalizationsPt extends AppLocalizations {
       one: '1 registro',
     );
     return '$count de $_temp0';
-  }
-
-  @override
-  String get histCoincidenceTitle => 'No mesmo dia';
-
-  @override
-  String histCoincidenceLine(int count, int days, String emotion, String body) {
-    return 'Em $count dos últimos $days dias você registrou, no mesmo dia, “$emotion” e “$body”.';
-  }
-
-  @override
-  String histCoincidenceMore(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'e mais $count combinações',
-      one: 'e mais 1 combinação',
-    );
-    return '$_temp0';
   }
 
   @override
@@ -4542,17 +4465,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get jv22HelpedTitle => 'O que te ajudou';
 
   @override
-  String jv22HelpedLine(String label, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count dias',
-      one: '1 dia',
-    );
-    return 'Você marcou “$label” em $_temp0';
-  }
-
-  @override
   String jv22EntryCoping(String label) {
     return 'Como foi lidar: $label';
   }
@@ -4660,27 +4572,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get habitsChartPeriodTitle => 'Ciclo menstrual';
-
-  @override
-  String habitsChartSleepBadCount(int count, int days) {
-    return 'Você dormiu mal em $count dos últimos $days dias';
-  }
-
-  @override
-  String habitsChartMovementCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Você se mexeu em $count dias',
-      one: 'Você se mexeu em 1 dia',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String habitsChartPeriodCount(int count) {
-    return 'Dias com menstruação: $count';
-  }
 
   @override
   String get habitsChartEmpty => 'Sem registros no período';

@@ -127,12 +127,8 @@ class _SliceRow extends StatelessWidget {
           ),
           if (top != null) ...[
             const SizedBox(height: 4),
-            if (top.answers.length == 1)
-              Text(l10n.gxPieTop(top.answers.first, top.count, count), style: body)
-            else ...[
-              Text(l10n.gxPieTied(top.count, count), style: body),
-              for (final a in top.answers) Text('· “$a”', style: body),
-            ],
+            for (final a in top.answers)
+              Text('“$a” · ${l10n.gxOfN(top.count, count)}', style: body),
           ],
         ],
       ),

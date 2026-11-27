@@ -42,9 +42,6 @@ class HabitsChartsSection extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final inWindow = _filterHabitsInWindow(habits, start, days);
 
-    final badSleepCount =
-        inWindow.where((h) => h.sleepQuality == HabitSleepQuality.mal).length;
-    final movedCount = inWindow.where((h) => h.moved == true).length;
     final periodCount = inWindow.where((h) => h.period == true).length;
 
     return Column(
@@ -54,7 +51,6 @@ class HabitsChartsSection extends StatelessWidget {
         InsightsCard(
           icon: Icons.bedtime_outlined,
           title: l10n.habitsChartSleepQualityTitle,
-          subtitle: l10n.habitsChartSleepBadCount(badSleepCount, days),
           child: HabitsSleepChart(habits: inWindow, start: start, days: days),
         ),
 
@@ -62,7 +58,6 @@ class HabitsChartsSection extends StatelessWidget {
         InsightsCard(
           icon: Icons.directions_walk_rounded,
           title: l10n.habitsChartMovementTitle,
-          subtitle: l10n.habitsChartMovementCount(movedCount),
           child: HabitsMovementChart(
             habits: inWindow,
             start: start,
@@ -75,7 +70,6 @@ class HabitsChartsSection extends StatelessWidget {
           InsightsCard(
             icon: Icons.water_drop_outlined,
             title: l10n.habitsChartPeriodTitle,
-            subtitle: l10n.habitsChartPeriodCount(periodCount),
             child: HabitsPeriodChart(
               habits: inWindow,
               start: start,

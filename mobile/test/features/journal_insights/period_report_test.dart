@@ -55,58 +55,6 @@ void main() {
       expect(counts[DateTime.tuesday], 1);
       expect(counts[DateTime.sunday], 0);
     });
-
-    test('names the weekdays with the most records, ties included', () {
-      final counts = recordsByWeekday([
-        e(1, const []), // Tuesday
-        e(6, const []), // Thursday
-        e(8, const []), // Tuesday
-        e(13, const []), // Thursday
-        e(0, const []), // Wednesday
-      ]);
-      expect(mostRecordedWeekdays(counts),
-          [DateTime.tuesday, DateTime.thursday]);
-    });
-
-    test('names nothing when empty or when every weekday is the same', () {
-      expect(mostRecordedWeekdays(recordsByWeekday(const [])), isEmpty);
-      final everyDay = [for (var i = 0; i < 7; i++) e(i, const [])];
-      expect(mostRecordedWeekdays(recordsByWeekday(everyDay)), isEmpty);
-    });
-  });
-
-  group('"não tão bem" sentence', () {
-    test('counts records per time among "não tão bem" records', () {
-      final summary = NotWellTimeSummary.compute([
-        e(0, [emo('futuro.mente.antecipar'), emo('futuro.medo.evitar')]),
-        e(1, [emo('futuro.custom')]),
-        e(2, [emo('passado.memoria.magoa')]),
-        e(3, [body('peito.respiracao.curta')]),
-        // Not counted: other moods.
-        e(4, [good('futuro.animo.planos')], mood: 'bem'),
-        e(5, [emo('passado.tristeza.culpa')], mood: null),
-      ])!;
-      expect(summary.total, 4);
-      expect(summary.count, 2);
-      expect(summary.times, ['futuro']);
-    });
-
-    test('keeps tied times in passado → futuro order', () {
-      final summary = NotWellTimeSummary.compute([
-        e(0, [emo('futuro.mente.antecipar')]),
-        e(1, [emo('passado.memoria.magoa')]),
-      ])!;
-      expect(summary.times, ['passado', 'futuro']);
-      expect(summary.count, 1);
-    });
-
-    test('is null without emotional "não tão bem" records', () {
-      expect(NotWellTimeSummary.compute(const []), isNull);
-      expect(
-        NotWellTimeSummary.compute([e(0, [body('cabeca.nuca.rigida')])]),
-        isNull,
-      );
-    });
   });
 
   group('"Como você se sentiu" groups', () {
@@ -150,55 +98,6 @@ void main() {
       ]);
       expect(counts.isEmpty, isTrue);
       expect(counts.records.values.every((v) => v == 0), isTrue);
-    });
-  });
-
-  group('body–mind coincidences', () {
-    test('counts days with an emotional branch and a region, most first', () {
-      final list = bodyMindCoincidences([
-        e(0, [emo('futuro.mente.antecipar'), body('peito.respiracao.curta')]),
-        // Same day, another record: still the same day.
-        e(1, [emo('futuro.mente.cobranca')]),
-        e(1, [body('peito.incomodo.batedeira', sensation: 'incomodo')]),
-        // Same day twice counts once.
-        e(1, [body('peito.respiracao.tosse')]),
-        e(2, [emo('passado.memoria.magoa'), body('cabeca.pressao.temporas')]),
-        // Different days: no pair.
-        e(3, [emo('presente.energia.corpo')]),
-        e(4, [body('costas.rigidez.ombros')]),
-      ]);
-      expect(list.first.emotional, 'futuro.mente');
-      expect(list.first.region, 'peito');
-      expect(list.first.days, 2);
-      expect(
-        list.map((c) => '${c.emotional}|${c.region}|${c.days}'),
-        ['futuro.mente|peito|2', 'passado.memoria|cabeca|1'],
-      );
-    });
-
-    test('uses the time for written items and skips triggers and legacy', () {
-      final list = bodyMindCoincidences([
-        JournalEntryView(
-          id: 'x',
-          recordedAt: today,
-          triggers: const ['trabalho'],
-          items: [
-            emo('presente.custom'),
-            body('pele.coceira.coceira'),
-            const JournalItemView(kind: 'physical', legacyLabel: 'Dor antiga'),
-          ],
-        ),
-      ]);
-      expect(list.single.emotional, 'presente');
-      expect(list.single.region, 'pele');
-    });
-
-    test('is empty without both sides', () {
-      expect(bodyMindCoincidences(const []), isEmpty);
-      expect(
-        bodyMindCoincidences([e(0, [emo('futuro.mente.antecipar')])]),
-        isEmpty,
-      );
     });
   });
 }
