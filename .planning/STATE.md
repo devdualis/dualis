@@ -5,10 +5,10 @@ current_phase: 17
 current_phase_name: Conversational voice check-in, multi-answer phrases, AI option suggestions and AI consent
 status: verifying
 stopped_at: Completed 17-09-PLAN.md
-last_updated: "2026-11-27T19:34:18.956Z"
+last_updated: "2026-11-27T21:00:00.000Z"
 last_activity: 2026-11-17
 last_activity_desc: Phase 17 execution started
-state_head: 58bf8e1022c394a6a4a2e1e9cbf83209efa7ca24
+state_head: 3d32c74
 progress:
   total_phases: 17
   completed_phases: 11
@@ -217,6 +217,7 @@ None yet.
 | fast | Check-in: greeting and transition phrases restored | 2026-11-27 | b6dc802 | — |
 | 261127-kfp | Remove regulatory claim, localize fixed Portuguese strings and iOS permission texts | 2026-11-27 | 69c0a99 | [261127-kfp-traducir-textos-fijos-y-quitar-afirmacio](./quick/261127-kfp-traducir-textos-fijos-y-quitar-afirmacio/) |
 | 261127-mt2 | System language default with saved choice; register errors and text wrap; status bar; home tile titles | 2026-11-27 | 58bf8e1 | [261127-mt2-idioma-del-sistema-y-arreglos-visuales](./quick/261127-mt2-idioma-del-sistema-y-arreglos-visuales/) |
+| 261127-q8w | E-mail autocorrect off; PRO badge and history tabs with large text; sex selector starts empty; help screen tú; page dots and privacy errors localized | 2026-11-27 | 3d32c74 | [261127-q8w-pendientes-del-recorrido](./quick/261127-q8w-pendientes-del-recorrido/) |
 
 ## Deferred Items
 
