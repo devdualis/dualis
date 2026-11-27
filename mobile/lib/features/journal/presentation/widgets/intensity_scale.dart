@@ -130,7 +130,7 @@ class IntensityScaleFull extends StatelessWidget {
                       key: Key('${keyPrefix}_$level'),
                       borderRadius: BorderRadius.circular(12),
                       onTap: () => onChanged(level),
-                      child: _LevelBar(level: level, value: value, unit: 12, base: 10),
+                      child: _LevelBar(level: level, value: value, unit: 14, base: 28),
                     ),
                   ),
                 ),
@@ -213,7 +213,7 @@ class IntensityScaleCompact extends StatelessWidget {
                     key: Key('${keyPrefix}_$level'),
                     borderRadius: BorderRadius.circular(10),
                     onTap: () => onChanged(level),
-                    child: _LevelBar(level: level, value: value, unit: 7, base: 8),
+                    child: _LevelBar(level: level, value: value, unit: 8, base: 28),
                   ),
                 ),
               ),
@@ -303,7 +303,7 @@ class _LevelBar extends StatelessWidget {
         Text(
           '$level',
           style: GoogleFonts.inter(
-            fontSize: 13,
+            fontSize: 18,
             fontWeight: current ? FontWeight.w800 : FontWeight.w600,
             color: current ? AppColors.dualisNavy : AppColors.textSecondaryLight,
           ),

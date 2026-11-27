@@ -1109,8 +1109,6 @@ void main() {
       await tapKey(tester, 'jv2_mood_bem');
 
       expect(h.remote.requestBodies, isEmpty);
-      expect(find.byKey(const Key('chronicTrack_bem_banner')), findsOneWidget);
-      expect(find.text(pt.chronicTrackBemBanner), findsOneWidget);
       expect(find.byType(BodyRegionMap), findsNothing);
       final justLog = find.descendant(
         of: find.byKey(const Key('chronicTrack_just_log')),

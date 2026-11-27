@@ -333,7 +333,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       axisLabel: JournalLabels.axis(l10n, _area.key),
       axisColor: emotional ? AppColors.dualisSymbolGreen : AppColors.dualisSymbolBlue,
       question: l10n.jv2MoodQuestion,
-      hint: l10n.jv23TapOneHint,
       children: [
         _CardGrid(
           columns: 2,
@@ -438,7 +437,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           ),
           TextButton(
             key: const Key('chronicTrack_save_without'),
-            style: TextButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+            style: TextButton.styleFrom(minimumSize: const Size.fromHeight(56)),
             onPressed: state.isSaving
                 ? null
                 : () {
@@ -453,19 +452,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         ],
       ),
       children: [
-        Container(
-          key: const Key('chronicTrack_bem_banner'),
-          padding: const EdgeInsets.all(14),
-          margin: const EdgeInsets.only(bottom: 14),
-          decoration: BoxDecoration(
-            color: AppColors.dualisSymbolBlue.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Text(
-            l10n.chronicTrackBemBanner,
-            style: GoogleFonts.inter(fontSize: 14, height: 1.4),
-          ),
-        ),
         ..._conditionTiles(l10n, state, conditions, trackedOnly: true),
       ],
     );
@@ -538,7 +524,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       progress: _progress(state),
       lead: _phrase(l10n, state),
       question: l10n.jv2TimeQuestion,
-      hint: l10n.jv23TapOneHint,
       children: [
         for (final time in JournalKeys.times)
           _ChoiceTile(
@@ -599,7 +584,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       eyebrowMark: time,
       lead: _phrase(l10n, state),
       question: question,
-      hint: l10n.jv23TapOneHint,
       children: [
         for (final branch in JournalKeys.emotionalTree[time]!.keys)
           _ChoiceTile(
@@ -629,7 +613,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       eyebrow: sideLabel == null ? rootLabel : '$rootLabel · $sideLabel',
       lead: _phrase(l10n, state),
       question: l10n.jv23WhereExactly,
-      hint: l10n.jv23TapOneHint,
       children: [
         for (final branch in branches.keys)
           _ChoiceTile(
@@ -661,7 +644,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       eyebrow: JournalLabels.branch(l10n, prefix),
       lead: _phrase(l10n, state),
       question: l10n.jv2OptionsQuestion,
-      hint: l10n.jv2MultiSelectHint,
       bottom: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -892,7 +874,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       progress: _progress(state),
       lead: _phrase(l10n, state),
       question: l10n.jv2BodyQuestion,
-      hint: l10n.jv23BodyMapHint,
       bottom: _ContinueButton(
         label: l10n.jv2Continue,
         onPressed: state.hasBodySelection
@@ -982,7 +963,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           emoji: '',
           markKey: 'physical',
           title: l10n.jv2WholeBody,
-          subtitle: l10n.jv23WholeBodyHint,
           count: wholeCount,
           countLabel: l10n.jv23TopicMarked(wholeCount),
           initiallyOpen: wholeCount > 0,
@@ -1015,7 +995,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       progress: _progress(state),
       lead: _phrase(l10n, state),
       question: single ? l10n.jv2PersistenceQuestion : l10n.jv24PersistenceCompactQuestion,
-      hint: single ? l10n.jv23TapOneHint : null,
       bottom: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1147,7 +1126,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
                   onTap: () => _controller.setPersistence(item.draftId, p),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
-                    constraints: const BoxConstraints(minHeight: 44),
+                    constraints: const BoxConstraints(minHeight: 56),
                     alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                     decoration: BoxDecoration(
@@ -1303,7 +1282,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       progress: _progress(state),
       lead: _phrase(l10n, state),
       question: l10n.jv2TriggersQuestion,
-      hint: l10n.jv23TriggersHint,
       bottom: _skipOrContinue(
         l10n,
         skipKey: const Key('jv2_skip'),
@@ -1331,7 +1309,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
         ),
         const SizedBox(height: 12),
         _CardGrid(
-          columns: 3,
+          columns: 2,
           children: [
             for (final t in shown)
               _ChoiceCard(
@@ -1407,7 +1385,8 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
           child: OutlinedButton(
             key: skipKey,
             style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(54),
+              minimumSize: const Size.fromHeight(64),
+              textStyle: GoogleFonts.inter(fontSize: 19, fontWeight: FontWeight.w600),
               side: BorderSide.none,
               backgroundColor: AppColors.dualisNavy.withValues(alpha: 0.08),
             ),
@@ -1432,7 +1411,6 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
       progress: _progress(state),
       lead: _phrase(l10n, state),
       question: l10n.jv23ClosingTitle,
-      hint: l10n.jv23ClosingHint,
       bottom: _skipOrContinue(
         l10n,
         skipKey: const Key('jv22_closing_skip'),
@@ -1446,7 +1424,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
               : l10n.jv22CopingQuestion,
         ),
         _CardGrid(
-          columns: 3,
+          columns: 2,
           children: [
             for (final c in JournalKeys.copings)
               _ChoiceCard(
@@ -1464,7 +1442,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
               : l10n.jv22HelpersQuestion,
         ),
         _CardGrid(
-          columns: 3,
+          columns: 2,
           children: [
             for (final h in helpers)
               _ChoiceCard(
@@ -1554,7 +1532,6 @@ class _StepLayout extends StatelessWidget {
 
   /// Read aloud instead of [question] (one that holds the person's text).
   final String? spokenQuestion;
-  final String? hint;
   final List<Widget> children;
   final Widget? bottom;
 
@@ -1570,7 +1547,6 @@ class _StepLayout extends StatelessWidget {
     this.axisColor,
     this.question,
     this.spokenQuestion,
-    this.hint,
     required this.children,
     this.bottom,
   });
@@ -1618,15 +1594,6 @@ class _StepLayout extends StatelessWidget {
                           ],
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    l10n.jv23StepOf(progress!.$1, progress!.$2),
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: secondary,
                     ),
                   ),
                 ],
@@ -1693,13 +1660,6 @@ class _StepLayout extends StatelessWidget {
                       color: AppColors.dualisNavy,
                     ),
                   ),
-                ),
-              ],
-              if (hint != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  hint!,
-                  style: GoogleFonts.inter(fontSize: 13, color: secondary),
                 ),
               ],
               const SizedBox(height: 16),
@@ -1935,12 +1895,12 @@ class _ChoiceCard extends StatelessWidget {
       );
 
   Widget _content(BuildContext context) {
-    final icon = JournalMarks.box(markKey, size: large ? 64 : (wide ? 28 : 36)) ?? leading;
+    final icon = JournalMarks.box(markKey, size: large ? 72 : (wide ? 36 : 52)) ?? leading;
     final text = Text(
       label,
       textAlign: wide ? TextAlign.start : TextAlign.center,
       style: GoogleFonts.inter(
-        fontSize: large ? 19 : 13.5,
+        fontSize: large ? 22 : 16,
         fontWeight: large ? FontWeight.w700 : FontWeight.w600,
         height: 1.22,
         color: enabled ? AppColors.dualisNavy : AppColors.textSecondaryLight,
@@ -1953,7 +1913,7 @@ class _ChoiceCard extends StatelessWidget {
         enabled: enabled,
         child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
-        constraints: BoxConstraints(minHeight: large ? 170 : (wide ? 56 : 96)),
+        constraints: BoxConstraints(minHeight: large ? 190 : (wide ? 72 : 128)),
         decoration: _optionDecoration(selected: selected, radius: 22),
         child: Material(
           type: MaterialType.transparency,
@@ -2105,7 +2065,7 @@ class _TopicTabs extends StatelessWidget {
                   onTap: t.onTap,
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
-                    constraints: const BoxConstraints(minHeight: 48),
+                    constraints: const BoxConstraints(minHeight: 56),
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
@@ -2129,7 +2089,7 @@ class _TopicTabs extends StatelessWidget {
                             t.label,
                             textAlign: TextAlign.center,
                             style: GoogleFonts.inter(
-                              fontSize: 13,
+                              fontSize: 15,
                               fontWeight: FontWeight.w600,
                               color: t.selected
                                   ? AppColors.dualisNavy
@@ -2220,7 +2180,7 @@ class _ChoiceTile extends StatelessWidget {
       );
 
   Widget _content(BuildContext context) {
-    final mark = JournalMarks.box(emojiKey, size: dense ? 22 : 26);
+    final mark = JournalMarks.box(emojiKey, size: dense ? 30 : 38);
     return Padding(
       padding: EdgeInsets.only(bottom: dense ? 8 : 10),
       child: Semantics(
@@ -2237,7 +2197,8 @@ class _ChoiceTile extends StatelessWidget {
             child: InkWell(
               borderRadius: BorderRadius.circular(20),
               onTap: enabled ? onTap : null,
-              child: Padding(
+              child: Container(
+                constraints: BoxConstraints(minHeight: dense ? 68 : 84),
                 padding: EdgeInsets.symmetric(
                   horizontal: 14,
                   vertical: dense ? 10 : 13,
@@ -2248,7 +2209,7 @@ class _ChoiceTile extends StatelessWidget {
                       SelectPop(
                         selected: selected,
                         child: DuotoneIconTile(
-                          size: dense ? 36 : 40,
+                          size: dense ? 46 : 56,
                           radius: 11,
                           child: mark,
                         ),
@@ -2256,10 +2217,10 @@ class _ChoiceTile extends StatelessWidget {
                       const SizedBox(width: 12),
                     ] else if (emoji != null) ...[
                       DuotoneIconTile(
-                        size: dense ? 36 : 40,
+                        size: dense ? 46 : 56,
                         radius: 11,
                         child: ExcludeSemantics(
-                          child: Text(emoji!, style: TextStyle(fontSize: dense ? 19 : 22)),
+                          child: Text(emoji!, style: TextStyle(fontSize: dense ? 24 : 30)),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -2268,7 +2229,7 @@ class _ChoiceTile extends StatelessWidget {
                       child: Text(
                         label,
                         style: GoogleFonts.inter(
-                          fontSize: 15,
+                          fontSize: dense ? 17 : 19,
                           fontWeight: accent ? FontWeight.w700 : FontWeight.w600,
                           color: !enabled
                               ? AppColors.textSecondaryLight
@@ -2309,7 +2270,6 @@ class _TopicCard extends StatefulWidget {
   /// Drawn in the header tile instead of [emoji] when it has a mark.
   final String? markKey;
   final String title;
-  final String subtitle;
   final int count;
   final String countLabel;
   final bool initiallyOpen;
@@ -2320,7 +2280,6 @@ class _TopicCard extends StatefulWidget {
     required this.emoji,
     this.markKey,
     required this.title,
-    required this.subtitle,
     required this.count,
     required this.countLabel,
     required this.initiallyOpen,
@@ -2336,7 +2295,6 @@ class _TopicCardState extends State<_TopicCard> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final rows = <Widget>[];
     for (var i = 0; i < widget.children.length; i += 2) {
       rows.add(Padding(
@@ -2399,18 +2357,6 @@ class _TopicCardState extends State<_TopicCard> {
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.dualisNavy,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              widget.subtitle,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
-                                color: isDark
-                                    ? AppColors.textSecondaryDark
-                                    : AppColors.textSecondaryLight,
                               ),
                             ),
                           ],
@@ -2618,7 +2564,7 @@ class _OptionCell extends StatelessWidget {
       selected: selected,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
-        constraints: const BoxConstraints(minHeight: 56),
+        constraints: const BoxConstraints(minHeight: 72),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           color: selected
@@ -2638,7 +2584,7 @@ class _OptionCell extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               child: Row(
                 children: [
-                  if (JournalMarks.box(markKey, size: 24) case final mark?) ...[
+                  if (JournalMarks.box(markKey, size: 32) case final mark?) ...[
                     mark,
                     const SizedBox(width: 8),
                   ],
@@ -2705,7 +2651,7 @@ class _MarkedPill extends StatelessWidget {
           customBorder: const StadiumBorder(),
           onTap: onRemove,
           child: Container(
-            constraints: const BoxConstraints(minHeight: 36),
+            constraints: const BoxConstraints(minHeight: 48),
             padding: EdgeInsets.fromLTRB(markKey == null ? 12 : 6, 6, 8, 6),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -2801,7 +2747,7 @@ class _ContinueButton extends StatelessWidget {
       key: key == null ? const Key('jv2_continue') : null,
       style: FilledButton.styleFrom(
         backgroundColor: AppColors.dualisNavy,
-        minimumSize: const Size.fromHeight(54),
+        minimumSize: const Size.fromHeight(64),
         shape: const StadiumBorder(),
       ).copyWith(
         shadowColor: WidgetStatePropertyAll(AppColors.softIndigoDark.withValues(alpha: 0.7)),
@@ -2819,7 +2765,7 @@ class _ContinueButton extends StatelessWidget {
           : Text(
               label,
               style: GoogleFonts.inter(
-                fontSize: 16.5,
+                fontSize: 19,
                 fontWeight: FontWeight.w600,
               ),
             ),
