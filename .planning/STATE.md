@@ -137,6 +137,7 @@ None yet.
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
+| fast | History screen: self-explanatory titles, no subtitles, captions or legend hints | 2026-11-27 | c3242d0 | — |
 | 261117-n27 | Notification restyle 1: monochrome icon, channel colors, calm pt/es/en copy, no health names in notifications | 2026-11-17 | f11fcc1 | [261117-n27-notification-restyle-part-1-icon-channel](./quick/261117-n27-notification-restyle-part-1-icon-channel/) |
 | 261117-los | Voice: hands-free stays on through a check-in opened by voice from Home; silences counted apart (8); large pt/es/en phrase dictionary | 2026-11-17 | cb4e0e3 | [261117-los-voice-hands-free-check-in-and-synonym-di](./quick/261117-los-voice-hands-free-check-in-and-synonym-di/) |
 | 261116-fp9 | Redesign step 2: Home restyle (navy hero with logo watermark, glass check-in and habits cards, duotone icons) | 2026-11-16 | 673316c | [261116-fp9-redesign-step2-home](./quick/261116-fp9-redesign-step2-home/) |
