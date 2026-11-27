@@ -79,6 +79,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
       required String completedCardKey,
       required bool tileViewOnly,
       required JournalArea area,
+      required double titleFontSize,
     }) {
       final iconWidget =
           premium
@@ -90,6 +91,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
         return _AxisTile(
           key: ValueKey('home-area-not-shared-$areaKey'),
           title: title,
+          titleFontSize: titleFontSize,
           semanticsLabel: title,
           accent: AppColors.textSecondaryLight,
           icon: Icon(icon, color: AppColors.textSecondaryLight, size: 36),
@@ -112,6 +114,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
         return _AxisTile(
           key: Key(completedCardKey),
           title: title,
+          titleFontSize: titleFontSize,
           semanticsLabel: '$title, ${tier.localizedLabel(context)}',
           accent: accentColor,
           icon: iconWidget,
@@ -133,6 +136,7 @@ class DualAxisTriggerCard extends ConsumerWidget {
       return _AxisTile(
         key: tileViewOnly ? null : Key(buttonKey),
         title: title,
+        titleFontSize: titleFontSize,
         semanticsLabel: tileViewOnly ? title : l10n.homeStartAxisLabel(title),
         semanticsHint: subtitle,
         accent: accentColor,
@@ -150,7 +154,8 @@ class DualAxisTriggerCard extends ConsumerWidget {
       );
     }
 
-    final emotionalTile = tileFor(
+    Widget emotionalTileAt(double titleFontSize) => tileFor(
+      titleFontSize: titleFontSize,
       areaKey: 'emotional',
       canRead: canReadEmotional,
       title: l10n.jv2AxisEmotional,
@@ -165,7 +170,8 @@ class DualAxisTriggerCard extends ConsumerWidget {
       tileViewOnly: emotionalViewOnly,
       area: JournalArea.emotional,
     );
-    final physicalTile = tileFor(
+    Widget physicalTileAt(double titleFontSize) => tileFor(
+      titleFontSize: titleFontSize,
       areaKey: 'physical',
       canRead: canReadPhysical,
       title: l10n.jv2AxisPhysical,
@@ -284,15 +290,25 @@ class DualAxisTriggerCard extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 18),
-                IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(child: emotionalTile),
-                      const SizedBox(width: 12),
-                      Expanded(child: physicalTile),
-                    ],
-                  ),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    // One size for both tiles, so the titles always match.
+                    final titleFontSize = _sharedAxisTitleFontSize(
+                      context: context,
+                      titles: [l10n.jv2AxisEmotional, l10n.jv2AxisPhysical],
+                      rowWidth: constraints.maxWidth,
+                    );
+                    return IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(child: emotionalTileAt(titleFontSize)),
+                          const SizedBox(width: _axisTileGap),
+                          Expanded(child: physicalTileAt(titleFontSize)),
+                        ],
+                      ),
+                    );
+                  },
                 ),
                 if (viewOnly) const ActiveProfileReadOnlyNote(),
                 if (details.isNotEmpty) ...[
@@ -317,6 +333,49 @@ class DualAxisTriggerCard extends ConsumerWidget {
   }
 }
 
+const _axisTitleDesignSize = 15.5;
+const _axisTitleMinSize = 6.0;
+const _axisTileGap = 12.0;
+const _axisTilePadding = 14.0;
+const _axisTileBorder = 1.5;
+
+/// Largest title size (stepping down from the design size) at which every
+/// title fits on one line in a tile at the current text scale. Words are
+/// never split: a title that does not fit shrinks instead of wrapping.
+double _sharedAxisTitleFontSize({
+  required BuildContext context,
+  required List<String> titles,
+  required double rowWidth,
+}) {
+  final tileInner =
+      (rowWidth - _axisTileGap) / 2 -
+      2 * _axisTilePadding -
+      2 * _axisTileBorder;
+  final scaler = MediaQuery.textScalerOf(context);
+  final direction = Directionality.of(context);
+  final base = GoogleFonts.inter(fontWeight: FontWeight.w700);
+  for (
+    var size = _axisTitleDesignSize;
+    size > _axisTitleMinSize;
+    size -= 0.5
+  ) {
+    final style = base.copyWith(fontSize: size);
+    final fits = titles.every((title) {
+      final painter = TextPainter(
+        text: TextSpan(text: title, style: style),
+        textDirection: direction,
+        textScaler: scaler,
+        maxLines: 1,
+      )..layout();
+      final width = painter.width;
+      painter.dispose();
+      return width <= tileInner;
+    });
+    if (fits) return size;
+  }
+  return _axisTitleMinSize;
+}
+
 /// One axis tile on the light check-in card: accent-tinted icon square, the
 /// label below, an optional corner badge (check), and the self-reported
 /// result chip (completed) or a short note (not shared). The whole tile is the tap target
@@ -330,6 +389,7 @@ class _AxisTile extends StatefulWidget {
     required this.accent,
     required this.icon,
     required this.reduceMotion,
+    this.titleFontSize = _axisTitleDesignSize,
     this.semanticsHint,
     this.badge,
     this.note,
@@ -340,6 +400,7 @@ class _AxisTile extends StatefulWidget {
   });
 
   final String title;
+  final double titleFontSize;
   final String semanticsLabel;
   final String? semanticsHint;
   final Color accent;
@@ -401,13 +462,20 @@ class _AxisTileState extends State<_AxisTile> {
                   child: widget.icon,
                 ),
                 const SizedBox(height: 12),
-                Text(
-                  widget.title,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
-                    fontSize: 15.5,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimaryLight,
+                // One line, never broken mid-word; FittedBox is the last
+                // guard if a title is still wider than its tile.
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    widget.title,
+                    maxLines: 1,
+                    softWrap: false,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: widget.titleFontSize,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimaryLight,
+                    ),
                   ),
                 ),
                 if (widget.note != null) ...[

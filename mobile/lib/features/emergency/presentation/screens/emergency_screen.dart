@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -70,6 +71,12 @@ class _EmergencyScreenState extends ConsumerState<EmergencyScreen> {
         backgroundColor: AppColors.emergencyCrimson,
         elevation: 0,
         scrolledUnderElevation: 0,
+        // Red bar: keep white status icons (the theme sets dark icons).
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarBrightness: Brightness.dark,
+          statusBarIconBrightness: Brightness.light,
+        ),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(

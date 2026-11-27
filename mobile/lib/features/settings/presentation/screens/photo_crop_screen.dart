@@ -1,8 +1,8 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -155,6 +155,7 @@ class _PhotoCropScreenState extends State<PhotoCropScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         title: Text(

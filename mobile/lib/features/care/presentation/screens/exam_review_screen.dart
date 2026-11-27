@@ -1,6 +1,6 @@
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
@@ -79,6 +79,7 @@ class _OriginalDocumentScreenState extends State<OriginalDocumentScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF1F2937),
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         title: Text(l10n.careExamOriginalTitle),
