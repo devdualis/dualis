@@ -214,6 +214,7 @@ None yet.
 | 73 | Seed the flaky phrase variety test (commit 1f4513b) | 2026-11-26 | 1f4513b | — |
 | fast | Check-in: less helper text, bigger buttons | 2026-11-27 | 1ca11a3 | — |
 | fast | Check-in: lead sentences removed, bigger side and duration buttons | 2026-11-27 | df8f4c5 | — |
+| fast | Check-in: greeting and transition phrases restored | 2026-11-27 | b6dc802 | — |
 
 ## Deferred Items
 
