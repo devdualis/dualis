@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/dualis_primary_button.dart';
 import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../journal/presentation/journal_marks.dart';
 import '../../../journal_insights/presentation/widgets/chart_tokens.dart';
 import '../controllers/hydration_controller.dart';
 
@@ -82,8 +83,20 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              AppLocalizations.of(context).waterLoggedSuccess(amountToSave),
+            content: Row(
+              children: [
+                DuotoneIconTile(
+                  size: 28,
+                  radius: 8,
+                  child: JournalMarks.box('beber_agua', size: 20)!,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    AppLocalizations.of(context).waterLoggedSuccess(amountToSave),
+                  ),
+                ),
+              ],
             ),
             backgroundColor: AppColors.softIndigoDark,
             duration: const Duration(seconds: 3),
@@ -116,14 +129,10 @@ class _WaterIntakeModalState extends ConsumerState<WaterIntakeModal> {
           // Header
           Row(
             children: [
-              const DuotoneIconTile(
+              DuotoneIconTile(
                 size: 44,
                 radius: 14,
-                child: Icon(
-                  Icons.water_drop_rounded,
-                  color: AppColors.dualisNavy,
-                  size: 26,
-                ),
+                child: JournalMarks.box('beber_agua', size: 30)!,
               ),
               const SizedBox(width: 14),
               Expanded(

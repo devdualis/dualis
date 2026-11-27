@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/duotone_icon_tile.dart';
 import '../../../../shared/widgets/load_error_view.dart';
+import '../../../journal/presentation/journal_marks.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../hydration/presentation/widgets/water_intake_modal.dart';
@@ -159,7 +161,19 @@ class HomeHydrationCard extends ConsumerWidget {
                       }
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(AppLocalizations.of(context).waterCardLogged(250)),
+                          content: Row(
+                            children: [
+                              DuotoneIconTile(
+                                size: 28,
+                                radius: 8,
+                                child: JournalMarks.box('beber_agua', size: 20)!,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(AppLocalizations.of(context).waterCardLogged(250)),
+                              ),
+                            ],
+                          ),
                           duration: const Duration(seconds: 2),
                           backgroundColor: AppColors.clinicalTealDark,
                         ),

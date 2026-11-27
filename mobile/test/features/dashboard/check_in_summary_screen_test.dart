@@ -101,7 +101,7 @@ void main() {
     expect(find.text('Fico antecipando problemas'), findsOneWidget);
     expect(find.text('Intensidade que você informou: 5/5'), findsOneWidget);
     expect(
-      find.textContaining('Obrigado por registrar seu dia! 🌿'),
+      find.textContaining('Obrigado por registrar seu dia! Na Biblioteca'),
       findsOneWidget,
     );
   });

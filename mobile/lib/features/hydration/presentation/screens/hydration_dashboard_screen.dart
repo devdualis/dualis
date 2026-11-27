@@ -12,6 +12,7 @@ import '../../../../shared/widgets/duotone_icon_tile.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../shared/widgets/load_error_view.dart';
 import '../../../home/domain/home_greeting.dart';
+import '../../../journal/presentation/journal_marks.dart';
 import '../../../house_ads/data/house_ads_repository.dart';
 import '../../../house_ads/presentation/house_ad_card.dart';
 import '../../../journal_insights/domain/chart_data.dart';
@@ -147,13 +148,20 @@ class _HydrationDashboardScreenState
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: Text(
-          l10n.xv2WaterTitle,
-          style: GoogleFonts.inter(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimaryLight,
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            JournalMarks.box('beber_agua', size: 24)!,
+            const SizedBox(width: 8),
+            Text(
+              l10n.xv2WaterTitle,
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimaryLight,
+              ),
+            ),
+          ],
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,

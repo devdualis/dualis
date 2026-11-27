@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/duotone_icon_tile.dart';
-import '../../../../shared/widgets/fluent_emoji.dart';
+import '../../../journal/presentation/journal_marks.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../../shared/widgets/load_error_view.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
@@ -775,13 +775,8 @@ class _EmojiOptionButton extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          FluentEmoji.forSleep(
-            sleepKey,
-            size: 42,
-            fallback: ExcludeSemantics(
-              child: Text(emoji, style: const TextStyle(fontSize: 28)),
-            ),
-          ),
+          JournalMarks.box(sleepKey, size: 44, sleep: true) ??
+              const SizedBox.square(dimension: 44),
           const SizedBox(height: 8),
           Text(
             label,

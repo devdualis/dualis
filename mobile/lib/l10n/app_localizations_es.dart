@@ -2508,7 +2508,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get xv2SummaryThanks =>
-      '¡Gracias por registrar tu día! 🌿 En la Biblioteca encontrarás textos de fuentes públicas, como el Ministerio de Salud de Brasil, sobre hábitos saludables.';
+      '¡Gracias por registrar tu día! En la Biblioteca encontrarás textos de fuentes públicas, como el Ministerio de Salud de Brasil, sobre hábitos saludables.';
 
   @override
   String get xv2SummaryOpenLibrary => 'Abrir la Biblioteca';
@@ -2520,8 +2520,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get xv2AdLearnMore => 'Más información';
 
   @override
-  String get xv2AdPremiumTags =>
-      '😴 Hábitos|💉 Vacunas|💊 Recordatorios|📅 Citas';
+  String get xv2AdPremiumTags => 'Hábitos|Vacunas|Recordatorios|Citas';
 
   @override
   String get xv2AdPremiumCta => 'Conocer Premium';
@@ -2531,7 +2530,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get xv2AdZocTags =>
-      '⏱ Registro de horas|📊 Panel financiero|🖥 Windows y macOS';
+      'Registro de horas|Panel financiero|Windows y macOS';
 
   @override
   String get xv2AdZocCta => 'Conocer ZOC';
@@ -2730,7 +2729,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get xv2DashDeleteConfirm => 'Eliminar';
 
   @override
-  String get xv2WaterTitle => 'Hidratación 💧';
+  String get xv2WaterTitle => 'Hidratación';
 
   @override
   String get xv2WaterTodayLogs => 'Registros de hoy';
@@ -5153,7 +5152,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get commonSaveFailed => 'No se pudo guardar. Inténtalo de nuevo.';
 
   @override
-  String get waterTimeTitle => 'Hora de hidratarte 💧';
+  String get waterTimeTitle => 'Hora de hidratarte';
 
   @override
   String get waterHowMuchNow => '¿Cuánta agua tomaste ahora?';
@@ -5190,7 +5189,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String waterLoggedSuccess(int ml) {
-    return '💧 ¡+$ml ml registrados!';
+    return '¡+$ml ml registrados!';
   }
 
   @override
@@ -5209,7 +5208,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String waterCardLogged(int ml) {
-    return '💧 ¡+$ml ml registrados!';
+    return '¡+$ml ml registrados!';
   }
 
   @override

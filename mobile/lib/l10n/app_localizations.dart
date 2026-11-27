@@ -4483,7 +4483,7 @@ abstract class AppLocalizations {
   /// No description provided for @xv2SummaryThanks.
   ///
   /// In pt, this message translates to:
-  /// **'Obrigado por registrar seu dia! 🌿 Na Biblioteca você encontra textos de fontes públicas, como o Ministério da Saúde, sobre hábitos saudáveis.'**
+  /// **'Obrigado por registrar seu dia! Na Biblioteca você encontra textos de fontes públicas, como o Ministério da Saúde, sobre hábitos saudáveis.'**
   String get xv2SummaryThanks;
 
   /// No description provided for @xv2SummaryOpenLibrary.
@@ -4507,7 +4507,7 @@ abstract class AppLocalizations {
   /// No description provided for @xv2AdPremiumTags.
   ///
   /// In pt, this message translates to:
-  /// **'😴 Hábitos|💉 Vacinas|💊 Lembretes|📅 Consultas'**
+  /// **'Hábitos|Vacinas|Lembretes|Consultas'**
   String get xv2AdPremiumTags;
 
   /// No description provided for @xv2AdPremiumCta.
@@ -4525,7 +4525,7 @@ abstract class AppLocalizations {
   /// No description provided for @xv2AdZocTags.
   ///
   /// In pt, this message translates to:
-  /// **'⏱ Apontamento|📊 Painel financeiro|🖥 Windows e macOS'**
+  /// **'Apontamento|Painel financeiro|Windows e macOS'**
   String get xv2AdZocTags;
 
   /// No description provided for @xv2AdZocCta.
@@ -4855,7 +4855,7 @@ abstract class AppLocalizations {
   /// No description provided for @xv2WaterTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Hidratação 💧'**
+  /// **'Hidratação'**
   String get xv2WaterTitle;
 
   /// No description provided for @xv2WaterTodayLogs.
@@ -8725,7 +8725,7 @@ abstract class AppLocalizations {
   /// No description provided for @waterTimeTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Hora de se hidratar 💧'**
+  /// **'Hora de se hidratar'**
   String get waterTimeTitle;
 
   /// No description provided for @waterHowMuchNow.
@@ -8791,7 +8791,7 @@ abstract class AppLocalizations {
   /// No description provided for @waterLoggedSuccess.
   ///
   /// In pt, this message translates to:
-  /// **'💧 +{ml} ml registrados com sucesso!'**
+  /// **'+{ml} ml registrados com sucesso!'**
   String waterLoggedSuccess(int ml);
 
   /// No description provided for @waterCardTitle.
@@ -8821,7 +8821,7 @@ abstract class AppLocalizations {
   /// No description provided for @waterCardLogged.
   ///
   /// In pt, this message translates to:
-  /// **'💧 +{ml} ml registrados!'**
+  /// **'+{ml} ml registrados!'**
   String waterCardLogged(int ml);
 
   /// No description provided for @waterCardOtherAmount.

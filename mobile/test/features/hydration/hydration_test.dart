@@ -240,7 +240,7 @@ void main() {
       await tester.tap(find.text('Open Modal'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Hora de se hidratar 💧'), findsOneWidget);
+      expect(find.text('Hora de se hidratar'), findsOneWidget);
       expect(find.text('Meta do dia: 2000 ml'), findsOneWidget);
       expect(find.text('500 ml (25%)'), findsOneWidget);
       expect(find.text('150 ml'), findsOneWidget);
@@ -294,7 +294,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Success SnackBar is shown
-      expect(find.text('💧 +500 ml registrados com sucesso!'), findsOneWidget);
+      expect(find.text('+500 ml registrados com sucesso!'), findsOneWidget);
     });
 
     testWidgets('displays loading state when state.isLoading is true', (tester) async {
@@ -560,7 +560,7 @@ void main() {
 
       expect(find.byKey(const Key('water_intake_save_failed')), findsOneWidget);
       expect(find.byKey(const Key('confirm_water_intake_button')), findsOneWidget);
-      expect(find.text('💧 +500 ml registrados com sucesso!'), findsNothing);
+      expect(find.text('+500 ml registrados com sucesso!'), findsNothing);
     });
 
     testWidgets('dashboard links to Lembretes and has no reminder switch', (tester) async {

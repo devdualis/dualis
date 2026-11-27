@@ -11,7 +11,7 @@ import '../../../hydration/presentation/controllers/hydration_controller.dart';
 import '../../../hydration/presentation/screens/hydration_dashboard_screen.dart';
 import '../../../profile/presentation/widgets/active_profile_banner.dart';
 import '../../../../shared/widgets/duotone_icon_tile.dart';
-import '../../../../shared/widgets/fluent_emoji.dart';
+import '../../../journal/presentation/journal_marks.dart';
 import '../../../../shared/widgets/premium_gradient_icon.dart';
 import '../controllers/habits_controller.dart';
 import '../../domain/models/habit_day.dart';
@@ -139,11 +139,7 @@ class _SleepTile extends ConsumerWidget {
     final done = today.sleepQuality != null;
     final hours = today.sleepHours;
     final sleepEmoji = done
-        ? FluentEmoji.forSleep(
-            today.sleepQuality!,
-            size: 22,
-            fallback: const SizedBox.shrink(),
-          )
+        ? JournalMarks.box(today.sleepQuality!, size: 22, sleep: true)
         : null;
 
     return _HabitTile(

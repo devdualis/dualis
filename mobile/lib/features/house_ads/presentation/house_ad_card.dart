@@ -8,6 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/glass_card.dart';
 import '../../home/domain/home_greeting.dart';
+import '../../journal/presentation/journal_marks.dart';
 import '../data/house_ads_repository.dart';
 import '../domain/house_ad.dart';
 
@@ -203,6 +204,10 @@ class _BrandStyle {
   final Color footnoteColor;
   final Widget logo;
   final String tags;
+
+  /// Mark file names (under [JournalMarks.dir]) shown before each tag, in the
+  /// same order as [tags]. Empty for brands that are not wellness products.
+  final List<String> tagMarks;
   final String cta;
   final String footnote;
   final String? screenshot;
@@ -221,6 +226,7 @@ class _BrandStyle {
     required this.footnoteColor,
     required this.logo,
     required this.tags,
+    this.tagMarks = const [],
     required this.cta,
     required this.footnote,
     this.screenshot,
@@ -257,6 +263,7 @@ class _BrandStyle {
             height: 24,
           ),
           tags: l10n.xv2AdPremiumTags,
+          tagMarks: const ['cama', 'vacina', 'medicamento', 'consulta'],
           cta: l10n.xv2AdPremiumCta,
           footnote: l10n.xv2AdPremiumPrice,
           screenshot: 'lib/assets/brand/premium_screen_habits.png',
@@ -424,11 +431,13 @@ class _BrandAdCard extends StatelessWidget {
                                   spacing: 6,
                                   runSpacing: 6,
                                   children: [
-                                    for (final tag in style.tags.split('|'))
+                                    for (final (i, tag) in style.tags.split('|').indexed)
                                       Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 9,
-                                          vertical: 5,
+                                        padding: EdgeInsets.fromLTRB(
+                                          i < style.tagMarks.length ? 4 : 9,
+                                          i < style.tagMarks.length ? 3 : 5,
+                                          9,
+                                          i < style.tagMarks.length ? 3 : 5,
                                         ),
                                         decoration: BoxDecoration(
                                           color: style.chipBg,
@@ -436,13 +445,34 @@ class _BrandAdCard extends StatelessWidget {
                                             999,
                                           ),
                                         ),
-                                        child: Text(
-                                          tag,
-                                          style: GoogleFonts.inter(
-                                            fontSize: 11.5,
-                                            fontWeight: FontWeight.w700,
-                                            color: style.chipText,
-                                          ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            if (i < style.tagMarks.length) ...[
+                                              Container(
+                                                width: 20,
+                                                height: 20,
+                                                alignment: Alignment.center,
+                                                decoration: const BoxDecoration(
+                                                  color: Colors.white,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: JournalMarks.image(
+                                                  '${JournalMarks.dir}/${style.tagMarks[i]}.png',
+                                                  size: 15,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 5),
+                                            ],
+                                            Text(
+                                              tag,
+                                              style: GoogleFonts.inter(
+                                                fontSize: 11.5,
+                                                fontWeight: FontWeight.w700,
+                                                color: style.chipText,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                   ],

@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/duotone_icon_tile.dart';
 import '../../../../shared/widgets/motion.dart';
-import '../../../../shared/widgets/fluent_emoji.dart';
+import '../../../journal/presentation/journal_marks.dart';
 
 /// Modal header for habit sheets (sleep, movement).
 class HabitModalHeader extends StatelessWidget {
@@ -187,13 +187,8 @@ class EmojiOptionButton extends StatelessWidget {
         children: [
           SelectPop(
             selected: selected,
-            child: FluentEmoji.forSleep(
-              sleepKey,
-              size: 42,
-              fallback: ExcludeSemantics(
-                child: Text(emoji, style: const TextStyle(fontSize: 28)),
-              ),
-            ),
+            child: JournalMarks.box(sleepKey, size: 44, sleep: true) ??
+                const SizedBox.square(dimension: 44),
           ),
           const SizedBox(height: 8),
           Text(
