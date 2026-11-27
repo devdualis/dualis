@@ -1,0 +1,7 @@
+/* Permission prompts. */
+"NSFaceIDUsageDescription" = "Dualis usa Face ID para proteger el acceso a tus registros de bienestar.";
+"NSMicrophoneUsageDescription" = "Dualis usa el micrófono solo cuando tocas el botón de voz, para entender tus comandos y dictados.";
+"NSSpeechRecognitionUsageDescription" = "Dualis convierte tu voz en texto para que navegues y registres tu día por voz. Cuando el dispositivo lo permite, esto ocurre en el propio dispositivo.";
+"NSCameraUsageDescription" = "Dualis necesita acceso a la cámara para que tomes tu foto de perfil y adjuntes exámenes.";
+"NSPhotoLibraryUsageDescription" = "Dualis necesita acceso a tu galería para que elijas tu foto de perfil y adjuntes exámenes.";
+"NSLocationWhenInUseUsageDescription" = "Dualis usa tu ubicación para encontrar servicios y profesionales de salud cerca de ti.";

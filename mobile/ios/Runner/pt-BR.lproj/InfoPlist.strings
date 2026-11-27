@@ -1,0 +1,7 @@
+/* Permission prompts. Portuguese values match the Info.plist fallback. */
+"NSFaceIDUsageDescription" = "O Dualis usa Face ID para proteger o acesso aos seus registros de bem-estar.";
+"NSMicrophoneUsageDescription" = "O Dualis usa o microfone só quando você toca no botão de voz, para entender seus comandos e ditados.";
+"NSSpeechRecognitionUsageDescription" = "O Dualis transforma sua fala em texto para você navegar e registrar seu dia por voz. Quando o aparelho permite, isso acontece no próprio aparelho.";
+"NSCameraUsageDescription" = "O Dualis precisa de acesso à câmera para você capturar sua foto de perfil e anexar exames.";
+"NSPhotoLibraryUsageDescription" = "O Dualis precisa de acesso à sua galeria para você escolher sua foto de perfil e anexar exames.";
+"NSLocationWhenInUseUsageDescription" = "O Dualis usa sua localização para encontrar serviços e profissionais de saúde próximos a você.";
