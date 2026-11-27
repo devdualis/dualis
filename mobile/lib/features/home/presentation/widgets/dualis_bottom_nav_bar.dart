@@ -387,9 +387,14 @@ class _TabButton extends StatelessWidget {
         key: const Key('nav_care_pro_badge'),
         offset: const Offset(14, -6),
         backgroundColor: AppColors.dualisSymbolBlue,
-        label: const Text(
+        // Badge height is fixed: cap text growth so "PRO" stays whole with
+        // large system text.
+        largeSize: 16,
+        label: Text(
           'PRO',
-          style: TextStyle(
+          textScaler: MediaQuery.textScalerOf(context)
+              .clamp(maxScaleFactor: 1.3),
+          style: const TextStyle(
             fontSize: 8,
             fontWeight: FontWeight.w800,
             color: Colors.white,
