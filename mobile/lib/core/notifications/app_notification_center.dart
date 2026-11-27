@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui' show Color, Locale, PlatformDispatcher;
+import 'dart:ui' show Color, Locale;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -467,19 +467,14 @@ class _PayloadSubscriber {
 }
 
 /// Notification texts in the app language, falling back to the device
-/// language and finally English when [locale] is unsupported or absent.
+/// language (see [resolveSystemLocale]) when [locale] is unsupported or absent.
 AppLocalizations resolveNotificationLocalizations(Locale? locale) {
-  final candidates = <Locale>[
-    if (locale != null) locale,
-    PlatformDispatcher.instance.locale,
-    const Locale('en'),
-  ];
-  for (final candidate in candidates) {
+  if (locale != null) {
     try {
-      return lookupAppLocalizations(candidate);
+      return lookupAppLocalizations(locale);
     } catch (_) {}
   }
-  return lookupAppLocalizations(const Locale('en'));
+  return lookupAppLocalizations(resolveSystemLocale());
 }
 
 /// `HH:00`, used in log messages (titles no longer carry the time).

@@ -27,6 +27,10 @@ class SecureStorageService {
   /// not personal data: kept on logout.
   static const String keyVoiceReadAloud = 'dualis_voice_read_aloud';
 
+  /// Language chosen in the app ('pt', 'es' or 'en'); absent while following
+  /// the system. A device preference: kept on logout and account deletion.
+  static const String keyAppLanguage = 'dualis_app_language';
+
   /// Set while a settings change has not reached the server yet.
   static const String keyHydrationSettingsPending =
       'dualis_hydration_settings_pending';
@@ -203,13 +207,15 @@ class SecureStorageService {
 
   /// Ends the session: wipes tokens and session data but keeps the local
   /// data owner, the hydration settings and the daily habits, which belong to
-  /// the device's last account and are checked again on the next login.
+  /// the device's last account and are checked again on the next login. Device
+  /// preferences (app language, read aloud) are kept too.
   Future<void> clearSession() async {
     const kept = [
       _keyLocalDataOwner,
       keyHydrationSettings,
       keyHydrationSettingsPending,
       keyVoiceReadAloud,
+      keyAppLanguage,
     ];
     final saved = <String, String>{};
     for (final key in kept) {

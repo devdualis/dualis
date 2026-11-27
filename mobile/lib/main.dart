@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/app_config/app_version_gate.dart';
 import 'core/notifications/app_notification_center.dart';
 import 'core/router/app_router.dart';
+import 'core/security/secure_storage_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/controllers/auth_controller.dart';
 import 'l10n/app_localizations.dart';
@@ -14,11 +15,14 @@ import 'shared/widgets/privacy_veil_overlay.dart';
 import 'shared/widgets/urgent_help_button.dart';
 import 'features/sync/presentation/widgets/offline_indicator_banner.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Read before the first frame so a saved language never flashes another one.
+  final savedLocale = await loadSavedLocale(SecureStorageService());
   runApp(
-    const ProviderScope(
-      child: DualisApp(),
+    ProviderScope(
+      overrides: [savedLocaleProvider.overrideWithValue(savedLocale)],
+      child: const DualisApp(),
     ),
   );
 }

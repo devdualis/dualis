@@ -392,7 +392,7 @@ Future<void> notificationActionBackgroundHandler(
       l10n: () async {
         final code = await queue.readLanguageCode();
         return resolveNotificationLocalizations(
-          code == null ? const Locale('pt', 'BR') : Locale(code),
+          code == null ? null : Locale(code),
         );
       },
     );
