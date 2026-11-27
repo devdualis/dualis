@@ -228,18 +228,7 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
           selected: _days,
           onChanged: (days) => setState(() => _days = days),
         ),
-        Padding(
-          padding: const EdgeInsets.only(top: 6, bottom: 10),
-          child: Text(
-            l10n.xv2DashWindow(_days),
-            key: const Key('dashboard_window_label'),
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSecondaryLight,
-            ),
-          ),
-        ),
+        const SizedBox(height: 12),
         ...switch (_tab) {
           _ when !_tabReadable(_tab) => [
               NotSharedPlaceholder(
@@ -357,19 +346,16 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
           icon: Icons.mood_rounded,
           key: const Key('feelings_card'),
           title: l10n.histFeelingsTitle,
-          subtitle: l10n.histFeelingsSubtitle,
           child: EverydayFeelingsSummary(counts: feelings),
         ),
       InsightsCard(
         icon: Icons.pie_chart_outline_rounded,
         title: l10n.gxPieTitle,
-        subtitle: l10n.gxPieSubtitle,
         child: TemporalPieChart(pie: TemporalPie.compute(points, entries)),
       ),
       InsightsCard(
         icon: Icons.show_chart_rounded,
         title: l10n.gxLinesTitleEmotional,
-        subtitle: l10n.gxLinesSubtitle,
         child: hasIntensity
             ? SeriesLinesCard(
                 key: ValueKey('emotional_$_days'),
@@ -384,7 +370,6 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
         InsightsCard(
           icon: Icons.chat_bubble_outline_rounded,
           title: l10n.gxAnswersTitleEmotional,
-          subtitle: l10n.gxAnswersSubtitle,
           child: SeriesAnswersCard(
             key: ValueKey('emotional_answers_$_days'),
             keyPrefix: 'emotional',
@@ -399,7 +384,6 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
           icon: Icons.wb_sunny_outlined,
           key: const Key('good_moments_card'),
           title: l10n.jv22GoodMomentsTitle,
-          subtitle: l10n.jv22GoodMomentsSubtitle,
           child: GoodMomentsSummary(summary: summary),
         ),
       if (summary.byHelper.isNotEmpty || summary.byCoping.isNotEmpty)
@@ -442,7 +426,6 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
       InsightsCard(
         icon: Icons.show_chart_rounded,
         title: l10n.gxLinesTitlePhysical,
-        subtitle: l10n.gxLinesSubtitle,
         child: hasIntensity
             ? SeriesLinesCard(
                 key: ValueKey('physical_$_days'),
@@ -458,7 +441,6 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
           icon: Icons.chat_bubble_outline_rounded,
           key: _bodyAnswersKey,
           title: l10n.gxAnswersTitlePhysical,
-          subtitle: l10n.gxAnswersSubtitle,
           child: SeriesAnswersCard(
             key: ValueKey('physical_answers_$_days'),
             keyPrefix: 'physical',
@@ -543,7 +525,6 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
       InsightsCard(
         icon: Icons.calendar_month_rounded,
         title: l10n.gxWaterCalendarTitle,
-        subtitle: l10n.gxWaterCalendarHint,
         child: WaterCalendar(
           totals: totals,
           start: start,
@@ -603,7 +584,6 @@ class _DashboardBodyState extends ConsumerState<_DashboardBody> {
       InsightsCard(
         icon: Icons.calendar_month_rounded,
         title: l10n.gxCalendarTitle,
-        subtitle: l10n.gxCalendarSubtitle,
         child: CombinedCalendar(
           days: calendarDays(
             emotional: emotionalPoints(l10n, entries),

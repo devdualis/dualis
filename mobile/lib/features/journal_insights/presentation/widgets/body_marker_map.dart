@@ -102,14 +102,6 @@ class BodyMarkerMap extends StatelessWidget {
               _RegionRow(summary: r, onTap: () => open(r)),
           ],
         ],
-        const SizedBox(height: 8),
-        Center(
-          child: Text(
-            l10n.gxBodyMapCaption,
-            textAlign: TextAlign.center,
-            style: chartCaptionStyle,
-          ),
-        ),
       ],
     );
   }

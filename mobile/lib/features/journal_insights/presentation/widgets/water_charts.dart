@@ -429,16 +429,6 @@ class WaterPeriodBars extends StatelessWidget {
             ),
           ),
         ),
-        if (inPeriod(today, start, days)) ...[
-          const SizedBox(height: 6),
-          Center(
-            child: Text(
-              l10n.gxTodayInProgress,
-              textAlign: TextAlign.center,
-              style: chartCaptionStyle,
-            ),
-          ),
-        ],
       ],
     );
   }

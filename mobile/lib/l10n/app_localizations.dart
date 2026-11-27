@@ -4696,12 +4696,6 @@ abstract class AppLocalizations {
   /// **'Histórico'**
   String get xv2DashTitle;
 
-  /// No description provided for @xv2DashWindow.
-  ///
-  /// In pt, this message translates to:
-  /// **'Seus registros dos últimos {days} dias'**
-  String xv2DashWindow(int days);
-
   /// No description provided for @xv2DashRetry.
   ///
   /// In pt, this message translates to:
@@ -6946,12 +6940,6 @@ abstract class AppLocalizations {
   /// **'Passado, presente e futuro'**
   String get gxPieTitle;
 
-  /// No description provided for @gxPieSubtitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Parte dos registros emocionais em cada tempo. A intensidade não muda o tamanho da fatia.'**
-  String get gxPieSubtitle;
-
   /// No description provided for @gxRecords.
   ///
   /// In pt, this message translates to:
@@ -6970,35 +6958,17 @@ abstract class AppLocalizations {
   /// **'Escolhas empatadas, {count} de {total} cada:'**
   String gxPieTied(int count, int total);
 
-  /// No description provided for @gxPieWithoutAxis.
-  ///
-  /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 registro sem escolha temporal (fora da pizza)} other{{count} registros sem escolha temporal (fora da pizza)}}'**
-  String gxPieWithoutAxis(int count);
-
   /// No description provided for @gxLinesTitleEmotional.
   ///
   /// In pt, this message translates to:
-  /// **'Intensidade informada por tempo'**
+  /// **'Intensidade'**
   String get gxLinesTitleEmotional;
 
   /// No description provided for @gxLinesTitlePhysical.
   ///
   /// In pt, this message translates to:
-  /// **'Intensidade informada por região'**
+  /// **'Intensidade'**
   String get gxLinesTitlePhysical;
-
-  /// No description provided for @gxLinesSubtitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cada ponto é um registro (1 a 5). O traço para nos dias sem registro.'**
-  String get gxLinesSubtitle;
-
-  /// No description provided for @gxLegendHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Toque na legenda para mostrar ou esconder uma linha. Toque num ponto para ver o registro.'**
-  String get gxLegendHint;
 
   /// No description provided for @gxIntensityValue.
   ///
@@ -7009,20 +6979,14 @@ abstract class AppLocalizations {
   /// No description provided for @gxAnswersTitleEmotional.
   ///
   /// In pt, this message translates to:
-  /// **'Respostas por tempo'**
+  /// **'Respostas'**
   String get gxAnswersTitleEmotional;
 
   /// No description provided for @gxAnswersTitlePhysical.
   ///
   /// In pt, this message translates to:
-  /// **'Respostas por região'**
+  /// **'Respostas'**
   String get gxAnswersTitlePhysical;
-
-  /// No description provided for @gxAnswersSubtitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'O símbolo mostra o caminho escolhido. A altura é a intensidade informada.'**
-  String get gxAnswersSubtitle;
 
   /// No description provided for @gxWrittenByYou.
   ///
@@ -7039,7 +7003,7 @@ abstract class AppLocalizations {
   /// No description provided for @gxBodyMapTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Marcações no corpo'**
+  /// **'Mapa do corpo'**
   String get gxBodyMapTitle;
 
   /// No description provided for @gxRegionDays.
@@ -7053,12 +7017,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{count, plural, =1{1 marcação} other{{count} marcações}}'**
   String gxMarks(int count);
-
-  /// No description provided for @gxBodyMapCaption.
-  ///
-  /// In pt, this message translates to:
-  /// **'Número = dias com ao menos uma marcação na região. A cor só identifica a região.'**
-  String get gxBodyMapCaption;
 
   /// No description provided for @gxWholeBody.
   ///
@@ -7081,20 +7039,8 @@ abstract class AppLocalizations {
   /// No description provided for @gxCalendarTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Calendário combinado'**
+  /// **'Calendário'**
   String get gxCalendarTitle;
-
-  /// No description provided for @gxCalendarSubtitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cabeça: emoções · Silhueta: corpo · Gota: água registrada'**
-  String get gxCalendarSubtitle;
-
-  /// No description provided for @gxCalendarCaption.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cabeça e silhueta: tamanho pela intensidade informada. Gota: tamanho fixo, litros do dia. Dia sem registro não é zero. Toque no dia para ver tudo.'**
-  String get gxCalendarCaption;
 
   /// No description provided for @gxOutOfPeriod.
   ///
@@ -7129,7 +7075,7 @@ abstract class AppLocalizations {
   /// No description provided for @histPeriodSummaryTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Resumo do período'**
+  /// **'Resumo'**
   String get histPeriodSummaryTitle;
 
   /// No description provided for @histNotWellTimeSummary.
@@ -7167,12 +7113,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Como você se sentiu'**
   String get histFeelingsTitle;
-
-  /// No description provided for @histFeelingsSubtitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Registros com alguma escolha em cada linha. Um registro pode aparecer em mais de uma linha.'**
-  String get histFeelingsSubtitle;
 
   /// No description provided for @histFeelingPesado.
   ///
@@ -7243,13 +7183,13 @@ abstract class AppLocalizations {
   /// No description provided for @gxWaterDayTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Água registrada em {date}'**
+  /// **'Água · {date}'**
   String gxWaterDayTitle(String date);
 
   /// No description provided for @gxWaterStepTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Volume registrado ao longo do dia'**
+  /// **'Ao longo do dia'**
   String get gxWaterStepTitle;
 
   /// No description provided for @gxWaterGoalLine.
@@ -7267,7 +7207,7 @@ abstract class AppLocalizations {
   /// No description provided for @gxWaterBarsTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Água registrada no período'**
+  /// **'Água por dia'**
   String get gxWaterBarsTitle;
 
   /// No description provided for @gxWaterCardTotal.
@@ -7306,23 +7246,11 @@ abstract class AppLocalizations {
   /// **'Sem registro'**
   String get gxNoRecord;
 
-  /// No description provided for @gxTodayInProgress.
-  ///
-  /// In pt, this message translates to:
-  /// **'Hoje ainda está em andamento.'**
-  String get gxTodayInProgress;
-
   /// No description provided for @gxWaterCalendarTitle.
   ///
   /// In pt, this message translates to:
-  /// **'Calendário de água'**
+  /// **'Calendário'**
   String get gxWaterCalendarTitle;
-
-  /// No description provided for @gxWaterCalendarHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Toque num dia para ver o volume ao longo do dia.'**
-  String get gxWaterCalendarHint;
 
   /// No description provided for @gxWaterLoggedSnack.
   ///
@@ -7345,7 +7273,7 @@ abstract class AppLocalizations {
   /// No description provided for @gxIntensityAxis.
   ///
   /// In pt, this message translates to:
-  /// **'Intensidade informada'**
+  /// **'Intensidade'**
   String get gxIntensityAxis;
 
   /// No description provided for @jv22PositiveQuestion.
@@ -7755,12 +7683,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Momentos bons'**
   String get jv22GoodMomentsTitle;
-
-  /// No description provided for @jv22GoodMomentsSubtitle.
-  ///
-  /// In pt, this message translates to:
-  /// **'Dias em que você anotou algo bom.'**
-  String get jv22GoodMomentsSubtitle;
 
   /// No description provided for @jv22GoodMomentsMost.
   ///

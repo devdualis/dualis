@@ -1588,14 +1588,6 @@
   "xv2AdZocTitle": "Cada hora da equipe, no projeto certo",
   "xv2AdZocBody": "Apontamento de horas por cliente, projeto e tarefa, com painel de orçamento e produtividade para gestores.",
   "xv2DashTitle": "Histórico",
-  "xv2DashWindow": "Seus registros dos últimos {days} dias",
-  "@xv2DashWindow": {
-    "placeholders": {
-      "days": {
-        "type": "int"
-      }
-    }
-  },
   "xv2DashRetry": "Tentar novamente",
   "xv2DashTimeTitle": "Passado, presente e futuro",
   "xv2DashTimeCount": "{time}: {count}",
@@ -2477,7 +2469,6 @@
   "gxTabWater": "Água",
   "gxTabTogether": "Juntos",
   "gxPieTitle": "Passado, presente e futuro",
-  "gxPieSubtitle": "Parte dos registros emocionais em cada tempo. A intensidade não muda o tamanho da fatia.",
   "gxRecords": "{count, plural, =1{1 registro} other{{count} registros}}",
   "@gxRecords": {
     "placeholders": {
@@ -2511,18 +2502,8 @@
       }
     }
   },
-  "gxPieWithoutAxis": "{count, plural, =1{1 registro sem escolha temporal (fora da pizza)} other{{count} registros sem escolha temporal (fora da pizza)}}",
-  "@gxPieWithoutAxis": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "gxLinesTitleEmotional": "Intensidade informada por tempo",
-  "gxLinesTitlePhysical": "Intensidade informada por região",
-  "gxLinesSubtitle": "Cada ponto é um registro (1 a 5). O traço para nos dias sem registro.",
-  "gxLegendHint": "Toque na legenda para mostrar ou esconder uma linha. Toque num ponto para ver o registro.",
+  "gxLinesTitleEmotional": "Intensidade",
+  "gxLinesTitlePhysical": "Intensidade",
   "gxIntensityValue": "Intensidade {value}/5",
   "@gxIntensityValue": {
     "placeholders": {
@@ -2531,12 +2512,11 @@
       }
     }
   },
-  "gxAnswersTitleEmotional": "Respostas por tempo",
-  "gxAnswersTitlePhysical": "Respostas por região",
-  "gxAnswersSubtitle": "O símbolo mostra o caminho escolhido. A altura é a intensidade informada.",
+  "gxAnswersTitleEmotional": "Respostas",
+  "gxAnswersTitlePhysical": "Respostas",
   "gxWrittenByYou": "Escrito por você",
   "gxNoIntensityPoints": "Nenhum registro com intensidade neste filtro.",
-  "gxBodyMapTitle": "Marcações no corpo",
+  "gxBodyMapTitle": "Mapa do corpo",
   "gxRegionDays": "{days, plural, =1{1 dia com marcação} other{{days} dias com marcação}}",
   "@gxRegionDays": {
     "placeholders": {
@@ -2553,19 +2533,16 @@
       }
     }
   },
-  "gxBodyMapCaption": "Número = dias com ao menos uma marcação na região. A cor só identifica a região.",
   "gxWholeBody": "Corpo todo (sem posição no mapa)",
   "gxViewUnspecified": "vista não informada",
   "gxSeeEvolution": "Ver evolução",
-  "gxCalendarTitle": "Calendário combinado",
-  "gxCalendarSubtitle": "Cabeça: emoções · Silhueta: corpo · Gota: água registrada",
-  "gxCalendarCaption": "Cabeça e silhueta: tamanho pela intensidade informada. Gota: tamanho fixo, litros do dia. Dia sem registro não é zero. Toque no dia para ver tudo.",
+  "gxCalendarTitle": "Calendário",
   "gxOutOfPeriod": "Fora do período",
   "gxIntensityNotInformed": "intensidade não informada",
   "gxWaterLogged": "Água registrada",
   "gxDayNothing": "Nenhum registro neste dia.",
   "gxSameDayNote": "Estar no mesmo dia não indica relação entre os itens.",
-  "histPeriodSummaryTitle": "Resumo do período",
+  "histPeriodSummaryTitle": "Resumo",
   "histNotWellTimeSummary": "Nos últimos {days} dias, {count} de {total, plural, =1{1 registro} other{{total} registros}} de “não tão bem” {count, plural, =1{foi} other{foram}} sobre {time, select, passado{o passado} presente{o presente} futuro{o futuro} other{outro tempo}}.",
   "@histNotWellTimeSummary": {
     "placeholders": {
@@ -2622,7 +2599,6 @@
     }
   },
   "histFeelingsTitle": "Como você se sentiu",
-  "histFeelingsSubtitle": "Registros com alguma escolha em cada linha. Um registro pode aparecer em mais de uma linha.",
   "histFeelingPesado": "Pesado / desanimado",
   "histFeelingAgitado": "Agitado / preocupado",
   "histFeelingIrritado": "Irritado / sem paciência",
@@ -2687,7 +2663,7 @@
     }
   },
   "gxNoWaterRecord": "Nenhum registro de água",
-  "gxWaterDayTitle": "Água registrada em {date}",
+  "gxWaterDayTitle": "Água · {date}",
   "@gxWaterDayTitle": {
     "placeholders": {
       "date": {
@@ -2695,7 +2671,7 @@
       }
     }
   },
-  "gxWaterStepTitle": "Volume registrado ao longo do dia",
+  "gxWaterStepTitle": "Ao longo do dia",
   "gxWaterGoalLine": "Meta escolhida: {goal} ml",
   "@gxWaterGoalLine": {
     "placeholders": {
@@ -2718,7 +2694,7 @@
       }
     }
   },
-  "gxWaterBarsTitle": "Água registrada no período",
+  "gxWaterBarsTitle": "Água por dia",
   "gxWaterCardTotal": "Total",
   "gxWaterCardDays": "Dias com registro",
   "gxWaterCardAverage": "Média por dia com registro",
@@ -2735,9 +2711,7 @@
     }
   },
   "gxNoRecord": "Sem registro",
-  "gxTodayInProgress": "Hoje ainda está em andamento.",
-  "gxWaterCalendarTitle": "Calendário de água",
-  "gxWaterCalendarHint": "Toque num dia para ver o volume ao longo do dia.",
+  "gxWaterCalendarTitle": "Calendário",
   "gxWaterLoggedSnack": "{ml} ml registrados",
   "@gxWaterLoggedSnack": {
     "placeholders": {
@@ -2755,7 +2729,7 @@
       }
     }
   },
-  "gxIntensityAxis": "Intensidade informada",
+  "gxIntensityAxis": "Intensidade",
   "jv22PositiveQuestion": "Que bom! Quer anotar o que fez seu dia bom?",
   "jv22JustSave": "Só registrar",
   "jv22PositiveTimeHint": "Se quiser, conte com o que tem a ver:",
@@ -2824,7 +2798,6 @@
   "jv22PhraseClosing2": "Se quiser, marque o que te ajudou.",
   "jv22PhraseClosing3": "Obrigado por registrar. Você pode pular.",
   "jv22GoodMomentsTitle": "Momentos bons",
-  "jv22GoodMomentsSubtitle": "Dias em que você anotou algo bom.",
   "jv22GoodMomentsMost": "Mais marcados",
   "jv22GoodMoment": "Momento bom",
   "jv22HelpedTitle": "O que te ajudou",

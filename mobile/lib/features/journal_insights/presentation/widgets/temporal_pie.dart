@@ -80,17 +80,6 @@ class TemporalPieChart extends StatelessWidget {
           const SizedBox(height: 14),
           for (final t in times) _SliceRow(time: t, pie: pie),
         ],
-        if (pie.withoutAxis > 0) ...[
-          const SizedBox(height: 6),
-          Center(
-            child: Text(
-              l10n.gxPieWithoutAxis(pie.withoutAxis),
-              key: const Key('temporal_pie_without_axis'),
-              textAlign: TextAlign.center,
-              style: chartCaptionStyle,
-            ),
-          ),
-        ],
       ],
     );
   }

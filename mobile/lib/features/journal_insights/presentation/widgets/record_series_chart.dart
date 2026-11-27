@@ -252,7 +252,6 @@ class _SeriesLinesCardState extends State<SeriesLinesCard> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     return Column(
       key: Key('${widget.keyPrefix}_lines'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -281,14 +280,6 @@ class _SeriesLinesCardState extends State<SeriesLinesCard> {
                     : _hidden.add(s.key)),
               ),
           ],
-        ),
-        const SizedBox(height: 8),
-        Center(
-          child: Text(
-            l10n.gxLegendHint,
-            textAlign: TextAlign.center,
-            style: chartCaptionStyle,
-          ),
         ),
       ],
     );

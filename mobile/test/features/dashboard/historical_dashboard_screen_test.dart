@@ -206,7 +206,6 @@ void main() {
       final ds = await pumpDashboard(tester, [entry('e1', 0, [head])]);
       expect(ds.requestedEntryDays, 30);
       expect(ds.requestedSummaryDays, isNull);
-      expect(find.text('Seus registros dos últimos 14 dias'), findsOneWidget);
       for (final tab in ['Emoções', 'Corpo', 'Água', 'Juntos']) {
         expect(find.text(tab), findsWidgets);
       }
@@ -238,7 +237,6 @@ void main() {
       expect(find.byKey(const Key('temporal_pie_row_futuro')), findsOneWidget);
       expect(find.byKey(const Key('temporal_pie_row_presente')), findsNothing);
       expect(find.textContaining('2 registros · 67%'), findsOneWidget);
-      expect(find.byKey(const Key('temporal_pie_without_axis')), findsOneWidget);
 
       // E2: one series per time; hiding Futuro removes its line.
       expect(find.byKey(const Key('emotional_chip_futuro')), findsOneWidget);
@@ -266,7 +264,6 @@ void main() {
 
       await tester.tap(find.byKey(const Key('history_period_30')));
       await tester.pumpAndSettle();
-      expect(find.text('Seus registros dos últimos 30 dias'), findsOneWidget);
       expect(find.byKey(const Key('emotional_chip_passado')), findsOneWidget);
       expect(find.byKey(const Key('journal_entry_older')), findsOneWidget);
 

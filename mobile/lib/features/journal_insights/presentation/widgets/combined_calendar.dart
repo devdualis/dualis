@@ -35,7 +35,6 @@ class CombinedCalendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toLanguageTag();
     final hasPeriod = days.values.any((d) => d.period == true);
     return Column(
@@ -100,14 +99,6 @@ class CombinedCalendar extends StatelessWidget {
               ],
             );
           },
-        ),
-        const SizedBox(height: 8),
-        Center(
-          child: Text(
-            l10n.gxCalendarCaption,
-            textAlign: TextAlign.center,
-            style: chartCaptionStyle,
-          ),
         ),
       ],
     );

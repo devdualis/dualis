@@ -2617,11 +2617,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get xv2DashTitle => 'Histórico';
 
   @override
-  String xv2DashWindow(int days) {
-    return 'Seus registros dos últimos $days dias';
-  }
-
-  @override
   String get xv2DashRetry => 'Tentar novamente';
 
   @override
@@ -4050,10 +4045,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get gxPieTitle => 'Passado, presente e futuro';
 
   @override
-  String get gxPieSubtitle =>
-      'Parte dos registros emocionais em cada tempo. A intensidade não muda o tamanho da fatia.';
-
-  @override
   String gxRecords(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -4075,29 +4066,10 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String gxPieWithoutAxis(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count registros sem escolha temporal (fora da pizza)',
-      one: '1 registro sem escolha temporal (fora da pizza)',
-    );
-    return '$_temp0';
-  }
+  String get gxLinesTitleEmotional => 'Intensidade';
 
   @override
-  String get gxLinesTitleEmotional => 'Intensidade informada por tempo';
-
-  @override
-  String get gxLinesTitlePhysical => 'Intensidade informada por região';
-
-  @override
-  String get gxLinesSubtitle =>
-      'Cada ponto é um registro (1 a 5). O traço para nos dias sem registro.';
-
-  @override
-  String get gxLegendHint =>
-      'Toque na legenda para mostrar ou esconder uma linha. Toque num ponto para ver o registro.';
+  String get gxLinesTitlePhysical => 'Intensidade';
 
   @override
   String gxIntensityValue(int value) {
@@ -4105,14 +4077,10 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get gxAnswersTitleEmotional => 'Respostas por tempo';
+  String get gxAnswersTitleEmotional => 'Respostas';
 
   @override
-  String get gxAnswersTitlePhysical => 'Respostas por região';
-
-  @override
-  String get gxAnswersSubtitle =>
-      'O símbolo mostra o caminho escolhido. A altura é a intensidade informada.';
+  String get gxAnswersTitlePhysical => 'Respostas';
 
   @override
   String get gxWrittenByYou => 'Escrito por você';
@@ -4122,7 +4090,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Nenhum registro com intensidade neste filtro.';
 
   @override
-  String get gxBodyMapTitle => 'Marcações no corpo';
+  String get gxBodyMapTitle => 'Mapa do corpo';
 
   @override
   String gxRegionDays(int days) {
@@ -4147,10 +4115,6 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get gxBodyMapCaption =>
-      'Número = dias com ao menos uma marcação na região. A cor só identifica a região.';
-
-  @override
   String get gxWholeBody => 'Corpo todo (sem posição no mapa)';
 
   @override
@@ -4160,15 +4124,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get gxSeeEvolution => 'Ver evolução';
 
   @override
-  String get gxCalendarTitle => 'Calendário combinado';
-
-  @override
-  String get gxCalendarSubtitle =>
-      'Cabeça: emoções · Silhueta: corpo · Gota: água registrada';
-
-  @override
-  String get gxCalendarCaption =>
-      'Cabeça e silhueta: tamanho pela intensidade informada. Gota: tamanho fixo, litros do dia. Dia sem registro não é zero. Toque no dia para ver tudo.';
+  String get gxCalendarTitle => 'Calendário';
 
   @override
   String get gxOutOfPeriod => 'Fora do período';
@@ -4187,7 +4143,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'Estar no mesmo dia não indica relação entre os itens.';
 
   @override
-  String get histPeriodSummaryTitle => 'Resumo do período';
+  String get histPeriodSummaryTitle => 'Resumo';
 
   @override
   String histNotWellTimeSummary(int days, int count, int total, String time) {
@@ -4252,10 +4208,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get histFeelingsTitle => 'Como você se sentiu';
 
   @override
-  String get histFeelingsSubtitle =>
-      'Registros com alguma escolha em cada linha. Um registro pode aparecer em mais de uma linha.';
-
-  @override
   String get histFeelingPesado => 'Pesado / desanimado';
 
   @override
@@ -4312,11 +4264,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String gxWaterDayTitle(String date) {
-    return 'Água registrada em $date';
+    return 'Água · $date';
   }
 
   @override
-  String get gxWaterStepTitle => 'Volume registrado ao longo do dia';
+  String get gxWaterStepTitle => 'Ao longo do dia';
 
   @override
   String gxWaterGoalLine(int goal) {
@@ -4329,7 +4281,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get gxWaterBarsTitle => 'Água registrada no período';
+  String get gxWaterBarsTitle => 'Água por dia';
 
   @override
   String get gxWaterCardTotal => 'Total';
@@ -4352,14 +4304,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get gxNoRecord => 'Sem registro';
 
   @override
-  String get gxTodayInProgress => 'Hoje ainda está em andamento.';
-
-  @override
-  String get gxWaterCalendarTitle => 'Calendário de água';
-
-  @override
-  String get gxWaterCalendarHint =>
-      'Toque num dia para ver o volume ao longo do dia.';
+  String get gxWaterCalendarTitle => 'Calendário';
 
   @override
   String gxWaterLoggedSnack(int ml) {
@@ -4375,7 +4320,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get gxIntensityAxis => 'Intensidade informada';
+  String get gxIntensityAxis => 'Intensidade';
 
   @override
   String get jv22PositiveQuestion =>
@@ -4586,9 +4531,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get jv22GoodMomentsTitle => 'Momentos bons';
-
-  @override
-  String get jv22GoodMomentsSubtitle => 'Dias em que você anotou algo bom.';
 
   @override
   String get jv22GoodMomentsMost => 'Mais marcados';
