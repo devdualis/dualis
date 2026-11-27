@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class AnimatedPageIndicator extends StatelessWidget {
   final int count;
@@ -14,7 +15,8 @@ class AnimatedPageIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Página ${currentIndex + 1} de $count',
+      label: AppLocalizations.of(context)
+          .pageIndicatorLabel(currentIndex + 1, count),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(count, (index) {

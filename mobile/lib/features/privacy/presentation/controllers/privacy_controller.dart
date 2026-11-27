@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/security/secure_storage_service.dart';
@@ -9,16 +8,16 @@ import '../../../../core/notifications/app_notification_center.dart';
 class PrivacyState {
   final bool isExporting;
   final bool isDeleting;
-  final String? errorMessage;
-  final String? successMessage;
+  /// Raw failure; the screen turns it into localized text with
+  /// ErrorMessageResolver, so no fixed language lives here.
+  final Object? error;
   final Map<String, dynamic>? exportedData;
   final bool isAccountDeleted;
 
   const PrivacyState({
     this.isExporting = false,
     this.isDeleting = false,
-    this.errorMessage,
-    this.successMessage,
+    this.error,
     this.exportedData,
     this.isAccountDeleted = false,
   });
@@ -26,16 +25,14 @@ class PrivacyState {
   PrivacyState copyWith({
     bool? isExporting,
     bool? isDeleting,
-    String? errorMessage,
-    String? successMessage,
+    Object? error,
     Map<String, dynamic>? exportedData,
     bool? isAccountDeleted,
   }) {
     return PrivacyState(
       isExporting: isExporting ?? this.isExporting,
       isDeleting: isDeleting ?? this.isDeleting,
-      errorMessage: errorMessage,
-      successMessage: successMessage,
+      error: error,
       exportedData: exportedData ?? this.exportedData,
       isAccountDeleted: isAccountDeleted ?? this.isAccountDeleted,
     );
@@ -52,46 +49,27 @@ class PrivacyController extends Notifier<PrivacyState> {
       ref.read(secureStorageServiceProvider);
   AppDatabase get _db => ref.read(appDatabaseProvider);
 
-  String _extractErrorMessage(dynamic e) {
-    if (e is DioException) {
-      final response = e.response;
-      if (response != null && response.data is Map<String, dynamic>) {
-        final data = response.data as Map<String, dynamic>;
-        final message = data['message'];
-        if (message is List) {
-          return message.join('\n');
-        } else if (message is String && message.isNotEmpty) {
-          return message;
-        }
-      }
-      return e.message ?? 'Erro na comunicação com o servidor.';
-    }
-    return e.toString();
-  }
-
   Future<Map<String, dynamic>?> exportData() async {
     state = state.copyWith(
       isExporting: true,
-      errorMessage: null,
-      successMessage: null,
+      error: null,
     );
     try {
       final token = await _secureStorage.getAccessToken() ??
           ref.read(authControllerProvider).accessToken;
       if (token == null || token.isEmpty) {
-        throw Exception('Sessão expirada. Faça login novamente.');
+        throw Exception('session expired');
       }
       final data = await _remoteDataSource.exportUserData(token: token);
       state = state.copyWith(
         isExporting: false,
         exportedData: data,
-        successMessage: 'Dados exportados com sucesso.',
       );
       return data;
     } catch (e) {
       state = state.copyWith(
         isExporting: false,
-        errorMessage: _extractErrorMessage(e),
+        error: e,
       );
       return null;
     }
@@ -100,14 +78,13 @@ class PrivacyController extends Notifier<PrivacyState> {
   Future<bool> deleteAccount(String password) async {
     state = state.copyWith(
       isDeleting: true,
-      errorMessage: null,
-      successMessage: null,
+      error: null,
     );
     try {
       final token = await _secureStorage.getAccessToken() ??
           ref.read(authControllerProvider).accessToken;
       if (token == null || token.isEmpty) {
-        throw Exception('Sessão expirada. Faça login novamente.');
+        throw Exception('session expired');
       }
       await _remoteDataSource.deleteUserAccount(
         token: token,
@@ -123,13 +100,12 @@ class PrivacyController extends Notifier<PrivacyState> {
       state = state.copyWith(
         isDeleting: false,
         isAccountDeleted: true,
-        successMessage: 'Conta e dados excluídos com sucesso.',
       );
       return true;
     } catch (e) {
       state = state.copyWith(
         isDeleting: false,
-        errorMessage: _extractErrorMessage(e),
+        error: e,
       );
       return false;
     }

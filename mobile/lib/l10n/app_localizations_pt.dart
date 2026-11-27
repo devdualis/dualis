@@ -6069,4 +6069,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String biologicalSexOptionLabel(String option) {
     return 'Sexo biológico: $option';
   }
+
+  @override
+  String pageIndicatorLabel(int current, int total) {
+    return 'Página $current de $total';
+  }
 }

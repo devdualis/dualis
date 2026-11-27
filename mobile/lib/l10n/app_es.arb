@@ -31,9 +31,9 @@
   "emergencyTitle": "¿Necesitas ayuda ahora?",
   "emergencySubtitle": "Si tú o alguien cerca de ti está en peligro, llama a emergencias. No esperes.",
   "emergencyFindHospital": "Buscar urgencias más cercanas",
-  "emergencyDispatcherHint": "Al llamar, informe su dirección con claridad y mantenga la calma.",
+  "emergencyDispatcherHint": "Al llamar, di tu dirección con claridad y mantén la calma.",
   "emergencyFallbackTitle": "Dispositivo sin Marcador",
-  "emergencyFallbackBody": "Este dispositivo no soporta llamadas directas. Marque manualmente el siguiente número en otro teléfono:",
+  "emergencyFallbackBody": "Este dispositivo no hace llamadas. Marca este número en otro teléfono:",
   "emergencyCopyNumber": "Copiar Número",
   "emergencyCopiedToast": "Número copiado al portapapeles.",
   "outcomeIntensityTitle": "Intensidad que informaste",
@@ -1746,5 +1746,6 @@
   "emailVerifyResendCountdown": "Reenviar código en {seconds}s",
   "emailVerifyResending": "Enviando código nuevo...",
   "emailVerifyResendPrompt": "¿No recibiste el código? Reenviar",
-  "biologicalSexOptionLabel": "Sexo biológico: {option}"
+  "biologicalSexOptionLabel": "Sexo biológico: {option}",
+  "pageIndicatorLabel": "Página {current} de {total}"
 }

@@ -3700,5 +3700,13 @@
         "type": "String"
       }
     }
+  },
+  "pageIndicatorLabel": "Página {current} de {total}",
+  "@pageIndicatorLabel": {
+    "description": "Screen reader label for the onboarding page dots.",
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
   }
 }

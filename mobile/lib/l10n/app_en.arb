@@ -1746,5 +1746,6 @@
   "emailVerifyResendCountdown": "Resend code in {seconds}s",
   "emailVerifyResending": "Sending a new code...",
   "emailVerifyResendPrompt": "Didn't get the code? Resend",
-  "biologicalSexOptionLabel": "Biological sex: {option}"
+  "biologicalSexOptionLabel": "Biological sex: {option}",
+  "pageIndicatorLabel": "Page {current} of {total}"
 }

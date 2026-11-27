@@ -111,14 +111,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get emergencyDispatcherHint =>
-      'Al llamar, informe su dirección con claridad y mantenga la calma.';
+      'Al llamar, di tu dirección con claridad y mantén la calma.';
 
   @override
   String get emergencyFallbackTitle => 'Dispositivo sin Marcador';
 
   @override
   String get emergencyFallbackBody =>
-      'Este dispositivo no soporta llamadas directas. Marque manualmente el siguiente número en otro teléfono:';
+      'Este dispositivo no hace llamadas. Marca este número en otro teléfono:';
 
   @override
   String get emergencyCopyNumber => 'Copiar Número';
@@ -6076,5 +6076,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String biologicalSexOptionLabel(String option) {
     return 'Sexo biológico: $option';
+  }
+
+  @override
+  String pageIndicatorLabel(int current, int total) {
+    return 'Página $current de $total';
   }
 }

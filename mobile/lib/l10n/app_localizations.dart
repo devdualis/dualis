@@ -10353,6 +10353,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Sexo biológico: {option}'**
   String biologicalSexOptionLabel(String option);
+
+  /// Screen reader label for the onboarding page dots.
+  ///
+  /// In pt, this message translates to:
+  /// **'Página {current} de {total}'**
+  String pageIndicatorLabel(int current, int total);
 }
 
 class _AppLocalizationsDelegate

@@ -6058,4 +6058,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String biologicalSexOptionLabel(String option) {
     return 'Biological sex: $option';
   }
+
+  @override
+  String pageIndicatorLabel(int current, int total) {
+    return 'Page $current of $total';
+  }
 }
