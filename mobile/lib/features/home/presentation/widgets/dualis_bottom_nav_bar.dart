@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/widgets/motion.dart';
 import '../../../../shared/widgets/premium_gradient_icon.dart';
 
 class DualisBottomNavBar extends StatelessWidget {
@@ -368,13 +369,19 @@ class _TabButton extends StatelessWidget {
             : AppColors.textSecondaryLight;
     final icon = Icon(
       selected ? spec.selectedIcon : spec.icon,
+      key: ValueKey(selected),
       color: color,
       size: 24,
     );
-    Widget glyph =
-        selected && premiumIcons
-            ? PremiumGradientIcon(icon: icon, showActiveDot: true)
-            : icon;
+    Widget glyph = IconStateSwitcher(
+      child: selected && premiumIcons
+          ? PremiumGradientIcon(
+              key: const ValueKey('premium'),
+              icon: icon,
+              showActiveDot: true,
+            )
+          : icon,
+    );
     if (spec.locked) {
       glyph = Badge(
         key: const Key('nav_care_pro_badge'),
@@ -403,7 +410,9 @@ class _TabButton extends StatelessWidget {
           key: spec.key,
           onTap: onTap,
           customBorder: const StadiumBorder(),
-          child: Center(
+          child: PressScale(
+            pressedScale: 0.94,
+            child: Center(
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -428,6 +437,7 @@ class _TabButton extends StatelessWidget {
                   ),
               ],
             ),
+          ),
           ),
         ),
       ),

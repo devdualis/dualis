@@ -32,6 +32,7 @@ import '../journal_labels.dart';
 import '../widgets/body_region_map.dart';
 import '../widgets/condition_readings_card.dart';
 import '../widgets/describe_sheet.dart';
+import '../../../../shared/widgets/motion.dart';
 import '../widgets/intensity_scale.dart';
 
 /// Starting point when the flow is opened from a Home card.
@@ -1949,7 +1950,9 @@ class _ChoiceCard extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      child: AnimatedContainer(
+      child: PressScale(
+        enabled: enabled,
+        child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
         constraints: BoxConstraints(minHeight: large ? 170 : (wide ? 56 : 96)),
         decoration: _optionDecoration(selected: selected, radius: 22),
@@ -1965,7 +1968,10 @@ class _ChoiceCard extends StatelessWidget {
                   if (wide)
                     Row(
                       children: [
-                        if (icon != null) ...[icon, const SizedBox(width: 10)],
+                        if (icon != null) ...[
+                          SelectPop(selected: selected, child: icon),
+                          const SizedBox(width: 10),
+                        ],
                         Expanded(child: text),
                       ],
                     )
@@ -1974,19 +1980,27 @@ class _ChoiceCard extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (icon != null) ...[icon, SizedBox(height: large ? 12 : 6)],
+                          if (icon != null) ...[
+                            SelectPop(selected: selected, child: icon),
+                            SizedBox(height: large ? 12 : 6),
+                          ],
                           text,
                         ],
                       ),
                     ),
-                  if (selected && showCheck)
-                    const Positioned(
+                  if (showCheck)
+                    Positioned(
                       top: 0,
                       right: 0,
-                      child: Icon(
-                        Icons.check_circle_rounded,
-                        size: 20,
-                        color: AppColors.dualisNavy,
+                      child: IconStateSwitcher(
+                        child: selected
+                            ? const Icon(
+                                Icons.check_circle_rounded,
+                                key: ValueKey(true),
+                                size: 20,
+                                color: AppColors.dualisNavy,
+                              )
+                            : const SizedBox(key: ValueKey(false), width: 20, height: 20),
                       ),
                     ),
                 ],
@@ -1994,6 +2008,7 @@ class _ChoiceCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
       ),
     );
   }
@@ -2216,7 +2231,9 @@ class _ChoiceTile extends StatelessWidget {
         button: true,
         selected: multi ? selected : null,
         hint: semanticsHint,
-        child: AnimatedContainer(
+        child: PressScale(
+          enabled: enabled,
+          child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           decoration: _optionDecoration(selected: selected, radius: 20),
           child: Material(
@@ -2232,10 +2249,13 @@ class _ChoiceTile extends StatelessWidget {
                 child: Row(
                   children: [
                     if (mark != null) ...[
-                      DuotoneIconTile(
-                        size: dense ? 36 : 40,
-                        radius: 11,
-                        child: mark,
+                      SelectPop(
+                        selected: selected,
+                        child: DuotoneIconTile(
+                          size: dense ? 36 : 40,
+                          radius: 11,
+                          child: mark,
+                        ),
                       ),
                       const SizedBox(width: 12),
                     ] else if (fluent != null) ...[
@@ -2264,19 +2284,23 @@ class _ChoiceTile extends StatelessWidget {
                       ),
                     ),
                     if (multi)
-                      Icon(
-                        selected
-                            ? Icons.check_circle_rounded
-                            : Icons.radio_button_unchecked_rounded,
-                        color: selected
-                            ? AppColors.dualisNavy
-                            : AppColors.dualisNavy.withValues(alpha: 0.22),
+                      IconStateSwitcher(
+                        child: Icon(
+                          selected
+                              ? Icons.check_circle_rounded
+                              : Icons.radio_button_unchecked_rounded,
+                          key: ValueKey(selected),
+                          color: selected
+                              ? AppColors.dualisNavy
+                              : AppColors.dualisNavy.withValues(alpha: 0.22),
+                        ),
                       ),
                   ],
                 ),
               ),
             ),
           ),
+        ),
         ),
       ),
     );

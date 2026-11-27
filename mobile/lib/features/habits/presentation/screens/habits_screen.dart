@@ -17,6 +17,7 @@ import '../controllers/habits_controller.dart';
 import '../widgets/habits_water_summary_card.dart';
 import '../widgets/movement_modal.dart';
 import '../widgets/sleep_modal.dart';
+import '../../../../shared/widgets/motion.dart';
 import '../../domain/models/habit_day.dart';
 
 /// Screen "Hábitos de hoje" (docs/bienestar/CONTRATO-JOURNAL-V2.md section 6).
@@ -671,10 +672,12 @@ class _QuestionCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      const PopIn(
+                        child: Icon(
                         Icons.check_circle_rounded,
                         size: 16,
                         color: Color(0xFF2E7D32),
+                      ),
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -831,10 +834,12 @@ class _YesNoButton extends StatelessWidget {
           ),
           if (selected) ...[
             const SizedBox(width: 6),
-            const Icon(
+            const PopIn(
+              child: Icon(
               Icons.check_circle_rounded,
               size: 18,
               color: AppColors.dualisNavy,
+            ),
             ),
           ],
         ],

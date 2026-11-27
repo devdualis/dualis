@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/duotone_icon_tile.dart';
+import '../../../../shared/widgets/motion.dart';
 import '../../../../shared/widgets/fluent_emoji.dart';
 
 /// Modal header for habit sheets (sleep, movement).
@@ -74,10 +75,12 @@ class HabitModalHeader extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                const PopIn(
+                  child: Icon(
                   Icons.check_circle_rounded,
                   size: 14,
                   color: Color(0xFF2E7D32),
+                ),
                 ),
                 const SizedBox(width: 4),
                 Text(
@@ -128,7 +131,9 @@ class OptionSurface extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      child: AnimatedContainer(
+      child: PressScale(
+        enabled: onTap != null,
+        child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
         constraints: const BoxConstraints(minHeight: 48),
         decoration: BoxDecoration(
@@ -149,6 +154,7 @@ class OptionSurface extends StatelessWidget {
             child: Padding(padding: padding, child: child),
           ),
         ),
+      ),
       ),
     );
   }
@@ -179,11 +185,14 @@ class EmojiOptionButton extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          FluentEmoji.forSleep(
-            sleepKey,
-            size: 42,
-            fallback: ExcludeSemantics(
-              child: Text(emoji, style: const TextStyle(fontSize: 28)),
+          SelectPop(
+            selected: selected,
+            child: FluentEmoji.forSleep(
+              sleepKey,
+              size: 42,
+              fallback: ExcludeSemantics(
+                child: Text(emoji, style: const TextStyle(fontSize: 28)),
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -238,10 +247,12 @@ class YesNoButton extends StatelessWidget {
           ),
           if (selected) ...[
             const SizedBox(width: 6),
-            const Icon(
+            const PopIn(
+              child: Icon(
               Icons.check_circle_rounded,
               size: 18,
               color: AppColors.dualisNavy,
+            ),
             ),
           ],
         ],
