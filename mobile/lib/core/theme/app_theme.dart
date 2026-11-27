@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
+import 'app_motion.dart';
 
 class AppTheme {
   static ThemeData get lightTheme {
@@ -59,6 +60,7 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
+      pageTransitionsTheme: appPageTransitionsTheme,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.backgroundDepth,
       dividerColor: AppColors.outlineLight,

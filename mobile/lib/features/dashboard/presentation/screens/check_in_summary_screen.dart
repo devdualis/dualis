@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/router/route_paths.dart';
+import '../../../../core/theme/app_motion.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/duotone_icon_tile.dart';
 import '../../../../shared/widgets/landscape_background.dart';
@@ -321,17 +322,35 @@ class _SummaryHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(2, 0, 2, 16),
       child: Row(
         children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-              border: Border.all(color: AppColors.dualisSymbolBlue, width: 5),
-              boxShadow: AppColors.glassShadow(blur: 20, alpha: 0.2),
+          // The ring settles in, then the check draws in: the entry is saved.
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: 1),
+            duration: AppMotion.of(context, AppMotion.slow),
+            curve: AppMotion.confirm,
+            builder: (context, t, child) => Transform.scale(
+              scale: 0.6 + 0.4 * t,
+              child: Opacity(opacity: t.clamp(0.0, 1.0), child: child),
             ),
-            child: const ExcludeSemantics(
-              child: Icon(Icons.check_rounded, size: 34, color: AppColors.dualisNavy),
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                border: Border.all(color: AppColors.dualisSymbolBlue, width: 5),
+                boxShadow: AppColors.glassShadow(blur: 20, alpha: 0.2),
+              ),
+              child: ExcludeSemantics(
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: 1),
+                  duration: AppMotion.of(context, AppMotion.slow),
+                  curve: const Interval(0.4, 1, curve: AppMotion.standard),
+                  builder: (context, t, child) =>
+                      Transform.scale(scale: t, child: child),
+                  child: const Icon(Icons.check_rounded,
+                      size: 34, color: AppColors.dualisNavy),
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 14),

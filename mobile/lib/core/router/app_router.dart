@@ -143,7 +143,9 @@ GoRouter createRouter({
       GoRoute(
         path: RoutePaths.emergency,
         name: 'emergency',
-        builder: (context, state) => const EmergencyScreen(),
+        // Help opens at once: never wait on a page transition.
+        pageBuilder: (context, state) =>
+            NoTransitionPage(key: state.pageKey, child: const EmergencyScreen()),
       ),
       GoRoute(
         path: RoutePaths.journal,

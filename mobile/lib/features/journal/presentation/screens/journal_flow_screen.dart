@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -102,6 +104,7 @@ class _JournalFlowScreenState extends ConsumerState<JournalFlowScreen> {
     try {
       final entry = await _controller.save(isMale: _isMale);
       if (!mounted) return;
+      unawaited(HapticFeedback.lightImpact());
       _updateHome(l10n, entry);
       if (entry.pendingSync) {
         messenger.showSnackBar(SnackBar(content: Text(l10n.jv2SavedOffline)));
