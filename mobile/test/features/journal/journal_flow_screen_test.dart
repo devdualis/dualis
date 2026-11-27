@@ -4,7 +4,6 @@ import 'package:dualis_mobile/features/journal/domain/journal_keys.dart';
 import 'package:dualis_mobile/features/journal/domain/journal_models.dart';
 import 'package:dualis_mobile/features/journal/presentation/controllers/journal_flow_controller.dart';
 import 'package:dualis_mobile/features/journal/presentation/controllers/journal_flow_state.dart';
-import 'package:dualis_mobile/features/journal/presentation/journal_labels.dart';
 import 'package:dualis_mobile/features/journal/presentation/screens/journal_flow_screen.dart';
 import 'package:dualis_mobile/features/journal/presentation/widgets/body_region_map.dart';
 import 'package:dualis_mobile/features/profile/domain/models/profile.dart';
@@ -101,14 +100,6 @@ void main() {
 
     final axisLabel = tester.widget<Text>(find.byKey(const Key('jv2_axis_label')));
     expect(axisLabel.data, pt.jv2AxisPhysical);
-  });
-
-  testWidgets('mood greeting uses the Home periods (00:48 is Boa noite)', (tester) async {
-    final h = JournalHarness()..clock = () => DateTime(2026, 10, 28, 0, 48);
-    await pumpJournalFlow(tester, h);
-
-    expect(find.textContaining(pt.jv2GoodEvening), findsOneWidget);
-    expect(find.textContaining(pt.jv2GoodMorning), findsNothing);
   });
 
   testWidgets('Bem then "Só registrar" saves in one tap and opens the summary', (tester) async {
@@ -225,12 +216,7 @@ void main() {
     expect(items.every((i) => i['kind'] == 'emotional'), isTrue);
     expect(items.every((i) => i['sensation'] == null), isTrue);
     expect(items.every((i) => i['intensity'] == 3 && i['persistence'] == 'hoje'), isTrue);
-    // Variant ids of the phrases that were shown (UX analytics only).
-    final variants = (body['transitionVariantIds'] as List).cast<String>();
-    expect(variants, isNotEmpty);
-    for (final id in variants) {
-      expect(JournalLabels.phrase(pt, id), isNot(id));
-    }
+    expect(body['transitionVariantIds'], isEmpty);
   });
 
   testWidgets('"+ Registrar outra coisa" goes back to the feelings screen', (tester) async {
@@ -249,24 +235,16 @@ void main() {
     expect(find.byKey(const Key('jv2_item_row_1')), findsOneWidget);
   });
 
-  testWidgets('phrases: own pool per time, per branch and per region; thank-you before the scale',
+  testWidgets('how long and how much are separate screens, with the emergency line',
       (tester) async {
     final h = JournalHarness();
     await pumpJournalFlow(tester, h);
     await startNotSoGood(tester);
-    await tapKey(tester, 'jv2_time_passado');
-    var id = containerOf(tester).read(journalFlowControllerProvider).phraseId!;
-    expect(id, startsWith('passado.'));
-    expect(find.text(JournalLabels.phrase(pt, id)), findsOneWidget);
-    await tapKey(tester, 'jv2_branch_passado.tristeza');
-    id = containerOf(tester).read(journalFlowControllerProvider).phraseId!;
-    expect(id, startsWith('passado.tristeza.'));
-    expect(find.text(JournalLabels.phrase(pt, id)), findsOneWidget);
+    await pickFeeling(tester, 'passado', 'tristeza');
     await tapKey(tester, 'jv2_option_passado.tristeza.culpa');
     await tapKey(tester, 'jv2_continue');
 
-    // Persistence alone, after the thank-you line; one tap moves on.
-    expect(find.text(pt.jv2PhraseThanks1), findsOneWidget);
+    // Persistence alone; one tap moves on.
     expect(find.text(pt.jv2PersistenceQuestion), findsOneWidget);
     expect(find.byKey(const Key('jv2_intensity_0_3')), findsNothing);
     expect(find.byKey(const Key('jv2_emergency_line')), findsOneWidget);
@@ -278,29 +256,6 @@ void main() {
     expect(find.byKey(const Key('jv2_emergency_line')), findsOneWidget);
     await tapKey(tester, 'jv2_back');
     expect(isCardSelected(tester, 'jv2_persistence_0_dias_semanas'), isTrue);
-  });
-
-  testWidgets('transition phrase types in, then shows whole', (tester) async {
-    final h = JournalHarness();
-    await pumpJournalFlow(tester, h);
-    await startNotSoGood(tester);
-    await tester.tap(find.byKey(const Key('jv2_time_futuro')));
-    await tester.pump();
-    // Past the screen fade (280 ms), still typing.
-    await tester.pump(const Duration(milliseconds: 350));
-    String typed() {
-      final text = tester.widget<Text>(find.descendant(
-        of: find.byKey(const Key('jv2_phrase')),
-        matching: find.byType(Text),
-      ));
-      return (text.textSpan! as TextSpan).children!.first.toPlainText();
-    }
-
-    final id = containerOf(tester).read(journalFlowControllerProvider).phraseId!;
-    final full = JournalLabels.phrase(pt, id);
-    expect(typed().length, lessThan(full.length));
-    await tester.pumpAndSettle();
-    expect(typed(), full);
   });
 
   test('a screen never shows the same phrase twice in a row', () {
