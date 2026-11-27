@@ -380,7 +380,7 @@ class _HabitTile extends StatelessWidget {
   final String value;
   final String? valueCaption;
 
-  /// Optional Fluent emoji shown before [value] (sleep quality).
+  /// Optional mark shown before [value] (sleep quality).
   final Widget? valueLeading;
   final bool done;
   final String doneLabel;

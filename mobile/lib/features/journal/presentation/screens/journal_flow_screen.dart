@@ -11,7 +11,6 @@ import '../../../../core/voice/voice_matcher.dart';
 import '../../../../core/voice/voice_targets.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/duotone_icon_tile.dart';
-import '../../../../shared/widgets/fluent_emoji.dart';
 import '../../../auth/domain/user_profile.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../consent/presentation/ai_consent_controller.dart';
@@ -2172,7 +2171,7 @@ class _TopicTabs extends StatelessWidget {
 class _ChoiceTile extends StatelessWidget {
   final String? emoji;
 
-  /// Journal key of the option: when it has a Fluent emoji, that is drawn
+  /// Journal key of the option: when it has a proprietary mark, that is drawn
   /// instead of [emoji].
   final String? emojiKey;
   final String label;
@@ -2222,9 +2221,6 @@ class _ChoiceTile extends StatelessWidget {
 
   Widget _content(BuildContext context) {
     final mark = JournalMarks.box(emojiKey, size: dense ? 22 : 26);
-    final fluent = mark != null || emojiKey == null
-        ? null
-        : FluentEmoji.assetForJournalKey(emojiKey!);
     return Padding(
       padding: EdgeInsets.only(bottom: dense ? 8 : 10),
       child: Semantics(
@@ -2257,9 +2253,6 @@ class _ChoiceTile extends StatelessWidget {
                           child: mark,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                    ] else if (fluent != null) ...[
-                      FluentEmoji.image(fluent, size: dense ? 34 : 38),
                       const SizedBox(width: 12),
                     ] else if (emoji != null) ...[
                       DuotoneIconTile(
@@ -2743,7 +2736,7 @@ class _MarkedPill extends StatelessWidget {
   }
 }
 
-/// Mood emoji (Fluent 3D: Bem, Não tão bem). Same size for both; nothing
+/// Mood mark (Bem, Não tão bem). Same size for both; nothing
 /// else on screen depends on the choice.
 class _MoodIcon extends StatelessWidget {
   final String mood;

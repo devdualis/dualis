@@ -87,7 +87,6 @@ flutter:
     - lib/assets/
     - lib/assets/brand/
     - lib/assets/icon/
-    - assets/emoji/
     - assets/marks/
 
 flutter_launcher_icons:
