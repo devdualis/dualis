@@ -6005,4 +6005,21 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get remindersPermissionNotNow => 'Ahora no';
+
+  @override
+  String get privacyLegalTitle => 'Documentación legal y términos';
+
+  @override
+  String get privacyLegalBody =>
+      'Consulta las directrices completas de gobernanza de datos y el contrato del servicio.';
+
+  @override
+  String get privacyLegalPolicyButton => 'Política LGPD';
+
+  @override
+  String get privacySecurityTitle => 'Seguridad y respuesta a incidentes';
+
+  @override
+  String get privacySecurityBody =>
+      '• Cifrado: TLS 1.3 en tránsito y AES-256 en reposo.\n• Autenticación: contraseñas protegidas con el algoritmo Argon2id.\n• Aislamiento multiinquilino: Row-Level Security (RLS) en PostgreSQL.\n• Plan ante filtraciones: protocolo de notificación en un máximo de 72h a la ANPD y a los titulares (LGPD art. 48).\n• Contacto: contato@dualischeckup.com';
 }

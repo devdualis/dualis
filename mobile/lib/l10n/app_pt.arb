@@ -3604,5 +3604,25 @@
   "remindersPermissionNotNow": "Agora não",
   "@remindersPermissionNotNow": {
     "description": "Permission sheet button that leaves reminders off"
+  },
+  "privacyLegalTitle": "Documentação Legal e Termos",
+  "@privacyLegalTitle": {
+    "description": "Privacy center: heading of the legal documents card"
+  },
+  "privacyLegalBody": "Acesse as diretrizes completas de governança de dados e o contrato do serviço.",
+  "@privacyLegalBody": {
+    "description": "Privacy center: body of the legal documents card"
+  },
+  "privacyLegalPolicyButton": "Política LGPD",
+  "@privacyLegalPolicyButton": {
+    "description": "Privacy center: button that opens the privacy policy"
+  },
+  "privacySecurityTitle": "Segurança e Resposta a Incidentes",
+  "@privacySecurityTitle": {
+    "description": "Privacy center: heading of the security card"
+  },
+  "privacySecurityBody": "• Criptografia: TLS 1.3 em trânsito e AES-256 em repouso.\n• Autenticação: Senhas protegidas com algoritmo Argon2id.\n• Isolamento Multitenant: Row-Level Security (RLS) no PostgreSQL.\n• Plano de Vazamento: Protocolo de notificação em até 72h à ANPD e aos titulares (LGPD Art. 48).\n• Contato: contato@dualischeckup.com",
+  "@privacySecurityBody": {
+    "description": "Privacy center: bullet list of the security card"
   }
 }

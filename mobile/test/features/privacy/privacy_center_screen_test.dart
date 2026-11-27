@@ -89,6 +89,7 @@ class FakeSecureStorageService extends SecureStorageService {
 Widget createTestWidget({
   required Widget child,
   required List<dynamic> overrides,
+  Locale locale = const Locale('pt', 'BR'),
 }) {
   return ProviderScope(
     overrides: overrides.cast(),
@@ -104,7 +105,7 @@ Widget createTestWidget({
         Locale('es', ''),
         Locale('en', ''),
       ],
-      locale: const Locale('pt', 'BR'),
+      locale: locale,
       home: child,
     ),
   );
@@ -147,6 +148,32 @@ void main() {
       expect(find.byKey(const Key('export_data_button')), findsOneWidget);
       expect(find.text('Exclusão Permanente da Conta'), findsOneWidget);
       expect(find.byKey(const Key('delete_account_button')), findsOneWidget);
+    });
+
+    testWidgets('legal documents block is shown in English with locale en',
+        (tester) async {
+      await tester.pumpWidget(
+        createTestWidget(
+          locale: const Locale('en'),
+          child: const PrivacyCenterScreen(),
+          overrides: [
+            appDatabaseProvider.overrideWithValue(db),
+            privacyRemoteDataSourceProvider.overrideWithValue(mockRemoteDataSource),
+            secureStorageServiceProvider.overrideWithValue(mockSecureStorage),
+            notificationActionQueueProvider
+                .overrideWithValue(InMemoryNotificationActionQueue()),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final body = find.text(
+          'Read the full data governance guidelines and the service agreement.');
+      await tester.ensureVisible(body);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Legal documentation and terms'), findsOneWidget);
+      expect(body, findsOneWidget);
     });
 
     testWidgets('tapping export data triggers export call and shows JSON preview dialog',

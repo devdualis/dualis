@@ -361,7 +361,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Documentação Legal e Termos',
+                            l10n.privacyLegalTitle,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -372,7 +372,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'Acesse as diretrizes completas de governança de dados, conformidade regulatória (Anvisa/CFM) e o contrato do serviço.',
+                      l10n.privacyLegalBody,
                       style: TextStyle(
                         fontSize: 14,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -394,7 +394,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                               ),
                             ),
                             icon: const Icon(Icons.description_outlined, size: 18),
-                            label: const FittedBox(fit: BoxFit.scaleDown, child: Text('Termos de Uso')),
+                            label: FittedBox(fit: BoxFit.scaleDown, child: Text(l10n.settingsTermsTile)),
                             onPressed: () => context.push(RoutePaths.termsOfService),
                           ),
                         ),
@@ -411,7 +411,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                               ),
                             ),
                             icon: const Icon(Icons.policy_outlined, size: 18),
-                            label: const FittedBox(fit: BoxFit.scaleDown, child: Text('Política LGPD')),
+                            label: FittedBox(fit: BoxFit.scaleDown, child: Text(l10n.privacyLegalPolicyButton)),
                             onPressed: () => context.push(RoutePaths.privacyPolicy),
                           ),
                         ),
@@ -434,7 +434,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Segurança e Resposta a Incidentes',
+                            l10n.privacySecurityTitle,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -445,11 +445,7 @@ class _PrivacyCenterScreenState extends ConsumerState<PrivacyCenterScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      '• Criptografia: TLS 1.3 em trânsito e AES-256 em repouso.\n'
-                      '• Autenticação: Senhas protegidas com algoritmo Argon2id.\n'
-                      '• Isolamento Multitenant: Row-Level Security (RLS) no PostgreSQL.\n'
-                      '• Plano de Vazamento: Protocolo de notificação em até 72h à ANPD e aos titulares (LGPD Art. 48).\n'
-                      '• Contato: contato@dualischeckup.com',
+                      l10n.privacySecurityBody,
                       style: TextStyle(
                         fontSize: 13,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,

@@ -10239,6 +10239,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Agora não'**
   String get remindersPermissionNotNow;
+
+  /// Privacy center: heading of the legal documents card
+  ///
+  /// In pt, this message translates to:
+  /// **'Documentação Legal e Termos'**
+  String get privacyLegalTitle;
+
+  /// Privacy center: body of the legal documents card
+  ///
+  /// In pt, this message translates to:
+  /// **'Acesse as diretrizes completas de governança de dados e o contrato do serviço.'**
+  String get privacyLegalBody;
+
+  /// Privacy center: button that opens the privacy policy
+  ///
+  /// In pt, this message translates to:
+  /// **'Política LGPD'**
+  String get privacyLegalPolicyButton;
+
+  /// Privacy center: heading of the security card
+  ///
+  /// In pt, this message translates to:
+  /// **'Segurança e Resposta a Incidentes'**
+  String get privacySecurityTitle;
+
+  /// Privacy center: bullet list of the security card
+  ///
+  /// In pt, this message translates to:
+  /// **'• Criptografia: TLS 1.3 em trânsito e AES-256 em repouso.\n• Autenticação: Senhas protegidas com algoritmo Argon2id.\n• Isolamento Multitenant: Row-Level Security (RLS) no PostgreSQL.\n• Plano de Vazamento: Protocolo de notificação em até 72h à ANPD e aos titulares (LGPD Art. 48).\n• Contato: contato@dualischeckup.com'**
+  String get privacySecurityBody;
 }
 
 class _AppLocalizationsDelegate
